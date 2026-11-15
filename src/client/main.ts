@@ -873,5 +873,6 @@ w.__villageJob = (seed = 7) => import('../shared/jobs').then((m) => ({ ...m.boar
 // Look sheets for screenshots: every hero, the Warrior's options, and a dark copy with only the glow lit.
 // One hero drawn by the game's own code, for the hero look sheet (scripts/heroes-look.cjs).
 w.__heroArt = (...a: Parameters<typeof import('./heroart').heroArt>) => import('./heroart').then((m) => m.heroArt(...a));
+w.__npcArt = (...a: Parameters<typeof import('./npcart').npcArt>) => import('./npcart').then((m) => m.npcArt(...a));
 w.__houndArt = (...a: Parameters<typeof import('./houndart').houndArt>) => import('./houndart').then((m) => m.houndArt(...a));
 w.__looks = () => Object.fromEntries(Object.keys(LOOKS).map((k) => [k, [0, 1, 2].map((i) => heroLook(k as HeroClass, i).down.c.toDataURL())]));

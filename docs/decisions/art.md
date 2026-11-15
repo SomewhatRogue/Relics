@@ -436,3 +436,17 @@ The plan, one class at a time so Kyle can play each against the old ones:
   actors.ts). Hand placement only; the Gear looks chat's colours untouched.
 - `?lineup=<class>` for any class; `node scripts/side-look.cjs <url> <out> <CLASS>`.
   (Claude Opus 5.5)
+
+## 2026-11-15: heroes seen from the side, slice 3 (the townsfolk)
+
+- Kyle: "Go", for slice 3. Townsfolk walking mostly across (|fx| over 0.7 on their path) are drawn in profile,
+  mirrored for west (npcside.ts): the same recipe as their front (body, trim, skin, apron, hair) laid out facing
+  east, in two frames on the walk's existing bob, contact (legs apart, the near arm back) on the low beat and passing
+  (together) on the high. Before they only bobbed.
+- Their hair was written for the front, so it's carried round by rule: on top a pixel toward the back, a beard a
+  pixel toward the face, side locks over the face dropped, anything wide (a brim) left as it is. No per-look maps.
+- Not for anyone carrying work (the crew, the gravedigger), sitting, sneaking, kneeling, hurt, or the child: what's in
+  their hands is placed for the front. The guard's spear goes to the near hand.
+- The tall-proportions step moved out of npcs.ts `person` into npcside.ts `tallPerson` so both views share it.
+  `window.__npcArt` (npcart.ts) and scripts/folk-look.cjs: every look standing, contact, passing, west, at 4x.
+  (Claude Opus 5.5)

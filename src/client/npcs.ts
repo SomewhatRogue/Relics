@@ -11,6 +11,7 @@ import { hs } from './heroscale';
 import { drawWork } from './siegedraw';
 import { CREW, drawCrew } from './crewdraw';
 import { COBB_SIT, drawCobbCrate, drawCobbThings } from './cobbdraw';
+import { sidePerson, tallPerson } from './npcside';
 
 type Part = Parameters<typeof makeSprite>[2][number];
 export interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
@@ -61,18 +62,9 @@ function person(l: Look): Sprite {
   else parts.push(['p', 6, 7, '#2a2420'], ['p', 6, 9, '#2a2420']);
   // A face: eyes, a mouth.
   parts.push(['e', 6, 3.5, 3.4, 3.4, l.skin], ['p', 5, 4, '#141218'], ['p', 7, 4, '#141218'], ['p', 6, 5, '#6a3a2a'], ...l.hair);
-  // A tall hat reaches above the head: grow the sprite upward to fit it.
-  const lift = Math.max(0, ...parts.map((q) => -(q[2] as number)));
   // The heroes' proportions (Kyle, 2026-11-12: "all other villagers in town" tall too): the head's rows drawn
   // smaller and the body's longer before the 1.5x redraw (sprites.ts `grow`), so it's redrawn, not stretched.
-  const neck = lift + 6, Y = (y: number) => (y <= neck ? y * 0.8 : neck * 0.8 + (y - neck) * 1.55);
-  const tall = parts.map((q): Part => {
-    const y = (q[2] as number) + lift;
-    if (q[0] === 'e') return ['e', q[1], Y(y), q[3], (q[4] as number) * 0.8, q[5]] as Part;
-    if (q[0] === 'r') return ['r', q[1], Y(y), q[3], Math.max(0.7, Y(y + (q[4] as number)) - Y(y)), q[5]] as Part;
-    return ['p', q[1], Math.round(Y(y + 0.5) - 0.5), q[3]] as Part;
-  });
-  return makeSprite(18, Math.round(Y(16 + lift) * 1.5), grow(tall));
+  return tallPerson(parts);
 }
 
 const SPRITES: Record<string, Sprite> = {};
@@ -146,11 +138,14 @@ function drawArrowIn(c: Ctx, x: number, y: number): void {
 }
 
 export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false, tx = n.x): void {
-  const s = SPRITES[n.look] ?? SPRITES.villager;
   walking ||= !!n.walking;
   // The gravedigger stops walking while he digs.
   if ((n.work === 'bury' || n.work === 'dig') && tx < 5) walking = false;
   const bob = n.pose ? 0 : Math.floor(c.now * (walking ? (n.sneak ? 4 : 7) : 1.5) + n.x) % 2 ? -1 : 0;
+  // Walking mostly across, in profile (npcside.ts): contact on the low beat, passing on the high. Not for anyone
+  // carrying work, sitting, sneaking, kneeling or hurt, whose things in hand are placed for the front.
+  const side = walking && Math.abs(fx) > 0.7 && !n.work && !n.pose && !n.sneak && !n.kneel && !n.arrow && n.look !== 'child';
+  const look = LOOKS[n.look] ? n.look : 'villager', s = side ? sidePerson(look, LOOKS[look], !bob) : SPRITES[n.look] ?? SPRITES.villager;
   shadow(c, x, y, hs(5));
   if (n.pose === 'corpse') return drawCorpse(c, s, x, y, n);
   if (n.smear) drawSmear(c, x, y, n.smear, n.lift ?? 0);
@@ -170,7 +165,9 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   else if (crew) drawCrew(p, n, x, y + bob, fx, walking);
   else if (n.work) drawWork(p, n, x, y + bob, tx, fx);
   if (n.mute) return;
-  if (n.look === 'guard') (p.lit.fillStyle = '#6b4a2b'), p.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 22 + bob), 1, 20), (p.lit.fillStyle = '#cfd6dc'), p.lit.fillRect(Math.round(x + (fx < 0 && walking ? -6 : 5)), Math.round(y - 24 + bob), 1, 3);
+  // (From the side, in the near hand before the body.)
+  const sx = side ? (fx < 0 ? -3 : 2) : fx < 0 && walking ? -6 : 5;
+  if (n.look === 'guard') (p.lit.fillStyle = '#6b4a2b'), p.lit.fillRect(Math.round(x + sx), Math.round(y - 22 + bob), 1, 20), (p.lit.fillStyle = '#cfd6dc'), p.lit.fillRect(Math.round(x + sx), Math.round(y - 24 + bob), 1, 3);
   // (No mark over everyone you can talk to: only someone with an errand or a quest for you gets the gold
   // diamond, client/errandmarks.ts (Kyle, 2026-11-12). Their name still shows when you're close.)
   if (near) drawText(c.glow, n.name, Math.round(x - textWidth(n.name) / 2), Math.round(y + 4), '#f0e0b0');
