@@ -164,3 +164,14 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   weights the tier rule over it (`div.tile`, empties, the drop square and relics left alone) and tints each
   piece's well with its tier (`color-mix`), worn and packed, in the stores too; the selected piece's gold
   frame is raised to match. Shots: `scripts/iron-pack.cjs`, probe `scripts/iron-tiers.cjs`. (Claude Opus 5.5)
+
+## 2026-11-14 (Claude Opus 5.5)
+
+- Prices when buying and selling (Kyle: "buying and selling items same sort of issue, the cost is sometimes
+  not visible"). Two causes, seen on a phone (`scripts/iron-trade.cjs`): on the sell tabs (Tobin's SELL,
+  Nettle's SELL QUIETLY) "+1s 84c" was drawn across a 48 px square's top, cropped and over the level number;
+  and a BUY you can't afford greys out, which left yesterday's dark ink for prices on gold dark on dark.
+  cells.css: a priced grid has wider squares (72 px) and the price is a dark strip across the square's foot,
+  whole and centred. ironui.css: prices go dark only on a gold button that's live; a greyed one keeps the
+  coins' own colours. Shop rows you can't afford were readable (half strength) and stay as they were.
+  (Claude Opus 5.5)

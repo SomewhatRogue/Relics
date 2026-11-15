@@ -60,3 +60,12 @@ body .pair .side + .side { padding: 2px 0 2px 10px; border: 0; border-left: 1px 
 .pair .card-head b { font: 700 16px/1.2 var(--i-read); }
 .pair .chip { font: 400 10px/1.2 var(--i-label); letter-spacing: 0.03em; }
 .pair .tr { font-size: 15px; }
+
+/* Prices on squares (Tobin's SELL, Nettle's SELL QUIETLY; Kyle, 2026-11-14: "buying and selling items...
+   the cost is sometimes not visible"): a priced grid has wider squares, and the price is a dark strip
+   across a square's foot, whole and centred, clear of the level number at the top. */
+#panel .cells:has(.tile > em) { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+#panel .cells .tile > em { top: auto; left: 0; right: 0; bottom: 0; padding: 3px 2px 2px; text-align: center; white-space: nowrap;
+  font: 400 10px/1 var(--i-label); color: var(--i-text); background: #07080ae6; text-shadow: none; }
+#panel .cells .tile > em .cn::before { width: 0.75em; height: 0.75em; }
+#panel .cells .tile:has(> em) img { margin-bottom: 10px; }
