@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { BARE, type Ctx } from '../draw';
 import { XRAY_LAYER } from './actors3d';
 import { PITCH } from './camera3d';
+import { SWING } from '../swing';
 import { POOL, cardMaterial, xrayMaterial } from './figmat';
 import type { Proj } from './overlay3d';
 
@@ -103,6 +104,8 @@ export class Figs {
     const px = x + (Math.round(sx) - sx) / this.ppu, pz = z + (Math.round(sy) - sy) / (this.ppu * SIN), b = o.bias ?? 0;
     const card = s.card;
     card.position.set(px, h, pz).addScaledVector(BACK, b);
+    // (The new look's chase camera, swing.ts: turned to face it.)
+    card.rotation.y = -SWING.yaw;
     card.scale.set(k / this.ppu, k / (this.ppu * COS), k / (this.ppu * SIN));
     card.visible = true;
     card.layers.set(o.xray ? XRAY_LAYER : 0);

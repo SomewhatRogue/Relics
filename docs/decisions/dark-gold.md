@@ -133,3 +133,19 @@ The Dark and gold chat's log (docs/design/dark-gold.md, Kyle's pictures in docs/
   40, so half its screen is empty: the next step is a true perspective chase camera in town (Kyle's picture,
   ref/town-chase-camera.png). Then the kit's props, then the town re-laid out dense.
   (Claude Opus 5.5)
+
+## 2026-11-15: the new look, the chase camera in town (behind `?hd&street`)
+
+- Kyle: more variety, buildings cheated toward the camera, and "the camera to also have more of a chase effect...
+  follow behind you as you're walking through, so you can see like the front of the church". Asked how far it
+  should turn: "Gentle swing first".
+- camera3d.ts: under `?street` the camera is perspective (28 degree lens, looking down 26 degrees), far enough back
+  that a tile at your hero is the street's ppu. In town it eases after you and turns toward where you walk, up to 45
+  degrees either way; walking back toward it holds the turn rather than spinning round. On a job it stays north.
+- swing.ts holds the turn (no imports): input.ts turns the stick and keys by it, so up still walks away from the
+  camera; figs3d.ts turns the figures' cards to face it.
+- The upright phone's empty half is gone (perspective shrinks the far rows). Known: black beyond the town's walls (no
+  sky or fog yet); the see-through hole's "behind" test doesn't know the swing.
+- Kyle asked whether to model in Blender; and that interiors (the barracks, the church) are now far too small for
+  these fronts: to be designed next.
+  (Claude Opus 5.5)

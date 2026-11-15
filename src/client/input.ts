@@ -6,6 +6,7 @@
  * a Ranger's MARK or a Healer's MEND (shared/signs.ts). Phone (upright):
  * a floating stick on the left, Attack, Block and Roll under the right thumb.
  */
+import { swung } from './swing';
 import { DEEP_SKILL } from '../shared/deepskill';
 import { NO_INTENT, type Intent } from '../sim/types';
 import { unlockAudio } from './sfx';
@@ -213,6 +214,8 @@ export class Input {
     else if (mx && my) (mx *= Math.SQRT1_2), (my *= Math.SQRT1_2);
     // Shift: creep (half pace, and goblins at rest see you from less far).
     if (!this.stick.id && k.has('shift')) (mx *= 0.45), (my *= 0.45);
+    // The new look's chase camera in town: up on the stick walks away from wherever it has swung (swing.ts).
+    [mx, my] = swung(mx, my);
     const i = this.intent;
     i.mx = Math.abs(mx) < 0.12 ? 0 : mx;
     i.my = Math.abs(my) < 0.12 ? 0 : my;

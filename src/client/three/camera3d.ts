@@ -8,15 +8,21 @@ import type { GameMap } from '../../shared/arena';
 import { WALL_H } from './ground';
 import { upright } from '../phoneband';
 import { STREET } from './streetkit';
+import { SWING } from '../swing';
 
-// (The new look's test street, `?hd&street`: lower, toward the chase view Kyle wants in town; streetkit.ts.)
-export const PITCH = ((STREET ? 20 : 36) * Math.PI) / 180;
+// (The new look's test street, `?hd&street`: a perspective chase camera, lower, looking down 26 degrees at your hero
+// through a 28 degree lens, turning up to 45 degrees toward where you walk in town; streetkit.ts, swing.ts.)
+export const PITCH = ((STREET ? 26 : 36) * Math.PI) / 180;
+const FOV = 28, SWING_MAX = Math.PI / 4;
 export const NEAR = 20;
 export const FAR = 110;
 const DIST = 60;
 
 export class Cam {
-  readonly cam = new THREE.OrthographicCamera(-1, 1, 1, -1, NEAR, FAR);
+  readonly cam: THREE.OrthographicCamera | THREE.PerspectiveCamera = STREET ? new THREE.PerspectiveCamera(FOV, 1, 2, 600) : new THREE.OrthographicCamera(-1, 1, 1, -1, NEAR, FAR);
+  /** The chase camera's distance (tiles) and its yaw; where the hero was, to see which way they walk. */
+  private dist = 60;
+  private last: [number, number] | null = null;
   /** Where it looks (tiles, on the floor). */
   readonly at = new THREE.Vector3();
   private ready = false;
@@ -34,7 +40,11 @@ export class Cam {
 
   size(W: number, H: number, ppu: number): void {
     Object.assign(this, { W, H, ppu });
-    Object.assign(this.cam, { left: -W / 2 / ppu, right: W / 2 / ppu, top: H / 2 / ppu, bottom: -H / 2 / ppu });
+    if (this.cam instanceof THREE.PerspectiveCamera) {
+      // Far enough back that a tile at your hero is `ppu` pixels across.
+      this.cam.aspect = W / H;
+      this.dist = H / (2 * ppu * Math.tan((FOV * Math.PI) / 360));
+    } else Object.assign(this.cam, { left: -W / 2 / ppu, right: W / 2 / ppu, top: H / 2 / ppu, bottom: -H / 2 / ppu });
     this.cam.updateProjectionMatrix();
   }
 
@@ -49,6 +59,7 @@ export class Cam {
    * covers under the top HUD; the view looks that much higher and the room's top may come down under it.
    */
   follow(map: GameMap, x: number, z: number, dt: number, shake: number, keep?: { z: number; top: number; bottom: number }, ins = 0): void {
+    if (this.cam instanceof THREE.PerspectiveCamera) return this.chase(map, x, z, dt);
     const k = this.ready ? Math.min(1, dt * 7) : 1, up = ins / (Math.sin(PITCH) * this.ppu);
     z -= up;
     this.at.x += (x - this.at.x) * k;
@@ -72,6 +83,30 @@ export class Cam {
     u = Math.round(u * this.ppu) / this.ppu;
     if (shake > 0.2) r += Math.round((Math.random() - 0.5) * shake) / this.ppu, (u += Math.round((Math.random() - 0.5) * shake) / this.ppu);
     this.cam.position.copy(this.right).multiplyScalar(r).addScaledVector(this.up, u).addScaledVector(this.back, b + DIST);
+    this.cam.updateMatrixWorld();
+  }
+
+  /**
+   * The chase camera (the new look's town): eases after your hero, turns toward where they walk, up to 45 degrees
+   * either way (walking back toward it holds the turn rather than spinning round), and looks down at them from
+   * behind and above. Only in town; on a job it stays facing north.
+   */
+  private chase(map: GameMap, x: number, z: number, dt: number): void {
+    const k = this.ready ? Math.min(1, dt * 5) : 1;
+    if (this.last && map.name === 'WICKHOLD') {
+      const dx = x - this.last[0], dz = z - this.last[1];
+      if (Math.hypot(dx, dz) > 0.002) {
+        const a = Math.atan2(dx, -dz);
+        if (Math.abs(a) < 2) SWING.yaw += (Math.max(-SWING_MAX, Math.min(SWING_MAX, a)) - SWING.yaw) * Math.min(1, dt * 1.4);
+      }
+    } else if (map.name !== 'WICKHOLD') SWING.yaw = 0;
+    this.last = [x, z];
+    this.at.x += (x - this.at.x) * k;
+    this.at.z += (z - this.at.z) * k;
+    this.ready = true;
+    const y = SWING.yaw, cp = Math.cos(PITCH);
+    this.cam.position.set(this.at.x - Math.sin(y) * cp * this.dist, Math.sin(PITCH) * this.dist, this.at.z + Math.cos(y) * cp * this.dist);
+    this.cam.lookAt(this.at.x, 0.8, this.at.z);
     this.cam.updateMatrixWorld();
   }
 
