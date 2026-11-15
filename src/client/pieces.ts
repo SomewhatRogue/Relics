@@ -14,12 +14,13 @@ import { gibbetBoxes, oakBoxes, waymarkBoxes } from './woodpieces';
 import { FEN_KINDS, fenBoxes } from './fenpieces';
 import { plinthBoxes } from './statuepieces';
 import { daisBoxes } from './daispieces';
+import { STREET_KINDS, streetBoxes } from './streetpieces';
 
 export type Bx = [number, number, number, number, number, number, number, ('lump' | 'cone')?];
 export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack', 'boards', 'reeds']);
 /** Boards you walk on (the Staithe's jetty and a log laid across): the flat view paints them under everyone (staithedraw.ts). */
 export const DECKS = new Set<Block['kind']>(['jetty', 'gangway', 'boards']);
-export const PIECE_ROUNDS = new Set<Round['kind']>(['hangtree', 'headstone', 'apple', 'gibbet', 'waymark', 'plinth', 'dais']);
+export const PIECE_ROUNDS = new Set<Round['kind']>(['hangtree', 'headstone', 'apple', 'gibbet', 'waymark', 'plinth', 'dais', ...STREET_KINDS]);
 
 const TIMBER = 0x4a3420, DARK = 0x2e2016, STONE = 0x6a6470, IRON = 0x55505e, ROPE = 0x8a7a5a, BARK = 0x4a3a2a, LEAF = 0x2f4a28;
 /** A tiny repeatable shuffle for looks. */
@@ -87,6 +88,8 @@ export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined'
 /** A round's boxes, from its foot. */
 export function roundBoxes(o: Pick<Round, 'kind' | 'r' | 'x' | 'y'>): Bx[] {
   const r = shuffle(Math.round(o.x * 31 + o.y * 17)), out: Bx[] = [];
+  // A lived-in town's street things (streetpieces.ts).
+  if (STREET_KINDS.has(o.kind)) return streetBoxes(o, r);
   if (o.kind === 'hangtree') {
     // A big old tree with one long limb out to the east, high enough to hang from (the stock under it is
     // grim, by the ankles from hooks at 0.75 and 1.35 along the limb: the larder rule).

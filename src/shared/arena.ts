@@ -23,7 +23,11 @@ export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | '
   // headstone, an orchard's apple tree.
   | 'hangtree' | 'headstone' | 'apple'
   // Hangman's Wood (shared/hangwood.ts): the crossroads gibbet's post and arm, a waymark stone.
-  | 'gibbet' | 'waymark';
+  | 'gibbet' | 'waymark'
+  // A lived-in town's street things (client/streetpieces.ts draws both views from one list): barrels, a stack of
+  // crates, sacks, a handcart, a woodpile, the smith's anvil, a washtub, a clothesline, a chopping block, a hen
+  // coop, flower pots by a door.
+  | 'barrels' | 'crates' | 'sacks' | 'handcart' | 'woodpile' | 'anvil' | 'washtub' | 'clothesline' | 'chopblock' | 'coop' | 'pots';
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
@@ -209,7 +213,9 @@ export interface Npc {
   /** Paint only, what they're busy at: carrying the dead and digging, at the whetstone, at the well;
    *  the public works' crew sweeping, hauling planks, shovelling rubble into a barrow. */
   /** (`ladder`: Cobb sitting on his crate at the Deep's ladder, with his lamp and slate: client/cobbdraw.ts.) */
-  work?: 'bury' | 'dig' | 'whet' | 'well' | 'sweep' | 'haul' | 'shovel' | 'ladder';
+  /** (A lived-in town, client/folkwork.ts: the smith at his anvil, the washerwoman between the well, her tub and the
+   *  line, a woodcutter, a carter with his handcart, a child bowling a hoop.) */
+  work?: 'bury' | 'dig' | 'whet' | 'well' | 'sweep' | 'haul' | 'shovel' | 'ladder' | 'smith' | 'wash' | 'chop' | 'cart' | 'hoop';
   /** Seconds they stand at each point of their round, working, before walking on (npcstops.ts). */
   stops?: number[];
   /** Walks on Wickhold's wall clock, not the room's, so every screen has them in the same spot. */
@@ -290,6 +296,8 @@ export interface GameMap {
   wallFace: number;
   rounds: Round[];
   blocks: Block[];
+  /** Paint only, never collided or walked round: animals about the streets (shared/townlife.ts). */
+  life?: import('./townlife.js').Life[];
   /** `wild`: a camp's fire, burning whatever the hour (shared/lamps.ts); the rest are tended lamps. */
   braziers: (Circle & { wild?: boolean })[];
   torches: { x: number; y: number }[];

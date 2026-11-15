@@ -108,6 +108,7 @@ import { sealScene } from './sealdraw';
 import { lampAt } from '../shared/lamps';
 import { drawChalkMarks, drawTally } from './chalkdraw';
 import { noteKneels } from './kneel';
+import { lifeFigs } from './townbeasts';
 
 
 /** The view's jolt this frame (heropose.ts), reused. */
@@ -438,6 +439,8 @@ export class Scene {
     }
     // (The windlass's post is drawn with the windlass: fendraw.ts.)
     fenScene(map, c, cx, cy, room.heroes, items);
+    // A lived-in town's animals, each at its own spot (townbeasts.ts).
+    if (map.life) for (const b of lifeFigs(map, now, others.length ? [...room.heroes, ...others] : room.heroes)) items.push({ y: OY + b.y * PX, draw: () => b.draw(c, OX + b.x * PX - cx, OY + b.y * PX - cy - Math.round(b.up * PX)) });
     for (const r of map.rounds) if ((r.kind !== 'post' || !map.windlass) && (!big || !off(OX + r.x * PX - cx, OY + r.y * PX - cy))) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
     for (const b of map.blocks) {
       if (b.kind === 'sideway') continue;

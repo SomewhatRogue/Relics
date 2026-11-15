@@ -155,6 +155,8 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
     case 'waymark':
     case 'plinth':
     case 'dais':
+    // A lived-in town's street things (../streetpieces.ts).
+    case 'barrels': case 'crates': case 'sacks': case 'handcart': case 'woodpile': case 'anvil': case 'washtub': case 'clothesline': case 'chopblock': case 'coop': case 'pots':
       // Layout 4's pieces: the boxes the flat view paints (../pieces.ts).
       putBoxes(B, roundBoxes(o), x, z);
       // The Last Lantern's flame, in its cage on top of the dais's column (daispieces.ts).

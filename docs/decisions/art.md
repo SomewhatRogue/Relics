@@ -450,3 +450,29 @@ The plan, one class at a time so Kyle can play each against the old ones:
 - The tall-proportions step moved out of npcs.ts `person` into npcside.ts `tallPerson` so both views share it.
   `window.__npcArt` (npcart.ts) and scripts/folk-look.cjs: every look standing, contact, passing, west, at 4x.
   (Claude Opus 5.5)
+
+## 2026-11-15: a lived-in world, slice 1 (the crowded town)
+
+- A new chat (the Lived-in world row) on docs/design/lived-in-world.md, after Riteborn: slice 1, Wickhold crowded.
+- Folk at work (shared/townlife.ts `streetFolk`, drawn by client/folkwork.ts through the pen): a smith hammering hot
+  iron at an anvil before the forge (sparks on the glow layer) and back to the forge's mouth for a heat; a washerwoman
+  filling her bucket at the millpond, scrubbing at a tub behind Rescue Row, pegging out on the line; a woodcutter
+  between the church and the hall, axe up slow and down, the halves jumping, armfuls to the pile; a carter pushing a
+  loaded handcart up and down the south lane; a potboy sweeping the Drowned Rat's step; two children chasing round
+  the Lantern, one bowling a hoop. All on the wall clock, `mute`, on rounds with stops (no collision: they have paths).
+  Each arrives facing what they work at. Washing is behind Rescue Row, not the west green: that's Widow Perrin's
+  garden once it's mended.
+- Street things as box pieces (client/streetpieces.ts, both views from one list via pieces.ts and rounds3d.ts):
+  barrels, crates (the cat's seat), sacks, a handcart, a woodpile with its cut ends out, the anvil and quench tub, a
+  washtub, two clotheslines hung with washing, a chopping block, a hen coop on legs, pots of flowers by the church's
+  and infirmary's doors; three more lamp posts. Off the lanes, the square (kept clean, Kyle 2026-11-13), every doorway
+  and every patrol (the town test caught Orla's round through the first crates; moved).
+- Animals in a new paint-only list, `GameMap.life` (shared/townlife.ts), never collided, never sent: client/townbeasts.ts
+  puts each at its own spot so the flat view sorts it in (scene.ts) and 2.5D stands it on a card (cards3d.ts). Hens
+  and a rooster scratching by their coop, running off from your feet; a duck and four ducklings out of the millpond
+  in file across Rescue Row and back in; a cat on the crates by the market (tail flicks, washes, looks your way, green
+  eyes after dark) and one asleep on the feed sacks; pigeons by Old Wenna's bench and on the gate road that clatter up
+  when you come near and drop back. Cosmetic: each screen's own clock and heroes.
+- scripts/crowd-look.cjs `<url> <out> x,y ...`: both views on a phone, the camera at each spot (cutFocus), the hero a
+  few steps south, the arrival scene skipped.
+  (Claude Opus 5.5)

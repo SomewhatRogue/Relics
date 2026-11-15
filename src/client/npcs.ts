@@ -10,6 +10,7 @@ import { gobPen } from './gobpen';
 import { hs } from './heroscale';
 import { drawWork } from './siegedraw';
 import { CREW, drawCrew } from './crewdraw';
+import { drawFolk, FOLK } from './folkwork';
 import { COBB_SIT, drawCobbCrate, drawCobbThings } from './cobbdraw';
 import { sidePerson, tallPerson } from './npcside';
 
@@ -151,7 +152,7 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   if (n.smear) drawSmear(c, x, y, n.smear, n.lift ?? 0);
   if (n.pose) return drawDead(c, s, x, y, n);
   // The works' crew face the way they walked in, so what's in their hands faces it too.
-  const crew = !!n.work && CREW.has(n.work);
+  const folk = !!n.work && FOLK.has(n.work), crew = (!!n.work && CREW.has(n.work)) || folk;
   // Cobb sits on his crate at the ladder: the crate behind, him up on it, his slate and lamp in front (cobbdraw.ts).
   const sits = n.work === 'ladder';
   if (sits) drawCobbCrate(c, x, y);
@@ -162,6 +163,7 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   if (n.arrow) drawArrowIn(p, x, y);
   // A guard carries a spear upright.
   if (sits) drawCobbThings(c, x, y);
+  else if (folk) drawFolk(p, n, x, y + bob, fx, walking, tx);
   else if (crew) drawCrew(p, n, x, y + bob, fx, walking);
   else if (n.work) drawWork(p, n, x, y + bob, tx, fx);
   if (n.mute) return;

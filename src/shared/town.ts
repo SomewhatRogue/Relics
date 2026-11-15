@@ -19,6 +19,7 @@ import { workDone } from './works.js';
 import { publicWorks } from './publicworks.js';
 import { BUTTS, MILLPOND } from './pastimes.js';
 import { PLINTH } from './statue.js';
+import { STREET_THINGS, TOWN_LIFE, streetFolk } from './townlife.js';
 
 /** What talking to someone (or using a spot) opens. */
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
@@ -124,6 +125,8 @@ export function townMap(w: WorldState): GameMap {
     { kind: 'plinth', x: PLINTH.x, y: PLINTH.y, r: PLINTH.r, ...(w.statue ? { hero: w.statue.by } : {}) },
     // Reeds round the millpond's edges.
     ...MILLPOND.reeds.map(([x, y]) => r('reed', x, y, 0.2)),
+    // A lived-in town: barrels, crates, sacks, a woodpile, the anvil, pots by the doors (shared/townlife.ts).
+    ...STREET_THINGS,
   ];
   const n = (name: string, x: number, y: number, talk: string, look: string, arg?: number, path?: [number, number][], speed?: number): Npc => ({ name, x, y, talk, look, arg, path, speed });
   const npcs: Npc[] = [
@@ -146,11 +149,13 @@ export function townMap(w: WorldState): GameMap {
   if (workDone(w, 'sewers')) npcs.push({ ...n('COBB', 25.1, 35.7, 'sewer', 'digger'), work: 'ladder' });
   // Foreman Judd at the works stall, and his crew sweeping, hauling and shovelling (publicworks.ts).
   npcs.push(...publicWorks(w));
+  // The town at work: the smith, the washerwoman, the woodcutter, the carter, the potboy, children (townlife.ts).
+  npcs.push(...streetFolk(w));
   const m = mending(w), sg = siege(w), worn = !workDone(w, 'shutters');
   for (const b of blocks) if (worn && b.label && WORN.includes(b.label)) b.worn = true;
   blocks.push(...m.blocks, ...sg.blocks), rounds.push(...m.rounds, ...sg.rounds), npcs.push(...m.npcs, ...sg.npcs);
   return {
-    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, soil: townSoil(w), marks: [...townGround(w), ...m.marks], breach: m.breach,
+    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, life: TOWN_LIFE, soil: townSoil(w), marks: [...townGround(w), ...m.marks], breach: m.breach,
     braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, ...sg.braziers],
     torches: [6, 14, 22, 34, 40, 46, 58].map((x) => ({ x, y: -1.6 })),
     // The millpond under the east wall, where the mill stream comes in (shared/pastimes.ts).
