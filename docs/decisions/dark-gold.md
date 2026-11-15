@@ -73,3 +73,17 @@ The Dark and gold chat's log (docs/design/dark-gold.md, Kyle's pictures in docs/
   to rust (the guard's tunic). `node scripts/folk-look.cjs` shows every look.
 - One line in Art's npcs.ts (the wrap; the Town quests chat's gold-mark lines untouched).
   (Claude Opus 5.5)
+
+## 2026-11-15: the new look (docs/design/new-look.md)
+
+- Kyle, playing the dark-and-gold build on a laptop: grainy, and not his pictures; a redesign. With four more
+  pictures (saved in docs/design/ref/: dense-town-day, hd2d-town-night, gothic-hall, lantern-bearer) and "a more full
+  looking town... buildings you can go in defined by their guild signs". "ya lets do it."
+- The grain: 16 px tiles scaled 4x to 6x on a laptop, and lone pixels everywhere (grass flecks, the scatter, the
+  light's dither). Recolouring code-drawn art gets the mood, not the pictures' craft (clusters, twice the density).
+- The spec: the steep camera kept (the fight needs the floor), 32 px tiles, HD-2D light in the 2.5D view, the town
+  re-laid out full with guild signs, day like the dense town and night like the HD-2D square. Art from licensed
+  packs; Mana Seed ruled out (its licence forbids use with anything AI-made, code included). The repo is public, so
+  a pack's files can't go in it as it is: Kyle to choose private repo or a private art repo.
+- Concept shots of Wickhold and the heroes generated in Kyle's ElevenLabs flow "Relic: HD-2D look tests".
+  (Claude Opus 5.5)
