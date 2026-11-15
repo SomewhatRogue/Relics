@@ -10,11 +10,13 @@ import type { Spot } from './rounds3d';
 import { setLampMeshes } from './lamps3d';
 import { houseAlight, kindling } from '../../shared/kindling';
 import { gradeBuilt } from './darkgold3d';
+import { ghostKit, STREET } from './streetkit';
+import { PITCH } from './camera3d';
 
 export class Buildings {
   readonly group = new THREE.Group();
   /** By the block's place in the map's list (a friend's copy of the room gets new block objects on every update). */
-  private built = new Map<number, { b: Built; key: string }>();
+  private built = new Map<number, { b: Built; key: string; ghost?: boolean }>();
 
   clear(): void {
     for (const { b } of this.built.values()) this.drop(b);
@@ -41,6 +43,15 @@ export class Buildings {
         this.built.set(i, e);
       }
       const roof = e.b.roof;
+      // The new look's test street (streetkit.ts): behind a kit building, as far back as it hides at this camera's
+      // tilt, it goes see-through instead; nothing lifts or drops.
+      if (STREET && roof) {
+        const hid = !!me && me[0] > blk.x - 0.8 && me[0] < blk.x + blk.w + 0.8 && me[1] > blk.y - e.b.top / Math.tan(PITCH) && me[1] < blk.y + 0.4;
+        if (e.ghost !== hid) ghostKit(e.b.group, (e.ghost = hid));
+        for (const f of e.b.fires) fires.push(f);
+        setLampMeshes(map.theme, blk.x, blk.y, e.b.lamps);
+        return;
+      }
       // Behind it: the roof comes off and the walls drop low, like a doll's house opened.
       const cut = !!roof && !!me && me[0] > blk.x - 0.5 && me[0] < blk.x + blk.w + 0.5 && me[1] > blk.y - e.b.top * 1.2 && me[1] < blk.y + 0.4;
       if (roof) roof.visible = !cut;

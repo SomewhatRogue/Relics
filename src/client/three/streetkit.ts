@@ -125,3 +125,40 @@ export function streetFloor(m: THREE.MeshLambertMaterial, w: number, h: number):
   t.repeat.set(w / 1.2, h / 1.2);
   m.map = t;
 }
+
+/** Render pixels a tile on the test street: about 40 tiles across a laptop, 20 across an upright phone. */
+export const streetPpu = (W: number, H: number) => Math.max(24, W / (H > W ? 20 : 40));
+
+/** Where your hero is on the render (x, y from the bottom) and the see-through hole's radius, in render pixels. */
+export const HOLE = { value: new THREE.Vector3(-1e4, -1e4, 0) };
+
+const ghosts = new WeakMap<THREE.Material, THREE.Material>();
+/** A material's see-through twin: a soft round hole round your hero, its edge dithered (no blending, no sorting). */
+function ghostOf(m: THREE.Material): THREE.Material {
+  let g = ghosts.get(m);
+  if (!g) {
+    g = m.clone();
+    g.onBeforeCompile = (sh) => {
+      sh.uniforms.uHole = HOLE;
+      sh.fragmentShader = sh.fragmentShader.replace('void main() {', `uniform vec3 uHole;
+float gb(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
+void main() {
+  float hk = length((gl_FragCoord.xy - uHole.xy) * vec2(1.0, 0.8)) / max(uHole.z, 1.0);
+  if (hk < 1.0 && gb(gl_FragCoord.xy) * 0.25 + gb(gl_FragCoord.xy * 0.5) > smoothstep(0.6, 1.0, hk) * 1.25) discard;`);
+    };
+    g.customProgramCacheKey = () => 'kitghost';
+    ghosts.set(m, g);
+  }
+  return g;
+}
+const own = new WeakMap<THREE.Mesh, THREE.Material>();
+/** A kit building with the hole round your hero while you're behind it (in place of the roof lifting off), or whole. */
+export function ghostKit(group: THREE.Group, on: boolean): void {
+  group.traverse((o) => {
+    const q = o as THREE.Mesh;
+    if (!q.isMesh) return;
+    if (!own.has(q)) own.set(q, q.material as THREE.Material);
+    const m = own.get(q)!;
+    q.material = on ? ghostOf(m) : m;
+  });
+}

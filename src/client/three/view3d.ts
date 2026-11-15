@@ -16,7 +16,7 @@ import { paintMap } from '../world';
 import { Actors, XRAY_LAYER, type Lerp } from './actors3d';
 import { XRAY } from './mats';
 import { HD, HD_AREA } from './hdlook';
-import { STREET } from './streetkit';
+import { HOLE, STREET, streetPpu } from './streetkit';
 import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
@@ -52,8 +52,7 @@ import { flashOf } from '../../sim/stormshape';
 import { drawChalkMarks } from '../chalkdraw';
 
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
-// (Closer on the new look's test street, streetkit.ts: the people and the fronts bigger.)
-const ZOOM = STREET ? { tall: 0.45, wide: 0.55 } : { tall: 0.8, wide: 1 };
+const ZOOM = { tall: 0.8, wide: 1 };
 
 export class View3D {
   readonly canvas: HTMLCanvasElement;
@@ -136,13 +135,14 @@ export class View3D {
   resize(): void {
     this.dpr = Math.min(devicePixelRatio || 1, 3);
     const Dw = innerWidth * this.dpr, Dh = innerHeight * this.dpr;
-    const S = (this.S = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
+    // (The new look's test street: painted at the screen's own pixels over its density, the kit at 32 px a tile; streetkit.ts.)
+    const S = (this.S = STREET ? Math.max(1, Math.round(this.dpr)) : Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
     const W = Math.ceil(Dw / S), H = Math.ceil(Dh / S);
     // As much floor as the pixel scene shows (its tiles across times down, scene.ts), so a figure stands
     // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.
     // `__zoom3` (a share of that floor) is for screenshots.
     const s2 = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / 118000))), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
-    this.view.size(W, H, Math.sqrt((W * H) / (Math.sin(PITCH) * floor)));
+    this.view.size(W, H, STREET ? streetPpu(W, H) : Math.sqrt((W * H) / (Math.sin(PITCH) * floor)));
     this.gl.setSize(W, H, false);
     const css: [string, string] = [(W * S) / this.dpr + 'px', (H * S) / this.dpr + 'px'];
     [this.canvas.style.width, this.canvas.style.height] = css;
@@ -183,6 +183,11 @@ export class View3D {
     if (me) {
       const [hx, hy] = lerp('h:' + me.id, me.x, me.y), portrait = this.view.H > this.view.W * 1.2;
       this.heroAt = [hx, hy];
+      // The new look's test street: the see-through hole round your hero in a building that hides them (streetkit.ts).
+      if (STREET) {
+        const [sx, sy] = this.view.px(hx, 0.9, hy);
+        HOLE.value.set(sx, this.view.H - sy, this.view.ppu * 2.2);
+      }
       // A cutscene's point of interest (the Stoker coming): the camera eases there instead.
       if (f) this.view.follow(map, f.x, f.y, f.snap ? 99 : dt * 0.36, fx.shake);
       else {

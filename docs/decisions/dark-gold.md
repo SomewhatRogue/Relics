@@ -118,3 +118,18 @@ The Dark and gold chat's log (docs/design/dark-gold.md, Kyle's pictures in docs/
   look crude beside the kit; the texture density doesn't sit 1:1 on screen at this zoom; the town's layout is the
   old one. Try: relic-lake.vercel.app/?look=3d&hd&street&day=0.9
   (Claude Opus 5.5)
+
+## 2026-11-15: the new look, slice 0b second pass (zoomed out, a hole round your hero)
+
+- Kyle on the first pass: "WAY too zoomed in", "passing behind houses looks cheap", "i like the lower camera and i
+  think we can go even lower but will probably need to redesign the town somewhat and zoom WAY back".
+- Zoom: under `?street` the view is painted at the screen's own pixels over its density (view3d.ts), the kit at
+  32 px a tile, about 40 tiles across a laptop and 20 across an upright phone (streetkit.ts `streetPpu`). (The first
+  try widened the view and raised the resolution by the same factor, which cancelled out.) Pitch 20 degrees.
+- Behind a kit building (as far back as it hides at this tilt, `top / tan(PITCH)`): a soft round hole round your
+  hero, its edge dithered, the rest of the building solid; nothing lifts or drops (buildings3d.ts, streetkit.ts
+  `ghostKit`, `HOLE` set each frame in view3d.ts). The hero's own see-through silhouette still shows.
+- Known: an upright phone at this low tilt sees about 100 tiles deep with an orthographic camera, past the town's
+  40, so half its screen is empty: the next step is a true perspective chase camera in town (Kyle's picture,
+  ref/town-chase-camera.png). Then the kit's props, then the town re-laid out dense.
+  (Claude Opus 5.5)
