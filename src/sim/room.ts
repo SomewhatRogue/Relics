@@ -27,6 +27,7 @@ import { HUNGRY_FX, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
 import { dropPickups, stepPickups, type Pickup } from './pickups';
+import { bossRelics } from './relicboss';
 import { dropCoal, stepCoals, type Coal } from './lantern';
 import { censerSwing, stepEmbers } from './censer';
 import { mend, shieldNear } from './holy';
@@ -178,6 +179,8 @@ export class ArenaRoom {
   private doorRng: Rng;
   /** Whether a house catches, and when its goblins come out (sim/catching.ts, houseburn.ts), on a stream of their own. */
   private fireRng: Rng;
+  /** A great boss's relic's id (sim/relicboss.ts), on its own stream so nothing else moves. */
+  private homeRng: Rng;
   /** Whether what's in a broken cage is false (sim/falsecage.ts), on its own stream as well. */
   private cageRng: Rng;
   /** What a technique knocks loose (CUTPURSE: sim/techrogue.ts), on its own stream too. */
@@ -230,6 +233,7 @@ export class ArenaRoom {
     this.lootRng = new Rng(seed * 7919 + 13);
     this.doorRng = new Rng(seed * 104729 + 31);
     this.fireRng = new Rng(seed * 7351 + 17);
+    this.homeRng = new Rng(seed * 4099 + 3);
     this.cageRng = new Rng(seed * 2971 + 41);
     this.purseRng = new Rng(seed * 6007 + 53);
     this.skyRng = new Rng(seed * 9173 + 61);
@@ -520,6 +524,8 @@ export class ArenaRoom {
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events, this.level, this.floor);
     if (this.floor > 0) uniqueDrops(this, this.enemies.filter((e) => alive.has(e.id) && isDead(e) && !e.escaped), this.lootRng);
+    // A great boss beaten: its relic, to each hero without one (sim/relicboss.ts; its own stream).
+    bossRelics(this.enemies.filter((e) => alive.has(e.id) && isDead(e) && e.boss), this.enemies, this.heroes, this.floor, this.homeRng, this.events);
     for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);

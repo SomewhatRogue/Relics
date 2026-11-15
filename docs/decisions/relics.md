@@ -34,3 +34,21 @@ The chat building docs/design/relics.md (Kyle approved 2026-11-15). Newest at th
   a card (`client/relicgone.ts`, from main.ts's raid-news spot) says so once, then it's saved. Words draft
   until the lore pass (`RELICW.goneTitle`, `goneLine`, `goneIsolde`). Small edits: `progress.ts` (the two
   fields, `relicsV: 1` in newProfile), `save.ts`, `main.ts`. tests/relicreset.test.ts. (Claude Opus 5.5)
+- **Slice 3 in: great bosses' first kills.** `shared/relichomes.ts` holds each relic's one home (draft table
+  from the spec: javelin the start; hook the Haulier; knuckle Hempen; lodestone the Doorkeepers; net
+  Fenmere's end boss; bomb, wind-up bow, bone whistle church quests). `sim/relicboss.ts`: the room's death
+  step (one line in room.ts, its own seeded stream `homeRng`) gives a beaten great boss's relic to every
+  hero there without one of that kind, through `takeRelic` (the found moment; carried if nothing is), marked
+  `from` on the item (a new optional `RelicItem.from`, for the fanfare and the reliquary). Hempen (BossOn
+  `hempen`) gives the knuckle; the Doorkeepers, when both Latch and Hasp are down and not on a Deep floor
+  (their home is the great barn), the lodestone. A friend in the leader's room gets theirs home through
+  keepKit as any pickup.
+  - **For the Instances chat:** the Haulier's hook is yours to give at the Open Cut's end: call
+    `giveHome('haulier', room.heroes, rng, room.events)` (sim/relicboss.ts) where the instance is won, on a
+    stream of your own. It's idempotent (nobody gets a second hook). Nothing of yours is touched; the Deep's
+    Haulier gives none.
+  - Open for Kyle: giving a relic up at the church (GIVE IT UP, for the light) and beating its boss again
+    gives it again. "Never twice" would want a list of relics ever won; say if so.
+  - Open for the lore keeper: the net is also the Ranger's class skill (HUNTER'S NET), so Fenmere's relic may
+    want to be something else. Fenmere's end boss isn't built yet.
+  - tests/relicboss.test.ts (the pair in the barn, Hempen in the wood, the Deep floor, giveHome). (Claude Opus 5.5)

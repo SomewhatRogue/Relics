@@ -18,6 +18,8 @@ export interface RelicItem {
   charge: number;
   /** 2: charge counts uses (3 to 6). Missing: an old save's, out of 24 / 36 / 48 (fitRelics turns it). */
   v?: 2;
+  /** Where it was won (shared/relichomes.ts RelicHome): the fanfare and the reliquary say so. */
+  from?: string;
 }
 
 /** Uses a full plain relic holds, by kind: the strongest hold fewest. An elemental one holds one more, a LOUD one two. */
