@@ -107,3 +107,11 @@ The economy chat's log (docs/design/economy.md). Newest at the foot.
   the same row (Kyle to look).
 - All five slices are in. Open for Kyle: the town's shared totals (works, Lantern, statue) left in the old
   units; voice.md and story-bible.md still give prices in gold (the lore keeper's note above).
+
+## 2026-11-14: the pack's skill square gone; a gear spec drafted (Opus 5.5)
+
+- Kyle: "remove skill from the pack UI". The class skill's square is out of the pack's figure
+  (`client/pack.ts`, the UI chat's file: one cell and an unused import removed, nothing else; its grid
+  spot stays empty for LEGS). **For the UI chat:** pack.css still names the `skill` grid area; harmless.
+- Kyle asked for item level, real rarity, uniques that change your look and a LEGS slot: drafted as
+  `docs/design/gear-levels.md`, waiting on his yes. Nothing built yet.

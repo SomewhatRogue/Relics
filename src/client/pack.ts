@@ -1,6 +1,6 @@
 /**
  * The pack (I, Tab, or PACK): your hero with what's on each part of them (HAND, BODY, two RINGs, the
- * RELIC carried, the BELT, and the class SKILL shown but not changed here), and beside it the pack, a
+ * RELIC carried, and the BELT), and beside it the pack, a
  * square a piece. Tap a piece (or point at it, with a mouse) for its card next to what you wear in that
  * slot now, every number with the change. Drag a piece onto its slot to wear it, or into the pack to
  * take it off. The world keeps going while it's open and your hero stands still; every change goes to
@@ -13,7 +13,7 @@ import type { Hero } from '../sim/types';
 import { COAL, COPY } from './copy';
 import { heroSheet, potionRows } from './card';
 import { cell, grid, plainKit, sideBySide } from './cells';
-import { ghostIcon, itemIcon, potionIcon, relicIcon, skillIcon } from './itemicons';
+import { ghostIcon, itemIcon, potionIcon, relicIcon } from './itemicons';
 import { drag } from './packdrag';
 import { heroLook } from './sprites';
 import { PACKW } from './storewords';
@@ -118,7 +118,6 @@ export class PackView {
     return '<div class="doll">' +
       // (A relic kind carried with no item, from before relics were items: the old square.)
       (h.relics[1] && !carriedRelic(h) ? slot('s-relic', cell(null, 'relic', { dst: 'relic', sel, title: PACKW.relic, icon: relicIcon(), col: '#ffd27a' })) : '') +
-      slot('s-skill', cell(null, 'skill', { sel, title: PACKW.skill, icon: skillIcon(), col: '#5a8ac8', dim: true })) +
       slot('s-hand', hand) +
       slot('s-body', cell(h.armor, h.armor ? 'armor' : null, { dst: 'armor', sel, title: PACKW.body, ghost: ghostIcon('light') })) +
       [0, 1].map((k) => slot('s-ring' + k, cell(h.rings[k] ?? null, h.rings[k] ? 'ring:' + k : null, { dst: 'ring', sel, title: PACKW.ring, ghost: ghostIcon('ring') }))).join('') +
