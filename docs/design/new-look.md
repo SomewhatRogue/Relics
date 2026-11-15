@@ -39,6 +39,19 @@ buildings you can go in defined by their guild signs". Then "ya lets do it."
 - **A chase camera in town.** It follows behind you as you walk, so walking up to the church you see its front;
   buildings face their lanes in every direction, not all south. (Jobs keep the steep, fixed camera.)
 - Everything else (props, people, the town's layout) he expects to come with the new system.
+- **The town re-organised** (Kyle, after the chase camera): "all the houses are facing the same way and on the same
+  elevation in town. Not very town like." Lanes running different ways, fronts facing their lanes, changes of level
+  (a raised square, steps, terraces, a lower quarter; GameMap's ledges and ramps exist), landmarks placed for the
+  chase camera to come upon.
+- **Interiors to match** (Kyle): "the insides are way too small now... the barracks and church etc. let's re-imagine
+  and design."
+
+## The chats (2026-11-15)
+
+The new look is split four ways, each with its own row on the board: **New look: buildings and camera** (the kit,
+building variety, Blender landmarks, props, sky and fog, the camera), **New look: town layout** (Wickhold re-laid
+out), **New look: interiors** (after the layout's sizes settle), **New look: characters** (heroes and goblins in the
+concepts' style, the long pole). The Dark and gold chat that started it is finished.
 
 ## Why it's grainy now
 

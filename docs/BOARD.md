@@ -40,10 +40,25 @@ The Deep chat, until it finishes (then the general chat).
 | Relics | Relics, earned (docs/design/relics.md): the old sources and the swap gone, the save step, great bosses' first kills, the fanfare, the reliquary, Isolde's rare relic quests | `src/shared/relicaward.ts`, `src/shared/relichomes.ts`, `src/shared/relicreset.ts`, `src/sim/namedrelic.ts`, `src/sim/relicboss.ts`, `src/client/relicnews.ts`, `relicmoment.ts`, `relicwords.ts`, `relicfanfare.ts`, `forgeanim.ts`, `tests/relic*.test.ts`, `tests/namedrelic.test.ts`; the relic lines only in `src/sim/pickups.ts`, `bosschest.ts`, `src/client/churchrelics.ts` (with Town quests; church.ts is Economy's), `packmoves.ts`; small edits in `sim/hero.ts`, `sim/room.ts`, `sim/types.ts`, `game.ts`, `save.ts`, `shared/jobs.ts` (the deep dive's words), UI's `pack.ts` (the relic buttons in town only) | docs/decisions/relics.md | All six slices in (old sources and swap gone; the save step; Hempen's and the Doorkeepers' first kills; the fanfare and the Roll; the reliquary; Isolde's rare quests), lines through the lore pass. Waiting on: Instances (`giveHome('opencut')` at the Open Cut's end), Town quests (Isolde's mark and goal line), Kyle's play |
 | Hero select | Choosing a new hero round the fire (docs/design/hero-select.md): the five classes round a campfire, tap one to step them forward and see the card, CHOOSE fades to black into the game | `src/client/heroring.ts`, `ringdraw.ts`, `ringcard.ts`, `ring.css`, `scripts/ring-look.cjs`, `src/shared/ringmap.ts`, `src/client/title.ts` (nobody's before); small edits in `main.ts` (the ring's frame), Art's `actors.ts` and `draw.ts` (`PLAIN`) | docs/decisions/hero-select.md | The ring, the card and CHOOSE's fade in, flat and 2.5D; WATCH IT FIGHT removed (Kyle). Waiting on Kyle's play |
 | Lived-in world | A lived-in world after Riteborn (docs/design/lived-in-world.md): slice 1 the crowded town, slice 2 the crowded job maps | `src/shared/townlife.ts`, `src/client/townbeasts.ts`, `folkwork.ts`, `streetpieces.ts`, `scripts/crowd-look.cjs`, `src/shared/scatter.ts`, `src/client/scatterpaint.ts`, `scripts/scatter-look.cjs`, `tests/scatter.test.ts`; small edits in `shared/arena.ts` (RoundKind, Npc.work, GameMap.life), `shared/town.ts` (three lines), `client/pieces.ts`, `three/rounds3d.ts`, `three/ground.ts`, `world.ts` (paintMap's one line), `scene.ts`, Art's `npcs.ts` (the folk's work hook) and `three/cards3d.ts` (the animals' cards) | docs/decisions/art.md | Slices 1 (the crowded town) and 2 (the crowded job maps) in. Slice 3 (buildings in 2.5D) goes to dark and gold's slice 1; 4 and 5 wait on Kyle's play |
-| New look (was Dark and gold) | The new look (docs/design/new-look.md): HD-2D light in the 2.5D view, twice the density, a full Wickhold with guild signs; slice 0 the test street. Dark and gold's four slices are in | Dark and gold's files (`src/client/darkgold.ts`, `darkdress.ts`, `darkfoe.ts`, `three/darkgold3d.ts`, `darkdress3d.ts`, `scripts/dark-look.cjs`); `src/client/three/hdlook.ts`, `streetkit.ts`, `three/kit/`, `scripts/kitprep.py`; small edits in `three/post.ts`, `three/view3d.ts`, `three/camera3d.ts`, `three/houses3d.ts`, `three/ground.ts` | docs/decisions/dark-gold.md | Spec written. 0a in (`?look=3d&hd`, the light). 0b first pass in (`&street`: the town's buildings from a generated kit, scripts/kitprep.py, src/client/three/kit/; a lower, closer camera). Art is generated in Kyle's ElevenLabs, so no pack or private repo needed. Next: kit props, a chase camera in town, then the town re-laid out dense (needs the Town quests, Lived-in and Art chats) **Heads up, every art chat:** the town, buildings, ground and figures are to be redone at 32 px a tile from a licensed pack (see the spec); hold big new code-drawn art |
 | General | Playtest fixes, tuning, specs (instances, trading, holy and hungry) | `docs/design/` except the-deep.md | docs/decisions/general.md | Specs written; no code claimed |
 
 ## Waiting (specs ready, no chat yet)
+
+- **New look: buildings and camera** (docs/design/new-look.md, everything behind `?look=3d&hd&street`): owns
+  `src/client/three/hdlook.ts`, `streetkit.ts`, `three/kit/`, `scripts/kitprep.py`, `src/client/swing.ts`, the
+  `STREET` lines in `three/camera3d.ts`, `view3d.ts`, `houses3d.ts`, `buildings3d.ts`, `ground.ts`, `figs3d.ts`, and
+  Dark and gold's files (`darkgold*.ts`, `darkdress*.ts`, `darkfoe.ts`, `scripts/dark-look.cjs`). Next: building
+  variety (single-storey cottages, shops, cheated landmarks), fronts on the sides the swing shows, the kit's props,
+  sky and fog past the walls, the see-through hole knowing the swing, Blender briefs for the landmarks.
+- **New look: town layout** (new-look.md "The town re-organised"): Wickhold re-laid out dense, lanes every way, fronts
+  facing their lanes, changes of level, landmarks for the chase camera; first as its own spec
+  (`docs/design/town-layout.md`), then a new town map behind `?street` so the old one stays playable. Works with the
+  Town quests, Lived-in world and Art chats (their people, rounds and marks live in `shared/town.ts`).
+- **New look: interiors** (after the town layout settles the outsides' sizes): the church, barracks, town hall, the
+  Drowned Rat, the forge, the infirmary re-imagined at the new scale; concepts, a spec, then build.
+- **New look: characters**: heroes, goblins and townsfolk in the concepts' style (the sprite sheet in Kyle's
+  ElevenLabs flow "Relic: HD-2D look tests"); first a test of one hero and one goblin, walking and attacking, to
+  choose how they're made (generated sheets cleaned up, or drawn parts the pose code moves).
 
 - **A lived-in world, slices 4 and 5** (docs/design/lived-in-world.md): a vignette and glow, a wider camera to try (slice 3, drawn buildings in 2.5D, is the Dark and gold chat's). Slices 1 and 2 are the Lived-in world chat's (above).
 
@@ -60,4 +75,4 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Finished
 
-(none yet)
+- **Dark and gold** (docs/decisions/dark-gold.md): all four slices in (the world, enemies, heroes, townsfolk recoloured), then the new look's spec and its test street (HD-2D light, the generated kit, the chase camera, behind `?hd&street`). Handed on to the four New look chats above.

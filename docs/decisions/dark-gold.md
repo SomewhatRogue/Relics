@@ -149,3 +149,11 @@ The Dark and gold chat's log (docs/design/dark-gold.md, Kyle's pictures in docs/
 - Kyle asked whether to model in Blender; and that interiors (the barracks, the church) are now far too small for
   these fronts: to be designed next.
   (Claude Opus 5.5)
+
+## 2026-11-15: handed on
+
+- Kyle: "all the houses are facing the same way and on the same elevation in town... we have to re organize where
+  things are", and asked how to split the work into other chats. Four New look chats, each with a row in the board's
+  Waiting list: buildings and camera (inherits this chat's files), town layout, interiors (after the layout), and
+  characters. This chat moves to Finished.
+  (Claude Opus 5.5)
