@@ -72,10 +72,65 @@ maybe isn't always better but maybe changes your cosmetics too. Add pants: chest
   little tougher to match (threat.ts), measured, not guessed.
 - Legs show on the hero: trousers, mail skirt or greaves in the piece's tier colour.
 
+## 5. Modifiers that fit the class, in plain words
+
+Kyle: "make sure gear enhancements make sense for some characters and classes and has clear text."
+The rule today is sound (mods.ts: a weapon rolls only what improves its own job, armour its weight's
+list, rings anyone's plus the class's own, nothing a class can't use when it's rolled for them). What
+each class can roll now, checked 2026-11-14:
+
+| Class | Weapons | Armour | Rings, besides anyone's |
+| --- | --- | --- | --- |
+| Warrior | QUICKNESS, REACH, QUICK HOLD, SWEEP (not the spear), FINISHER, KNOCKBACK, BLOCK | BLOCK, TOUGHNESS, HEALTH | BLOCK |
+| Ranger | QUICKNESS, REACH, QUICK HOLD, SWEEP, FINISHER, CRIT (KNOCKBACK on the crossbow) | DODGE, STAMINA, SPEED, CRIT | DODGE |
+| Rogue | QUICKNESS, REACH, QUICK HOLD, SWEEP (not the rapier), FINISHER, BACKSTAB, CRIT | DODGE, STAMINA, SPEED, CRIT | DODGE |
+| Mage | QUICKNESS, REACH, QUICK HOLD, SWEEP (staff, spellblade), FINISHER (spellblade), SPELL POWER, CHEAPER SPELLS | DODGE, STAMINA, SPEED, CRIT | DODGE, SPELL POWER, CHEAPER SPELLS |
+| Healer | QUICKNESS, REACH, QUICK HOLD, SWEEP, FINISHER, KNOCKBACK, BLOCK, HEALING | HEALTH, TOUGHNESS, STAMINA, SPEED | BLOCK, HEALING |
+
+Anyone's ring: DAMAGE, HEALTH, STAMINA, RECHARGE, CRIT, SPEED.
+
+**What doesn't fit, to fix:**
+- **Bows roll SWEEP** ("wider swings"), because one step of a bow's combo is a wide melee one. A bow's
+  job is the shot: no SWEEP on a bow unless its close blow is a real part of how it fights, and then
+  the card says "your close swing is wider", not "wider swings".
+- **QUICK HOLD rolls on every weapon.** Only where the held attack is part of the kit's job (bows,
+  the greatsword, the staff); elsewhere QUICKNESS does the work.
+- **SPELL POWER says "held spells hit harder"**: a Mage reads that as all spells. Either it lifts every
+  spell, or the name says HELD (pick one when building; my lean: every spell, so it reads true).
+- **Item level never changes which modifiers a piece can have, only how much they give.** Higher tiers
+  add modifiers (FINE 1, FORGED and PRE-WAR 2, the rare three 3), and the rare three's traits and costs
+  are the extra.
+- **LEGS** roll movement and staying up, never a weapon's or a hand's: light DODGE, STAMINA, SPEED;
+  medium HEALTH, STAMINA, SPEED; heavy TOUGHNESS, HEALTH, STAMINA. No CRIT, BLOCK or DAMAGE on legs.
+
+**Words on the card.** Each modifier is its name, its value, and one short line saying when it helps.
+The name says the stat; nothing a player has to guess at. Proposed (all through one lore keeper and
+one line editor call when built):
+
+| Now | Proposed | Line |
+| --- | --- | --- |
+| QUICK HOLD | CHARGE SPEED | held attacks and bow draws charge faster |
+| STAMINA | STAMINA REFILL | stamina comes back faster |
+| RECHARGE | SKILL RECHARGE | your skill and relic come back sooner |
+| DODGE | DODGE RECHARGE | your dodge comes back sooner |
+| CRIT | CRIT CHANCE | a crit hits for 50% more |
+| BLOCK | BLOCK | blocks let less through and cost less stamina |
+| SPELL POWER | SPELL POWER | spells hit harder (if it lifts every spell) |
+| CHEAPER SPELLS | CHEAPER SPELLS | spells cost less magic |
+| SWEEP | SWEEP | wider swings (melee only) |
+
+- Values read in the game's own shown scale (as the trainer does: +13 health shows as the big number).
+- A modifier the wearer can't use (a pawn-stall piece) stays dim with "no use to you", as now.
+- The card's compare against what you wear says the change in plain numbers: `DAMAGE +8%` against
+  `+5%` worn, green or red, never a bare point total.
+- Tests: no modifier rolls for a class where it changes nothing (every class, kit, slot and weight,
+  legs included); every modifier has a line, and no line is over 45 characters.
+
 ## Slices
 
 1. Item level on every piece and card, the closer tier points, the level growth; old pieces carried over.
-2. The card: `LV 7 +2`, and what a piece would be now and after a plus.
+2. Modifiers and words (section 5): the class fixes, the renames through the lore keeper and line
+   editor, the card's `LV 7 +2` and its compare, the two tests.
 3. Rarity measured by the bot, odds retuned, a test per row.
 4. Legs: the slot, drops, the pack square, the card, the sums; goblins measured and retuned.
 5. Looks, with docs/design/gear-looks.md: legs on the hero, uniques' own looks, keeping a look at Master
@@ -86,5 +141,6 @@ maybe isn't always better but maybe changes your cosmetics too. Add pants: chest
 - Item level from where it dropped, about 7% a level: yes. Pluses stay pluses, on top.
 - Legs: modifiers only, the weight on the chest.
 - Keep-the-look for uniques at Master Cole's: yes.
+- Modifiers must make sense for each class and read clearly: section 5, slice 2.
 - Built by a new Gear chat, not the Economy chat. Prices it sets go through the Economy log's rules
   (prices in jobs of copper, `jobs()` in shared/coins.ts, tests/prices.test.ts).
