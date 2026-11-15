@@ -43,6 +43,7 @@ The Deep chat, until it finishes (then the general chat).
 
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
 
+- **Relics, earned** (docs/design/relics.md): church quests and great bosses' first kills only, one of each, carry one, the fanfare; existing heroes keep only the javelin. Coordinates with Town quests (the church) and Instances (the Haulier). Before Holy and hungry.
 - **Holy and hungry** (docs/design/holy-and-hungry.md). Last: it changes loot everything above uses.
 
 ## Collisions to settle
