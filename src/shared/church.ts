@@ -6,7 +6,6 @@
  */
 import { Rng } from './rng.js';
 import { isDark, relicFill, relicMax, rollRelic, type RelicItem } from './relicitems.js';
-import { awardRelic } from './relicaward.js';
 import type { RelicId } from './magic.js';
 
 /** Gold for each use put back in a plain relic (a dark javelin: 4 x 18 = 72, what it cost before uses were few). */
@@ -82,8 +81,3 @@ export function forge(p: RelicHolder, a: string, b: string): RelicItem | null {
   return got;
 }
 
-/** The relic at the bottom of a won deep dive: a kind you don't have yet (plain, full), else any, rolled.
- *  (Kept as it was called before awardRelic, shared/relicaward.ts, which it goes through now.) */
-export function deepRelic(owned: RelicItem[], kinds: readonly string[], seed: number): RelicItem {
-  return awardRelic(null, new Rng(seed || 1), 'deep', owned, kinds as RelicId[]);
-}

@@ -9,7 +9,6 @@ import { describe, expect, it } from 'vitest';
 import { BELL, BOMB, HOOK, JAVELIN, KNUCKLE, LODESTONE, SENTRY, TICK, FOUND_RELICS, type RelicId } from '../src/shared/tuning';
 import { Rng } from '../src/shared/rng';
 import { RELIC_DROP, RELIC_USES, fitRelic, makeRelic, relicMax, relicStage, type RelicItem } from '../src/shared/relicitems';
-import { ZONE_RELICS, awardRelic, jobRelic, jobSources, wonRelics, type Awarded } from '../src/shared/relicaward';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { NO_INTENT, type Enemy, type FightEvent, type Hero, type Intent } from '../src/sim/types';
@@ -179,42 +178,6 @@ describe('few uses, fading by stages', () => {
     // Saved and loaded again: unchanged (they're marked as counted in uses now).
     expect(fromJson(JSON.parse(JSON.stringify(s)))!.heroes[0].relics).toEqual(p.relics);
     expect(fitRelic(fitRelic(old('lodestone', 1, '', 24)))).toMatchObject({ charge: 3, v: 2 });
-  });
-});
-
-describe('where relics come from', () => {
-  it('a named butcher drops one rarer than before (12 in 100 then)', () => {
-    expect(RELIC_DROP.named).toBeLessThan(0.12);
-  });
-
-  it("Hangman's Wood's climax gives the grappling hook, noted on the run; once you have it, one from the wood's pool", () => {
-    const r: Awarded = {};
-    const got = awardRelic(r, new Rng(5), { zone: 'hangman' });
-    expect(got).toMatchObject({ kind: 'hook', tier: 1, el: '', charge: relicMax(got) });
-    expect(r.relicsWon).toEqual([{ item: got, from: 'zone:hangman' }]);
-    const next = awardRelic(r, new Rng(6), { zone: 'hangman' }, [got]);
-    expect(ZONE_RELICS.hangman.pool).toContain(next.kind);
-    expect(next.kind).not.toBe('hook');
-    expect(r.relicsWon?.length).toBe(2);
-  });
-
-  it('a story job, the beacon and a deep dive each give one sure relic; a zone award on the run is not given twice', () => {
-    expect(jobSources({ objective: 'story' })).toEqual(['story']);
-    expect(jobSources({ exped: 'barrowfields', objective: 'hunt' })).toEqual(['beacon']);
-    expect(jobSources({ deep: true })).toEqual(['deep']);
-    expect(jobSources({ objective: 'rescue' })).toEqual([]);
-    const story = { job: { objective: 'story' } };
-    expect(jobRelic(story, 7, [])).toBeDefined();
-    const zone: Awarded & { job: { zone: string } } = { job: { zone: 'hangman' } };
-    awardRelic(zone, new Rng(1), { zone: 'hangman' });
-    const home = wonRelics(zone, 9, []);
-    expect(home.map((x) => x.kind)).toEqual(['hook']);
-  });
-
-  it('awards are seeded: the same seed, the same relic', () => {
-    const a = awardRelic(null, new Rng(11), 'beacon', FOUND_RELICS.map((k) => makeRelic(new Rng(1), k)));
-    const b = awardRelic(null, new Rng(11), 'beacon', FOUND_RELICS.map((k) => makeRelic(new Rng(1), k)));
-    expect(a).toEqual(b);
   });
 });
 

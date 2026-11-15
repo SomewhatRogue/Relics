@@ -55,7 +55,7 @@ export const BOSS = {
   aggro: 4,
   keep: 2.5,
   adds: [0, 0, 3, 4],
-  chest: { prewar: 0.15, relic: 0.15, gold: [80, 120] as [number, number], armor: 0.5 },
+  chest: { prewar: 0.15, gold: [80, 120] as [number, number], armor: 0.5 },
 };
 
 const spec = (s: EnemyAttackSpec) => s;

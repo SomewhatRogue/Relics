@@ -9,7 +9,6 @@ import { expedPlan } from '../src/shared/expedmap';
 import { SPINE } from '../src/shared/hangwood';
 import { FOUND_RELICS } from '../src/shared/magic';
 import { BOSS, HEMPEN, HEMPEN_BOSS, HERO, POISE_KIT, TICK, WEAPONS, type HempenMove, type WeaponId } from '../src/shared/tuning';
-import { wonRelics } from '../src/shared/relicaward';
 import { Decoder, Encoder, stateOf } from '../src/client/snap';
 import { clocked, useBook } from '../src/sim/bosskit';
 import { bossRoll } from '../src/sim/bosschest';
@@ -271,29 +270,18 @@ describe('the sure chest and the relic', () => {
     expect(k.room.pickups.some((p) => p.relic)).toBe(false);
   });
 
-  it("each hero's own roll: a named butcher's odds (Forged or better, PRE-WAR about 20%, its hungry piece about 5%), a relic about 20% and never the hook", () => {
+  it("each hero's own roll: a named butcher's odds (Forged or better, PRE-WAR about 20%, its hungry piece about 5%), never a relic", () => {
     const n = 4000, tiers: Record<string, number> = {};
-    let relics = 0, hooks = 0;
     for (let s = 1; s <= n; s++) {
       const r = bossRoll(s, { id: 'p0', weapon: 'sword', found: [] }, 3, 'hempen');
       tiers[r.item.quality] = (tiers[r.item.quality] ?? 0) + 1;
-      if (r.relic) relics++, (hooks += r.relic.kind === 'hook' ? 1 : 0);
+      expect('relic' in r).toBe(false);
     }
     expect(Object.keys(tiers).every((t) => ['forged', 'tolmouth', 'touched', 'turning', 'hungry'].includes(t))).toBe(true);
     expect(tiers.tolmouth / n).toBeGreaterThan(0.16), expect(tiers.tolmouth / n).toBeLessThan(0.24);
     expect(tiers.hungry / n).toBeGreaterThan(0.03), expect(tiers.hungry / n).toBeLessThan(0.07);
-    expect(relics / n).toBeGreaterThan(0.17), expect(relics / n).toBeLessThan(0.23);
-    expect(hooks).toBe(0);
     // Two heroes, the same chest: their own rolls.
     expect(JSON.stringify(bossRoll(9, { id: 'p0', weapon: 'sword', found: [] }, 3, 'hempen'))).not.toBe(JSON.stringify(bossRoll(9, { id: 'p1', weapon: 'sword', found: [] }, 3, 'hempen')));
-  });
-
-  it("the chest's relic comes beside the wood's own: the grappling hook is still the wood's at the job's end", () => {
-    const seed = [...Array(400).keys()].find((s) => bossRoll(s + 1, { id: 'p0', weapon: 'sword', found: [] }, 3, 'hempen').relic)! + 1;
-    const r = bossRoll(seed, { id: 'p0', weapon: 'sword', found: [] }, 3, 'hempen');
-    expect(FOUND_RELICS).toContain(r.relic!.kind);
-    const won = wonRelics({ job: hangmansWood(3) }, 77, [r.relic!]);
-    expect(won.map((x) => x.kind)).toEqual(['hook']);
   });
 });
 

@@ -227,38 +227,17 @@ describe('the sure chest', () => {
     expect(b.room.drops.filter((d) => d.owner).length).toBe(2);
   });
 
-  it('rolled on each hero\'s own seed: PRE-WAR about 15%, a relic about 15%', () => {
-    let pre = 0, relic = 0;
+  it('rolled on each hero\'s own seed: PRE-WAR about 15%, never a relic (docs/design/relics.md)', () => {
+    let pre = 0;
     const n = 600;
     for (let i = 0; i < n; i++) {
       const r = bossRoll(77, { id: 'h' + i, weapon: 'sword', found: [] });
       if (r.item.quality === 'tolmouth') pre++;
-      if (r.relic) relic++;
+      expect('relic' in r).toBe(false);
     }
     expect(pre / n).toBeGreaterThan(0.1);
     expect(pre / n).toBeLessThan(0.2);
-    expect(relic / n).toBeGreaterThan(0.1);
-    expect(relic / n).toBeLessThan(0.2);
     expect(heroSeed(77, 'a')).not.toBe(heroSeed(77, 'b'));
-  });
-
-  it('a relic in it is the hero\'s the moment it opens: found, and the relic moment on their game', () => {
-    // A hero id whose roll in this chest gives a relic.
-    const b = barn(['sword'], [[6, 2.6]]), c = b.room.chests[0];
-    let id = '';
-    for (let i = 0; i < 200 && !id; i++) if (bossRoll(c.boss!, { id: 'p' + i, weapon: 'sword', found: [] }).relic) id = 'p' + i;
-    expect(id).not.toBe('');
-    const h = b.heroes[0];
-    h.id = id;
-    for (const e of [b.latch, b.hasp]) Object.assign(e, { hp: 0, act: 'dead' });
-    startChest(c, h, b.room.heroes, b.room.enemies, new Rng(1), 0, []);
-    const ev: FightEvent[] = [];
-    for (let k = 0; k < 45; k++) b.room.setIntent(id, { ...NO_INTENT }), b.room.step(), ev.push(...b.room.events);
-    expect(ev.some((e) => e.k === 'relicfound')).toBe(true);
-    const relic = c.relics![id];
-    expect(h.found!.map((r) => r.id)).toContain(relic.id);
-    const k = keepKitNoting(newProfile('WARRIOR'), h, true);
-    expect(k.news.map((x) => x.item.id)).toEqual([relic.id]);
   });
 });
 

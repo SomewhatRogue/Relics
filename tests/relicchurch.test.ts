@@ -3,8 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Rng } from '../src/shared/rng';
 import { FOUND_RELICS } from '../src/shared/tuning';
 import { RELIC_DROP, makeRelic, relicMax, type RelicItem } from '../src/shared/relicitems';
-import { LIT, RECHARGE, deepRelic, forge, forgeOdds, leaveRelic, litFor, recharge, rechargeCost, type RelicHolder } from '../src/shared/church';
-import { dropRelic, type Pickup } from '../src/sim/pickups';
+import { LIT, RECHARGE, forge, forgeOdds, leaveRelic, litFor, recharge, rechargeCost, type RelicHolder } from '../src/shared/church';
 import { newEnemy } from '../src/sim/enemies';
 import { litMult } from '../src/sim/charge';
 import { lure } from '../src/sim/lantern';
@@ -132,32 +131,14 @@ describe('two for one', () => {
   });
 });
 
-describe('drops', () => {
-  it(`a named butcher leaves a relic about ${RELIC_DROP.named * 100} times in 100, by the room's own dice; nobody else does`, () => {
-    const rng = new Rng(42);
-    let n = 0, el = 0;
-    for (let i = 0; i < 4000; i++) {
-      const e = Object.assign(newEnemy(i, 'butcher', 5, 5), { name: 'GRISTLE', respawns: false }), out: Pickup[] = [];
-      dropRelic(e, out, rng);
-      if (out[0]?.relic) (n++, out[0].relic.el && el++);
-    }
-    expect(n / 4000).toBeGreaterThan(RELIC_DROP.named - 0.012);
-    expect(n / 4000).toBeLessThan(RELIC_DROP.named + 0.012);
-    expect(el / n).toBeLessThan(0.3);
-    const plain: Pickup[] = [];
-    for (let i = 0; i < 200; i++) dropRelic(Object.assign(newEnemy(i, 'butcher', 5, 5), { respawns: false }), plain, rng), dropRelic(newEnemy(i, 'scrapper', 5, 5), plain, rng);
-    expect(plain.length).toBe(0);
-  });
-
-  it('a won deep dive gives a kind you lack, plain and full; with all of them, any one', () => {
-    expect(deepRelic([], FOUND_RELICS, 5)).toMatchObject({ kind: 'javelin', tier: 1, el: '', charge: 4 });
-    const all = FOUND_RELICS.map((k) => relic(k, 1));
-    expect(FOUND_RELICS).toContain(deepRelic(all, FOUND_RELICS, 5).kind);
+describe('no relic from a deep dive (docs/design/relics.md)', () => {
+  it('a won deep dive brings no relic home', () => {
     const g = new Game();
     g.create('ROGUE', 'q');
+    const before = g.profile.relics.map((r) => r.id);
     g.startJob(deepDive(1));
     (g as unknown as { finish(how: string): void }).finish('won');
-    expect(g.profile.relics.map((r) => r.kind)).toEqual(['javelin']);
+    expect(g.profile.relics.map((r) => r.id)).toEqual(before);
   });
 });
 

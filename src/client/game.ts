@@ -54,7 +54,7 @@ import { fitHound, nameTrouble, type HoundLook } from '../shared/houndlook';
 import { fitShield, type ShieldLook } from '../shared/shieldlook';
 import { treasure } from '../shared/treasure';
 import { makeRelic, relicMax, type RelicItem } from '../shared/relicitems';
-import { wonRelics } from '../shared/relicaward';
+import { GEAR } from '../sim/pack';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
 import { rebase } from '../sim/rebase';
@@ -377,8 +377,6 @@ export class Game {
     h.found = p.relics.map((r) => ({ ...r }));
     const carried = p.relics.find((r) => r.id === p.relic);
     h.relicItem = carried?.id ?? '';
-    // Their first named butcher's sure relic, had already (sim/namedrelic.ts): from the save, or this run.
-    h.namedRelic = !!p.namedRelic || !!keep?.namedRelic || undefined;
     h.lit = (p.lit ?? 0) > 0;
     h.perks = [...p.perks];
     h.drills = p.drills;
@@ -828,6 +826,8 @@ export class Game {
     if (this.mode === 'wood' && this.wood?.hold && this.holding(intent, dt)) return [];
     // Your class and kit are your hero's: changed at the smith and the relic-wright, never mid-fight.
     intent = { ...intent, classSeq: h.seen.cls, weaponSeq: h.seen.weapon, augmentSeq: h.seen.augment };
+    // The relic you carry is chosen in town and kept the whole job (docs/design/relics.md): no change on one.
+    if (this.mode !== 'town' && intent.gearOp === GEAR.carry && intent.gearSeq !== h.seen.gear) intent = { ...intent, gearSeq: h.seen.gear };
     // No fighting in town: no blows, guard, relics or grabs; rolls, dashes and blinks still work.
     // The works' crew walk on Wickhold's wall clock, the same on every screen (townclock.ts).
     if (this.mode === 'town') onClock(this.room.map.npcs, this.room.time);
@@ -1301,13 +1301,8 @@ export class Game {
     // Grown on the way home (the job's pay): lit up back in Wickhold.
     if (levels > this.grown) this.levelSeq += levels - this.grown;
     this.grown = 0;
-    // The sure relics (shared/relicaward.ts): a curated zone's climax (already noted on the run), else a
-    // story mission, the expedition's beacon or a deep dive's butcher; each player's own roll. The first
-    // is carried at once if nothing is.
-    const relics = won && !deep ? wonRelics(run, run.job.seed * 977 + p.runs * 31 + p.xp, p.relics) : [], relic = relics[0];
-    for (const r of relics) (p.relics.push(r), (p.relic ||= r.id));
-    // Each one NEW in the pack, and its moment once the recap is closed (relicnews.ts).
-    this.relicNews.push(...this.unannounced(gainRelics(p, relics, true)));
+    // No relic at a job's end (docs/design/relics.md): a great boss's first kill gives its own in the room.
+    const relics: RelicItem[] = [], relic: RelicItem | undefined = undefined;
     // The church's light: one job less (any job, won or not).
     const lit = p.lit ?? 0;
     if (lit > 0) p.lit = lit - 1;

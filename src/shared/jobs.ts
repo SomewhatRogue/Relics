@@ -62,7 +62,7 @@ export interface Job {
   text: string;
   /** The named goblin to kill (hunts and the story mission). */
   boss?: string;
-  /** A deep dive: longer, worse, a named butcher at the bottom, and a relic pried out of it. */
+  /** A deep dive: longer, worse, a named butcher at the bottom. */
   deep?: boolean;
   /** How long (old jobs without one are medium). */
   size?: Size;
@@ -78,7 +78,7 @@ export interface Job {
   layout?: 2 | 3 | 4;
   /** An expedition (shared/expedjob.ts): one big map of the Barrowfields instead of rooms. */
   exped?: 'barrowfields' | 'hangmans' | 'fen';
-  /** A curated zone (docs/plans/atlas.md): its climax's relic, awarded once at the job's end (shared/relicaward.ts ZONE_RELICS). */
+  /** A curated zone (docs/plans/atlas.md). */
   zone?: 'hangman' | 'fen';
   /** A boss's arena as the last room (shared/barnarena.ts): the Doorkeepers in the great barn. */
   arena?: 'doorkeepers' | 'haulier' | 'listener' | 'leechman';
@@ -109,13 +109,13 @@ export function board(day: number, sewers = false): Job[] {
   return [...ordinary(day, sewers), deepDive(day)];
 }
 
-/** Five rooms into the worst of it, a named butcher at the bottom with a relic in its gut. */
+/** Five rooms into the worst of it, a named butcher at the bottom. */
 export function deepDive(day: number): Job {
   const rng = new Rng(day * 613 + 7), place = rng.pick(PLACES.filter((p) => p.ruin >= 2)), boss = rng.pick(BOSSES), night = rng.next() < 0.5;
   return {
     id: `d${day}-deep`, place: { ...place, ruin: 3 }, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(day * 131 + 59, night), rooms: 5, boss, deep: true, size: 'long', layout: 4,
     reward: payFor(5, 3, false, 'long') + 40, seed: day * 131 + 59, title: `Deep: ${boss} at ${place.name}`,
-    text: `Five rooms down through ${place.name}, the worst of it, and ${boss} at the bottom with a relic grown into it. Kill it and the relic is yours.`,
+    text: `Five rooms down through ${place.name}, the worst of it, and ${boss} at the bottom, grown fat on whatever's been sent down to it.`,
   };
 }
 

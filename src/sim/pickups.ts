@@ -7,7 +7,7 @@ import { BIG, COINS, POTION, POTION_DROPS, POTION_ORDER, type PotionId } from '.
 import type { Rng } from '../shared/rng';
 import type { Enemy, FightEvent, Hero } from './types';
 import { HUNGRY_FX, wears } from './hungry';
-import { RELIC_DROP, relicName, rollRelic, type RelicItem } from '../shared/relicitems';
+import { relicName, type RelicItem } from '../shared/relicitems';
 
 export interface Pickup { id: number; x: number; y: number; life: number; gold?: number; potion?: PotionId; relic?: RelicItem }
 let nextId = 1;
@@ -43,19 +43,7 @@ export function dropLoot(pickups: Pickup[], x: number, y: number, loot: { gold?:
   pickups.push({ id: pid(pickups), x, y, life: COINS.life * 2, ...(loot.gold ? { gold: loot.gold } : {}), ...(loot.potion ? { potion: loot.potion } : {}) });
 }
 
-/** A named butcher, now and then, leaves a relic where it fell (its own seeded stream: RELIC_DROP.named). */
-export function dropRelic(e: Enemy, pickups: Pickup[], rng: Rng): void {
-  // (A boss of the kit's loot is its sure chest: sim/bosschest.ts.)
-  if (!e.name || e.respawns || e.kind !== 'butcher' || e.boss) return;
-  // (Hempen's relic is Hangman's Wood's own, awarded once at the job's end: shared/relicaward.ts. Never a drop too.)
-  if (e.zoned) return;
-  if (rng.next() >= RELIC_DROP.named) return;
-  pickups.push({ id: pid(pickups), x: e.x - 0.3, y: e.y + 0.3, life: RELIC_LIFE, relic: rollRelic(rng) });
-}
-/** A relic on the floor waits a long while (it's worth walking back for). */
-const RELIC_LIFE = 90;
-
-/** A relic picked up: kept, and carried at once if nothing is. */
+/** A relic won (relics are earned, never dropped: docs/design/relics.md): kept, and carried at once if nothing is. */
 export function takeRelic(h: Hero, r: RelicItem, ev: FightEvent[]): void {
   h.found = [...(h.found ?? []), r];
   if (!h.relics[1]) {

@@ -54,7 +54,7 @@ export interface Foe {
   kind: 'scrapper' | 'butcher' | 'spider' | 'brood' | 'nest'; wave?: number; x: number; y: number; hp?: number; name?: string; bow?: boolean; z?: number; awake?: boolean; feeding?: boolean; variant?: FoeVariant; pack?: number; role?: Role; more?: Role;
   /** Layout 4: what it's busy at when you come in (sim/tasks.ts), and a body it's hauling. */
   task?: import('./scenes4.js').FoeTask; haul?: { x: number; y: number; sack?: boolean };
-  /** Hangman's Wood: Hempen throws its noose (sim/hempen.ts); its relic is the zone's, awarded at the job's end (shared/relicaward.ts), never a drop. */
+  /** Hangman's Wood: Hempen throws its noose (sim/hempen.ts); its relic is its first kill's (docs/design/relics.md). */
   noose?: boolean; zoned?: boolean;
   /** Pacing (shared/threat.ts): its pack's beat, a BIG ONE, and how much harder it hits (a bigger party). */
   beat?: import('./encounters.js').Beat; big?: boolean; harm?: number;

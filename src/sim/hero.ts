@@ -141,12 +141,9 @@ export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h 
 export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], acts: HeroActs): void {
   gear(h, inp, ev);
   if (inp.relicSeq !== h.seen.relic) (h.seen.relic = inp.relicSeq), (h.relicQueuedAt = now);
-  if (inp.relicSwapSeq !== h.seen.relicSwap) {
-    h.seen.relicSwap = inp.relicSwapSeq;
-    const usable = h.relics.filter((r, i) => i > 0 || knows(h, 'skill'));
-    if (usable.length) h.relic = usable[(usable.indexOf(h.relic) + 1) % usable.length];
-    ev.push({ k: 'relic', x: h.x, y: h.y, name: RELICS[h.relic].name });
-  }
+  // (The old relic swap is gone, docs/design/relics.md: the relic carried is chosen in town. relicSwapSeq is still
+  // counted so an older friend's press does nothing.)
+  h.seen.relicSwap = inp.relicSwapSeq;
   if (inp.relicPickSeq !== h.seen.relicPick) {
     h.seen.relicPick = inp.relicPickSeq;
     const r = h.relics[inp.relicPick];

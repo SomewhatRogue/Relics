@@ -324,8 +324,6 @@ export interface Hero extends Body {
   marks?: string[];
   /** The Deep: the floor its player has chosen GO DEEPER on (sim/deepmarks.ts, from their input), shown to the party. */
   deepVote?: number;
-  /** Has had the sure relic of their first named butcher (sim/namedrelic.ts; Profile.namedRelic). Set once. */
-  namedRelic?: boolean;
   /** Carrying the church's light this job (shared/church.ts LIT). */
   lit?: boolean;
   /** Quickened by a bone bell until then (BELL.quick). */

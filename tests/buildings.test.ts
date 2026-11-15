@@ -109,7 +109,7 @@ describe('the forge', () => {
   });
 });
 
-describe('relics come from deep dives', () => {
+describe('deep dives', () => {
   const win = (g: Game) => (g as unknown as { finish(how: string): void }).finish('won');
 
   it('every board has one deep dive: five rooms, a named butcher at the bottom', () => {
@@ -119,32 +119,15 @@ describe('relics come from deep dives', () => {
     expect(deep[0].boss).toBeTruthy();
   });
 
-  it('a hero starts with no relic, wins one at the bottom of a deep dive, and carries what they found', () => {
+  it('a hero starts with no relic and a won deep dive gives none (relics are earned: docs/design/relics.md)', () => {
     const g = new Game();
     g.create('MAGE', 'r');
     expect(g.profile.relics).toEqual([]);
     expect(g.hero.relics).toEqual(['grasp']);
-    g.startJob(board(1, false)[0]);
-    win(g);
-    expect(g.profile.relics).toEqual([]);
     g.startJob(deepDive(1));
     win(g);
-    // A kind you don't have: the first found, plain and full, carried at once.
-    expect(g.result?.relic).toMatchObject({ kind: 'javelin', tier: 1, el: '', charge: 4 });
-    expect(g.hero.relics).toEqual(['grasp', 'javelin']);
-    const jav = g.profile.relic;
-    g.startJob(deepDive(2));
-    win(g);
-    expect(g.result?.relic?.kind).toBe('hook');
-    expect(g.profile.relic).toBe(jav);
-    g.carry(g.result!.relic!.id);
-    expect(g.hero.relics).toEqual(['grasp', 'hook']);
-    // From the pack: put it away, then carry the javelin again.
-    g.step(0.1, { ...NO_INTENT, gearSeq: 1, gearOp: 3, gearArg: -1 });
-    expect(g.profile.relic).toBe('');
-    g.step(0.1, { ...NO_INTENT, gearSeq: 2, gearOp: 3, gearArg: 0 });
-    expect(g.hero.relics).toEqual(['grasp', 'javelin']);
-    expect(g.profile.relic).toBe(jav);
+    expect(g.result?.relic).toBeUndefined();
+    expect(g.profile.relics).toEqual([]);
   });
 });
 

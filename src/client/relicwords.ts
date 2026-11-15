@@ -70,16 +70,6 @@ export const RELICW = {
   recharged: 'Isolde takes it round the back and brings it out warm and full. She doesn\'t say what she did.',
   litNow: (n: number) => `You carry the church's light for your next ${jobs(n)}: ${LIGHT}.`,
   litNone: 'Only a relic with uses left gives the light.',
-  /** Two for one. */
-  twoTitle: 'LEAVE TWO, TAKE ONE',
-  twoLine: "Give up two relics for one someone else left. You don't choose which. No light.",
-  pick: 'PICK TWO',
-  picked: (n: number) => (n === 2 ? 'Two picked.' : n === 1 ? 'One picked. One more.' : 'Tap two of your relics.'),
-  odds: (el: number) => `${Math.round(el * 100)} IN 100 IT HAS AN ELEMENT.`,
-  give: 'GIVE BOTH UP',
-  giveWarn: 'Both gone for good. You get one back, and no light.',
-  giveSure: 'YES, GIVE BOTH UP',
-  got: (name: string) => `Odric brings the ${name} out to you. He doesn't say whose it was.`,
   carry: 'CARRY IT',
   carrying: 'CARRYING',
   back: 'BACK',
@@ -104,6 +94,8 @@ export const RELICW = {
   tapSlot: 'TAP',
   emptySlot: 'Nothing carried. Tap a relic to carry it, or drag it onto RELIC.',
   shelfHow: 'Tap a relic to see it, or drag it onto RELIC to carry it.',
+  /** On a job (docs/design/relics.md): the relic carried is chosen in town and kept the whole way. */
+  keptOnJob: 'You keep the relic you set out with until the job is done. Choose another in town.',
   shelfHint: 'It\'s with your other relics, in your pack.',
   /** Ivo at his bench, of a fading relic (the lore keeper's draft). */
   ivoFading: "Hear that? No, you *don't*, and that's the trouble. It hummed like a hive a week ago. It's running down.",

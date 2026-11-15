@@ -83,7 +83,7 @@ export const HEMPEN_BOSS = {
   rope: { fall: 1.2, r: 1.2, dmg: 16, knock: 5 },
   rotation: { 1: ['cleave', 'cleave', 'slam', 'cleave', 'slam'], 2: ['cleave', 'rain', 'slam', 'rain', 'cleave'] } as Record<1 | 2, HempenMove[]>,
   more: 'cleave' as HempenMove,
-  chest: { prewar: 0.2, touched: 0.04, turning: 0.015, hungry: 0.05, relic: 0.2, armor: 0.5, gold: [0, 0] as [number, number] },
+  chest: { prewar: 0.2, touched: 0.04, turning: 0.015, hungry: 0.05, armor: 0.5, gold: [0, 0] as [number, number] },
 };
 
 /** The gibbet's winch: stand in its ring `r` round the winch `hold` seconds (the grace and waves of any hold) to wind the cage down. */

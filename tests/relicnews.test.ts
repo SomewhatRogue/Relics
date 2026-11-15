@@ -7,11 +7,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Rng } from '../src/shared/rng';
 import { makeRelic } from '../src/shared/relicitems';
-import { wonRelics } from '../src/shared/relicaward';
 import { newProfile, TICK } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { GEAR, applyGear } from '../src/sim/pack';
-import type { Hero } from '../src/sim/types';
+import { NO_INTENT, type Hero } from '../src/sim/types';
+import { board } from '../src/shared/jobs';
 import { Decoder, Encoder, stateOf } from '../src/client/snap';
 import { gainRelics, isNewRelic, keepKitNoting, seeRelic } from '../src/client/relicnews';
 import { relicRow } from '../src/client/relicshelf';
@@ -29,10 +29,9 @@ function holding(kinds: Parameters<typeof makeRelic>[1][], carried: number): Pic
 }
 
 describe('the moment a relic is yours', () => {
-  it('a job-end award is marked NEW and makes a moment with the fanfare, the tip only the first time', () => {
+  it('a relic won is marked NEW and makes a moment with the fanfare, the tip only the first time', () => {
     const p = newProfile('WARRIOR');
-    const run = { job: { zone: 'hangman' } };
-    const got = wonRelics(run, 77, p.relics);
+    const got = [makeRelic(new Rng(77), 'hook')];
     p.relics.push(...got);
     p.relic ||= got[0].id;
     const news = gainRelics(p, got, true);
@@ -69,6 +68,21 @@ describe('the moment a relic is yours', () => {
   });
 });
 
+describe('the relic carried is kept the whole job (docs/design/relics.md)', () => {
+  it('a CARRY press on a job changes nothing; in town it carries', () => {
+    const g = new Game();
+    g.create('RANGER', 'kept');
+    g.skipWood();
+    const bomb = makeRelic(new Rng(3), 'bomb');
+    g.profile.relics.push(bomb);
+    g.startJob(board(1)[0]);
+    const h = g.hero, was = h.relicItem, k = g.profile.relics.findIndex((r) => r.id === bomb.id);
+    const press = { ...NO_INTENT, gearSeq: h.seen.gear + 1, gearOp: GEAR.carry, gearArg: k };
+    for (let i = 0; i < 4; i++) g.step(TICK, press);
+    expect(g.hero.relicItem).toBe(was);
+  });
+});
+
 describe('relics in the pack', () => {
   it('every relic owned has its square, with pips, NEW on the unseen; the empty slot pulses and says TAP', () => {
     const h = holding(['javelin', 'hook', 'bomb'], 0);
@@ -87,18 +101,21 @@ describe('relics in the pack', () => {
     expect(relicRow(holding([], -1), null, [])).toBe('');
   });
 
-  it('CARRY from the shelf (a tap or a drag onto RELIC) swaps the carried relic; the carried one dragged to the shelf is put away', () => {
+  it('CARRY from the shelf (a tap or a drag onto RELIC) swaps the carried relic in town; the carried one dragged to the shelf is put away', () => {
     const room = new ArenaRoom(1), h = room.join('me');
     Object.assign(h, holding(['javelin', 'hook'], 0));
-    expect(moveOf(h, 'found:0', 'relic')).toBeNull();
-    const m = moveOf(h, 'found:1', 'relic')!;
+    expect(moveOf(h, 'found:0', 'relic', true)).toBeNull();
+    // On a job, kept the whole way (docs/design/relics.md).
+    expect(moveOf(h, 'found:1', 'relic')).toBeNull();
+    expect(moveOf(h, 'relic', 'shelf')).toBeNull();
+    const m = moveOf(h, 'found:1', 'relic', true)!;
     expect(m).toEqual([GEAR.carry, 1]);
     applyGear(h, m[0], m[1], []);
     expect(h.relicItem).toBe(h.found[1].id);
     expect(h.relics[1]).toBe('hook');
     // The javelin is back on the shelf.
     expect(relicRow(h, null, [])).toContain('data-src="found:0"');
-    expect(moveOf(h, 'relic', 'shelf')).toEqual([GEAR.carry, -1]);
+    expect(moveOf(h, 'relic', 'shelf', true)).toEqual([GEAR.carry, -1]);
     applyGear(h, GEAR.carry, -1, []);
     expect(h.relicItem).toBe('');
     expect(h.relics[1]).toBeUndefined();

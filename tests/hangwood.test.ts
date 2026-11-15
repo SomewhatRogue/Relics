@@ -17,7 +17,6 @@ import { newRun, tally } from '../src/sim/run';
 import type { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT, type FightEvent, type Hero } from '../src/sim/types';
 import { walkable } from './walk';
-import { ZONE_RELICS, jobRelic, wonRelics } from '../src/shared/relicaward';
 
 const job = (d = 3) => hangmansWood(d);
 /** A wood with its heroes (who can't be hurt unless `soft`), every goblin but the ones `keep` says gone. */
@@ -223,19 +222,10 @@ describe("Hangman's Wood", () => {
     }
   });
 
-  it("the wood won gives its relic once, at the job's end: the grappling hook first, then the wood's pool", () => {
+  it("the wood won gives no relic at the job's end (its first kill does: docs/design/relics.md)", () => {
     const run = newRun(job(3));
     expect(run.job.zone).toBe('hangman');
-    const first = wonRelics(run, 77, []);
-    expect(first.map((r) => r.kind)).toEqual(['hook']);
-    expect(run.relicsWon).toHaveLength(1);
-    // Asked again for the same run: nothing more.
-    expect(jobRelic(run, 78, first)).toBeUndefined();
-    // Another run, the hook already owned: one from the wood's pool instead, still just the one.
-    const again = wonRelics(newRun(job(4)), 79, first);
-    expect(again).toHaveLength(1);
-    expect(ZONE_RELICS.hangman.pool).toContain(again[0].kind);
-    expect(again[0].kind).not.toBe('hook');
+    expect(run.relicsWon ?? []).toHaveLength(0);
   });
 
   it('the same fight twice is the same, and a friend sees it from the patches with nothing new each tick', () => {
