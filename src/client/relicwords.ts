@@ -52,9 +52,20 @@ export const RELICW = {
   found: 'RELIC',
   /** The church (Father Odric) and its relic panel. */
   churchButton: 'RELICS',
-  churchTitle: 'THE STEP',
+  churchTitle: 'THE RELIQUARY',
   churchIntro: "Fading, is it? Mother Isolde sees to those round the back, and she'll want paying. Not the ones with fire or frost or storm in them, mind, she *won't* have those in the house.",
-  none: 'No relics. The big jobs give them: a story job, the beacon on the Barrowfields, the bottom of a DEEP job. Now and then a named butcher has one in it.',
+  none: "No relics. Each one is won once: from a great boss the first time it falls, or from Mother Isolde when she has word of one.",
+  /** The reliquary (churchrelics.ts): carry one, and the ones still to win. Draft until the lore pass. */
+  carryThis: 'CARRY THIS ONE',
+  carryNow: "It's on your RELIC button for the next job. You keep it the whole way.",
+  stillTitle: 'STILL TO WIN',
+  saidToBe: {
+    hook: "Said to hang on the Haulier's chain, at the Open Cut.",
+    knuckle: "Said to be in Hempen's fist, out in Hangman's Wood.",
+    lodestone: 'Said to sit behind the Doorkeepers, in the great barn at Lowfurrow.',
+    net: 'Said to be somewhere out on Fenmere.',
+  } as Partial<Record<string, string>>,
+  saidChurch: 'Nobody knows where. Mother Isolde might, when she has word.',
   recharge: (n: number) => `RECHARGE (${coinsHtml(n)})`,
   full: 'FULL',
   /** Above the cards: what giving one up means, before anything is tapped. */
@@ -84,7 +95,7 @@ export const RELICW = {
   carryHint: 'It\'s on your RELIC button.',
   /** The moment a relic is gained (relicmoment.ts), its pop's small heading and how to use it. */
   newRelic: 'NEW RELIC',
-  momentShelf: "It's in your pack. Tap it there, then CARRY.",
+  momentShelf: "It's in your pack. Carry it from the church's reliquary.",
   /** The first relic a hero ever gets: how the button works. */
   firstTip: (el: boolean) => `Press RELIC to use it, or R on a laptop. Each press spends a use${el ? ", and the church won't recharge this one." : ', and the church can recharge it.'}`,
   tapClose: 'TAP TO CLOSE',
@@ -92,7 +103,7 @@ export const RELICW = {
   shelf: 'RELICS',
   newMark: 'NEW',
   tapSlot: 'TAP',
-  emptySlot: 'Nothing carried. Tap a relic to carry it, or drag it onto RELIC.',
+  emptySlot: "Nothing carried. Choose a relic to carry at the church's reliquary.",
   shelfHow: 'Tap a relic to see it, or drag it onto RELIC to carry it.',
   /** The full-screen moment a relic is won (relicfanfare.ts): draft until the lore pass. */
   wonKicker: 'A RELIC',
@@ -116,7 +127,8 @@ export const RELICW = {
   goneLine: (jav: boolean) => (jav ? 'Every relic you carried is gone but the Relic Javelin.' : 'Every relic you carried is gone.') + ' Relics are won now, each one once: from a great boss the first time it falls, or from Mother Isolde at the church.',
   goneIsolde: "They came back to us, the lot of them, the way they do when they've been passed round too freely. Earn one and it'll stay with you, I should think.",
   /** On a job (docs/design/relics.md): the relic carried is chosen in town and kept the whole way. */
-  keptOnJob: 'You keep the relic you set out with until the job is done. Choose another in town.',
+  keptOnJob: "You keep the relic you set out with until the job is done. Choose another at the church's reliquary.",
+  chooseAtChurch: "Choose which relic to carry at the church's reliquary, from Father Odric.",
   shelfHint: 'It\'s with your other relics, in your pack.',
   /** Ivo at his bench, of a fading relic (the lore keeper's draft). */
   ivoFading: "Hear that? No, you *don't*, and that's the trouble. It hummed like a hive a week ago. It's running down.",

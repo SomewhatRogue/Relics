@@ -67,3 +67,11 @@ The chat building docs/design/relics.md (Kyle approved 2026-11-15). Newest at th
     (`client/relicrollui.ts`, one line in `squareui.ts`, the BRAVE side).
   - It goes straight into the relic slot when nothing is carried (takeRelic, as before).
   - tests/relicfanfare.test.ts. Lines draft until the lore pass. (Claude Opus 5.5)
+- **Slice 5 in: the reliquary.** The church's relic panel (Father Odric's RELICS, `churchrelics.ts`) is THE
+  RELIQUARY (name draft for the lore keeper): every relic held with where it was won and CARRY THIS ONE (the
+  one carried tagged CARRYING), recharge and give-up as before, then STILL TO WIN: each relic not held, dark,
+  with a word on where it's said to be (`RELICW.saidToBe`; the church-quest ones "Mother Isolde might, when she
+  has word"). The pack now only shows relics: no drag or button carries or puts one away, in town or out
+  (`packmoves.ts` relic moves gone; UI's `pack.ts` relic rows say where to choose). The Keeping Room's shelf
+  waits for that room (holy-and-hungry section 7). **For the UI chat:** `relicshelf.ts`'s header still says
+  "drag it onto RELIC to carry it"; the drop does nothing now. tests/reliquary.test.ts. (Claude Opus 5.5)

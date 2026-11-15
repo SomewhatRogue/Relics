@@ -25,11 +25,8 @@ export function moveOf(h: Hero, src: string, dst: string, town = false): [number
     if (s === 'ring' && h.rings[i] && h.rings[i].hungry !== 'wedding') return [GEAR.off, i];
   }
   if (s === 'belt' && d === 'belt' && i > 0) return [GEAR.front, i];
-  // Relics (relicshelf.ts), in town only (docs/design/relics.md: kept the whole job): one off the shelf onto
-  // RELIC is carried (the one carried goes back on the shelf); the carried one onto the shelf is put away.
-  if (!town) return null;
-  if (s === 'found' && d === 'relic' && h.found?.[i] && h.found[i].id !== h.relicItem) return [GEAR.carry, i];
-  if (s === 'relic' && d === 'shelf' && h.relics[1]) return [GEAR.carry, -1];
+  // Relics (relicshelf.ts): the pack only shows them. The one carried is chosen at the church's reliquary
+  // and kept the whole job (docs/design/relics.md section 3), so no drag changes it.
   return null;
 }
 

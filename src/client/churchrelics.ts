@@ -14,6 +14,10 @@ import { line } from './speech';
 import { relicDone } from '../shared/errands';
 import { relicMax } from '../shared/relicitems';
 import { ERRANDW } from './errandwords';
+import { ROLL_RELICS } from '../shared/relicroll';
+import { RELICS } from '../shared/magic';
+import { relicItemIcon } from './relicicons';
+import type { RelicItem } from '../shared/relicitems';
 
 const p = (s: string) => `<p>${s}</p>`;
 const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}`);
@@ -38,15 +42,19 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
     const leave = sure === r.id
       ? `</div><p class="rwarn">${RELICW.leaveWarn(get)}</p><div class="rbtns">` + b('leave', r.id, RELICW.leaveSure, { go: true }) + b('keep', r.id, RELICW.keep)
       : b('ask', r.id, n ? RELICW.leave(get) : RELICW.leaveDark);
-    return relicCard(r, { tag: r.id === pr.relic ? RELICW.carrying : '' }) + `<div class="rbtns">${re}${leave}</div>`;
+    // The reliquary (docs/design/relics.md section 3): where it was won, and CARRY (the one relic for the next job).
+    const carried = r.id === pr.relic, from = r.from && RELICW.wonFrom[r.from] ? `<p class="rfrom">${RELICW.wonFrom[r.from]}</p>` : '';
+    const carry = carried ? '' : b('carry', r.id, RELICW.carryThis, { go: true });
+    return relicCard(r, { tag: carried ? RELICW.carrying : '' }) + from + `<div class="rbtns">${carry}${re}${leave}</div>`;
   }).join('');
-  panel.show(RELICW.churchTitle, head + (pr.relics.length ? rows : p(RELICW.none)), [{ label: RELICW.back, act: back }]);
+  panel.show(RELICW.churchTitle, head + (pr.relics.length ? rows : p(RELICW.none)) + stillToWin(pr.relics), [{ label: RELICW.back, act: back }]);
   const root = document.getElementById('panel');
   for (const el of root?.querySelectorAll<HTMLButtonElement>('[data-rop]') ?? []) el.onclick = (e) => {
     e.stopPropagation();
     const id = el.dataset.rid!, op = el.dataset.rop;
     if (op === 'ask') return (sure = id), openStep(g, panel, back, said);
     if (op === 'keep') return again(said);
+    if (op === 'carry') return g.carry(id), again('~' + RELICW.carryNow);
     if (op === 'recharge') return recharge(pr, id) ? (g.relicsChanged(), again('~' + RELICW.recharged)) : undefined;
     if (op === 'free') {
       const r = pr.relics.find((x) => x.id === id);
@@ -63,4 +71,12 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
       return again(added ? RELICW.odricLeave : RELICW.odricLeaveDark);
     }
   };
+}
+
+/** The relics still to win, dark, each with a word on where it's said to be (docs/design/relics.md section 3). */
+function stillToWin(held: readonly RelicItem[]): string {
+  const left = ROLL_RELICS.filter((k) => !held.some((r) => r.kind === k));
+  if (!left.length) return '';
+  return `<div class="rsec">${RELICW.stillTitle}</div>` + left.map((k) =>
+    `<div class="rdark"><img src="${relicItemIcon({ kind: k, el: '', charge: 0 })}" alt=""><div><b>${RELICS[k].name}</b><p>${RELICW.saidToBe[k] ?? RELICW.saidChurch}</p></div></div>`).join('');
 }

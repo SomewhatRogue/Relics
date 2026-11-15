@@ -34,3 +34,9 @@
 .litbadge { display: inline-block; margin-top: 4px; font-size: var(--fs-s); letter-spacing: 0.15em; color: #fff1b0; background: #2e2618cc; border: 1px solid #ffd27a; padding: 1px 5px; text-shadow: 0 0 4px #ffd27a; }
 .litbadge { pointer-events: auto; cursor: help; }
 .litbadge[hidden] { display: none; }
+/* The reliquary (churchrelics.ts): where a relic was won, and the ones still to win, dark. */
+#panel .rfrom { margin: -2px 0 4px; color: #b8a47c; font-size: var(--fs-s); }
+#panel .rdark { display: flex; gap: 10px; align-items: center; margin: 6px 0; opacity: 0.75; }
+#panel .rdark img { width: 40px; height: 40px; flex: none; image-rendering: pixelated; background: #100e14; border: 2px solid #3a3e46; padding: 2px; }
+#panel .rdark b { color: #8d929c; font-weight: inherit; }
+#panel .rdark p { margin: 2px 0 0; color: #8d929c; }

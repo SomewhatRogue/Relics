@@ -21,7 +21,6 @@ import { KNW } from './treewords';
 import { fits, moveOf } from './packmoves';
 export { moveOf };
 import './pack.css';
-import { relicName } from '../shared/relicitems';
 import { relicCard } from './reliccard';
 import { carriedRelic, relicRow } from './relicshelf';
 import { RELICW } from './relicwords';
@@ -145,12 +144,11 @@ export class PackView {
     if (s === 'ring' && h.rings[i]) return row(sideBySide(h, h.rings[i], true), h.rings[i].hungry === 'wedding' ? '' : btn(COPY.takeOff, GEAR.off, i, 'ghost'));
     if (s === 'relic' && h.relics[1]) {
       const it = carriedRelic(h);
-      return row(it ? relicCard(it) : `<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, town ? btn(COPY.putAway, GEAR.carry, -1, 'ghost') : '', !town ? RELICW.keptOnJob : h.found.length > 1 ? RELICW.shelfHow : '');
+      return row(it ? relicCard(it) : `<b>${RELICS[h.relics[1]].name}</b>${el(h.relics[1], h)}`, '', town ? RELICW.chooseAtChurch : RELICW.keptOnJob);
     }
-    // Nothing carried: each relic owned, to carry (in town only: the relics chat, docs/design/relics.md).
-    if (s === 'relic') return row('', town ? h.found.map((r, k) => btn(`${COPY.carry} ${relicName(r)}`, GEAR.carry, k, 'go')).join('') : '', town ? RELICW.emptySlot : RELICW.keptOnJob);
-    // One on the shelf: its card, and CARRY in town (the one carried now goes back on the shelf).
-    if (s === 'found' && h.found[i] && h.found[i] !== carriedRelic(h)) return row(relicCard(h.found[i]), town ? btn(COPY.carry, GEAR.carry, i, 'go') : '', town ? '' : RELICW.keptOnJob);
+    // The one carried is chosen at the church's reliquary (the relics chat, docs/design/relics.md section 3).
+    if (s === 'relic') return row('', '', town ? RELICW.emptySlot : RELICW.keptOnJob);
+    if (s === 'found' && h.found[i] && h.found[i] !== carriedRelic(h)) return row(relicCard(h.found[i]), '', town ? RELICW.chooseAtChurch : RELICW.keptOnJob);
     if (s === 'skill') return row(`<b>${RELICS[h.relics[0]].name}</b>${el(h.relics[0], h)}`, '', PACKW.skillLine);
     if (s === 'belt' && h.belt[i]) return row(`<b>${POTIONS[h.belt[i]].name}</b>${potionRows(h.belt[i], WEAPONS[h.weapon].cls)}`, (i ? btn(COPY.next, GEAR.front, i, 'go') : '') + btn(COPY.pour, GEAR.pour, i, 'ghost'));
     // Nothing chosen (the relics have their own row above, relicshelf.ts).

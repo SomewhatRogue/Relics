@@ -101,24 +101,16 @@ describe('relics in the pack', () => {
     expect(relicRow(holding([], -1), null, [])).toBe('');
   });
 
-  it('CARRY from the shelf (a tap or a drag onto RELIC) swaps the carried relic in town; the carried one dragged to the shelf is put away', () => {
+  it('the pack only shows relics: no drag carries or puts one away, in town or on a job (the reliquary does)', () => {
     const room = new ArenaRoom(1), h = room.join('me');
     Object.assign(h, holding(['javelin', 'hook'], 0));
-    expect(moveOf(h, 'found:0', 'relic', true)).toBeNull();
-    // On a job, kept the whole way (docs/design/relics.md).
-    expect(moveOf(h, 'found:1', 'relic')).toBeNull();
-    expect(moveOf(h, 'relic', 'shelf')).toBeNull();
-    const m = moveOf(h, 'found:1', 'relic', true)!;
-    expect(m).toEqual([GEAR.carry, 1]);
-    applyGear(h, m[0], m[1], []);
-    expect(h.relicItem).toBe(h.found[1].id);
+    for (const town of [true, false]) {
+      expect(moveOf(h, 'found:1', 'relic', town)).toBeNull();
+      expect(moveOf(h, 'relic', 'shelf', town)).toBeNull();
+    }
+    // The room still carries by the gear op (the reliquary's choice comes in through the save).
+    applyGear(h, GEAR.carry, 1, []);
     expect(h.relics[1]).toBe('hook');
-    // The javelin is back on the shelf.
-    expect(relicRow(h, null, [])).toContain('data-src="found:0"');
-    expect(moveOf(h, 'relic', 'shelf', true)).toEqual([GEAR.carry, -1]);
-    applyGear(h, GEAR.carry, -1, []);
-    expect(h.relicItem).toBe('');
-    expect(h.relics[1]).toBeUndefined();
   });
 });
 
