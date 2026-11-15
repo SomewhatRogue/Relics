@@ -476,3 +476,22 @@ The plan, one class at a time so Kyle can play each against the old ones:
 - scripts/crowd-look.cjs `<url> <out> x,y ...`: both views on a phone, the camera at each spot (cutFocus), the hero a
   few steps south, the arrival scene skipped.
   (Claude Opus 5.5)
+
+## 2026-11-15: a lived-in world, slice 2 (the crowded job maps)
+
+- A scatter pass for every job's ground (shared/scatter.ts, pure, seeded from the map so every screen is the same):
+  by the floor, grass gets tufts, low leafy clumps, stones, twigs, dead leaves, moss, flowers, mushrooms (only at the
+  roots of trees and stumps), a rare bone; dirt and mud much the same, muddier; wheat stones and tufts; rock and
+  flagstone gravel, stones, moss and bones (now and then a skull). Along water a soft dark wet edge and reed tufts.
+  Crowded at the room's edges, round its rocks, trees and walls and by water; thin in the open middle where the
+  fights are. Never inside a house or the water. Not the town (its own ground) or rooms indoors.
+- Painted into the floor both views share (client/scatterpaint.ts, called once from world.ts paintMap), so it costs
+  nothing a frame and 2.5D gets the same ground.
+- Standing things, out at the edges only, clear of the hero's start, the way out and anything already there: stumps
+  and dead snags on grass, dirt and mud; reed beds round every pool. Paint only, never collided (the room never reads
+  scatter.ts): the flat view sorts them in with the rounds (scene.ts), 2.5D builds them with the rounds (three/ground.ts).
+  You can walk through a snag; they're kept to the edges so you rarely do.
+- Big maps look only at their grid cell (mapgrid.ts) when judging how crowded a spot is.
+- tests/scatter.test.ts; scripts/scatter-look.cjs `<url> <out> [kind ...]`: a day job at one place of each kind,
+  flat and 2.5D.
+  (Claude Opus 5.5)

@@ -4,6 +4,7 @@
  * painted face and real thickness and the gap of the way out, low side walls, ledges, the round things,
  * torches and braziers (their flames and light by the hour: lamps3d.ts). Static boxes are merged into one mesh.
  */
+import { scatterOf } from '../../shared/scatter';
 import { LANTERN_Y } from '../daispieces';
 import * as THREE from 'three';
 import { trackMouths3d } from './tracks3d';
@@ -124,7 +125,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   for (const k of m.marks ?? []) if (k.kind === 'bridge') addBridge(B, k);
   // The tended lamps (torches, braziers, lamp posts) give flames and light only while lit (lamps3d.ts).
   const wf = waterField(m);
-  for (const o of m.rounds) {
+  // (With a job's standing scatter: stumps, snags, reed beds, paint only: shared/scatter.ts.)
+  for (const o of [...m.rounds, ...scatterOf(m).stand]) {
     const n = fires.length;
     // A reed or a stump standing in deep water: its foot goes down to the water.
     if (levelAt(wf, o.x, o.y) === DEEP) B.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);

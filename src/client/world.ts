@@ -3,6 +3,7 @@
  * pixel (OX + 16x, OY + 16y). Buildings, trees and rocks are drawn with the actors (so you can walk
  * behind them); see blocks.ts.
  */
+import { paintScatter } from './scatterpaint';
 import { paintTracks } from './trackbed';
 import type { GameMap, Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
@@ -77,6 +78,8 @@ export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
   paintSoil(m, g);
   // Water over the ground's paths (a path stops at the bank): client/waterpaint.ts.
   paintWater(m, rect, rng, toPx, PX, flat ? g : undefined);
+  // A job's ground strewn by what it is: tufts, stones, twigs, bones, leaves, a wet edge by water (scatterpaint.ts).
+  paintScatter(m, rect);
   paintMarks(m, rect);
   paintGrim(m, rect);
   g.fillStyle = 'rgba(0,0,0,0.35)';
