@@ -9,7 +9,7 @@
  */
 import { Rng } from './rng.js';
 import { bagFull, type Stores } from './bags.js';
-import { pickTier, rollGear } from './gear.js';
+import { dropLevel, pickTier, raise, rollGear } from './gear.js';
 import { priceOf } from './prices.js';
 import type { Item, Tier } from './loot.js';
 import { CLASS_KITS, CLASS_ORDER, WEAPONS, WEAPON_ORDER, type HeroClass } from './weapons.js';
@@ -47,7 +47,8 @@ export function stockSeed(v: VendorId, win: number): number {
 }
 
 /** What `v` has on its counter in window `win`. A class vendor: three of the class's weapons, an armor, a ring. */
-export function stockFor(v: VendorId, win: number): Item[] {
+/** The window's stock, each piece at the shopper's level (Kyle, 2026-11-15: shop stock follows your level; the price stays by tier and roll). */
+export function stockFor(v: VendorId, win: number, lv = 1): Item[] {
   const rng = new Rng(stockSeed(v, win)), s = STOCK[v === 'pawn' ? 'pawn' : v === 'HEALER' ? 'church' : 'class'], out: Item[] = [];
   for (let i = 0; i < s.count; i++) {
     const tier = pickTier(rng, s.odds), lean = rng.next() < s.strong ? s.lean : 0;
@@ -59,11 +60,11 @@ export function stockFor(v: VendorId, win: number): Item[] {
       out.push(rollGear(rng, v, tier, slot, slot === 'weapon' ? rng.pick(CLASS_KITS[v]) : undefined, undefined, lean));
     }
   }
-  return out;
+  return out.map((it) => raise(it, dropLevel(lv)));
 }
 
 /** A shopper's side of it: the save's pack and gold, the class, and what's been bought this window. */
-export interface Shopper extends Stores { cls: HeroClass; bought?: string[] }
+export interface Shopper extends Stores { cls: HeroClass; bought?: string[]; level?: number }
 const key = (v: VendorId, win: number, i: number) => `${v}:${win}:${i}`;
 export const isBought = (p: { bought?: string[] }, v: VendorId, win: number, i: number) => !!p.bought?.includes(key(v, win, i));
 /** Can this hero use it: a weapon only in its own class's hands; armor and rings anyone. */
@@ -71,7 +72,7 @@ export const usable = (p: { cls: HeroClass }, it: Item) => !it.kit || (it.slot ?
 
 /** Why piece `i` can't be bought now, as a code ('' if it can). */
 export function cantBuy(p: Shopper, v: VendorId, win: number, i: number): '' | 'gone' | 'class' | 'pack' | 'gold' {
-  const it = stockFor(v, win)[i];
+  const it = stockFor(v, win, p.level ?? 1)[i];
   if (!it || isBought(p, v, win, i)) return 'gone';
   if (!usable(p, it)) return 'class';
   if (bagFull(p)) return 'pack';

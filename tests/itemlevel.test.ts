@@ -5,6 +5,8 @@ import { rollAny } from '../src/shared/hungry';
 import { Rng } from '../src/shared/rng';
 import { board, type Job } from '../src/shared/jobs';
 import { treasure } from '../src/shared/treasure';
+import { stockFor } from '../src/shared/vendors';
+import { cleanItem } from '../src/shared/trade';
 
 /** What a tier is worth at a level after its cost: the number the spec's crossings are about. */
 const net = (t: Tier, lv: number) => budgetAt(t, 'ring', undefined, lv) - (COST_POINTS[t] ?? 0) * growAt(lv);
@@ -71,5 +73,15 @@ describe('item level', () => {
     for (const it of treasure(job, 'WARRIOR', 'hkyle0000001', 1, 1, 0, 7)) expect([it.ilvl, it.level]).toEqual([7, 0]);
     for (const it of treasure({ ...job, place: { ...job.place, ruin: 3 } }, 'WARRIOR', 'hkyle0000001', 1, 1, 0, 7)) expect(it.ilvl).toBe(8);
     expect(dropLevel(0.4)).toBe(1);
+  });
+
+  it('stocks the stalls at your level, priced as before, and trades a piece with its level and legs', () => {
+    const at1 = stockFor('WARRIOR', 77), at8 = stockFor('WARRIOR', 77, 8);
+    expect(at8.map((i) => i.ilvl)).toEqual(at1.map(() => 8));
+    expect(at8.map((i) => rollQuality(i).toFixed(1))).toEqual(at1.map((i) => rollQuality(i).toFixed(1)));
+    const legs: Item = { slot: 'legs', armor: 'medium', quality: 'forged', traits: [], mods: [{ id: 'foot', v: 0.04 }], ilvl: 6, ledger: 'abcdefgh12345678' };
+    const got = cleanItem(legs);
+    expect(got && [got.slot, got.armor, got.ilvl]).toEqual(['legs', 'medium', 6]);
+    expect(cleanItem({ ...legs, ilvl: 40 })).toBeNull();
   });
 });

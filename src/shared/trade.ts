@@ -56,21 +56,23 @@ export function cleanItem(raw: unknown): Item | null {
   const i = raw as Item;
   if (!i || typeof i !== 'object' || JSON.stringify(i).length > 1500) return null;
   const slot = i.slot ?? 'weapon';
-  if (slot !== 'weapon' && slot !== 'armor' && slot !== 'ring') return null;
+  if (slot !== 'weapon' && slot !== 'armor' && slot !== 'legs' && slot !== 'ring') return null;
   if (slot === 'weapon' && !(typeof i.kit === 'string' && i.kit in WEAPONS)) return null;
-  if (slot === 'armor' && i.armor !== 'light' && i.armor !== 'medium' && i.armor !== 'heavy') return null;
+  if ((slot === 'armor' || slot === 'legs') && i.armor !== 'light' && i.armor !== 'medium' && i.armor !== 'heavy') return null;
   if (!TIERS.has(i.quality) || i.hungry !== undefined || i.bound !== undefined || typeof i.ledger !== 'string' || !LEDGER_ID.test(i.ledger)) return null;
   if (!Array.isArray(i.traits) || i.traits.length > 6 || !i.traits.every((t) => typeof t === 'string' && t in TRAITS)) return null;
   const mods = i.mods ?? [];
   if (!Array.isArray(mods) || mods.length > 8 || !mods.every((m) => m && typeof m.id === 'string' && /^[a-z]{1,12}$/.test(m.id) && fin(m.v, -100, 1000))) return null;
   if (i.level !== undefined && !fin(i.level, 0, 5)) return null;
   if (i.temper !== undefined && !fin(i.temper, 0, 5)) return null;
+  // Its item level (shared/itemlevel.ts; the Gear chat, Kyle's yes 2026-11-15): a whole number, 1 to 20.
+  if (i.ilvl !== undefined && !(Number.isInteger(i.ilvl) && i.ilvl >= 1 && i.ilvl <= 20)) return null;
   if (i.unique !== undefined && (typeof i.unique !== 'string' || !/^[a-z0-9]{1,24}$/.test(i.unique))) return null;
   if (i.cost !== undefined && !(i.cost && typeof i.cost.id === 'string' && /^[a-z]{1,10}$/.test(i.cost.id) && fin(i.cost.v, 0, 100))) return null;
   const out: Item = { slot, quality: i.quality, traits: [...i.traits] as TraitId[], mods: mods.map((m) => ({ id: m.id, v: m.v })), ledger: i.ledger };
   if (slot === 'weapon') out.kit = i.kit;
-  if (slot === 'armor') out.armor = i.armor;
-  for (const k of ['level', 'temper', 'unique', 'cost'] as const) if (i[k] !== undefined) (out as unknown as Record<string, unknown>)[k] = i[k];
+  if (slot === 'armor' || slot === 'legs') out.armor = i.armor;
+  for (const k of ['level', 'ilvl', 'temper', 'unique', 'cost'] as const) if (i[k] !== undefined) (out as unknown as Record<string, unknown>)[k] = i[k];
   return out;
 }
 

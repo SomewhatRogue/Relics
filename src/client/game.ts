@@ -35,7 +35,7 @@ import { wayGot, wayLine } from '../shared/waypay';
 import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
-import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, raise, dropLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
@@ -1372,7 +1372,8 @@ export class Game {
     const p = this.profile, cost = SHOP[quality];
     if (p.gold < cost || bagFull(p) || (slot === 'weapon' && !CLASS_KITS[p.cls].includes(kit))) return null;
     p.gold -= cost;
-    const item = rollGear(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality, slot, kit, armor);
+    // At your level, as the stalls' stock is (shared/itemlevel.ts; Kyle, 2026-11-15).
+    const item = raise(rollGear(new Rng(p.runs * 131 + p.gold * 7 + 5), p.cls, quality, slot, kit, armor), dropLevel(p.level));
     p.bag.push(item);
     this.hero.bag = [...p.bag];
     store(this.save);

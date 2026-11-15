@@ -47,7 +47,7 @@ function tick(again: () => void, win: number): void {
 export function stockGoods(g: Game, v: VendorId, again: () => void): Good[] {
   const pr = g.profile, win = stockWindow(Date.now());
   tick(again, win);
-  return stockFor(v, win).flatMap((it, i) => {
+  return stockFor(v, win, pr.level).flatMap((it, i) => {
     if (isBought(pr, v, win, i)) return [];
     const why = cantBuy(pr, v, win, i);
     return [{

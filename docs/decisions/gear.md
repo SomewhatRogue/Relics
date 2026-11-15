@@ -129,3 +129,15 @@ The Gear chat's log (docs/design/gear-levels.md). Newest at the foot.
   - Cole's KEEP A LOOK panel (words approved, slice 2's entry above): beside YOUR SHIELD on Cole's
     trainer panel (Art's shieldui.ts, trainerui.ts). Built once a kept look can be seen, so it never
     offers a change nobody sees.
+
+## 2026-11-15: Kyle's yes to the three questions (Opus 5.5)
+
+- **The legs-only lines in other chats' files stay** (UI's pack files, Economy's `prices.ts`).
+- **Trades carry legs and item level**: Kyle said yes, so this chat made the edit in Trading's
+  `shared/trade.ts` `cleanItem` (a legs piece checked like armor, `ilvl` a whole number 1 to 20, copied
+  with `level`). **For Trading**: that's the whole change; tests/itemlevel.test.ts checks it, and
+  tests/ledgertrade.test.ts still passes.
+- **Shop stock follows your level**: `stockFor(v, win, lv)` (vendors.ts) raises each piece to the
+  shopper's level, and `buyStock` uses the profile's own level, so what you see is what you buy; Halvard's
+  and the trader's FINE and FORGED (`Game.buy`) too. Prices stay by tier and roll (`rollQuality` takes the
+  level out), as the Economy log set them.
