@@ -11,6 +11,7 @@
 import { art, darker, glint, skin, type Cls, type LookDef } from './lookkit';
 import { CLERIC, MAGE } from './herolooks2';
 import { SIDE_NO_HEAD, W_SIDE_ARM, W_SIDE_BODY, W_SIDE_HEADS } from './herosides';
+import { G_SIDE_ARM, G_SIDE_BODY, G_SIDE_HEAD, R_SIDE_ARM, R_SIDE_BODY, R_SIDE_HEADS } from './herosides2';
 
 export type { Cls, LookDef, Life } from './lookkit';
 
@@ -55,9 +56,10 @@ const R_HOOD_BACK = [
 ];
 // (`_life` was the fluttering cloak drawn behind; its outline stuck out as a notch beside the cloak's own, so its own
 // lower half sways with the walk instead: the cut's `skirt`. Kyle, 2026-11-12.)
-const ranger = (face: string[], pal: Record<string, string>, _life: LookDef['life']): LookDef => {
+const ranger = (face: string[], pal: Record<string, string>, _life: LookDef['life'], look: number): LookDef => {
   const p = { l: darker(pal.L), f: darker(pal.F), ...pal };
   return {
+    side: { body: art([...R_SIDE_HEADS[look], ...R_SIDE_BODY], p), arm: art(R_SIDE_ARM, p), eyes: [5, 11, 11] },
     down: art([...R_HOOD, ...face, ...R_BODY], p), up: art([...R_HOOD_BACK, ...R_BACK], p), h: 33, tall: 2, eyes: [5, 7, 10], life: {},
     // (The legs cut below the cloak's hem, so it stays whole as they walk.)
     cut: { headTo: 9, hip: 25, back: [0, 9, 6, 19], arm: [12, 9, 18, 19], skirt: 20 }, lift: 6,
@@ -93,6 +95,7 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
     // (One cloak: its own lower half sways from the waist with the walk, `skirt`; the separate swaying mantle behind it
     // is gone, its outline read as the cloak cut in two. The legs cut below the hem; only the boots step under it.)
     down: art([...G_HEAD, ...G_BODY], p), up: art(G_BACK, p), h: 33, tall: 0, eyes: [5, 7, 10], life: {},
+    side: { body: art([...G_SIDE_HEAD, ...G_SIDE_BODY], p), arm: art(G_SIDE_ARM, p), eyes: [5, 11, 11] },
     cut: { headTo: 9, hip: 27, back: [0, 9, 6, 17], arm: [12, 9, 18, 17], skirt: 19 }, lift: 7,
   };
 };
@@ -119,15 +122,15 @@ export const LOOK_DEFS: Record<Cls, LookDef[]> = {
     // Green hood and cloak, an auburn fringe under it, the quiver's grey goose feathers.
     ranger(['....CCHHHHHHCCQ...', '....CSSESSESSCQ...', '....CSsSSSSsSCQ...', '....CCsSssSsCCQ...', '.....CCCSSCCCQ....'],
       { ...skin('light'), H: '#8a3e1e', C: '#3f6b3a', c: '#2a4a28', B: '#6b4a2b', b: '#5a3d22', K: '#4a3420', k: '#9aa3ad', Q: '#5a3d22', q: '#d8d0bc', W: '#9aa3ad', L: '#3a3a2a', F: '#2a2420' },
-      { cloak: ['#3f6b3a', '#2a4a28'] }),
+      { cloak: ['#3f6b3a', '#2a4a28'] }, 0),
     // A trapper: brown hood with a fur edge, deep brown skin, a black beard.
     ranger(['....CCccccccCCQ...', '....CcSESSEScCQ...', '....CHSSSSSSHCQ...', '....CCHSssSHCCQ...', '.....CCHHHHCCQ....'],
       { ...skin('deep'), H: '#141012', C: '#6b4a2b', c: '#9a8a70', B: '#8a7a5a', b: '#6a5a40', K: '#3a2a1a', k: '#9aa3ad', Q: '#4a3420', q: '#b03a2a', W: '#8a8a90', L: '#3a2e24', F: '#241c16' },
-      { cloak: ['#6b4a2b', '#4a3420'] }),
+      { cloak: ['#6b4a2b', '#4a3420'] }, 1),
     // A hill warden: grey-blue hood and cloak, pale, a fair fringe, white fletching.
     ranger(['....CCHHHHHHCCQ...', '....CSSESSESSCQ...', '....CSsSSSSsSCQ...', '....CCsSssSsCCQ...', '.....CCCSSCCCQ....'],
       { ...skin('fair'), H: '#c8a868', C: '#4a5a6a', c: '#323e4a', B: '#5a5048', b: '#443c36', K: '#2a2420', k: '#9aa3ad', Q: '#3a3028', q: '#eeeae0', W: '#c0c8d0', L: '#3a3e46', F: '#2a2420' },
-      { cloak: ['#4a5a6a', '#323e4a'] }),
+      { cloak: ['#4a5a6a', '#323e4a'] }, 2),
   ],
   ROGUE: [
     // The shade: a charcoal hood and cloak, a plum wrap, violet-black leathers.

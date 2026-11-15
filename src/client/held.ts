@@ -1,4 +1,5 @@
 /** What a hero holds and how: each weapon's pose through rest, charge and swing, then drawn in hand. */
+import { OFF } from './sideview';
 import { cutPose } from './cutdraw';
 import { CHARGE, RELEASE, WEAPONS } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
@@ -111,7 +112,7 @@ function bow(c: Ctx, x: number, y: number, a: number, pull: number, r0 = 6, afte
     if (pull >= 1) (c.glow.fillStyle = '#ffffff'), c.glow.fillRect(Math.round(nock[0] + dx * 10 * HS), Math.round(nock[1] + dy * 10 * HS), 1, 1);
   }
   // The draw arm: the forearm from the far shoulder to the hand on the string.
-  const hand = pull > 0.05 ? nock : after ? back(1.3) : null, sx = x - side * hs(6), sy = y - hs(3);
+  const hand = pull > 0.05 ? nock : after ? back(1.3) : null, sx = x - side * hs(6) * OFF.reach, sy = y - hs(3);
   if (hand) rawLine(c.lit, sx, sy, Math.atan2(hand[1] - sy, hand[0] - sx), 0, Math.hypot(hand[0] - sx, hand[1] - sy), '#4a3420', 2);
   fist(c, gx, gy);
   if (hand) fist(c, hand[0], hand[1]);
@@ -249,7 +250,7 @@ function inHand(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
     censer(c, px, py, side);
   } else {
     // Twin daggers: one in each hand, the off hand trailing the swing.
-    const lx = ox - side * hs(6), ly = oy + hs(1), la = p.a - side * 0.6;
+    const lx = ox - side * hs(6) * OFF.reach, ly = oy + hs(1), la = p.a - side * 0.6;
     for (const [x0, y0, a] of (p.hide ? [[lx, ly, la]] : [[ox, oy, p.a], [lx, ly, la]]) as [number, number, number][]) {
       line(g, x0, y0, a, 0, 2, '#2a2420');
       line(g, x0, y0, a, 2, 7, '#e6ecf0');

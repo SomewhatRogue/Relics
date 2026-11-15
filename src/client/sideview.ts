@@ -9,6 +9,10 @@ import type { Hero } from '../sim/types';
 export const VIEW = { front: false };
 /** How far |fx| must lead |fy| to turn to the side, and how far it may fall behind before turning back. */
 const IN = 0.12, OUT = -0.12;
+/** How far the off hand is from the weapon hand, as a share of the front's (a body apart there, a few pixels from the
+ *  side): the censer, the second dagger, the bow's draw arm. Set while a hero's gear is drawn (actors.ts). */
+export const OFF = { reach: 1 };
+export const SIDE_REACH = 0.35;
 const was = new Map<string, boolean>();
 
 export function sideOn(h: Hero, has: boolean): boolean {

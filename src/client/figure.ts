@@ -63,7 +63,9 @@ function legAt(part: Joint, row: number): [number, number] {
   const s = STRIDE[LAYOUT.step];
   if (!s || (part.kind !== 'legL' && part.kind !== 'legR')) return [0, 0];
   const a = part.kind === 'legL' ? 0 : 3, robe = part.y1 - part.y0 < 6, knee = part.y0 + Math.ceil((part.y1 - part.y0) * 0.45);
-  const fwd = LAYOUT.flip ? -1 : 1, dx = robe ? 0 : (row < knee ? s[a] : s[a + 1]) * fwd;
+  // (From the side a foot under a robe does step out before the hem and back, a little: `ROBE_STEP`.)
+  const fwd = LAYOUT.flip ? -1 : 1, side = LAYOUT.step > 20, go = (row < knee ? s[a] : s[a + 1]) * fwd;
+  const dx = robe ? (side ? Math.max(-ROBE_STEP, Math.min(ROBE_STEP, go)) : 0) : go;
   // (Under a robe a foot only lifts up into the hem, never drops out below it: Kyle, "boots out the middle".)
   return [dx, robe ? Math.min(0, s[a + 2]) : s[a + 2]];
 }
@@ -80,7 +82,8 @@ function slice(g: CanvasRenderingContext2D, img: HTMLCanvasElement, part: Joint,
 
 /** A cloak's lower half on the walk (the cut's `skirt`): trailing a pixel behind as a foot lands across the screen,
  *  swinging side to side toward or away from you (Kyle, 2026-11-12: the Rogue's cloak "doesn't really move right"). */
-const SWAY: Record<number, number> = { 11: -1, 13: -1, 1: 1, 3: -1 };
+const ROBE_STEP = 3;
+const SWAY: Record<number, number> = { 11: -1, 13: -1, 1: 1, 3: -1, 21: -1, 23: -1 };
 
 function put(g: CanvasRenderingContext2D, part: Joint, img: HTMLCanvasElement): void {
   const [x0, y0, dh] = place(part, AT), h = part.y1 - part.y0, L = LAYOUT;

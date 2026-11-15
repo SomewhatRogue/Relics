@@ -1,7 +1,7 @@
 /**
  * The lineup (docs/design/art-pass.md): a dev page that draws every unit in every move side by side, at
  * phone scale, on the stone floor under torchlight, with the game's own drawHero and drawFoe and the
- * real lighting pass. Open it with `?lineup` (all), `?lineup=heroes`, `?lineup=goblins` or `?lineup=warrior`. Drawing only.
+ * real lighting pass. Open it with `?lineup` (all), `?lineup=heroes`, `?lineup=goblins` or one class (`?lineup=warrior`). Drawing only.
  */
 import { Lighting, type Light } from './light';
 import { drawHero } from './actors';

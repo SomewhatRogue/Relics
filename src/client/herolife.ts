@@ -146,11 +146,14 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
   // A robe's hem flaring at the foot, the side behind kicking out when walking.
   if (L.hem) {
     const sw = wave(3, 0.6 + k), y = bottom;
-    rect('front', sw > 0 ? 12 : -1, y, 1, 1, L.hem[1], 2);
+    // (From the side the robe's front edge is nearer the middle, and the back kicks out behind.)
+    const fr = sv ? 9.7 : 12;
+    rect('front', sw > 0 ? fr : -1, y, 1, 1, L.hem[1], 2);
     if (side > 0.3) rect('front', -1, y - 1, 1, 1, L.hem[0], 2), rect('front', 0, y - 2, 1, 2, L.hem[0], 2);
   }
   // A hat's crooked tip nodding as they walk.
-  if (L.tip && k > 0.2 && wave(4, 1) > 0) rect('front', 8, 0, 1, 1, L.tip, 1);
+  // (From the side the tip leans back.)
+  if (L.tip && k > 0.2 && wave(4, 1) > 0) rect('front', sv ? 3.4 : 8, 0, 1, 1, L.tip, 1);
   // The tabard's foot flicking.
   if (L.tabard && !up && !sv) {
     const sw = wave(5, 0.4 + k);

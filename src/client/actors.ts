@@ -12,7 +12,7 @@ import { BARE, blit, blitPose, line, ring, shadow, spin, stars, type Ctx } from 
 import { LAYOUT, armOffset, drawFigure, layout } from './figure';
 import { heroCut, jointed } from './joints';
 import { sideJointed } from './sidejoints';
-import { sideOn } from './sideview';
+import { OFF, SIDE_REACH, sideOn } from './sideview';
 import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
 import { EL_COL, heldEl } from './palette';
@@ -152,6 +152,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   // (From the side the shield is on the far arm, held up before the chest, its face forward: seen edge-on.)
   const shieldAt: [number, number] = idl?.shield ? [bx + Math.round(idl.shield[0] * HS), by + Math.round(idl.shield[1] * HS)] : sv ? [bx + mid + side * (h.blocking ? SIDE_SHIELD + 2 : SIDE_SHIELD), gy - (h.blocking ? hs(7) : hs(6) - SIDE_DROP) + low] : h.blocking ? [bx + mid + Math.round(h.fx * hs(6)), gy - hs(7) + low + Math.round(h.fy * hs(4))] : [bx + mid - side * hs(4), gy - hs(6) + low];
   const drawGear = () => {
+    OFF.reach = sv ? SIDE_REACH : 1;
     const sh = h.shieldLook ? shieldSprite(h.shieldLook) : SPRITES.shield;
     if (h.weapon === 'sword') blitPose(c, sh, shieldAt[0], shieldAt[1] + hs(4), false, sv ? SIDE_EDGE : 1, 1, 0, snap ? 0.85 : 0);
     drawWeapon(c, hw, px, py, p);
@@ -196,6 +197,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
     c.glow.globalAlpha = 1;
   }
   if (!behind) drawGear();
+  OFF.reach = 1;
   if (idl) idleProps(c, { x, y, bx, by: gy, px, py, side, ey, exl, exr, def, p, el: EL_COL[heldEl(h)], now: c.now, o: idl, w: h.weapon });
   // A blade's charge gathers at the hand (a caster's draws into the tip instead, held.ts).
   if (h.act === 'charge' && cls !== 'MAGE' && !h.winding) {

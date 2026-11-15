@@ -3,6 +3,7 @@
  * blowpipe, the sword and censer, the flail. Their rest and charge poses, and how each is drawn. Swings,
  * thrusts and shots use held.ts's shared poses, so what sweeps on screen is the arc the room judges.
  */
+import { OFF } from './sideview';
 import { censerSmoke } from './wisps';
 import { WEAPONS } from '../shared/tuning';
 import { currentSwing } from '../sim/hero';
@@ -46,8 +47,8 @@ export function kitPose(h: Hero, now: number, fa: number, side: number, charge: 
 
 /** The censer at the off hand, a coal lit from the Last Lantern swinging in it (every Cleric carries one). */
 export function censer(c: Ctx, px: number, py: number, side: number): void {
-  const g = c.lit, cx = px - side * hs(9), cy = py + hs(3) + Math.round(Math.sin(c.now * 3)), sway = Math.sin(c.now * 3) * 3;
-  line(g, px - side * hs(8), py - hs(1), Math.PI / 2 + sway * 0.1, 0, 3, '#6a6470');
+  const r = OFF.reach, g = c.lit, cx = px - side * hs(9) * r, cy = py + hs(3) + Math.round(Math.sin(c.now * 3)), sway = Math.sin(c.now * 3) * 3;
+  line(g, px - side * hs(8) * r, py - hs(1), Math.PI / 2 + sway * 0.1, 0, 3, '#6a6470');
   g.fillStyle = '#b08a3a';
   g.fillRect(Math.round(cx + sway - 1), Math.round(cy), 3, 2);
   c.glow.fillStyle = Math.floor(c.now * 6) % 2 ? '#ffd27a' : '#ff9a3c';

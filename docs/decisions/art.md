@@ -416,3 +416,23 @@ The plan, one class at a time so Kyle can play each against the old ones:
   scripts/side-look.cjs: each look 4x, front, then side standing, the walk's four poses, west, wind, hit, block.
 - Drawing only; facing, reach and hit circles unchanged. 2.5D gets it through drawHero. Kyle to try before slice 2.
   (Claude Opus 5.5)
+
+## 2026-11-15: heroes seen from the side, slice 2 (every class)
+
+- Kyle: "Continue", taken as the yes slice 2 waited on. The Ranger, Rogue, Mage and Healer, all three looks each, in
+  profile walking east or west, on the same rows as their fronts so the cuts, skirts, lift and hands carry over
+  (herosides2.ts: Ranger, Rogue; herosides3.ts: Mage, Healer, the friar).
+- Ranger: the cloak over the back and shoulder, the quiver on the back with its fletching up past the hood's peak,
+  the face under the brim. Rogue: the deep hood, the wrap over the nose with its tail behind the neck, the long cloak
+  flaring behind (one map, three colourings). Mage: the hat leaning back to its tip, the brim out both ways, the beard
+  down the chest (frost: the white hair down the back), the robe's gold band down its front edge. Healer: the coif
+  or cap, the tabard a strip down the front (the Lantern isn't seen side on), the mail skirt; the friar's tonsure, the
+  cowl down, the cross hung before the chest, the rope belt.
+- Motion: the cloaks' lower halves sway on the side stride too (figure.ts SWAY 21, 23). Under a robe a foot steps
+  out before the hem and back, up to 3 pixels, from the side only (the front keeps Kyle's "boots out the middle"
+  rule). The hem's front kick and the hat's tip have side places.
+- The off hand from the side: the censer, the Rogue's second dagger and the bow's draw arm sat a body's width behind
+  the weapon hand and floated off the back; side on they're 0.35 of that (sideview.ts `OFF`, set round the gear in
+  actors.ts). Hand placement only; the Gear looks chat's colours untouched.
+- `?lineup=<class>` for any class; `node scripts/side-look.cjs <url> <out> <CLASS>`.
+  (Claude Opus 5.5)

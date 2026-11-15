@@ -36,8 +36,10 @@ export function cast(which: string): Unit[] {
     for (const weapon of ['longbow', 'shortbow', 'crossbow'] as const) for (const look of [0, 1, 2]) out.push({ label: `${weapon.slice(0, 5).toUpperCase()} ${look + 1}`, tall: 46, hero: { cls: 'RANGER', look, weapon } });
     return out;
   }
-  if (which === 'warrior') {
-    for (const look of [0, 1, 2]) out.push({ label: `WARRIOR ${look + 1}`, tall: 40, hero: { cls: 'WARRIOR', look } });
+  // One class's three looks (`?lineup=warrior`, `ranger`, `rogue`, `mage`, `healer`).
+  const one = CLS.find((c) => c.toLowerCase() === which);
+  if (one) {
+    for (const look of [0, 1, 2]) out.push({ label: `${one} ${look + 1}`, tall: 40, hero: { cls: one, look } });
     return out;
   }
   if (which !== 'goblins') for (const cls of CLS) for (const look of [0, 1, 2]) out.push({ label: `${cls} ${look + 1}`, tall: 40, hero: { cls, look } });
