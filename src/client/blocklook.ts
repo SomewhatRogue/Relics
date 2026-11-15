@@ -13,7 +13,8 @@ export const LOOK: Record<Block['kind'], Look> = {
   hall: { tall: 24, roof: '#4a3a2a', ridge: '#5e4a34', wall: '#5e5248', windows: true },
   church: { tall: 40, roof: '#3a3a4a', ridge: '#4e4e60', wall: '#6a6470', windows: true },
   forge: { tall: 28, roof: '#3a3036', ridge: '#4a3e44', wall: '#4f4a5c', windows: true },
-  stall: { tall: 12, roof: '#7a2a2a', ridge: '#d8c48a', wall: '#5a3d22', windows: false },
+  // (Dark and gold: the awning's stripes bone, not cream; the grade turns its red to rust.)
+  stall: { tall: 12, roof: '#7a2a2a', ridge: '#9a8c6a', wall: '#5a3d22', windows: false },
   tent: { tall: 14, roof: '#8a7a5a', ridge: '#a8986a', wall: '#6a5a40', windows: false },
   rockwall: { tall: 14, roof: '#45414c', ridge: '#55505e', wall: '#34313a', windows: false },
   fence: { tall: 8, roof: '#5a3d22', ridge: '#6b4a2b', wall: '#4a3420', windows: false },

@@ -14,6 +14,7 @@ import { paintGrim } from './grimpaint';
 import { paintSoil } from './soil';
 import { paintGaps } from './wayout';
 import { paintWater } from './waterpaint';
+import { gradeCanvas, MOSS } from './darkgold';
 
 export const PX = 16;
 export const OX = 8;
@@ -52,6 +53,7 @@ export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
   paintHangs(m, rect);
   // Floor.
   const f = FLOORS[m.theme.floor], [tw, th] = f.tile, fw = m.w * PX, fh = m.h * PX;
+  const stony = m.theme.floor === 'cobble' || m.theme.floor === 'flagstone' || m.theme.floor === 'rock', moss = new Rng(m.w * 13 + m.h * 5 + 3);
   for (let r = 0; r * th < fh; r++) {
     const off = (r % 2) * (tw / 2);
     for (let x = OX - tw + off; x < OX + fw; x += tw) {
@@ -59,6 +61,8 @@ export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
       rect(x, y0, tw, th, f.line);
       rect(x + (f.line === f.base[0] ? 0 : 1), y0 + (f.line === f.base[0] ? 0 : 1), tw - 1, th - 1, pick(f.base));
       for (let k = 0; k < (tw * th) / 40; k++) rect(x + 1 + rng.int(tw - 1), y0 + 1 + rng.int(th - 1), 1, 1, pick(f.fleck));
+      // Moss in the stone's joints (dark and gold), on its own seed so the rest paints as before.
+      if (stony && moss.next() < 0.16) rect(x + moss.int(Math.max(1, tw - 3)), y0, 2 + moss.int(3), 1, MOSS[moss.int(3)]);
     }
   }
   if (m.theme.floor === 'wheat') {
@@ -100,6 +104,8 @@ export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
   }
   // The Haulier's tracks into the 3D view's ground (the flat view draws them itself each frame: client/sumpdraw.ts).
   if (!flat && m.tracks) paintTracks(g, m);
+  // Dark and gold (darkgold.ts): the stone to the reference dungeon's green-grey, once per map.
+  gradeCanvas(c, 'floor');
   return c;
 }
 

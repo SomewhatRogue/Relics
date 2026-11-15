@@ -28,6 +28,8 @@ import { FEN_KINDS } from './fenpieces';
 import { drawPieceBlock, drawPieceRound, paintBoxes } from './piecedraw';
 import { drawDoorGlow, paintShut } from './shutdraw';
 import { drawPost, isPost } from './postdraw';
+import { gradeCanvas, gradeSprite } from './darkgold';
+import { dressFlat, ROOFED } from './darkdress';
 
 export { LOOK };
 
@@ -53,6 +55,7 @@ function paint(b: Block, st: number): HTMLCanvasElement {
       const h = rnd(RUBBLE);
       rect(x, RUBBLE + d - h, 3, h, x % 2 ? '#2a2420' : '#3a2e24');
     }
+    gradeCanvas(c, 'wall');
     return c;
   }
   c.width = w;
@@ -71,7 +74,7 @@ function paint(b: Block, st: number): HTMLCanvasElement {
     rect(Math.round(w / 2 - 5), 0, 10, 6, '#4e4e60');
     rect(Math.round(w / 2 - 2), 1, 4, 4, '#14121a');
   }
-  if (b.kind === 'stall') for (let x = 0; x < w; x += 6) rect(x, 0, 3, roofH, '#d8c48a');
+  if (b.kind === 'stall') for (let x = 0; x < w; x += 6) rect(x, 0, 3, roofH, l.ridge);
   if (b.label) {
     const tw = textWidth(b.label), ty = b.kind === 'stall' ? wallY + 3 : wallY + 2;
     if (tw < w - 2) drawText(g, b.label, Math.round(w / 2 - tw / 2), ty, b.kind === 'stall' ? '#f0e0b0' : '#d8c48a');
@@ -84,6 +87,9 @@ function paint(b: Block, st: number): HTMLCanvasElement {
     g.globalCompositeOperation = 'source-over';
     for (let i = 0; i < w / 6; i++) rect(rnd(w - 4), rnd(Math.max(1, roofH - 3)), 3 + rnd(4), 2 + rnd(3), '#0d0b10');
   }
+  // Dark and gold (darkgold.ts): the colours pulled to Kyle's pictures, then moss, rubble, columns (darkdress.ts).
+  gradeCanvas(c, 'wall', ROOFED.has(b.kind) ? roofH : 0);
+  if (st === 0) dressFlat(rect, b, w, roofH, l.tall);
   return c;
 }
 
@@ -249,7 +255,7 @@ export const blockAt = (b: Block): [number, number] => [OX + b.x * PX, OY + b.y 
 
 /** A round thing at its foot (x, y on screen). */
 export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
-  if (r.kind === 'pillar') return blit(c, SPRITES.pillar, x, y + 5);
+  if (r.kind === 'pillar') return blit(c, gradeSprite(SPRITES.pillar), x, y + 5);
   if (r.kind === 'plinth') return drawPlinth(c, r, x, y);
   if (r.kind === 'dais') {
     // The Last Lantern on its dais (daispieces.ts): a flame that never goes out, over the statue's head.
@@ -267,7 +273,7 @@ export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
   if (r.kind === 'candles' || r.kind === 'witchfire') return void drawHallRound(c, r, x, y);
   if (drawSite(c, r, x, y)) return;
-  blit(c, SPRITES[r.kind as keyof typeof SPRITES], x, y + Math.round(r.r * 6));
+  blit(c, gradeSprite(SPRITES[r.kind as keyof typeof SPRITES]), x, y + Math.round(r.r * 6));
   if (r.kind === 'lantern') {
     // The Last Lantern: a flame that never goes out.
     const f = Math.floor(c.now * 9) % 3;

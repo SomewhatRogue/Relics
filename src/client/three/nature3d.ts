@@ -7,9 +7,19 @@
  */
 import type { Round } from '../../shared/arena';
 import { jit, type Boxes, type Seed } from './boxes';
+import { graded as gr } from '../darkgold';
+
+/** The boxes with every colour through the dark-and-gold grade (../darkgold.ts): rocks and stones green-grey. */
+const graded = (B: Boxes): Boxes => ({
+  c: (x: number, y: number, z: number, w: number, h: number, d: number, c: number, ...t: number[]) => B.c(x, y, z, w, h, d, gr(c, 'wall'), ...t),
+  b: (x: number, y: number, z: number, w: number, h: number, d: number, c: number, ry?: number) => B.b(x, y, z, w, h, d, gr(c, 'wall'), ry),
+  lump: (x: number, y: number, z: number, w: number, h: number, d: number, c: number, ry?: number) => B.lump(x, y, z, w, h, d, gr(c, 'wall'), ry),
+  cone: (x: number, y: number, z: number, w: number, h: number, c: number, ry?: number) => B.cone(x, y, z, w, h, gr(c, 'wall'), ry),
+}) as unknown as Boxes;
 
 /** Build `o` if it's one of these; false if not. */
 export function addNature(B: Boxes, o: Round, r: Seed): boolean {
+  B = graded(B);
   const x = o.x, z = o.y, R = Math.max(0.25, o.r);
   switch (o.kind) {
     case 'rock':

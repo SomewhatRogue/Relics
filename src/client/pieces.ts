@@ -8,6 +8,7 @@
  * top-left corner, or a round's foot), y how high its base stands, w by h by d its size; a `lump` is a
  * rounded crown, a `cone` a point. Paint only.
  */
+import { graded as gradeHex } from './darkgold';
 import type { Block, Round } from '../shared/arena';
 import { STAITHE_KINDS, staitheBoxes } from './staithebox';
 import { gibbetBoxes, oakBoxes, waymarkBoxes } from './woodpieces';
@@ -27,7 +28,7 @@ const TIMBER = 0x4a3420, DARK = 0x2e2016, STONE = 0x6a6470, IRON = 0x55505e, ROP
 const shuffle = (n: number) => () => ((n = (n * 1103515245 + 12345) & 0x7fffffff), n / 0x7fffffff);
 
 /** A block's boxes, by its kind and footprint (`look`: which way a mill's wheel faces). */
-export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | 'deck' | 'hp'>): Bx[] {
+function rawBlockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | 'deck' | 'hp'>): Bx[] {
   const w = b.w, d = b.h, cx = w / 2, cz = d / 2, out: Bx[] = [], r = shuffle(Math.round(w * 37 + d * 11));
   if (STAITHE_KINDS.has(b.kind)) return staitheBoxes(b, r);
   if (FEN_KINDS.has(b.kind)) return fenBoxes(b, r);
@@ -86,7 +87,7 @@ export function blockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined'
 }
 
 /** A round's boxes, from its foot. */
-export function roundBoxes(o: Pick<Round, 'kind' | 'r' | 'x' | 'y'>): Bx[] {
+function rawRoundBoxes(o: Pick<Round, 'kind' | 'r' | 'x' | 'y'>): Bx[] {
   const r = shuffle(Math.round(o.x * 31 + o.y * 17)), out: Bx[] = [];
   // A lived-in town's street things (streetpieces.ts).
   if (STREET_KINDS.has(o.kind)) return streetBoxes(o, r);
@@ -113,6 +114,11 @@ export function roundBoxes(o: Pick<Round, 'kind' | 'r' | 'x' | 'y'>): Bx[] {
   for (let i = 0; i < 4; i++) out.push([(r() - 0.5) * 0.9, 0.75 + r() * 0.5, 0.35 + r() * 0.15, 0.08, 0.08, 0.08, 0x9a2a1a]);
   return out;
 }
+
+/** Both views' pieces through the dark-and-gold grade (darkgold.ts), so a plinth's stone matches the walls'. */
+const gradeBx = (bx: Bx[]): Bx[] => bx.map((q) => [q[0], q[1], q[2], q[3], q[4], q[5], gradeHex(q[6], 'wall'), q[7]] as Bx);
+export const blockBoxes = (b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | 'deck' | 'hp'>): Bx[] => gradeBx(rawBlockBoxes(b));
+export const roundBoxes = (o: Pick<Round, 'kind' | 'r' | 'x' | 'y'>): Bx[] => gradeBx(rawRoundBoxes(o));
 
 /** How tall a piece stands (tiles), for the flat view's canvas. */
 export const pieceTall = (bx: Bx[]) => Math.max(0, ...bx.map((q) => q[1] + q[4]));

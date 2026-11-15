@@ -19,6 +19,7 @@ import { woodpile } from './woodpile3d';
 import type { Kindling } from '../../shared/kindling';
 import { asLamp, lampMeshes } from './lamps3d';
 import { doorGlow, shutDoor } from './shut3d';
+import { dress3d } from './darkdress3d';
 
 /** Eave height (tiles) by kind. */
 // (Walls 1.7 times their first height since the heroic proportions, Kyle 2026-11-12: "houses now look way too tiny";
@@ -160,6 +161,8 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
       R.c(lc, lh + 0.1 + lw * 0.14, (z0 + z1) / 2, lw + 0.2, 0.07, b.h + 0.3, shade(0x4a3a2a, k), 0, 0, lean < 0 ? 0.28 : -0.28);
     }
     if (b.label && b.door && !charred) dressHall(W, b, H, group, r);
+    // Dark and gold: rubble at the walls' foot, columns and a broken step at a stone building's door (darkdress3d.ts).
+    if (!charred) dress3d(W, b, x0, x1, z0, z1, H, door, dw, dh);
     if (alight) for (let x = x0 + 0.4; x < x1 - 0.2; x += 0.9) fires.push([x, ridge - 0.1, (z0 + z1) / 2 + (r.next() - 0.5) * 0.6, 1.4]);
     if (alight && door !== null) fires.push([door, dh * 0.6, z1 - 0.3, 1]);
     // A chimney (cottage.ts places a cottage's), stone with a dark cap.

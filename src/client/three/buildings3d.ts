@@ -9,6 +9,7 @@ import { blockState, buildBlock, type Built } from './houses3d';
 import type { Spot } from './rounds3d';
 import { setLampMeshes } from './lamps3d';
 import { houseAlight, kindling } from '../../shared/kindling';
+import { gradeBuilt } from './darkgold3d';
 
 export class Buildings {
   readonly group = new THREE.Group();
@@ -34,6 +35,8 @@ export class Buildings {
       if (!e || e.key !== key) {
         if (e) this.drop(e.b);
         e = { b: buildBlock(blk, kindling(blk, map)), key };
+        // Dark and gold: the colours graded and moss laid on, once per build (darkgold3d.ts).
+        gradeBuilt(e.b.group, e.b.roof, Math.round(blk.x * 31 + blk.y * 17));
         this.group.add(e.b.group);
         this.built.set(i, e);
       }

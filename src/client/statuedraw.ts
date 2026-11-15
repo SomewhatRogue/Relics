@@ -12,9 +12,11 @@ import { drawHero } from './actors';
 import { BARE, type Ctx } from './draw';
 import { paintBoxes } from './piecedraw';
 import { glyph } from './pixfont';
-import { PLATE, PLINTH_BOX, PLINTH_TOP, plateLines, plinthBoxes } from './statuepieces';
+import { PLATE, PLINTH_BOX, PLINTH_TOP, plateLines } from './statuepieces';
 import { STATUE_WORDS } from './statuewords';
 import { PX } from './world';
+import { gradeHex } from './darkgold';
+import { roundBoxes } from './pieces';
 
 const FW = 40, FH = 48, FOOT = 4;
 /**
@@ -26,7 +28,11 @@ export const STATUE_SCALE = 1;
 /** How tall the figure stands above its feet on screen, drawn at STATUE_SCALE. */
 export const STATUE_TALL = (FH - FOOT) * STATUE_SCALE;
 /** Stone, darkest to palest: the hero's own shading kept, in the plinth's colours. */
-const BANDS = [[46, 43, 54], [62, 58, 70], [87, 82, 94], [106, 100, 112], [138, 132, 148], [168, 162, 176]];
+// (Dark and gold, darkgold.ts: the same stone as the plinth's and the walls'.)
+const BANDS = [[46, 43, 54], [62, 58, 70], [87, 82, 94], [106, 100, 112], [138, 132, 148], [168, 162, 176]].map(([r, g, b]) => {
+  const v = gradeHex((r << 16) | (g << 8) | b, 'wall');
+  return [v >> 16, (v >> 8) & 255, v & 255];
+});
 const figures = new Map<string, HTMLCanvasElement>();
 
 /** The hero in stone (cached by who and how they look): FW by FH, feet at (FW / 2, FH - FOOT). */
@@ -144,7 +150,7 @@ export function drawPlinth(c: Ctx, r: Round, x: number, y: number): void {
   c.glow.globalCompositeOperation = 'destination-out';
   c.glow.fillRect(Math.round(x - half), Math.round(y - tall), half * 2, Math.round(tall + PX));
   c.glow.globalCompositeOperation = 'source-over';
-  paintBoxes(c.lit, plinthBoxes(), x, y);
+  paintBoxes(c.lit, roundBoxes(r), x, y);
   // The front face's foot is half the body's depth forward of the foot, and its slab's height up.
   drawPlate(c.lit, r.hero?.name, x, Math.round(y + PLATE.z * PX - PLATE.y0 * PX));
   drawStatueTop(c, r.hero, x, Math.round(y - PLINTH_TOP * PX));
