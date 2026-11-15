@@ -28,6 +28,18 @@ buildings you can go in defined by their guild signs". Then "ya lets do it."
 - **The art is generated**, in his ElevenLabs workspace, then cut and cleaned by `scripts/kitprep.py` into crisp
   32 px textures (`src/client/three/kit/`). Ours, so it can live in the public repo; no pack licence in the way.
 
+## Kyle's notes on the test street (2026-11-15, second pass)
+
+"a lot better... the right direction, but a lot of nuance to do."
+- **Variety.** "Things right now all kind of look and feel the same." Heights and kinds should differ: single-storey
+  cottages (more defined, the odd-looking houses at the bottom right should be these), shops of two storeys, the
+  landmarks (church, town hall, the Drowned Rat, the forge) bigger.
+- **Cheat toward the camera.** Some buildings turned and enlarged toward the viewer, more dynamic, not every front
+  pointed the same way.
+- **A chase camera in town.** It follows behind you as you walk, so walking up to the church you see its front;
+  buildings face their lanes in every direction, not all south. (Jobs keep the steep, fixed camera.)
+- Everything else (props, people, the town's layout) he expects to come with the new system.
+
 ## Why it's grainy now
 
 The world is painted at 16 pixels a tile (heroes 31 to 40 tall) and blown up by a whole number: 3x on a phone, 4x
