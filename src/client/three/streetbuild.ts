@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { doorAt, type Block } from '../../shared/arena';
 import { mat, quad, tri } from './streetkit';
-import { front, openEnd, PX, rowOf, seeded, size, type Front, type Side } from './streetrow';
+import { front, MID, openEnd, PX, rowOf, seeded, size, type Front, type Side } from './streetrow';
 import { dressing } from './streetprops';
 import SIZES from './kit/kit.json';
 
@@ -37,6 +37,16 @@ function sideWall(g: THREE.Group, x: number, z0: number, z1: number, top: number
   for (let y = art4; y < top - 0.05; y += 2) band(y, Math.min(top, y + 2), 1 - Math.min(2, top - y) / 4);
 }
 
+/** A building's back across x0 to x1 at z, facing back (-z), up to `top`, in side-wall art like its sides. */
+function backWall(g: THREE.Group, x0: number, x1: number, z: number, top: number, art: string | null, n: number): void {
+  const t = new THREE.Group();
+  sideWall(t, 0, x0, x1, top, art, 1, n);
+  // (Built as a side wall along z at x 0, then turned a quarter so it runs along x at the back.)
+  t.rotation.y = Math.PI / 2;
+  t.position.z = z;
+  g.add(t);
+}
+
 /** A box of stone (a tower, a chimney) from y0 to y1, x0 to x1, z0 to z1, its front face left open (the picture's). */
 function stack(g: THREE.Group, x0: number, x1: number, y0: number, y1: number, z0: number, z1: number): void {
   const sm = mat('mat-stone', true), h = y1 - y0, w = x1 - x0, d = z1 - z0;
@@ -54,7 +64,8 @@ function building(f: Front, d: number, flip: boolean, n: number): { g: THREE.Gro
   sideWall(g, x0, -d, -0.02, eave, art, -1, n);
   sideWall(g, x1, -d, -0.02, eave, art, 1, n + 1);
   const sm = mat('mat-stone', true);
-  g.add(quad([x1, 0, -d], [x0, 0, -d], [x0, eave, -d], [x1, eave, -d], sm, 0, f.w / 2, eave / 2));
+  // The back, in the same side-wall art (a turned building shows its back to a lane now and then).
+  backWall(g, x0, x1, -d, eave, art, n + 2);
   // The roof: slate down both sides from the ridge to the eaves, running back from just behind the picture.
   const rm = mat('mat-slate', true), slope = Math.hypot(f.w / 2, ridge - eave), ov = 0.15, zf = -0.04;
   roof.add(quad([x0 - ov, eave - 0.1, zf], [x0 - ov, eave - 0.1, -d - ov], [0, ridge, -d - ov], [0, ridge, zf], rm, 0, (d + ov) / 2, slope / 2));
@@ -102,16 +113,38 @@ function signOf(b: Block, f: Front): string | null {
   return null;
 }
 
-/** Build a roofed block from the kit into `group`; returns its roofs and how tall it stands. */
+/** How far a block's front is turned from facing south (radians about y), by its `face` (the way you walk in). */
+const FACING: Record<string, number> = { N: 0, S: Math.PI, W: Math.PI / 2, E: -Math.PI / 2 };
+
+/**
+ * Build a roofed block from the kit into `group`, its front on the side its door is (`face`); returns its roofs and
+ * how tall it stands. Built in the block's own frame (front to the south, middle at the origin), then turned.
+ */
 export function kitBlock(b: Block, group: THREE.Group): { roof: THREE.Group; top: number } {
-  const row = rowOf(b), rnd = seeded({ ...b, x: b.x + 0.5 }), roofs = new THREE.Group(), z1 = b.y + b.h, d = b.h, total = row.reduce((s, f) => s + f.w, 0);
+  const th = FACING[b.face ?? 'N'], side = Math.abs(Math.sin(th)) > 0.5, W = side ? b.h : b.w, D = side ? b.w : b.h;
+  const frame = new THREE.Group();
+  frame.position.set(b.x + b.w / 2, 0, b.y + b.h / 2);
+  frame.rotation.y = th;
+  group.add(frame);
+  // A local step (lx, lz) in the world, for asking which ends look out on open street.
+  const world = (lx: number, lz: number): [number, number] => [lx * Math.cos(th) + lz * Math.sin(th), -lx * Math.sin(th) + lz * Math.cos(th)];
+  // A landmark turns toward the middle of town, by half the angle, at most 15 degrees.
+  const [nx, nz] = world(0, 1), fx = b.x + b.w / 2 + nx * D / 2, fz = b.y + b.h / 2 + nz * D / 2;
+  let a = Math.atan2(MID.x - fx, MID.z - fz) - Math.atan2(nx, nz);
+  a = Math.atan2(Math.sin(a), Math.cos(a));
+  const turn = Math.abs(a) < Math.PI / 2 ? Math.max(-0.26, Math.min(0.26, a * 0.5)) : 0;
+  return kitFrame({ ...b, x: -W / 2, y: -D / 2, w: W, h: D, face: undefined }, b, frame, turn, world);
+}
+
+function kitFrame(b: Block, at: Block, group: THREE.Group, turn: number, world: (lx: number, lz: number) => [number, number]): { roof: THREE.Group; top: number } {
+  const row = rowOf(b, at, turn), rnd = seeded({ ...at, x: at.x + 0.5 }), roofs = new THREE.Group(), z1 = b.y + b.h, d = b.h, total = row.reduce((s, f) => s + f.w, 0);
   let x = b.x + (b.w - total) / 2, top = 0;
   row.forEach((f, i) => {
-    const n = Math.round(b.x * 3 + b.y * 5) + i * 7, { g, roof } = building(f, d, i % 2 === 1 && !f.turn, n);
+    const n = Math.round(at.x * 3 + at.y * 5) + i * 7, { g, roof } = building(f, d, i % 2 === 1 && !f.turn, n);
     // The row's open ends get a front facing the side lane (not on a landmark, which is turned already).
     for (const dir of [-1, 1] as const) {
       const end = dir < 0 ? i === 0 : i === row.length - 1;
-      if (end && !f.turn && f.kind !== 'cottage' && d >= 2.6 && openEnd(b, dir)) crossWing(g, f, front(rnd() < 0.5 ? 'shop' : 'house', rnd), (dir * f.w) / 2, d, dir);
+      if (end && !f.turn && f.kind !== 'cottage' && d >= 2.6 && openEnd(at, ...world(dir, 0))) crossWing(g, f, front(rnd() < 0.5 ? 'shop' : 'house', rnd), (dir * f.w) / 2, d, dir);
     }
     g.position.set(x + f.w / 2, 0, z1);
     g.rotation.y = f.turn ?? 0;

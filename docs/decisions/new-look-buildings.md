@@ -73,3 +73,18 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   for the church, the town hall, the Drowned Rat and the forge, from the kit's landmark takes and the town-layout
   spec's placings. Models are made straight; the game turns them to their block's facing and toward the square.
   (Claude Opus 5.5)
+
+## 2026-11-15: the kit follows the new town's facings
+
+- The town layout chat's new Wickhold (behind the same `?street`) gives every block a `face`. streetbuild.ts now
+  builds each kit block in its own frame (front to the south, middle at the origin) and turns it to its facing: front
+  south by default, north for 'S', east for 'W', west for 'E'. Open ends are asked in world terms (streetrow.ts
+  `openEnd` takes a direction); landmarks turn toward the map's middle by half the angle, at most 15 degrees.
+- Backs are in the side-wall art too (windows, timber, barrels), since turned buildings show their backs to lanes:
+  the Drowned Rat fronts north up the Rat Steps, so the lane below sees its back.
+- camera3d.ts: the chase camera rises with the level under your hero (eased), so on Kirkhill it looks at you, not
+  the square's height. Merged with the layout's lifts: kit props stand on their level too (ground.ts).
+- For Kyle: with the swing capped at 45 degrees, north-facing fronts (the Rat, the lodge, half of Rescue Row) are
+  only ever seen from behind. Options: let the camera swing round further when you walk toward one, or keep fronts
+  south-ish. Yours to call.
+  (Claude Opus 5.5)

@@ -5,7 +5,8 @@
  */
 import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
-import { WALL_H } from './ground';
+import { LEDGE_H, WALL_H } from './ground';
+import { levelAt } from '../../shared/arena';
 import { upright } from '../phoneband';
 import { STREET } from './streetkit';
 import { SWING } from '../swing';
@@ -23,6 +24,8 @@ export class Cam {
   /** The chase camera's distance (tiles) and its yaw; where the hero was, to see which way they walk. */
   private dist = 60;
   private last: [number, number] | null = null;
+  /** How high the ground under your hero stands (tiles), eased. */
+  private lift = 0;
   /** Where it looks (tiles, on the floor). */
   readonly at = new THREE.Vector3();
   private ready = false;
@@ -104,9 +107,11 @@ export class Cam {
     this.at.x += (x - this.at.x) * k;
     this.at.z += (z - this.at.z) * k;
     this.ready = true;
-    const y = SWING.yaw, cp = Math.cos(PITCH);
-    this.cam.position.set(this.at.x - Math.sin(y) * cp * this.dist, Math.sin(PITCH) * this.dist, this.at.z + Math.cos(y) * cp * this.dist);
-    this.cam.lookAt(this.at.x, 0.8, this.at.z);
+    // Up on a raised level (the new town's Kirkhill), the camera rises with you, easing so a step doesn't jolt it.
+    this.lift += ((map.ledges ? levelAt(map, x, z) * LEDGE_H : 0) - this.lift) * k;
+    const y = SWING.yaw, cp = Math.cos(PITCH), ly = 0.8 + this.lift;
+    this.cam.position.set(this.at.x - Math.sin(y) * cp * this.dist, ly - 0.8 + Math.sin(PITCH) * this.dist, this.at.z + Math.cos(y) * cp * this.dist);
+    this.cam.lookAt(this.at.x, ly, this.at.z);
     this.cam.updateMatrixWorld();
   }
 

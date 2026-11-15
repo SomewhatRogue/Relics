@@ -49,8 +49,6 @@ const LOOKS: Record<Kind, Look> = {
   smithy: { prefix: 'land-forge-', eave: 0.5, ridge: 0.78, side: 'stone', stack: [0.82, 0.16, 0.97], max: 9.5 },
 };
 const LANDMARK = new Set<Kind>(['church', 'hall', 'inn', 'smithy']);
-/** The middle of town (the Lantern's square), that landmarks turn toward. */
-const MID_X = 28;
 
 /** A block's own front: a landmark, or the kind it is. */
 export function mainOf(b: Block): Kind {
@@ -79,17 +77,20 @@ export function front(kind: Kind, rnd: () => number): Front {
   return { name, kind, w: pw / PX, H: ph / PX, eave: L.eave, ridge: L.ridge, side: L.side, stack: L.stack };
 }
 
-/** The row of fronts along a block's south side, left to right, exactly its width (the fillers squeezed to fit). */
-export function rowOf(b: Block): Front[] {
-  const rnd = seeded(b), kind = mainOf(b), main: Front = { ...front(kind, rnd), main: true };
+/**
+ * The row of fronts along a block's front, left to right, exactly its width (the fillers squeezed to fit). `b` is the
+ * block in its own frame (front to the south, door in the middle); `seed` the block where it stands (so each picks its
+ * own); `turn` how far a landmark turns toward the middle of town (radians, streetbuild.ts works it out).
+ */
+export function rowOf(b: Block, seed: Block = b, turn = 0): Front[] {
+  const rnd = seeded(seed), kind = mainOf(b), main: Front = { ...front(kind, rnd), main: true };
   // A landmark keeps its proportions: as tall as its kind may go, as wide as most of the block allows.
   if (LANDMARK.has(kind)) {
     const ar = main.w / main.H, H = Math.min(LOOKS[kind].max!, Math.max(main.H, (b.w * 0.8) / ar));
     main.H = H;
     main.w = Math.min(H * ar, b.w + 1.2);
     main.H = main.w / ar;
-    const lean = (MID_X - (b.x + b.w / 2)) / 10;
-    main.turn = Math.max(-0.26, Math.min(0.26, lean * 0.26));
+    main.turn = turn;
   }
   // Single-storey homes: just the cottage, fitted to its plot.
   if (kind === 'cottage') return [{ ...main, w: b.w, H: main.H * Math.min(1.15, Math.max(0.85, b.w / main.w)) }];
@@ -120,13 +121,15 @@ export function rowOf(b: Block): Front[] {
   return [...L, main, ...R];
 }
 
-/** The town's blocks, set before its buildings are built (buildings3d.ts), so a row can see its neighbours. */
+/** The town's blocks and middle, set before its buildings are built (buildings3d.ts), so a row can see its neighbours. */
 let around: Block[] = [];
-export const streetAround = (blocks: Block[]) => void (around = blocks);
+export const MID = { x: 28, z: 18 };
+export const streetAround = (blocks: Block[], w: number, h: number) => void ((around = blocks), (MID.x = w / 2), (MID.z = h / 2));
 const ROOFED = new Set<Block['kind']>(['house', 'hall', 'church', 'forge', 'tavern', 'tower', 'granary', 'barn']);
 
-/** Whether a block's west (-1) or east (1) end looks out on open street: no roofed building within `gap` tiles. */
-export function openEnd(b: Block, dir: -1 | 1, gap = 2.5): boolean {
-  const x0 = dir < 0 ? b.x - gap : b.x + b.w, x1 = dir < 0 ? b.x : b.x + b.w + gap;
-  return !around.some((o) => o !== b && ROOFED.has(o.kind) && o.x < x1 && o.x + o.w > x0 && o.y < b.y + b.h && o.y + o.h > b.y);
+/** Whether a block's side looks out on open street that way (dx, dz a unit step): no roofed building within `gap`. */
+export function openEnd(b: Block, dx: number, dz: number, gap = 2.5): boolean {
+  const x0 = dx < -0.5 ? b.x - gap : dx > 0.5 ? b.x + b.w : b.x, x1 = dx < -0.5 ? b.x : dx > 0.5 ? b.x + b.w + gap : b.x + b.w;
+  const z0 = dz < -0.5 ? b.y - gap : dz > 0.5 ? b.y + b.h : b.y, z1 = dz < -0.5 ? b.y : dz > 0.5 ? b.y + b.h + gap : b.y + b.h;
+  return !around.some((o) => o !== b && ROOFED.has(o.kind) && o.x < x1 && o.x + o.w > x0 && o.y < z1 && o.y + o.h > z0);
 }
