@@ -9,6 +9,7 @@ import { blit, shadow, type Ctx } from './draw';
 import { makeSprite, type Part, type Sprite } from './sprites';
 import { lookKey, type WeaponLook } from '../shared/gearlook';
 import { elCol, tintPixel } from './weaponlook';
+import { NAMED_FLOOR } from './namedart';
 
 /** A pixel map to a sprite: '.' empty, a letter a colour from `pal`. */
 function art(rows: string[], pal: Record<string, string>, tint?: (hex: string, x: number, y: number) => string): Sprite {
@@ -41,7 +42,7 @@ function weaponSprite(kit: string, look: WeaponLook): Sprite {
   const key = kit + '/' + lookKey(look);
   let s = lying.get(key);
   if (!s) {
-    const w = WEAPONS[kit] ?? WEAPONS.sword, el = elCol(look);
+    const w = (look.named && NAMED_FLOOR[look.named]) || WEAPONS[kit] || WEAPONS.sword, el = elCol(look);
     // (A wand's or staff's tip in the element it carries.)
     lying.set(key, (s = art(w.rows, el && w.pal.e ? { ...w.pal, e: el } : w.pal, tintPixel(look))));
   }
@@ -93,7 +94,7 @@ export function drawBottle(c: Ctx, col: string, x: number, y: number, id: number
 export function drawGear(c: Ctx, kind: string, kit: string | undefined, armor: string | undefined, tierCol: string, x: number, y: number, id: number, alpha: number, look: WeaponLook = { tier: 'fine' }): void {
   shadow(c, x, y, 6);
   if (kind === 'weapon') {
-    const w = WEAPONS[kit ?? 'sword'] ?? WEAPONS.sword, ws = weaponSprite(kit ?? 'sword', look), el = elCol(look);
+    const w = (look.named && NAMED_FLOOR[look.named]) || WEAPONS[kit ?? 'sword'] || WEAPONS.sword, ws = weaponSprite(kit ?? 'sword', look), el = elCol(look);
     blit(c, ws, x, y + 1);
     // The glint: once every few seconds a bright pixel runs down the blade.
     const t = (c.now * 0.45 + id * 0.37) % 1;

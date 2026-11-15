@@ -12,6 +12,8 @@ import type { Ctx } from './draw';
 import { HS, hline } from './heroscale';
 import type { Pose } from './held';
 import { VEIN, VEIN_GLOW, elCol, glowingVeins } from './weaponlook';
+import { NAMED, type Strokes } from './namedlooks';
+import { WEAPONS } from '../shared/weapons';
 
 /** Where each kit's metal runs along it from the hand (hero units, as held.ts draws them). */
 const METAL: Partial<Record<Hero['weapon'], [number, number]>> = {
@@ -25,15 +27,27 @@ function bladeOut(h: Hero): boolean {
   const s = h.act === 'attack' ? currentSwing(h) : null;
   if (h.weapon === 'poisoner') return !(h.act === 'charge' || (s && h.heavy));
   if (h.weapon === 'censer') return !(h.act === 'charge' || (s && s.burn));
+  // (A Ranger's quick cut is the short sword, whatever bow they carry.)
+  if (WEAPONS[h.weapon].cls === 'RANGER') return !(s && !s.shot);
   return true;
 }
 
 export function weaponMarks(c: Ctx, h: Hero, ox: number, oy: number, p: Pose): void {
-  const span = METAL[h.weapon];
-  if (!span || p.hide || !bladeOut(h)) return;
-  const look = heldLook(h), n = VEINS[look.tier], el = elCol(look), [r0, r1] = span;
-  if (!n && !el) return;
+  if (p.hide || !bladeOut(h)) return;
+  const look = heldLook(h), named = look.named ? NAMED[look.named] : undefined;
   const nx = -Math.sin(p.a), ny = Math.cos(p.a);
+  metal(c, h, look, !!named, ox, oy, p, nx, ny);
+  // (Last, so the piece's own shape is never hidden under its veins.)
+  if (named?.held) named.held(strokes(c, ox, oy, p.a));
+}
+
+/** Veins through cursed metal and an element along the edge, along the kit's metal. */
+function metal(c: Ctx, h: Hero, look: ReturnType<typeof heldLook>, named: boolean, ox: number, oy: number, p: Pose, nx: number, ny: number): void {
+  const span = METAL[h.weapon];
+  if (!span) return;
+  // (A named piece shows its shape first: fewer veins on it.)
+  const n = named ? Math.min(3, VEINS[look.tier]) : VEINS[look.tier], el = elCol(look), [r0, r1] = span;
+  if (!n && !el) return;
   for (let i = 0; i < n; i++) {
     const r = r0 + (r1 - r0) * ((i * 0.618 + 0.13) % 1), o = ((i % 3) - 1) * 0.6, x = ox + nx * o, y = oy + ny * o;
     hline(c.lit, x, y, p.a, r, r + 0.6, VEIN);
@@ -58,4 +72,20 @@ export function weaponMarks(c: Ctx, h: Hero, ox: number, oy: number, p: Pose): v
     }
     c.glow.globalAlpha = 1;
   }
+}
+
+/** A named piece's strokes, in the hand's frame (namedlooks.ts). */
+function strokes(c: Ctx, ox: number, oy: number, a: number): Strokes {
+  const ca = Math.cos(a), sa = Math.sin(a), at = (r: number, o: number): [number, number] => [ox + (ca * r - sa * o) * HS, oy + (sa * r + ca * o) * HS];
+  return {
+    now: c.now,
+    along: (r0, r1, o, col, w) => hline(c.lit, ox - sa * o * HS, oy + ca * o * HS, a, r0, r1, col, w),
+    across: (r, o0, o1, col, w) => hline(c.lit, ox + ca * r * HS, oy + sa * r * HS, a + Math.PI / 2, o0, o1, col, w),
+    dot: (r, o, col, glow) => {
+      const [x, y] = at(r, o).map(Math.round);
+      c.lit.fillStyle = col;
+      c.lit.fillRect(x, y, 1, 1);
+      if (glow) (c.glow.globalAlpha = glow), (c.glow.fillStyle = col), c.glow.fillRect(x, y, 1, 1), (c.glow.globalAlpha = 1);
+    },
+  };
 }

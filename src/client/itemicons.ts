@@ -7,6 +7,7 @@
 import { ELEMENT_TRAITS, POTIONS, slotOf, type Item, type PotionId } from '../shared/tuning';
 import { lookKey, weaponLookOf } from '../shared/gearlook';
 import { elCol, tintPixel } from './weaponlook';
+import { NAMED_ICON } from './namedart';
 
 const S = 12;
 const M = '#c4cad4', MD = '#6a7280', W = '#8a5a30', WD = '#5a3a1e', G = '#d9b13a', C = '#9a6a3a';
@@ -97,7 +98,7 @@ export function itemIcon(it: Item): string {
       const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
       for (let i = 0; i <= n; i++) px(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), col);
     };
-    ICONS[key](px, tint ? line : line0);
+    ((look?.named && NAMED_ICON[look.named]) || ICONS[key])(px, tint ? line : line0);
     if (el) px(11, 0, el === 'ember' ? '#ff6a2a' : el === 'rime' ? '#9fe8ff' : '#e8e07a');
   });
 }

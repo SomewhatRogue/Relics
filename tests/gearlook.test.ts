@@ -3,12 +3,16 @@ import { describe, expect, it } from 'vitest';
 import { heldLook, packLook, unpackLook, weaponLookOf } from '../src/shared/gearlook';
 import { TIER_ORDER } from '../src/shared/gear';
 import { PAINT, tintOf, tintPixel, VEIN } from '../src/client/weaponlook';
+import { NAMED } from '../src/client/namedlooks';
+import { NAMED_FLOOR, NAMED_ICON } from '../src/client/namedart';
+import { HUNGRY, HUNGRY_ORDER } from '../src/shared/hungry';
+import type { Item } from '../src/shared/loot';
 
 describe('weapon looks', () => {
-  it('reads tier, element and hungry id off the piece; no piece is plain', () => {
+  it('reads tier, element and name (Hungry or unique) off the piece; no piece is plain', () => {
     expect(weaponLookOf(undefined)).toEqual({ tier: 'plain' });
     expect(weaponLookOf({ kit: 'sword', quality: 'forged', traits: ['rime'] })).toEqual({ tier: 'forged', el: 'frost' });
-    expect(weaponLookOf({ kit: 'mace', quality: 'hungry', traits: [], hungry: 'cleaver' })).toEqual({ tier: 'hungry', hungry: 'cleaver' });
+    expect(weaponLookOf({ kit: 'mace', quality: 'hungry', traits: [], hungry: 'cleaver' })).toEqual({ tier: 'hungry', named: 'cleaver' });
     expect(heldLook({ weapon: 'sword', arms: { sword: { kit: 'sword', quality: 'fine', traits: [] } } })).toEqual({ tier: 'fine' });
     // A friend's word wins over an empty kit.
     expect(heldLook({ weapon: 'sword', arms: {}, gearLook: { w: { tier: 'turning' } } })).toEqual({ tier: 'turning' });
@@ -19,7 +23,7 @@ describe('weapon looks', () => {
       const l = { tier, ...(el ? { el } : {}) };
       expect(unpackLook(packLook(l))).toEqual(l);
     }
-    expect(unpackLook(packLook({ tier: 'hungry', hungry: 'pike' }))).toEqual({ tier: 'hungry', hungry: 'pike' });
+    expect(unpackLook(packLook({ tier: 'hungry', named: 'pike' }))).toEqual({ tier: 'hungry', named: 'pike' });
     for (const bad of [undefined, 3, '9', 'x', '2q', '2f:<script>']) expect(unpackLook(bad)).toEqual({ tier: 'plain' });
   });
 
@@ -44,5 +48,22 @@ describe('weapon looks', () => {
     expect(count('touched')).toBeGreaterThan(count('tolmouth'));
     expect(count('hungry')).toBeGreaterThan(count('touched'));
     expect(PAINT.plain.veins).toBe(0);
+  });
+
+  it('every Hungry weapon has its own look, held, on the floor and in the bag', () => {
+    for (const id of HUNGRY_ORDER.filter((h) => HUNGRY[h].slot === 'weapon')) {
+      expect(NAMED[id]?.held, id).toBeTypeOf('function');
+      expect(NAMED_FLOOR[id], id).toBeDefined();
+      expect(NAMED_ICON[id], id).toBeTypeOf('function');
+    }
+    // Its own stuff over the tier's: Spendthrift's string is gold, a plain hungry bow's is not.
+    expect(tintOf({ tier: 'hungry', named: 'spendthrift' })('#d8d0bc')).toBe('#e8c050');
+    expect(tintOf({ tier: 'hungry' })('#d8d0bc')).toBe('#d8d0bc');
+  });
+
+  it('shows a kept look over the piece worn, on the same kit only', () => {
+    const fine: Item = { kit: 'greatsword', quality: 'fine', traits: [] };
+    expect(heldLook({ weapon: 'greatsword', arms: { greatsword: { ...fine } }, keep: { weapon: 'haulpick' } })).toEqual({ tier: 'fine', named: 'haulpick' });
+    expect(heldLook({ weapon: 'sword', arms: { sword: { ...fine, kit: 'sword' } }, keep: { weapon: 'haulpick' } })).toEqual({ tier: 'fine' });
   });
 });

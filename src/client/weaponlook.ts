@@ -6,7 +6,8 @@
  * - fine: bright steel and brass (the look every weapon had before);
  * - forged: dark steel with a silver edge and silver fittings, the grip in black leather;
  * - PRE-WAR, touched, turning: the metal blackening and veined in the hungry's sickly green, more each tier;
- * - hungry: blackest, most veined (its named pieces get their own looks in slice 2).
+ * - hungry: blackest, most veined.
+ * A named piece (a Hungry weapon, a unique) has its own stuff over its tier's (namedlooks.ts).
  * An element (fire, frost, storm) runs along the edge in the spells' colours with a faint glow (weaponmarks.ts).
  *
  * Every colour today's weapon art uses has a role (steel, fittings, grip, wood); a tier's ramp maps each
@@ -15,8 +16,9 @@
 import type { Tier } from '../shared/loot';
 import { lookKey, type WeaponLook } from '../shared/gearlook';
 import { EL_COL } from './palette';
+import { NAMED } from './namedlooks';
 
-type Role = 'steel' | 'fit' | 'grip' | 'wood';
+export type Role = 'steel' | 'fit' | 'grip' | 'wood';
 /** The weapon art's colours by role (held.ts, heldkits.ts, lootart.ts, three/loot3d.ts, itemicons.ts). */
 const ROLES: Record<Role, string[]> = {
   steel: ['#eef2f5', '#e6ecf0', '#dfe6ec', '#e8eef2', '#e4eaf2', '#cfd6dc', '#c4cad4', '#cfd6e8', '#d8e0f4', '#9aa4ae', '#9aa3ad', '#9aa6b2', '#aab2be', '#8a929c', '#6a727c', '#6a7280', '#8a8490', '#6a6470', '#5a5560'],
@@ -30,7 +32,7 @@ const ROLE_OF = new Map<string, Role>();
 for (const r of Object.keys(ROLES) as Role[]) for (const h of ROLES[r]) ROLE_OF.set(h, r);
 
 /** Dark, middle and light, and how far up the middle sits (a high one keeps only the brightest edge light). */
-type Ramp = [string, string, string, number];
+export type Ramp = [string, string, string, number];
 interface Paint { steel?: Ramp; fit?: Ramp; grip?: Ramp; wood?: Ramp; /** Green veins on the metal: held marks, and one pixel in `veins` on the floor and in the bag. */ veins: number }
 
 const BLACK_GRIP: Ramp = ['#1a1418', '#241c20', '#30262a', 0.5];
@@ -64,13 +66,13 @@ export function tintOf(l: WeaponLook): (hex: string) => string {
   const key = lookKey(l);
   let f = tints.get(key);
   if (f) return f;
-  const p = PAINT[l.tier], done = new Map<string, string>();
+  const n = l.named ? NAMED[l.named] : undefined, p: Paint = { ...PAINT[l.tier], ...(n?.paint ?? {}) }, swap = n?.swap ?? {}, done = new Map<string, string>();
   f = (hex: string) => {
     const k = hex.toLowerCase(), had = done.get(k);
     if (had) return had;
     const role = ROLE_OF.get(k), ramp = role && p[role];
-    let out = hex;
-    if (role && ramp) {
+    let out = swap[k] ?? hex;
+    if (!swap[k] && role && ramp) {
       const [lo, hi] = SPAN[role];
       out = along(ramp, Math.max(0, Math.min(1, (luma(k) - lo) / (hi - lo))));
     }
@@ -83,7 +85,8 @@ export function tintOf(l: WeaponLook): (hex: string) => string {
 
 /** For pixel maps (the floor, the bag): the tint, and on cursed metal a green vein pixel here and there. */
 export function tintPixel(l: WeaponLook): (hex: string, x: number, y: number) => string {
-  const t = tintOf(l), n = PAINT[l.tier].veins;
+  // (A named piece shows its shape first: half the veins.)
+  const t = tintOf(l), v = PAINT[l.tier].veins, n = v && l.named ? v * 2 : v;
   return (hex, x, y) => (n && ROLE_OF.get(hex.toLowerCase()) === 'steel' && (x * 7 + y * 13 + ((x * y) % 5)) % n === 0 ? VEIN : t(hex));
 }
 

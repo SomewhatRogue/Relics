@@ -286,6 +286,8 @@ export interface Hero extends Body {
   /** What a friend in town holds, as their word said (shared/gearlook.ts). Drawing only; your own hero's and a party's
    *  come from the weapon in hand (`arms`). */
   gearLook?: import('../shared/gearlook').GearLook;
+  /** The looks this hero keeps per slot (shared/keptlook.ts, `Profile.keep`). Drawing only. */
+  keep?: import('../shared/keptlook').Looks['keep'];
   /** In a party: down and waiting to be picked up (`pickT` so far), or out until the job ends. */
   bleeding?: boolean;
   out?: boolean;

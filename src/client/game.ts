@@ -385,6 +385,7 @@ export class Game {
     h.armor = p.armor;
     h.legs = p.legs ?? null;
     h.rings = [...p.rings];
+    h.keep = p.keep; // (Looks kept per slot: drawing only, shared/gearlook.ts.)
     h.baseHp = HERO.hp + (perkFx(p.perks).health ?? 0);
     // Raised this job (sim/raise.ts): the most health stays cut till it ends, and who raised you stays known.
     if (keep) Object.assign(h, { hpCut: keep.hpCut, risenBy: keep.risenBy });

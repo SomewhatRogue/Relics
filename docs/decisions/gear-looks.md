@@ -35,3 +35,25 @@ The gear-looks chat's log (docs/design/gear-looks.md). Newest at the foot.
   has no metal run for weaponmarks.ts). Mage tips still glow in the spell's element as before. Next: slice 2,
   the Hungry pieces.
 (Opus 5.5)
+
+## 2026-11-15: slice 2, the six Hungry weapons, and kept looks shown
+
+- `WeaponLook.hungry` is now `named` (a Hungry id or a unique id). Your own hero and a party's look go
+  through the Gear chat's `shownItem` (keptlook.ts) with `Hero.keep` (copied from `Profile.keep` in
+  game.ts's equip, one line; drawing only), so a kept unique's look shows over the piece worn, on the
+  same kit only. Friends in town get it in `gw` as before.
+- Named looks, data in `client/namedlooks.ts`: their own stuff (ramps by role over the tier's, exact
+  colour swaps) and a few strokes along the weapon in hand, drawn last from weaponmarks.ts in the hand's
+  frame, so held.ts needed no new edit. Floor sprites and bag pictures in `client/namedart.ts`, picked by
+  lootart.ts and itemicons.ts (one line each). 2.5D loot takes the named stuff only, no shape yet.
+  - Skarn's Cleaver: a black iron slab off the greatsword's spine, squared, with a hanging hole; rag grip.
+  - The Larder Pike: a barbed head, three meat hooks hung down a greasy haft.
+  - Spendthrift: a black bow on a gold string, coins tied at the grip.
+  - Mother Rust's Needles: long rusted needles bound in red thread (the main hand's runs longer).
+  - The Jealous Wand: black twisted wood, a green eye at the tip that glows.
+  - The Keeping Mace: tarnished collar, a coal burning in the head.
+- A named piece carries fewer veins (three in hand, half on the floor and in the bag) so its shape leads.
+- `?gearlook` has a HUNGRY row, mid-swing so the pieces are out.
+- Next: the twelve unique weapons by their lines (uniques.ts), the same way, so a kept look shows as its
+  own thing. The Deep chat owns what a unique looks like; drawn from its `line` unless they say otherwise.
+(Opus 5.5)
