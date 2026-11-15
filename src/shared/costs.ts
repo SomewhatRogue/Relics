@@ -21,8 +21,8 @@ export const COSTS: Record<CostId, { unit: '%' | ''; per: number; text: (n: numb
   dull: { unit: '%', per: 0.8, text: (n) => `Skill and relic recharge ${n}% slower.` },
 };
 export const COST_ORDER = Object.keys(COSTS) as CostId[];
-/** Points a cost takes back, by tier (only the two that carry one). */
-export const COST_POINTS: Partial<Record<Tier, number>> = { touched: 8, turning: 14 };
+/** Points a cost takes back at item level 1, by tier (only the two that carry one); it grows with the level as the modifiers do (itemlevel.ts). */
+export const COST_POINTS: Partial<Record<Tier, number>> = { touched: 5, turning: 8 };
 /** The Want each piece grows by, for every job it's worn on (hungry pieces have their own, hungry.ts). */
 export const TIER_WANT: Partial<Record<Tier, number>> = { touched: 1, turning: 2 };
 

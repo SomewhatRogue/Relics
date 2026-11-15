@@ -149,6 +149,8 @@ body.touch #pack .head span { font-size: var(--fs-s); }
 
 .chip { display: inline-block; padding: 1px 6px; margin-right: 6px; border: 1px solid var(--t); color: var(--t); font-size: var(--fs-s); letter-spacing: 0.1em; vertical-align: 1px; }
 .card-head b { color: var(--t, #f0e6cc); }
+/* A piece's item level beside its tier (shared/itemlevel.ts; the Gear chat). */
+.card-head .ilv { margin-right: 6px; color: #d8cfbc; font-size: var(--fs-s); letter-spacing: 0.08em; font-weight: 700; }
 .how { color: #c8c0b0; font-size: var(--fs-text); margin: 2px 0; }
 .cmp { margin-top: 4px; display: grid; gap: 1px; font-size: var(--fs-text); }
 .cmp > div { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: baseline; }

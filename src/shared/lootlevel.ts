@@ -2,8 +2,9 @@
  * Loot by the party's level (Kyle, 2026-11-05; numbers shared/threat.ts LEVEL_SCALE): the stronger the
  * party, the better what drops, gently. Each level past the first leans the odds: plain down, Forged and
  * PRE-WAR up, the rare three up a little, Fine taking up the difference so the odds still add up; capped
- * at LEVEL_SCALE.most levels. And a drop's item level: +1 from `itemFrom`, +2 from
- * `item2`. Same draws from the stream as before, so a level-1 party's rolls are exactly what they were.
+ * at LEVEL_SCALE.most levels. Same draws from the stream as before, so a level-1 party's rolls are what
+ * they were. A drop's item level is its own (shared/itemlevel.ts, budget.ts `raise`); it no longer
+ * comes as a free plus.
  */
 import type { Tier } from './loot.js';
 import { LEVEL_SCALE } from './threat.js';
@@ -23,6 +24,3 @@ export function leanOdds(odds: [Tier, number][], lv: number): [Tier, number][] {
   const sq = (total - keep) / rest;
   return out.map(([t, p]) => [t, t === 'fine' ? keep : p * sq]);
 }
-
-/** A drop's item level for a party of average level `lv`. */
-export const itemLevel = (lv: number) => (lv >= LEVEL_SCALE.item2 ? 2 : lv >= LEVEL_SCALE.itemFrom ? 1 : 0);

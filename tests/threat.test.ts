@@ -9,7 +9,8 @@ import { planRoom, type Foe } from '../src/shared/terrain';
 import { BIG, HOLD, LEVEL_SCALE, PARTY_TOUGH, SPRINT, THREAT, TICK, VARIANTS, levelHarm, levelHp } from '../src/shared/tuning';
 import { beatsFor, bigRooms, capsFor, foeThreat, meaty, roomBudget, threatIn, tierOf } from '../src/shared/roombudget';
 import { threatOf } from '../src/shared/threat';
-import { leanOdds, itemLevel } from '../src/shared/lootlevel';
+import { leanOdds } from '../src/shared/lootlevel';
+import { dropLevel } from '../src/shared/itemlevel';
 import { DROP_ODDS } from '../src/shared/gear';
 import { isSpecial } from '../src/shared/encounter';
 import { Rng } from '../src/shared/rng';
@@ -217,7 +218,8 @@ describe("the party's level", () => {
       expect(rare(leanOdds(base, 10))).toBeGreaterThan(rare(base));
       expect(rare(leanOdds(base, 10))).toBeLessThan(rare(base) * 1.5);
     }
-    expect([itemLevel(1), itemLevel(5), itemLevel(9)]).toEqual([0, 1, 2]);
+    // A drop's item level is where it fell (shared/itemlevel.ts), no longer a free plus.
+    expect([dropLevel(1), dropLevel(5.4), dropLevel(9, 1), dropLevel(40)]).toEqual([1, 5, 10, 20]);
   });
 });
 

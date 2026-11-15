@@ -3,7 +3,7 @@
  * and what it would change against what you wear now, in the numbers the room uses. Green better, red
  * worse. Used by the loot card, chests and the pack.
  */
-import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, PLUS, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, itemName, levelOf, plusOf, temperOf, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
+import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, PLUS, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, ilvlOf, itemName, levelOf, plusOf, temperOf, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
 import { CARDW } from './shopwords';
 import { itemCol, isUnique, uniqueLine } from './uniquelook';
 import { LOOTW } from './lootwords';
@@ -128,7 +128,8 @@ export function card(it: Item, h?: Hero, brief = false): string {
   if (tp > 0) traits.push(`<div class="tr"><b>${ANVILW.cardRow}:</b> ${ANVILW.cardText(tp)}</div>`);
   // The rare three wear their chip filled in; HUNGRY's darkest of all (ui.css).
   const chip = RARE.includes(it.quality) ? ` rare ${it.quality}` : '';
-  return `<div class="card-head" style="--t:${itemCol(it)}"><span class="chip${chip}">${isUnique(it) ? LOOTW.title : t.name}</span><b>${itemName(it)}</b></div>` +
+  // Its item level beside the tier (shared/itemlevel.ts): where it dropped, read from its points if it's from before levels.
+  return `<div class="card-head" style="--t:${itemCol(it)}"><span class="chip${chip}">${isUnique(it) ? LOOTW.title : t.name}</span><span class="ilv">LV ${ilvlOf(it)}</span><b>${itemName(it)}</b></div>` +
     (uniqueLine(it) ? `<div class="uline">${uniqueLine(it)}</div>` : '') +
     // SOULBOUND: taken by another class (sim/loot.ts); it sells, it never trades.
     (it.bound ? `<div class="tr"><b>SOULBOUND:</b> ${CARDW.bound}</div>` : '') +

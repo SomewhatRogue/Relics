@@ -4,7 +4,7 @@
  * it from the pack.
  */
 import { DROPS, ELITE, WEAPONS, itemName, rollAny, rollTier, type Item } from '../shared/tuning';
-import { itemLevel } from '../shared/lootlevel';
+import { dropLevel, raise } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { full } from './pack';
 import type { Drop, Enemy, FightEvent, Hero, Intent } from './types';
@@ -15,8 +15,8 @@ export const dropId = () => nextId++;
 /** How close a hero must stand to take a drop. */
 export const REACH = 1.4;
 
-/** A drop at the party's level (shared/lootlevel.ts): a level or two up for a strong party (never down, never a hungry piece). */
-export const lift = (i: Item, lv: number): Item => (i.hungry || (i.level ?? 0) >= itemLevel(lv) ? i : { ...i, level: itemLevel(lv) });
+/** A drop at the item level of where it fell (shared/itemlevel.ts): `lv` the room's level, `more` on top. Never lowers a piece. */
+export const lift = (i: Item, lv: number, more = 0): Item => raise(i, dropLevel(lv, more));
 
 /**
  * Maybe drop a weapon where this goblin fell (a BIG ONE always drops one). `lv`: the party's level. An
@@ -36,7 +36,7 @@ export function dropFrom(e: Enemy, heroes: Hero[], drops: Drop[], rng: Rng, ev: 
   // Tier by who fell; butchers sometimes leave armor or a ring instead of a weapon.
   const tier = rollTier(rng, e.name ? 'named' : e.big ? 'butcher' : e.kind, 0, lv + (elite ? ELITE.loot.levels : 0), floor), cls = WEAPONS[near.weapon].cls;
   const slot = e.kind === 'butcher' && rng.next() < 0.3 ? (rng.next() < 0.5 ? 'armor' : 'ring') : 'weapon';
-  const item = lift(rollAny(rng, cls, tier, slot, slot === 'weapon' && rng.next() < 0.5 ? near.weapon : undefined, e.name), lv);
+  const item = lift(rollAny(rng, cls, tier, slot, slot === 'weapon' && rng.next() < 0.5 ? near.weapon : undefined, e.name), lv, elite ? ELITE.loot.levels : 0);
   drops.push({ id: nextId++, x: e.x, y: e.y, item, life: DROPS.life });
   ev.push({ k: 'drop', x: e.x, y: e.y, q: item.quality });
 }

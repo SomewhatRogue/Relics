@@ -12,6 +12,7 @@ import { ELEMENT_TRAITS, traitsFor, type Item, type Tier } from './loot.js';
 import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
 import { CAPS, MODS, MOD_COUNT, PER_MOD, modFits, modPool, modValue, rollMods, type ArmorKind, type ModId, type Slot } from './mods.js';
 import { ARMOR, budget } from './budget.js';
+import { ILVL, fitLevel } from './itemlevel.js';
 import { rollCost } from './costs.js';
 import { PLUS, plusCost, plusOf } from './forgeplus.js';
 import { deepOdds } from './deeploot.js';
@@ -20,6 +21,7 @@ import { jobs } from './coins.js';
 export * from './mods.js';
 export * from './budget.js';
 export * from './forgeplus.js';
+export * from './itemlevel.js';
 
 /** Each tier: its name, colour and its step up the ladder. Every tier but hungry goes to +5 (forgeplus.ts). */
 export const TIERS: Record<Tier, { name: string; col: string; mods: number; step: number }> = {
@@ -67,10 +69,11 @@ export function reroll(rng: Rng, i: Item, k: number, cls: HeroClass): Item {
 /**
  * Roll a piece of `tier` for `slot`: a weapon of `kit` (or any of the class's), armor of `armor` weight
  * (or any). `cls` null rolls it for nobody in particular (the pawn's stall). `lean` (0 to 1) pushes every
- * roll toward the top of its band: a strong piece. Hungry gear comes from hungry.ts.
+ * roll toward the top of its band: a strong piece. Hungry gear comes from hungry.ts. Rolled at item level 1;
+ * a drop raises it to where it dropped (budget.ts `raise`).
  */
 export function rollGear(rng: Rng, cls: HeroClass | null, tier: Tier, slot: Slot = 'weapon', kit?: WeaponId, armor?: ArmorKind, lean = 0): Item {
-  const t = tier === 'hungry' ? 'turning' : tier, n = MOD_COUNT[t], out: Item = { slot, quality: t, traits: [], mods: [], level: 0 };
+  const t = tier === 'hungry' ? 'turning' : tier, n = MOD_COUNT[t], out: Item = { slot, quality: t, traits: [], mods: [], level: 0, ilvl: 1 };
   if (slot === 'weapon') out.kit = kit ?? rng.pick(CLASS_KITS[cls ?? 'WARRIOR']);
   if (slot === 'armor') out.armor = armor ?? rng.pick(['light', 'medium', 'heavy'] as ArmorKind[]);
   const pool = modPool(slot, slot === 'weapon' ? null : cls, out.kit, out.armor);
@@ -122,7 +125,7 @@ export function upgradeOld(i: Item): Item {
 export type GearStats = Record<ModId, number> & { speed: number; taken: number; dodgeDist: number; dodgeCost: number; steady: boolean };
 
 /** What everything worn adds up to (each piece's modifiers grown by its plus, the caps, then what the
- *  pluses add to a weapon's damage, armor's toughness and a ring's health, then any costs). */
+ *  item levels and pluses add to a weapon's damage, armor's toughness and a ring's health, then any costs). */
 export function gearStats(weapon: Item | undefined, armor: Item | null | undefined, rings: Item[] = []): GearStats {
   const s = Object.fromEntries((Object.keys(MODS) as ModId[]).map((k) => [k, 0])) as Record<ModId, number>;
   let taken = 1;
@@ -131,9 +134,12 @@ export function gearStats(weapon: Item | undefined, armor: Item | null | undefin
     if (!it) continue;
     const lv = levelOf(it), grow = 1 + lv * PLUS.mods;
     for (const m of it.mods ?? []) if (m.id in s) s[m.id] += m.v * grow;
-    if (slotOf(it) === 'weapon') lift.damage += lv * PLUS.damage;
-    if (slotOf(it) === 'armor') lift.tough += lv * PLUS.tough;
-    if (slotOf(it) === 'ring') lift.health += lv * PLUS.health;
+    // The item level lifts the base too (itemlevel.ts), a little a level past the first. Only a level it
+    // dropped with: a piece from before levels already has its old free plus in `level`, so it gives what it gave.
+    const il = it.ilvl !== undefined ? fitLevel(it.ilvl) - 1 : 0;
+    if (slotOf(it) === 'weapon') lift.damage += lv * PLUS.damage + il * ILVL.base.damage;
+    if (slotOf(it) === 'armor') lift.tough += lv * PLUS.tough + il * ILVL.base.tough;
+    if (slotOf(it) === 'ring') lift.health += lv * PLUS.health + il * ILVL.base.health;
     if (it.cost) costs.push(it.cost);
   }
   for (const [k, cap] of Object.entries(CAPS)) s[k as ModId] = Math.min(cap!, s[k as ModId]);

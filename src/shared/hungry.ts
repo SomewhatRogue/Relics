@@ -36,7 +36,7 @@ export function rollHungry(rng: Rng, cls: HeroClass, from?: string): Item {
   const id = own && rng.next() < 0.6 ? own : rng.pick(fits), d = HUNGRY[id];
   // Three modifiers, the biggest there are, from what the piece can roll for this class (mods.ts).
   const mods = rollMods(rng, modPool(d.slot, cls, d.kit, d.armor), MOD_COUNT.hungry, d.slot === 'weapon' ? budget('hungry', 'weapon') : budget('hungry', d.slot, d.armor));
-  return { slot: d.slot, kit: d.kit, armor: d.armor, quality: 'hungry', traits: [], mods, level: 0, hungry: id };
+  return { slot: d.slot, kit: d.kit, armor: d.armor, quality: 'hungry', traits: [], mods, level: 0, ilvl: 1, hungry: id };
 }
 
 /** Any tier: hungry pieces from rollHungry, the rest from rollGear. */

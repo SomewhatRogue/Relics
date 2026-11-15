@@ -68,6 +68,8 @@ export interface Item {
     | 'arc' | 'crit' | 'backstab' | 'finisher' | 'spell' | 'thrift'; v: number }[];
   /** What a touched or turning piece costs you (costs.ts), as hungry gear has its own. */
   cost?: { id: 'taken' | 'winded' | 'slow' | 'frail' | 'dull'; v: number };
+  /** Where it dropped (itemlevel.ts), 1 to 20: its modifiers are saved grown to it. None on pieces from before levels. */
+  ilvl?: number;
   /** Halvard's upgrades, +0 to +5. */
   level?: number;
   /** What striking it yourself at the anvil added on top of its upgrades, in levels (gear.ts `temperOf`). */

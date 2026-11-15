@@ -64,8 +64,14 @@ export const CAPS: Partial<Record<ModId, number>> = {
   arc: 0.5, crit: 0.3, backstab: 1, finisher: 0.8, spell: 0.5, thrift: 0.4,
 };
 
-/** Points each modifier gets at a tier, and how many modifiers a piece has. */
-export const PER_MOD: Record<Tier, number> = { plain: 0, fine: 5, forged: 8, tolmouth: 12, touched: 14, turning: 17, hungry: 20 };
+/**
+ * Points each modifier gets at a tier at item level 1, and how many modifiers a piece has. The tiers sit
+ * close (docs/design/gear-levels.md): after its cost a piece is worth FINE 13, FORGED 16, PRE-WAR 20,
+ * TOUCHED 24, TURNING 28, HUNGRY 32, so a level (7%, itemlevel.ts) can beat a tier: PRE-WAR beats a TOUCHED
+ * three levels under it, a TURNING five, a HUNGRY seven. TOUCHED and TURNING carry their cost (costs.ts
+ * COST_POINTS, 5 and 8) on top, so their modifiers are worth 29 and 36 before it.
+ */
+export const PER_MOD: Record<Tier, number> = { plain: 0, fine: 13, forged: 8, tolmouth: 10, touched: 29 / 3, turning: 12, hungry: 32 / 3 };
 export const MOD_COUNT: Record<Tier, number> = { plain: 0, fine: 1, forged: 2, tolmouth: 2, touched: 3, turning: 3, hungry: 3 };
 
 /** What a weapon's own job is: the modifiers that make this kit better at it. */
