@@ -64,3 +64,12 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   camera meets its footprint before climbing over its roof (a slab test), not "north of it" as before. So with the
   camera swung east you can stand at a building's east side and still be seen. tests/streethole.test.ts.
   (Claude Opus 5.5)
+
+## 2026-11-15: Blender briefs for the landmarks
+
+- docs/design/blender/: a README with the rules for all four (a tile a unit, the front toward +Z, origin under the
+  door, the block's footprint plus up to a tile of overhang at the front, pixel textures at 32 px a tile snapped to
+  a palette, a `glow` material for lit windows, under 4,000 triangles, `.glb` to `kit/models/`), and a brief each
+  for the church, the town hall, the Drowned Rat and the forge, from the kit's landmark takes and the town-layout
+  spec's placings. Models are made straight; the game turns them to their block's facing and toward the square.
+  (Claude Opus 5.5)
