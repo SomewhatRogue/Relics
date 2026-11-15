@@ -51,7 +51,8 @@ interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; rings: Item[
 export function sheet(w: Worn): Row[] {
   const g = gearStats(w.item, w.armor, w.rings), k = WEAPONS[w.weapon], first = k.combo[0], last = k.combo[k.combo.length - 1], q = 1 - g.quick;
   return [
-    { label: 'HIT', v: bigNum(first.dmg * (1 + g.damage)), unit: '' },
+    // A Mage's tap spark is a spell, so SPELL POWER counts in it (sim/hero.ts currentSwing).
+    { label: 'HIT', v: bigNum(first.dmg * (1 + g.damage) * (1 + (k.cls === 'MAGE' && first.shot ? g.spell : 0))), unit: '' },
     { label: 'FULL CHARGE', v: bigNum(k.heavy.dmgFull * (1 + g.damage)), unit: '' },
     { label: 'SWING', v: (first.windup + first.active + first.recover * 1) * q, unit: 's', low: true },
     { label: 'TO FULL CHARGE', v: (k.draw ?? CHARGE.full) * (1 - g.draw), unit: 's', low: true },
@@ -129,7 +130,9 @@ export function card(it: Item, h?: Hero, brief = false): string {
   // The rare three wear their chip filled in; HUNGRY's darkest of all (ui.css).
   const chip = RARE.includes(it.quality) ? ` rare ${it.quality}` : '';
   // Its item level beside the tier (shared/itemlevel.ts): where it dropped, read from its points if it's from before levels.
-  return `<div class="card-head" style="--t:${itemCol(it)}"><span class="chip${chip}">${isUnique(it) ? LOOTW.title : t.name}</span><span class="ilv">LV ${ilvlOf(it)}</span><b>${itemName(it)}</b></div>` +
+  // `LV 7 +2`: where it dropped, then Halvard's pluses on top (the name drops its own +2 here).
+  const lvp = `LV ${ilvlOf(it)}${plusOf(it) ? ' +' + plusOf(it) : ''}`;
+  return `<div class="card-head" style="--t:${itemCol(it)}"><span class="chip${chip}">${isUnique(it) ? LOOTW.title : t.name}</span><span class="ilv">${lvp}</span><b>${itemName(it).replace(/ \+\d+$/, '')}</b></div>` +
     (uniqueLine(it) ? `<div class="uline">${uniqueLine(it)}</div>` : '') +
     // SOULBOUND: taken by another class (sim/loot.ts); it sells, it never trades.
     (it.bound ? `<div class="tr"><b>SOULBOUND:</b> ${CARDW.bound}</div>` : '') +

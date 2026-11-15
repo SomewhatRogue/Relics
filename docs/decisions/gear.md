@@ -36,3 +36,29 @@ The Gear chat's log (docs/design/gear-levels.md). Newest at the foot.
   modifiers as LV 1 values (divide today's by about 2) with `ilvl: 1`, then `raise(item, dropLevel(lv))`.
 - Open: shop stock is LV 1 (Tobin's, the pawn); whether it follows your level is Kyle's call.
 - Tests: tests/itemlevel.test.ts (the crossings, raising, the base lift, old pieces, treasure).
+
+## 2026-11-14: slice 2, modifiers that fit, in plain words (Opus 5.5)
+
+- **Class fixes** (mods.ts): CHARGE SPEED (was QUICK HOLD) rolls only on `HELD_KITS` (the three bows, the
+  greatsword, the staff); no SWEEP on a Ranger's bow. Old pieces keep what they have, and it still works
+  (a sword's hold does charge faster), so `modFits` doesn't call it "no use to you".
+- **SPELL POWER lifts every spell**: held ones as before (castHold), and a Mage's tap spark now too
+  (sim/hero.ts `currentSwing`, one line); the card's HIT row counts it.
+- **Names**: CHARGE SPEED, CRIT CHANCE, STAMINA RECOVERY (the hero sheet's own word, not the spec's
+  STAMINA REFILL), DODGE RECHARGE, SKILL RECHARGE. Every modifier has a line now, under 45 characters
+  for every class. Lore keeper then line editor, one call each (as general agents reading their
+  `.claude/agents` files). Taken: DAMAGE, REACH, KNOCKBACK, CRIT, BLOCK and HEALTH lines reworded, the
+  legs and Cole words below. Not taken: the lore keeper's "relics only recharge at the church", since
+  SKILL RECHARGE does shorten a relic's cooldown in the fight (sim/hero.ts), so its line stays; the line
+  editor's "spells cost less", since only a Mage rolls CHEAPER SPELLS.
+- **The card head**: tier chip, then `LV 7 +2`, then the name without its plus.
+- **The compare** already says the change in the fight's own numbers, old to new, green or red (HIT 12
+  to 13, CRIT CHANCE 5% to 11%), never a point total. Kept as it is.
+- Approved words for later slices: LEGS; LEATHER TROUSERS, MAIL SKIRT, GREAVES; "Modifiers only. Your
+  body piece sets your weight."; "Nothing on your legs."; at Cole's KEEP A LOOK, WEAR AS IS, "Looks only.
+  What you wear still does the fighting.", "Miss it, do you? Hand me something plain and I'll make it
+  match.", "There. Nobody'll know it's not the real thing.", "Nothing to keep yet. Wear a piece with its
+  own look first." Lore keeper's notes for slice 5: Cole's looks are paint and stitching, and a kept look
+  from hungry gear is not hungry gear (no Want, Tobin doesn't care).
+- tests/gearmods.test.ts; tests/fence.test.ts's 2026-11-05 words moved to these. Shots:
+  scripts/gearlevel-look.cjs (the pack, a PRE-WAR LV 7 +2 card, a TOUCHED LV 9 ring).

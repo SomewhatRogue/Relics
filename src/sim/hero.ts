@@ -52,9 +52,11 @@ export function currentSwing(h: Hero): Swing {
   // Modifiers: how well (shared/gear.ts).
   // FINISHER: the last blow of the combo (shared/mods.ts); SWEEP widens a swung arc, never a thrust or a shot.
   const fin = !h.heavy && h.combo === w.combo.length - 1 && w.combo.length >= 2 ? g.finisher : 0, wide = !s.thrust && !s.shot && s.arc > 0 ? g.arc : 0;
-  if (!g.damage && !g.quick && !g.reach && !g.knock && !fin && !wide && fedMult(h) === 1) return s;
+  // SPELL POWER lifts every spell (docs/design/gear-levels.md section 5): a held one in castHold (room.ts), a Mage's tap spark here.
+  const sp = w.cls === 'MAGE' && s.shot && !s.spell ? g.spell : 0;
+  if (!g.damage && !g.quick && !g.reach && !g.knock && !fin && !wide && !sp && fedMult(h) === 1) return s;
   const fed = fedMult(h);
-  return { ...s, dmg: Math.round(s.dmg * (1 + g.damage) * (1 + fin) * fed), windup: s.windup * (1 - g.quick), recover: s.recover * (1 - g.quick), range: s.range * (1 + g.reach), knock: s.knock * (1 + g.knock), arc: Math.min(360, s.arc * (1 + wide)) };
+  return { ...s, dmg: Math.round(s.dmg * (1 + g.damage) * (1 + fin) * (1 + sp) * fed), windup: s.windup * (1 - g.quick), recover: s.recover * (1 - g.quick), range: s.range * (1 + g.reach), knock: s.knock * (1 + g.knock), arc: Math.min(360, s.arc * (1 + wide)) };
 }
 
 const swingTime = (s: Swing) => s.windup + s.active + s.recover;

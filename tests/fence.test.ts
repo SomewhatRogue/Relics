@@ -152,9 +152,10 @@ describe('Nettle, under the table', () => {
 describe("the lore keeper's fixes (2026-11-05)", () => {
   it('names and words', async () => {
     const { MODS, MOD_TEXT, costText } = await import('../src/shared/tuning');
-    expect([MODS.draw.name, MOD_TEXT.draw]).toEqual(['QUICK HOLD', 'held attacks and bow draws build faster']);
-    expect([MODS.thrift.name, MOD_TEXT.thrift]).toEqual(['CHEAPER SPELLS', 'held spells cost less magic']);
-    expect(MOD_TEXT.crit).toBe('chance a hit does 50% more damage');
+    // Renamed by the gear-levels spec (2026-11-14, docs/decisions/gear.md), through the lore keeper and line editor again.
+    expect([MODS.draw.name, MOD_TEXT.draw]).toEqual(['CHARGE SPEED', 'held attacks and bow draws charge faster']);
+    expect([MODS.thrift.name, MOD_TEXT.thrift]).toEqual(['CHEAPER SPELLS', 'spells cost less magic']);
+    expect(MOD_TEXT.crit).toBe('more hits crit, for 50% more damage');
     expect(costText({ id: 'winded', v: 0.12 }, 'MAGE')).toBe('Magic refills 12% slower.');
     expect(costText({ id: 'winded', v: 0.12 }, 'RANGER')).toBe('Stamina refills 12% slower.');
     expect(costText({ id: 'slow', v: 0.08 })).toBe('You move 8% slower.');

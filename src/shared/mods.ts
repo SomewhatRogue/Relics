@@ -33,30 +33,34 @@ export const MODS: Record<ModId, { name: string; unit: '%' | 's' | ''; per: numb
   quick: { name: 'QUICKNESS', unit: '%', per: 1 },
   reach: { name: 'REACH', unit: '%', per: 0.8 },
   arc: { name: 'SWEEP', unit: '%', per: 0.6 },
-  draw: { name: 'QUICK HOLD', unit: '%', per: 0.67 },
+  draw: { name: 'CHARGE SPEED', unit: '%', per: 0.67 },
   finisher: { name: 'FINISHER', unit: '%', per: 0.5 },
   knock: { name: 'KNOCKBACK', unit: '%', per: 0.4 },
   backstab: { name: 'BACKSTAB', unit: '%', per: 0.4 },
-  crit: { name: 'CRIT', unit: '%', per: 1.5 },
+  crit: { name: 'CRIT CHANCE', unit: '%', per: 1.5 },
   guard: { name: 'BLOCK', unit: '%', per: 0.67 },
   mending: { name: 'HEALING', unit: '%', per: 0.8 },
   spell: { name: 'SPELL POWER', unit: '%', per: 0.8 },
   thrift: { name: 'CHEAPER SPELLS', unit: '%', per: 1 },
   health: { name: 'HEALTH', unit: '', per: 0.6 },
   tough: { name: 'TOUGHNESS', unit: '%', per: 1 },
-  breath: { name: 'STAMINA', unit: '%', per: 0.5 },
+  breath: { name: 'STAMINA RECOVERY', unit: '%', per: 0.5 },
   foot: { name: 'SPEED', unit: '%', per: 1 },
-  dodge: { name: 'DODGE', unit: '%', per: 0.6 },
-  focus: { name: 'RECHARGE', unit: '%', per: 0.8 },
+  dodge: { name: 'DODGE RECHARGE', unit: '%', per: 0.6 },
+  focus: { name: 'SKILL RECHARGE', unit: '%', per: 0.8 },
 };
-/** What each modifier does, after its name and value on the card ('' when the name says it). */
+/**
+ * What each modifier does, after its name and value on the card: one short line saying when it helps
+ * (docs/design/gear-levels.md section 5; tests/gearmods.test.ts holds every line under 45 characters).
+ */
 export const MOD_TEXT: Record<ModId, string> = {
-  damage: 'all hits, shots and spells', quick: 'faster swings and casts', reach: 'longer reach and range', arc: 'wider swings',
-  draw: 'held attacks and bow draws build faster', finisher: 'the last blow of a combo hits harder', knock: 'knocks goblins further',
-  backstab: 'more damage from behind', crit: 'chance a hit does 50% more damage',
-  guard: 'less damage through a block, cheaper blocks', mending: 'bigger heals', spell: 'held spells hit harder',
-  thrift: 'held spells cost less magic', health: '', tough: 'less damage taken', breath: 'refills faster', foot: 'move faster',
-  dodge: 'dodge recharges faster', focus: 'skill and relic recharge faster',
+  damage: 'more damage from hits, shots and spells', quick: 'faster swings and casts', reach: 'swings and shots reach further', arc: 'wider swings',
+  draw: 'held attacks and bow draws charge faster', finisher: 'the last blow of a combo hits harder', knock: 'knocks foes back further',
+  backstab: 'more damage from behind', crit: 'more hits crit, for 50% more damage',
+  guard: 'blocked hits hurt less, cost less stamina', mending: 'bigger heals', spell: 'spells hit harder',
+  thrift: 'spells cost less magic', health: 'a bigger health bar', tough: 'less damage taken',
+  breath: 'stamina comes back faster', foot: 'move faster', dodge: 'your dodge comes back sooner',
+  focus: 'your skill and relic come back sooner',
 };
 /** Most a full set can stack, so gear never breaks the fight. */
 export const CAPS: Partial<Record<ModId, number>> = {
@@ -74,10 +78,20 @@ export const CAPS: Partial<Record<ModId, number>> = {
 export const PER_MOD: Record<Tier, number> = { plain: 0, fine: 13, forged: 8, tolmouth: 10, touched: 29 / 3, turning: 12, hungry: 32 / 3 };
 export const MOD_COUNT: Record<Tier, number> = { plain: 0, fine: 1, forged: 2, tolmouth: 2, touched: 3, turning: 3, hungry: 3 };
 
-/** What a weapon's own job is: the modifiers that make this kit better at it. */
+/**
+ * Kits whose held attack is their job (Kyle, 2026-11-14: "enhancements make sense"): the bows' draws, the
+ * greatsword's overhead, the staff's spell. Only these roll CHARGE SPEED; elsewhere QUICKNESS does the work.
+ */
+export const HELD_KITS: WeaponId[] = ['longbow', 'shortbow', 'crossbow', 'greatsword', 'staff'];
+
+/**
+ * What a weapon's own job is: the modifiers that make this kit better at it. A bow's job is the shot, so
+ * no SWEEP on a bow though one step of its combo is a close swing.
+ */
 export function weaponMods(kit: WeaponId): ModId[] {
-  const k = WEAPONS[kit], cls = k.cls, g = guardOf(k), out: ModId[] = ['quick', 'reach', 'draw'];
-  if (k.combo.some((s) => !s.thrust && !s.shot && s.arc >= 100)) out.push('arc');
+  const k = WEAPONS[kit], cls = k.cls, g = guardOf(k), out: ModId[] = ['quick', 'reach'];
+  if (HELD_KITS.includes(kit)) out.push('draw');
+  if (cls !== 'RANGER' && k.combo.some((s) => !s.thrust && !s.shot && s.arc >= 100)) out.push('arc');
   if (k.combo.length >= 2) out.push('finisher');
   if (cls === 'WARRIOR' || cls === 'HEALER' || k.breaker || kit === 'crossbow') out.push('knock');
   if (k.backstab) out.push('backstab');
