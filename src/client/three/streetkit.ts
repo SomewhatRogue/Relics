@@ -66,15 +66,16 @@ export function streetFloor(m: THREE.MeshLambertMaterial, w: number, h: number):
  * The new look's zoom. The kit and the figures are 32 px a tile, so under `?street` a tile is always 32 render pixels
  * at your hero (one art pixel to one render pixel) and the zoom is how many screen pixels each render pixel takes,
  * always a whole number: a tile is 32, 64, 96 ... screen pixels, never between, so no pixel is drawn wider than its
- * neighbour. Aimed at about `STREET_TILE` CSS pixels a tile (an upright phone sees about 12 tiles across, a 1440
- * laptop 22); `&zoom=N` in the address picks the step outright.
+ * neighbour. Aimed at about `STREET_TILE` CSS pixels a tile: in town closer (Kyle's pick, 4 screen pixels an art
+ * pixel on a 3x phone and a retina laptop), on a job as before. `&zoom=N` in the address picks the step outright.
  */
 export const STREET_PPU = 32;
-const STREET_TILE = { tall: 30, wide: 54 };
+const STREET_TILE = { tall: 30, wide: 54 }, TOWN_TILE = { tall: 42, wide: 64 };
 const ZOOM_ASK = typeof location !== 'undefined' ? Number(new URLSearchParams(location.search).get('zoom')) || 0 : 0;
-export function streetScale(dpr: number, cssW: number, cssH: number): number {
+export function streetScale(dpr: number, cssW: number, cssH: number, town: boolean): number {
   if (ZOOM_ASK) return Math.max(1, Math.round(ZOOM_ASK));
-  return Math.max(1, Math.round(((cssH > cssW ? STREET_TILE.tall : STREET_TILE.wide) * dpr) / STREET_PPU));
+  const aim = town ? TOWN_TILE : STREET_TILE;
+  return Math.max(1, Math.round(((cssH > cssW ? aim.tall : aim.wide) * dpr) / STREET_PPU));
 }
 
 /** Where your hero is on the render (x, y from the bottom) and the see-through hole's radius, in render pixels. */

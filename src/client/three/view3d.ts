@@ -83,6 +83,8 @@ export class View3D {
   private perf = new Perf(perfOn());
   private dpr = 1;
   private S = 1;
+  /** In town (the new look zooms closer there: streetkit.ts `streetScale`). */
+  private town = false;
   private heroAt: [number, number] | null = null;
   private calls = 0;
   private tris = 0;
@@ -140,7 +142,7 @@ export class View3D {
     this.dpr = Math.min(devicePixelRatio || 1, 3);
     const Dw = innerWidth * this.dpr, Dh = innerHeight * this.dpr;
     // (The new look: a tile 32 render pixels, each a whole number of screen pixels: streetkit.ts `streetScale`.)
-    const S = (this.S = STREET ? streetScale(this.dpr, innerWidth, innerHeight) : Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
+    const S = (this.S = STREET ? streetScale(this.dpr, innerWidth, innerHeight, this.town) : Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
     const W = Math.ceil(Dw / S), H = Math.ceil(Dh / S);
     // As much floor as the pixel scene shows (its tiles across times down, scene.ts), so a figure stands
     // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.
@@ -190,7 +192,7 @@ export class View3D {
       // The new look's test street: the see-through hole round your hero in a building that hides them (streetkit.ts).
       if (STREET) {
         const [sx, sy] = this.view.px(hx, 0.9, hy);
-        HOLE.value.set(sx, this.view.H - sy, this.view.ppu * 2.2);
+        HOLE.value.set(sx, this.view.H - sy, this.view.ppu * 3.5);
       }
       // A cutscene's point of interest (the Stoker coming): the camera eases there instead.
       if (f) this.view.follow(map, f.x, f.y, f.snap ? 99 : dt * 0.36, fx.shake);
@@ -306,6 +308,8 @@ export class View3D {
 
   private setMap(map: GameMap): void {
     this.sky?.build(map);
+    const town = map.name === 'WICKHOLD';
+    if (STREET && town !== this.town) (this.town = town), this.resize();
     if (this.ground) this.scene.remove(this.ground.group), this.ground.dispose();
     this.buildings.clear();
     this.people.clear();

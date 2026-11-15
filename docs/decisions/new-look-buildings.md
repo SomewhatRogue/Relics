@@ -101,3 +101,11 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   as a whole number of render pixels: 16 px sprites at 2, so 32 a tile like the kit. For the characters chat: a 32 px
   a tile sheet should be drawn at 1 (k = ppu / 32).
   (Claude Opus 5.5)
+
+## 2026-11-15: town at zoom 4, a bigger hole
+
+- Kyle: `&zoom=4` is solid for town. Town now aims at 42 CSS px a tile upright and 64 lying down, so a 3x phone and a
+  retina laptop both land on 4 screen pixels an art pixel; jobs keep the earlier aim. view3d.ts re-sizes when you go
+  between town and a job (`streetScale(..., town)`).
+- The see-through hole: 3.5 tiles across your hero, was 2.2.
+  (Claude Opus 5.5)
