@@ -183,7 +183,12 @@ export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: numb
  * its edge is a wall; from on top you can step off it (a drop). Ramps (stairs, a slope) overlap its
  * edge: inside a ramp you go freely between the levels.
  */
-export interface Ledge { x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood' }
+export interface Ledge {
+  x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood';
+  /** The level its top stands at (default 1). Ledges stack: you stand on the highest one under you, and a ramp joins
+   *  the levels either side of its edge (the new town's three levels: docs/design/town-layout.md). */
+  lv?: number;
+}
 /** A way out of a run room, when there's more than one: the road it leads to. */
 export interface Road {
   area: Area; road: 'high' | 'low'; label: string; /** Layout 3: the side of the room it leaves by (else the top). */ side?: 'N' | 'E' | 'S' | 'W';
@@ -333,6 +338,9 @@ export interface GameMap {
   npcs?: Npc[];
   /** Raised ground. */
   ledges?: Ledge[];
+  /** Anyone set down well inside a raised level stands on it (the new town, where most of it is raised); without it
+   *  they're pushed out to its edge, as on a job's map. */
+  settle?: boolean;
   /** A fork: two ways out, each leading to its own next room (the party picks). */
   roads?: Road[];
   /** Water: deep (nobody wades it; shots fly over) or shallow (everyone in it slows to WADE). */
@@ -398,10 +406,15 @@ export const inShallows = (x: number, y: number) => !MAP.drained && inWater(x, y
 export const MUD_SLOW = 0.55;
 export const wadeAt = (x: number, y: number) => (inShallows(x, y) ? WADE : MAP.drained && inWater(x, y) ? MUD_SLOW : 1) * (MAP.mud?.some((c) => Math.hypot(c.x - x, c.y - y) <= c.r) ? MUD_SLOW : 1);
 
-export const onLedge = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h);
+const over = (l: Ledge, x: number, y: number) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h;
+export const onLedge = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => over(l, x, y));
 export const inRamp = (m: GameMap, x: number, y: number) => !!m.ledges?.some((l) => l.ramps.some((r) => inArea(r, x, y)));
-/** The level a point is at (for things placed there). */
-export const levelAt = (m: GameMap, x: number, y: number) => (onLedge(m, x, y) ? 1 : 0);
+/** The level a point is at (for things placed there): the highest ledge under it, or the ground. */
+export const levelAt = (m: GameMap, x: number, y: number) => {
+  let lv = 0;
+  for (const l of m.ledges ?? []) if (over(l, x, y)) lv = Math.max(lv, l.lv ?? 1);
+  return lv;
+};
 
 /** Which way you push to go in at a block's door (up the screen, or into a side way's side). */
 export const pushDir = (b: Block): [number, number] => (b.face === 'W' ? [-1, 0] : b.face === 'E' ? [1, 0] : b.face === 'S' ? [0, 1] : [0, -1]);
@@ -503,16 +516,24 @@ export function collide(p: { x: number; y: number }, r: number): void {
 function levels(m: GameMap, p: { x: number; y: number; z?: number; dropped?: number; kvx?: number; kvy?: number }, r: number): void {
   // Things with no footing (a shot, a thrown javelin, a point being tested) pass over ledges.
   if (!('z' in p)) return;
-  const up = onLedge(m, p.x, p.y);
+  const at = levelAt(m, p.x, p.y), z = p.z ?? 0;
   if (inRamp(m, p.x, p.y)) {
-    if ('z' in p) p.z = up ? 1 : 0;
+    p.z = at;
     return;
   }
-  if ((p.z ?? 0) >= 1) {
-    if (!up) (p.z = 0), (p.dropped = Math.hypot(p.kvx ?? 0, p.kvy ?? 0));
+  // Walked off an edge: down to whatever is below.
+  if (z > at) {
+    p.z = at;
+    p.dropped = Math.hypot(p.kvx ?? 0, p.kvy ?? 0);
     return;
   }
-  for (const l of m.ledges!) box(p, r, l);
+  // Set down well inside a raised level (arriving, coming out of a door), on a map that allows it: stand on it.
+  if (m.settle && z < at && [[r, 0], [-r, 0], [0, r], [0, -r]].every(([dx, dy]) => levelAt(m, p.x + dx * 1.3, p.y + dy * 1.3) >= at)) {
+    p.z = at;
+    return;
+  }
+  // Anything higher than where you stand is a wall.
+  for (const l of m.ledges!) if ((l.lv ?? 1) > z) box(p, r, l);
 }
 
 /** Push a circle out of a box. */

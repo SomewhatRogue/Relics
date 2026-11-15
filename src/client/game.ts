@@ -32,7 +32,7 @@ import { dueLevels, jobXp } from '../shared/pace';
 import { Rng } from '../shared/rng';
 import { CHAPTER_1, rewardMult, settle, type WorldState } from '../shared/story';
 import { wayGot, wayLine } from '../shared/waypay';
-import { SPOT_REACH, TOWN_PROPS, housesFor, townMap, townSpots, type SpotId } from '../shared/town';
+import { SPOT_REACH, housesFor, townMap, townPoint, townProps, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
 import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, raise, dropLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
@@ -519,7 +519,7 @@ export class Game {
   }
 
   private townRoom(): ArenaRoom {
-    return Object.assign(new ArenaRoom(this.world.day, { map: townMap(this.world), furniture: TOWN_PROPS }), { dread: SET_BACK });
+    return Object.assign(new ArenaRoom(this.world.day, { map: townMap(this.world), furniture: townProps() }), { dread: SET_BACK });
   }
 
   enterYard(): void {
@@ -577,7 +577,9 @@ export class Game {
   enterPastime(id: PastimeId): void {
     if (this.mode !== 'town' || this.room.map.name !== placeOf(id)) return;
     const h = this.hero, sp = spotOf(id);
-    Object.assign(h, { x: sp.seat[0], y: sp.seat[1], fx: sp.face[0], fy: sp.face[1], moving: false });
+    // (Out in the street, where the seat stands in the town being played: the new town moves it, town-layout.md.)
+    const [sx, sy] = this.room.map.name === 'WICKHOLD' ? townPoint(sp.seat[0], sp.seat[1]) : [sp.seat[0], sp.seat[1]];
+    Object.assign(h, { x: sx, y: sy, fx: sp.face[0], fy: sp.face[1], moving: false });
     this.pastime = id;
     this.mode = 'pastime';
   }

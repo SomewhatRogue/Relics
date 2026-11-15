@@ -12,7 +12,7 @@ import { ROOF_UP3 } from '../foedraw';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero, Hound } from '../../sim/types';
 import { GRAB } from '../../shared/tuning';
-import { npcAt } from '../../shared/arena';
+import { levelAt, npcAt } from '../../shared/arena';
 import { SPOT_REACH } from '../../shared/town';
 import { drawHero } from '../actors';
 import { asleep, drawHeld } from '../foes';
@@ -132,6 +132,6 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   if (map.life) for (const b of lifeFigs(map, f.now, others.length ? [...room.heroes, ...others] : room.heroes)) f.put('lf' + b.key, b.x, b.up, b.y, b.draw, { pool: 0 });
   (map.npcs ?? []).forEach((n, i) => {
     const at = npcAt(n, t), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
-    f.put('n' + i + n.name, at.x, 0, at.y, (c, px, py) => drawNpc(c, n, px, py, near && !n.mute, at.fx, !!n.path && !at.still, at.x), { pool: n.pose ? 0 : 0.3, bias: n.pose ? -0.3 : 0 });
+    f.put('n' + i + n.name, at.x, map.ledges ? lift(levelAt(map, at.x, at.y)) : 0, at.y, (c, px, py) => drawNpc(c, n, px, py, near && !n.mute, at.fx, !!n.path && !at.still, at.x), { pool: n.pose ? 0 : 0.3, bias: n.pose ? -0.3 : 0 });
   });
 }

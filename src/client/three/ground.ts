@@ -28,6 +28,8 @@ import { DEEP, levelAt, waterField } from '../waterfield';
 import { addBrazier } from './brazier3d';
 import { palisadeRun } from './palisade3d';
 import { addMounds } from './mounds3d';
+import { levelAt as standAt } from '../../shared/arena';
+import { stackLedges, stacked } from './layoutledges';
 
 /** How high the back wall stands, and a ledge (tiles). */
 export const WALL_H = 2.4;
@@ -121,7 +123,9 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   const kerb = cuts.filter((g) => g.side === 'S').map((g): [number, number] => [g.a.x, g.a.x + g.a.w]);
   for (const [x0, x1] of runs(-0.9, m.w + 0.9, kerb)) B.b((x0 + x1) / 2, 0, m.h + 0.3, x1 - x0, 0.25, 0.6, body);
   for (const [x0, x1] of kerb) for (const x of [x0, x1]) B.b(x, 0, m.h + 0.3, 0.3, 0.9, 0.3, 0x3a3640);
-  for (const l of m.ledges ?? []) {
+  // The new town's stacked levels: tops in the floor's material, stone faces, steps (layoutledges.ts).
+  if (stacked(m)) stackLedges(B, group, m, floorMat, LEDGE_H);
+  else for (const l of m.ledges ?? []) {
     B.b(l.x + l.w / 2, 0, l.y + l.h / 2, l.w, LEDGE_H, l.h, l.kind === 'wood' ? 0x5a3d22 : 0x3a3640);
     for (const rp of l.ramps) B.b(rp.x + rp.w / 2, 0, rp.y + rp.h / 2, rp.w, LEDGE_H * 0.45, rp.h, 0x46424e);
   }
@@ -133,8 +137,11 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     const n = fires.length;
     // A reed or a stump standing in deep water: its foot goes down to the water.
     if (levelAt(wf, o.x, o.y) === DEEP) B.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
+    // (On a stacked level, lifted to stand on it, its flames with it: layoutledges.ts.)
+    const k = B.mark(), up = m.ledges ? standAt(m, o.x, o.y) * LEDGE_H : 0;
     addRound(B, o, fires, r);
-    if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8, c: [1, 0.72, 0.42], f: 9 } });
+    if (up) B.raise(k, up), fires.slice(n).forEach((f) => (f[1] += up));
+    if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6 + up, z: o.y, r: 4.5, i: 0.8, c: [1, 0.72, 0.42], f: 9 } });
   }
   for (const t of m.torches) {
     // A cottage's fire is a torch in its hearth's mouth (shared/inside.ts): its flames on the hearth's floor.
@@ -150,10 +157,20 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     lamps.push({ x: t.x, y: t.y, fires: [[t.x, y, z, 0.7]], light: { x: t.x, y: y + 0.4, z: z + 0.5, r: 8, i: 1.1, c: [1, 0.66, 0.36], f: 13 } });
   }
   // Braziers: a bowl on legs, its coals, its flames and light (brazier3d.ts).
-  for (const b of m.braziers) addBrazier(B, b, lamps);
+  for (const b of m.braziers) {
+    const k = B.mark(), n = lamps.length, up = m.ledges ? standAt(m, b.x, b.y) * LEDGE_H : 0;
+    addBrazier(B, b, lamps);
+    if (up) B.raise(k, up), lamps.slice(n).forEach((l) => (l.fires.forEach((f) => (f[1] += up)), l.light && (l.light.y += up)));
+  }
   // Fresh graves and the barrows: heaped earth and the marker standing (mounds3d.ts).
   addMounds(B, m, r);
   for (const o of m.rounds) {
+    const n = lights.length, k = lamps.length;
+    lightsOf(o);
+    const up = m.ledges ? standAt(m, o.x, o.y) * LEDGE_H : 0;
+    if (up) lights.slice(n).forEach((l) => (l.y += up)), lamps.slice(k).forEach((l) => l.light && (l.light.y += up));
+  }
+  function lightsOf(o: GameMap['rounds'][number]): void {
     if (o.kind === 'cookfire') lights.push({ x: o.x, y: 1.6, z: o.y, r: 4.5, i: 0.8 * tk, c: [1, 0.72, 0.42], f: 9 });
     // The Last Lantern never goes out (but its light, like any fire's, fades under the sun: lamps3d.ts).
     if (o.kind === 'dais') lamps.push({ x: o.x, y: o.y, always: true, fires: [], light: { x: o.x, y: LANTERN_Y, z: o.y, r: 12, i: 1.3, c: [1, 0.78, 0.45], f: 3 } });

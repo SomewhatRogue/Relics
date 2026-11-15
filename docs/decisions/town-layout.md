@@ -17,3 +17,38 @@ The chat re-laying out Wickhold (docs/design/town-layout.md; new-look.md "The to
   you'd rather; say so in your log. Art: townsfolk lifted to their level in cards3d.ts, one line, same.
 
 Claude Opus 5.5
+
+## 2026-11-15: built behind `?street` (Kyle: "approved, get it done!")
+
+- Kyle's three open calls went to my picks, unanswered: Kirkhill 1.5 tiles over the square (LEDGE_H, unchanged);
+  arriving on the square's south side (a new hero still comes in at the north gate, as the arrival scene has it);
+  the training yard kept, and Perrin's garden moved into it.
+- **Levels** (shared/arena.ts): `Ledge.lv` (stacked, default 1), `levelAt` the highest under you, `levels()` walls
+  you off anything higher, drops you off an edge, ramps join the levels either side. `GameMap.settle`: anyone set down
+  well inside a raised level stands on it (the new town only; job maps still push you out). Old maps unchanged (the
+  full suite). tests/layout.test.ts.
+- **Drawn** (three/layoutledges.ts, new): each level's top in the floor's own material at its height, coursed stone
+  faces where the ground beside is lower, ramps as flights of steps. Small edits, logged here: ground.ts (stacked
+  ledges; rounds, braziers and their lights lifted to their level; `Boxes.mark`/`raise` in boxes.ts),
+  buildings3d.ts (a building lifted to its level), Art's cards3d.ts (townsfolk lifted), water3d.ts (the floor's
+  cut for water undoes the street cobbles' texture repeat: the millpond was missing under `?street`, old town too).
+- **The map**: shared/layoutplan.ts (buildings with faces, levels, steps, walls, fences on the drops, the pond, soil,
+  graves), layoutmove.ts (thirteen districts of today's town and where each now stands; the Rat's turned about;
+  a few things set by hand; new rounds for the guards, the carter, the washerwoman, the digger, the ducks),
+  layouttown.ts (the map from today's map for the same world). town.ts: `LAYOUT.on`, `townMap`/`townSpots`
+  ask it, `townProps()`, `townPoint()`; old body is `oldTown`. main.ts sets `LAYOUT.on = STREET`; game.ts uses
+  `townProps()` and the pastime seat via `townPoint` out in the street.
+- Tests: every spot, door and person standing still reached from where you arrive, up and down the steps, in three
+  world states; every door and person of today's town kept; rounds clear of buildings. Full suite 1955 passed.
+- **For others:**
+  - Buildings and camera: every block has its `face`; the kit still puts fronts south. The swing's 45 degree cap
+    means north-facing fronts (the Drowned Rat, the lodge, half of Rescue Row) are never seen front-on; the camera
+    also looks at y 0.8 whatever level the hero stands on. Yours to decide.
+  - Town quests: runnerpath.ts walks round buildings but not levels (the runner can cut across a retaining wall in
+    the new town); the arrival scene still brings a new hero in at the north gate, which is fine.
+  - Lived-in world: folkwork.ts's poses compare with ANVIL, WASHTUB, CHOPBLOCK at today's spots; their districts
+    move by translation only, so the smith and the woodcutter keep their poses; the washerwoman's new round is longer.
+  - TRAINERS' "where" lines still say the church is in the north-west (it's north, on Kirkhill): words for Kyle.
+- Tools: `scripts/town-look.cjs` (walks the chase camera's views; VIEWS=1,2 LAPTOP=1), `scripts/townsketch.py`.
+
+Claude Opus 5.5

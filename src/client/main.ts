@@ -147,7 +147,10 @@ import { runner } from './runner';
 import { toast } from './partytoast';
 import { QUESTW } from './questwords';
 import { echoes } from './runnerecho';
-import { townSpots } from '../shared/town';
+import { LAYOUT, townSpots } from '../shared/town';
+import { STREET } from './three/streetkit';
+// The new town behind `?street` (docs/design/town-layout.md): set before the town is first built.
+LAYOUT.on = STREET;
 import { GearHint } from './gearhint';
 import './goal.css';
 import { UnlockFlash } from './unlockflash';

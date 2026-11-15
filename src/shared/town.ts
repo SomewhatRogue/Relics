@@ -20,6 +20,10 @@ import { publicWorks } from './publicworks.js';
 import { BUTTS, MILLPOND } from './pastimes.js';
 import { PLINTH } from './statue.js';
 import { STREET_THINGS, TOWN_LIFE, streetFolk } from './townlife.js';
+import { layoutPoint, layoutProps, layoutSpots, layoutTown } from './layouttown.js';
+
+/** The new town (docs/design/town-layout.md), on for a screen that asks for it (`?street`): set before the town is built. */
+export const LAYOUT = { on: false };
 
 /** What talking to someone (or using a spot) opens. */
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
@@ -56,7 +60,8 @@ export const SPOT_REACH = 1.6;
 
 const marketIn = (w: WorldState) => w.flags['north-fields'] === 'refugees';
 /** The spots out in the open today (the market is a person once the traders are in; the rubble goes). */
-export const townSpots = (w: WorldState) => SPOTS.filter((s) => (s.id !== 'market' || !marketIn(w)) && (s.key !== 'oldquarter' || !workDone(w, 'oldquarter')));
+export const townSpots = (w: WorldState) => (LAYOUT.on ? layoutSpots(oldSpots(w)) : oldSpots(w));
+const oldSpots = (w: WorldState) => SPOTS.filter((s) => (s.id !== 'market' || !marketIn(w)) && (s.key !== 'oldquarter' || !workDone(w, 'oldquarter')));
 
 /** Up to eight houses on Rescue Row: one per two people home. */
 export const HOUSES = [[34, 30.5], [38, 30.5], [42, 30.5], [46, 30.5], [34, 35], [38, 35], [42, 35], [46, 35]] as const;
@@ -80,7 +85,14 @@ export const TOWN_PROPS: { kind: PropKind; x: number; y: number }[] = [
   { kind: 'barrel', x: 38.8, y: 7.6 }, { kind: 'crate', x: 30.3, y: 7.5 }, { kind: 'crate', x: 10.6, y: 16.9 },
 ];
 
-export function townMap(w: WorldState): GameMap {
+/** Wickhold: today's, or the new town behind `?street`. */
+export const townMap = (w: WorldState): GameMap => (LAYOUT.on ? layoutTown(w, oldTown(w)) : oldTown(w));
+/** The barrels and crates about the streets, where they stand in the town being played. */
+export const townProps = () => (LAYOUT.on ? layoutProps(TOWN_PROPS) : TOWN_PROPS);
+/** A point of today's town (a pastime's seat) where it stands in the town being played. */
+export const townPoint = (x: number, y: number): [number, number] => (LAYOUT.on ? layoutPoint(x, y) : [x, y]);
+
+export function oldTown(w: WorldState): GameMap {
   const quarter = workDone(w, 'oldquarter'), watch = workDone(w, 'watch');
   const blocks: Block[] = [
     { x: 3, y: 3, w: 8, h: 4.5, kind: 'church', label: 'CHURCH', door: 'church' },

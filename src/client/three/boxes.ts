@@ -39,6 +39,16 @@ export class Boxes {
     return this.pos.length / 108;
   }
 
+  /** Where the boxes added from now on begin (for `raise`). */
+  mark(): number {
+    return this.pos.length;
+  }
+
+  /** Lift everything added since `mark` by `dy` (a thing standing on a raised level: three/layoutledges.ts). */
+  raise(from: number, dy: number): void {
+    for (let i = from + 1; i < this.pos.length; i += 3) this.pos[i] += dy;
+  }
+
   /** A box by its centre, size, colour and turn (y, then x, then z). */
   c(x: number, y: number, z: number, w: number, h: number, d: number, hex: number, ry = 0, rx = 0, rz = 0): void {
     this.put(BOX, x, y, z, w, h, d, hex, ry, rx, rz);

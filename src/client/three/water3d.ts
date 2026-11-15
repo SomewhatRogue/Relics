@@ -124,8 +124,10 @@ export function buildWater(m: GameMap, floor: THREE.MeshLambertMaterial, bed: TH
   const tex = dataTexture(f), size = new THREE.Vector2(m.w, m.h), time = { value: 0 };
   // No floor where the water is: it's below.
   also(floor, (sh) => {
+    // (Over the floor's own UVs: the street's cobbles repeat their texture, streetkit.ts, so undo the repeat.)
     sh.uniforms.uWater = { value: tex };
-    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'uniform sampler2D uWater;\nvoid main() {\nif (texture2D(uWater, vec2(vMapUv.x, 1.0 - vMapUv.y)).r > 0.25) discard;');
+    sh.uniforms.uRep = { value: floor.map?.repeat ?? new THREE.Vector2(1, 1) };
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'uniform sampler2D uWater; uniform vec2 uRep;\nvoid main() {\nif (texture2D(uWater, vec2(vMapUv.x / uRep.x, 1.0 - vMapUv.y / uRep.y)).r > 0.25) discard;');
   });
   floor.customProgramCacheKey = () => 'floorcut';
   floor.needsUpdate = true;
