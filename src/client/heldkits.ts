@@ -17,7 +17,7 @@ const KITS = new Set<Hero['weapon']>(['rapier', 'poisoner', 'censer', 'flail']);
 
 /** How long a blade's charge glow runs along it (0: none; a flail or a censer glows its own way). */
 export function bladeLength(w: Hero['weapon']): number {
-  if (w === 'greatsword' || w === 'spear') return 17;
+  if (w === 'greatsword' || w === 'spear') return 21;
   if (w === 'daggers') return 7;
   if (w === 'rapier') return 14;
   if (w === 'poisoner') return 9;

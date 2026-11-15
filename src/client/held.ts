@@ -177,14 +177,15 @@ function inHand(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
   } else if (h.weapon === 'sword') {
     // An arming sword at the tall heroes' size (Kyle, 2026-11-13: "so small"): a gold pommel, a bound grip,
     // a broad gold cross, a blade two pixels wide with a bright edge, narrowing to its point.
-    sword(g, ox, oy, p.a, 15, 3);
+    // (Dark and gold: weapons longer, docs/design/dark-gold.md; drawing only, the reach is the room's.)
+    sword(g, ox, oy, p.a, 18, 3);
     // The edge flashes as the blow goes out.
-    if (h.act === 'attack' && h.actT >= currentSwing(h).windup && h.actT < currentSwing(h).windup + 0.08) line(c.glow, ox, oy, p.a, 4, 15, '#ffffff');
+    if (h.act === 'attack' && h.actT >= currentSwing(h).windup && h.actT < currentSwing(h).windup + 0.08) line(c.glow, ox, oy, p.a, 4, 18, '#ffffff');
   } else if (h.weapon === 'greatsword') {
-    sword(g, ox, oy, p.a, 21, 4, true);
+    sword(g, ox, oy, p.a, 25, 4, true);
   } else if (h.weapon === 'spear') {
-    line(g, ox, oy, p.a, -7, 13, '#8b6a3a');
-    line(g, ox, oy, p.a, 13, 17, '#dfe6ec', 2);
+    line(g, ox, oy, p.a, -9, 16, '#8b6a3a');
+    line(g, ox, oy, p.a, 16, 21, '#dfe6ec', 2);
   } else if (WEAPONS[h.weapon].cls === 'RANGER' && h.act === 'attack' && !currentSwing(h).shot) {
     // The Ranger's short sword, out for a quick cut.
     line(g, ox, oy, p.a, 2, 9, '#dfe6ec');
@@ -220,8 +221,8 @@ function inHand(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
     if (h.act !== 'charge') focusMotes(c, tx, ty, el);
     flourish(c, h, tx, ty, p.a);
   } else if (h.weapon === 'staff') {
-    line(g, ox, oy, p.a, -6, 12, '#6b4a2b');
-    const tx = ox + Math.cos(p.a) * 13 * HS, ty = oy + Math.sin(p.a) * 13 * HS, r = 1 + Math.round(p.pull * 4);
+    line(g, ox, oy, p.a, -8, 15, '#6b4a2b');
+    const tx = ox + Math.cos(p.a) * 16 * HS, ty = oy + Math.sin(p.a) * 16 * HS, r = 1 + Math.round(p.pull * 4);
     c.glow.fillStyle = el;
     c.glow.globalAlpha = 0.7 + 0.3 * Math.sin(c.now * 9);
     c.glow.fillRect(Math.round(tx - r / 2), Math.round(ty - r / 2), r + 1, r + 1);

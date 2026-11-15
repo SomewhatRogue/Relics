@@ -7,9 +7,10 @@
 import { art, skin, type LookDef } from './lookkit';
 
 import { C_SIDE_ARM, C_SIDE_BODY, C_SIDE_CAP, C_SIDE_COIF, C_SIDE_NECK, F_SIDE_ARM, F_SIDE_BODY, F_SIDE_HEAD, M_SIDE_ARM, M_SIDE_BEARD, M_SIDE_BODY, M_SIDE_FROST, M_SIDE_HAT } from './herosides3';
+// (Dark and gold, docs/design/dark-gold.md: the brim out to the full width and a feather from the band, Q and q.)
 const HAT = [
-  '...........X......', '..........XX......', '.........XxX......', '........XXXX......', '........XXkXX.....', '.......XXXXXX.....',
-  '.......XXXxXXX....', '......XXxXXXX.....', '.....XTTkkTTX.....', '..xXXXXXXXXXXXXx..', '.xXXxxxxxxxxxxXXx.',
+  '...........X......', '..........XX......', '.........XxX......', '........XXXX...q..', '........XXkXX.qQ..', '.......XXXXXXqQ...',
+  '.......XXXxXXQQ...', '......XXxXXXQQ....', '.....XTTkkTTQ.....', '.xXXXXXXXXXXXXXXx.', 'xXXXxxxxxxxxxxXXXx',
 ];
 // Trimmed cuffs, hands at the belt, a pouch and a tassel, folds down the robe, a gold-stitched hem. Row 0 is the look's own.
 const M_BODY = [
@@ -32,14 +33,14 @@ const mage = (face: string[], back: string[], side: string[], pal: Record<string
 
 export const MAGE: LookDef[] = [
   // Violet hat and robe, a gold band, a long grey beard.
-  mage(BEARD, BEARD_BACK, M_SIDE_BEARD, { ...skin('fair'), X: '#4a2f6e', x: '#2e1c48', T: '#b89a4a', H: '#b0aabc', h: '#8a8498', O: '#4a2f6e', B: '#3e2760', b: '#2e1c48', K: '#b89a4a', k: '#e0c878', F: '#2a2420' }),
+  mage(BEARD, BEARD_BACK, M_SIDE_BEARD, { ...skin('fair'), X: '#22222c', x: '#14141c', T: '#c8962e', H: '#b0aabc', h: '#8a8498', O: '#3a4656', B: '#2e3a48', b: '#1e2632', K: '#c8962e', k: '#e0c070', F: '#18161a', Q: '#7a2a32', q: '#4a161c' }),
   // The ember: red hat and robe, brass, a black beard.
-  mage(BEARD, BEARD_BACK, M_SIDE_BEARD, { ...skin('tan'), X: '#7a2420', x: '#3a1210', T: '#d4a537', H: '#2a2226', h: '#141014', O: '#7a2a1e', B: '#6a1e1a', b: '#3a1210', K: '#3a1210', k: '#d4a537', F: '#2a2420' }),
+  mage(BEARD, BEARD_BACK, M_SIDE_BEARD, { ...skin('tan'), X: '#2a1210', x: '#180a08', T: '#d4a537', H: '#2a2226', h: '#141014', O: '#4e1a14', B: '#421612', b: '#2a0e0c', K: '#2a0e0c', k: '#d4a537', F: '#18120e', Q: '#141010', q: '#0a0808' }),
   // Frost: pale blue, no beard, long white hair down the back.
   mage(['.....HssSSssH.....', '.....HSESSESH.....', '.....HSSsSSSH.....', '....HhHsSSsHhH....', '....HhHSSSSHhH....', '.OOHHBBBTTBBBHHOO.'],
     ['.....HHHHHHHH.....', '.....HHhHHhHH.....', '.....HHHHHHHH.....', '....HhHHHHHHhH....', '....HHHhHHhHHH....', '.OOOHHHHHHHHHHOOO.'],
     M_SIDE_FROST,
-    { ...skin('deep'), X: '#5a7a9a', x: '#3a4a5a', T: '#cfe0ec', H: '#e8eef2', h: '#b8c4cc', O: '#6a8aaa', B: '#5a7a9a', b: '#3a4a5a', K: '#3a4a5a', k: '#cfe0ec', F: '#2a2420' }),
+    { ...skin('deep'), X: '#1e3440', x: '#12222a', T: '#c8962e', H: '#e8eef2', h: '#b8c4cc', O: '#2e4a58', B: '#264050', b: '#182a36', K: '#182a36', k: '#e0c070', F: '#141a1e', Q: '#d8d8d0', q: '#9a9a94' }),
 ];
 
 // The Healer: mail with a narrow tabard panel (Kyle, 2026-11-12: wide over the hips it read as a nappy), the
@@ -52,7 +53,8 @@ const C_BODY = [
   '...FFFF....FFFF...', '..FFFFF....FFFFF..', '..ffff......ffff..',
 ];
 const C_BACK = C_BODY.map((r) => r.replace(/[Gg]/g, 'W').replace(/k/g, 'K'));
-const MAIL = { M: '#8a9098', m: '#646a74', K: '#5a3d22', k: '#d4a537', L: '#4a4e56', F: '#2a2420', f: '#1a1612' };
+// (Dark and gold: the mail dark steel, the tabard's edge (w) in gold.)
+const MAIL = { M: '#4e545c', m: '#363b42', K: '#241a14', k: '#d4a537', L: '#262a30', F: '#18161a', f: '#100e10' };
 /** `neck`: the first body row, the coif over the neck or the neck bare. `sideHead`, `sideNeck`: the same in profile. */
 const cleric = (head: string[], back: string[], neck: string, pal: Record<string, string>, sideHead: string[], sideNeck: string): LookDef => ({
   side: { body: art([...sideHead, sideNeck, ...C_SIDE_BODY], pal), arm: art(C_SIDE_ARM, pal), eyes: [3, 11, 11] },
@@ -61,7 +63,7 @@ const cleric = (head: string[], back: string[], neck: string, pal: Record<string
   life: { tabard: pal.W }, cut: { headTo: 7, hip: 22, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] }, lift: 6,
 });
 
-const FRIAR = { ...skin('brown'), H: '#2a2020', C: '#4a3428', B: '#5a4232', b: '#3a2a20', O: '#4a3428', K: '#c8b88a', k: '#a89868', F: '#2a2420', W: '#9a7a4a' };
+const FRIAR = { ...skin('brown'), H: '#2a2020', C: '#2e221a', B: '#3a2a20', b: '#261c16', O: '#2e221a', K: '#a89868', k: '#7a6c4a', F: '#18120e', W: '#c8962e' };
 // The habit to the feet, a wooden cross on its cord, a rope belt, folds; only the feet show under it.
 const F_BODY = [
   '.CCCCCBBkBBBCCCCC.', '.OOBBBBBWBBBBBBOO.', '.OOBbBBWWWBBBbBOO.', '.OOBbBBBWBBBBbBOO.', '.OOBBBBBBBBBBBBOO.',
@@ -79,18 +81,18 @@ export const CLERIC: LookDef[] = [
   // A mail coif, a white tabard to the shin with the Lantern on it in gold.
   cleric(['......MMMMMM......', '.....MMMMMMMM.....', '.....MSsSSsSM.....', '.....MSESSESM.....', '.....MSSsSSSM.....', '.....MMSssSMM.....', '......MMMMMM......'],
     ['......MMMMMM......', '.....MMMMMMMM.....', '.....MMMMMMMM.....', '.....MMMMMMMM.....', '.....MMMMMMMM.....', '.....MMMMMMMM.....', '......MMMMMM......'],
-    '..MMMMMMMMMMMMMM..', { ...skin('light'), ...MAIL, W: '#e0d8c4', w: '#b8b09c', g: '#e8c870', G: '#c8962e' }, C_SIDE_COIF, C_SIDE_NECK[0]),
+    '..MMMMMMMMMMMMMM..', { ...skin('light'), ...MAIL, W: '#d0c8b4', w: '#c8962e', g: '#e8c870', G: '#c8962e' }, C_SIDE_COIF, C_SIDE_NECK[0]),
   // The friar: a brown habit to the feet, the cowl down, a tonsure, a rope belt.
   {
     down: art(['.......SSSS.......', '.....HSSSSSSH.....', '.....SSHSSHSS.....', '.....SSESSESS.....', '.....SSSsSSSS.....', '.....CsSSSSsC.....', '....CCCsSSsCCC....', ...F_BODY], FRIAR),
     up: art(['.......SSSS.......', '.....HSSSSSSH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....CCCCCCCC.....', '....CCCCCCCCCC....', ...F_BACK], FRIAR),
-    h: 31, tall: 0, robe: true, eyes: [3, 7, 10], life: { hem: ['#5a4232', '#3a2a20'] },
+    h: 31, tall: 0, robe: true, eyes: [3, 7, 10], life: { hem: ['#3a2a20', '#261c16'] },
     side: { body: art([...F_SIDE_HEAD, ...F_SIDE_BODY], FRIAR), arm: art(F_SIDE_ARM, FRIAR), eyes: [3, 11, 11] },
     cut: { headTo: 7, hip: 29, back: [0, 7, 5, 17], arm: [13, 7, 18, 17] }, lift: 6,
   },
   // A red cap over cropped brown hair, a red tabard over the mail.
   cleric(['......RRRRRR......', '.....RRRRRRRR.....', '.....HSsSSsSH.....', '.....HSESSESH.....', '.....HSSsSSSH.....', '.....HSSssSSH.....', '......sSSSSs......'],
     ['......RRRRRR......', '.....RRRRRRRR.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '......HHHHHH......'],
-    '..MMMMMMSSMMMMMM..', { ...skin('fair'), ...MAIL, R: '#5a1414', H: '#5a3a22', W: '#8a2020', w: '#601414', g: '#f0d888', G: '#d4a537' }, C_SIDE_CAP, C_SIDE_NECK[1]),
+    '..MMMMMMSSMMMMMM..', { ...skin('fair'), ...MAIL, R: '#3a0e10', H: '#5a3a22', W: '#4e1214', w: '#c8962e', g: '#f0d888', G: '#d4a537' }, C_SIDE_CAP, C_SIDE_NECK[1]),
 ];
 

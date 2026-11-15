@@ -91,6 +91,8 @@ const G_BACK = [
 const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): LookDef => {
   const p: Record<string, string> = { ...skin(sk), H: glint(pal.C), ...pal };
   p.G = glint(p.S);
+  // Dark and gold (docs/design/dark-gold.md): the face lost in the hood's dark but for two glints, the hands gloved.
+  Object.assign(p, { S: p.O, s: p.O, G: '#c8ccd8' });
   return {
     // (One cloak: its own lower half sways from the waist with the walk, `skirt`; the separate swaying mantle behind it
     // is gone, its outline read as the cloak cut in two. The legs cut below the hem; only the boots step under it.)
@@ -105,40 +107,40 @@ export const LOOK_DEFS: Record<Cls, LookDef[]> = {
     // The knight: an open-faced helm with a red plume, blue and gold, a red cape.
     warrior(['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....ASEAAESa.....', '.....ASSAASSa.....', '.....aASssSAa.....', '......aSSSSa......'],
       ['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....aAAAAAAa.....', '......aAAAAa......'], 'aAAa',
-      { ...skin('fair'), A: '#b4bcc6', a: '#6a727c', h: '#dce2ea', P: '#a8b0ba', p: '#6a727c', B: '#2f5d9b', b: '#24487a', T: '#d4a537', M: '#8a929c', m: '#666e78', K: '#5a3d22', k: '#d4a537', L: '#3a3f4a', F: '#2a2420' },
-      { cape: ['#9a2420', '#5a1414'], plume: '#c0392b' }, 0),
+      { ...skin('fair'), A: '#5e6670', a: '#363c46', h: '#8a929e', P: '#4e5660', p: '#c8962e', B: '#1c2638', b: '#141c2a', T: '#d4a537', M: '#4a5058', m: '#343a42', K: '#241a14', k: '#d4a537', L: '#262a32', F: '#18141a' },
+      { cape: ['#5a1416', '#2e0a0c'], plume: '#7a1a1c' }, 0),
     // The sellsword: bare-headed, cropped black hair and a beard, dented steel over old leather, a brown rag of a cape.
     warrior(['......hHHHHh......', '.....HHHHHHHH.....', '.....HhSSSShH.....', '.....HSESSESH.....', '.....HSSSsSSH.....', '.....HHSssSHH.....', '......HHHHHH......'],
       ['......hHHHHh......', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....sHHHHHHs.....', '......ssssss......'], 'sSSs',
-      { ...skin('tan'), H: '#2a201c', h: '#1a1412', P: '#7a7e84', p: '#4a4e54', B: '#5a4030', b: '#3a2a20', T: '#3e2c20', M: '#6a6e74', m: '#4e5258', K: '#2a1e16', k: '#9a9a9a', L: '#4a3a2e', F: '#241c16' },
-      { cape: ['#5a4432', '#36281c'], ragged: true }, 1),
+      { ...skin('tan'), H: '#2a201c', h: '#1a1412', P: '#4e5258', p: '#2e3238', B: '#3a2a20', b: '#261c16', T: '#2a1e16', M: '#46494e', m: '#323538', K: '#1e1610', k: '#b8923a', L: '#2e2620', F: '#1a1410' },
+      { cape: ['#3a2c20', '#221a12'], ragged: true }, 1),
     // Blackiron: long pale hair over blackened plate, a scar, dull brass, a cape the colour of old blood.
     warrior(['......hHHHHh......', '.....HHHHHHHH.....', '....HHhhSShhHH....', '....HSSESSESSH....', '....HSSSSSSrSH....', '....HHsSssSsHH....', '....HHHsSSsHHH....'],
       ['......hHHHHh......', '.....HHHHHHHH.....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....'], 'HHHH',
-      { ...skin('fair'), S: '#f0d0b0', H: '#d8d0b4', h: '#a8a088', r: '#b8706a', P: '#3e3e48', p: '#26262e', B: '#2a2a32', b: '#1e1e24', T: '#8a6a3a', M: '#3e3e48', m: '#2a2a30', K: '#3a2a1a', k: '#8a6a3a', L: '#2a2a30', F: '#1a1a1e' },
-      { cape: ['#5a1818', '#2e0c0c'], hair: '#d8d0b4' }, 2),
+      { ...skin('fair'), S: '#f0d0b0', H: '#d8d0b4', h: '#a8a088', r: '#b8706a', P: '#30303a', p: '#b8862e', B: '#1e1e26', b: '#16161c', T: '#c8962e', M: '#30303a', m: '#222228', K: '#1e1610', k: '#c8962e', L: '#202026', F: '#141418' },
+      { cape: ['#4a1214', '#26080a'], hair: '#d8d0b4' }, 2),
   ],
   RANGER: [
     // Green hood and cloak, an auburn fringe under it, the quiver's grey goose feathers.
     ranger(['....CCHHHHHHCCQ...', '....CSSESSESSCQ...', '....CSsSSSSsSCQ...', '....CCsSssSsCCQ...', '.....CCCSSCCCQ....'],
-      { ...skin('light'), H: '#8a3e1e', C: '#3f6b3a', c: '#2a4a28', B: '#6b4a2b', b: '#5a3d22', K: '#4a3420', k: '#9aa3ad', Q: '#5a3d22', q: '#d8d0bc', W: '#9aa3ad', L: '#3a3a2a', F: '#2a2420' },
-      { cloak: ['#3f6b3a', '#2a4a28'] }, 0),
+      { ...skin('light'), H: '#8a3e1e', C: '#264a42', c: '#18302c', B: '#3a2a1e', b: '#2a1e16', K: '#7a5e2a', k: '#d4a537', Q: '#2a1e16', q: '#d8d0bc', W: '#d4a537', L: '#2a2c26', F: '#1a1614' },
+      { cloak: ['#264a42', '#18302c'] }, 0),
     // A trapper: brown hood with a fur edge, deep brown skin, a black beard.
     ranger(['....CCccccccCCQ...', '....CcSESSEScCQ...', '....CHSSSSSSHCQ...', '....CCHSssSHCCQ...', '.....CCHHHHCCQ....'],
-      { ...skin('deep'), H: '#141012', C: '#6b4a2b', c: '#9a8a70', B: '#8a7a5a', b: '#6a5a40', K: '#3a2a1a', k: '#9aa3ad', Q: '#4a3420', q: '#b03a2a', W: '#8a8a90', L: '#3a2e24', F: '#241c16' },
-      { cloak: ['#6b4a2b', '#4a3420'] }, 1),
+      { ...skin('deep'), H: '#141012', C: '#3e2c1e', c: '#7a6c56', B: '#4a3e2e', b: '#362c20', K: '#241a12', k: '#c8962e', Q: '#2a1e14', q: '#8a2a22', W: '#c8962e', L: '#2a221a', F: '#18120e' },
+      { cloak: ['#3e2c1e', '#2a1e14'] }, 1),
     // A hill warden: grey-blue hood and cloak, pale, a fair fringe, white fletching.
     ranger(['....CCHHHHHHCCQ...', '....CSSESSESSCQ...', '....CSsSSSSsSCQ...', '....CCsSssSsCCQ...', '.....CCCSSCCCQ....'],
-      { ...skin('fair'), H: '#c8a868', C: '#4a5a6a', c: '#323e4a', B: '#5a5048', b: '#443c36', K: '#2a2420', k: '#9aa3ad', Q: '#3a3028', q: '#eeeae0', W: '#c0c8d0', L: '#3a3e46', F: '#2a2420' },
-      { cloak: ['#4a5a6a', '#323e4a'] }, 2),
+      { ...skin('fair'), H: '#c8a868', C: '#2e3a46', c: '#1e2630', B: '#3a3632', b: '#2a2622', K: '#7a5e2a', k: '#d4a537', Q: '#221e1a', q: '#eeeae0', W: '#d4a537', L: '#262a30', F: '#18161a' },
+      { cloak: ['#2e3a46', '#1e2630'] }, 2),
   ],
   ROGUE: [
     // The shade: a charcoal hood and cloak, a plum wrap, violet-black leathers.
-    rogue('light', { C: '#474258', c: '#2a2634', O: '#120f18', K: '#6e3060', k: '#48203e', B: '#2e2a38', b: '#221e2a', T: '#6a4a2a', t: '#a8b0b8', L: '#3c3848', l: '#2c2836', F: '#5a4636', f: '#3c2e24' }),
+    rogue('light', { C: '#2e2c38', c: '#1c1a24', O: '#0c0a10', K: '#1e1a24', k: '#141118', B: '#22202a', b: '#18161e', T: '#c8962e', t: '#e0c070', L: '#26242e', l: '#1c1a22', F: '#2a2420', f: '#1c1814' }),
     // The cutpurse: a brown hood and cloak, a red wrap, brown leather.
-    rogue('tan', { C: '#5e4834', c: '#3a2c20', O: '#160f0a', K: '#a82e1c', k: '#701c12', B: '#4a3426', b: '#34241a', T: '#2a1e16', t: '#c8a050', L: '#4a3c30', l: '#362c22', F: '#6a5238', f: '#463624' }),
+    rogue('tan', { C: '#3a2c22', c: '#261c16', O: '#0e0a08', K: '#4a1814', k: '#30100c', B: '#2e2219', b: '#221811', T: '#221812', t: '#c8962e', L: '#2e261e', l: '#221c16', F: '#3a2c20', f: '#261c14' }),
     // Night: black from hood to boot and a pale bone mask, dark eyes in deep brown skin.
-    rogue('deep', { C: '#26242e', c: '#16151c', O: '#08070b', K: '#d0c8b4', k: '#a8a090', B: '#1c1a22', b: '#141218', T: '#3a3640', t: '#7a8088', L: '#22212a', l: '#18171e', F: '#2a2830', f: '#1a1920' }),
+    rogue('deep', { C: '#1c1a22', c: '#121116', O: '#060508', K: '#16151a', k: '#0e0d12', B: '#16151a', b: '#0f0e12', T: '#8a6a2a', t: '#d4a537', L: '#1a1920', l: '#121116', F: '#1e1c24', f: '#141318' }),
   ],
   MAGE,
   HEALER: CLERIC,
