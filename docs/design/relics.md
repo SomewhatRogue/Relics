@@ -24,6 +24,11 @@ Each relic has one home, and getting it is a big moment, never a roll:
 
 A church quest can send you to a great boss: the two are one road, from the church or straight at the boss.
 
+**Relic quests are rare (Kyle, 2026-11-15: "few and far between, not always available").** At most one is
+open at a time, and a new one is offered only now and then: at a level milestone (say every fifth level) or
+after a long stretch of in-game days *(the spacing to tune: weeks of play between relics, not jobs)*.
+Isolde has nothing for you in between; her quest mark shows only when she does.
+
 | Relic | Home (draft; the lore keeper settles) |
 | --- | --- |
 | Relic Javelin | Every hero starts with it (broken, mended at the church: town-quests.md) |
@@ -45,10 +50,15 @@ A church quest can send you to a great boss: the two are one road, from the chur
 - **The Roll:** the first in Wickhold to win each relic is named on it.
 - It goes straight into the relic slot, carried if you carry nothing better.
 
-## 3. Carry one
+## 3. Carry one, chosen at the reliquary
 
-- A hero carries **one** relic on a job, chosen in town: in the pack's relic slot, or at the church when
-  it's handed over. No swapping on a job (the relic swap and its button go).
+- A hero carries **one** relic on a job. No swapping on a job (the relic swap and its button go).
+- **The reliquary** *(lore: name)* at the church (Kyle, 2026-11-15): every relic the hero has, each with its
+  uses and where it came from, and the ones still to win shown dark, with a word on where they're said to be.
+  Tap one to carry it. The church also recharges here (clean heroes).
+- **The Keeping Room** (holy-and-hungry section 7) has the same shelf for a corrupt hero, Dorcas's version:
+  see and choose there; feeding a relic stays her trough.
+- The pack shows the one you carry; changing it is the reliquary's.
 - Five uses each before the church recharges it (holy-and-hungry section 4; recharge for gold, clean heroes).
 
 ## 4. Existing heroes (Kyle: "re-earn")
@@ -63,7 +73,8 @@ under this version (a version on the save so it runs once). Shown to them once, 
 3. Great bosses' first kills give their relic (the Haulier's with the Instances chat; the Hempen Man and the
    Doorkeepers here).
 4. The fanfare: the moment, the Roll line, the slot.
-5. Church relic quests from Isolde (with the Town quests chat's quest marks and goal line).
+5. The reliquary at the church (and its shelf in the Keeping Room once that's built).
+6. Church relic quests from Isolde, rare and one at a time (with the Town quests chat's quest marks and goal line).
 
 ## Coordination
 
