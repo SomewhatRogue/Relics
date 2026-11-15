@@ -100,3 +100,21 @@ The Dark and gold chat's log (docs/design/dark-gold.md, Kyle's pictures in docs/
 - Known: the overlay's pixel-font labels (FORGE, WORKS) come out half size under `?hd`; Fenmere's mist isn't drawn.
   Try: relic-lake.vercel.app/?look=3d&hd (or `&day=0.9` for night).
   (Claude Opus 5.5)
+
+## 2026-11-15: the new look, slice 0b first pass (the kit-built town behind `?hd&street`)
+
+- Kyle loved the concepts ("the WHOLE aesthetic is what I want. entirely"), asked about cost (about 190 ElevenLabs
+  credits an image; the test street's kit was three sheets of four), and "Do it". Then: a low chase camera in town.
+- The kit: facade sheets (forge, tavern, chapel, house, four takes each), a material sheet (cobble, stone, slate,
+  timber, planks, flags) and a prop sheet (the four guild signs), generated in his ElevenLabs flow, pulled down,
+  and cut by scripts/kitprep.py: background cleared, scaled to 32 px a tile, snapped to a palette with no dither,
+  glow masks for the lit windows in their own colours, kit.json with each picture's size. 776 KB.
+- three/streetkit.ts: a roofed block becomes a row of gable-fronted houses at their natural sizes, its own front in
+  the middle and houses either side (mirrored every other one), each with a slate roof running back and stone or
+  timber at the row's ends and backs; a guild sign by the door (anvil, tankard, lantern, mortar by kind and label).
+  The floor laid with the cobbles. Under `?street` the camera's pitch is 24 degrees (camera3d.ts) and the view
+  closer (view3d.ts ZOOM). Drawing only: footprints, doors and collision unchanged. Nothing changes without it.
+- Known: the painted doors don't line up with the room's doors; props, trees and people are still the old art and
+  look crude beside the kit; the texture density doesn't sit 1:1 on screen at this zoom; the town's layout is the
+  old one. Try: relic-lake.vercel.app/?look=3d&hd&street&day=0.9
+  (Claude Opus 5.5)

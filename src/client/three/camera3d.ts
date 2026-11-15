@@ -7,8 +7,10 @@ import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { WALL_H } from './ground';
 import { upright } from '../phoneband';
+import { STREET } from './streetkit';
 
-export const PITCH = (36 * Math.PI) / 180;
+// (The new look's test street, `?hd&street`: lower, toward the chase view Kyle wants in town; streetkit.ts.)
+export const PITCH = ((STREET ? 24 : 36) * Math.PI) / 180;
 export const NEAR = 20;
 export const FAR = 110;
 const DIST = 60;

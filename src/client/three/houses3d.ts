@@ -20,6 +20,7 @@ import type { Kindling } from '../../shared/kindling';
 import { asLamp, lampMeshes } from './lamps3d';
 import { doorGlow, shutDoor } from './shut3d';
 import { dress3d } from './darkdress3d';
+import { kitBlock, STREET } from './streetkit';
 
 /** Eave height (tiles) by kind. */
 // (Walls 1.7 times their first height since the heroic proportions, Kyle 2026-11-12: "houses now look way too tiny";
@@ -60,6 +61,11 @@ const shade = (c: number, k: number) => {
 export function buildBlock(b: Block, kin?: Kindling | null): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
   if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1, lamps: [] };
+  // The new look's test street (streetkit.ts, `?hd&street`): the building from the generated kit.
+  if (STREET && !b.ruined) {
+    const k = kitBlock(b, group);
+    return { group, roof: k.roof as unknown as THREE.Mesh, fires, top: k.top + 1, lamps: [] };
+  }
   const st = blockState(b), ruined = st >= 4, alight = st % 2 === 1, charred = st >= 2 || alight || b.shut === 'burnt';
   const r = new Seed(Math.round(b.x * 31 + b.y * 17 + 7)), L = LOOK[b.kind], home = houseOf(b), hc = home ? houseColours(b, home) : null;
   const k = charred ? 0.45 : 1, wallC = shade(hex(hc?.wall ?? L.wall), k), beam = shade(0x3a2a1e, k);

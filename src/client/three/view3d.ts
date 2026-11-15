@@ -16,6 +16,7 @@ import { paintMap } from '../world';
 import { Actors, XRAY_LAYER, type Lerp } from './actors3d';
 import { XRAY } from './mats';
 import { HD, HD_AREA } from './hdlook';
+import { STREET } from './streetkit';
 import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
@@ -51,7 +52,8 @@ import { flashOf } from '../../sim/stormshape';
 import { drawChalkMarks } from '../chalkdraw';
 
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
-const ZOOM = { tall: 0.8, wide: 1 };
+// (Closer on the new look's test street, streetkit.ts: the people and the fronts bigger.)
+const ZOOM = STREET ? { tall: 0.45, wide: 0.55 } : { tall: 0.8, wide: 1 };
 
 export class View3D {
   readonly canvas: HTMLCanvasElement;

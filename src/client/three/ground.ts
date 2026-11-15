@@ -17,6 +17,7 @@ import type { Lamp3 } from './lamps3d';
 import type { L3 } from './lights3d';
 import { VCOL } from './mats';
 import { toonize } from './post';
+import { STREET, streetFloor } from './streetkit';
 import { addRound, type Spot } from './rounds3d';
 import { addBridge } from './bridge3d';
 import { sideGaps } from '../sidegaps';
@@ -53,6 +54,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   const fg = fc.getContext('2d')!;
   fg.drawImage(bg, OX, OY, fc.width, fc.height, 0, 0, fc.width, fc.height);
   const floorTex = texture(fc), floorMat = toonize(new THREE.MeshLambertMaterial({ map: floorTex }));
+  // The new look's test street: the generated cobbles (streetkit.ts).
+  if (STREET) streetFloor(floorMat, m.w, m.h);
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(m.w, m.h), floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(m.w / 2, 0, m.h / 2);

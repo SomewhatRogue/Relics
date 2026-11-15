@@ -17,6 +17,17 @@ buildings you can go in defined by their guild signs". Then "ya lets do it."
   and the heroes. Grey stone, firelight, dark figures with one bright accent.
 - `ref/grain-before.png`: what we have now on a laptop, for comparison.
 
+## Kyle's calls, 2026-11-15 (after the concepts)
+
+- "the WHOLE aesthetic is what I want. entirely": the concept shots in his ElevenLabs flow "Relic: HD-2D look tests"
+  (`ref/concept-squares.png`, `ref/dense-town-night.png`) are the target for everything, characters included.
+- **In town, a low chase camera** (`ref/town-chase-camera.png`): lower and closer behind your hero, the fronts seen
+  nearly face-on. Jobs keep the steep camera, where the fight needs the floor.
+- **The town dense and overlapping**, as in the concepts: rows of gable-fronted houses packed along its lanes and
+  squares, guild signs on the ones you can go in.
+- **The art is generated**, in his ElevenLabs workspace, then cut and cleaned by `scripts/kitprep.py` into crisp
+  32 px textures (`src/client/three/kit/`). Ours, so it can live in the public repo; no pack licence in the way.
+
 ## Why it's grainy now
 
 The world is painted at 16 pixels a tile (heroes 31 to 40 tall) and blown up by a whole number: 3x on a phone, 4x
@@ -70,8 +81,11 @@ art in a private repo the build pulls in. Kyle's call.
 0. **The test street** (this before anything else is redone):
    a. The HD-2D render in the 2.5D view behind a switch (`?look=hd`): higher internal resolution, smooth lights,
       bloom, fog, the tilt-shift blur, on today's art, so the light can be judged alone.
-   b. One stretch of Wickhold at the new density: a few buildings with guild signs, ground, props, one hero and
-      one goblin at the new size, from the chosen pack (or placeholders). Kyle plays it on phone and laptop.
+   b. Wickhold's buildings from the generated kit behind `?street` (with `?hd`): each block a row of gable-fronted
+      houses at their natural size, its own front (forge, tavern, chapel) in the middle, slate roofs, guild signs, the
+      cobbles; the camera lower (24 degrees) and closer. First pass in.
+   c. Next: props from the kit (barrels, crates, lamps, stalls, the well, braziers, trees); a true perspective chase
+      camera in town; the town re-laid out dense (slice 1); then heroes and goblins in the concepts' style.
 1. The town re-laid out (shared/town.ts, with the Town quests, Lived-in world and Art chats).
 2. The jobs' maps and the dungeons.
 3. Heroes, 4. enemies, 5. townsfolk, at the new size.

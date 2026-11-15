@@ -1,0 +1,106 @@
+{
+"facade-chapel-0": [
+133,
+272
+],
+"facade-chapel-1": [
+134,
+272
+],
+"facade-chapel-2": [
+127,
+272
+],
+"facade-chapel-3": [
+131,
+272
+],
+"facade-forge-0": [
+78,
+176
+],
+"facade-forge-1": [
+82,
+176
+],
+"facade-forge-2": [
+79,
+176
+],
+"facade-forge-3": [
+82,
+176
+],
+"facade-house-0": [
+67,
+224
+],
+"facade-house-1": [
+77,
+224
+],
+"facade-house-2": [
+71,
+224
+],
+"facade-house-3": [
+74,
+224
+],
+"facade-tavern-0": [
+95,
+208
+],
+"facade-tavern-1": [
+128,
+208
+],
+"facade-tavern-2": [
+113,
+208
+],
+"facade-tavern-3": [
+101,
+208
+],
+"mat-cobble": [
+64,
+64
+],
+"mat-flags": [
+64,
+64
+],
+"mat-planks": [
+64,
+64
+],
+"mat-slate": [
+64,
+64
+],
+"mat-stone": [
+64,
+64
+],
+"mat-timber": [
+64,
+64
+],
+"sign-anvil": [
+73,
+64
+],
+"sign-lantern": [
+69,
+64
+],
+"sign-mortar": [
+71,
+64
+],
+"sign-tankard": [
+72,
+64
+]
+}
