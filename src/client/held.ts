@@ -12,6 +12,8 @@ import { bladeLength, censer, drawKit, kitPose } from './heldkits';
 import { bladeEdge } from './blademark';
 import { flourish, tapPose, tapSmearCol } from './castflourish';
 import { focusMotes } from './wisps';
+import { paintWeapon } from './weaponpaint';
+import { weaponMarks } from './weaponmarks';
 
 export interface Pose { a: number; ext: number; from?: number; thrust?: boolean; reach: number; pull: number; /** The main-hand blade isn't in the hand (flipped in an idle: idlepose.ts). */ hide?: boolean }
 
@@ -156,7 +158,17 @@ function sword(g: CanvasRenderingContext2D, ox: number, oy: number, a: number, l
   line(g, ox, oy, a, len - 1.2, len, '#cfd6dc');
 }
 
+/** The weapon in hand, in its tier's and element's look (weaponpaint.ts, weaponmarks.ts: colours only). */
 export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
+  const undo = paintWeapon(c, h);
+  try {
+    inHand(c, h, px, py, p);
+  } finally {
+    undo();
+  }
+}
+
+function inHand(c: Ctx, h: Hero, px: number, py: number, p: Pose): void {
   const g = c.lit, ox = px + Math.cos(p.a) * p.ext * HS, oy = py + Math.sin(p.a) * p.ext * HS;
   const side = h.fx >= -0.2 ? 1 : -1, el = EL_COL[heldEl(h)];
   if (drawKit(c, h, px, py, ox, oy, p)) {
@@ -243,6 +255,7 @@ export function drawWeapon(c: Ctx, h: Hero, px: number, py: number, p: Pose): vo
       line(g, x0, y0, a, 2, 7, '#e6ecf0');
     }
   }
+  weaponMarks(c, h, ox, oy, p);
   if (h.act === 'charge' && !ranged(h) && bladeLength(h.weapon)) {
     const k = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h)), len = bladeLength(h.weapon);
     c.glow.globalAlpha = 0.4 + 0.5 * k * (0.6 + 0.4 * Math.sin(c.now * 30));

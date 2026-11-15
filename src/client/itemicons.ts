@@ -1,10 +1,12 @@
 /**
  * Small pixel pictures for the pack's cells: what kind of thing a piece is at a glance (a blade, a bow,
  * a staff, mail, a ring, a flask), drawn in code on a 12 by 12 grid and kept as images, outlined dark so steel
- * reads as steel and not a white smudge (Kyle, 2026-11-13). The cell's border carries its tier's colour; the
- * picture is the same for every tier.
+ * reads as steel and not a white smudge (Kyle, 2026-11-13). The cell's border carries its tier's colour; a
+ * weapon's picture is in its tier's stuff too (docs/design/gear-looks.md).
  */
 import { ELEMENT_TRAITS, POTIONS, slotOf, type Item, type PotionId } from '../shared/tuning';
+import { lookKey, weaponLookOf } from '../shared/gearlook';
+import { elCol, tintPixel } from './weaponlook';
 
 const S = 12;
 const M = '#c4cad4', MD = '#6a7280', W = '#8a5a30', WD = '#5a3a1e', G = '#d9b13a', C = '#9a6a3a';
@@ -74,12 +76,18 @@ export function draw(key: string, paint: Paint): string {
   return url;
 }
 
-/** The picture for a piece of gear (a weapon's element tints its blade a little, nothing more). */
+/** The picture for a piece of gear: a weapon in its tier's stuff (weaponlook.ts), its element a spark at the tip. */
 export function itemIcon(it: Item): string {
   const s = slotOf(it), key = s === 'weapon' ? it.kit ?? 'sword' : s === 'armor' ? it.armor ?? 'light' : 'ring';
-  const el = it.traits.find((t) => ELEMENT_TRAITS.includes(t));
-  return draw(key + (el ?? ''), (px, line) => {
-    ICONS[key](px, line);
+  const el = it.traits.find((t) => ELEMENT_TRAITS.includes(t)), look = s === 'weapon' ? weaponLookOf(it) : null, tint = look && tintPixel(look);
+  return draw(key + (el ?? '') + (look ? '/' + lookKey(look) : ''), (px0, line0) => {
+    // (An element's blade: its bright line in the element's colour, as it glows in the hand; a bow keeps its string.)
+    const elc = look && !/bow/.test(key) && elCol(look), px = tint ? (x: number, y: number, c: string) => px0(x, y, elc && c === M ? elc : tint(c, x, y)) : px0;
+    const line = (x0: number, y0: number, x1: number, y1: number, col: string) => {
+      const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+      for (let i = 0; i <= n; i++) px(Math.round(x0 + ((x1 - x0) * i) / n), Math.round(y0 + ((y1 - y0) * i) / n), col);
+    };
+    ICONS[key](px, tint ? line : line0);
     if (el) px(11, 0, el === 'ember' ? '#ff6a2a' : el === 'rime' ? '#9fe8ff' : '#e8e07a');
   });
 }

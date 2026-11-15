@@ -12,6 +12,7 @@ import { makeSprite, type Part } from './sprites';
 import { EL_COL } from './palette';
 import { drawSpell } from './spelldraw';
 import { drawBottle, drawGear, drawGold } from './lootart';
+import { weaponLookOf } from '../shared/gearlook';
 
 const runes = (c: Ctx, x: number, y: number, a: number, from: number, to: number) => {
   c.glow.globalAlpha = 0.6 + 0.4 * Math.sin(c.now * 6);
@@ -282,6 +283,6 @@ export function drawDrop(c: Ctx, d: Drop, x: number, y: number): void {
     c.glow.globalAlpha = fade;
   }
   // The thing itself, lying on the floor (lootart.ts): the weapon with a glint down its blade, a breastplate, an amulet.
-  drawGear(c, kind, d.item.kit, d.item.armor, col, x, y, d.id, fade);
+  drawGear(c, kind, d.item.kit, d.item.armor, col, x, y, d.id, fade, weaponLookOf(d.item));
   c.lit.globalAlpha = c.glow.globalAlpha = 1;
 }
