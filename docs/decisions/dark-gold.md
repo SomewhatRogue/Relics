@@ -28,3 +28,18 @@ The Dark and gold chat's log (docs/design/dark-gold.md, Kyle's pictures in docs/
   hour held.
 - Open for Kyle: whether the green is right (one number, darkgold.ts `rgb(90 ...)`), the market's stripes.
   (Claude Opus 5.5)
+
+## 2026-11-15: slice 2, enemies
+
+- One wrapper, not a recolour in every enemy file: strawman.ts `drawFoe` (the flat scene and the 2.5D cards both draw
+  through it) hands the painters a lit layer that grades every fill, stroke and sprite it's given (client/darkfoe.ts,
+  a Proxy like gobpen.ts's; a sprite's canvas graded once and kept). So goblins, their kits, butchers, beasts and the
+  bosses change together, each keeping its shape, with nothing edited in Art's, the Deep's or the Instances' files.
+  The yard's straw men and dummies are left as they are. The glow layer (eyes, telegraphs, hit flashes) is untouched.
+- The 'foe' rules (darkgold.ts `foeHex`): goblin greens kept; whites and anything bright and strong (a telegraph's
+  red, fire, a spell) kept; blood kept red, since wounds show how hurt a foe is (a first pass rusted it: the HURT and
+  BAD rows lost their cuts); duller reds to rust; light hide and cloth to bone, dark leather and wood nearly black,
+  greys and cloth to dirty iron; gold and brass on a goblin to dull bronze (gold is the heroes' mark).
+- Looked at in `?lineup=goblins` (every foe, every move) and in the Open Cut in 2.5D.
+- One line in Art's strawman.ts (the wrap), noted here.
+  (Claude Opus 5.5)

@@ -7,8 +7,8 @@
  * Cosmetic only.
  */
 
-/** Which rules apply: the ground (stone only), a wall or furniture, a roof (slate). */
-export type Grade = 'floor' | 'wall' | 'roof';
+/** Which rules apply: the ground (stone only), a wall or furniture, a roof (slate), an enemy (foeHex). */
+export type Grade = 'floor' | 'wall' | 'roof' | 'foe';
 
 /** Moss in the joints and on the roofs, darkest first. */
 export const MOSS = ['#2c3820', '#34421f', '#3e4c26', '#4a5a2c'];
@@ -35,6 +35,7 @@ const greyish = (h: number, s: number, l: number) => l > 0.04 && l < 0.82 && (s 
 /** One colour (0xrrggbb) under a grade. */
 export function gradeHex(c: number, mode: Grade): number {
   const [h, s, l] = hsl((c >> 16) & 255, (c >> 8) & 255, c & 255);
+  if (mode === 'foe') return foeHex(c, h, s, l);
   if (greyish(h, s, l)) {
     // Roofs of grey stone or lead read as slate; everything else as the dungeon's green-grey.
     if (mode === 'roof') return rgb(208, Math.min(0.16, 0.07 + s * 0.5), l * 0.9);
@@ -52,7 +53,23 @@ export function gradeHex(c: number, mode: Grade): number {
   return c;
 }
 
-const memo: Record<Grade, Map<number, number>> = { floor: new Map(), wall: new Map(), roof: new Map() };
+/**
+ * An enemy (slice 2): goblins keep their sickly greens and glowing eyes; the rest darkened to rust, bone, black
+ * leather and dirty iron. Gold is the heroes' mark, so on a goblin it's dull bronze. Whites, and anything bright
+ * and strong (a telegraph's red, fire, a spell), are left alone so the fight still reads.
+ */
+function foeHex(c: number, h: number, s: number, l: number): number {
+  if (h >= 36 && h <= 60 && s > 0.45 && l > 0.3) return rgb(32, s * 0.35, l * 0.6);
+  if (l > 0.78 || (s > 0.55 && l > 0.45)) return c;
+  if (h > 60 && h < 165) return c;
+  // Blood stays red (wounds show how hurt a foe is); duller reds, cloth and paint, go to rust.
+  if ((h < 14 || h > 335) && s > 0.25) return s > 0.48 ? c : rgb(14, s * 0.7, l * 0.85);
+  if (h >= 14 && h <= 60 && s > 0.1) return l > 0.48 ? rgb(40, Math.min(0.2, s * 0.4 + 0.05), l * 0.86) : rgb(24, s * 0.55, l * 0.66);
+  if (s < 0.3) return rgb(40, Math.min(s, 0.07), l * 0.84);
+  return rgb(h, s * 0.5, l * 0.7);
+}
+
+const memo: Record<Grade, Map<number, number>> = { floor: new Map(), wall: new Map(), roof: new Map(), foe: new Map() };
 /** gradeHex, remembered (for painters that call it every frame). */
 export const graded = (c: number, mode: Grade) => {
   const m = memo[mode];

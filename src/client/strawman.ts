@@ -24,9 +24,12 @@ import { grownBy } from '../shared/meaty2';
 import { hopOf } from './meatydraw2';
 import { drawKeeper } from './doordraw';
 import { shown } from '../shared/shown';
+import { darkFoe } from './darkfoe';
 
 /** A goblin, or (in the yard: `straw`) a straw man playing one. The plain dummies are themselves either way. */
 export function drawFoe(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean, straw: boolean): void {
+  // Dark and gold (darkfoe.ts): the real ones in rust, bone, black leather and dirty iron; the yard's straw men as they are.
+  if (!straw && e.kind !== 'dummy' && e.kind !== 'swingDummy') c = darkFoe(c);
   // Lying in Fenmere's reeds: eyes only; standing up out of the water (fenlurk.ts).
   if (e.task?.k === 'lurk') {
     const q = lurkPose(c, e, x, y);
