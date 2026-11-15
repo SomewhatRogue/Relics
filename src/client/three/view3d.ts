@@ -15,6 +15,7 @@ import type { Fx } from '../fx';
 import { paintMap } from '../world';
 import { Actors, XRAY_LAYER, type Lerp } from './actors3d';
 import { XRAY } from './mats';
+import { HD, HD_AREA } from './hdlook';
 import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
@@ -133,7 +134,7 @@ export class View3D {
   resize(): void {
     this.dpr = Math.min(devicePixelRatio || 1, 3);
     const Dw = innerWidth * this.dpr, Dh = innerHeight * this.dpr;
-    const S = (this.S = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / this.q.area))));
+    const S = (this.S = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
     const W = Math.ceil(Dw / S), H = Math.ceil(Dh / S);
     // As much floor as the pixel scene shows (its tiles across times down, scene.ts), so a figure stands
     // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.

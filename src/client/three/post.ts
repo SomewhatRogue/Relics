@@ -8,6 +8,7 @@
 import * as THREE from 'three';
 import { FOG_BANDS } from '../light';
 import { MIST_GLSL, MIST_KEEP, MIST_MAX } from '../fenmistdraw';
+import { HD, hdPostMaterial } from './hdlook';
 
 export const BAYER = `
 float bay2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
@@ -42,6 +43,11 @@ const TOON = `
 
 /** Band a Lambert material's light into steps. */
 export function toonize<T extends THREE.Material>(m: T): T {
+  // (The new look's test, hdlook.ts: smooth light, not stepped. The dither helper still goes in: the cards use it.)
+  if (HD) {
+    m.onBeforeCompile = (sh) => void (sh.fragmentShader = sh.fragmentShader.replace('void main() {', BAYER + '\nvoid main() {'));
+    return m;
+  }
   m.onBeforeCompile = (sh) => {
     sh.fragmentShader = sh.fragmentShader.replace('void main() {', BAYER + '\nvoid main() {').replace('vec3 outgoingLight =', TOON + '\nvec3 outgoingLight =');
   };
@@ -52,6 +58,7 @@ export const QUAD_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = v
 
 /** Outlines from depth, creases, and a little bloom from the glowing; drawn straight to the low-res canvas. */
 export function postMaterial(near: number, far: number): THREE.ShaderMaterial {
+  if (HD) return hdPostMaterial();
   return new THREE.ShaderMaterial({
     uniforms: {
       tCol: { value: null }, tDep: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uGamma: { value: 1 }, uFog: { value: new THREE.Vector4(0, 0, 0, 16) }, uFogC: { value: new THREE.Vector3() }, uFogY: { value: 1 },

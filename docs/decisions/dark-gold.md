@@ -87,3 +87,16 @@ The Dark and gold chat's log (docs/design/dark-gold.md, Kyle's pictures in docs/
   a pack's files can't go in it as it is: Kyle to choose private repo or a private art repo.
 - Concept shots of Wickhold and the heroes generated in Kyle's ElevenLabs flow "Relic: HD-2D look tests".
   (Claude Opus 5.5)
+
+## 2026-11-15: the new look, slice 0a (HD-2D light behind `?hd`)
+
+- three/hdlook.ts: with `?hd` in the address the 2.5D view paints at about twice the resolution (`HD_AREA`, four
+  times high quality's pixels), light is smooth (post.ts `toonize` keeps only the dither helper the cards need), and
+  its own post pass: a three-ring bloom off everything glowing, fog that thickens smoothly, a tilt-shift blur toward
+  the top and bottom (ordinary surfaces only, from ordinary neighbours: telegraphs and eyes stay crisp), a vignette,
+  no outlines. Without `?hd` nothing changes.
+- Looked at: the town at night on a laptop and a phone, Hangman's Wood by day on a laptop. The checker grain is gone
+  and the light pools; what's left is the art (busy 16 px grass, the trees as low-poly lumps), slice 0b's job.
+- Known: the overlay's pixel-font labels (FORGE, WORKS) come out half size under `?hd`; Fenmere's mist isn't drawn.
+  Try: relic-lake.vercel.app/?look=3d&hd (or `&day=0.9` for night).
+  (Claude Opus 5.5)

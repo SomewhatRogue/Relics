@@ -8,8 +8,10 @@ const spots = (rest.length ? rest : ['28,23']).map((s) => (s === 'me' || s.start
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const errors = [];
-  for (const look of ['flat', '3d']) {
-    const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })).newPage();
+  for (const look of process.env.ONLY3D ? ['3d'] : ['flat', '3d']) {
+    // LAPTOP=1: a 1440x900 laptop screen at 2x (the grain shows worst there), else a phone.
+    const ctx = process.env.LAPTOP ? { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 } : { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
+    const page = await (await browser.newContext(ctx)).newPage();
     page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto(`${url}${url.includes('?') ? '&' : '?'}look=${look}&day=${day}`);
     await page.waitForFunction(() => window.__game);
