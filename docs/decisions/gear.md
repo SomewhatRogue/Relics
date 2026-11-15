@@ -62,3 +62,21 @@ The Gear chat's log (docs/design/gear-levels.md). Newest at the foot.
   from hungry gear is not hungry gear (no Want, Tobin doesn't care).
 - tests/gearmods.test.ts; tests/fence.test.ts's 2026-11-05 words moved to these. Shots:
   scripts/gearlevel-look.cjs (the pack, a PRE-WAR LV 7 +2 card, a TOUCHED LV 9 ring).
+
+## 2026-11-15: slice 3, rarity measured (Opus 5.5)
+
+- **Measured like income**: the income bot (scripts/incomebot.ts, a small edit: `Take.rolls`) logs every
+  tier roll a job makes (shared/gear.ts `TIER_LOG`, on only in the bot) with its source, danger lift,
+  level and floor; scripts/rarity.ts sums each roll's exact odds (`tierOdds`). So the rare three are
+  measured from a few days of real jobs, not hundreds. An hour is six jobs.
+- **Before**: TOUCHED about 0.4 an hour, TURNING 0.2, HUNGRY 0.13 (two and a half to six times the spec).
+- **Retuned** (gear.ts ODDS): PRE-WAR down a little, the rare three down to a third or less, Fine taking
+  up the rest. The rare three's level lean halved and more (lootlevel.ts `RARE_LEAN` 0.012, in place of
+  threat.ts's LEVEL_SCALE.rare 0.03, which nothing else reads for loot).
+- **Now** (an hour, levels 1 / 10): FINE 12 / 15, FORGED 8 / 9, PRE-WAR 0.6 / 0.76, TOUCHED one in about
+  6.5 hours, TURNING one in about 28, HUNGRY one in about 70. tests/rarity.test.ts holds a row per tier
+  and the lean (a level-10 party finds the rare three under a quarter more often).
+- **For Deep**: the Deep's odds lean these same tables (deeploot.ts), so a Deep floor's rare three are
+  about a third as common as before. Kept so; if the Deep's bands should make up for it, their `pre` and
+  `rare` are the Deep chat's to raise.
+- **For Economy**: `Take` has a `rolls` field now; nothing in income changed (tests/income.test.ts passes).

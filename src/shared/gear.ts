@@ -90,13 +90,16 @@ export function rollGear(rng: Rng, cls: HeroClass | null, tier: Tier, slot: Slot
 
 /**
  * Odds of each tier by where it came from. PRE-WAR (purple) is a real find; the rare three are each
- * rarer than the last (Kyle, 2026-11-05: "rare and dangerous").
+ * rarer than the last (Kyle, 2026-11-05: "rare and dangerous"). Measured per hour of play (six jobs) by
+ * scripts/rarity.ts and held by tests/rarity.test.ts (docs/design/gear-levels.md section 2): FINE a few
+ * a job, FORGED one or two, PRE-WAR one every hour or two, TOUCHED about one a week of play (six hours),
+ * TURNING one in a few weeks, HUNGRY rarer still. Fine takes up what the rarer tiers gave back.
  */
 const ODDS: Record<'scrapper' | 'butcher' | 'named' | 'chest', [Tier, number][]> = {
   scrapper: [['plain', 0.7], ['fine', 0.3]],
-  butcher: [['plain', 0.2], ['fine', 0.55], ['forged', 0.22], ['tolmouth', 0.02], ['touched', 0.01]],
-  named: [['fine', 0.36], ['forged', 0.5], ['tolmouth', 0.09], ['touched', 0.025], ['turning', 0.015], ['hungry', 0.01]],
-  chest: [['plain', 0.45], ['fine', 0.37], ['forged', 0.14], ['tolmouth', 0.02], ['touched', 0.01], ['turning', 0.006], ['hungry', 0.004]],
+  butcher: [['plain', 0.2], ['fine', 0.5614], ['forged', 0.22], ['tolmouth', 0.014], ['touched', 0.0046]],
+  named: [['fine', 0.4235], ['forged', 0.5], ['tolmouth', 0.06], ['touched', 0.0115], ['turning', 0.0037], ['hungry', 0.0013]],
+  chest: [['plain', 0.45], ['fine', 0.3901], ['forged', 0.14], ['tolmouth', 0.014], ['touched', 0.0044], ['turning', 0.0011], ['hungry', 0.0004]],
 };
 export const DROP_ODDS = ODDS;
 /** Danger lifts a roll a tier a step, but only as far as Forged: PRE-WAR and the rare three are found, never lifted into. */
@@ -112,8 +115,25 @@ export function pickTier(rng: Rng, odds: [Tier, number][]): Tier {
  * floor (shared/deeploot.ts), its band's PRE-WAR and rare odds on top.
  */
 export function rollTier(rng: Rng, from: keyof typeof ODDS, shift = 0, lv = 1, floor = 0): Tier {
+  if (TIER_LOG.on) TIER_LOG.rolls.push({ from, shift, lv, floor });
   const t = pickTier(rng, deepOdds(leanOdds(ODDS[from], lv), floor)), i = TIER_ORDER.indexOf(t), top = TIER_ORDER.indexOf(LIFT_TO);
   return i >= top ? t : TIER_ORDER[Math.min(top, i + shift)];
+}
+
+/**
+ * Every tier roll, while `on` (scripts/incomebot.ts only, never in play): where it came from, so the
+ * rarity measure (tests/rarity.test.ts) can sum each roll's exact odds (`tierOdds`) instead of waiting
+ * hundreds of jobs for a red to turn up.
+ */
+export const TIER_LOG = { on: false, rolls: [] as { from: keyof typeof ODDS; shift: number; lv: number; floor: number }[] };
+/** The chance of each tier from one `rollTier` with these arguments: the same odds, lifted the same way. */
+export function tierOdds(from: keyof typeof ODDS, shift = 0, lv = 1, floor = 0): Record<Tier, number> {
+  const out = Object.fromEntries(TIER_ORDER.map((t) => [t, 0])) as Record<Tier, number>, top = TIER_ORDER.indexOf(LIFT_TO);
+  for (const [t, p] of deepOdds(leanOdds(ODDS[from], lv), floor)) {
+    const i = TIER_ORDER.indexOf(t);
+    out[i >= top ? t : TIER_ORDER[Math.min(top, i + shift)]] += p;
+  }
+  return out;
 }
 
 /** Old saves: a weapon with a trait and no modifiers becomes PRE-WAR, keeping what it had. */

@@ -6,7 +6,7 @@
  * own drops and the pay is the game's own sum; only the fighting is skipped. Not a test on its own:
  * scripts/income.ts prints the table, tests/income.test.ts holds the targets.
  */
-import { TICK, BLESSING, newProfile, type HeroClass } from '../src/shared/tuning';
+import { TICK, BLESSING, TIER_LOG, newProfile, type HeroClass } from '../src/shared/tuning';
 import { board, type Job } from '../src/shared/jobs';
 import { sellValue } from '../src/shared/prices';
 import { isDead } from '../src/sim/damage';
@@ -18,7 +18,9 @@ const store = new Map<string, string>();
 (globalThis as unknown as { localStorage: unknown }).localStorage ??= { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) };
 
 /** One job's take, in copper: the pay, the coins picked up (kills, chests), and what the gear found sells for. */
-export interface Take { job: string; size: string; rooms: number; pay: number; coins: number; gear: number; total: number; secs: number; kills: Record<string, number> }
+export interface Take { job: string; size: string; rooms: number; pay: number; coins: number; gear: number; total: number; secs: number; kills: Record<string, number>;
+  /** Every tier roll the job made, with where it came from (shared/gear.ts TIER_LOG): the Gear chat's rarity measure, tests/rarity.test.ts. */
+  rolls: typeof TIER_LOG.rolls }
 
 /** The most a room is given (seconds of the room's own clock) before the bot moves on. */
 const ROOM_MOST = 150;
@@ -36,6 +38,8 @@ export function playJob(job: Job, level: number, cls: HeroClass = 'WARRIOR'): Ta
   g.create(cls, 'income');
   Object.assign(g.profile, { level, prologue: true, wish: false });
   const before = g.profile.gold, bagBefore = new Set(g.profile.bag);
+  TIER_LOG.rolls = [];
+  TIER_LOG.on = true;
   g.startJob(job, 1);
   let seq = 1, secs = 0;
   const kills: Record<string, number> = {};
@@ -80,9 +84,10 @@ export function playJob(job: Job, level: number, cls: HeroClass = 'WARRIOR'): Ta
   const coins = g.run?.gold ?? 0;
   if (g.mode === 'run') g.finish('won');
   (BLESSING as Loose).dmgMult = mult;
+  TIER_LOG.on = false;
   const gear = g.profile.bag.filter((i: Loose) => !bagBefore.has(i)).reduce((s: number, i: Loose) => s + sellValue(i), 0);
   const total = g.profile.gold - before;
-  return { job: job.title, size: job.size ?? 'medium', rooms: job.rooms, pay: total - coins, coins, gear, total, secs: Math.round(secs), kills };
+  return { job: job.title, size: job.size ?? 'medium', rooms: job.rooms, pay: total - coins, coins, gear, total, secs: Math.round(secs), kills, rolls: TIER_LOG.rolls };
 }
 
 /** The board's ordinary jobs over `days` days (no Deep, no instances, no expeditions: their pay is their chat's). */
