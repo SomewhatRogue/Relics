@@ -127,7 +127,7 @@ function forgePop(g: Game, it: Item, acts: Act[], again: () => void): void {
 
 /** Halvard's forge: UPGRADE what you wear, or MELT DOWN what's in your pack. One choice per piece. Or WORK A SHIFT (shiftui.ts). */
 function forge(g: Game, panel: Panel): void {
-  const pr = g.profile, held = pr.arms[pr.weapon], worn = [held, pr.armor, ...pr.rings].filter((x): x is Item => !!x), again = () => forge(g, panel);
+  const pr = g.profile, held = pr.arms[pr.weapon], worn = [held, pr.armor, pr.legs, ...pr.rings].filter((x): x is Item => !!x), again = () => forge(g, panel);
   const tap = (s: string, i: number) => {
     const it = s === 'worn' ? worn[i] : s === 'bag' ? pr.bag[i] : undefined;
     if (!it) return;

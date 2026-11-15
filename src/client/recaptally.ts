@@ -41,7 +41,7 @@ export interface PartyLine { id: string; me: boolean; name: string; cls?: HeroCl
 /** What a hero has on them at the start of a job, to tell what they picked up by its end. */
 export interface Kit { items: string[]; relics: string[] }
 
-const owned = (p: Profile): Item[] => [...p.bag, ...Object.values(p.arms), ...(p.armor ? [p.armor] : []), ...p.rings].filter(Boolean) as Item[];
+const owned = (p: Profile): Item[] => [...p.bag, ...Object.values(p.arms), ...(p.armor ? [p.armor] : []), ...(p.legs ? [p.legs] : []), ...p.rings].filter(Boolean) as Item[];
 
 export const kitOf = (p: Profile): Kit => ({ items: owned(p).map((i) => JSON.stringify(i)), relics: p.relics.map((r) => r.id) });
 

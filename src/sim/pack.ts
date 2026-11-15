@@ -13,14 +13,17 @@ import type { FightEvent, Hero, Intent } from './types';
 export const PACK = BAG.start;
 /** No room left in this hero's pack. */
 export const full = (h: Hero) => h.bag.length >= (h.bagSize || BAG.start);
-export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6, unarm: 7 } as const;
+export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6, unarm: 7, unlegs: 8 } as const;
 
-/** Put on armor (the old goes in the pack) or a ring (a third pushes out the older). */
+/** Put on armor or legs (the old goes in the pack) or a ring (a third pushes out the older). */
 function wear(h: Hero, i: number, it: Item, ev: FightEvent[]): void {
   h.bag.splice(i, 1);
   if (slotOf(it) === 'armor') {
     if (h.armor) h.bag.push(h.armor);
     h.armor = it;
+  } else if (slotOf(it) === 'legs') {
+    if (h.legs) h.bag.push(h.legs);
+    h.legs = it;
   } else {
     // A third ring pushes out the older, never Someone's Wedding Ring (only the church takes that off).
     if (h.rings.length >= 2) {
@@ -62,6 +65,12 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
     if (!h.armor || full(h)) return;
     h.bag.push(h.armor);
     h.armor = null;
+    refreshHealth(h);
+  } else if (op === GEAR.unlegs) {
+    // Legs off, into the pack (if there's room).
+    if (!h.legs || full(h)) return;
+    h.bag.push(h.legs);
+    h.legs = null;
     refreshHealth(h);
   } else if (op === GEAR.drop) {
     // Hungry gear can't be dropped: only given up at the church.

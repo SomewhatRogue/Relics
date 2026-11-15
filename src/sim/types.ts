@@ -205,6 +205,8 @@ export interface Hero extends Body {
   bagSize: number;
   /** Worn armor (none: as light) and up to two rings (shared/gear.ts). */
   armor: Item | null;
+  /** Worn on the legs (modifiers only; the BODY sets the weight). */
+  legs?: Item | null;
   rings: Item[];
   /** Health before gear. */
   baseHp: number;

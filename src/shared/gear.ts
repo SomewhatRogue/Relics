@@ -75,7 +75,7 @@ export function reroll(rng: Rng, i: Item, k: number, cls: HeroClass): Item {
 export function rollGear(rng: Rng, cls: HeroClass | null, tier: Tier, slot: Slot = 'weapon', kit?: WeaponId, armor?: ArmorKind, lean = 0): Item {
   const t = tier === 'hungry' ? 'turning' : tier, n = MOD_COUNT[t], out: Item = { slot, quality: t, traits: [], mods: [], level: 0, ilvl: 1 };
   if (slot === 'weapon') out.kit = kit ?? rng.pick(CLASS_KITS[cls ?? 'WARRIOR']);
-  if (slot === 'armor') out.armor = armor ?? rng.pick(['light', 'medium', 'heavy'] as ArmorKind[]);
+  if (slot === 'armor' || slot === 'legs') out.armor = armor ?? rng.pick(['light', 'medium', 'heavy'] as ArmorKind[]);
   const pool = modPool(slot, slot === 'weapon' ? null : cls, out.kit, out.armor);
   // Forged: half the time one modifier and an element instead of two.
   const element = slot === 'weapon' && t === 'forged' && rng.next() < 0.5;
@@ -84,7 +84,8 @@ export function rollGear(rng: Rng, cls: HeroClass | null, tier: Tier, slot: Slot
   if (element) out.traits.push(rng.pick(ELEMENT_TRAITS));
   if (slot === 'weapon' && (t === 'tolmouth' || t === 'touched' || t === 'turning')) out.traits.push(rng.pick(traitsFor(out.kit!)));
   const cost = rollCost(rng, t);
-  if (cost) out.cost = cost;
+  // Legs carry half a chest piece's points, so half its cost.
+  if (cost) out.cost = slot === 'legs' ? { id: cost.id, v: cost.id === 'frail' ? Math.max(1, Math.round(cost.v / 2)) : Math.round(cost.v * 500) / 1000 } : cost;
   return out;
 }
 
@@ -146,11 +147,12 @@ export type GearStats = Record<ModId, number> & { speed: number; taken: number; 
 
 /** What everything worn adds up to (each piece's modifiers grown by its plus, the caps, then what the
  *  item levels and pluses add to a weapon's damage, armor's toughness and a ring's health, then any costs). */
-export function gearStats(weapon: Item | undefined, armor: Item | null | undefined, rings: Item[] = []): GearStats {
+export function gearStats(weapon: Item | undefined, armor: Item | null | undefined, rings: Item[] = [], legs: Item | null = null): GearStats {
   const s = Object.fromEntries((Object.keys(MODS) as ModId[]).map((k) => [k, 0])) as Record<ModId, number>;
   let taken = 1;
   const costs: Item['cost'][] = [], lift = { damage: 0, tough: 0, health: 0 };
-  for (const it of [weapon, armor, ...rings]) {
+  // Legs: their modifiers (grown by their plus) and costs only; the BODY sets the weight.
+  for (const it of [weapon, armor, legs, ...rings]) {
     if (!it) continue;
     const lv = levelOf(it), grow = 1 + lv * PLUS.mods;
     for (const m of it.mods ?? []) if (m.id in s) s[m.id] += m.v * grow;

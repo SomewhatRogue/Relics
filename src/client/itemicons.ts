@@ -40,10 +40,20 @@ const ICONS: Record<string, Paint> = {
   light: (px, line) => tunic(px, line, '#8a5a30', '#5a3a1e'),
   medium: (px, line) => tunic(px, line, '#8a90a0', '#5a6070'),
   heavy: (px, line) => tunic(px, line, '#c8ccd8', '#7a8090'),
+  // Legs (the Gear chat, docs/design/gear-levels.md): trousers, a mail skirt, greaves, in their weight's colours.
+  'legs-light': (px, line) => trousers(px, line, '#8a5a30', '#5a3a1e'),
+  'legs-medium': (px, line) => trousers(px, line, '#8a90a0', '#5a6070'),
+  'legs-heavy': (px, line) => trousers(px, line, '#c8ccd8', '#7a8090'),
   ring: (px, line) => { line(4, 3, 7, 3, G), line(4, 10, 7, 10, G), line(2, 5, 2, 8, G), line(9, 5, 9, 8, G); px(3, 4, G), px(8, 4, G), px(3, 9, G), px(8, 9, G); px(5, 1, '#e07a6a'), px(6, 1, '#e07a6a'), px(5, 2, '#ff9a8a'), px(6, 2, '#c84a3a'); },
   relic: (px, line) => { for (let y = 1; y < 11; y++) { const h = Math.min(y, 11 - y) >> 1; line(6 - h, y, 6 + h, y, y < 6 ? '#ffd27a' : '#d9a13a'); } px(6, 3, '#fff6e0'); },
   skill: (px, line) => { line(6, 0, 6, 11, '#9fd0ff'); line(1, 6, 11, 6, '#9fd0ff'); line(3, 3, 9, 9, '#5a8ac8'); line(9, 3, 3, 9, '#5a8ac8'); px(6, 6, '#fff'); },
 };
+function trousers(px: (x: number, y: number, c: string) => void, line: (a: number, b: number, c: number, d: number, col: string) => void, a: string, b: string): void {
+  line(2, 1, 9, 1, b);
+  for (let y = 2; y < 5; y++) line(2, y, 9, y, a);
+  for (let y = 5; y < 11; y++) line(2, y, 4, y, y % 3 ? a : b), line(7, y, 9, y, y % 3 ? a : b);
+  line(1, 11, 4, 11, b), line(7, 11, 10, 11, b);
+}
 function tunic(px: (x: number, y: number, c: string) => void, line: (a: number, b: number, c: number, d: number, col: string) => void, a: string, b: string): void {
   line(1, 2, 3, 1, a), line(8, 1, 10, 2, a), line(0, 3, 0, 6, a), line(11, 3, 11, 6, a);
   for (let y = 1; y < 11; y++) line(2, y, 9, y, y % 3 ? a : b);
@@ -78,7 +88,7 @@ export function draw(key: string, paint: Paint): string {
 
 /** The picture for a piece of gear: a weapon in its tier's stuff (weaponlook.ts), its element a spark at the tip. */
 export function itemIcon(it: Item): string {
-  const s = slotOf(it), key = s === 'weapon' ? it.kit ?? 'sword' : s === 'armor' ? it.armor ?? 'light' : 'ring';
+  const s = slotOf(it), key = s === 'weapon' ? it.kit ?? 'sword' : s === 'armor' ? it.armor ?? 'light' : s === 'legs' ? 'legs-' + (it.armor ?? 'light') : 'ring';
   const el = it.traits.find((t) => ELEMENT_TRAITS.includes(t)), look = s === 'weapon' ? weaponLookOf(it) : null, tint = look && tintPixel(look);
   return draw(key + (el ?? '') + (look ? '/' + lookKey(look) : ''), (px0, line0) => {
     // (An element's blade: its bright line in the element's colour, as it glows in the hand; a bow keeps its string.)
@@ -93,7 +103,7 @@ export function itemIcon(it: Item): string {
 }
 export const relicIcon = () => draw('relic', ICONS.relic);
 /** What an empty slot shows, faint, in place of its name: a tunic for the body, a ring, a relic. */
-export const ghostIcon = (key: 'light' | 'ring' | 'relic') => draw(key, ICONS[key]);
+export const ghostIcon = (key: 'light' | 'legs-light' | 'ring' | 'relic') => draw(key, ICONS[key]);
 export const skillIcon = () => draw('skill', ICONS.skill);
 export function potionIcon(id: PotionId): string {
   const col = POTIONS[id]?.col ?? '#c84a3a';

@@ -55,11 +55,11 @@ export const traitText = (t: TraitId, cls?: HeroClass) => barWords(t === 'reaper
 export type Tier = 'plain' | 'fine' | 'forged' | 'tolmouth' | 'touched' | 'turning' | 'hungry';
 export type Quality = Tier;
 export interface Item {
-  /** Weapon (the default, for old saves), armor or ring. */
-  slot?: 'weapon' | 'armor' | 'ring';
+  /** Weapon (the default, for old saves), armor (the BODY), legs or ring. */
+  slot?: 'weapon' | 'armor' | 'legs' | 'ring';
   /** A weapon's type. */
   kit?: WeaponId;
-  /** Armor's weight. */
+  /** Armor's weight (a legs piece's too: it picks its modifiers and name, never the wearer's weight). */
   armor?: 'light' | 'medium' | 'heavy';
   quality: Tier;
   traits: TraitId[];
@@ -85,12 +85,14 @@ export interface Item {
 }
 
 const ARMOR_NAME = { light: 'LEATHERS', medium: 'MAIL SHIRT', heavy: 'PLATE' };
+/** Legs by weight (docs/design/gear-levels.md section 4). */
+export const LEGS_NAME = { light: 'LEATHER TROUSERS', medium: 'MAIL SKIRT', heavy: 'GREAVES' };
 /** "STORMFORGED SPEAR +2": an element if it has one, the base, its level. */
 export function itemName(i: Item): string {
   const el = i.traits.find((t) => ELEMENT_TRAITS.includes(t));
   if (i.hungry) return HUNGRY[i.hungry as HungryId].name;
   if (i.unique && UNIQUE_NAMES[i.unique]) return UNIQUE_NAMES[i.unique];
-  const base = i.slot === 'armor' ? ARMOR_NAME[i.armor ?? 'light'] : i.slot === 'ring' ? 'RING' : WEAPONS[i.kit ?? 'sword'].name;
+  const base = i.slot === 'armor' ? ARMOR_NAME[i.armor ?? 'light'] : i.slot === 'legs' ? LEGS_NAME[i.armor ?? 'light'] : i.slot === 'ring' ? 'RING' : WEAPONS[i.kit ?? 'sword'].name;
   return (el ? TRAITS[el].name + ' ' : '') + base + (i.level ? ' +' + i.level : '');
 }
 
@@ -103,4 +105,4 @@ export const DROPS = { scrapper: 0.02, butcher: 0.15, forged: { scrapper: 0.2, b
  * browser, so nobody fights over it). One piece always, a chance of a second, a better one for
  * worse places and deep jobs. Most gear comes from here; goblins on the way rarely drop any.
  */
-export const TREASURE = { second: 0.35, slots: [['weapon', 0.6], ['armor', 0.2], ['ring', 0.2]] as const };
+export const TREASURE = { second: 0.35, slots: [['weapon', 0.55], ['armor', 0.16], ['legs', 0.13], ['ring', 0.16]] as const };

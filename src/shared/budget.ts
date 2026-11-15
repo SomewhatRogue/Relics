@@ -31,10 +31,13 @@ export function frame(kind: ArmorKind): number {
 /** The points a lighter weight gets back in its modifiers, to stand level with plate. */
 export const lift = (kind: ArmorKind) => Math.max(0, frame('heavy') - frame(kind));
 
-/** The points a tier spends on a piece's modifiers (armor gets its weight's lift from Fine up). */
+/** A legs piece's share of what a tier gives (docs/design/gear-levels.md section 4: about half a chest piece's). */
+export const LEGS_SHARE = 0.5;
+
+/** The points a tier spends on a piece's modifiers (armor gets its weight's lift from Fine up; legs half, no lift). */
 export function budget(tier: Tier, slot: Slot, armor?: ArmorKind): number {
   const n = MOD_COUNT[tier];
-  return n ? n * PER_MOD[tier] + (slot === 'armor' ? lift(armor ?? 'light') : 0) : 0;
+  return n ? n * PER_MOD[tier] * (slot === 'legs' ? LEGS_SHARE : 1) + (slot === 'armor' ? lift(armor ?? 'light') : 0) : 0;
 }
 
 /** What a piece adds up to: its modifiers, its frame if it's armor, less its cost. */
@@ -48,7 +51,7 @@ export function itemPoints(it: Item): number {
  * weight's lift as it was. A Forged weapon with an element has one modifier fewer (`n`).
  */
 export function budgetAt(tier: Tier, slot: Slot, armor: ArmorKind | undefined, lv: number, n = MOD_COUNT[tier]): number {
-  return n * PER_MOD[tier] * growAt(lv) + (n && slot === 'armor' ? lift(armor ?? 'light') : 0);
+  return n * PER_MOD[tier] * (slot === 'legs' ? LEGS_SHARE : 1) * growAt(lv) + (n && slot === 'armor' ? lift(armor ?? 'light') : 0);
 }
 const modsPts = (it: Item) => (it.mods ?? []).reduce((s, m) => s + modPoints(m), 0);
 const want = (it: Item, lv: number) => {

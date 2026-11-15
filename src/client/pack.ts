@@ -120,6 +120,8 @@ export class PackView {
       (h.relics[1] && !carriedRelic(h) ? slot('s-relic', cell(null, 'relic', { dst: 'relic', sel, title: PACKW.relic, icon: relicIcon(), col: '#ffd27a' })) : '') +
       slot('s-hand', hand) +
       slot('s-body', cell(h.armor, h.armor ? 'armor' : null, { dst: 'armor', sel, title: PACKW.body, ghost: ghostIcon('light') })) +
+      // LEGS, in the square the skill had (docs/design/gear-levels.md section 4; the Gear chat).
+      slot('s-legs', cell(h.legs ?? null, h.legs ? 'legs' : null, { dst: 'legs', sel, title: PACKW.legs, ghost: ghostIcon('legs-light') })) +
       [0, 1].map((k) => slot('s-ring' + k, cell(h.rings[k] ?? null, h.rings[k] ? 'ring:' + k : null, { dst: 'ring', sel, title: PACKW.ring, ghost: ghostIcon('ring') }))).join('') +
       `<div class="fig"><img src="${look}" alt=""></div>` +
       `<div class="slot s-belt" title="${PACKW.belt}"><div class="beltrow">${belt}</div></div></div>`;
@@ -139,6 +141,7 @@ export class PackView {
       return row(held ? sideBySide(h, held, true) : `<b>${WEAPONS[h.weapon].name}</b><div class="tr">${COPY.plain}</div>`, held || h.weapon !== plainKit(h) ? btn(COPY.intoPack, GEAR.equip, -1, 'ghost') : '');
     }
     if (s === 'armor' && h.armor) return row(sideBySide(h, h.armor, true), btn(COPY.takeOff, GEAR.unarm, 0, 'ghost'));
+    if (s === 'legs' && h.legs) return row(sideBySide(h, h.legs, true), btn(COPY.takeOff, GEAR.unlegs, 0, 'ghost'));
     if (s === 'ring' && h.rings[i]) return row(sideBySide(h, h.rings[i], true), h.rings[i].hungry === 'wedding' ? '' : btn(COPY.takeOff, GEAR.off, i, 'ghost'));
     if (s === 'relic' && h.relics[1]) {
       const it = carriedRelic(h);

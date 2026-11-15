@@ -36,6 +36,7 @@ export function wornFor(h: Hero, it: Item): Item | null {
   const s = slotOf(it);
   if (s === 'weapon') return h.arms[h.weapon] ?? null;
   if (s === 'armor') return h.armor;
+  if (s === 'legs') return h.legs ?? null;
   return h.rings.length >= 2 ? h.rings[0] : null;
 }
 

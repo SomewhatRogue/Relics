@@ -71,7 +71,7 @@ const clock = () => performance.now() / 1000;
 /** The run as a patch carries it: without the heroes' board, which rides whole in the end and the saves (sim/score.ts). */
 const lean = (r: Run | null): Run | null => (r?.board ? { ...r, board: undefined } : r);
 /** A hero's fields that are their kit (client/keepkit.ts). */
-const KIT = ['weapon', 'arms', 'bag', 'armor', 'rings', 'belt', 'glow', 'relics', 'augments', 'found', 'relicItem'];
+const KIT = ['weapon', 'arms', 'bag', 'armor', 'legs', 'rings', 'belt', 'glow', 'relics', 'augments', 'found', 'relicItem'];
 /** A friend in the leader's room. */
 export interface Friend {
   name: string; profile: Profile | null; intent: Intent; heard: number; fresh: boolean; gone: boolean;

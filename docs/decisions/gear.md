@@ -80,3 +80,32 @@ The Gear chat's log (docs/design/gear-levels.md). Newest at the foot.
   about a third as common as before. Kept so; if the Deep's bands should make up for it, their `pre` and
   `rare` are the Deep chat's to raise.
 - **For Economy**: `Take` has a `rolls` field now; nothing in income changed (tests/income.test.ts passes).
+
+## 2026-11-15: slice 4, legs (Opus 5.5)
+
+- **The slot**: `Item.slot` 'legs', its weight in `armor` (it picks the list and the name, never the
+  wearer's weight). `LEGS_MODS` (mods.ts): light DODGE, STAMINA, SPEED; medium HEALTH, STAMINA, SPEED;
+  heavy TOUGHNESS, HEALTH, STAMINA. Half a chest piece's points (budget.ts `LEGS_SHARE`), no weight lift,
+  half a rare piece's cost. Names LEATHER TROUSERS, MAIL SKIRT, GREAVES (loot.ts `LEGS_NAME`).
+- **Worn**: `Profile.legs`, `Hero.legs` (optional, so old saves are simply bare-legged); `gearStats`
+  takes them fourth (modifiers and costs, grown by their plus; no base lift, no weight); the room's
+  `statsOf` counts them; `GEAR.unlegs` (8) takes them off; equip goes through `wear`. Carried online
+  (coop.ts KIT), home and back (keepkit.ts), in the Want sum, the forge's UPGRADE list, the recap's tally.
+- **Drops**: treasure 55/16/13/16 (weapon, body, legs, ring); a chest's and a butcher's non-weapon pick
+  splits body, legs and ring with the same draws as before.
+- **The pack**: LEGS takes the empty top-left square (pack.css area `skill`), a trousers icon by weight
+  (itemicons.ts), the card's how row "Modifiers only. Your body piece sets your weight." (approved), the
+  compare sees legs, a plus on legs reads "Each modifier on it is 20% stronger".
+- **Goblins measured**: a FORGED pair at your level keeps a hero up about 4% longer at level 1, 5% at 5,
+  7% at 10 (4% times the item level's growth). threat.ts `LEGS_THREAT` 0.04: `levelHarm` takes that
+  share on top. tests/gearmods.test.ts holds it within a fifth of the measure.
+- **Other chats' files, one or two lines each, legs only** (asking Kyle in the reply): UI's `pack.ts`
+  (the square and its card), `pack.css` (one line), `cells.ts` (what legs replace), `itemicons.ts` (three
+  icons); Economy's `prices.ts` (`SLOT_MULT.legs` 0.55, since legs are half the points),
+  `storewords.ts` and `shopwords.ts` (the LEGS label and two lines, no gold); shared `game.ts`,
+  `keepkit.ts`, `coop.ts`, `recaptally.ts`, `stores.ts`, `forgeview.ts`, `plusrows.ts`, `sim/pack.ts`,
+  `packmoves.ts`, `sim/types.ts`, `progress.ts`, `sim/gearstats.ts`, `threat.ts`.
+- **For Trading**: `cleanItem` turns legs away (slot must be weapon, armor or ring). Allow 'legs' with
+  an armor weight, as armor, and they trade.
+- **For Art**: a legs piece on the floor draws as a ring for now (relicsdraw.ts `drawGear`, loot3d.ts
+  `makeLoot` fall through). Legs on the hero are slice 5, with gear-looks.

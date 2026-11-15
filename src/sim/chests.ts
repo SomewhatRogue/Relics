@@ -31,7 +31,8 @@ export function startChest(c: Chest, h: Hero, heroes: Hero[], enemies: Enemy[], 
     if (c.rolls[p.id]) continue;
     const n = rng.next() < 0.4 || c.chained ? 2 : 1, cls = WEAPONS[p.weapon].cls;
     c.rolls[p.id] = Array.from({ length: n }, () => {
-      const slot = rng.next() < 0.55 ? 'weapon' : rng.next() < 0.5 ? 'armor' : 'ring';
+      // (Legs as often as a chest piece's share allows: the Gear chat, docs/design/gear-levels.md.)
+      const r2 = rng.next() < 0.55 ? -1 : rng.next(), slot = r2 < 0 ? 'weapon' : r2 < 0.36 ? 'armor' : r2 < 0.64 ? 'legs' : 'ring';
       return lift(rollAny(rng, cls, rollTier(rng, 'chest', shift + (c.chained ? 1 : 0), lv, floor), slot), lv);
     });
   }

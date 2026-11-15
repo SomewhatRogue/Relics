@@ -383,6 +383,7 @@ export class Game {
     h.perks = [...p.perks];
     h.drills = p.drills;
     h.armor = p.armor;
+    h.legs = p.legs ?? null;
     h.rings = [...p.rings];
     h.baseHp = HERO.hp + (perkFx(p.perks).health ?? 0);
     // Raised this job (sim/raise.ts): the most health stays cut till it ends, and who raised you stays known.
@@ -1287,7 +1288,7 @@ export class Game {
     const hungry = this.hungryWorn();
     p.want += hungry.reduce((s, it) => s + HUNGRY[it.hungry as HungryId].want, 0) + (hungry.length ? run.kills * WANT.perKill : 0);
     // TOUCHED and TURNING gear grows it a little too, for every job it's worn on (shared/costs.ts).
-    p.want += [p.arms[p.weapon], p.armor, ...p.rings].reduce((s, it) => s + (it ? TIER_WANT[it.quality] ?? 0 : 0), 0);
+    p.want += [p.arms[p.weapon], p.armor, p.legs, ...p.rings].reduce((s, it) => s + (it ? TIER_WANT[it.quality] ?? 0 : 0), 0);
     const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;
@@ -1488,15 +1489,16 @@ export class Game {
   /** Every piece this hero owns, worn or packed, for the forge. */
   gearList(): Item[] {
     const p = this.profile, held = p.arms[p.weapon];
-    return [...(held ? [held] : []), ...(p.armor ? [p.armor] : []), ...p.rings, ...p.bag];
+    return [...(held ? [held] : []), ...(p.armor ? [p.armor] : []), ...(p.legs ? [p.legs] : []), ...p.rings, ...p.bag];
   }
 
   /** Swap one piece for its changed copy, wherever it is (profile and hero alike). */
   private replace(old: Item, next: Item): void {
     const p = this.profile, h = this.hero, swap = (xs: Item[]) => xs.map((x) => (x === old ? next : x));
-    for (const o of [p, h] as { arms: Partial<Record<WeaponId, Item>>; armor: Item | null; rings: Item[]; bag: Item[] }[]) {
+    for (const o of [p, h] as { arms: Partial<Record<WeaponId, Item>>; armor: Item | null; legs?: Item | null; rings: Item[]; bag: Item[] }[]) {
       for (const k of Object.keys(o.arms) as WeaponId[]) if (o.arms[k] === old) o.arms[k] = next;
       if (o.armor === old) o.armor = next;
+      if (o.legs === old) o.legs = next;
       o.rings = swap(o.rings);
       o.bag = swap(o.bag);
     }

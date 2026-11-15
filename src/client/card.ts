@@ -45,11 +45,11 @@ export const shown = (r: Row, w: WeaponId) => {
 };
 
 export interface Row { label: string; v: number; unit: '' | 's' | '%'; low?: boolean }
-interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; rings: Item[]; baseHp: number }
+interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; legs?: Item | null; rings: Item[]; baseHp: number }
 
 /** The numbers that matter, for what's worn. */
 export function sheet(w: Worn): Row[] {
-  const g = gearStats(w.item, w.armor, w.rings), k = WEAPONS[w.weapon], first = k.combo[0], last = k.combo[k.combo.length - 1], q = 1 - g.quick;
+  const g = gearStats(w.item, w.armor, w.rings, w.legs ?? null), k = WEAPONS[w.weapon], first = k.combo[0], last = k.combo[k.combo.length - 1], q = 1 - g.quick;
   return [
     // A Mage's tap spark is a spell, so SPELL POWER counts in it (sim/hero.ts currentSwing).
     { label: 'HIT', v: bigNum(first.dmg * (1 + g.damage) * (1 + (k.cls === 'MAGE' && first.shot ? g.spell : 0))), unit: '' },
@@ -77,13 +77,14 @@ export function sheet(w: Worn): Row[] {
 }
 
 export const fmt = (r: Row, v = r.v) => (r.unit === 's' ? v.toFixed(2) + ' s' : r.unit === '%' ? Math.round(v * 100) + '%' : String(Math.round(v * 10) / 10));
-export const worn = (h: Hero): Worn => ({ weapon: h.weapon, item: h.arms[h.weapon], armor: h.armor, rings: h.rings, baseHp: h.baseHp });
+export const worn = (h: Hero): Worn => ({ weapon: h.weapon, item: h.arms[h.weapon], armor: h.armor, legs: h.legs ?? null, rings: h.rings, baseHp: h.baseHp });
 
 /** What you'd wear with `it` on instead (a third ring pushes out the older). */
 export function wearing(h: Hero, it: Item): Worn {
   const w = worn(h), s = slotOf(it);
   if (s === 'weapon') return { ...w, weapon: it.kit!, item: it };
   if (s === 'armor') return { ...w, armor: it };
+  if (s === 'legs') return { ...w, legs: it };
   return { ...w, rings: [...(h.rings.length >= 2 ? h.rings.slice(1) : h.rings), it] };
 }
 
@@ -111,7 +112,8 @@ export const modValue = (m: Mod, grow = 1) => {
 export function card(it: Item, h?: Hero, brief = false): string {
   const t = TIERS[it.quality], s = slotOf(it), cls = h ? WEAPONS[h.weapon].cls : it.kit ? WEAPONS[it.kit].cls : undefined;
   // A weapon's TAP / HOLD / PERFECT rows live in the gear's WEAPONS panel now (weaponsabout.ts; Kyle, 2026-11-05: "too cluttered").
-  const how = s === 'armor' ? armorHow(it.armor ?? 'light', cls) : '';
+  // Legs: modifiers only; the BODY sets the weight (docs/design/gear-levels.md section 4).
+  const how = s === 'armor' ? armorHow(it.armor ?? 'light', cls) : s === 'legs' ? `<div class="kitrows armor"><div><b>LEGS</b><span>${CARDW.legs}</span></div></div>` : '';
   // Whose hands it's judged in: the weapon itself, or what the wearer holds.
   const kit = s === 'weapon' ? it.kit : h?.weapon;
   // "NAME +10%: what it does" and "NAME: what it does" (Kyle's example, before parry went: "STAMINA ON PARRY: parry refills stamina").

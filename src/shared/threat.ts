@@ -7,6 +7,7 @@
  * sim/packs.ts (the party), sim/pacing.ts (holding a pack back), sim/chase.ts (kiting), sim/bigone.ts.
  */
 import type { Role } from './encounters.js';
+import { growAt } from './itemlevel.js';
 import type { EnemyAttackSpec } from './tuning.js';
 
 /** How heavy a goblin is on the fight. Chaff is the small ones; a special has one trick; meaty takes a few good hits; heavy is a butcher. */
@@ -78,12 +79,18 @@ export const PARTY_TOUGH = { hp: [1, 1.35, 1.65, 1.95], harm: [1, 1.15, 1.25, 1.
  * party's size, up to `hpMost` and `harmMost` (reached about level 8 to 9, so the last levels and gear
  * are all yours). Loot the same, up to `most` levels' worth: a level past the first, plain is `lean.plain`
  * less likely, Forged and PRE-WAR `lean` more, the rare three only `rare` more, and Fine takes up the
- * difference (never under `floor` of what it was); and from level `itemFrom`, a drop comes a level up
- * (+1), and +2 from `item2`.
+ * difference (never under `floor` of what it was). (`itemFrom`, `item2`, `rare`: the old free plus and
+ * rare lean, before item levels; the Gear chat's lootlevel.ts and itemlevel.ts have taken over.)
  */
 export const LEVEL_SCALE = { hp: 0.06, harm: 0.04, hpMost: 0.45, harmMost: 0.3, most: 9, lean: { plain: -0.06, forged: 0.04, tolmouth: 0.04 }, rare: 0.03, floor: 0.05, itemFrom: 5, item2: 9 };
 export const levelHp = (lv: number) => 1 + Math.min(LEVEL_SCALE.hpMost, LEVEL_SCALE.hp * Math.max(0, lv - 1));
-export const levelHarm = (lv: number) => 1 + Math.min(LEVEL_SCALE.harmMost, LEVEL_SCALE.harm * Math.max(0, lv - 1));
+/**
+ * Legs (docs/design/gear-levels.md section 4): a FORGED pair at your level, the tier you can count on,
+ * keeps a hero up about 4% longer at level 1, growing with the item level as its modifiers do (7% a
+ * level: 5% at 5, 7% at 10). Measured by tests/gearmods.test.ts; goblins hit that much harder to match.
+ */
+export const LEGS_THREAT = 0.04;
+export const levelHarm = (lv: number) => (1 + Math.min(LEVEL_SCALE.harmMost, LEVEL_SCALE.harm * Math.max(0, lv - 1))) * (1 + LEGS_THREAT * growAt(lv));
 /** The party's level for the job: the heroes' average, to one place (a level-1 party is 1). */
 export const partyLevel = (levels: number[]) => (levels.length ? Math.round((levels.reduce((s, l) => s + Math.max(1, l), 0) / levels.length) * 10) / 10 : 1);
 

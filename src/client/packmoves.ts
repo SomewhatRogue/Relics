@@ -14,13 +14,14 @@ export function moveOf(h: Hero, src: string, dst: string, town = false): [number
     if (!it) return null;
     const slot = slotOf(it);
     if (d === 'hand' && slot === 'weapon' && fits(h, it.kit)) return [GEAR.equip, i];
-    if ((d === 'armor' && slot === 'armor') || (d === 'ring' && slot === 'ring')) return [GEAR.equip, i];
+    if ((d === 'armor' && slot === 'armor') || (d === 'legs' && slot === 'legs') || (d === 'ring' && slot === 'ring')) return [GEAR.equip, i];
     if (d === 'drop' && !town && it.quality !== 'hungry') return [GEAR.drop, i];
     return null;
   }
   if (d === 'bag' && room) {
     if (s === 'hand' && h.arms[h.weapon]) return [GEAR.equip, -1];
     if (s === 'armor' && h.armor) return [GEAR.unarm, 0];
+    if (s === 'legs' && h.legs) return [GEAR.unlegs, 0];
     if (s === 'ring' && h.rings[i] && h.rings[i].hungry !== 'wedding') return [GEAR.off, i];
   }
   if (s === 'belt' && d === 'belt' && i > 0) return [GEAR.front, i];

@@ -5,7 +5,7 @@
  */
 import { coinsHtml } from '../shared/coins';
 export const PACKW = {
-  hand: 'HAND', body: 'BODY', ring: 'RING', relic: 'RELIC', skill: 'SKILL', belt: 'BELT',
+  hand: 'HAND', body: 'BODY', legs: 'LEGS', ring: 'RING', relic: 'RELIC', skill: 'SKILL', belt: 'BELT',
   bag: 'PACK',
   wear: 'WEAR',
   hint: 'Tap a piece to compare it with what you wear.',
@@ -73,6 +73,8 @@ export const FORGE = {
   /** What a plus adds, on the card. */
   adds: (main: string, mods: number) => main + (mods ? `, and each modifier on it is ${mods}% stronger` : ''),
   damage: (pct: number) => `${pct}% more damage`,
+  /** Legs (the Gear chat): no main number, the modifiers only. */
+  legs: (mods: number) => `Each modifier on it is ${mods}% stronger`,
   tough: (pct: number) => `${pct}% less damage taken`,
   health: (n: number) => `${n} more health`,
   melt: (steel: number) => `MELT DOWN (+${steel} STEEL)`,

@@ -15,18 +15,20 @@ const tag = process.argv[2] || 'now';
     p.bag = [
       { slot: 'weapon', kit: 'greatsword', quality: 'tolmouth', traits: ['crushing'], mods: [{ id: 'draw', v: 0.161 }, { id: 'arc', v: 0.27 }], level: 2, ilvl: 7 },
       { slot: 'ring', quality: 'touched', traits: [], mods: [{ id: 'damage', v: 0.13 }, { id: 'crit', v: 0.11 }, { id: 'health', v: 30 }], cost: { id: 'slow', v: 0.09 }, level: 0, ilvl: 9 },
+      { slot: 'legs', armor: 'medium', quality: 'tolmouth', traits: [], mods: [{ id: 'health', v: 21 }, { id: 'breath', v: 0.18 }], level: 0, ilvl: 6 },
       { slot: 'armor', armor: 'heavy', quality: 'forged', traits: [], mods: [{ id: 'guard', v: 0.14 }, { id: 'tough', v: 0.08 }], level: 1 },
     ];
+    p.legs = { slot: 'legs', armor: 'heavy', quality: 'fine', traits: [], mods: [{ id: 'tough', v: 0.07 }], ilvl: 4 };
     p.armor = { slot: 'armor', armor: 'heavy', quality: 'fine', traits: [], mods: [{ id: 'health', v: 22 }], ilvl: 3 };
     p.rings = [{ slot: 'ring', quality: 'fine', traits: [], mods: [{ id: 'focus', v: 0.16 }], ilvl: 2 }];
     try { localStorage.setItem('relic.packHint', '1'); } catch {}
-    for (const x of [g.hero, ...g.room.heroes]) Object.assign(x, { bag: [...p.bag], armor: p.armor, rings: [...p.rings] });
+    for (const x of [g.hero, ...g.room.heroes]) Object.assign(x, { bag: [...p.bag], armor: p.armor, legs: p.legs, rings: [...p.rings] });
   });
   await page.waitForTimeout(300);
   await page.evaluate(() => document.getElementById('packbtn').click());
   await page.waitForTimeout(800);
   await page.screenshot({ path: `shots/gear-${tag}-pack.png` });
-  for (let i = 0; i < 2; i++) {
+  for (const i of [0, 2]) {
     // The pack draws itself again on a tap, so each tile is found afresh.
     const t = (await page.$$('#pack .bag .tile[data-src]'))[i];
     if (!t) break;

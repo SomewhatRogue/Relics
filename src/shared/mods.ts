@@ -24,7 +24,7 @@ import { CLASS_DODGES, CLASS_KITS, WEAPONS, guardOf, type HeroClass, type Weapon
 export type ModId = 'damage' | 'quick' | 'reach' | 'draw' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'
   | 'arc' | 'crit' | 'backstab' | 'finisher' | 'spell' | 'thrift';
 export interface Mod { id: ModId; v: number }
-export type Slot = 'weapon' | 'armor' | 'ring';
+export type Slot = 'weapon' | 'armor' | 'legs' | 'ring';
 export type ArmorKind = 'light' | 'medium' | 'heavy';
 
 /** Each modifier: its name, its unit (1% / 0.01 s / 1 health), and `per`, the points one unit is worth. */
@@ -106,6 +106,15 @@ export const ARMOR_MODS: Record<ArmorKind, ModId[]> = {
   medium: ['health', 'tough', 'breath', 'foot'],
   light: ['dodge', 'breath', 'foot', 'crit'],
 };
+/**
+ * Legs (docs/design/gear-levels.md section 4): modifiers only, movement and staying up, never a weapon's
+ * or a hand's. The weight picks the list and the name; the BODY still sets how you move and take.
+ */
+export const LEGS_MODS: Record<ArmorKind, ModId[]> = {
+  light: ['dodge', 'breath', 'foot'],
+  medium: ['health', 'breath', 'foot'],
+  heavy: ['tough', 'health', 'breath'],
+};
 /** Rings: anyone's, then (rolled for a class) the class's own. */
 export const RING_MODS: ModId[] = ['damage', 'health', 'breath', 'focus', 'crit', 'foot'];
 const RING_OWN: ModId[] = ['guard', 'dodge', 'mending', 'spell', 'thrift'];
@@ -127,7 +136,7 @@ export function modFits(id: ModId, cls: HeroClass, kit?: WeaponId): boolean {
 /** The list a piece rolls from: its kit's, its weight's or a ring's, trimmed to `cls` when rolled for one. */
 export function modPool(slot: Slot, cls: HeroClass | null, kit?: WeaponId, armor?: ArmorKind): ModId[] {
   if (slot === 'weapon') return weaponMods(kit!);
-  const base = slot === 'armor' ? ARMOR_MODS[armor ?? 'light'] : [...RING_MODS, ...(cls ? RING_OWN : [])];
+  const base = slot === 'armor' ? ARMOR_MODS[armor ?? 'light'] : slot === 'legs' ? LEGS_MODS[armor ?? 'light'] : [...RING_MODS, ...(cls ? RING_OWN : [])];
   return cls ? base.filter((id) => modFits(id, cls)) : base;
 }
 

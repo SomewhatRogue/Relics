@@ -3,6 +3,7 @@ body #pack { width: min(660px, calc(100vw - 20px)); }
 body #pack .top { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; margin-top: 8px; }
 body #pack .doll { flex: none; display: grid; grid-template-columns: 44px 54px 44px; grid-template-areas: 'skill fig body' 'hand fig ring0' 'relic fig ring1' 'belt belt belt'; gap: 6px 5px; }
 body #pack .s-relic { grid-area: relic; } body #pack .s-skill { grid-area: skill; } body #pack .s-hand { grid-area: hand; } body #pack .s-body { grid-area: body; }
+body #pack .s-legs { grid-area: skill; } /* LEGS, the Gear chat */
 body #pack .s-ring0 { grid-area: ring0; } body #pack .s-ring1 { grid-area: ring1; } body #pack .s-belt { grid-area: belt; }
 body #pack .fig { grid-area: fig; display: flex; align-items: center; justify-content: center; background: radial-gradient(closest-side, #2e3138, transparent); }
 body #pack .fig img { width: 60px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 #000); }

@@ -11,7 +11,8 @@ import { jobs } from './coins.js';
 /** A middling piece's price, by tier (0: never sold). */
 /** In jobs of copper (economy.md section 3): a FORGED piece three or four jobs, a TOLMOUTH one a couple of evenings. */
 export const PRICE: Record<Tier, number> = { plain: jobs(0.5), fine: jobs(1.2), forged: jobs(3.5), tolmouth: jobs(11), touched: jobs(25), turning: jobs(60), hungry: 0 };
-const SLOT_MULT = { weapon: 1, armor: 0.9, ring: 0.8 };
+// Legs carry half a chest piece's points (the Gear chat, docs/decisions/gear.md), so a little over half its price.
+const SLOT_MULT = { weapon: 1, armor: 0.9, legs: 0.55, ring: 0.8 };
 /** Tobin's cut of a piece's worth (a fifth: economy.md, his cut falls), plus a little for each of Halvard's levels on it. */
 export const PAWN_CUT = 0.2, PER_LEVEL = 20;
 /** Given to the town works instead, a piece counts for `GIVE_MULT` times what it sells for. */

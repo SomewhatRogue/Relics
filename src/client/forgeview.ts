@@ -31,6 +31,8 @@ export function plusFmt(r: PlusRow): string {
 /** What the piece's plus adds, in words, for its card: "30% more damage, and each modifier on it is 30% stronger". */
 export function plusLine(it: Item): string {
   const lv = plusOf(it), s = slotOf(it), pct = (x: number) => Math.round(lv * x * 100);
+  // Legs have no main number: a plus only grows their modifiers.
+  if (s === 'legs') return FORGE.legs(pct(PLUS.mods));
   const main = s === 'weapon' ? FORGE.damage(pct(PLUS.damage)) : s === 'armor' ? FORGE.tough(pct(PLUS.tough)) : FORGE.health(shown(lv * PLUS.health));
   const others = (it.mods ?? []).some((m) => m.id !== (s === 'weapon' ? 'damage' : s === 'armor' ? 'tough' : 'health'));
   return FORGE.adds(main, others ? pct(PLUS.mods) : 0);

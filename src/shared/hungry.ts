@@ -40,6 +40,6 @@ export function rollHungry(rng: Rng, cls: HeroClass, from?: string): Item {
 }
 
 /** Any tier: hungry pieces from rollHungry, the rest from rollGear. */
-export function rollAny(rng: Rng, cls: HeroClass, tier: Item['quality'], slot: 'weapon' | 'armor' | 'ring' = 'weapon', kit?: WeaponId, from?: string): Item {
+export function rollAny(rng: Rng, cls: HeroClass, tier: Item['quality'], slot: 'weapon' | 'armor' | 'legs' | 'ring' = 'weapon', kit?: WeaponId, from?: string): Item {
   return tier === 'hungry' ? rollHungry(rng, cls, from) : rollGear(rng, cls, tier, slot, kit);
 }

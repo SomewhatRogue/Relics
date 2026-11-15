@@ -15,7 +15,7 @@ export interface PlusRow { id: string; label: string; v: number; unit: '' | 's' 
 /** The piece at plus `lv` (its temper kept; gear.ts temperOf reads it up to the new plus). */
 export const atPlus = (it: Item, lv: number): Item => ({ ...it, level: Math.max(0, Math.min(PLUS_CAP, lv)) });
 
-const MAIN: Record<'weapon' | 'armor' | 'ring', ModId> = { weapon: 'damage', armor: 'tough', ring: 'health' };
+const MAIN: Record<'weapon' | 'armor' | 'legs' | 'ring', ModId | ''> = { weapon: 'damage', armor: 'tough', legs: '', ring: 'health' };
 
 /** The rows, at the piece's own plus or at `lv`. */
 export function plusRows(it: Item, lv = plusOf(it)): PlusRow[] {
@@ -27,7 +27,7 @@ export function plusRows(it: Item, lv = plusOf(it)): PlusRow[] {
   } else if (s === 'armor') {
     // Costs (costs.ts) stay on the card's COST row, not here.
     out.push({ id: 'taken', label: 'DAMAGE TAKEN', v: gearStats(undefined, { ...at, cost: undefined }).taken, unit: '%', low: true });
-  } else {
+  } else if (s === 'ring') {
     out.push({ id: 'health', label: 'HEALTH', v: gearStats(undefined, null, [{ ...at, cost: undefined }]).health, unit: '' });
   }
   // Each modifier as the piece alone gives it (gearStats grows it the same way, before the caps).

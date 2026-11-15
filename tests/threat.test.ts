@@ -10,7 +10,8 @@ import { BIG, HOLD, LEVEL_SCALE, PARTY_TOUGH, SPRINT, THREAT, TICK, VARIANTS, le
 import { beatsFor, bigRooms, capsFor, foeThreat, meaty, roomBudget, threatIn, tierOf } from '../src/shared/roombudget';
 import { threatOf } from '../src/shared/threat';
 import { leanOdds } from '../src/shared/lootlevel';
-import { dropLevel } from '../src/shared/itemlevel';
+import { ILVL, dropLevel, growAt } from '../src/shared/itemlevel';
+import { LEGS_THREAT } from '../src/shared/threat';
 import { DROP_ODDS } from '../src/shared/gear';
 import { isSpecial } from '../src/shared/encounter';
 import { Rng } from '../src/shared/rng';
@@ -197,7 +198,9 @@ describe("the party's level", () => {
   it('is capped', () => {
     expect(levelHp(1)).toBe(1);
     expect(levelHp(40)).toBe(1 + LEVEL_SCALE.hpMost);
-    expect(levelHarm(40)).toBe(1 + LEVEL_SCALE.harmMost);
+    // The legs' share on top (threat.ts LEGS_THREAT), capped at the highest item level.
+    expect(levelHarm(40)).toBeCloseTo((1 + LEVEL_SCALE.harmMost) * (1 + LEGS_THREAT * growAt(ILVL.most)));
+    expect(levelHarm(40)).toBeLessThanOrEqual(1.5);
     expect(levelHp(40)).toBeLessThanOrEqual(1.5);
   });
 

@@ -43,6 +43,8 @@ export const SHOPW = {
 
 /** Words on an item's card (card.ts). */
 export const CARDW = {
+  /** A legs piece's line where a chest piece says how its weight wears (the Gear chat; lore keeper and line editor, 2026-11-14). */
+  legs: 'Modifiers only. Your body piece sets your weight.',
   /** A SOULBOUND piece's row (client/card.ts; sim/loot.ts). */
   bound: 'sells, but can\'t be given to another hero.',
   /** After a modifier the wearer can't use (a BLOCK on a Mage's plate). */

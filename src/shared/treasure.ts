@@ -18,7 +18,7 @@ export function treasure(job: Job, cls: HeroClass, who: string, runs: number, pa
   // A short job: one piece. Medium: maybe two. Long: two, a cut above.
   const n = (long ? 2 : 1 + (job.rooms >= 3 && rng.next() < TREASURE.second ? 1 : 0)) + (party >= 2 ? 1 : 0) + more, out: Item[] = [];
   for (let i = 0; i < n; i++) {
-    let r = rng.next(), slot: 'weapon' | 'armor' | 'ring' = 'weapon';
+    let r = rng.next(), slot: 'weapon' | 'armor' | 'legs' | 'ring' = 'weapon';
     for (const [s, p] of TREASURE.slots) if ((r -= p) < 0) { slot = s; break; }
     const it = rollAny(rng, cls, rollTier(rng, worse ? 'named' : 'butcher', (worse ? 1 : 0) + (party >= 3 ? 1 : 0), lv), slot, undefined, job.boss);
     // At the party's level, one more from a hard place, a deep dive or a long job (shared/itemlevel.ts).
