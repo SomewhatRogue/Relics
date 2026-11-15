@@ -103,6 +103,9 @@ export class Soundscape {
     if (ev.k === 'judged') return sfx.smite();
     if (ev.k === 'mending' || ev.k === 'sanctstep' || ev.k === 'risen') return sfx.blessed();
     // The movement ladder and the Mage's techniques (sim/ladder*.ts, taunt.ts, techmage.ts).
+    // The streak (sim/streak.ts), your own only: a step up rings, a break cracks.
+    if (ev.k === 'streak') return void (ev.id === 'me' && sfx.blessed());
+    if (ev.k === 'streakbreak') return void (ev.id === 'me' && sfx.wardbreak());
     if (ev.k === 'landing' || ev.k === 'braced') return sfx.bodyhit();
     if (ev.k === 'airshot' || ev.k === 'twinsnare') return sfx.latch();
     if (ev.k === 'blinkthrough' || ev.k === 'halfblink' || ev.k === 'spellthief') return sfx.channeled();

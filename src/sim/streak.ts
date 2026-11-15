@@ -5,7 +5,7 @@
  * reads that for the bonus). Only on a job: nothing counts outside one.
  */
 import { STREAK, streakStep } from '../shared/streak';
-import type { Count } from './score';
+import { count, type Count } from './score';
 import type { FightEvent, Hero } from './types';
 
 const pending = new Map<string, { add: number; broke: boolean }>();
@@ -41,6 +41,8 @@ export function stepStreaks(heroes: Hero[], now: number, ev: FightEvent[]): void
     const step = streakStep(n);
     if (step > (h.streakStep ?? 0)) ev.push({ k: 'streak', x: h.x, y: h.y, id: h.id, n, step });
     Object.assign(h, { streak: n, streakStep: step, streakBest: Math.max(h.streakBest ?? 0, n) });
+    // The job's best, for the recap and the board (sim/score.ts keeps the most).
+    if (n > 0) count(h.id, 'streak', n);
   }
   pending.clear();
 }

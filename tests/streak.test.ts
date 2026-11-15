@@ -55,3 +55,20 @@ describe('the streak (2026-11-14)', () => {
     expect(streakStep(50)).toBe(3);
   });
 });
+
+describe('the streak on the board (2026-11-14)', () => {
+  it("a job's longest streak goes on the recap's line and onto the world's board, each hero once at their best", async () => {
+    const { contribute } = await import('../src/shared/worldsync');
+    const { newWorld } = await import('../src/shared/story');
+    const h = hero(), b: Board = {};
+    useBoard(b);
+    for (let i = 0; i < 7; i++) (count(h.id, 'best', 10), stepStreaks([h], i * 0.5, []));
+    useBoard(null);
+    expect(b[h.id].streak).toBe(7);
+    const w = newWorld(), who = { id: 'haaaaaaa1', name: 'ALYS', cls: 'ROGUE' as const };
+    contribute(w, { hero: who, streak: 7 });
+    contribute(w, { hero: who, streak: 3 });
+    contribute(w, { hero: { ...who, id: 'hbbbbbbb2', name: 'ORRIN' }, streak: 12 });
+    expect(w.streaks!.map((l) => [l.name, l.n])).toEqual([['ORRIN', 12], ['ALYS', 7]]);
+  });
+});

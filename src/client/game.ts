@@ -1322,6 +1322,8 @@ export class Game {
       story: won && run.job.objective === 'story' ? run.job.id : undefined,
       deed: won && !followed ? { title: run.job.title, place: run.job.place.name, party } : undefined,
       ...(claim && deep ? { deep: { ...claim, g: deep.gold } } : {}),
+      // The longest streak this job, for its board (shared/streak.ts).
+      ...((run.board?.[ME]?.streak ?? 0) > 0 ? { streak: run.board![ME].streak } : {}),
     });
     // The quest in hand counts this job, whoever's it was (a run joined counts: Kyle, 2026-11-13).
     this.questEnd({ job: run.job, won, rescued, dens: run.dens ?? 0 });

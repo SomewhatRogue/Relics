@@ -14,10 +14,10 @@ import { shown } from '../shared/shown';
 
 /** The rows shown; the rest open under MORE. */
 // (PARRIES was here until parry went, 2026-11-05: BLOCKS took its place beside DODGES.)
-export const SHOWN: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'blocks', 'downs'];
+export const SHOWN: readonly Count[] = ['kills', 'dealt', 'streak', 'taken', 'dodges', 'blocks', 'downs'];
 export const MORE: readonly Count[] = ['raised', 'healed', 'best'];
 /** Rows where leading is something to light up (not damage taken, not downs). */
-const GOOD = new Set<Count>(['kills', 'dealt', 'dodges', 'blocks', 'raised', 'healed', 'best']);
+const GOOD = new Set<Count>(['kills', 'dealt', 'dodges', 'blocks', 'raised', 'healed', 'best', 'streak']);
 const led = (l: PartyLine, all: PartyLine[], k: Count) => GOOD.has(k) && leads(l.s, all.map((o) => o.s), k as CallId);
 /** RAISE's rows (sim/raise.ts), shown with the rest only on a job where someone was raised: friends a
  *  Cleric raised, and the most health each hero lost to it, in %. */

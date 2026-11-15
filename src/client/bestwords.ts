@@ -9,6 +9,7 @@ export const BESTW = {
   butts: 'AT THE BUTTS',
   knives: "AT THE RAT'S KNIFE BOARD",
   forge: "AT HALVARD'S FORGE",
+  streak: 'LONGEST STREAK ON A JOB',
   empty: "Nobody's name is up yet.",
   offline: 'Only your own heroes show until you play online.',
   /** Halvard, to a Warrior. */

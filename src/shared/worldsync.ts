@@ -54,6 +54,8 @@ export interface Contribution {
   /** The Deep (shared/deepboard.ts): a run down begun (its seed, stamped with the world's clock), and a run ended (for the boards). */
   deepStart?: number;
   deep?: DeepClaim;
+  /** The hero's longest streak on a job just done (shared/streak.ts), for its board. */
+  streak?: number;
 }
 
 /**
@@ -94,6 +96,7 @@ export function contribute(w: WorldState, c: Contribution, now = Date.now(), rai
   }
   if (c.statue) placeBid(w, c.hero, c.statue);
   // The Deep: a run's start stamped with this world's clock; a run's end onto its board only against that stamp.
+  if (Number.isInteger(c.streak) && c.streak! > 0 && c.streak! < 10_000) w.streaks = addRangeLine(w.streaks, { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n: c.streak! });
   if (c.deepStart !== undefined) w.deepRuns = startDeep(w.deepRuns, c.hero.id, c.deepStart, now);
   if (c.deep && deepClaimOk(w.deepRuns?.[c.hero.id], c.deep, now)) {
     const line = { id: c.hero.id, name: c.hero.name, cls: c.hero.cls, n: c.deep.f, gold: c.deep.g };

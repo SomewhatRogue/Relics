@@ -45,6 +45,8 @@ export interface WorldState {
   deepRuns?: Record<string, import('./deepboard.js').DeepStamp>;
   /** The archery range's board at the hunters' lodge: each hero's best round, the top ten (shared/rangeboard.ts). */
   range?: import('./rangeboard.js').RangeLine[];
+  /** The longest streaks on a job: each hero's best, the top ten (shared/streak.ts). */
+  streaks?: import('./rangeboard.js').RangeLine[];
   /** The Drowned Rat's knife board: each hero's best round, the top ten (shared/knifeboard.ts). */
   knives?: import('./rangeboard.js').RangeLine[];
   /** Halvard's forge: each hero's best shift, the top ten (shared/shiftboard.ts). */

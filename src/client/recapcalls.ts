@@ -10,7 +10,7 @@ import type { Count, Score } from '../sim/score';
 // (RAISE's `rose` is a callout too, the Cleric who raised the most friends, ahead of healing since it's the
 // rarer thing; `cut`, the health lost to being raised, is only a row.)
 export type CallId = Exclude<Count, 'taken' | 'downs' | 'cut'> | 'standing';
-export const CALL_ORDER: readonly CallId[] = ['kills', 'dealt', 'rose', 'healed', 'raised', 'dodges', 'blocks', 'best', 'standing'];
+export const CALL_ORDER: readonly CallId[] = ['kills', 'dealt', 'rose', 'healed', 'raised', 'dodges', 'blocks', 'best', 'streak', 'standing'];
 
 /** Does `s` lead everyone in `all` at `c`? */
 export function leads(s: Score, all: Score[], c: CallId): boolean {

@@ -33,6 +33,7 @@ export const RECAPW = {
     raised: 'HELPED UP',
     healed: 'HEALING GIVEN',
     best: 'BIGGEST HIT',
+    streak: 'BEST STREAK',
     /** RAISE (sim/raise.ts): friends a Cleric raised when they were out; the most health lost to being raised, in %. */
     rose: 'FRIENDS RAISED',
     cut: 'MAX HEALTH LOST',
@@ -50,6 +51,7 @@ export const RECAPW = {
     dodges: 'MOST DODGES',
     blocks: 'MOST BLOCKS',
     best: 'BIGGEST HIT',
+    streak: 'LONGEST STREAK',
     standing: 'NEVER WENT DOWN',
   } as Record<string, string>,
 };

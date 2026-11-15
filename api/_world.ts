@@ -74,6 +74,8 @@ export function clean(raw: unknown): Contribution | null {
     if (giveMore(st.given as number) > 0) return null;
     out.statue = { over: st.over as number, pay: st.pay as number, w: st.w as WeaponId, l: st.l as number, given: st.given as number };
   }
+  // The longest streak on a job just done (shared/streak.ts), for its board: a whole number, within reason.
+  if (Number.isInteger(c.streak) && (c.streak as number) > 0 && (c.streak as number) < 10_000) out.streak = c.streak as number;
   if (CHAPTER_1.decision.choices.some((x) => x.id === c.vote)) out.vote = c.vote as string;
   if (typeof c.voter === 'string' && /^[\w-]{6,40}$/.test(c.voter)) out.voter = c.voter;
   const d = c.deed as Record<string, unknown> | undefined, words = (v: unknown, n: number) => String(v ?? '').replace(/[^A-Za-z0-9 ',.-]/g, '').slice(0, n);

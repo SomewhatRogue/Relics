@@ -36,6 +36,7 @@ export function openBest(g: Game, panel: Panel): void {
     block(BESTW.butts, w.range, me, pr.range?.best ? RANGEW.yourBest(pr.range.best) : '') +
     block(BESTW.knives, w.knives, me, pr.knives?.best ? KNIFEW.yourBest(pr.knives.best) : '') +
     block(BESTW.forge, w.shift, me, pr.shift?.best ? SHIFTW.yourBest(pr.shift.best) : '') +
+    block(BESTW.streak, w.streaks, me, '') +
     deepBlocks(w, me) +
     (g.link?.online ? '' : `<p class="dim">${BESTW.offline}</p>`);
   panel.show(BESTW.title, html);

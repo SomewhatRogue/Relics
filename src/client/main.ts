@@ -120,6 +120,7 @@ import { Chat } from './chat';
 import './style.css';
 import './ui.css';
 import './hud.css';
+import { showStreak } from './streakhud';
 import './coins.css';
 import './cluster.css';
 import './keybar.css';
@@ -397,6 +398,7 @@ function hud(now: number): void {
   // Winded: the bar flashes, fast while nothing's coming back, slower as it refills.
   $('.st').classList.toggle('winded', !!me.winded);
   $('.st').classList.toggle('empty', !!me.winded && room.time - me.staminaAt < HERO.windedDelay);
+  showStreak(me);
   $('.who').textContent = pr.name;
   $('.who').title = `${CLASS_NAME[pr.cls]}, level ${pr.level}`;
   const item = me.arms[me.weapon];

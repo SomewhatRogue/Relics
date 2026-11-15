@@ -28,6 +28,8 @@ export interface Score {
   cut?: number;
   /** The biggest single blow on a goblin. */
   best: number;
+  /** The longest streak this job (sim/streak.ts; a board from before reads 0). */
+  streak?: number;
   /** Who it is: the hero's name (as the party knows it) and class. */
   name?: string;
   cls?: HeroClass;
@@ -35,8 +37,8 @@ export interface Score {
 export type Board = Record<string, Score>;
 export type Count = Exclude<keyof Score, 'name' | 'cls'>;
 
-export const COUNTS: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'blocks', 'downs', 'raised', 'healed', 'best', 'rose', 'cut'];
-export const blankScore = (): Score => ({ kills: 0, dealt: 0, taken: 0, dodges: 0, blocks: 0, downs: 0, raised: 0, healed: 0, best: 0, rose: 0, cut: 0 });
+export const COUNTS: readonly Count[] = ['kills', 'dealt', 'taken', 'dodges', 'blocks', 'downs', 'raised', 'healed', 'best', 'rose', 'cut', 'streak'];
+export const blankScore = (): Score => ({ kills: 0, dealt: 0, taken: 0, dodges: 0, blocks: 0, downs: 0, raised: 0, healed: 0, best: 0, rose: 0, cut: 0, streak: 0 });
 
 /** The board of the room stepping now (null between steps: nothing outside a step counts). */
 let on: Board | null = null;
@@ -47,7 +49,7 @@ export function count(id: string | undefined, k: Count, n = 1): void {
   if (!on || !id || id === 'squire' || !(n > 0)) return;
   noteStreak(id, k, n);
   const s = (on[id] ??= blankScore());
-  if (k === 'best') s.best = Math.max(s.best, n);
+  if (k === 'best' || k === 'streak') s[k] = Math.max(s[k] ?? 0, n);
   else s[k] = (s[k] ?? 0) + n;
 }
 

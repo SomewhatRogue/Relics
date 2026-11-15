@@ -1,0 +1,11 @@
+/* The streak on the hero card (streakhud.ts): its step's colour, a flare at each step, struck red when broken. */
+#hud .streak { margin-top: 2px; font: 400 11px/1.2 var(--i-label, monospace); letter-spacing: 0.08em; color: #c8c0b0; text-shadow: 1px 1px 0 #07080a; }
+#hud .streak[data-step="1"] { color: #e8a060; }
+#hud .streak[data-step="2"] { color: #ffb040; }
+#hud .streak[data-step="3"] { color: #ffe08a; text-shadow: 1px 1px 0 #07080a, 0 0 6px rgba(255, 210, 122, 0.8); }
+#hud .streak.flare b { display: inline-block; animation: streak-flare 0.6s steps(4) 1; }
+#hud .streak.broken { color: #e8604a; }
+#hud .streak.broken b { text-decoration: line-through; animation: streak-crack 0.3s steps(3) 1; }
+@keyframes streak-flare { 0% { transform: scale(1.6); } 100% { transform: scale(1); } }
+@keyframes streak-crack { 0%, 100% { transform: translateX(0); } 33% { transform: translateX(-2px); } 66% { transform: translateX(2px); } }
+@media (prefers-reduced-motion: reduce) { #hud .streak b { animation: none !important; } }
