@@ -1,27 +1,27 @@
 /**
  * The start screen: your heroes (up to three), each with its class for life, its level and gold; play
- * one, make a new one, or retire one. Making a hero: the five classes, name and look only; tap one to
- * watch it fight and see its ratings; name them and begin. (Kyle: less is more.) RECOVERY CODE opens recoveryui.ts.
+ * one, make a new one, or retire one. Making a hero: the five classes round a fire (heroring.ts), tap one
+ * for its card (ringcard.ts): its looks, ratings, a name, CHOOSE; it walks off, black, and the game starts
+ * (docs/design/hero-select.md). RECOVERY CODE opens recoveryui.ts.
  */
 import { NAME_OK, normName } from '../shared/names';
 import { heroId } from '../shared/progress';
 import { claimName, freeNames } from './names';
 import { HERO_SLOTS, canMake } from '../shared/progress';
 import { CHAPTER_1 } from '../shared/story';
-import { CLASS_KITS, CLASS_ORDER, type HeroClass } from '../shared/tuning';
-import { CLASSES, CLASS_NAME, CLASS_TAG, SKILL_NOTE, STATS } from '../shared/classes';
-import { areas } from './guardarea';
+import { CLASS_ORDER, type HeroClass } from '../shared/tuning';
+import { CLASS_NAME } from '../shared/classes';
 import { Preview } from './preview';
+import { HeroRing, liftBlack } from './heroring';
+import { face, ringCard } from './ringcard';
 import { COPY, RECOVER } from './copy';
 import { RECOVERY, type Recovery } from './recovery';
 import { RecoveryPanel } from './recoveryui';
 import type { Game } from './game';
-import { heroPortrait } from './sprites';
 
 const NAMES: Record<HeroClass, string> = { WARRIOR: 'BRANNOCK', RANGER: 'WREN', ROGUE: 'SILK', MAGE: 'ASHE', HEALER: 'IVY' };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 import { HOMEW } from './homewords';
-const face = (cls: HeroClass, look = 0) => `<img class="face" alt="" src="${heroPortrait(cls, look).toDataURL()}">`;
 
 export class Title {
   private el = document.createElement('div');
@@ -38,6 +38,11 @@ export class Title {
   /** The recovery code panel (none in the one-file build), and whether it's the one showing. */
   private panel: RecoveryPanel | null = null;
   private inPanel = false;
+  /** The fire (heroring.ts) while making a hero, and whether the card's fight is open. */
+  private ring: HeroRing | null = null;
+  private watching = false;
+  private leaving = false;
+  private scrollFight = false;
 
   constructor(private g: Game, private done: () => void, recovery?: Recovery) {
     this.el.id = 'title';
@@ -87,12 +92,14 @@ export class Title {
   private hide(): void {
     this.preview?.stop();
     this.preview = null;
+    this.dropRing();
     this.open = false;
     this.el.hidden = true;
     this.done();
   }
 
   private home(): void {
+    this.dropRing();
     const hs = this.g.save.heroes;
     this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">${CHAPTER_1.name.toUpperCase()}</div>` +
       `<p class="lede">${COPY.homeLede}</p><div class="slots">` +
@@ -107,34 +114,50 @@ export class Title {
       `</div>${hs.length < HERO_SLOTS && CLASS_ORDER.some((k) => canMake(hs, k)) ? '<button data-new class="wide">NEW HERO</button>' : `<p class="dim">${HOMEW.full}</p>`}${this.recoverButton()}</div>`;
   }
 
+  /** The fire with the five round it; the card under it once one is picked. */
   private create(): void {
+    if (!this.ring) {
+      const hs = this.g.save.heroes, ring = (this.ring = new HeroRing((k) => !canMake(hs, k)));
+      this.el.classList.add('ringing');
+      this.el.innerHTML = `<div class="rtop"><h1>RELIC</h1><div class="sub">A NEW CHAPTER</div><p class="lede">Pick a class.</p>` +
+        `<div class="rtopb">${hs.length ? '<button data-back class="ghost">BACK</button>' : ''}${this.recoverButton()}</div></div><div class="rcard tcard"></div>`;
+      this.el.prepend(ring.el);
+      ring.start();
+    }
+    this.ring.pick(this.detail ? this.pick : null);
+    this.ring.setLook(this.pick, this.look);
+    this.el.classList.toggle('picked', this.detail);
+    this.card();
+  }
+
+  private card(): void {
     this.preview?.stop();
     this.preview = null;
-    const back = this.g.save.heroes.length ? '<button data-back class="ghost wide">BACK</button>' : '';
-    if (!this.detail) {
-      this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">A NEW CHAPTER</div><p class="lede">Pick a class.</p><div class="cgrid names">` +
-        // One of each class: one you have already is shown, not picked (Kyle, 2026-11-13).
-        CLASS_ORDER.map((k) => (canMake(this.g.save.heroes, k) ? `<button data-cls="${k}" class="ccard">${face(k)}<b>${CLASS_NAME[k]}</b></button>` : `<button class="ccard" disabled>${face(k)}<b>${CLASS_NAME[k]}</b><small>${HOMEW.have}</small></button>`)).join('') + `</div>${back}${this.recoverButton()}</div>`;
-      return;
-    }
-    // The class card (Kyle, 2026-11-04): name and tagline, how it plays, the ratings, GUARD and DODGE
-    // (from the class's first kit), the class's own rule and extra, then its skill.
-    const c = this.pick, s = CLASSES[c];
-    const row = (label: string, text: string) => `<div class="crow"><b>${label}</b><span>${text}</span></div>`;
-    this.el.innerHTML = `<div class="tcard"><h2 class="cname">${CLASS_NAME[c]}</h2><p class="ctag">${CLASS_TAG[c]}</p><div class="stage"></div>` +
-      `<div class="looks">${[0, 1, 2].map((i) => `<button data-look="${i}" class="${i === this.look ? 'on' : ''}">${face(c, i)}</button>`).join('')}</div>` +
-      `<p class="cline">${s.line}</p>` +
-      `<div class="bars">${STATS.map((k) => `<span>${k}</span><i>${'<em class="on"></em>'.repeat(s.stats[k])}${'<em></em>'.repeat(5 - s.stats[k])}</i>`).join('')}</div>` +
-      `<div class="csheet">${areas(CLASS_KITS[c][0])}<p class="cguard">${s.guard}</p>` +
-      (s.perk ? row(s.perkLabel ?? '', s.perk) : '') + (s.note ? row(s.noteLabel ?? '', s.note) : '') +
-      (s.sign ? row(s.signLabel ?? '', s.sign) : '') + row('SKILL', s.skill) + `<p class="cnote">${SKILL_NOTE}</p></div>` +
-      `<label class="name">NAME <input maxlength="12" value="${this.free[0] ?? ''}" autocomplete="off" spellcheck="false"></label>` +
-      `<button data-newname class="ghost">NEW NAME</button><p class="nameerr" role="status"></p>` +
-      `${this.onTry ? `<button data-try class="wide">TRY THE ${CLASS_NAME[c]}</button>` : ''}<button data-begin class="primary wide">BEGIN</button>${this.g.save.heroes.some((h) => h.prologue) ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : ''}<button data-pick class="ghost wide">BACK</button></div>`;
-    this.fillNames();
-    this.preview = new Preview(c, this.look);
-    this.el.querySelector('.stage')!.appendChild(this.preview.el);
-    this.preview.start();
+    const box = this.el.querySelector('.rcard') as HTMLElement | null;
+    if (!box) return;
+    if (!this.detail) return void (box.innerHTML = '');
+    const c = this.pick, yours = !canMake(this.g.save.heroes, c);
+    box.innerHTML = ringCard({ cls: c, look: this.look, watching: this.watching, yours, name: this.free[0] ?? '', tryIt: !!this.onTry, skipWood: this.g.save.heroes.some((h) => h.prologue) });
+    if (!yours) this.fillNames();
+    const stage = box.querySelector('.stage');
+    if (stage) (this.preview = new Preview(c, this.look)), stage.appendChild(this.preview.el), this.preview.start();
+    if (stage && this.scrollFight) (this.scrollFight = false), box.querySelector('[data-watch]')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+
+  private dropRing(): void {
+    this.ring?.stop();
+    this.ring = null;
+    this.el.classList.remove('ringing', 'picked');
+  }
+
+  /** Tapped a hero round the fire (or the dark, `null`). */
+  private tapRing(cls: HeroClass | null): void {
+    if (this.leaving) return;
+    if (!cls || (this.detail && cls === this.pick)) return void (this.detail && ((this.detail = false), (this.watching = false), this.create()));
+    if (cls !== this.pick) this.look = 0;
+    Object.assign(this, { pick: cls, detail: true, watching: false });
+    this.create();
+    this.el.querySelector('.rcard')?.scrollTo(0, 0);
   }
 
   /** Names nobody has (client/names.ts): the first is the one suggested. Asked for when they run out. */
@@ -158,7 +181,7 @@ export class Title {
 
   /** BEGIN (or skip the wood): the name is claimed on the server first, so no two heroes share one. */
   private async begin(skip: boolean): Promise<void> {
-    if (this.claiming) return;
+    if (this.claiming || this.leaving) return;
     const box = this.el.querySelector('label.name input') as HTMLInputElement, name = normName(box.value || this.free[0] || NAMES[this.pick]);
     if (!NAME_OK.test(name)) return this.nameSays('Two to twelve letters.');
     if (this.g.save.heroes.some((h) => normName(h.name) === name)) return this.nameSays('One of your heroes has that name.');
@@ -167,7 +190,13 @@ export class Title {
     const id = heroId(), got = await claimName(name, id);
     this.claiming = false;
     if (got === 'taken') return (this.free = this.free.filter((n) => n !== name)), this.nameSays('Someone has that name. Try another.');
+    if (!canMake(this.g.save.heroes, this.pick)) return;
+    // The hero turns to the road, the fire flares, black; the game starts under it and the black lifts.
+    this.leaving = true;
+    await this.ring?.leave();
+    this.leaving = false;
     if (this.g.create(this.pick, name, this.look, id) >= 0) (skip && this.g.skipWood(), this.hide());
+    liftBlack();
   }
 
   /** A hero whose name another hero holds: a new one before it plays (Kyle, 2026-11-13). */
@@ -206,10 +235,10 @@ export class Title {
 
   private click(t: HTMLElement): void {
     const b = t.closest('button');
-    if (!b) return;
+    if (!b) return void (this.ring && t.closest('.hring') && this.tapRing(null));
     const d = b.dataset;
     if (this.inPanel) return this.panel?.click(d);
-    if (d.recover !== undefined && this.panel) return (this.inPanel = true), this.panel.open(), void (this.el.innerHTML = this.panel.html());
+    if (d.recover !== undefined && this.panel) return this.dropRing(), (this.inPanel = true), this.panel.open(), void (this.el.innerHTML = this.panel.html());
     if (d.play !== undefined && this.g.save.heroes[Number(d.play)]?.rename) return this.renameView(Number(d.play));
     if (d.rename !== undefined) return void this.rename(Number(d.rename));
     if (d.play !== undefined) return this.g.choose(Number(d.play)), this.hide();
@@ -230,10 +259,10 @@ export class Title {
     }
     if (d.new !== undefined) return (this.detail = false), this.create();
     if (d.back !== undefined) return this.home();
-    if (d.cls) return (this.pick = d.cls as HeroClass), (this.look = 0), (this.detail = true), this.create();
+    if (d.cls) return this.tapRing(d.cls as HeroClass);
     if (d.look !== undefined) return (this.look = Number(d.look)), this.keepName(() => this.create());
-    if (d.pick !== undefined) return (this.detail = false), this.create();
+    if (d.watch !== undefined) return (this.watching = !this.watching), (this.scrollFight = this.watching), this.keepName(() => this.create());
     if (d.try !== undefined && this.onTry) return this.hide(), this.onTry(this.pick, this.look);
-    if (d.begin !== undefined) void this.begin(false);
+    if (d.begin !== undefined && !this.leaving) void this.begin(false);
   }
 }

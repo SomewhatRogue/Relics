@@ -1,0 +1,50 @@
+/* Choosing a new hero round the fire (heroring.ts, ringcard.ts; docs/design/hero-select.md). The fire fills
+   the screen; the card rises from the foot on a phone and stands at the right on a wide screen. */
+#title.ringing { display: block; padding: 0; background: #05070a; overflow: hidden; touch-action: manipulation; }
+#title .hring { position: absolute; inset: 0; }
+#title .hringcv { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
+#title .hring .hspot { position: absolute; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0; cursor: pointer; }
+#title .hring .hspot:focus-visible { outline: 2px solid #ffd27a88; outline-offset: -2px; }
+
+#title .rtop { position: absolute; left: 0; right: 0; top: 0; padding: max(14px, env(safe-area-inset-top)) 16px 0; text-align: center; pointer-events: none; transition: opacity 0.3s; }
+#title .rtop h1 { font-size: 34px; }
+#title .rtop .lede { margin: 6px 0 0; }
+#title .rtopb { display: flex; justify-content: center; gap: 10px; margin-top: 8px; pointer-events: auto; }
+#title .rtopb button { min-width: 120px; max-width: 320px; flex: 1; }
+
+/* The card: hidden till a hero is picked, then rises. */
+#title .rcard.tcard { position: absolute; left: 0; right: 0; bottom: 0; width: auto; margin: 0; max-height: 58%; overflow-y: auto; gap: 10px; align-items: stretch;
+  padding: 14px max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  background: linear-gradient(180deg, #16181ce8, #0c0d10f6 40px); border-top: 2px solid #3a3e46; box-shadow: 0 -8px 24px #000a;
+  transform: translateY(105%); transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1); overscroll-behavior: contain; touch-action: pan-y; }
+#title.picked .rcard.tcard { transform: none; }
+#title .rcard .rhead { display: flex; flex-direction: column; gap: 6px; text-align: center; }
+#title .rcard .cname { margin: 0; }
+#title .rcard .ctag { margin: 0; }
+#title .rcard .looks { margin: 0; }
+#title .rcard .looks button.on { box-shadow: 0 0 0 2px #0b0c0e, inset 0 0 0 3px #ffd27a; }
+#title .rcard .rname { display: flex; gap: 10px; align-items: center; }
+#title .rcard .rname .name { flex: 1; min-width: 0; }
+#title .rcard .nameerr { margin: -6px 0 0; min-height: 0; }
+#title .rcard .nameerr:empty { display: none; }
+#title .rcard .rmore { display: flex; gap: 10px; }
+#title .rcard .rmore button { flex: 1; }
+#title .rcard .rmore button.on { color: var(--i-leaf, #ffd27a); }
+#title .rcard .ryours { margin: 0; letter-spacing: 0.1em; }
+#title .rcard .stage { margin: 0; }
+
+/* A phone with a hero picked: the fire moves up, the heading goes. */
+@media (max-width: 759px) {
+  #title.picked .rtop { opacity: 0; }
+  #title.picked .rtop .rtopb { pointer-events: none; }
+}
+/* A wide screen: the card at the right, the fire in the room left of it. */
+@media (min-width: 760px) {
+  #title .rtop { right: 420px; }
+  #title .rcard.tcard { left: auto; right: 16px; top: 16px; bottom: 16px; width: 388px; max-height: none; border: 2px solid #3a3e46; transform: translateX(calc(100% + 24px)); }
+}
+
+/* CHOOSE: black over about a second, lifted once the game is under it. */
+#ringfade { position: fixed; inset: 0; z-index: 60; background: #000; opacity: 0; pointer-events: none; transition: opacity 1s ease-in; }
+#ringfade.on { opacity: 1; pointer-events: auto; }
+#ringfade.lift { opacity: 0; transition: opacity 0.8s ease-out; }
