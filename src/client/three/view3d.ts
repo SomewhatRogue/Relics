@@ -30,6 +30,7 @@ import { Lights, type L3 } from './lights3d';
 import { BOXFIGS, QUALITY, brightGamma, perfOn, quality, type Quality } from './look';
 import { Figs } from './figs3d';
 import { putCards } from './cards3d';
+import { CHARS, Chars } from './chars3d';
 import { Overlay, type Marks } from './overlay3d';
 import { People } from './people3d';
 import { Grim3D } from './grim3d';
@@ -71,6 +72,8 @@ export class View3D {
   private fires = new Fires();
   private actors = new Actors();
   private figs = new Figs();
+  // The new look's characters (chars3d.ts, under `?street`).
+  private chars = CHARS ? new Chars() : null;
   private buildings = new Buildings();
   /** The new look's tall inside walls (insidekit.ts). */
   private inside: THREE.Group | null = null;
@@ -110,6 +113,7 @@ export class View3D {
     this.postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.post));
     this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.witch.group, this.beacon.group, this.figs.group, this.hazards.group);
     if (this.sky) this.scene.add(this.sky.group);
+    if (this.chars) this.scene.add(this.chars.group);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -235,6 +239,7 @@ export class View3D {
     if (!BOXFIGS) {
       this.figs.begin(this.view.ppu, P, this.view.W, this.view.H, now, room.time);
       putCards(this.figs, room, meId, others, lerp);
+      this.chars?.put(this.figs, room, meId, others, lerp, now);
       this.figs.end();
     }
     this.ground!.decals(fx);

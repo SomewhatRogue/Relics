@@ -1,0 +1,42 @@
+{
+ "knight": {
+  "w": 96,
+  "h": 98,
+  "fx": 47,
+  "fy": 96,
+  "rows": [
+   "front",
+   "side",
+   "back"
+  ],
+  "cols": [
+   "idle",
+   "walk1",
+   "walk2",
+   "walk3",
+   "walk4",
+   "draw",
+   "strike"
+  ]
+ },
+ "goblin": {
+  "w": 81,
+  "h": 65,
+  "fx": 31,
+  "fy": 63,
+  "rows": [
+   "front",
+   "side",
+   "back"
+  ],
+  "cols": [
+   "idle",
+   "walk1",
+   "walk2",
+   "walk3",
+   "walk4",
+   "draw",
+   "strike"
+  ]
+ }
+}

@@ -11,3 +11,33 @@ the butcher). Everything here is behind `?look=3d&hd&street`; without it nothing
   `&chars=sheet` (generated frames, cleaned up and played by the act) and `&chars=parts` (the idle frame cut into
   parts that the pose code, heropose.ts and foepose.ts, moves).
   (Claude Opus 5.5)
+
+## 2026-11-15: the test, the knight and the knife goblin, made both ways
+
+- **The art.** Two sheets generated in the flow from the concept sheet as reference (gpt-image-2.5-sunburst, node
+  "knight" and "goblin" next to the concepts; picked take 2 of four for each): one character, flat magenta, 3 rows
+  (facing you, side-on facing right, walking away) by 7 columns (idle, a four-frame walk, the attack drawn back, the
+  attack through). `scripts/charprep.py` cuts them out, scales the lot by one factor (the knight's idle 80 px tall,
+  the goblin's 56, at 32 px a tile), snaps to one 40-colour palette with no dither, adds a one-pixel dark edge, puts
+  every frame's feet at one point in a fixed cell, and keeps hot reds out of the palette as a glow layer (the
+  goblin's eyes; opt-in, as the knight's cape would count). Out: `src/client/three/charkit/` (knight 96x98 cells,
+  goblin 81x65).
+- **On screen** (`three/chars3d.ts`, one hook line in `view3d.ts`): any Warrior and the plain, lunger and looter
+  scrappers stand on their own card at the feet, turned to the chase camera, lit by the same card material as the
+  flat figures (figmat.ts). The old card stays for its shadow, drawn empty. The row is the facing as the camera sees
+  it, the side row mirrored for the left; the column follows the pose code's phase, so the room's timing is kept
+  (`charframe.ts`, tested). `&chars=sheet` (the default under `?street`) plays the frames; `&chars=parts` cuts each
+  facing's idle frame into joints.ts's parts and moves them with figure.ts and heropose.ts or foepose.ts, the pose
+  numbers scaled to the new density; `&chars=old` is today's.
+- **What the shots say** (`scripts/chars-look.cjs`, shots/chars/compare-*.png): the sheet way reads like the
+  concepts: the sword comes up and over, the goblin coils and lunges, the legs step. The parts way is the idle frame
+  nudged a pixel or two: a blade can't swing (parts only slide), and the hip cut shows as a seam across the cape.
+  **Recommendation: generated sheets, cleaned up.** Kyle to choose.
+- **Not yet in the new figures** (the old drawing had them): the swing's smear, your hero's ring at the feet, status
+  marks over a goblin, the silhouette behind a wall, the red after the white hit flash, rolls, carrying, being down.
+  Weapons are baked into a sheet, so gear looks (the gear-looks chat's tiers and elements) need the weapon left out of
+  the sheet and drawn at the hand, or a sheet per weapon kind. On a phone the street draws 24 px a tile, so the 32 px
+  art is shown a little under 1:1.
+- Script note: the room is held still for shots (`__game.step` stubbed, positions and the eased positions set every
+  16 ms), and the runner's arrival scene is skipped, or its camera cut leaves the knight.
+  (Claude Opus 5.5)
