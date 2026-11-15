@@ -15,6 +15,9 @@ import { gradeBuilt } from './darkgold3d';
 import { ghostKit, STREET } from './streetkit';
 import { streetAround } from './streetrow';
 import { PITCH } from './camera3d';
+import { SWING } from '../swing';
+import { hides } from '../streethole';
+
 
 export class Buildings {
   readonly group = new THREE.Group();
@@ -49,10 +52,10 @@ export class Buildings {
         this.built.set(i, e);
       }
       const roof = e.b.roof;
-      // The new look's test street (streetkit.ts): behind a kit building, as far back as it hides at this camera's
-      // tilt, it goes see-through instead; nothing lifts or drops.
+      // The new look's street (streetkit.ts): a kit building between your hero and the swung camera goes see-through
+      // round them instead; nothing lifts or drops.
       if (STREET && roof) {
-        const hid = !!me && me[0] > blk.x - 0.8 && me[0] < blk.x + blk.w + 0.8 && me[1] > blk.y - e.b.top / Math.tan(PITCH) && me[1] < blk.y + 0.4;
+        const hid = !!me && hides(me, blk.x, blk.y, blk.x + blk.w, blk.y + blk.h, e.b.top, SWING.yaw, PITCH);
         if (e.ghost !== hid) ghostKit(e.b.group, (e.ghost = hid));
         for (const f of e.b.fires) fires.push(f);
         setLampMeshes(map.theme, blk.x, blk.y, e.b.lamps);

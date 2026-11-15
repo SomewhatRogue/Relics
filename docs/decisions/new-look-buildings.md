@@ -57,3 +57,10 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
 - Colours go in raw (this pipeline has colour management off); a first try converted them and came out black.
 - Open: the silhouettes are smooth shapes, not pixel art; a generated skyline strip could replace them.
   (Claude Opus 5.5)
+
+## 2026-11-15: the see-through hole knows the swing
+
+- streethole.ts `hides`: a building goes see-through round your hero when the line from your hero toward the swung
+  camera meets its footprint before climbing over its roof (a slab test), not "north of it" as before. So with the
+  camera swung east you can stand at a building's east side and still be seen. tests/streethole.test.ts.
+  (Claude Opus 5.5)
