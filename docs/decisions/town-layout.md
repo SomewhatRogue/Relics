@@ -52,3 +52,14 @@ Claude Opus 5.5
 - Tools: `scripts/town-look.cjs` (walks the chase camera's views; VIEWS=1,2 LAPTOP=1), `scripts/townsketch.py`.
 
 Claude Opus 5.5
+
+## 2026-11-15: to do once Kyle confirms the town
+
+Kyle: fix these once the layout is confirmed, not before.
+- Trainers' directions (TRAINERS' "where" lines: the church is north on Kirkhill now, not north-west).
+- Quest markers: check every marker and errand target points at the new town's spots and doors.
+- First-time runners: the arrival scene and runnerpath.ts, so the runner walks the new lanes and steps (not across
+  retaining walls) and brings a new hero in the right way.
+Also still open: the Drowned Rat (camera turns all the way round, or the Rat moves off the square's line).
+
+Claude Opus 5.5
