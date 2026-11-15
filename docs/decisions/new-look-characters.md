@@ -41,3 +41,19 @@ the butcher). Everything here is behind `?look=3d&hd&street`; without it nothing
 - Script note: the room is held still for shots (`__game.step` stubbed, positions and the eased positions set every
   16 ms), and the runner's arrival scene is skipped, or its camera cut leaves the knight.
   (Claude Opus 5.5)
+
+## 2026-11-15: blood, dismemberment and fire (Kyle: "remember the blood / dismemberment and fire")
+
+What today's goblins carry and the new ones must too: wounds while alive on the tough ones (wounds.ts: cuts, blood
+running, an eye put out, a limp), deaths by kind (foes.ts, gore.ts: beheaded with the head flung, halved, opened,
+burst or shattered to stains, burned to a charred body), and flames on the burning (status.ts). In the test, a dead
+goblin falls back to today's drawing.
+- **With sheets** (the recommendation, unchanged): each sheet gets a dying row (struck, falling, lying, charred
+  lying). The cuts are made in code from the frames, as foes.ts's `halves` does today: the head's rows lifted off a
+  falling frame and flung (gore.ts's head gib becomes that picture), a frame split along the blow for a halving, a
+  frame broken into chunks for a burst. Wounds and blood are drawn over the frame by code (wounds.ts at the new
+  density, seeded the same), fire as glow flames over the card with the body darkening as it burns.
+- **With parts** dismemberment comes free (the parts are already apart), but the living figure stays stiff.
+- Next, once Kyle chooses: the dying row and the cuts for the knife goblin, then wounds and fire, before the other
+  characters.
+  (Claude Opus 5.5)
