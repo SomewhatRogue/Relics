@@ -9,6 +9,7 @@ import type { Profile } from '../shared/progress';
 import { bagSize } from '../shared/bags';
 import { refreshHealth } from '../sim/gearstats';
 import type { ArenaRoom } from '../sim/room';
+import { noteLooks } from '../shared/keptlook';
 import type { Hero } from '../sim/types';
 
 type Kit = Pick<Profile, 'weapon' | 'arms' | 'bag' | 'armor' | 'legs' | 'rings' | 'belt' | 'glow' | 'relic' | 'relics'> & { channel: string };
@@ -38,6 +39,8 @@ export function keepKit(p: Profile, h: Hero, copy: boolean): boolean {
   const k = copy ? (JSON.parse(JSON.stringify(now)) as Kit) : now;
   Object.assign(p, { weapon: k.weapon, arms: { ...k.arms }, bag: [...k.bag], armor: k.armor, legs: k.legs ?? null, rings: [...k.rings], belt: [...k.belt], glow: k.glow, relic: k.relic, relics: k.relics.map((r) => ({ ...r })) });
   p.augments.channel = k.channel as Profile['augments']['channel'];
+  // Every unique worn is a look this hero can keep at Cole's (shared/keptlook.ts).
+  noteLooks(p);
   return true;
 }
 

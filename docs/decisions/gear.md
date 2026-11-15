@@ -109,3 +109,23 @@ The Gear chat's log (docs/design/gear-levels.md). Newest at the foot.
   an armor weight, as armor, and they trade.
 - **For Art**: a legs piece on the floor draws as a ring for now (relicsdraw.ts `drawGear`, loot3d.ts
   `makeLoot` fall through). Legs on the hero are slice 5, with gear-looks.
+
+## 2026-11-15: slice 5 started, keeping a look (Opus 5.5)
+
+- **What's in**: `shared/keptlook.ts`. Every unique a hero wears is noted in `Profile.looks` whenever
+  their kit settles (keepkit.ts, one line), so the looks are there to keep when Cole's panel can show
+  them. `keepLook` keeps one per slot (`Profile.keep`), only a look worn and made for that slot.
+  `shownItem(worn, keep, kitFor)` is the piece as it should be drawn: the kept unique over it (a weapon
+  only on the same kit), the piece itself otherwise. Drawing only; nothing it gives changes.
+  tests/keptlook.test.ts.
+- **What waits, and on whom**:
+  - Legs on the hero, and a unique's own chest or legs look: armour overlays, gear-looks slice 3, which
+    waits for the side view. **For gear-looks**: draw legs as their own overlay under the body's, by the
+    legs piece's weight and tier (`Hero.legs`); read every worn piece through `shownItem` so a kept look
+    shows; a unique has its own colours and trim (uniques.ts ids).
+  - A unique weapon as its own sprite: like the Hungry pieces (gear-looks slice 2). **For Deep**: the
+    look of each unique (colours, trim, the thing it is) is yours to say; gear-looks draws it.
+  - A ring's faint glow: gear-looks slice 4.
+  - Cole's KEEP A LOOK panel (words approved, slice 2's entry above): beside YOUR SHIELD on Cole's
+    trainer panel (Art's shieldui.ts, trainerui.ts). Built once a kept look can be seen, so it never
+    offers a change nobody sees.

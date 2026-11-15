@@ -106,6 +106,9 @@ export interface Profile {
   /** Worn on the legs (docs/design/gear-levels.md section 4): modifiers only. None in saves from before legs. */
   legs?: Item | null;
   rings: Item[];
+  /** Uniques this hero has worn, and a kept look per slot (shared/keptlook.ts): drawing only. */
+  looks?: string[];
+  keep?: Partial<Record<'weapon' | 'armor' | 'legs' | 'ring', string>>;
   /** Relics owned, each with its charge (shared/relicitems.ts), and the id of the one carried ('' none). */
   relics: RelicItem[];
   relic: string;
