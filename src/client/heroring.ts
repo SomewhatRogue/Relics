@@ -42,10 +42,6 @@ export class HeroRing {
   private in3d = false;
   private litC = document.createElement('canvas');
   private glowC = document.createElement('canvas');
-  /** A class you have already, drawn here first and greyed before it goes on the scene. */
-  private grey = Object.assign(document.createElement('canvas'), { width: 64, height: 80 });
-  private greyGlow = Object.assign(document.createElement('canvas'), { width: 64, height: 80 });
-  private greyOut = Object.assign(document.createElement('canvas'), { width: 64, height: 80 });
   private bg = paintClearing();
   private light = new Lighting(this.out);
   private c: Ctx;
@@ -62,8 +58,8 @@ export class HeroRing {
   private vh = 0;
   private onResize = () => this.resize();
 
-  /** `yours`: the classes you have a hero of already (stood there, labelled darker). */
-  constructor(private yours: (cls: HeroClass) => boolean) {
+  /** `yours`: the look of your hero of this class, if you have one (they stand there in it; picked, the card offers PLAY). */
+  constructor(yours: (cls: HeroClass) => number | null) {
     this.el.className = 'hring';
     this.out.className = 'hringcv';
     this.copy.className = 'hring3dcv';
@@ -73,13 +69,11 @@ export class HeroRing {
     this.room.heroes = [];
     this.stands = CLASS_ORDER.map((cls, i) => {
       const [sx, sy] = RING.spots[i], h = newHero('ring-' + cls, F.x + sx, F.y + sy);
-      Object.assign(h, { weapon: CLASS_KITS[cls][0], look: 0, hp: 100, tag: '', noHound: true });
+      Object.assign(h, { weapon: CLASS_KITS[cls][0], look: yours(cls) ?? 0, hp: 100, tag: '', noHound: true });
       this.room.heroes.push(h);
       const btn = Object.assign(document.createElement('button'), { className: 'hspot', type: 'button', innerHTML: `<span>${CLASS_NAME[cls]}</span>` });
       btn.dataset.cls = cls;
       btn.setAttribute('aria-label', CLASS_NAME[cls]);
-      // A class you have a hero of already: greyed out and not picked (Kyle, 2026-11-15).
-      if (yours(cls)) btn.classList.add('yours'), (btn.disabled = true);
       this.el.append(btn);
       return { cls, h, x: sx * PX, y: sy * PX, hx: sx * PX, hy: sy * PX, btn };
     });
@@ -104,7 +98,7 @@ export class HeroRing {
     if (s) s.h.look = look;
   }
 
-  /** CHOOSE: the hero turns to the road, the fire flares, black over about a second. */
+  /** CHOOSE or PLAY: the hero turns to the road, the fire flares, black over about a second. */
   leave(): Promise<void> {
     this.leaving = 0;
     return fadeToBlack();
@@ -145,10 +139,13 @@ export class HeroRing {
     for (const g of [this.c.lit, this.c.glow]) g.imageSmoothingEnabled = false;
   }
 
-  /** Where the fire sits on screen (a share across and down): left of the card on a wide screen, higher on a phone with a hero picked. */
+  /** Where the fire sits on screen (a share across and down): left of the card on a wide screen, over the card on a phone with a hero picked. */
   private fireShare(): [number, number] {
     if (innerWidth >= 760) return [(innerWidth - 420) / 2 / innerWidth, 0.56];
-    return [0.5, this.picked ? 0.29 : 0.44];
+    if (!this.picked) return [0.5, 0.44];
+    // Over the card, however tall it is (it rises, so this follows it up).
+    const top = this.el.parentElement?.querySelector('.rcard')?.getBoundingClientRect().top ?? innerHeight * 0.58;
+    return [0.5, Math.max(0.29, Math.min(0.44, (top / innerHeight) * 0.56))];
   }
 
   /** The 2.5D camera's point (tiles): the eased camera, shifted so the fire sits where the flat one does. */
@@ -212,14 +209,14 @@ export class HeroRing {
     // The names first: a body drawn after erases the glow under it, so a hero in front hides a name behind.
     for (const s of this.stands) {
       const x = ox + Math.round(s.x), y = oy + Math.round(s.y), name = CLASS_NAME[s.cls];
-      if (s !== me) drawText(glow, name, Math.round(x - textWidth(name) / 2), y + 5, this.yours(s.cls) ? '#5a564e' : this.picked ? '#7a7466' : '#c8bc9c');
+      if (s !== me) drawText(glow, name, Math.round(x - textWidth(name) / 2), y + 5, this.picked ? '#7a7466' : '#c8bc9c');
       // The tap target: the body and the name under it, in CSS pixels.
       Object.assign(s.btn.style, { left: (x - 12) * cssK + 'px', top: (y - 46) * cssK + 'px', width: 24 * cssK + 'px', height: 58 * cssK + 'px' });
       s.btn.classList.toggle('on', s === me);
     }
     BARE.on = true;
     try {
-      for (const s of order) if (s !== me) (this.yours(s.cls) ? this.drawGrey(s.h, ox + Math.round(s.x), oy + Math.round(s.y), now) : drawHero(this.c, s.h, ox + Math.round(s.x), oy + Math.round(s.y), 'bare', now));
+      for (const s of order) if (s !== me) drawHero(this.c, s.h, ox + Math.round(s.x), oy + Math.round(s.y), 'bare', now);
       // The others dim: the dark laid over everything but the picked hero and the fire.
       if (this.dim > 0.01) (lit.globalAlpha = this.dim * 0.55), (lit.fillStyle = '#05070a'), lit.fillRect(0, 0, this.vw, this.vh), (lit.globalAlpha = 1);
       if (me) drawHero(this.c, me.h, ox + Math.round(me.x), oy + Math.round(me.y), 'bare', now);
@@ -228,23 +225,6 @@ export class HeroRing {
     }
     drawCampfire(this.c, ox, oy, now, flare);
     this.light.render(this.litC, this.glowC, fireLights(ox, oy, now, flare), [0.1, 0.11, 0.17]);
-  }
-
-  /** A hero greyed out where it stands: drawn on its own, its colour taken out (shading and outline kept) and
-   *  dimmed a little, nothing it glows with; then put down. */
-  private drawGrey(h: Hero, x: number, y: number, now: number): void {
-    const src = this.grey.getContext('2d')!, g = this.greyOut.getContext('2d')!, c: Ctx = { lit: src, glow: this.greyGlow.getContext('2d')!, now };
-    for (const k of [src, g, c.glow]) k.clearRect(0, 0, 64, 80);
-    drawHero(c, h, 32, 72, 'bare', now);
-    g.drawImage(this.grey, 0, 0);
-    g.globalCompositeOperation = 'saturation';
-    g.fillStyle = '#808080', g.fillRect(0, 0, 64, 80);
-    g.globalCompositeOperation = 'destination-in';
-    g.drawImage(this.grey, 0, 0);
-    g.globalCompositeOperation = 'source-atop';
-    g.fillStyle = 'rgba(16, 16, 22, 0.35)', g.fillRect(0, 0, 64, 80);
-    g.globalCompositeOperation = 'source-over';
-    this.c.lit.drawImage(this.greyOut, x - 32, y - 72);
   }
 }
 

@@ -4,7 +4,6 @@
 #title .hring { position: absolute; inset: 0; }
 #title .hringcv { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
 #title .hring .hspot { position: absolute; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0; cursor: pointer; }
-#title .hring .hspot:disabled { cursor: default; }
 #title .hring .hspot:focus-visible { outline: 2px solid #ffd27a88; outline-offset: -2px; }
 /* The names are drawn into the flat ring; in 2.5D they ride at the foot of each hero's button. */
 #title .hring .hspot span { display: none; }
@@ -12,7 +11,6 @@
 #title.ring3d .hring .hspot span { display: block; font: 400 11px/1 var(--i-label, monospace); letter-spacing: 0.08em; color: #c8bc9c; text-shadow: 0 1px 0 #000, 0 0 4px #000; }
 #title.ring3d .hring.picked .hspot span { color: #7a7466; }
 #title.ring3d .hring .hspot.on span { visibility: hidden; }
-#title.ring3d .hring .hspot.yours span { color: #5a564e; }
 /* 2.5D: the game's own 3D picture, copied in (heroring.ts), in place of the flat canvas. */
 #title .hring3dcv { display: none; position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; image-rendering: pixelated; }
 #title.ring3d .hringcv { display: none; }

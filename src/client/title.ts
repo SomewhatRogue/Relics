@@ -12,7 +12,7 @@ import { CHAPTER_1 } from '../shared/story';
 import { CLASS_ORDER, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
 import { HeroRing, liftBlack } from './heroring';
-import { face, ringCard } from './ringcard';
+import { face, ownCard, ringCard } from './ringcard';
 import { COPY, RECOVER } from './copy';
 import { RECOVERY, type Recovery } from './recovery';
 import { RecoveryPanel } from './recoveryui';
@@ -114,7 +114,7 @@ export class Title {
   /** The fire with the five round it; the card under it once one is picked. */
   private create(): void {
     if (!this.ring) {
-      const hs = this.g.save.heroes, ring = (this.ring = new HeroRing((k) => !canMake(hs, k)));
+      const hs = this.g.save.heroes, ring = (this.ring = new HeroRing((k) => hs.find((h) => h.cls === k)?.look ?? null));
       this.el.classList.add('ringing');
       this.el.innerHTML = `<div class="rtop"><h1>RELIC</h1><div class="sub">A NEW CHAPTER</div><p class="lede">Pick a class.</p>` +
         `<div class="rtopb">${hs.length ? '<button data-back class="ghost">BACK</button>' : ''}${this.recoverButton()}</div></div><div class="rcard tcard"></div>`;
@@ -122,7 +122,7 @@ export class Title {
       ring.start();
     }
     this.ring.pick(this.detail ? this.pick : null);
-    this.ring.setLook(this.pick, this.look);
+    if (!this.mine()) this.ring.setLook(this.pick, this.look);
     this.el.classList.toggle('picked', this.detail);
     this.card();
   }
@@ -131,7 +131,8 @@ export class Title {
     const box = this.el.querySelector('.rcard') as HTMLElement | null;
     if (!box) return;
     if (!this.detail) return void (box.innerHTML = '');
-    const c = this.pick;
+    const c = this.pick, own = this.mine();
+    if (own) return void (box.innerHTML = ownCard(own.h, own.i));
     box.innerHTML = ringCard({ cls: c, look: this.look, name: this.free[0] ?? '', tryIt: !!this.onTry, skipWood: this.g.save.heroes.some((h) => h.prologue) });
     this.fillNames();
   }
@@ -149,9 +150,25 @@ export class Title {
     this.el.classList.remove('ringing', 'picked');
   }
 
+  /** Your hero of the picked class, and its slot (none: a new one is made). */
+  private mine(): { h: Game['save']['heroes'][number]; i: number } | null {
+    const i = this.g.save.heroes.findIndex((h) => h.cls === this.pick);
+    return i < 0 ? null : { h: this.g.save.heroes[i], i };
+  }
+
+  /** PLAY round the fire: they walk off, black, and your hero's game starts under it. */
+  private async playFromRing(i: number): Promise<void> {
+    this.leaving = true;
+    await this.ring?.leave();
+    this.leaving = false;
+    this.g.choose(i);
+    this.hide();
+    liftBlack();
+  }
+
   /** Tapped a hero round the fire (or the dark, `null`). */
   private tapRing(cls: HeroClass | null): void {
-    if (this.leaving || (cls && !canMake(this.g.save.heroes, cls))) return;
+    if (this.leaving) return;
     if (!cls || (this.detail && cls === this.pick)) return void (this.detail && ((this.detail = false), this.create()));
     if (cls !== this.pick) this.look = 0;
     Object.assign(this, { pick: cls, detail: true });
@@ -201,6 +218,7 @@ export class Title {
   /** A hero whose name another hero holds: a new one before it plays (Kyle, 2026-11-13). */
   private renameView(i: number): void {
     const h = this.g.save.heroes[i];
+    this.dropRing();
     this.pick = h.cls;
     this.el.innerHTML = `<div class="tcard"><h1>RELIC</h1><div class="sub">A NEW NAME</div><div class="stop" style="justify-content: center">${face(h.cls, h.look)}</div>` +
       `<p class="lede">Another hero already goes by ${esc(h.name)}. Pick a new name for yours.</p>` +
@@ -240,6 +258,7 @@ export class Title {
     if (d.recover !== undefined && this.panel) return this.dropRing(), (this.inPanel = true), this.panel.open(), void (this.el.innerHTML = this.panel.html());
     if (d.play !== undefined && this.g.save.heroes[Number(d.play)]?.rename) return this.renameView(Number(d.play));
     if (d.rename !== undefined) return void this.rename(Number(d.rename));
+    if (d.play !== undefined && this.ring) return void (this.leaving || this.playFromRing(Number(d.play)));
     if (d.play !== undefined) return this.g.choose(Number(d.play)), this.hide();
     if (d.wood !== undefined) return this.g.choose(Number(d.wood)), this.g.startWood(true), this.hide();
     if (d.skipwood !== undefined) return void this.begin(true);

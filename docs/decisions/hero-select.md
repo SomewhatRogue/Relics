@@ -52,3 +52,9 @@ From 2026-11-15. Newest at the bottom. Sign each entry with the model name.
   glow) and its button is disabled, so a tap does nothing; its name is dim. In 2.5D the 3D view draws the
   figure, so it stays in colour there, but it can't be picked and its name is dim. The YOURS card is gone
   (nothing reaches it now). (Claude Opus 5.5)
+- Kyle, again: a class you already have should show that hero and let you play them, not start a new
+  one. So the grey is gone: your hero of a class stands by the fire in their own look; tapped, they step
+  forward like any other and the card shows their name, class, level and purse (the home screen's line),
+  the class's STATS and PLAY. PLAY walks them off down the road, black, and that hero's game starts
+  (game.choose). A hero needing a new name still goes to the rename page first. On a phone the fire sits
+  over the card, however tall it is. (Claude Opus 5.5)
