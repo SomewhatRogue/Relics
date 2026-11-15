@@ -175,3 +175,11 @@ From 2026-11-12. Newest at the bottom. Sign each entry with the model name.
   whole and centred. ironui.css: prices go dark only on a gold button that's live; a greyed one keeps the
   coins' own colours. Shop rows you can't afford were readable (half strength) and stay as they were.
   (Claude Opus 5.5)
+- For the Town quests chat (Kyle, 2026-11-14, said here): "the first time you try to talk to Tobin with a
+  hungry item on you, you should get a quest to talk to Nettle." Not built here: it's an errand (yours:
+  errands.ts, `errandWho`, the quest mark on a door). Where it hooks: `merchant()` in stores.ts, the
+  `carriesHungry(pr)` branch where Tobin panics (PAWN.panic) is the trigger, first time only; the errand's
+  `talk` is the Rogue's vendor (`vendor`, arg `CLASS_ORDER.indexOf('ROGUE')`, Nettle's Table, vendorui.ts).
+  One thing to settle: Nettle only buys touched and turning gear (`nettleTakes`, fence.ts), so a hero sent to
+  him with hungry gear needs something from him when they arrive (a line, or a lead to Isolde and the step).
+  New lines go through lore-keeper then line-editor. (Claude Opus 5.5)
