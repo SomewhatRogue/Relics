@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import type { Block } from '../../shared/arena';
 import { mat, quad, tri } from './streetkit';
-import { PX, rowOf, size, type Front, type Side } from './streetrow';
+import { front, openEnd, PX, rowOf, seeded, size, type Front, type Side } from './streetrow';
 import SIZES from './kit/kit.json';
 
 const SIDES = Object.keys(SIZES).filter((k) => k.startsWith('side-'));
@@ -68,6 +68,29 @@ function building(f: Front, d: number, flip: boolean, n: number): { g: THREE.Gro
   return { g, roof };
 }
 
+/**
+ * A cross wing on a row's end that looks out on open street: a second front facing the side lane (dir -1 west, 1
+ * east), its gable roof running back into the house a couple of tiles, so the chase camera coming round the corner
+ * sees a front, not a blank end. Built in the end house's frame (x across, z back from its face), at its side x.
+ */
+function crossWing(g: THREE.Group, f: Front, wing: Front, x: number, d: number, dir: -1 | 1): void {
+  const w = Math.min(d - 0.5, wing.w * 1.15), k = w / wing.w, H = wing.H * k, eave = H * wing.eave, ridge = H * wing.ridge;
+  const zc = -d / 2, za = zc - w / 2, zb = zc + w / 2, xo = x + dir * 0.03, back = Math.min(2.4, f.w * 0.6), xi = x - dir * back;
+  const m = mat(wing.name, false, true);
+  g.add(dir > 0 ? quad([xo, 0, zb], [xo, 0, za], [xo, H, za], [xo, H, zb], m) : quad([xo, 0, za], [xo, 0, zb], [xo, H, zb], [xo, H, za], m));
+  // Its roof: slate from the ridge down to its eaves, from the face back into the house.
+  const rm = mat('mat-slate', true), slope = Math.hypot(w / 2, ridge - eave), xe = xo + dir * 0.12;
+  g.add(quad([xe, eave - 0.1, za - 0.15], [xi, eave - 0.1, za - 0.15], [xi, ridge, zc], [xe, ridge, zc], rm, 0, back / 2, slope / 2));
+  g.add(quad([xi, eave - 0.1, zb + 0.15], [xe, eave - 0.1, zb + 0.15], [xe, ridge, zc], [xi, ridge, zc], rm, 0, back / 2, slope / 2));
+  // If the wing stands over the house's own eave, its side walls show above the main roof: plain stone.
+  const top = f.H * f.eave;
+  if (eave > top) {
+    const sm = mat('mat-stone', true);
+    g.add(quad([xi, top - 0.3, za], [xo, top - 0.3, za], [xo, eave, za], [xi, eave, za], sm, 0, back / 2, (eave - top) / 2));
+    g.add(quad([xo, top - 0.3, zb], [xi, top - 0.3, zb], [xi, eave, zb], [xo, eave, zb], sm, 0, back / 2, (eave - top) / 2));
+  }
+}
+
 /** The sign a block hangs by its door when its picture has none: by what the block is. */
 function signOf(b: Block, f: Front): string | null {
   const l = (b.label ?? '').toUpperCase();
@@ -80,10 +103,15 @@ function signOf(b: Block, f: Front): string | null {
 
 /** Build a roofed block from the kit into `group`; returns its roofs and how tall it stands. */
 export function kitBlock(b: Block, group: THREE.Group): { roof: THREE.Group; top: number } {
-  const row = rowOf(b), roofs = new THREE.Group(), z1 = b.y + b.h, d = b.h, total = row.reduce((s, f) => s + f.w, 0);
+  const row = rowOf(b), rnd = seeded({ ...b, x: b.x + 0.5 }), roofs = new THREE.Group(), z1 = b.y + b.h, d = b.h, total = row.reduce((s, f) => s + f.w, 0);
   let x = b.x + (b.w - total) / 2, top = 0;
   row.forEach((f, i) => {
     const n = Math.round(b.x * 3 + b.y * 5) + i * 7, { g, roof } = building(f, d, i % 2 === 1 && !f.turn, n);
+    // The row's open ends get a front facing the side lane (not on a landmark, which is turned already).
+    for (const dir of [-1, 1] as const) {
+      const end = dir < 0 ? i === 0 : i === row.length - 1;
+      if (end && !f.turn && f.kind !== 'cottage' && d >= 2.6 && openEnd(b, dir)) crossWing(g, f, front(rnd() < 0.5 ? 'shop' : 'house', rnd), (dir * f.w) / 2, d, dir);
+    }
     g.position.set(x + f.w / 2, 0, z1);
     g.rotation.y = f.turn ?? 0;
     group.add(g);

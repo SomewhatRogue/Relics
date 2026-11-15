@@ -26,3 +26,12 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
 - Same footprints, doors and collision. Kit now 5.4 MB, loaded only under `?street`, each picture when first drawn.
 - scripts/street-look.cjs: shots with the swing held (`x,y,yawDeg`), `HOMES=1` for all eight homes.
   (Claude Opus 5.5)
+
+## 2026-11-15: fronts on the sides the swing shows
+
+- A row's end that looks out on open street (no roofed building within 2.5 tiles that way, streetrow.ts `openEnd`)
+  gets a cross wing (streetbuild.ts `crossWing`): a shop or town-house front facing the side lane, fitted to the
+  block's depth, with its own short gable roof running back into the house. Not on a landmark (already turned to the
+  middle of town), a cottage, or a block under 2.6 tiles deep. Other ends keep the side-wall art from the variety
+  slice. buildings3d.ts hands the town's blocks to streetrow.ts before building so a row can see its neighbours.
+  (Claude Opus 5.5)

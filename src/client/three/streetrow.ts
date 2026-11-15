@@ -68,12 +68,12 @@ export function mainOf(b: Block): Kind {
 }
 
 /** A seeded picker for one block, the same every build. */
-function seeded(b: Block): () => number {
+export function seeded(b: Block): () => number {
   let n = (Math.round(b.x * 7 + b.y * 13) >>> 0) || 1;
   return () => ((n = (Math.imul(n, 1103515245) + 12345) >>> 0) / 4294967296);
 }
 
-function front(kind: Kind, rnd: () => number): Front {
+export function front(kind: Kind, rnd: () => number): Front {
   const L = LOOKS[kind], all = takes(L.prefix), name = all[Math.floor(rnd() * all.length)] ?? 'facade-house-0';
   const [pw, ph] = size(name);
   return { name, kind, w: pw / PX, H: ph / PX, eave: L.eave, ridge: L.ridge, side: L.side, stack: L.stack };
@@ -118,4 +118,15 @@ export function rowOf(b: Block): Front[] {
   if (slop > 0.02 && !R.length && L.length) L = fill(b.w - main.w);
   else if (slop > 0.02 && !L.length && !R.length && !LANDMARK.has(kind)) main.w = b.w;
   return [...L, main, ...R];
+}
+
+/** The town's blocks, set before its buildings are built (buildings3d.ts), so a row can see its neighbours. */
+let around: Block[] = [];
+export const streetAround = (blocks: Block[]) => void (around = blocks);
+const ROOFED = new Set<Block['kind']>(['house', 'hall', 'church', 'forge', 'tavern', 'tower', 'granary', 'barn']);
+
+/** Whether a block's west (-1) or east (1) end looks out on open street: no roofed building within `gap` tiles. */
+export function openEnd(b: Block, dir: -1 | 1, gap = 2.5): boolean {
+  const x0 = dir < 0 ? b.x - gap : b.x + b.w, x1 = dir < 0 ? b.x : b.x + b.w + gap;
+  return !around.some((o) => o !== b && ROOFED.has(o.kind) && o.x < x1 && o.x + o.w > x0 && o.y < b.y + b.h && o.y + o.h > b.y);
 }
