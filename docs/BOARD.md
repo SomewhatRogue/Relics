@@ -38,6 +38,8 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **Gear levels** (docs/design/gear-levels.md, Kyle approved 2026-11-14): item level from where a piece dropped, about 7% a level, so a high purple beats a low red; tiers closer together, pluses stay on top; rarity measured by the income bot with a test per tier; uniques with their own look and keep-the-look; a LEGS slot (modifiers only). One new Gear chat. Pairs with gear-looks.md for slice 5.
+
 - **Gear you can see** (docs/design/gear-looks.md): weapons look like their tier and element, the eleven Hungry pieces their own, then armour weight as overlays and rings. Slice 1 (weapons) can run beside the side-view chat; armour waits for it.
 
 - **Heroes seen from the side** (docs/design/side-view.md): a profile map per look, picked when walking east or west, with its own stride; slice 1 is the Warrior's three looks, for Kyle to try. Art work; for a fresh art chat.
