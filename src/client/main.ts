@@ -71,6 +71,7 @@ import { commission } from './statuebuy';
 import { WorldLink } from './worldlink';
 import { setLink } from './squareui';
 import { raidNews } from './raidnews';
+import { relicsGoneNews } from './relicgone';
 import { WORK_ORDER } from '../shared/works';
 import { grabbable } from '../sim/grab';
 import { raisable } from '../sim/party';
@@ -658,7 +659,10 @@ function tick(t: number): void {
   if (game.greeting === 'road' && !panel.open) (game.greeting = null), panel.show('WICKHOLD', `<p class="dim">${line(WOOD_ROAD)}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   // Back to a town the hungry raided while you were away: Dunn tells you, the first time you see it.
   else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result) {
-    const news = raidNews(game.world);
+    // (After it, once: the relics that went when relics became earned, relicgone.ts; told, it's saved.)
+    const raid = raidNews(game.world), gone = raid ? null : relicsGoneNews(game.profile);
+    if (gone) game.keep();
+    const news = raid ?? gone;
     if (news) panel.show(news.title, news.html, [{ label: 'CLOSE', primary: true, act: () => panel.hide() }], true);
   }
   fx.update(dt);

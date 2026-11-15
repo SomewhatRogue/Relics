@@ -114,6 +114,9 @@ export interface Profile {
   relic: string;
   /** Relics gained but not looked at yet (ids; the pack marks them NEW), and whether the first relic's tip has been shown. */
   relicNew?: string[];
+  /** Relics re-earned (shared/relicreset.ts): the step's version, and how many went until the hero is told. */
+  relicsV?: number;
+  relicsGone?: number;
   /** The first named butcher this hero killed gave its sure relic (sim/namedrelic.ts): once a hero. */
   namedRelic?: boolean;
   relicTip?: boolean;
@@ -169,7 +172,7 @@ export interface Profile {
 }
 
 export const newProfile = (cls: HeroClass = 'WARRIOR', name = 'HERO', id = heroId()): Profile =>
-  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, coin: 1, ranks: 1, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true, errands: newErrands(), quests: newQuests() });
+  ({ id, ...(cls === 'RANGER' ? { hound: defaultHound(id) } : {}), name, cls, gold: 0, coin: 1, relicsV: 1, ranks: 1, xp: 0, level: 1, perks: [], learned: [], picks: 0, arms: {}, weapon: CLASS_KITS[cls][0], bag: [], glow: 0, belt: ['bitter'], armor: { slot: 'armor', armor: CLASS_ARMOR[cls], quality: 'plain', traits: [], mods: [], level: 0 }, rings: [], steel: 0, want: 0, prologue: false, tally: false, cold: false, cutSeen: false, relics: [], relic: '', augments: {}, runs: 0, stats: newStats(), wish: false, dice: 0, signs: true, errands: newErrands(), quests: newQuests() });
 
 export function heroId(): string {
   const c = 'abcdefghijkmnpqrstuvwxyz23456789';

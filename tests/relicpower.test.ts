@@ -171,7 +171,7 @@ describe('few uses, fading by stages', () => {
 
   it('old saves come over with the same share of charge in uses; full stays full, dark stays dark', () => {
     const old = (kind: RelicId, tier: 1 | 2 | 3, el: RelicItem['el'], charge: number) => ({ id: `o${kind}${charge}`, kind, tier, el, charge });
-    const s = fromJson({ heroes: [{ name: 'OLD', cls: 'WARRIOR', weapon: 'sword', relics: [old('javelin', 1, '', 24), old('hook', 1, '', 12), old('bell', 1, '', 1), old('knuckle', 1, '', 0), old('bomb', 2, 'frost', 36), old('sentry', 3, 'storm', 24)], relic: 'ohook12' } as never], current: 0, world: newWorld() })!;
+    const s = fromJson({ heroes: [{ name: 'OLD', cls: 'WARRIOR', weapon: 'sword', relicsV: 1, relics: [old('javelin', 1, '', 24), old('hook', 1, '', 12), old('bell', 1, '', 1), old('knuckle', 1, '', 0), old('bomb', 2, 'frost', 36), old('sentry', 3, 'storm', 24)], relic: 'ohook12' } as never], current: 0, world: newWorld() })!;
     const p = s.heroes[0];
     expect(p.relics.map((r) => [r.kind, r.charge, relicMax(r)])).toEqual([['javelin', 4, 4], ['hook', 2, 4], ['bell', 1, 4], ['knuckle', 0, 4], ['bomb', 5, 5], ['sentry', 3, 5]]);
     expect(p.relic).toBe('ohook12');

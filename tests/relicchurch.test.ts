@@ -143,8 +143,8 @@ describe('no relic from a deep dive (docs/design/relics.md)', () => {
 });
 
 describe('old saves and the room', () => {
-  it('a hero saved before relics had charge keeps each one, full and plain, still carrying the same', () => {
-    const s = fromJson({ heroes: [{ name: 'OLD', cls: 'WARRIOR', weapon: 'sword', relics: ['javelin', 'hook'], relic: 'hook' } as never], current: 0, world: newWorld() })!;
+  it('a hero saved before relics had charge keeps each one, full and plain, still carrying the same (past the earned step: relicreset.test.ts)', () => {
+    const s = fromJson({ heroes: [{ name: 'OLD', cls: 'WARRIOR', weapon: 'sword', relics: ['javelin', 'hook'], relic: 'hook', relicsV: 1 } as never], current: 0, world: newWorld() })!;
     const p = s.heroes[0];
     expect(p.relics.map((r) => [r.kind, r.tier, r.el, r.charge])).toEqual([['javelin', 1, '', 4], ['hook', 1, '', 4]]);
     expect(p.relics.find((r) => r.id === p.relic)?.kind).toBe('hook');

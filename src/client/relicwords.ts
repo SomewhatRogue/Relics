@@ -94,6 +94,10 @@ export const RELICW = {
   tapSlot: 'TAP',
   emptySlot: 'Nothing carried. Tap a relic to carry it, or drag it onto RELIC.',
   shelfHow: 'Tap a relic to see it, or drag it onto RELIC to carry it.',
+  /** The one-time card when relics became earned (relicgone.ts): draft until the lore pass. */
+  goneTitle: 'YOUR RELICS',
+  goneLine: (jav: boolean) => (jav ? 'Every relic you carried is gone but the Relic Javelin.' : 'Every relic you carried is gone.') + ' Relics are won now, each one once: from a great boss the first time it falls, or from Mother Isolde at the church.',
+  goneIsolde: "They came back to us, the lot of them, the way they do when they've been passed round too freely. Earn one and it'll stay with you, I should think.",
   /** On a job (docs/design/relics.md): the relic carried is chosen in town and kept the whole way. */
   keptOnJob: 'You keep the relic you set out with until the job is done. Choose another in town.',
   shelfHint: 'It\'s with your other relics, in your pack.',

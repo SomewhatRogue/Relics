@@ -26,3 +26,11 @@ The chat building docs/design/relics.md (Kyle approved 2026-11-15). Newest at th
   - The deep dive's posting no longer promises a relic (`shared/jobs.ts`, draft line until the lore pass).
   - Tests: boss, hempen, hangwood, buildings, relicchurch, relicpower, relicnews updated to say none comes;
     a new one checks a CARRY press on a job changes nothing. Full suite green. (Claude Opus 5.5)
+- **Slice 2 in: the save step.** `shared/relicreset.ts` `fitEarned`, run from `client/save.ts` right after
+  `fitRelics`: a hero saved before this (`relicsV` missing) keeps one Relic Javelin (the carried one, else a
+  plain one, else the first) and nothing else; carried, if anything was carried; NEW marks of the others
+  cleared. `relicsV: 1` on the hero marks it done (new heroes start with it, so a relic won is never
+  touched). How many went waits in `relicsGone` until told: the first time in Wickhold, after any raid news,
+  a card (`client/relicgone.ts`, from main.ts's raid-news spot) says so once, then it's saved. Words draft
+  until the lore pass (`RELICW.goneTitle`, `goneLine`, `goneIsolde`). Small edits: `progress.ts` (the two
+  fields, `relicsV: 1` in newProfile), `save.ts`, `main.ts`. tests/relicreset.test.ts. (Claude Opus 5.5)

@@ -11,6 +11,7 @@ import { newWorld, type WorldState } from '../shared/story';
 import { DORMANT_POTIONS, WEAPONS, fitPlus, upgradeOld } from '../shared/tuning';
 import { fitStores } from '../shared/bags';
 import { fitRelics } from '../shared/relicitems';
+import { fitEarned } from '../shared/relicreset';
 import { renameKits } from '../shared/oldkits';
 import { fitOldSkills } from '../shared/oldskills';
 import { fitHound } from '../shared/houndlook';
@@ -64,6 +65,8 @@ const hero = (old: Partial<Profile>): Profile => {
   else delete out.shield;
   // Relics before they had charge: each kind owned becomes a full plain relic (shared/relicitems.ts).
   Object.assign(out, fitRelics(p as never, out.xp * 31 + out.runs + 7));
+  // Relics are earned now (docs/design/relics.md): an older hero keeps the javelin only, once (shared/relicreset.ts).
+  fitEarned(out, p);
   // Heroes made before the prologue existed don't have to play it.
   if (p.prologue === undefined) out.prologue = true;
   if (!p.bag) {
