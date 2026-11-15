@@ -3,6 +3,7 @@
  * sockets or screens. Solo, it runs in this browser; online, it runs in the party leader's browser
  * (the Come Bye host model) and friends send it Intents.
  */
+import { stepStreaks } from './streak';
 import { fireSign } from './signature';
 import { stepCuts } from './samuraicut';
 import { stepSmoke } from './smokebomb';
@@ -353,6 +354,8 @@ export class ArenaRoom {
     useBook(this.bosses);
     try {
       this.stepOnce();
+      // The streak (sim/streak.ts): settled from what was counted this step, on a job.
+      if (this.board) stepStreaks(this.heroes, this.time, this.events);
     } finally {
       useBoard(null);
       useLate(null);

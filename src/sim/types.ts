@@ -184,6 +184,11 @@ export interface Hero extends Body {
   mendLeft: number;
   /** Wall Brandy: breath comes back faster until then. */
   brandyUntil: number;
+  /** The streak (shared/streak.ts): now, when it last moved, its step, and the best this job. */
+  streak?: number;
+  streakAt?: number;
+  streakStep?: number;
+  streakBest?: number;
   /** In smoke: goblins can't see you (unless close) until then. */
   hiddenUntil: number;
   /** A chalker's strokes on this hero (sim/chalker.ts), when the last went on, and the pack turned on them until then. Drawn over them on every screen. */
@@ -817,6 +822,9 @@ export interface LootRoll {
 }
 
 export type FightEvent =
+  /** The streak (sim/streak.ts): hero `id` up to step `step` at `n`; or its streak of `n` broken. */
+  | { k: 'streak'; x: number; y: number; id: string; n: number; step: number }
+  | { k: 'streakbreak'; x: number; y: number; id: string; n: number }
   /** A chalker's stroke on hero `on` (`n` now), the fifth turning its pack on them, the strokes wiped (sim/chalker.ts). */
   | { k: 'chalk'; x: number; y: number; n: number; on: string }
   | { k: 'chalked' | 'chalkwipe'; x: number; y: number; on: string }

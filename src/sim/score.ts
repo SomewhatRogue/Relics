@@ -6,6 +6,7 @@
  * a friend's game reads the leader's numbers with its own under `me` (coop.ts swaps the ids).
  */
 import type { HeroClass } from '../shared/weapons';
+import { noteStreak } from './streak';
 
 export interface Score {
   /** Goblins killed (not spiders or wolves: the same goblins the run counts). */
@@ -44,6 +45,7 @@ export const useBoard = (b: Board | null): void => void (on = b);
 /** Count `n` of `k` for hero `id` (the squire and nobody count nothing). */
 export function count(id: string | undefined, k: Count, n = 1): void {
   if (!on || !id || id === 'squire' || !(n > 0)) return;
+  noteStreak(id, k, n);
   const s = (on[id] ??= blankScore());
   if (k === 'best') s.best = Math.max(s.best, n);
   else s[k] = (s[k] ?? 0) + n;

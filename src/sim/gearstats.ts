@@ -1,4 +1,5 @@
 /** What a hero's worn gear adds up to (shared/gear.ts), read wherever the fight uses a number. */
+import { streakBonus } from '../shared/streak';
 import { cutMax, drilled, gearStats, perkFx, type Fx, type GearStats } from '../shared/tuning';
 import type { Hero } from './types';
 import { markSum } from '../shared/deepmarks';
@@ -10,13 +11,16 @@ const cache = new WeakMap<Hero, { key: unknown[]; s: Stats }>();
 export function statsOf(h: Hero): Stats {
   const w = h.arms?.[h.weapon], rings = h.rings ?? [], c = cache.get(h), d = h.drills;
   const mk = (h.marks ?? []).join();
-  if (c && c.key[0] === w && c.key[1] === h.armor && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d && c.key[5] === (h.perks ?? []).join() && c.key[6] === mk) return c.s;
+  if (c && c.key[0] === w && c.key[1] === h.armor && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d && c.key[5] === (h.perks ?? []).join() && c.key[7] === (h.streakStep ?? 0) && c.key[6] === mk) return c.s;
   const g = gearStats(w, h.armor, rings);
   const fx = perkFx(h.perks);
   const s = { ...g, fx, damage: g.damage + drilled(d, 'power'), health: g.health + drilled(d, 'health'), speed: g.speed * (1 + drilled(d, 'speed')), breath: g.breath + drilled(d, 'wind'), crit: g.crit + drilled(d, 'crit') };
   withKnacks(s, fx);
   withMarks(s, h.marks);
-  cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join(), mk], s });
+  // The streak's steps on top (shared/streak.ts): for as long as it lasts.
+  const sb = streakBonus(h.streakStep ?? 0);
+  Object.assign(s, { damage: s.damage + sb.damage, speed: s.speed * (1 + sb.speed), breath: s.breath + sb.breath, crit: s.crit + sb.crit });
+  cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join(), mk, h.streakStep ?? 0], s });
   return s;
 }
 
