@@ -9,3 +9,20 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   cheated toward the camera), fronts on the sides the camera swing shows, the kit's props, sky and fog past the town
   walls, the see-through hole working with the swing; Blender briefs for the landmarks.
   (Claude Opus 5.5)
+
+## 2026-11-15: building variety
+
+- New art in Kyle's flow "Relic: HD-2D look tests" (four sheets of four, about 3,400 credits): single-storey cottages,
+  two-storey shops, the four landmarks as grand fronts (church with its bell tower, town hall with clock and arcade,
+  the Drowned Rat three storeys and jettied, the forge with its tall chimney), and long side walls (timber, stone,
+  shop, a church nave). Cut by scripts/kitprep.py, which now takes sets (`cottages shops landmarks sides props`); the
+  prop sheet from the test street is cut into props too (used in the props slice).
+- three/streetrow.ts decides a block's row: the landmark (church, TOWN HALL, THE DROWNED RAT, FORGE) at its door,
+  9 to 14 tiles tall, keeping its proportions (up to a tile wider than its block), turned up to 15 degrees toward the
+  middle of town; homes (`home:`) are one cottage each; everything else a front by kind with cottages, shops and town
+  houses either side, never the same kind twice running. three/streetbuild.ts builds it: the picture, side walls in
+  side-wall art (taller walls repeat the upper storey), a back, the slate roof from each front's own eave and ridge,
+  a stone stack behind the church's tower and the forge's chimney. Signs hang only on the block's own front.
+- Same footprints, doors and collision. Kit now 5.4 MB, loaded only under `?street`, each picture when first drawn.
+- scripts/street-look.cjs: shots with the swing held (`x,y,yawDeg`), `HOMES=1` for all eight homes.
+  (Claude Opus 5.5)

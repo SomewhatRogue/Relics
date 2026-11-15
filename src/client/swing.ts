@@ -13,3 +13,6 @@ export function swung(mx: number, my: number): [number, number] {
   const c = Math.cos(y), s = Math.sin(y);
   return [mx * c - my * s, mx * s + my * c];
 }
+
+// Test hook (scripts/street-look.cjs): hold the swing for a screenshot.
+if (typeof window !== 'undefined') (window as unknown as { __swing: typeof SWING }).__swing = SWING;

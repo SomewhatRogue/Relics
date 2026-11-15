@@ -20,7 +20,8 @@ import type { Kindling } from '../../shared/kindling';
 import { asLamp, lampMeshes } from './lamps3d';
 import { doorGlow, shutDoor } from './shut3d';
 import { dress3d } from './darkdress3d';
-import { kitBlock, STREET } from './streetkit';
+import { STREET } from './streetkit';
+import { kitBlock } from './streetbuild';
 
 /** Eave height (tiles) by kind. */
 // (Walls 1.7 times their first height since the heroic proportions, Kyle 2026-11-12: "houses now look way too tiny";
