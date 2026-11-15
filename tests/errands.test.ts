@@ -166,3 +166,42 @@ describe('the arrival and the runner', () => {
     for (const q of way) expect(q.y > 6 - 0.3 && q.y < 9 + 0.3 && q.x > 6 - 0.3 && q.x < 16 + 0.3).toBe(false);
   });
 });
+
+import { metNettle, sendToNettle, errandWho } from '../src/shared/errands';
+
+describe('Tobin sends you to Nettle (Kyle, 2026-11-14)', () => {
+  const hungryHero = () => {
+    const p = { ...newProfile('MAGE', 'H'), prologue: true };
+    told(p), relicDone(p), talkedTo(p, 'trainer', 3);
+    p.quests = undefined; // (hero quests aside: tests/heroquests.test.ts)
+    const it = p.bag[0] ?? (p.bag.push({ ...(p.armor as object) } as never), p.bag[0]);
+    it.quality = 'hungry';
+    return p;
+  };
+
+  it('the first time only; while you carry hungry gear; ended at his table', () => {
+    const p = hungryHero();
+    expect(openErrands(p)).toEqual([]);
+    expect(sendToNettle(p)).toBe(true);
+    expect(sendToNettle(p)).toBe(false);
+    expect(openErrands(p)).toEqual(['nettle']);
+    expect(errandWho(p, 'nettle')).toEqual({ door: 'tavern', talk: 'vendor', arg: 2 });
+    // Given up at the church, say: nothing hungry on you, nothing to sell him, and the errand's out of sight.
+    const keep = p.bag.map((it) => it.quality);
+    for (const it of p.bag) if (it.quality === 'hungry') it.quality = 'plain' as never;
+    expect(openErrands(p)).toEqual([]);
+    p.bag.forEach((it, i) => (it.quality = keep[i]));
+    expect(metNettle(p)).toBe(true);
+    expect(metNettle(p)).toBe(false);
+    expect(openErrands(p)).toEqual([]);
+    expect(sendToNettle(p)).toBe(false);
+  });
+
+  it('kept across a save', () => {
+    const p = hungryHero();
+    sendToNettle(p);
+    const s = fromJson(JSON.parse(JSON.stringify({ heroes: [p], current: 0, world: newWorld() })))!;
+    expect(s.heroes[0].errands?.nettle).toBe(1);
+    expect(fitErrands({ told: true, nettle: 7 }, 1).nettle).toBeUndefined();
+  });
+});

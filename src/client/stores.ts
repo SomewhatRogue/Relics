@@ -8,6 +8,8 @@
  * the rare three, and won't trade at all with a hero carrying hungry gear, shared/fence.ts); Halvard's forge (strike what you wear up a plus for gold and steel, forgeview.ts; MELT DOWN what's in your pack).
  * The rules are shared/bags.ts; syncPack keeps the hero in step with the save after each one.
  */
+import { sendToNettle } from '../shared/errands';
+import { ERRANDW } from './errandwords';
 import { coinsHtml } from '../shared/coins';
 import { carriesHungry, tobinWont } from '../shared/fence';
 import { bagSize, growBag, growVault, nextBag, nextVault, pawn, pawns, redeem, stow, unstow, vaultSize } from '../shared/bags';
@@ -85,7 +87,12 @@ export const pawnTabTo = (t: 'buy' | 'sell') => void (pawnTab = t);
  */
 function merchant(g: Game, panel: Panel): void {
   const pr = g.profile, held = pawns(pr), more = nextBag(pr), room = pr.bag.length < bagSize(pr), again = () => merchant(g, panel);
-  if (carriesHungry(pr)) return show(panel, PLACES.pawn.name, shopHead(PLACES.pawn, says('Tobin', PAWN.panic)) + p(`<span class="dim">${PAWN.panicRule}</span>`), () => {}, again);
+  if (carriesHungry(pr)) {
+    // The first time, he sends you to Nettle (an errand: shared/errands.ts, the town quests chat), and says so while it's open.
+    if (sendToNettle(pr)) g.keep?.();
+    const sends = pr.errands?.nettle === 1 ? says('Tobin', ERRANDW.tobinSends) : '';
+    return show(panel, PLACES.pawn.name, shopHead(PLACES.pawn, says('Tobin', PAWN.panic)) + sends + p(`<span class="dim">${PAWN.panicRule}</span>`), () => {}, again);
+  }
   const wont = (it: Item) => !!tobinWont(pr, it);
   const tap = (s: string, i: number) => {
     const it = s === 'bag' ? pr.bag[i] : undefined, price = it ? sellValue(it) : 0;

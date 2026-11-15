@@ -32,7 +32,7 @@ import { openButts, openPond } from './pastimeui';
 import { openArmTable, openKnifeBoard } from './ratui';
 import { openBest } from './bestui';
 import { townVoice, voiceClock } from './voiceplay';
-import { talkedTo } from '../shared/errands';
+import { metNettle, talkedTo } from '../shared/errands';
 import { ERRANDW } from './errandwords';
 import { questBack, questHeld } from '../shared/heroquests';
 import { QUESTW } from './questwords';
@@ -49,6 +49,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   if (openSquare(id, g, panel, arg, key)) return;
   if (openStore(id, g, panel) || openShop(id, g, panel)) return;
   // A class's vendor, at a counter in its place (vendorui.ts); `arg` is the class.
+  // Come from Tobin with hungry gear: Nettle knows, and his table opens on SELL QUIETLY (shared/errands.ts).
+  if (id === 'vendor' && CLASS_ORDER[arg] === 'ROGUE' && metNettle(g.profile)) return g.keep(), openVendor(g, panel, arg, 'fence', ERRANDW.nettleMet);
   if (id === 'vendor') return openVendor(g, panel, arg);
   if (id === 'practice') {
     openPractice(g, panel);

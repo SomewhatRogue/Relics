@@ -23,12 +23,12 @@ const trainer = (cls: HeroClass) => title(TRAINERS[cls].name);
 
 export const ERRANDW = {
   /** The tracker's rows: a label and what to do. */
-  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL' } as Record<ErrandId, string>,
+  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR' } as Record<ErrandId, string>,
   todo: (id: ErrandId, cls: HeroClass) =>
-    id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
+    id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
   /** Folded, one line. */
   small: (id: ErrandId, cls: HeroClass) =>
-    id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
+    id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
   freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",
@@ -41,6 +41,10 @@ export const ERRANDW = {
     MAGE: "Ah. Yes. You. Mind the circle, it's chalk. I can't teach you anything yet, not really, so there's the board in the square, and come back after, and I'll have something worked out.",
     HEALER: "Stand there where I can see you. Hm. You'll do, you great calf. Go and do an honest job off the board in the square, and come back to me after.",
   } as Record<HeroClass, string>,
+  /** Tobin, frightened of your hungry gear, the first time (said under his panic while the errand's open), and
+   *  Nettle when you come from him (Kyle, 2026-11-14; lore keeper and line editor). */
+  tobinSends: "If you want rid of it there's a man at the back of the Rat, Nettle he's called, and he'll take it off you, only I never said so, mind, and if anyone asks it's the church you want.",
+  nettleMet: "Tobin sent you, I'd guess, he always does and then swears he never did, so keep your voice down and let's see what you've brought.",
   /** Back after that first job: your first skill, and when (level 3: drills.ts SKILL_STEPS). */
   back: {
     WARRIOR: "Good, you came back. At level 3 I'll teach you Shield Charge. Till then, more of the same.",

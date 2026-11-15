@@ -68,9 +68,10 @@ export function stockGoods(g: Game, v: VendorId, again: () => void): Good[] {
  * A class's vendor, by the class's place in CLASS_ORDER (the Npc's arg). Anyone may look; weapons only fit
  * their class. Nettle's table (the Rogue's) has a second tab, SELL QUIETLY, where he buys (fenceui.ts).
  */
-export function openVendor(g: Game, panel: Panel, arg: number, tab: Tab = 'sale'): void {
+/** `greet`: their line in place of the usual (Nettle when Tobin's sent you: townui.ts). */
+export function openVendor(g: Game, panel: Panel, arg: number, tab: Tab = 'sale', greet = ''): void {
   const cls = CLASS_ORDER[arg] ?? 'WARRIOR', pl = VENDOR_PLACES[cls], again = () => openVendor(g, panel, arg, tab), fence = cls === 'ROGUE';
-  const head = shopHead(pl, says(pl.who, pl.greet)) + (fence ? fenceTabs(tab) : '');
+  const head = shopHead(pl, says(pl.who, greet || pl.greet)) + (fence ? fenceTabs(tab) : '');
   if (fence && tab === 'fence') {
     clearInterval(ticking);
     townVoice.hush(voiceClock());

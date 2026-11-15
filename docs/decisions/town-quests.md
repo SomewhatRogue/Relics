@@ -151,3 +151,22 @@ From 2026-11-12. Spec: docs/design/town-quests.md. Newest at the bottom. Sign ea
   - Checked end to end with `scripts/firstjob.cjs` (a fresh hero out of the wood, the runner, the
     meeting, the board, the job won with `endForTest`, back to the trainer), Warrior and Cleric, phone,
     no page errors. (Claude Opus 5.5)
+
+## 2026-11-14 (Claude Opus 5.5)
+
+- **Tobin sends you to Nettle** (Kyle, via the UI chat's log 2026-11-14). The first time you try Tobin
+  with hungry gear on you (his panic, `merchant()` in stores.ts) you get an errand, `nettle`
+  (`errands.nettle`: 1 to go, 2 been; once only, old heroes included): HUNGRY GEAR, "Sell it to Nettle,
+  at the back of the Drowned Rat" on the goal line, the gold mark on the Rat's door and on Nettle inside.
+  Shown only while there's still hungry gear on you (given up at the church, it's out of sight). Tobin
+  says where under his panic while it's open. Talking to Nettle ends it: his table opens on SELL
+  QUIETLY with his own line for it (`openVendor`'s new `greet`).
+- The UI chat's note said Nettle only buys touched and turning gear; he buys hungry gear too (Kyle,
+  2026-11-11; bible 331; `nettleTakes`), so arriving he has something for you. His SELL QUIETLY note still
+  reads "Nettle buys touched and turning gear" (the UI and Economy chats' words): worth adding hungry.
+  He sells from the pack, so worn hungry gear has to come off first.
+- Lines: one lore-keeper call, one line-editor call (Nettle's without the line editor's "the watch are
+  drinking", which says they're in the room when they may not be). New lore for the bible: Tobin knows
+  Nettle buys hungry gear and quietly sends heroes to him, and Nettle's used to it.
+- `stores.ts` calls `g.keep?.()`: the Economy chat's fence tests drive Tobin with a game that has none.
+  Tests in `tests/errands.test.ts`; phone shots of Tobin, the street and Nettle. (Claude Opus 5.5)

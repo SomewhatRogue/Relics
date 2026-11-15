@@ -10,11 +10,13 @@ import { SKILL_CHOICES } from './magic.js';
 import type { Profile } from './progress.js';
 import { knowsSkill, skillStep } from './skillteach.js';
 import { CLASS_ORDER, type HeroClass } from './weapons.js';
+import { carriesHungry } from './fence.js';
 import { questBack, questDue, questHeld, reported, takeQuest } from './heroquests.js';
 import { deepSkillOpen } from './deepskill.js';
 
-/** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do; `back`: one done, to tell them of (shared/heroquests.ts). */
-export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back';
+/** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do; `back`: one done, to tell them of (shared/heroquests.ts).
+ *  `nettle`: Tobin, frightened of your hungry gear, sent you to Nettle. */
+export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle';
 export interface Errands {
   /** The runner has found you and said their line (the first two are yours from then). */
   told: boolean;
@@ -25,6 +27,8 @@ export interface Errands {
   seen: number;
   /** The trainer has seen you since the Deep opened your Deep skill (shared/deepskill.ts): no longer news. */
   deep?: boolean;
+  /** Tobin sent you to Nettle with your hungry gear: 1 to go, 2 been (Kyle, 2026-11-14). Once only. */
+  nettle?: number;
 }
 
 export const newErrands = (): Errands => ({ told: false, relic: false, trainer: false, seen: 1 });
@@ -35,7 +39,7 @@ export const doneErrands = (level: number): Errands => ({ told: true, relic: tru
 export function fitErrands(e: unknown, level: number): Errands {
   if (!e || typeof e !== 'object') return doneErrands(level);
   const o = e as Partial<Errands>;
-  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}) };
+  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}) };
 }
 
 /** Where each class's trainer is (the hall's door in town, shared/town.ts). */
@@ -62,6 +66,8 @@ export function openErrands(p: Profile): ErrandId[] {
   if (questDue(p) && e.told && e.trainer) out.push('quest');
   if (questHeld(p)) out.push('job');
   if (questBack(p)) out.push('back');
+  // (Only while there's still something hungry on you to sell him.)
+  if (e.nettle === 1 && carriesHungry(p)) out.push('nettle');
   return out;
 }
 
@@ -90,6 +96,7 @@ export function relicDone(p: Profile): boolean {
 /** Who an errand sends you to: a door in town and who's behind it (an npc's `talk` and `arg`). */
 export function errandWho(p: Profile, id: ErrandId): { door: string; talk: string; arg?: number; spot?: string } {
   if (id === 'relic') return { door: 'church', talk: 'church' };
+  if (id === 'nettle') return { door: 'tavern', talk: 'vendor', arg: CLASS_ORDER.indexOf('ROGUE') };
   // A quest in hand: the board, where your job for it is; or Cobb's ladder, for what's found in the Deep.
   if (id === 'job') return questHeld(p)?.q.post ? { door: '', talk: 'board', spot: 'board' } : { door: '', talk: 'sewer', spot: 'sewer' };
   return { door: TRAINER_DOOR[p.cls], talk: 'trainer', arg: CLASS_ORDER.indexOf(p.cls) };
@@ -108,4 +115,20 @@ export function talkedTo(p: Profile, talk: string, arg?: number): boolean {
   reported(p);
   const took = e.told && e.trainer && takeQuest(p);
   return back || took || JSON.stringify(e) !== was;
+}
+
+/** Tobin won't trade with your hungry gear on you: the first time, he sends you to Nettle. True if that's news. */
+export function sendToNettle(p: Profile): boolean {
+  const e = p.errands;
+  if (!e || e.nettle) return false;
+  e.nettle = 1;
+  return true;
+}
+
+/** At Nettle's table on Tobin's word: that's done. True if it was open. */
+export function metNettle(p: Profile): boolean {
+  const e = p.errands;
+  if (e?.nettle !== 1) return false;
+  e.nettle = 2;
+  return true;
 }
