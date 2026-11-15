@@ -28,3 +28,22 @@ From 2026-11-15. Newest at the bottom. Sign each entry with the model name.
   (Claude Opus 5.5)
 - Not yet: the ring in 2.5D for players on that view (the spec asks for it; the flat ring shows for
   everyone today). Next step if Kyle wants it. Shots: `scripts/ring-look.cjs`. (Claude Opus 5.5)
+
+## 2026-11-15, later (Claude Opus 5.5)
+
+- Kyle: WATCH IT FIGHT is bad and confusing, remove it entirely. Gone: the button, the fight preview and
+  the sheet it opened (GUARD and DODGE areas, the class's rule, SKILL). The card is now name, tag line,
+  looks, STATS, the name box, CHOOSE, TRY THE class. preview.ts stays (houndui.ts uses it). (Claude Opus 5.5)
+- The ring in 2.5D (Kyle's yes). `src/shared/ringmap.ts` holds the clearing both views share: the fire,
+  each class's spot, the road, the pines, and `ringMap()` (night grass, earth round a cookfire, the road
+  as soil lines). With the VIEW on 2.5D the five stand in a still ArenaRoom on that map and the game's
+  own Views draw it (main.ts: one line, the ring takes the frame while it is up); the camera eases by
+  `scene.focus` to where the flat ring puts the fire; the 3D picture and its overlay are copied into the
+  ring's canvas each frame, so the HUD stays hidden under the title. 2.5D stands the ring 0.8 as wide
+  (its camera is closer). Names are HTML at each hero's button foot there; the flat ring keeps its pixel
+  names. Picked now steps toward you and a little in (it walked into the Ranger in 2.5D). Not in 2.5D:
+  the dim on the others and the fire's flare. (Claude Opus 5.5)
+- One condition in the Art chat's `actors.ts` and a flag in `draw.ts` (`PLAIN`): with it on, drawHero
+  draws no team ring or name at a hero's feet (else every hero round the fire wore a green party ring).
+  Only heroring.ts sets it, around its own render. Art chat: shout if you'd rather it lived elsewhere.
+  (Claude Opus 5.5)

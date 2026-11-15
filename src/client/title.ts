@@ -11,13 +11,15 @@ import { HERO_SLOTS, canMake } from '../shared/progress';
 import { CHAPTER_1 } from '../shared/story';
 import { CLASS_ORDER, type HeroClass } from '../shared/tuning';
 import { CLASS_NAME } from '../shared/classes';
-import { Preview } from './preview';
 import { HeroRing, liftBlack } from './heroring';
 import { face, ringCard } from './ringcard';
 import { COPY, RECOVER } from './copy';
 import { RECOVERY, type Recovery } from './recovery';
 import { RecoveryPanel } from './recoveryui';
 import type { Game } from './game';
+import type { Fx } from './fx';
+import type { Scene } from './scene';
+import type { Views } from './three/views';
 
 const NAMES: Record<HeroClass, string> = { WARRIOR: 'BRANNOCK', RANGER: 'WREN', ROGUE: 'SILK', MAGE: 'ASHE', HEALER: 'IVY' };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -32,17 +34,14 @@ export class Title {
   private retiring = -1;
   /** Which hero's other options (play the wood again, retire) are open on the home screen. */
   private more = -1;
-  private preview: Preview | null = null;
   /** Which of the class's three looks is chosen. */
   private look = 0;
   /** The recovery code panel (none in the one-file build), and whether it's the one showing. */
   private panel: RecoveryPanel | null = null;
   private inPanel = false;
-  /** The fire (heroring.ts) while making a hero, and whether the card's fight is open. */
+  /** The fire (heroring.ts) while making a hero. */
   private ring: HeroRing | null = null;
-  private watching = false;
   private leaving = false;
-  private scrollFight = false;
 
   constructor(private g: Game, private done: () => void, recovery?: Recovery) {
     this.el.id = 'title';
@@ -90,8 +89,6 @@ export class Title {
   }
 
   private hide(): void {
-    this.preview?.stop();
-    this.preview = null;
     this.dropRing();
     this.open = false;
     this.el.hidden = true;
@@ -131,17 +128,19 @@ export class Title {
   }
 
   private card(): void {
-    this.preview?.stop();
-    this.preview = null;
     const box = this.el.querySelector('.rcard') as HTMLElement | null;
     if (!box) return;
     if (!this.detail) return void (box.innerHTML = '');
     const c = this.pick, yours = !canMake(this.g.save.heroes, c);
-    box.innerHTML = ringCard({ cls: c, look: this.look, watching: this.watching, yours, name: this.free[0] ?? '', tryIt: !!this.onTry, skipWood: this.g.save.heroes.some((h) => h.prologue) });
+    box.innerHTML = ringCard({ cls: c, look: this.look, yours, name: this.free[0] ?? '', tryIt: !!this.onTry, skipWood: this.g.save.heroes.some((h) => h.prologue) });
     if (!yours) this.fillNames();
-    const stage = box.querySelector('.stage');
-    if (stage) (this.preview = new Preview(c, this.look)), stage.appendChild(this.preview.el), this.preview.start();
-    if (stage && this.scrollFight) (this.scrollFight = false), box.querySelector('[data-watch]')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+
+  /** While the ring is up, main.ts gives it the frame in place of the game's (flat here, or the game's 2.5D view). */
+  ringFrame(views: Views, scene: Scene, fx: Fx, now: number, dt: number): boolean {
+    if (!this.ring || !this.open) return false;
+    this.ring.frame(views, scene, fx, now, dt);
+    return true;
   }
 
   private dropRing(): void {
@@ -153,9 +152,9 @@ export class Title {
   /** Tapped a hero round the fire (or the dark, `null`). */
   private tapRing(cls: HeroClass | null): void {
     if (this.leaving) return;
-    if (!cls || (this.detail && cls === this.pick)) return void (this.detail && ((this.detail = false), (this.watching = false), this.create()));
+    if (!cls || (this.detail && cls === this.pick)) return void (this.detail && ((this.detail = false), this.create()));
     if (cls !== this.pick) this.look = 0;
-    Object.assign(this, { pick: cls, detail: true, watching: false });
+    Object.assign(this, { pick: cls, detail: true });
     this.create();
     this.el.querySelector('.rcard')?.scrollTo(0, 0);
   }
@@ -261,7 +260,6 @@ export class Title {
     if (d.back !== undefined) return this.home();
     if (d.cls) return this.tapRing(d.cls as HeroClass);
     if (d.look !== undefined) return (this.look = Number(d.look)), this.keepName(() => this.create());
-    if (d.watch !== undefined) return (this.watching = !this.watching), (this.scrollFight = this.watching), this.keepName(() => this.create());
     if (d.try !== undefined && this.onTry) return this.hide(), this.onTry(this.pick, this.look);
     if (d.begin !== undefined && !this.leaving) void this.begin(false);
   }

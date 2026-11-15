@@ -702,6 +702,8 @@ function tick(t: number): void {
   // (Off screen, leading a job in the background: nothing to draw.)
   // (On the wall for the Night Watch: it paints itself over all this, watchmode.ts.)
   if (document.hidden || away()) return;
+  // Choosing a new hero round the fire (heroring.ts): the ring takes the frame, flat or 2.5D.
+  if (title.ringFrame(views, scene, fx, t / 1000, dt)) return;
   views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
   under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
   uncover.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);

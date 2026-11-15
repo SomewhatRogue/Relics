@@ -7,11 +7,10 @@
  */
 import type { Ctx } from './draw';
 import type { Light } from './light';
+import { ringPines, roadDist as roadTiles } from '../shared/ringmap';
 
 /** The painted ground's size and where the fire sits in it (scene pixels). */
 export const BG = { w: 720, h: 640, fx: 360, fy: 270 };
-/** Where the road leaves the clearing and where it goes (fire at 0, 0). */
-export const ROAD = { from: [-70, 26], to: [-330, 330] } as const;
 
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 const bay = (x: number, y: number) => BAYER[(y & 3) * 4 + (x & 3)] / 16;
@@ -25,14 +24,8 @@ const hash = (x: number, y: number) => {
 const GRASS = ['#26332a', '#29372c', '#243028', '#2c3a2e'];
 const DIRT = ['#4a3f34', '#463b31', '#4e4237', '#433930'];
 
-/** How far (x, y) is from the road's middle (Infinity before it starts; fire at 0, 0). */
-function roadDist(x: number, y: number): number {
-  const [ax, ay] = ROAD.from, [bx, by] = ROAD.to, dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy;
-  const k = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L2));
-  if (k <= 0) return Infinity;
-  const px = ax + dx * k + Math.sin(k * 9) * 10, py = ay + dy * k;
-  return Math.hypot(x - px, (y - py) * 1.2);
-}
+/** How far (x, y) is from the road's middle in pixels (shared/ringmap.ts lays it in tiles; fire at 0, 0). */
+const roadDist = (x: number, y: number) => roadTiles(x / 16, y / 16) * 16;
 /** How far inside the road's band: above 0 on it, 1 at its middle. */
 const onRoad = (x: number, y: number) => 1 - roadDist(x, y) / 13;
 
@@ -56,19 +49,10 @@ export function paintClearing(): HTMLCanvasElement {
     if (earth) (g.fillStyle = i % 3 ? '#5a4e40' : '#3a3129'), g.fillRect(x, y, 1, 1);
     else (g.fillStyle = i % 2 ? '#34463a' : '#1e2922'), g.fillRect(x, y, 1, 2), g.fillRect(x + 1, y + 1, 1, 1);
   }
-  for (let k = 0.05; k < 1; k += 0.004) for (const off of [-4, 4]) {
-    const [ax, ay] = ROAD.from, [bx, by] = ROAD.to, x = ax + (bx - ax) * k + Math.sin(k * 9) * 10 + off, y = ay + (by - ay) * k;
-    g.fillStyle = '#3a3129', g.fillRect(Math.round(x + BG.fx), Math.round(y + BG.fy), 1, 1);
-  }
   // Two logs to sit on, by the fire.
   log(g, BG.fx - 44, BG.fy + 16, 18), log(g, BG.fx + 30, BG.fy + 18, 16);
-  // The pines: a ring well outside the heroes, none on the road, back ones first.
-  const pines: [number, number, number][] = [];
-  for (let i = 0; i < 70; i++) {
-    const a = hash(i, 3) * Math.PI * 2, r = 1.25 + hash(i, 5) * 1.6, x = Math.cos(a) * 120 * r, y = Math.sin(a) * 66 * r;
-    if (roadDist(x, y) < 34 || Math.abs(x) > BG.fx - 10 || y < -BG.fy + 50 || y > BG.h - BG.fy - 4) continue;
-    pines.push([x, y, 0.8 + hash(i, 9) * 0.5]);
-  }
+  // The pines (shared/ringmap.ts, as the 2.5D ring has them), back ones first.
+  const pines = ringPines().map(([x, y, k]): [number, number, number] => [x * 16, y * 16, k]);
   pines.sort((a, b) => a[1] - b[1]).forEach(([x, y, s]) => pine(g, Math.round(x + BG.fx), Math.round(y + BG.fy), s));
   return cv;
 }

@@ -8,7 +8,7 @@ import { chargeFull } from '../sim/hero';
 import { releaseWindow } from '../sim/knacks';
 import { castElement } from '../sim/channel';
 import type { Hero } from '../sim/types';
-import { BARE, blit, blitPose, line, ring, shadow, spin, stars, type Ctx } from './draw';
+import { BARE, PLAIN, blit, blitPose, line, ring, shadow, spin, stars, type Ctx } from './draw';
 import { LAYOUT, armOffset, drawFigure, layout } from './figure';
 import { heroCut, jointed } from './joints';
 import { sideJointed } from './sidejoints';
@@ -117,7 +117,9 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   if (h.act === 'roll' && dk.kind === 'dash') (ox = Math.round(h.rollDx * 2)), (oy += 1);
   const bx = x + ox, by = y + oy;
   shadow(c, x, y, hs(6));
-  if (me === true) ring(c, x, y, hs(7), '#4a90e0');
+  // (Round the fire choosing a new hero, heroring.ts: nobody's ring or name.)
+  if (PLAIN.on) void 0;
+  else if (me === true) ring(c, x, y, hs(7), '#4a90e0');
   // Allies show their health at their feet, and their name (nothing at all on the pick screen).
   else if (me === false) {
     ring(c, x, y, hs(7), '#5ad07a', h.hp / 100, '#1a3a22');

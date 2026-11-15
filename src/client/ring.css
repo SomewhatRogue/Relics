@@ -5,6 +5,17 @@
 #title .hringcv { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
 #title .hring .hspot { position: absolute; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0; cursor: pointer; }
 #title .hring .hspot:focus-visible { outline: 2px solid #ffd27a88; outline-offset: -2px; }
+/* The names are drawn into the flat ring; in 2.5D they ride at the foot of each hero's button. */
+#title .hring .hspot span { display: none; }
+#title.ring3d .hring .hspot { display: flex; align-items: flex-end; justify-content: center; }
+#title.ring3d .hring .hspot span { display: block; font: 400 11px/1 var(--i-label, monospace); letter-spacing: 0.08em; color: #c8bc9c; text-shadow: 0 1px 0 #000, 0 0 4px #000; }
+#title.ring3d .hring.picked .hspot span { color: #7a7466; }
+#title.ring3d .hring .hspot.on span { visibility: hidden; }
+#title.ring3d .hring .hspot.yours span { color: #5a564e; }
+/* 2.5D: the game's own 3D picture, copied in (heroring.ts), in place of the flat canvas. */
+#title .hring3dcv { display: none; position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; image-rendering: pixelated; }
+#title.ring3d .hringcv { display: none; }
+#title.ring3d .hring3dcv { display: block; }
 
 #title .rtop { position: absolute; left: 0; right: 0; top: 0; padding: max(14px, env(safe-area-inset-top)) 16px 0; text-align: center; pointer-events: none; transition: opacity 0.3s; }
 #title .rtop h1 { font-size: 34px; }
@@ -27,11 +38,7 @@
 #title .rcard .rname .name { flex: 1; min-width: 0; }
 #title .rcard .nameerr { margin: -6px 0 0; min-height: 0; }
 #title .rcard .nameerr:empty { display: none; }
-#title .rcard .rmore { display: flex; gap: 10px; }
-#title .rcard .rmore button { flex: 1; }
-#title .rcard .rmore button.on { color: var(--i-leaf, #ffd27a); }
 #title .rcard .ryours { margin: 0; letter-spacing: 0.1em; }
-#title .rcard .stage { margin: 0; }
 
 /* A phone with a hero picked: the fire moves up, the heading goes. */
 @media (max-width: 759px) {

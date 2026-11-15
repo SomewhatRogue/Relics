@@ -123,6 +123,8 @@ export const SUN = { k: 0 };
 
 /** Drawing a figure onto a 2.5D card (three/figs3d.ts): the 3D floor gives it its shadow instead. */
 export const BARE = { on: false };
+/** The hero select ring round the fire (heroring.ts): heroes stand there plain, no team ring or name at their feet. */
+export const PLAIN = { on: false };
 
 export function shadow(c: Ctx, x: number, y: number, rx: number): void {
   if (BARE.on) return;
