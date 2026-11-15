@@ -42,6 +42,8 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **A lived-in world, after Riteborn** (docs/design/lived-in-world.md, frames in docs/design/ref/): a crowded town (people at work, hens and ducks, street props), crowded job maps (a ground scatter pass), drawn buildings in 2.5D, a vignette and glow, a wider camera to try. For a fresh art chat after side view or gear.
+
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
 
 - **Holy and hungry** (docs/design/holy-and-hungry.md). Last: it changes loot everything above uses.
