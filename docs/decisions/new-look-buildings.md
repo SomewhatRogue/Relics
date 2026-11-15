@@ -35,3 +35,13 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   middle of town), a cottage, or a block under 2.6 tiles deep. Other ends keep the side-wall art from the variety
   slice. buildings3d.ts hands the town's blocks to streetrow.ts before building so a row can see its neighbours.
   (Claude Opus 5.5)
+
+## 2026-11-15: the kit's props
+
+- three/streetprops.ts: the prop sheet's pictures (cut in the variety slice) stood up as boards that turn with the
+  swing (one shared yaw read in the vertex shader, so nothing is touched per frame), lit like the buildings, lanterns
+  glowing. In town under `?street`: the trees, the well, the lamp posts (lantern on a post, light kept, no flame),
+  the barrels, crates, sacks and the handcart from the lived-in town's round things (ground.ts); the market stalls,
+  benches and the cart from their blocks (houses3d.ts). Dressing: now and then a barrel, crates or sacks against a
+  front, never by the block's door (streetbuild.ts). Breakable barrels and crates (Art's props3d.ts) unchanged.
+  (Claude Opus 5.5)

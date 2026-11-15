@@ -7,9 +7,10 @@
  * lack one in their picture. Drawing only.
  */
 import * as THREE from 'three';
-import type { Block } from '../../shared/arena';
+import { doorAt, type Block } from '../../shared/arena';
 import { mat, quad, tri } from './streetkit';
 import { front, openEnd, PX, rowOf, seeded, size, type Front, type Side } from './streetrow';
+import { dressing } from './streetprops';
 import SIZES from './kit/kit.json';
 
 const SIDES = Object.keys(SIZES).filter((k) => k.startsWith('side-'));
@@ -125,6 +126,9 @@ export function kitBlock(b: Block, group: THREE.Group): { roof: THREE.Group; top
       const [sw, sh] = size(sign), w = sw / PX, h = sh / PX, sx = x + f.w - 0.25, sy = Math.min(2.6, f.H * f.eave - h - 0.1);
       group.add(quad([sx - w * 0.1, sy, z1 + 0.5], [sx + w * 0.9, sy, z1 + 0.5], [sx + w * 0.9, sy + h, z1 + 0.5], [sx - w * 0.1, sy + h, z1 + 0.5], mat(sign)));
     }
+    // Now and then a barrel, crates or sacks against the front, never in front of the block's door.
+    const dx = b.door ? doorAt(b).x : -99, px = x + f.w * (0.2 + rnd() * 0.6);
+    if (!f.turn && rnd() < 0.45 && Math.abs(px - dx) > 1.1) dressing(group, px, z1, n);
     x += f.w;
   });
   group.add(roofs);

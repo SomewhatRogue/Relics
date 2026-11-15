@@ -18,6 +18,7 @@ import type { L3 } from './lights3d';
 import { VCOL } from './mats';
 import { toonize } from './post';
 import { STREET, streetFloor } from './streetkit';
+import { kitRound } from './streetprops';
 import { addRound, type Spot } from './rounds3d';
 import { addBridge } from './bridge3d';
 import { sideGaps } from '../sidegaps';
@@ -139,6 +140,11 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     if (levelAt(wf, o.x, o.y) === DEEP) B.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
     // (On a stacked level, lifted to stand on it, its flames with it: layoutledges.ts.)
     const k = B.mark(), up = m.ledges ? standAt(m, o.x, o.y) * LEDGE_H : 0;
+    // The new look (`?hd&street`): in town, the kit's trees, well, lamp posts and street clutter (streetprops.ts).
+    if (STREET && m.name === 'WICKHOLD' && kitRound(group, o, up)) {
+      if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: [], light: { x: o.x, y: 3 + up, z: o.y + 0.3, r: 6, i: 0.9, c: [1, 0.74, 0.44], f: 5 } });
+      continue;
+    }
     addRound(B, o, fires, r);
     if (up) B.raise(k, up), fires.slice(n).forEach((f) => (f[1] += up));
     if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6 + up, z: o.y, r: 4.5, i: 0.8, c: [1, 0.72, 0.42], f: 9 } });

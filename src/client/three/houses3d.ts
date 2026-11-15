@@ -22,6 +22,7 @@ import { doorGlow, shutDoor } from './shut3d';
 import { dress3d } from './darkdress3d';
 import { STREET } from './streetkit';
 import { kitBlock } from './streetbuild';
+import { kitFurniture } from './streetprops';
 
 /** Eave height (tiles) by kind. */
 // (Walls 1.7 times their first height since the heroic proportions, Kyle 2026-11-12: "houses now look way too tiny";
@@ -61,6 +62,9 @@ const shade = (c: number, k: number) => {
 
 export function buildBlock(b: Block, kin?: Kindling | null): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
+  // The new look's stalls, benches and carts from the kit (streetprops.ts, `?hd&street`).
+  const kf = STREET ? kitFurniture(b.kind, b.x, b.y, b.w, b.h) : null;
+  if (kf) return { group: kf, roof: null, fires, top: 1, lamps: [] };
   if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1, lamps: [] };
   // The new look's test street (streetkit.ts, `?hd&street`): the building from the generated kit.
   if (STREET && !b.ruined) {
