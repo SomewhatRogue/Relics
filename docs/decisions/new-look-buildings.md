@@ -45,3 +45,15 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   benches and the cart from their blocks (houses3d.ts). Dressing: now and then a barrel, crates or sacks against a
   front, never by the block's door (streetbuild.ts). Breakable barrels and crates (Art's props3d.ts) unchanged.
   (Claude Opus 5.5)
+
+## 2026-11-15: sky and haze past the town walls
+
+- three/streetsky.ts (from view3d.ts under `?street`, town only). The chase camera looks down 26 degrees through a 28
+  degree lens, so even the screen's top row points below the horizon: what showed black was the land past the walls,
+  not the sky. So the haze lives on the land: dark earth to just past the walls, then thinning into the hour's haze
+  (blue-grey at night, pale by day). Standing in it, a ring of roofs, chimneys, spires and trees 10 tiles out with a
+  few lit windows after dark, and hills 55 tiles out. Only the side of each ring beyond the town's middle is drawn
+  (the camera backs off outside it). A sky dome too, for any view that does look up.
+- Colours go in raw (this pipeline has colour management off); a first try converted them and came out black.
+- Open: the silhouettes are smooth shapes, not pixel art; a generated skyline strip could replace them.
+  (Claude Opus 5.5)

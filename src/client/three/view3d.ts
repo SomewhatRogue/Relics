@@ -17,6 +17,7 @@ import { Actors, XRAY_LAYER, type Lerp } from './actors3d';
 import { XRAY } from './mats';
 import { HD, HD_AREA } from './hdlook';
 import { HOLE, STREET, streetPpu } from './streetkit';
+import { StreetSky } from './streetsky';
 import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
@@ -75,6 +76,8 @@ export class View3D {
   private beacon = new Beacon3D();
   private hazards = new Hazards();
   private ground: Ground | null = null;
+  /** The new look's sky and the land past the walls (streetsky.ts, `?hd&street`). */
+  private sky = STREET ? new StreetSky() : null;
   private map: GameMap | null = null;
   private overlay = new Overlay();
   private perf = new Perf(perfOn());
@@ -100,6 +103,7 @@ export class View3D {
     this.overlay.canvas.style.display = 'none';
     this.postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.post));
     this.scene.add(this.lights.group, this.fires.group, this.actors.group, this.buildings.group, this.people.group, this.grim.group, this.witch.group, this.beacon.group, this.figs.group, this.hazards.group);
+    if (this.sky) this.scene.add(this.sky.group);
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -230,6 +234,7 @@ export class View3D {
     // Everything but the heroes; then the heroes as a silhouette where something nearer hides them;
     // then the heroes themselves over that, so only the hidden parts stay a silhouette.
     const cam = this.view.cam, gl = this.gl;
+    this.sky?.update(map.theme);
     gl.setRenderTarget(this.rt);
     cam.layers.set(0);
     gl.render(this.scene, cam);
@@ -300,6 +305,7 @@ export class View3D {
   }
 
   private setMap(map: GameMap): void {
+    this.sky?.build(map);
     if (this.ground) this.scene.remove(this.ground.group), this.ground.dispose();
     this.buildings.clear();
     this.people.clear();
