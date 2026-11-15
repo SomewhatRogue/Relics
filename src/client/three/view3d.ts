@@ -16,7 +16,7 @@ import { paintMap } from '../world';
 import { Actors, XRAY_LAYER, type Lerp } from './actors3d';
 import { XRAY } from './mats';
 import { HD, HD_AREA } from './hdlook';
-import { HOLE, STREET, streetPpu } from './streetkit';
+import { HOLE, STREET, STREET_PPU, streetScale } from './streetkit';
 import { StreetSky } from './streetsky';
 import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
@@ -139,14 +139,14 @@ export class View3D {
   resize(): void {
     this.dpr = Math.min(devicePixelRatio || 1, 3);
     const Dw = innerWidth * this.dpr, Dh = innerHeight * this.dpr;
-    // (The new look's test street: painted at the screen's own pixels over its density, the kit at 32 px a tile; streetkit.ts.)
-    const S = (this.S = STREET ? Math.max(1, Math.round(this.dpr)) : Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
+    // (The new look: a tile 32 render pixels, each a whole number of screen pixels: streetkit.ts `streetScale`.)
+    const S = (this.S = STREET ? streetScale(this.dpr, innerWidth, innerHeight) : Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
     const W = Math.ceil(Dw / S), H = Math.ceil(Dh / S);
     // As much floor as the pixel scene shows (its tiles across times down, scene.ts), so a figure stands
     // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.
     // `__zoom3` (a share of that floor) is for screenshots.
     const s2 = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / 118000))), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
-    this.view.size(W, H, STREET ? streetPpu(W, H) : Math.sqrt((W * H) / (Math.sin(PITCH) * floor)));
+    this.view.size(W, H, STREET ? STREET_PPU : Math.sqrt((W * H) / (Math.sin(PITCH) * floor)));
     this.gl.setSize(W, H, false);
     const css: [string, string] = [(W * S) / this.dpr + 'px', (H * S) / this.dpr + 'px'];
     [this.canvas.style.width, this.canvas.style.height] = css;

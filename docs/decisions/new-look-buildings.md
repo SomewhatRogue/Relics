@@ -88,3 +88,16 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   only ever seen from behind. Options: let the camera swing round further when you walk toward one, or keep fronts
   south-ish. Yours to call.
   (Claude Opus 5.5)
+
+## 2026-11-15: closer, and crisp
+
+- Kyle: zoom in, and keep the art crisp (everything is 32 px a tile). Under `?street` a tile is now always 32 render
+  pixels at your hero (`STREET_PPU`, one art pixel to one render pixel) and the zoom is how many screen pixels each
+  render pixel takes, a whole number (`streetScale`, streetkit.ts; view3d.ts's `S`). So a tile is 32, 64, 96 ...
+  screen pixels and no pixel is wider than its neighbour. Aimed at about 30 CSS px a tile upright (a phone sees about
+  12 tiles across, was 16) and 54 lying down (a retina laptop takes 48, about 30 tiles across, was 40; a plain 1440
+  screen 64, 22 across). `&zoom=N` picks the step outright, for trying.
+- Steps only: on one screen the zoom can't land between two of them. Figures (figs3d.ts) already draw a sprite pixel
+  as a whole number of render pixels: 16 px sprites at 2, so 32 a tile like the kit. For the characters chat: a 32 px
+  a tile sheet should be drawn at 1 (k = ppu / 32).
+  (Claude Opus 5.5)

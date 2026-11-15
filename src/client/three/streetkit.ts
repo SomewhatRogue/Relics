@@ -62,8 +62,20 @@ export function streetFloor(m: THREE.MeshLambertMaterial, w: number, h: number):
   m.map = t;
 }
 
-/** Render pixels a tile on the test street: about 40 tiles across a laptop, 20 across an upright phone. */
-export const streetPpu = (W: number, H: number) => Math.max(24, W / (H > W ? 20 : 40));
+/**
+ * The new look's zoom. The kit and the figures are 32 px a tile, so under `?street` a tile is always 32 render pixels
+ * at your hero (one art pixel to one render pixel) and the zoom is how many screen pixels each render pixel takes,
+ * always a whole number: a tile is 32, 64, 96 ... screen pixels, never between, so no pixel is drawn wider than its
+ * neighbour. Aimed at about `STREET_TILE` CSS pixels a tile (an upright phone sees about 12 tiles across, a 1440
+ * laptop 22); `&zoom=N` in the address picks the step outright.
+ */
+export const STREET_PPU = 32;
+const STREET_TILE = { tall: 30, wide: 54 };
+const ZOOM_ASK = typeof location !== 'undefined' ? Number(new URLSearchParams(location.search).get('zoom')) || 0 : 0;
+export function streetScale(dpr: number, cssW: number, cssH: number): number {
+  if (ZOOM_ASK) return Math.max(1, Math.round(ZOOM_ASK));
+  return Math.max(1, Math.round(((cssH > cssW ? STREET_TILE.tall : STREET_TILE.wide) * dpr) / STREET_PPU));
+}
 
 /** Where your hero is on the render (x, y from the bottom) and the see-through hole's radius, in render pixels. */
 export const HOLE = { value: new THREE.Vector3(-1e4, -1e4, 0) };
