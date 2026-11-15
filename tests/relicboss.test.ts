@@ -26,12 +26,12 @@ const steps = (room: { step(): void; events: FightEvent[] }, n = 1) => {
 };
 
 describe('the homes', () => {
-  it('one home a relic, never twice; Hempen the knuckle, the Doorkeepers the lodestone, the Haulier the hook', () => {
+  it("one home a relic, never twice; Hempen the knuckle, the Doorkeepers the lodestone, the Open Cut's end the hook", () => {
     const kinds = RELIC_HOMES.map((h) => h.kind);
     expect(new Set(kinds).size).toBe(kinds.length);
     expect(bossRelic('hempen')).toBe('knuckle');
     expect(bossRelic('doorkeepers')).toBe('lodestone');
-    expect(bossRelic('haulier')).toBe('hook');
+    expect(bossRelic('opencut')).toBe('hook');
   });
 });
 
@@ -85,13 +85,13 @@ describe('Hempen', () => {
 });
 
 describe('giveHome, for the Instances chat', () => {
-  it("gives the Haulier's hook to each hero without one, never the squire, seeded", () => {
+  it("gives the Open Cut's hook to each hero without one, never the squire, seeded", () => {
     const b = barn(['sword', 'longbow']), ev: FightEvent[] = [];
-    const got = giveHome('haulier', b.heroes, new Rng(7), ev);
+    const got = giveHome('opencut', b.heroes, new Rng(7), ev);
     expect(got).toHaveLength(2);
-    expect(giveHome('haulier', b.heroes, new Rng(7), ev)).toHaveLength(0);
+    expect(giveHome('opencut', b.heroes, new Rng(7), ev)).toHaveLength(0);
     const again = barn(['sword', 'longbow']);
-    giveHome('haulier', again.heroes, new Rng(7), []);
+    giveHome('opencut', again.heroes, new Rng(7), []);
     expect(again.heroes.map((h) => h.found[0].id)).toEqual(b.heroes.map((h) => h.found[0].id));
   });
 });

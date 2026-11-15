@@ -3,7 +3,7 @@
  * it's yours, no roll. Every hero in the room (a friend in someone else's room too: keepKit takes it
  * home) gets their own, straight into their relics with the found moment, carried if nothing is. Hempen
  * gives the butcher's knuckle; the Doorkeepers, both down, in the great barn (not their Deep floor), the
- * lodestone. The Haulier's hook is the Instances chat's to give at the Open Cut's end, through giveHome.
+ * lodestone. The hook is the Instances chat's to give at the Open Cut's end (its end boss), through giveHome.
  */
 import { bossRelic, type GreatBoss } from '../shared/relichomes';
 import { makeRelic } from '../shared/relicitems';

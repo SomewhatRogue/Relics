@@ -91,3 +91,23 @@ The chat building docs/design/relics.md (Kyle approved 2026-11-15). Newest at th
     Wood and the Open Cut, the board for the barn. Then the Odric nudge in the reliquary can go.
   - **For the Instances chat:** with `giveHome('haulier', ...)` wired, set `live: true` on the hook's row in
     `shared/relichomes.ts` and Isolde starts sending heroes for it. tests/relicquests.test.ts. (Claude Opus 5.5)
+- **Lines settled:** one lore-keeper call, one line-editor call, over every new line from slices 1 to 6
+  (`relicwords.ts`, the deep dive's posting). Applied: "a boss", not "a great boss", on screen; Hempen is "it"
+  and never "the Hempen Man"; "Lowfurrow Fields" in full on panels; the fanfare's line is the game's own plain
+  narration (only the party stands at a dead boss); the Doorkeepers sit behind the barn's doors and the
+  lodestone hangs from its crossbeam; the line editor's three spoken-line edits. THE RELIQUARY stays the name.
+  - **The hook's home is the Open Cut's end boss**, not named on screen: docs/design/open-cut-map.md moves the
+    hook from the Haulier to the Overman, docs/design/relics.md still says the Haulier. `relichomes.ts` keys
+    it `opencut`; the lines say "the bottom of the Open Cut". **For the Instances chat:** call
+    `giveHome('opencut', ...)` from whichever boss ends it, and set `live`. **For Kyle / the General chat:**
+    relics.md's table should say Hempen (not the Hempen Man) and the Open Cut's end boss for the hook; and if
+    Fenmere gets the net, the lore keeper wants it its own relic (an eel net of bone and lead), since the
+    Ranger's skill is HUNTER'S NET.
+  - **For the story bible** (the lore keeper's notes): relics are won, one of each, never rolled; the
+    reliquary is the church's locked case by the step, in Odric's keeping; lost relics "came back to us";
+    Isolde "has word" of relic quests and where from stays unsaid; the hook was the church's once; the
+    lodestone is from before the war; the knuckle is grown into Hempen's fist (replaces bible line 275's hook);
+    the Doorkeepers took the barn's doors off and carry them; the Roll names each relic's first winner.
+- **Shots:** `scripts/relics-earned-look.cjs` (phone): the fanfare for Hempen's knuckle, first in Wickhold,
+  and the pack's carry slot in town (no carry button; the note says the reliquary chooses). No page errors.
+  The solo build not published (the Deep chat's). (Claude Opus 5.5)

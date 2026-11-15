@@ -24,7 +24,7 @@ describe('the reliquary', () => {
     expect(html.match(/CARRY THIS ONE/g)).toHaveLength(1);
     expect(html).toContain('CARRYING');
     expect(html).toContain('STILL TO WIN');
-    expect(html).toContain("Haulier's chain");
+    expect(html).toContain('down the Open Cut');
     expect(html).not.toContain("Said to be in Hempen's fist");
     game.carry(knuckle.id);
     expect(game.profile.relic).toBe(knuckle.id);

@@ -6,7 +6,7 @@
 import type { RelicId } from './magic.js';
 
 /** A great boss with a relic of its own: who it is (sim/bosskit.ts BossOn.who, or the pair). */
-export type GreatBoss = 'hempen' | 'doorkeepers' | 'haulier' | 'fen';
+export type GreatBoss = 'hempen' | 'doorkeepers' | 'opencut' | 'fen';
 /** Where a relic is won: the start, a great boss, or a church quest. */
 export type RelicHome = 'start' | GreatBoss | 'church';
 
@@ -14,8 +14,9 @@ export interface Home { kind: RelicId; home: RelicHome; /** A boss whose first k
 
 export const RELIC_HOMES: Home[] = [
   { kind: 'javelin', home: 'start' },
-  // The Haulier at the Open Cut's end: the Instances chat calls giveHome there (sim/relicboss.ts) and sets live.
-  { kind: 'hook', home: 'haulier' },
+  // The Open Cut's end boss (the Haulier then, the Overman now: docs/design/open-cut-map.md): the Instances
+  // chat calls giveHome('opencut', ...) there (sim/relicboss.ts) and sets live.
+  { kind: 'hook', home: 'opencut' },
   { kind: 'knuckle', home: 'hempen', live: true },
   { kind: 'lodestone', home: 'doorkeepers', live: true },
   // Fenmere's end boss (not built yet; the net is the Ranger's skill too, to settle with the lore keeper).

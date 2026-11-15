@@ -54,15 +54,15 @@ export const RELICW = {
   churchButton: 'RELICS',
   churchTitle: 'THE RELIQUARY',
   churchIntro: "Fading, is it? Mother Isolde sees to those round the back, and she'll want paying. Not the ones with fire or frost or storm in them, mind, she *won't* have those in the house.",
-  none: "No relics. Each one is won once: from a great boss the first time it falls, or from Mother Isolde when she has word of one.",
+  none: "No relics. Each one is won once: from a boss the first time it falls, or from Mother Isolde when she has word of one.",
   /** The reliquary (churchrelics.ts): carry one, and the ones still to win. Draft until the lore pass. */
   carryThis: 'CARRY THIS ONE',
-  carryNow: "It's on your RELIC button for the next job. You keep it the whole way.",
+  carryNow: "It's on your RELIC button for the next job. You keep it until the job is done.",
   stillTitle: 'STILL TO WIN',
   saidToBe: {
-    hook: "Said to hang on the Haulier's chain, at the Open Cut.",
+    hook: 'Said to be down the Open Cut, at the very bottom.',
     knuckle: "Said to be in Hempen's fist, out in Hangman's Wood.",
-    lodestone: 'Said to sit behind the Doorkeepers, in the great barn at Lowfurrow.',
+    lodestone: 'Said to hang in the great barn at Lowfurrow Fields, where the Doorkeepers sit.',
     net: 'Said to be somewhere out on Fenmere.',
   } as Partial<Record<string, string>>,
   saidChurch: 'Nobody knows where. Mother Isolde might, when she has word.',
@@ -72,11 +72,11 @@ export const RELICW = {
   questTitle: 'MOTHER ISOLDE SENT YOU',
   questOpen: (name: string, where: string) => `For the ${name}. ${where}`,
   questWord: {
-    hook: "There's a hook on a chain at the Open Cut, a relic, and the thing that hauls the carts up out of the pit wears it like a charm. It was ours once. I'd like it back with someone who'll use it.",
-    knuckle: "Hempen has a relic in its fist, out in Hangman's Wood. It's had it so long the hand's grown round it, and I'm told it doesn't let go of anything. Kill it and it's yours.",
-    lodestone: "Two of them keep the doors of the great barn at Lowfurrow, and behind the doors there's a lodestone, a real one, from before. Get past the pair and bring it out.",
+    hook: "There's a hook down the Open Cut, a relic, and ours once, at the very bottom where the _worst_ of them keeps. I'd like it carried by someone who'll *use* it.",
+    knuckle: "Hempen has a relic in its fist, out in Hangman's Wood. It's had it so long the hand's grown round it, and I'm told it doesn't let go of anything.",
+    lodestone: "Two of them took the doors off the great barn at Lowfurrow Fields and sit in there behind them, and there's a lodestone hung in the barn, a real one, from before the war. I'd have it out of there, if you can get past the pair.",
   } as Partial<Record<string, string>>,
-  questHow: "Beat it and the relic is yours. Hangman's Wood and the Open Cut are Corporal Brisk's, at the barracks; the barn's job goes up on the board.",
+  questHow: "Beat the boss and the relic is yours. Hangman's Wood and the Open Cut are Corporal Brisk's, at the barracks; the barn's job goes up on the board.",
   questGo: "I'LL GO",
   questLater: 'NOT NOW',
   recharge: (n: number) => `RECHARGE (${coinsHtml(n)})`,
@@ -120,16 +120,16 @@ export const RELICW = {
   shelfHow: 'Tap a relic to see it, or drag it onto RELIC to carry it.',
   /** The full-screen moment a relic is won (relicfanfare.ts): draft until the lore pass. */
   wonKicker: 'A RELIC',
-  wonFrom: { hempen: "From Hempen, in Hangman's Wood", doorkeepers: 'From the Doorkeepers, in the great barn at Lowfurrow', haulier: 'From the Haulier, at the Open Cut' } as Record<string, string>,
+  wonFrom: { hempen: "From Hempen, in Hangman's Wood", doorkeepers: 'From the Doorkeepers, in the great barn at Lowfurrow Fields', opencut: 'From the bottom of the Open Cut' } as Record<string, string>,
   wonUses: (n: number) => `${n} USES. RECHARGE AT THE CHURCH.`,
   rollLabel: 'ON THE ROLL',
   rollFirst: (name: string) => `First in Wickhold to win it: <b>${name}</b>`,
   rollMine: "You're the first in Wickhold to win it. Your name goes on the Roll.",
-  /** A line from the place it was won (no one stands near a dead boss but you, so the place speaks). */
+  /** The game's own plain word on where it was (only the party stands at a dead boss: the lore keeper, nobody speaks). */
   wonSay: {
-    hempen: "It was in Hempen's fist the whole time, the knuckle, grown into the hand like a stone in a tree.",
-    doorkeepers: "It sat in the barn's crossbeam, behind the doors they kept. Nobody knows who put it there.",
-    haulier: 'The hook was on the Haulier\'s chain, worn bright where the rope ran.',
+    hempen: 'It was in its fist, the knuckle, grown into the hand like a stone in a tree.',
+    doorkeepers: 'It hung from the barn\'s crossbeam, over the spot where the pair sat with the doors across their knees.',
+    opencut: 'The hook was on a chain at the bottom of the Open Cut, worn bright where the rope ran.',
   } as Record<string, string>,
   seePack: 'SEE IT IN THE PACK',
   /** The Roll's relics (relicrollui.ts). */
@@ -137,8 +137,8 @@ export const RELICW = {
   rollNobody: 'Nobody yet',
   /** The one-time card when relics became earned (relicgone.ts): draft until the lore pass. */
   goneTitle: 'YOUR RELICS',
-  goneLine: (jav: boolean) => (jav ? 'Every relic you carried is gone but the Relic Javelin.' : 'Every relic you carried is gone.') + ' Relics are won now, each one once: from a great boss the first time it falls, or from Mother Isolde at the church.',
-  goneIsolde: "They came back to us, the lot of them, the way they do when they've been passed round too freely. Earn one and it'll stay with you, I should think.",
+  goneLine: (jav: boolean) => (jav ? 'Every relic you carried is gone but the Relic Javelin.' : 'Every relic you carried is gone.') + ' Relics are won now, each one once: from a boss the first time it falls, or from Mother Isolde at the church.',
+  goneIsolde: "They came back to us, the lot of them, the way they do when they've been passed round too *freely*. Earn one and it'll stay with you, I should think.",
   /** On a job (docs/design/relics.md): the relic carried is chosen in town and kept the whole way. */
   keptOnJob: "You keep the relic you set out with until the job is done. Choose another at the church's reliquary.",
   chooseAtChurch: "Choose which relic to carry at the church's reliquary, from Father Odric.",

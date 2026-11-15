@@ -115,7 +115,7 @@ export function deepDive(day: number): Job {
   return {
     id: `d${day}-deep`, place: { ...place, ruin: 3 }, objective: 'hunt', twist: night ? 'night' : 'none', time: rollTime(day * 131 + 59, night), rooms: 5, boss, deep: true, size: 'long', layout: 4,
     reward: payFor(5, 3, false, 'long') + 40, seed: day * 131 + 59, title: `Deep: ${boss} at ${place.name}`,
-    text: `Five rooms down through ${place.name}, the worst of it, and ${boss} at the bottom, grown fat on whatever's been sent down to it.`,
+    text: `Five rooms down through ${place.name}, the worst of it, and ${boss} at the bottom, grown fat on whatever the hungry have left down there.`,
   };
 }
 
