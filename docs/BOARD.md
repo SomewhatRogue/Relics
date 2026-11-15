@@ -38,6 +38,8 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **Gear you can see** (docs/design/gear-looks.md): weapons look like their tier and element, the eleven Hungry pieces their own, then armour weight as overlays and rings. Slice 1 (weapons) can run beside the side-view chat; armour waits for it.
+
 - **Heroes seen from the side** (docs/design/side-view.md): a profile map per look, picked when walking east or west, with its own stride; slice 1 is the Warrior's three looks, for Kyle to try. Art work; for a fresh art chat.
 
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
