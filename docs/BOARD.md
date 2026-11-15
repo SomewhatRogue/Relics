@@ -42,6 +42,8 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **Choosing a new hero round the fire** (docs/design/hero-select.md): the five classes standing round a campfire, tap one to step them forward and see its card, CHOOSE fades to black and the game starts. Replaces title.ts's class grid.
+
 - **A lived-in world, after Riteborn** (docs/design/lived-in-world.md, frames in docs/design/ref/): a crowded town (people at work, hens and ducks, street props), crowded job maps (a ground scatter pass), drawn buildings in 2.5D, a vignette and glow, a wider camera to try. For a fresh art chat after side view or gear.
 
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
