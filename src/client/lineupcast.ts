@@ -11,7 +11,10 @@ import { CLASS_KITS, type HeroClass } from '../shared/tuning';
 import type { WeaponId } from '../shared/weapons';
 import type { FoeVariant } from '../shared/terrain';
 
-export const MOVES = ['stand', 'walk', 'wind up', 'strike', 'recover', 'hurt', 'flinch', 'stagger', 'die'] as const;
+export const MOVES = ['stand', 'walk', 'wind up', 'strike', 'recover', 'hurt', 'flinch', 'stagger', 'die', 'walk e', 'walk w', 'strike e', 'block e'] as const;
+/** The side columns (docs/design/side-view.md): facing due east or west, drawn as the game draws them. The others
+ *  keep the front view (lineup.ts sets sideview.ts VIEW.front for them) so each look's two views sit side by side. */
+export const SIDE_MOVES: readonly Move[] = ['walk e', 'walk w', 'strike e', 'block e'];
 /** The bows' own page (`?lineup=bows`): drawing, holding at full and loosing, aimed across, up and down. */
 export const BOW_MOVES = ['stand', 'walk', 'charge', 'hold', 'release', 'hold up', 'hold down', 'tap'] as const;
 export type Move = (typeof MOVES)[number] | (typeof BOW_MOVES)[number];
@@ -31,6 +34,10 @@ export function cast(which: string): Unit[] {
   const out: Unit[] = [];
   if (which === 'bows') {
     for (const weapon of ['longbow', 'shortbow', 'crossbow'] as const) for (const look of [0, 1, 2]) out.push({ label: `${weapon.slice(0, 5).toUpperCase()} ${look + 1}`, tall: 46, hero: { cls: 'RANGER', look, weapon } });
+    return out;
+  }
+  if (which === 'warrior') {
+    for (const look of [0, 1, 2]) out.push({ label: `WARRIOR ${look + 1}`, tall: 40, hero: { cls: 'WARRIOR', look } });
     return out;
   }
   if (which !== 'goblins') for (const cls of CLS) for (const look of [0, 1, 2]) out.push({ label: `${cls} ${look + 1}`, tall: 40, hero: { cls, look } });
@@ -72,6 +79,12 @@ export function heroIn(u: { cls: HeroClass; look: number; weapon?: WeaponId }, m
   // Stepped a hair every 3 s (never drawn) so a class's idle never starts: this column is the plain stand.
   h.x = (Math.floor(now / 3) % 2) * 0.05;
   if (m === 'walk') Object.assign(h, { fx: 1, fy: 0.1, moving: true });
+  if (m === 'walk e' || m === 'walk w') Object.assign(h, { fx: m === 'walk e' ? 1 : -1, fy: 0, moving: true });
+  if (m === 'block e') Object.assign(h, { fx: 1, fy: 0, blocking: true });
+  if (m === 'strike e') {
+    Object.assign(h, { fx: 1, fy: 0, act: 'attack', combo: 0 });
+    h.actT = s.windup + s.active * loop(now, 0.9);
+  }
   if (m === 'wind up' || m === 'strike' || m === 'recover') {
     Object.assign(h, { fx: 1, fy: 0.15, act: 'attack', combo: 0 });
     const k = loop(now, m === 'wind up' ? 1.2 : 0.9);
@@ -98,7 +111,9 @@ function kindOf(e: Enemy): AttackKind {
 }
 
 /** A goblin in the move at wall time `now`; `t` is the room time to draw it at. */
-export function foeIn(u: Foe, m: Move, id: number, now: number): { e: Enemy; t: number } {
+export function foeIn(u: Foe, m0: Move, id: number, now: number): { e: Enemy; t: number } {
+  // (Goblins have no side view: in the side columns they walk and strike as in their own.)
+  const m: Move = m0 === 'walk e' || m0 === 'walk w' ? 'walk' : m0 === 'strike e' ? 'strike' : m0;
   const e = newEnemy(id, u.kind, 0, 0);
   if (u.variant) e.variant = u.variant;
   if (u.name) e.name = u.name;

@@ -11,8 +11,9 @@ import { HERO_W } from './heroscale';
 
 const EYES: [number, number, number] = [0, 0, 0];
 /** Where the eyes are this frame (scene pixels, after `layout`): row, left eye, right eye. */
-export function eyesAt(d: LookDef): [number, number, number] {
-  const L = LAYOUT, [row, a, b] = d.eyes, x = (c: number) => (L.flip ? L.left + HERO_W - c : L.left + 1 + c) + L.lean;
+/** `side`: drawn in profile (the one eye of `d.side`). */
+export function eyesAt(d: LookDef, side = false): [number, number, number] {
+  const L = LAYOUT, [row, a, b] = side && d.side ? d.side.eyes : d.eyes, x = (c: number) => (L.flip ? L.left + HERO_W - c : L.left + 1 + c) + L.lean;
   (EYES[0] = L.top + 1 + row + L.drop), (EYES[1] = Math.min(x(a), x(b))), (EYES[2] = Math.max(x(a), x(b)));
   return EYES;
 }

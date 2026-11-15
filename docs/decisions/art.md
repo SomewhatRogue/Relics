@@ -393,3 +393,26 @@ The plan, one class at a time so Kyle can play each against the old ones:
   cross is fine (the church's sign is the Lantern, never a cross). New for the bible if Kyle wants it: Warriors
   can paint the Last Lantern on a shield as a mark, cosmetic only. Then the line editor (Cole leans on *still*). Looks only: every shield
   blocks the same. (Claude Opus 5.5)
+
+## 2026-11-14: heroes seen from the side, slice 1 (the Warrior)
+
+- The side-view chat (its own row on the board), building docs/design/side-view.md slice 1. A Warrior facing mostly
+  east or west is drawn in profile, mirrored for west, the same 18 by 31 with the same cut rows and lift
+  (`LookDef.side`, herosides.ts: one body, one near arm, a head a look: the knight's open helm, the sellsword's crop
+  and beard, Blackiron's hair and scar). sideview.ts picks it, with a margin in and out so a diagonal walk doesn't
+  flicker; an idle keeps its own view.
+- sidejoints.ts cuts it: the body has only the near leg, and the far leg is made from it a pixel behind and a shade
+  darker, drawn first. The near arm is its own map with its own outline, drawn last, so it swings with no hole in
+  the chest. No far arm (behind the body, holding the shield).
+- The side stride (figure.ts STRIDE 21 to 24): the legs swing fore and aft, a longer step than across the front
+  (the foot 5 pixels out, so the two dark boots part rather than read as one long boot), the near foot lifted
+  passing through.
+- Gear: the hand at the hip (2 off the middle, not 5 beside the body); the shield on the far arm before the chest, a
+  little lower than the front's, drawn at 0.3 of its width (its face forward, seen edge-on), further out when
+  blocking. The cape hangs down the back and streams behind; the plume sits behind the helm (its outline cut the
+  helm's top row when drawn over it); Blackiron's hair down the back of the head. The dial's eye is the one eye.
+- The lineup: `?lineup=warrior`, and four side columns (WALK E, WALK W, HIT E, BLOCK) drawn as the game draws them;
+  the old columns are held to the front view (sideview.ts `VIEW.front`) so a look's two views sit side by side.
+  scripts/side-look.cjs: each look 4x, front, then side standing, the walk's four poses, west, wind, hit, block.
+- Drawing only; facing, reach and hit circles unchanged. 2.5D gets it through drawHero. Kyle to try before slice 2.
+  (Claude Opus 5.5)

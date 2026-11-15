@@ -82,12 +82,14 @@ function flush(c: Ctx, flash: number, tint: string): void {
 }
 
 /**
- * Draw one layer of a hero's moving cloth. `up`: walking away (the back view). `dark`: how far the
+ * Draw one layer of a hero's moving cloth. `up`: walking away (the back view), or `'side'` in profile facing
+ * east (docs/design/side-view.md: x is still counted from the back, so it mirrors for west). `dark`: how far the
  * eye dial has gone to red (0 to 1, heroeyes.ts): a cape or cloak goes darker and its hem ragged.
  * `t0`: the room's time (a Rogue vanished draws their cloak shut).
  */
-export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back' | 'front', flash: number, tint: string, dark = 0, t0 = 0): void {
+export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', layer: 'back' | 'front', flash: number, tint: string, dark = 0, t0 = 0): void {
   lay = layer;
+  const up = view === true, sv = view === 'side';
   const now = c.now, ph = idPhase(h.id) * 6.283, k = layer === 'back' ? trail(h, now) : swing.get(h.id)?.k ?? 0;
   const side = Math.abs(h.fx) > 0.35 ? k : 0, rate = 2 + 7 * k;
   const wave = (i: number, amp = 1) => Math.round(Math.sin(now * rate + ph + i * 0.9) * amp);
@@ -103,7 +105,12 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back'
     for (let r = top; r <= bottom; r++) {
       const i = r - top, low = i > n / 2, ext = Math.round(side * 3.5 * (i / n) ** 1.2), sw = i >= n - 1 ? wave(i, k > 0.2 ? 1 : 0.6) : k > 0.2 ? wave(i) : 0;
       const hem = r === bottom && rag && (Math.floor(now * 3 + ph) + r) % 2 ? 1 : 0;
-      if (!up) {
+      if (sv) {
+        // In profile: hanging down the back from the shoulders, a little off it at the hem, streaming behind walking.
+        const x0 = (low ? 1.3 : 2) - ext * 1.2 + Math.min(0, sw), x1 = 3.7;
+        rect('back', x0 + hem, r, x1 - x0 - hem, 1, col);
+        rect('back', x0 + hem, r, 0.7, 1, lin);
+      } else if (!up) {
         const x0 = (low ? 0 : 1) - ext + Math.min(0, sw), x1 = (low ? 11 : 10) + Math.max(0, sw);
         rect('back', x0, r, x1 - x0 + 1 - hem, 1, lin);
         if (ext > 0) rect('back', x0, r, ext, 1, col);
@@ -115,7 +122,13 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back'
     }
   }
   // The plume off the top of the helm, nodding, and streaming back when walking.
-  if (L.plume) {
+  if (L.plume && sv) {
+    // From the side: behind the helm (so its outline doesn't cut the helm's top row), a crest sweeping back.
+    const back = Math.round(side * 1.5), nod = wave(0, 0.6 + k * 0.6);
+    rect('back', 4, -1.7, 2.7, 0.85, L.plume, 1);
+    rect('back', 3.3 - back + nod, -2.57, 2, 0.87, L.plume, 1);
+    if (k > 0.3) rect('back', 2.6 - back + nod, -2.57, 0.7, 0.87, L.plume, 1);
+  } else if (L.plume) {
     const back = Math.round(side * 2), nod = wave(0, 0.6 + k * 0.6);
     rect('front', 5, -1, 2, 1, L.plume, 1);
     rect('front', 5 - back + nod, -2, 2, 1, L.plume, 1);
@@ -124,7 +137,8 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back'
   // Long hair: past the face on both sides, swinging; down the back walking away.
   if (L.hair) {
     const ey = d.cut ? (d.eyes[0] * (9 + d.tall)) / d.cut.headTo : d.eyes[0], y = ey / HS + 1, sw = wave(2, 0.5 + k);
-    if (!up) rect('back', 1 - Math.round(side * 2) + Math.min(0, sw), y, 1 + Math.round(side * 2), 3, L.hair, 1), rect('back', 10, y + Math.max(0, sw), 1, 3 - Math.max(0, sw), L.hair, 1);
+    if (sv) rect('front', 3 - Math.round(side * 1.5) + Math.min(0, sw), y, 1, 4, L.hair, 1);
+    else if (!up) rect('back', 1 - Math.round(side * 2) + Math.min(0, sw), y, 1 + Math.round(side * 2), 3, L.hair, 1), rect('back', 10, y + Math.max(0, sw), 1, 3 - Math.max(0, sw), L.hair, 1);
     else rect('front', 3 + sw, y + 2, 6, 2, L.hair, 1);
   }
   // A Rogue's long cloak (cloaklife.ts): its skirts, sway and flare, and what the kit hangs off the belt.
@@ -138,7 +152,7 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, up: boolean, layer: 'back'
   // A hat's crooked tip nodding as they walk.
   if (L.tip && k > 0.2 && wave(4, 1) > 0) rect('front', 8, 0, 1, 1, L.tip, 1);
   // The tabard's foot flicking.
-  if (L.tabard && !up) {
+  if (L.tabard && !up && !sv) {
     const sw = wave(5, 0.4 + k);
     if (sw) rect('front', sw > 0 ? 7 : 4, 14 + t, 1, 1, L.tabard, 2);
   }

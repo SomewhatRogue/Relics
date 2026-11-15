@@ -43,7 +43,7 @@ function place(part: Joint, out: number[]): number[] {
 
 /**
  * The walk cycle (Kyle, 2026-11-12: "lets do it", a real walk for the tall heroes). `step` 1 to 4 walks toward
- * or away from you, 11 to 14 across the screen; each leg is cut at the knee and posed by thigh and shin:
+ * or away from you, 11 to 14 across the screen, 21 to 24 across it seen from the side; each leg is cut at the knee and posed by thigh and shin:
  * contact (one foot forward, the other back, both down), passing (the back leg comes through, knee bent, its
  * foot a pixel up), then the same with the other foot. Toward you, the forward foot is drawn a pixel lower and
  * the back one a pixel higher. Under a robe (the legs only the feet) the feet just peek in turn, never out past
@@ -53,6 +53,10 @@ const STRIDE: Record<number, [number, number, number, number, number, number]> =
   // [A thigh dx, A shin dx, A dy, B thigh dx, B shin dx, B dy]; A is the left leg, dx forward along the walk.
   11: [1, 2, 0, -1, -2, 0], 12: [0, 0, 0, 0, -1, -1], 13: [-1, -2, 0, 1, 2, 0], 14: [0, -1, -1, 0, 0, 0],
   1: [0, 0, 1, 0, 0, -1], 2: [0, 0, 0, 0, 0, -1], 3: [0, 0, -1, 0, 0, 1], 4: [0, 0, -1, 0, 0, 0],
+  // From the side (21 to 24, docs/design/side-view.md): A is the far leg, B the near; they swing fore and aft, not
+  // apart. Contact (the far foot out in front, the near trailing), passing (the near comes through, its foot up),
+  // then the other foot, a longer step than across the front.
+  21: [3, 5, 0, -3, -5, 0], 22: [0, 0, 0, 0, 1, -1], 23: [-3, -5, 0, 3, 5, 0], 24: [0, 1, -1, 0, 0, 0],
 };
 /** A leg's offset at a row: [dx on screen, dy]. */
 function legAt(part: Joint, row: number): [number, number] {

@@ -1,18 +1,19 @@
 /**
  * The lineup (docs/design/art-pass.md): a dev page that draws every unit in every move side by side, at
  * phone scale, on the stone floor under torchlight, with the game's own drawHero and drawFoe and the
- * real lighting pass. Open it with `?lineup` (all), `?lineup=heroes` or `?lineup=goblins`. Drawing only.
+ * real lighting pass. Open it with `?lineup` (all), `?lineup=heroes`, `?lineup=goblins` or `?lineup=warrior`. Drawing only.
  */
 import { Lighting, type Light } from './light';
 import { drawHero } from './actors';
 import { drawFoe } from './strawman';
 import { BARE, type Ctx } from './draw';
 import { drawText } from './pixfont';
-import { cast, foeIn, heroIn, movesFor, type Move, type Unit } from './lineupcast';
+import { SIDE_MOVES, cast, foeIn, heroIn, movesFor, type Move, type Unit } from './lineupcast';
+import { VIEW } from './sideview';
 
 const CELL = 32, LEFT = 46, TOP = 18, PX = 16;
 /** Column heads, short enough to fit a cell (alternate ones sit lower so neighbours never touch). */
-const HEAD: Record<string, string> = { 'wind up': 'WINDUP', recover: 'RECOVR', stagger: 'STAGGR', 'hold up': 'UP', 'hold down': 'DOWN', release: 'LOOSE' };
+const HEAD: Record<string, string> = { 'wind up': 'WINDUP', recover: 'RECOVR', stagger: 'STAGGR', 'hold up': 'UP', 'hold down': 'DOWN', release: 'LOOSE', 'strike e': 'HIT E', 'block e': 'BLOCK' };
 const head = (m: string) => HEAD[m] ?? m.toUpperCase();
 /** Two CSS pixels a scene pixel: the scale a phone sees the game at (about 12 tiles across). */
 const SCALE = 2;
@@ -89,6 +90,7 @@ function draw(c: Ctx, sc: Ctx, u: Unit, m: Move, x: number, y: number, id: numbe
   try {
     if ('hero' in u) {
       const { h, t, prime } = heroIn(u.hero, m, 'lineup' + id, now);
+      VIEW.front = !SIDE_MOVES.includes(m);
       if (prime) drawHero(sc, prime, 32, 40, 'bare', 0), drawHero(sc, h, 32, 40, 'bare', 0);
       drawHero(c, h, x, y, 'bare', t);
     } else {
@@ -102,5 +104,6 @@ function draw(c: Ctx, sc: Ctx, u: Unit, m: Move, x: number, y: number, id: numbe
     if (now % 5 < 0.02) console.warn('lineup:', u.label, m, err);
   } finally {
     c.t = undefined;
+    VIEW.front = false;
   }
 }

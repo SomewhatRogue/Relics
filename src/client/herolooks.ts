@@ -10,6 +10,7 @@
  */
 import { art, darker, glint, skin, type Cls, type LookDef } from './lookkit';
 import { CLERIC, MAGE } from './herolooks2';
+import { SIDE_NO_HEAD, W_SIDE_ARM, W_SIDE_BODY, W_SIDE_HEADS } from './herosides';
 
 export type { Cls, LookDef, Life } from './lookkit';
 
@@ -25,10 +26,12 @@ const W_BODY = [
 // top and bottom".)
 const W_CUT: LookDef['cut'] = { headTo: 7, hip: 22, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] };
 /** `neck`: the four pixels at the back of the neck walking away (the helm's guard, hair, or skin). */
-const warrior = (head: string[], back: string[], neck: string, pal: Record<string, string>, life: LookDef['life']): LookDef => {
+/** `look`: which of the three, for its head in profile (herosides.ts). */
+const warrior = (head: string[], back: string[], neck: string, pal: Record<string, string>, life: LookDef['life'], look: number): LookDef => {
   const p = { A: pal.P, G: '#ecd078', l: darker(pal.L), f: darker(pal.F), ...pal };
   const wb = W_BODY.map((r, i) => (i === 0 ? `.pPPPPp${neck}pPPPPp.` : r.replace(/T/g, 'B').replace(/G/g, 'K').replace(/k/g, 'P')));
-  return { down: art([...head, ...W_BODY], p), up: art([...back, ...wb], p), h: 31, tall: 0, eyes: [3, 7, 10], life, cut: W_CUT, lift: 6 };
+  const side = { body: art([...W_SIDE_HEADS[look], ...W_SIDE_BODY], p), arm: art([...SIDE_NO_HEAD, ...W_SIDE_ARM], p), eyes: [3, 11, 11] as [number, number, number] };
+  return { down: art([...head, ...W_BODY], p), up: art([...back, ...wb], p), h: 31, tall: 0, eyes: [3, 7, 10], life, cut: W_CUT, lift: 6, side };
 };
 
 // The Ranger: a peaked hood over a 5-row face, the quiver's fletching over the shoulder, a cloak to the
@@ -100,17 +103,17 @@ export const LOOK_DEFS: Record<Cls, LookDef[]> = {
     warrior(['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....ASEAAESa.....', '.....ASSAASSa.....', '.....aASssSAa.....', '......aSSSSa......'],
       ['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....aAAAAAAa.....', '......aAAAAa......'], 'aAAa',
       { ...skin('fair'), A: '#b4bcc6', a: '#6a727c', h: '#dce2ea', P: '#a8b0ba', p: '#6a727c', B: '#2f5d9b', b: '#24487a', T: '#d4a537', M: '#8a929c', m: '#666e78', K: '#5a3d22', k: '#d4a537', L: '#3a3f4a', F: '#2a2420' },
-      { cape: ['#9a2420', '#5a1414'], plume: '#c0392b' }),
+      { cape: ['#9a2420', '#5a1414'], plume: '#c0392b' }, 0),
     // The sellsword: bare-headed, cropped black hair and a beard, dented steel over old leather, a brown rag of a cape.
     warrior(['......hHHHHh......', '.....HHHHHHHH.....', '.....HhSSSShH.....', '.....HSESSESH.....', '.....HSSSsSSH.....', '.....HHSssSHH.....', '......HHHHHH......'],
       ['......hHHHHh......', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....HHHHHHHH.....', '.....sHHHHHHs.....', '......ssssss......'], 'sSSs',
       { ...skin('tan'), H: '#2a201c', h: '#1a1412', P: '#7a7e84', p: '#4a4e54', B: '#5a4030', b: '#3a2a20', T: '#3e2c20', M: '#6a6e74', m: '#4e5258', K: '#2a1e16', k: '#9a9a9a', L: '#4a3a2e', F: '#241c16' },
-      { cape: ['#5a4432', '#36281c'], ragged: true }),
+      { cape: ['#5a4432', '#36281c'], ragged: true }, 1),
     // Blackiron: long pale hair over blackened plate, a scar, dull brass, a cape the colour of old blood.
     warrior(['......hHHHHh......', '.....HHHHHHHH.....', '....HHhhSShhHH....', '....HSSESSESSH....', '....HSSSSSSrSH....', '....HHsSssSsHH....', '....HHHsSSsHHH....'],
       ['......hHHHHh......', '.....HHHHHHHH.....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....', '....HHHHHHHHHH....'], 'HHHH',
       { ...skin('fair'), S: '#f0d0b0', H: '#d8d0b4', h: '#a8a088', r: '#b8706a', P: '#3e3e48', p: '#26262e', B: '#2a2a32', b: '#1e1e24', T: '#8a6a3a', M: '#3e3e48', m: '#2a2a30', K: '#3a2a1a', k: '#8a6a3a', L: '#2a2a30', F: '#1a1a1e' },
-      { cape: ['#5a1818', '#2e0c0c'], hair: '#d8d0b4' }),
+      { cape: ['#5a1818', '#2e0c0c'], hair: '#d8d0b4' }, 2),
   ],
   RANGER: [
     // Green hood and cloak, an auburn fringe under it, the quiver's grey goose feathers.

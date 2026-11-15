@@ -8,9 +8,11 @@ import { chargeFull } from '../sim/hero';
 import { releaseWindow } from '../sim/knacks';
 import { castElement } from '../sim/channel';
 import type { Hero } from '../sim/types';
-import { BARE, blit, line, ring, shadow, spin, stars, type Ctx } from './draw';
+import { BARE, blit, blitPose, line, ring, shadow, spin, stars, type Ctx } from './draw';
 import { LAYOUT, armOffset, drawFigure, layout } from './figure';
 import { heroCut, jointed } from './joints';
+import { sideJointed } from './sidejoints';
+import { sideOn } from './sideview';
 import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
 import { EL_COL, heldEl } from './palette';
@@ -52,6 +54,9 @@ const BREATH = { every: 3.4, up: 1.3, crouch: -0.07 };
  *  "isn't timed up" on the tall bodies: 4.4 squares a second over longer legs wants quicker steps). Across the screen
  *  the step is 2 (figure.ts swings the legs); toward you or away, 1. */
 const CADENCE = 9;
+/** In profile (docs/design/side-view.md): the near hand's x off the middle (it hangs at the hip, not beside the body),
+ *  the shield's before the chest (a little lower than the front's, clear of the chin), and how much of its width shows edge-on. */
+const SIDE_HAND = 2, SIDE_SHIELD = 5, SIDE_EDGE = 0.3, SIDE_DROP = 3;
 
 /** `t` is the room's time (blessings and rallies are kept in it). */
 /** A hero, and a netter's net over them while they're held in it (foedraw.ts). */
@@ -84,14 +89,17 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   const pz = heroPose(h, t, c.now);
   // Stood still a while out of a fight: an idle of their class, or petting a hound (idlepose.ts).
   const idl = idlePose(h, pz, c.now);
-  const up = idl?.up ?? (h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8);
+  const cls = WEAPONS[h.weapon].cls as Cls, def = lookDef(cls, h.look);
+  // Facing mostly east or west: in profile, for a look drawn that way (sideview.ts), unless an idle has its own view.
+  const sv = !idl && sideOn(h, !!def.side);
+  const up = !sv && (idl?.up ?? (h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8));
   const flip = idl?.flip ?? h.fx < -0.2;
   // Looking the other way for a moment: the weapon's drawn as if they faced it (held.ts reads the facing).
   const hw = flip !== h.fx < -0.2 ? { ...h, fx: -h.fx } : h;
   let ox = pz.ox, oy = pz.oy, squash = 1;
   const ph = idPhase(h.id);
   // The walk cycle's four poses, across the screen (11 to 14) or toward and away (1 to 4): figure.ts STRIDE.
-  if (pz.phase === 'rest' && h.moving) pz.step = (Math.abs(h.fx) > 0.5 ? 11 : 1) + (Math.floor(c.now * CADENCE + ph * 4) % 4);
+  if (pz.phase === 'rest' && h.moving) pz.step = (sv ? 21 : Math.abs(h.fx) > 0.5 ? 11 : 1) + (Math.floor(c.now * CADENCE + ph * 4) % 4);
   else if (!idl && pz.phase === 'rest' && h.act === 'idle' && !h.blocking && ((c.now + ph * BREATH.every) % BREATH.every) < BREATH.up) pz.crouch = BREATH.crouch;
   if (h.act === 'zip') (ox = Math.round(h.fx * 2)), (oy = Math.round(h.fy * 2) - 1);
   const dk = WEAPONS[h.weapon].dodge;
@@ -132,18 +140,20 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
     if (tumble) return blit(c, look.down, bx, by, flip, 0, squash);
   }
   // The body in parts (figure.ts); the weapon is in the weapon hand, wherever that arm has gone.
-  const cls = WEAPONS[h.weapon].cls as Cls, def = lookDef(cls, h.look), body = jointed(up ? look.up : look.down, cutOf(def));
+  const body = sv ? sideJointed(def) : jointed(up ? look.up : look.down, cutOf(def));
   const L = layout(body, bx, by, flip, pz, HS), [ax, ay] = armOffset(ARM), mid = Math.round(L.lean / 2), low = L.drop;
   // (A taller body's hands are higher: `lift`, lookkit.ts.)
-  const gy = by - (def.lift ?? 0), side = flip ? -1 : 1, px = bx + side * hs(3) + ax, py = gy - hs(8) + ay, p = pose(hw, c.now);
+  const gy = by - (def.lift ?? 0), side = flip ? -1 : 1, px = bx + side * (sv ? SIDE_HAND : hs(3)) + ax, py = gy - hs(8) + ay, p = pose(hw, c.now);
   if (idl?.a != null) p.a = side > 0 ? idl.a : Math.PI - idl.a;
   if (idl?.ext != null) p.ext = idl.ext;
   if (idl?.hide) p.hide = true;
   // The sword and shield's release: the shield flashes as the blow goes out (the blade too, held.ts).
   const snap = h.weapon === 'sword' && (pz.phase === 'release' || pz.phase === 'contact');
-  const shieldAt: [number, number] = idl?.shield ? [bx + Math.round(idl.shield[0] * HS), by + Math.round(idl.shield[1] * HS)] : h.blocking ? [bx + mid + Math.round(h.fx * hs(6)), gy - hs(7) + low + Math.round(h.fy * hs(4))] : [bx + mid - side * hs(4), gy - hs(6) + low];
+  // (From the side the shield is on the far arm, held up before the chest, its face forward: seen edge-on.)
+  const shieldAt: [number, number] = idl?.shield ? [bx + Math.round(idl.shield[0] * HS), by + Math.round(idl.shield[1] * HS)] : sv ? [bx + mid + side * (h.blocking ? SIDE_SHIELD + 2 : SIDE_SHIELD), gy - (h.blocking ? hs(7) : hs(6) - SIDE_DROP) + low] : h.blocking ? [bx + mid + Math.round(h.fx * hs(6)), gy - hs(7) + low + Math.round(h.fy * hs(4))] : [bx + mid - side * hs(4), gy - hs(6) + low];
   const drawGear = () => {
-    if (h.weapon === 'sword') blit(c, h.shieldLook ? shieldSprite(h.shieldLook) : SPRITES.shield, shieldAt[0], shieldAt[1] + hs(4), false, snap ? 0.85 : 0);
+    const sh = h.shieldLook ? shieldSprite(h.shieldLook) : SPRITES.shield;
+    if (h.weapon === 'sword') blitPose(c, sh, shieldAt[0], shieldAt[1] + hs(4), false, sv ? SIDE_EDGE : 1, 1, 0, snap ? 0.85 : 0);
     drawWeapon(c, hw, px, py, p);
     if (h.act === 'throw' && h.actT < 0.2) {
       const a = Math.atan2(h.fy, h.fx) + Math.PI;
@@ -169,12 +179,12 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   if (dim && !pz.flash) (pz.flash = dim), (pz.tint = SHADOW_TINT);
   // The eye dial's light round the body (heroeyes.ts), cloth behind, the body, cloth over it (herolife.ts).
   const dl = dialLook(h.dial);
-  drawLife(c, h, def, up, 'back', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0, t);
+  drawLife(c, h, def, sv ? 'side' : up, 'back', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0, t);
   drawFigure(c, body, bx, by, pz);
-  drawLife(c, h, def, up, 'front', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0, t);
+  drawLife(c, h, def, sv ? 'side' : up, 'front', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0, t);
   rim(c, dl, body);
   if (h.poison) drip(c, bx, by, h.poison);
-  const [ey, exl, exr] = eyesAt(def);
+  const [ey, exl, exr] = eyesAt(def, sv);
   if (!up) drawDialEyes(c, dl, exl, exr, ey, ph);
   drawDialAura(c, dl, bx, by, LAYOUT.top + 1 + topRow(def) + LAYOUT.drop, ph);
   // The Want shows in the eyes first: a glint in the dark, like theirs.

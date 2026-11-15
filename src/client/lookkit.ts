@@ -34,6 +34,9 @@ export interface LookDef {
   cut?: { headTo: number; hip: number; back: [number, number, number, number]; arm: [number, number, number, number]; skirt?: number };
   /** ...and how many pixels higher its hands are than a 24-tall hero's (the weapon, shield and thrown relics). */
   lift?: number;
+  /** In profile facing east (docs/design/side-view.md): the body with the near leg only, the near arm on its own,
+   *  and where the one eye is (row, x, x). Mirrored for west. A look without it draws its front walking across. */
+  side?: { body: Part[]; arm: Part[]; eyes: [number, number, number] };
 }
 
 /** A pixel map to parts: '.' is empty, `M` (mail) checkers between `M` and `m`. Rows are HERO_W (18) wide. */
