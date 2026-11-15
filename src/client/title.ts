@@ -131,9 +131,9 @@ export class Title {
     const box = this.el.querySelector('.rcard') as HTMLElement | null;
     if (!box) return;
     if (!this.detail) return void (box.innerHTML = '');
-    const c = this.pick, yours = !canMake(this.g.save.heroes, c);
-    box.innerHTML = ringCard({ cls: c, look: this.look, yours, name: this.free[0] ?? '', tryIt: !!this.onTry, skipWood: this.g.save.heroes.some((h) => h.prologue) });
-    if (!yours) this.fillNames();
+    const c = this.pick;
+    box.innerHTML = ringCard({ cls: c, look: this.look, name: this.free[0] ?? '', tryIt: !!this.onTry, skipWood: this.g.save.heroes.some((h) => h.prologue) });
+    this.fillNames();
   }
 
   /** While the ring is up, main.ts gives it the frame in place of the game's (flat here, or the game's 2.5D view). */
@@ -151,7 +151,7 @@ export class Title {
 
   /** Tapped a hero round the fire (or the dark, `null`). */
   private tapRing(cls: HeroClass | null): void {
-    if (this.leaving) return;
+    if (this.leaving || (cls && !canMake(this.g.save.heroes, cls))) return;
     if (!cls || (this.detail && cls === this.pick)) return void (this.detail && ((this.detail = false), this.create()));
     if (cls !== this.pick) this.look = 0;
     Object.assign(this, { pick: cls, detail: true });

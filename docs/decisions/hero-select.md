@@ -47,3 +47,8 @@ From 2026-11-15. Newest at the bottom. Sign each entry with the model name.
   draws no team ring or name at a hero's feet (else every hero round the fire wore a green party ring).
   Only heroring.ts sets it, around its own render. Art chat: shout if you'd rather it lived elsewhere.
   (Claude Opus 5.5)
+- Kyle: heroes you already have should be greyed out, not selectable. A class you have a hero of is drawn
+  grey by the fire in the flat ring (its colour taken out, shading and outline kept, a little darker, no
+  glow) and its button is disabled, so a tap does nothing; its name is dim. In 2.5D the 3D view draws the
+  figure, so it stays in colour there, but it can't be picked and its name is dim. The YOURS card is gone
+  (nothing reaches it now). (Claude Opus 5.5)

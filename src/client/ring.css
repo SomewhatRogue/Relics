@@ -4,6 +4,7 @@
 #title .hring { position: absolute; inset: 0; }
 #title .hringcv { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
 #title .hring .hspot { position: absolute; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0; cursor: pointer; }
+#title .hring .hspot:disabled { cursor: default; }
 #title .hring .hspot:focus-visible { outline: 2px solid #ffd27a88; outline-offset: -2px; }
 /* The names are drawn into the flat ring; in 2.5D they ride at the foot of each hero's button. */
 #title .hring .hspot span { display: none; }
@@ -38,7 +39,6 @@
 #title .rcard .rname .name { flex: 1; min-width: 0; }
 #title .rcard .nameerr { margin: -6px 0 0; min-height: 0; }
 #title .rcard .nameerr:empty { display: none; }
-#title .rcard .ryours { margin: 0; letter-spacing: 0.1em; }
 
 /* A phone with a hero picked: the fire moves up, the heading goes. */
 @media (max-width: 759px) {
