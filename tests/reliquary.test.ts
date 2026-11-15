@@ -24,6 +24,9 @@ describe('the reliquary', () => {
     expect(html.match(/CARRY THIS ONE/g)).toHaveLength(1);
     expect(html).toContain('CARRYING');
     expect(html).toContain('STILL TO WIN');
+    // A relic won stays yours: nothing to give one up (Kyle, 2026-11-15).
+    expect(html).not.toContain('GIVE IT UP');
+    expect(html).not.toContain('data-rop="ask"');
     expect(html).toContain('down the Open Cut');
     expect(html).not.toContain("Said to be in Hempen's fist");
     game.carry(knuckle.id);

@@ -1,11 +1,10 @@
 /**
  * The church step's relic panel (shared/church.ts decides; this shows it): each relic you own as a
- * card with RECHARGE (plain ones, for gold) and GIVE IT UP (gone for good, worth the church's light for
- * your next jobs; a second tap says so and confirms). TWO FOR ONE is gone (2026-11-15, the relics chat:
- * relics are earned, never rolled, docs/design/relics.md).
+ * card with CARRY and RECHARGE (plain ones, for gold). Gone 2026-11-15 (the relics chat, Kyle): TWO FOR
+ * ONE (relics are earned, never rolled, docs/design/relics.md) and GIVE IT UP (a relic won stays yours).
  */
 import { coinsHtml } from '../shared/coins';
-import { LIT, canRecharge, leaveRelic, litFor, recharge, rechargeCost } from '../shared/church';
+import { canRecharge, recharge, rechargeCost } from '../shared/church';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { relicCard } from './reliccard';
@@ -25,28 +24,21 @@ const say = (who: string, s: string) => p(`<b>${who}:</b> ${line(`"${s}"`, who)}
 const b = (op: string, id: string, label: string, opts: { go?: boolean; off?: boolean } = {}) =>
   `<button data-rop="${op}" data-rid="${id}" class="${opts.go ? 'go' : ''}"${opts.off ? ' disabled' : ''}>${label}</button>`;
 
-/** Asked once already: the relic id about to be given up. */
-let sure = '';
-
 export function openStep(g: Game, panel: Panel, back: () => void, said = ''): void {
-  const pr = g.profile, again = (s = '') => ((sure = ''), openStep(g, panel, back, s));
+  const pr = g.profile, again = (s = '') => openStep(g, panel, back, s);
   // A new hero's first recharge is Isolde's to give (the relic's errand, shared/errands.ts); with nothing
-  // to fill (it's been given up, or it's full), the errand's done all the same.
+  // to fill (it's full, or there's none), the errand's done all the same.
   const free = !!pr.errands?.told && !pr.errands.relic;
   if (free && !pr.relics.some((r) => canRecharge(r))) relicDone(pr), g.keep();
   const lit = pr.lit ?? 0;
-  const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${coinsHtml(pr.gold)}.`) + p(RELICW.stepHow);
+  const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${coinsHtml(pr.gold)}.`);
   const rows = pr.relics.map((r) => {
-    const cost = rechargeCost(r), n = litFor(r);
+    const cost = rechargeCost(r);
     const re = r.el ? '' : free && canRecharge(r) ? b('free', r.id, ERRANDW.free, { go: true }) : b('recharge', r.id, canRecharge(r) ? RELICW.recharge(cost) : RELICW.full, { off: !canRecharge(r) || pr.gold < cost });
-    const get = n ? Math.min(n, LIT.max - lit) : 0;
-    const leave = sure === r.id
-      ? `</div><p class="rwarn">${RELICW.leaveWarn(get)}</p><div class="rbtns">` + b('leave', r.id, RELICW.leaveSure, { go: true }) + b('keep', r.id, RELICW.keep)
-      : b('ask', r.id, n ? RELICW.leave(get) : RELICW.leaveDark);
     // The reliquary (docs/design/relics.md section 3): where it was won, and CARRY (the one relic for the next job).
     const carried = r.id === pr.relic, from = r.from && RELICW.wonFrom[r.from] ? `<p class="rfrom">${RELICW.wonFrom[r.from]}</p>` : '';
     const carry = carried ? '' : b('carry', r.id, RELICW.carryThis, { go: true });
-    return relicCard(r, { tag: carried ? RELICW.carrying : '' }) + from + `<div class="rbtns">${carry}${re}${leave}</div>`;
+    return relicCard(r, { tag: carried ? RELICW.carrying : '' }) + from + `<div class="rbtns">${carry}${re}</div>`;
   }).join('');
   // Mother Isolde's relic quest (shared/relicquests.ts): offered now and then; open, a word on where to go.
   const offer = questOffered(pr, g.world.day), open = pr.rq?.open;
@@ -57,8 +49,6 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
   for (const el of root?.querySelectorAll<HTMLButtonElement>('[data-rop]') ?? []) el.onclick = (e) => {
     e.stopPropagation();
     const id = el.dataset.rid!, op = el.dataset.rop;
-    if (op === 'ask') return (sure = id), openStep(g, panel, back, said);
-    if (op === 'keep') return again(said);
     if (op === 'hear') return hearIsolde(g, panel, () => openStep(g, panel, back));
     if (op === 'carry') return g.carry(id), again('~' + RELICW.carryNow);
     if (op === 'recharge') return recharge(pr, id) ? (g.relicsChanged(), again('~' + RELICW.recharged)) : undefined;
@@ -68,13 +58,6 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
       r.charge = relicMax(r);
       g.relicsChanged();
       return again('~' + ERRANDW.freeDone);
-    }
-    if (op === 'leave') {
-      const r = pr.relics.find((x) => x.id === id), was = pr.lit ?? 0;
-      if (!r || leaveRelic(pr, id) < 0) return;
-      g.relicsChanged();
-      const added = (pr.lit ?? 0) - was;
-      return again(added ? RELICW.odricLeave : RELICW.odricLeaveDark);
     }
   };
 }

@@ -111,3 +111,9 @@ The chat building docs/design/relics.md (Kyle approved 2026-11-15). Newest at th
 - **Shots:** `scripts/relics-earned-look.cjs` (phone): the fanfare for Hempen's knuckle, first in Wickhold,
   and the pack's carry slot in town (no carry button; the note says the reliquary chooses). No page errors.
   The solo build not published (the Deep chat's). (Claude Opus 5.5)
+- **GIVE IT UP gone (Kyle, 2026-11-15: "get rid of giving up relics").** The reliquary no longer offers to give
+  a relic up for the church's light: the button, its confirm, the line above the cards and Odric's two lines
+  are gone (`churchrelics.ts`, `relicwords.ts`). That also closes the "won twice" gap from slice 3: a relic
+  won is yours for good. A light already burning still counts down and shows. Hungry items left on the step
+  (Holy and hungry) are untouched. **For the Economy chat:** `leaveRelic`, `litFor` (and `forge`, `forgeOdds`)
+  in your `shared/church.ts` are now unused by any screen; their tests still pass. (Claude Opus 5.5)
