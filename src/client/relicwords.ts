@@ -66,6 +66,19 @@ export const RELICW = {
     net: 'Said to be somewhere out on Fenmere.',
   } as Partial<Record<string, string>>,
   saidChurch: 'Nobody knows where. Mother Isolde might, when she has word.',
+  /** Mother Isolde's relic quests (churchrelics.ts, shared/relicquests.ts). Draft until the lore pass. */
+  questNudge: "Isolde's been asking after you. She's had word of something, she says, and she'd rather tell you herself.",
+  questHear: 'HEAR ISOLDE OUT',
+  questTitle: 'MOTHER ISOLDE SENT YOU',
+  questOpen: (name: string, where: string) => `For the ${name}. ${where}`,
+  questWord: {
+    hook: "There's a hook on a chain at the Open Cut, a relic, and the thing that hauls the carts up out of the pit wears it like a charm. It was ours once. I'd like it back with someone who'll use it.",
+    knuckle: "Hempen has a relic in its fist, out in Hangman's Wood. It's had it so long the hand's grown round it, and I'm told it doesn't let go of anything. Kill it and it's yours.",
+    lodestone: "Two of them keep the doors of the great barn at Lowfurrow, and behind the doors there's a lodestone, a real one, from before. Get past the pair and bring it out.",
+  } as Partial<Record<string, string>>,
+  questHow: "Beat it and the relic is yours. Hangman's Wood and the Open Cut are Corporal Brisk's, at the barracks; the barn's job goes up on the board.",
+  questGo: "I'LL GO",
+  questLater: 'NOT NOW',
   recharge: (n: number) => `RECHARGE (${coinsHtml(n)})`,
   full: 'FULL',
   /** Above the cards: what giving one up means, before anything is tapped. */

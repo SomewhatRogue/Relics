@@ -55,6 +55,7 @@ import { fitShield, type ShieldLook } from '../shared/shieldlook';
 import { treasure } from '../shared/treasure';
 import { makeRelic, relicMax, type RelicItem } from '../shared/relicitems';
 import { GEAR } from '../sim/pack';
+import { endQuest } from '../shared/relicquests';
 /** What a piece of treasure that won't fit in the pack fetches. */
 const TREASURE_SOLD = 20;
 import { rebase } from '../sim/rebase';
@@ -1598,6 +1599,8 @@ export class Game {
       Object.assign(n, { first: was ?? this.profile.name, mine: !was });
     }
     if (won.length) this.give({ relics: won.map((n) => n.item.kind) });
+    // Mother Isolde's quest for it, if that's the one she sent you for, ends (shared/relicquests.ts).
+    if (won.length) endQuest(this.profile, this.world.day);
     this.relicNews.push(...news);
     store(this.save);
   }

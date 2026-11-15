@@ -15,6 +15,7 @@ import { relicDone } from '../shared/errands';
 import { relicMax } from '../shared/relicitems';
 import { ERRANDW } from './errandwords';
 import { ROLL_RELICS } from '../shared/relicroll';
+import { questOffered, takeQuest } from '../shared/relicquests';
 import { RELICS } from '../shared/magic';
 import { relicItemIcon } from './relicicons';
 import type { RelicItem } from '../shared/relicitems';
@@ -47,13 +48,18 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
     const carry = carried ? '' : b('carry', r.id, RELICW.carryThis, { go: true });
     return relicCard(r, { tag: carried ? RELICW.carrying : '' }) + from + `<div class="rbtns">${carry}${re}${leave}</div>`;
   }).join('');
-  panel.show(RELICW.churchTitle, head + (pr.relics.length ? rows : p(RELICW.none)) + stillToWin(pr.relics), [{ label: RELICW.back, act: back }]);
+  // Mother Isolde's relic quest (shared/relicquests.ts): offered now and then; open, a word on where to go.
+  const offer = questOffered(pr, g.world.day), open = pr.rq?.open;
+  const quest = offer ? say('Father Odric', RELICW.questNudge) + `<div class="rbtns" style="margin-left:0">${b('hear', '', RELICW.questHear, { go: true })}</div>`
+    : open ? `<div class="rsec">${RELICW.questTitle}</div>` + p(RELICW.questOpen(RELICS[open].name, RELICW.saidToBe[open] ?? '')) : '';
+  panel.show(RELICW.churchTitle, quest + head + (pr.relics.length ? rows : p(RELICW.none)) + stillToWin(pr.relics), [{ label: RELICW.back, act: back }]);
   const root = document.getElementById('panel');
   for (const el of root?.querySelectorAll<HTMLButtonElement>('[data-rop]') ?? []) el.onclick = (e) => {
     e.stopPropagation();
     const id = el.dataset.rid!, op = el.dataset.rop;
     if (op === 'ask') return (sure = id), openStep(g, panel, back, said);
     if (op === 'keep') return again(said);
+    if (op === 'hear') return hearIsolde(g, panel, () => openStep(g, panel, back));
     if (op === 'carry') return g.carry(id), again('~' + RELICW.carryNow);
     if (op === 'recharge') return recharge(pr, id) ? (g.relicsChanged(), again('~' + RELICW.recharged)) : undefined;
     if (op === 'free') {
@@ -79,4 +85,14 @@ function stillToWin(held: readonly RelicItem[]): string {
   if (!left.length) return '';
   return `<div class="rsec">${RELICW.stillTitle}</div>` + left.map((k) =>
     `<div class="rdark"><img src="${relicItemIcon({ kind: k, el: '', charge: 0 })}" alt=""><div><b>${RELICS[k].name}</b><p>${RELICW.saidToBe[k] ?? RELICW.saidChurch}</p></div></div>`).join('');
+}
+
+/** Mother Isolde sends you for a relic: where it was last seen and what holds it, and I'LL GO or NOT NOW. */
+function hearIsolde(g: Game, panel: Panel, back: () => void): void {
+  const kind = questOffered(g.profile, g.world.day);
+  if (!kind) return back();
+  panel.show('MOTHER ISOLDE', say('Mother Isolde', RELICW.questWord[kind] ?? '') + p(RELICW.questHow), [
+    { label: RELICW.questGo, primary: true, act: () => (takeQuest(g.profile, g.world.day), g.keep(), back()) },
+    { label: RELICW.questLater, act: back },
+  ]);
 }

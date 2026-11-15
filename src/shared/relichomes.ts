@@ -14,7 +14,7 @@ export interface Home { kind: RelicId; home: RelicHome; /** A boss whose first k
 
 export const RELIC_HOMES: Home[] = [
   { kind: 'javelin', home: 'start' },
-  // The Haulier at the Open Cut's end: the Instances chat calls giveHome there (sim/relicboss.ts).
+  // The Haulier at the Open Cut's end: the Instances chat calls giveHome there (sim/relicboss.ts) and sets live.
   { kind: 'hook', home: 'haulier' },
   { kind: 'knuckle', home: 'hempen', live: true },
   { kind: 'lodestone', home: 'doorkeepers', live: true },

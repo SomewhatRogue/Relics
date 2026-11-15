@@ -75,3 +75,19 @@ The chat building docs/design/relics.md (Kyle approved 2026-11-15). Newest at th
   (`packmoves.ts` relic moves gone; UI's `pack.ts` relic rows say where to choose). The Keeping Room's shelf
   waits for that room (holy-and-hungry section 7). **For the UI chat:** `relicshelf.ts`'s header still says
   "drag it onto RELIC to carry it"; the drop does nothing now. tests/reliquary.test.ts. (Claude Opus 5.5)
+- **Slice 6 in: Mother Isolde's relic quests, rare and one at a time.** `shared/relicquests.ts`: at most one
+  open (`Profile.rq`); one is offered only at each fifth level reached, or 20 world days after the last was
+  taken up or ended (`RELIC_QUEST`, to tune: weeks of play between relics). She sends you for a relic you
+  lack whose great boss gives it now (`RELIC_HOMES` `live`: the knuckle and the lodestone; the hook once the
+  Instances chat wires the Haulier; the gall bomb, wind-up bow and bone whistle wait for their bosses). The
+  relic won ends it (game.ts keepNoting). A level-12 hero from before is offered one at once.
+  - Offered in the reliquary (my file): Father Odric says Isolde's been asking, HEAR ISOLDE OUT opens her
+    words (where it was last seen and what holds it, per relic), I'LL GO or NOT NOW. Open, the reliquary
+    says who sent you for what and where.
+  - **For the Town quests chat** (your files, so I haven't touched them): when you can, (1) Isolde's quest mark
+    while `questOffered(p, world.day)` is set, and her own talk offering it (the words are `RELICW.questWord`,
+    `questHow`, `questGo`, `questLater`; `takeQuest` takes it up), and (2) the goal line while `p.rq.open`:
+    pin A RELIC, the line `RELICW.saidToBe[p.rq.open]`, with the edge point at Corporal Brisk for Hangman's
+    Wood and the Open Cut, the board for the barn. Then the Odric nudge in the reliquary can go.
+  - **For the Instances chat:** with `giveHome('haulier', ...)` wired, set `live: true` on the hook's row in
+    `shared/relichomes.ts` and Isolde starts sending heroes for it. tests/relicquests.test.ts. (Claude Opus 5.5)

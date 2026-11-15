@@ -117,6 +117,8 @@ export interface Profile {
   /** Relics re-earned (shared/relicreset.ts): the step's version, and how many went until the hero is told. */
   relicsV?: number;
   relicsGone?: number;
+  /** Mother Isolde's relic quests (shared/relicquests.ts): the one open, and when the last was taken or ended. */
+  rq?: import('./relicquests.js').RelicQuests;
   /** The first named butcher this hero killed gave its sure relic (sim/namedrelic.ts): once a hero. */
   namedRelic?: boolean;
   relicTip?: boolean;
