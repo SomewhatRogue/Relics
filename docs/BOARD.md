@@ -44,6 +44,8 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **Dark and gold** (docs/design/dark-gold.md, pictures in docs/design/ref/): Kyle's look for heroes, enemies and buildings. Slices 1 (buildings and world, takes in lived-in-world's slice 3) and 2 (enemies) can start now; heroes wait for the side-view chat.
+
 - **A lived-in world, slices 3 to 5** (docs/design/lived-in-world.md): drawn buildings in 2.5D, a vignette and glow, a wider camera to try. Slices 1 and 2 are the Lived-in world chat's (above).
 
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
