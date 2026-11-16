@@ -20,7 +20,7 @@ Each relic has one home, and getting it is a big moment, never a roll:
 - **A church quest.** Isolde (the quest mark on her: docs/design/town-quests.md) sends you for a relic: where it
   was last seen and what holds it *(lore: her words per relic)*. The quest's job ends at a boss that has it.
 - **A great boss's first kill.** Beat the end boss of a big quest or instance and, if you don't have its
-  relic, it's yours, no roll (docs/design/instances.md: the Haulier's).
+  relic, it's yours, no roll (the Open Cut's end boss: docs/design/open-cut-map.md).
 
 A church quest can send you to a great boss: the two are one road, from the church or straight at the boss.
 
@@ -32,8 +32,8 @@ Isolde has nothing for you in between; her quest mark shows only when she does.
 | Relic | Home (draft; the lore keeper settles) |
 | --- | --- |
 | Relic Javelin | Every hero starts with it (broken, mended at the church: town-quests.md) |
-| Grappling Hook | The Haulier, the Open Cut (Rakehead's end) |
-| Knuckle | The Hempen Man, Hangman's Wood |
+| Grappling Hook | The Open Cut's end boss (the Overman: open-cut-map.md) |
+| Knuckle | Hempen, Hangman's Wood |
 | Lodestone | The Doorkeepers, Lowfurrow |
 | Net | Fenmere's end boss |
 | Gall Bomb, Wind-Up Bow, Bone Whistle | Church quests to the next great bosses (Coldscar's Turnkey, the Old Park, the Corpse Road) |
@@ -70,7 +70,7 @@ under this version (a version on the save so it runs once). Shown to them once, 
 
 1. Remove the old sources (above) and the swap; carry one, chosen in town.
 2. The save step: everything but the javelin gone, once, with its notice.
-3. Great bosses' first kills give their relic (the Haulier's with the Instances chat; the Hempen Man and the
+3. Great bosses' first kills give their relic (the Open Cut's with the Instances chat; Hempen and the
    Doorkeepers here).
 4. The fanfare: the moment, the Roll line, the slot.
 5. The reliquary at the church (and its shelf in the Keeping Room once that's built).
@@ -78,5 +78,5 @@ under this version (a version on the save so it runs once). Shown to them once, 
 
 ## Coordination
 
-The Town quests chat owns the church's errands and quest marks; the Instances chat owns the Haulier's drop
-and boss loot; check the board and change their files through them.
+The Town quests chat owns the church's errands and quest marks; the Instances chat owns the Open Cut's end
+boss's drop and boss loot; check the board and change their files through them.

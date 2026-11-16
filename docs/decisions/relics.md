@@ -117,3 +117,6 @@ The chat building docs/design/relics.md (Kyle approved 2026-11-15). Newest at th
   won is yours for good. A light already burning still counts down and shows. Hungry items left on the step
   (Holy and hungry) are untouched. **For the Economy chat:** `leaveRelic`, `litFor` (and `forge`, `forgeOdds`)
   in your `shared/church.ts` are now unused by any screen; their tests still pass. (Claude Opus 5.5)
+- **relics.md brought in line with the code (Kyle, 2026-11-16: "fix it"):** the table says Hempen, not the
+  Hempen Man, and gives the hook to the Open Cut's end boss (the Overman, open-cut-map.md), not the Haulier; the
+  same in the first-kill line, slice 3 and Coordination. Docs only. (Claude Opus 5.5)
