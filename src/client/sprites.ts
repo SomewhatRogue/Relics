@@ -6,6 +6,7 @@ import { LOOK_DEFS, type Cls, type LookDef } from './herolooks';
 import { HERO_W } from './heroscale';
 import { PLAIN_BUTCHER, butcherParts, headlessParts } from './butcherparts';
 import { SHARP, paintSharp } from './charpaint';
+import { MEAN_BODY, MEAN_EARS, MEAN_FACE, MEAN_GOB, SHIELD_MEAN } from './charmean';
 
 export type Part = ['r', number, number, number, number, string] | ['e', number, number, number, number, string] | ['p', number, number, string] | ['t', number, number, number, number, string];
 
@@ -148,7 +149,8 @@ const dummyBase: Part[] = [
  * eyes); the pale blind hunters are the same body in bone and ash with empty sockets.
  */
 type GobCols = { S: string; s: string; L: string; F: string; B: string; b: string; K: string; m: string; T: string; E: string };
-const GOB: GobCols = { S: '#5b6b2a', s: '#4a5a22', L: '#3a4a1f', F: '#2a3418', B: '#4a3a2a', b: '#5a4836', K: '#2a2018', m: '#2a1a14', T: '#e8e0c8', E: '#ff4a3a' };
+// (Under ?sharp the goblins are drawn meaner: charmean.ts.)
+const GOB: GobCols = SHARP ? MEAN_GOB : { S: '#5b6b2a', s: '#4a5a22', L: '#3a4a1f', F: '#2a3418', B: '#4a3a2a', b: '#5a4836', K: '#2a2018', m: '#2a1a14', T: '#e8e0c8', E: '#ff4a3a' };
 const PALE: GobCols = { S: '#c8c2b0', s: '#a8a290', L: '#8a8478', F: '#5a5650', B: '#4a4440', b: '#5a5450', K: '#2a2420', m: '#2a2420', T: '#e8e0c8', E: '#1a1614' };
 const gobBody = (k: GobCols): Part[] => [
   ['r', 4, 14, 3, 5, k.L], ['r', 10, 14, 3, 5, k.L], ['r', 3, 19, 4, 1, k.F], ['r', 10, 19, 4, 1, k.F],
@@ -178,17 +180,20 @@ const gobFace = (k: GobCols): Part[] => [
   ['p', 9, 6, k.s], ['p', 4, 6, k.s], ['p', 13, 6, k.s], ['p', 6, 8, k.T], ['p', 10, 8, k.T],
 ];
 const gobBack = (k: GobCols): Part[] => [['r', 5, 7, 7, 1, k.s], ['r', 6, 3, 5, 1, k.s], ['p', 8, 4, k.s], ['r', 8, 10, 1, 4, k.b]];
-const scrapperBody = gobBody(GOB);
-const scrapperHead = [...gobHead(GOB), ...gobFace(GOB)];
+const scrapperBody = [...gobBody(GOB), ...(SHARP ? MEAN_BODY : [])];
+const scrapperHead = [...gobHead(GOB), ...(SHARP ? MEAN_EARS : []), ...gobFace(GOB), ...(SHARP ? MEAN_FACE : [])];
 /** The small goblin's parts, facing you and walking away (foes.ts draws Rakehead's four from them a size up). */
 export const GOB_PARTS = {
-  down: [...scrapperBody, ...scrapperHead], up: [...scrapperBody, ...gobHead(GOB), ...gobBack(GOB)],
+  down: [...scrapperBody, ...scrapperHead], up: [...scrapperBody, ...gobHead(GOB), ...(SHARP ? MEAN_EARS : []), ...gobBack(GOB)],
   paleDown: [...gobBody(PALE), ...gobHead(PALE, true), ...gobFace(PALE)], paleUp: [...gobBody(PALE), ...gobHead(PALE, true), ...gobBack(PALE)],
 };
 /** Everything burned to the same black, a few embers left. */
 const char = (parts: Part[]): Part[] => parts.map((p, i) => [...p.slice(0, -1), i % 5 ? '#1a1614' : '#2a2420'] as Part);
 
 export const HEROES = Object.fromEntries(Object.keys(LOOKS).map((k) => [k, heroLook(k as Cls)])) as Record<Cls, HeroSprites>;
+
+/** The heater shield's colours: the rim lit and shaded, the chevron lit and shaded, the field lit and shaded. */
+const SHIELD = ['#cfd6dc', '#8a929c', '#ecc860', '#c8962e', '#9a2a22', '#7a1e1a'];
 
 /** The heater shield's pixels: each row's span narrowing to the point, the rim round its edge, the chevron in gold. */
 function shieldParts(): Part[] {
@@ -197,7 +202,9 @@ function shieldParts(): Part[] {
   span.forEach(([a, b], y) => {
     for (let x = a; x <= b; x++) {
       const rim = y === 0 || x === a || x === b || y === span.length - 1, chev = Math.abs(Math.abs(x - 5.5) - (9.5 - y)) < 1.1 && y >= 4 && y <= 10;
-      out.push(['p', x, y, rim ? (x <= 5 || y === 0 ? '#cfd6dc' : '#8a929c') : chev ? (x <= 5 ? '#ecc860' : '#c8962e') : x <= 3 ? '#9a2a22' : '#7a1e1a']);
+      // (Under ?sharp, the knight's: blackened steel rim, a deep crimson field, old gold: charmean.ts.)
+      const c = SHARP ? SHIELD_MEAN : SHIELD;
+      out.push(['p', x, y, rim ? (x <= 5 || y === 0 ? c[0] : c[1]) : chev ? (x <= 5 ? c[2] : c[3]) : x <= 3 ? c[4] : c[5]]);
     }
   });
   return out;
@@ -211,7 +218,7 @@ export const SPRITES = {
   /** The blind hunters of the deep workings: bone-pale, long-eared, empty sockets where the eyes should glow. */
   pale: makeSprite(17, 20, [...gobBody(PALE), ...gobHead(PALE, true), ...gobFace(PALE)]),
   paleUp: makeSprite(17, 20, [...gobBody(PALE), ...gobHead(PALE, true), ...gobBack(PALE)]),
-  scrapperUp: makeSprite(17, 20, [...scrapperBody, ...gobHead(GOB), ...gobBack(GOB)]),
+  scrapperUp: makeSprite(17, 20, [...scrapperBody, ...gobHead(GOB), ...(SHARP ? MEAN_EARS : []), ...gobBack(GOB)]),
   // Bodies left behind: without a head (a red stump), or burned black.
   scrapperHeadless: makeSprite(17, 20, [...scrapperBody, ['r', 6, 8, 5, 1, '#7a1d1d'], ['r', 7, 7, 3, 1, '#9a2a2a']]),
   butcherHeadless: makeSprite(27, 33, headlessParts()),

@@ -102,3 +102,16 @@ doesn't come out nicely from the blade"; "the attack looks lame, not a pull back
   so, `?sharp` comes out with this log entry kept.
 - Check: shots/figures-today-vs-sharper.png, shots/today-vs-sharper.mp4 (chars-play.cjs's mode `sharp`).
   (Claude Opus 5.5)
+
+## 2026-11-16: the knight and the goblins redrawn meaner (`?sharp`)
+
+- Kyle on the sharper painting: the villagers "look really good"; not the knight, not the goblins. Their shapes were
+  the trouble. charmean.ts, used only under `?sharp`, redraws them in the very same sizes and cuts (every pose and
+  timing kept): the knight (the Warrior's first look) a closed great helm with a black visor slit (the look's eye
+  pixels two dim glints in it, red with the eye dial), breathing holes, blackened plate, a crimson surcoat stripe,
+  gold-tipped points off the pauldrons, the red cape, no plume; the goblins (every kind built on the small goblin)
+  sicklier skin, brows slanting down to the nose, two-pixel red eyes, ears longer and swept to points, a wider
+  jagged grin with fangs, a scar, a rust-red rag, black leather pads with bone spikes, a harness. The Warrior's own
+  shield (shieldart.ts, the barracks' choices kept) goes deeper: darker fields, older metal, blackened rims.
+- On the test page (the artifact "Relic: new look characters"; `#today` for today's figures).
+  (Claude Opus 5.5)

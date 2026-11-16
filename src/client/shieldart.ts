@@ -5,11 +5,14 @@
  */
 import type { ShieldLook } from '../shared/shieldlook';
 import { makeSprite, type Part, type Sprite } from './sprites';
+import { SHARP } from './charpaint';
+import { SHIELD_FIELDS_MEAN, SHIELD_TRIMS_MEAN } from './charmean';
 
 /** Each field colour: dark, then the lit left of it. */
-export const FIELD_COL: [string, string][] = [['#7a1e1a', '#9a2a22'], ['#1e3a6e', '#2c4e8a'], ['#24502a', '#326636'], ['#1e1c22', '#2e2c34'], ['#b0aca4', '#ccc8c0'], ['#8a6a24', '#a8822a']];
+// (Under ?sharp the same choices, deeper and older: charmean.ts.)
+export const FIELD_COL: [string, string][] = SHARP ? SHIELD_FIELDS_MEAN : [['#7a1e1a', '#9a2a22'], ['#1e3a6e', '#2c4e8a'], ['#24502a', '#326636'], ['#1e1c22', '#2e2c34'], ['#b0aca4', '#ccc8c0'], ['#8a6a24', '#a8822a']];
 /** Each trim: the device's light and dark, the rim's light and dark. */
-const TRIM_COL = { gold: ['#ecc860', '#c8962e', '#d4a537', '#8a6a24'], silver: ['#e8eef2', '#a8b0ba', '#cfd6dc', '#8a929c'], iron: ['#5a5662', '#3a3640', '#5a5662', '#34313b'] };
+const TRIM_COL = SHARP ? SHIELD_TRIMS_MEAN : { gold: ['#ecc860', '#c8962e', '#d4a537', '#8a6a24'], silver: ['#e8eef2', '#a8b0ba', '#cfd6dc', '#8a929c'], iron: ['#5a5662', '#3a3640', '#5a5662', '#34313b'] };
 
 /** Each shape: its size and each row's span, left to right. */
 const SHAPE: Record<ShieldLook['shape'], [number, number][]> = {

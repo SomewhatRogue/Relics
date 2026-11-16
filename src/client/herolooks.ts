@@ -12,6 +12,8 @@ import { art, darker, glint, skin, type Cls, type LookDef } from './lookkit';
 import { CLERIC, MAGE } from './herolooks2';
 import { SIDE_NO_HEAD, W_SIDE_ARM, W_SIDE_BODY, W_SIDE_HEADS } from './herosides';
 import { G_SIDE_ARM, G_SIDE_BODY, G_SIDE_HEAD, R_SIDE_ARM, R_SIDE_BODY, R_SIDE_HEADS } from './herosides2';
+import { SHARP } from './charpaint';
+import { KNIGHT_BACK, KNIGHT_CAPE, KNIGHT_HEAD, KNIGHT_PAL } from './charmean';
 
 export type { Cls, LookDef, Life } from './lookkit';
 
@@ -105,6 +107,8 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
 export const LOOK_DEFS: Record<Cls, LookDef[]> = {
   WARRIOR: [
     // The knight: an open-faced helm with a red plume, blue and gold, a red cape.
+    // (Under ?sharp, the concepts' knight: a closed great helm, blackened plate, no plume: charmean.ts.)
+    SHARP ? warrior(KNIGHT_HEAD, KNIGHT_BACK, 'aAAa', { ...skin('fair'), ...KNIGHT_PAL }, { cape: KNIGHT_CAPE }, 0) :
     warrior(['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....ASEAAESa.....', '.....ASSAASSa.....', '.....aASssSAa.....', '......aSSSSa......'],
       ['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....aAAAAAAa.....', '......aAAAAa......'], 'aAAa',
       { ...skin('fair'), A: '#5e6670', a: '#363c46', h: '#8a929e', P: '#4e5660', p: '#c8962e', B: '#1c2638', b: '#141c2a', T: '#d4a537', M: '#4a5058', m: '#343a42', K: '#241a14', k: '#d4a537', L: '#262a32', F: '#18141a' },
