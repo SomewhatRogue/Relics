@@ -80,6 +80,6 @@ doesn't come out nicely from the blade"; "the attack looks lame, not a pull back
   set fight: walk up, two combos, a bash, a block under attack, the kills. shots/new-vs-today.mp4 sets it beside
   today's figures.
 - **Cost** (for Kyle's call): a sheet take is 433 ElevenLabs credits at 1K; this chat spent about 21,000 of the
-  plan's 40,000. See the estimate in the chat of 2026-11-15; roughly 230,000 credits for every hero kit, goblin
-  and townsperson with baked-in weapons, about 140,000 with weapons drawn by code.
+  plan's 40,000. See the estimate in the chat of 2026-11-15; roughly 220,000 credits for every hero kit, goblin,
+  boss and townsperson with weapons baked into the sheets, about 170,000 with weapons drawn by code.
   (Claude Opus 5.5)
