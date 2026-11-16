@@ -174,3 +174,19 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   hero walks first; and the Gate Road itself is about 4.5 tiles between the hall's annex and the tower. Kyle wants
   the first walk in to feel open: the stalls somewhere off that path, and the road in wider if it can be.
   (Claude Opus 5.5)
+
+## 2026-11-16: parked, by Kyle's call
+
+- Kyle: the HD street look isn't working for him; stop here. Parked, not deleted. Everything this chat built stays
+  behind `?look=3d&hd&street` (and `&parts`, `&hole=old`, `&zoom=N` under it): checked that each piece outside its
+  own `street*.ts` files is switched off without it (the chase camera only with the street's perspective camera; the
+  new town's map, the lodge's turn included, only with the layout on; foe silhouettes, the fade, the sky, props, the
+  kit, the zoom, each on `STREET`). The one thing outside is `window.__swing`, a test hook that changes nothing in
+  play. Without the switch the game draws as it did before this chat.
+- The characters chat's `?sharp` (today's figures painted sharper, charpaint.ts and sprites.ts) imports nothing of
+  the street's and stands on its own.
+- Board row moved to Finished as Done (parked).
+- Where it was, for picking it up: houses from parts liked (`&parts`); the town layout chat has my notes on the
+  stalls at the Gate Road's mouth, the road's width and the Rat's second door; open with Kyle, a camera that turns all
+  the way round in town; ElevenLabs credits ran out.
+  (Claude Opus 5.5)
