@@ -62,6 +62,9 @@ function skyline(seed: number, hills: boolean): [HTMLCanvasElement, HTMLCanvasEl
 
 /** The strip of land left open for a gorge (z from, to). */
 const GAP = { value: new THREE.Vector2(1e6, 1e6) };
+/** The town's own ground (x, z to x, z): the land past the walls stops at it, so nothing below the floor (the
+ * millpond, a gorge) is covered over. */
+const TOWN = { value: new THREE.Vector4(0, 0, 0, 0) };
 
 /** Only the side of a ring beyond the town's middle (as the camera sees it): the camera backs off outside the ring. */
 const MID = { value: new THREE.Vector3() };
@@ -102,8 +105,9 @@ export class StreetSky {
     const lm = this.land.material as THREE.MeshBasicMaterial;
     lm.onBeforeCompile = (sh) => {
       sh.uniforms.uGap = GAP;
+      sh.uniforms.uTown = TOWN;
       sh.vertexShader = 'varying vec3 vW;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-      sh.fragmentShader = 'varying vec3 vW;\nuniform vec2 uGap;\n' + sh.fragmentShader.replace('void main() {', 'void main() {\n  if (vW.z > uGap.x && vW.z < uGap.y) discard;');
+      sh.fragmentShader = 'varying vec3 vW;\nuniform vec2 uGap;\nuniform vec4 uTown;\n' + sh.fragmentShader.replace('void main() {', 'void main() {\n  if (vW.z > uGap.x && vW.z < uGap.y) discard;\n  if (vW.x > uTown.x && vW.x < uTown.z && vW.z > uTown.y && vW.z < uTown.w) discard;');
     };
     lm.customProgramCacheKey = () => 'streetland';
     const g = this.dome.geometry;
@@ -123,6 +127,7 @@ export class StreetSky {
     this.land.position.set(cx, -0.08, cz);
     const gap = gorgeSpan(map);
     GAP.value.set(gap ? gap[0] : 1e6, gap ? gap[1] : 1e6);
+    TOWN.value.set(0.5, 0.5, map.w - 0.5, map.h - 0.5);
     this.key = '';
     const [town, lights] = skyline(7, false), [hills] = skyline(3, true);
     this.dome.position.set(cx, 0, cz);

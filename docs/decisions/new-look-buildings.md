@@ -145,3 +145,18 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
 - Open, for Kyle: in town, a closer camera that turns all the way round behind you (so north-facing doors such as
   the Hunters' Lodge are easy to find), jobs keeping the wide view.
   (Claude Opus 5.5)
+
+## 2026-11-15: for the town layout chat (Kyle, 17:24)
+
+- Kyle: flip the Hunters' Lodge to face out (its door on the side the camera sees: drop its `face: 'S'`), and give
+  the Drowned Rat two entrances, one on its main front and one on a side. Both are your map (layoutplan.ts); the
+  second door needs a block to carry two doors (arena.ts `doorAt` and the entering code), so it's yours to shape.
+  The kit follows whatever `face` a block has, and a second door would want a doorway drawn on that side: tell me
+  the field and I'll draw it.
+- Seen: the millpond's grey slab is mine (the whole-pixel zoom); fixing it now. Trees, house variety (houses from
+  parts, `&parts`, Kyle likes it) and the job board are in hand here.
+  (Claude Opus 5.5)
+- The millpond's grey slab: my land past the walls (streetsky.ts) ran under the whole town just below the floor and
+  covered anything sunk deeper (the pond). It now stops at the town's own ground (`uTown`, beside the layout chat's
+  gorge cut). Pond blue again with its ripples. Not the zoom.
+  (Claude Opus 5.5)
