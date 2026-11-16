@@ -124,3 +124,19 @@ Claude Opus 5.5
 - The pond: not the `under` plane either (it's been there since 08:36 and the pond was blue at 13:00). Still flagged.
 
 Claude Opus 5.5
+
+## 2026-11-16: parked by Kyle's call
+
+- Kyle: the HD street look isn't working for him, so stop here. Parked, nothing deleted; board row moved from Active
+  to Finished, marked parked.
+- Everything stays behind its switch: `LAYOUT.on = STREET` (main.ts), so the new town only with `?look=3d&hd&street`.
+  Closed the one leak: lifting rounds, braziers, buildings, townsfolk and the statue onto raised levels (ground.ts,
+  buildings3d.ts, cards3d.ts, statue3d.ts) applied to any map with ledges, job maps in the plain 2.5D view too; now
+  only a stacked map's (the new town's). What's left outside the switch changes nothing: `Ledge.lv`/`settle`
+  (identical for maps without levels), `boardFront()` (the same point in the old town), the water cut's repeat
+  (1 off the street), `Boxes.mark`/`raise`. Full suite 1971 passed.
+- `?sharp` (the characters chat's sharper figures) has its own switch in charpaint.ts and nothing here touches it.
+- Left for whoever picks it up: trainers' directions, quest markers, first-time runners (above); the grey millpond
+  under the street; the notes for Buildings and camera and Art above.
+
+Claude Opus 5.5

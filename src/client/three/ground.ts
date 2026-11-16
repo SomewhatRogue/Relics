@@ -148,7 +148,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     // A reed or a stump standing in deep water: its foot goes down to the water.
     if (levelAt(wf, o.x, o.y) === DEEP) B.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
     // (On a stacked level, lifted to stand on it, its flames with it: layoutledges.ts.)
-    const k = B.mark(), up = m.ledges ? standAt(m, o.x, o.y) * LEDGE_H : 0;
+    const k = B.mark(), up = stacked(m) ? standAt(m, o.x, o.y) * LEDGE_H : 0;
     // The new look (`?hd&street`): in town, the kit's trees, well, lamp posts and street clutter (streetprops.ts).
     if (STREET && m.name === 'WICKHOLD' && kitRound(group, o, up)) {
       if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: [], light: { x: o.x, y: 3 + up, z: o.y + 0.3, r: 6, i: 0.9, c: [1, 0.74, 0.44], f: 5 } });
@@ -173,7 +173,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   }
   // Braziers: a bowl on legs, its coals, its flames and light (brazier3d.ts).
   for (const b of m.braziers) {
-    const k = B.mark(), n = lamps.length, up = m.ledges ? standAt(m, b.x, b.y) * LEDGE_H : 0;
+    const k = B.mark(), n = lamps.length, up = stacked(m) ? standAt(m, b.x, b.y) * LEDGE_H : 0;
     addBrazier(B, b, lamps);
     if (up) B.raise(k, up), lamps.slice(n).forEach((l) => (l.fires.forEach((f) => (f[1] += up)), l.light && (l.light.y += up)));
   }
@@ -182,7 +182,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   for (const o of m.rounds) {
     const n = lights.length, k = lamps.length;
     lightsOf(o);
-    const up = m.ledges ? standAt(m, o.x, o.y) * LEDGE_H : 0;
+    const up = stacked(m) ? standAt(m, o.x, o.y) * LEDGE_H : 0;
     if (up) lights.slice(n).forEach((l) => (l.y += up)), lamps.slice(k).forEach((l) => l.light && (l.light.y += up));
   }
   function lightsOf(o: GameMap['rounds'][number]): void {

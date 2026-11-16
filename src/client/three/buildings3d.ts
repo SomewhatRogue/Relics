@@ -5,6 +5,7 @@
  */
 import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
+import { stacked } from './layoutledges';
 import { blockState, buildBlock, type Built } from './houses3d';
 import { levelAt } from '../../shared/arena';
 import { LEDGE_H } from './ground';
@@ -56,7 +57,7 @@ export class Buildings {
         // Dark and gold: the colours graded and moss laid on, once per build (darkgold3d.ts).
         gradeBuilt(e.b.group, e.b.roof, Math.round(blk.x * 31 + blk.y * 17));
         // Standing on a stacked level (the new town: docs/design/town-layout.md), lifted onto it.
-        if (map.ledges) e.b.group.position.y = levelAt(map, blk.x + blk.w / 2, blk.y + blk.h / 2) * LEDGE_H;
+        if (stacked(map)) e.b.group.position.y = levelAt(map, blk.x + blk.w / 2, blk.y + blk.h / 2) * LEDGE_H;
         this.group.add(e.b.group);
         this.built.set(i, e);
       }

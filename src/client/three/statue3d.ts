@@ -5,6 +5,7 @@
  * (../statuedraw.ts), so both views show the same figure and the same name. Only draws.
  */
 import { levelAt, type GameMap } from '../../shared/arena';
+import { stacked } from './layoutledges';
 import { LEDGE_H } from './ground';
 import { STATUE_TALL, drawPlate, drawStatueTop } from '../statuedraw';
 import { PLATE, PLINTH_TOP } from '../statuepieces';
@@ -17,7 +18,7 @@ const UPPER = CELL.fy - 8;
 export function putStatue(f: Figs, map: GameMap): void {
   for (const r of map.rounds) if (r.kind === 'plinth') {
     // On a raised level (the new town's square), up with the plinth's stone (ground.ts lifts the round's boxes).
-    const up = map.ledges ? levelAt(map, r.x, r.y) * LEDGE_H : 0;
+    const up = stacked(map) ? levelAt(map, r.x, r.y) * LEDGE_H : 0;
     // A card holds CELL.fy pixels above its foot: a figure taller than that would stand on two, its lower part on
     // the cap and a second card raised UPPER pixels (each drawing only its own rows). At a hero's size one does.
     f.put('st-top', r.x, PLINTH_TOP + up, r.y, (c, px, py) => drawStatueTop(c, r.hero, px, py, 0, UPPER), { pool: 0 });
