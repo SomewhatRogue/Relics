@@ -81,3 +81,26 @@ The gear-looks chat's log (docs/design/gear-looks.md). Newest at the foot.
 - For the new-look characters chat: generated sheets with the weapon baked in would hide all of this; keep
   the weapon drawn by held.ts over them, as your log says.
 (Opus 5.5)
+
+## 2026-11-16: slice 3, armour weight and legs on the hero
+
+- `client/armourlook.ts`: the body piece's weight at the shoulders and neck, the legs piece's on the shins,
+  in the piece's tier (the weapons' colour roles, so weaponlook.ts recolours them the same way: plain dull
+  iron, fine bright steel, forged dark steel, cursed blackening and veined). Heavy: pauldrons with a rivet, a
+  gorget, greaves with a knee cop. Medium: a mail mantle, mail shins. Light: a leather collar and bracers,
+  leather shin wraps. A robe's legs (only the feet) take nothing.
+- Made from each body's own pixels, not drawn per look: a second jointed figure (joints.ts) holding only the
+  armour pixels, laid on the body's inside pixels (never the outline, so silhouettes stay), each in a tone
+  matching the shading under it, pale colourless pixels (beards, white trim) left alone. `drawFigure` draws it
+  right after the body (one hook line in actors.ts, the side-view chat's), so it walks, leans, crouches and
+  turns with it, front, back and side, every class and look, and in 2.5D through drawHero. Cached per body
+  sprite and look.
+- Read through Gear's `shownItem` (`Hero.armor`, `Hero.legs`, `Hero.keep`), so a kept look applies. A unique's
+  armour (PRE-WAR tier) shows clean steel, not blackened, until it has its own look; the Hungry apron and coat
+  show their hungry tier. Friends in town get it in the `me` word as `ga` and `gl` ("4h", "0l").
+- `?gearlook=armour` (armourpage.ts): each class facing you and in profile, light, medium and heavy at plain,
+  fine and forged, and heavy at turning. `node scripts/gear-look.cjs <url> shots/armour armour` shoots it.
+- Not yet: a unique's or a Hungry piece's own chest or legs look (the Haulier's Plate, the apron), and rings
+  (slice 4). The Warrior's shield covers most of the chest, so on the Warrior it shows at the sword shoulder,
+  the neck and the shins.
+(Opus 5.5)

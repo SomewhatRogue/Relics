@@ -1,6 +1,6 @@
 /** Gear you can see, slice 1 (docs/design/gear-looks.md): a weapon's look from the piece, packed for town, and the colour table. */
 import { describe, expect, it } from 'vitest';
-import { heldLook, packLook, unpackLook, weaponLookOf } from '../src/shared/gearlook';
+import { armourLookOf, heldLook, legsLook, packArmour, packLook, unpackArmour, unpackLook, weaponLookOf, wornLook } from '../src/shared/gearlook';
 import { TIER_ORDER } from '../src/shared/gear';
 import { PAINT, tintOf, tintPixel, VEIN } from '../src/client/weaponlook';
 import { NAMED } from '../src/client/namedlooks';
@@ -80,5 +80,17 @@ describe('weapon looks', () => {
     }
     // Over today's art, not its PRE-WAR tier: a unique's gold stays gold unless it swaps it.
     expect(tintOf({ tier: 'tolmouth', named: 'doorbow' })('#d4a537')).toBe('#d4a537');
+  });
+
+  it('armour: the body and legs pieces by weight and tier, kept looks, a friend\'s word, packed small', () => {
+    const plate: Item = { slot: 'armor', armor: 'heavy', quality: 'forged', traits: [] }, wraps: Item = { slot: 'legs', armor: 'light', quality: 'plain', traits: [] };
+    expect(armourLookOf(null)).toBeNull();
+    expect(wornLook({ armor: plate })).toEqual({ weight: 'heavy', tier: 'forged' });
+    expect(legsLook({ legs: wraps })).toEqual({ weight: 'light', tier: 'plain' });
+    expect(wornLook({ armor: plate, keep: { armor: 'smeltplate' } })).toEqual({ weight: 'heavy', tier: 'forged', named: 'smeltplate' });
+    expect(wornLook({ armor: plate, gearLook: { a: null } })).toBeNull();
+    for (const l of [{ weight: 'medium', tier: 'turning' }, { weight: 'heavy', tier: 'hungry', named: 'apron' }] as const) expect(unpackArmour(packArmour(l))).toEqual(l);
+    expect(packArmour(null)).toBe('');
+    for (const bad of [undefined, '', '9h', '2x', 7]) expect(unpackArmour(bad)).toBeNull();
   });
 });

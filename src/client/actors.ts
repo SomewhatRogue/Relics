@@ -10,6 +10,7 @@ import { castElement } from '../sim/channel';
 import type { Hero } from '../sim/types';
 import { BARE, PLAIN, blit, blitPose, line, ring, shadow, spin, stars, type Ctx } from './draw';
 import { LAYOUT, armOffset, drawFigure, layout } from './figure';
+import { drawArmour } from './armourlook';
 import { heroCut, jointed } from './joints';
 import { sideJointed } from './sidejoints';
 import { OFF, SIDE_REACH, sideOn } from './sideview';
@@ -184,6 +185,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   const dl = dialLook(h.dial);
   drawLife(c, h, def, sv ? 'side' : up, 'back', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0, t);
   drawFigure(c, body, bx, by, pz);
+  drawArmour(c, h, body, bx, by, pz); // (What they wear over it, gear-looks: armourlook.ts.)
   drawLife(c, h, def, sv ? 'side' : up, 'front', pz.flash, pz.tint, dl.side < 0 ? dl.a : 0, t);
   rim(c, dl, body);
   if (h.poison) drip(c, bx, by, h.poison);

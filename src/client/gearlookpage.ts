@@ -34,6 +34,8 @@ const UNIQUE_ALL = (Object.entries(UNIQUES) as [string, { slot: string; kit?: We
 const NAMED_ROWS = [{ label: 'HUNGRY', col: '#ff6a5a', pieces: HUNGRY_ROW }, { label: 'UNIQUE', col: '#d8b0ff', pieces: UNIQUE_ALL.slice(0, 6) }, { label: 'UNIQUE', col: '#d8b0ff', pieces: UNIQUE_ALL.slice(6) }];
 
 export function openGearLooks(): void {
+  // (`?gearlook=armour`: the armour page, armourpage.ts.)
+  if (new URLSearchParams(location.search).get('gearlook') === 'armour') return void import('./armourpage').then((m) => m.openArmourLooks());
   const W = LEFT + LOOKS.length * CELL + 4, H = TOP + (KITS.length + NAMED_ROWS.length) * ROW + 6;
   const mk = () => Object.assign(document.createElement('canvas'), { width: W, height: H });
   const lit = mk(), glow = mk(), out = mk();

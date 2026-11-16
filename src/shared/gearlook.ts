@@ -14,8 +14,10 @@ import { UNIQUES } from './uniques.js';
 export type GearEl = 'fire' | 'frost' | 'storm';
 /** `named`: a named piece's own look (docs/design/gear-looks.md slice 2), a Hungry id or a unique id. */
 export interface WeaponLook { tier: Tier; el?: GearEl; named?: string }
-/** Later slices add armour weight and rings beside the weapon. */
-export interface GearLook { w?: WeaponLook }
+/** A worn body or legs piece's look (slice 3): its weight and tier, and its name if it's a named piece. */
+export interface ArmourLook { weight: 'light' | 'medium' | 'heavy'; tier: Tier; named?: string }
+/** Weapon, body (`a`) and legs (`l`); rings come in slice 4. */
+export interface GearLook { w?: WeaponLook; a?: ArmourLook | null; l?: ArmourLook | null }
 
 const EL: Partial<Record<TraitId, GearEl>> = { ember: 'fire', rime: 'frost', storm: 'storm' };
 
@@ -44,4 +46,25 @@ export function unpackLook(s: unknown): WeaponLook {
   if (!m) return { tier: 'plain' };
   const el = ({ f: 'fire', r: 'frost', s: 'storm' } as const)[m[2] as 'f' | 'r' | 's'];
   return { tier: TIER_ORDER[Number(m[1])], ...(el ? { el } : {}), ...(m[3] ? { named: m[3] } : {}) };
+}
+
+/** A body or legs piece's look; none worn, none drawn. */
+export function armourLookOf(it: Item | null | undefined): ArmourLook | null {
+  if (!it) return null;
+  const weight = it.armor === 'heavy' || it.armor === 'medium' ? it.armor : 'light';
+  return { weight, tier: TIER_ORDER.includes(it.quality) ? it.quality : 'plain', ...(it.hungry || it.unique ? { named: it.hungry ?? it.unique } : {}) };
+}
+type Wearer = { gearLook?: GearLook; armor?: Item | null; legs?: Item | null; keep?: Looks['keep'] };
+/** What a hero wears on the body and the legs, as shown (a kept look over it), or what a friend's word said. */
+export const wornLook = (h: Wearer): ArmourLook | null => (h.gearLook && 'a' in h.gearLook ? h.gearLook.a ?? null : armourLookOf(shownItem(h.armor, h.keep, kitFor)));
+export const legsLook = (h: Wearer): ArmourLook | null => (h.gearLook && 'l' in h.gearLook ? h.gearLook.l ?? null : armourLookOf(shownItem(h.legs, h.keep, kitFor)));
+
+const WEIGHT_KEY = { light: 'l', medium: 'm', heavy: 'h' } as const;
+/** An armour look packed for the town's word ("0h", "3m:apron"); none is "". */
+export const packArmour = (l: ArmourLook | null) => (l ? TIER_ORDER.indexOf(l.tier) + WEIGHT_KEY[l.weight] + (l.named ? ':' + l.named : '') : '');
+export function unpackArmour(s: unknown): ArmourLook | null {
+  const m = typeof s === 'string' ? /^([0-6])([lmh])(?::([a-z]{1,16}))?$/.exec(s) : null;
+  if (!m) return null;
+  const weight = ({ l: 'light', m: 'medium', h: 'heavy' } as const)[m[2] as 'l' | 'm' | 'h'];
+  return { weight, tier: TIER_ORDER[Number(m[1])], ...(m[3] ? { named: m[3] } : {}) };
 }
