@@ -1,42 +1,70 @@
 {
  "knight": {
-  "w": 96,
-  "h": 98,
-  "fx": 47,
-  "fy": 96,
-  "rows": [
-   "front",
+  "w": 183,
+  "h": 93,
+  "fx": 76,
+  "fy": 90,
+  "tall": 80,
+  "facings": [
    "side",
-   "back"
+   "back",
+   "front"
   ],
-  "cols": [
-   "idle",
-   "walk1",
-   "walk2",
-   "walk3",
-   "walk4",
-   "draw",
-   "strike"
+  "rows": [
+   [
+    "walk",
+    8
+   ],
+   [
+    "slash1",
+    7
+   ],
+   [
+    "slash2",
+    7
+   ],
+   [
+    "slash3",
+    7
+   ],
+   [
+    "misc",
+    6
+   ]
   ]
  },
  "goblin": {
-  "w": 81,
-  "h": 65,
-  "fx": 31,
-  "fy": 63,
-  "rows": [
-   "front",
+  "w": 119,
+  "h": 59,
+  "fx": 59,
+  "fy": 56,
+  "tall": 50,
+  "facings": [
    "side",
+   "front",
    "back"
   ],
-  "cols": [
-   "idle",
-   "walk1",
-   "walk2",
-   "walk3",
-   "walk4",
-   "draw",
-   "strike"
+  "rows": [
+   [
+    "walk",
+    8
+   ],
+   [
+    "stab",
+    5
+   ],
+   [
+    "slash",
+    5
+   ],
+   [
+    "lunge",
+    5
+   ],
+   [
+    "misc",
+    6
+   ]
   ]
  }
 }

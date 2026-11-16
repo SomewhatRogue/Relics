@@ -57,3 +57,29 @@ goblin falls back to today's drawing.
 - Next, once Kyle chooses: the dying row and the cuts for the knife goblin, then wounds and fire, before the other
   characters.
   (Claude Opus 5.5)
+
+## 2026-11-15: pushed further (Kyle: "slow and bad, not fluid, missing a lot of animation steps"; "the danger area
+doesn't come out nicely from the blade"; "the attack looks lame, not a pull back and then attack, too few frames")
+
+- **More frames.** Each facing is now its own generated sheet (sources in docs/design/ref/chars/): the knight a walk
+  of 8, the three combo blows in 7 each (raise, fully cocked, halfway, through, follow-through, recovering, guard;
+  the third a wide lunging sweep, as the room judges it), then bash in, bash out, bash recovery, block, hit,
+  stagger; the goblin a scuttle of 8, stab, backhand and pounce in 5, then hit, stagger, dazed and a three-frame
+  death fall. `charprep.py` takes a sheet per facing with named rows, places each frame by its hips (so a walk's
+  feet move under a steady body) and keeps one palette for the lot.
+- **Motion from code on top** (chars3d.ts): the frame from the pose phase (each combo hit its own row, the windup's
+  tenth of a second as two frames); the walk from the ground covered (no body bob: Kyle asked for none on
+  2026-11-12); the card leant, squashed and shifted by the pose; a blow pushed past its frames (sinking back on the
+  windup, thrown forward stretched as it snaps out); a short white then red flash when struck (a full white
+  silhouette hid the body); a roll turns the card over; a dead goblin falls, lies and dissolves away in an ordered
+  dither, charred if burned (cut-apart deaths keep today's drawing, gore and all, for now).
+- **The danger area** at the new blade's height: a sweep laid in the world along the arc the room judges (held.ts),
+  bright at the blade and fading back. extras3d.ts (no chat's) skips its dotted trail for a hero drawn new (one line).
+- **Real timing on video**: `scripts/chars-play.cjs` drives the page's frames and clocks itself, a thirtieth of a
+  second a frame (Playwright's clock let the game step its maximum tenth every frame, ten times fast), and plays a
+  set fight: walk up, two combos, a bash, a block under attack, the kills. shots/new-vs-today.mp4 sets it beside
+  today's figures.
+- **Cost** (for Kyle's call): a sheet take is 433 ElevenLabs credits at 1K; this chat spent about 21,000 of the
+  plan's 40,000. See the estimate in the chat of 2026-11-15; roughly 230,000 credits for every hero kit, goblin
+  and townsperson with baked-in weapons, about 140,000 with weapons drawn by code.
+  (Claude Opus 5.5)

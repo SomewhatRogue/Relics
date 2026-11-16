@@ -16,6 +16,7 @@ import { drawHook } from '../relicsdraw';
 import { drawStatus } from '../status';
 import { drawLoad } from '../xbowmark';
 import { drawBladeMark } from '../blademark';
+import { drawnNew } from './chars3d';
 import { drawHolyGuard } from '../holyguardmark';
 import { houseAlight, kindling } from '../../shared/kindling';
 import { drawGlint, drawHouseSmoke, drawKindling } from '../kindledraw';
@@ -158,7 +159,8 @@ function ring(g: CanvasRenderingContext2D, P: Proj, x: number, y: number, r: num
 
 /** A swing's trail at waist height: the arc swept so far (a thrust's line), white, gold for a heavy, orange for a counter. */
 function trail(g: CanvasRenderingContext2D, h: ArenaRoom['heroes'][number], lerp: Lerp, P: Proj, now: number, lift: number): void {
-  if (h.act !== 'attack') return;
+  // (A hero in the new look's characters sweeps its own at the blade's height: chars3d.ts.)
+  if (h.act !== 'attack' || drawnNew(h)) return;
   const p = pose(h, now);
   if (p.from === undefined || !p.reach) return;
   const [hx, hy] = lerp('h:' + h.id, h.x, h.y), reach = p.reach / PX, hold = h.hitstop > 0;
