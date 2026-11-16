@@ -69,3 +69,18 @@ Claude Opus 5.5
   generated in the flow and cut into the kit.
 
 Claude Opus 5.5
+
+## 2026-11-15: slice 3 in, the showpieces (cut from the concepts)
+
+- The planned generated sheet couldn't be made: Kyle's ElevenLabs workspace is out of credits (93 left, a sheet is
+  190). So the showpieces are cut straight from the concept takes instead, which already show them front-on:
+  `scripts/insideprep.py` (new) crops, masks, scales to 32 px a tile and snaps to a palette like kitprep.py, into
+  `kit/inside-rose.png`, `inside-map.png`, `inside-ratsign.png` (and their sizes into kit.json; kitprep.py rebuilds
+  kit.json from every picture in the folder, so they stay).
+- Hung (insidedress.ts `piece`): the rose window over the church's altar, glowing, the moon through it (the two
+  placeholder lancets gone); the painted valley map between the town hall's two boards; the carved rat on the front
+  of the Rat's gallery over the bar. A little of their own light so they read by candlelight.
+- Left for when there are credits (or not at all): a trophy of arms for the barracks, the forge's mouth.
+- Checks: tsc and tests/insides.test.ts (drawing and pictures only, no rules touched).
+
+Claude Opus 5.5

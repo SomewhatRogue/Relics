@@ -7,6 +7,8 @@ import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { Boxes, Seed, jit } from './boxes';
 import { arch, beam, canvasTex, gallery, shaft, windowMesh } from './insideparts';
+import { kitTex } from './streetkit';
+import SIZES from './kit/kit.json';
 
 /** A window: on the back wall at x, or on a side wall ('W' or 'E') at z; from y0 to y1; coloured or not. */
 type Win = { on: 'N' | 'W' | 'E'; at: number; y0: number; y1: number; w: number; stained?: boolean };
@@ -53,6 +55,17 @@ function clock(g: THREE.Group, x: number, y: number, d: number): void {
   g.add(m);
 }
 
+/** A showpiece cut from the concepts into the kit (scripts/insideprep.py), flat on a wall: `w` tiles wide, centred at
+ *  (x, y, z); `lit` by the room's light, or glowing (a window). */
+function piece(g: THREE.Group, name: string, x: number, y: number, z: number, w: number, lit = true): void {
+  const [pw, ph] = (SIZES as Record<string, number[]>)['inside-' + name], h = (w * ph) / pw, map = kitTex('inside-' + name);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), lit ? new THREE.MeshLambertMaterial({ map, transparent: true, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: 0.3 }) : new THREE.MeshBasicMaterial({ map, transparent: true, alphaTest: 0.5 }));
+  m.position.set(x, y, z);
+  // (The kit's pictures are shared: the room frees its own material, not the picture: insidekit.ts disposeInside.)
+  (map as THREE.Texture & { shared?: boolean }).shared = true;
+  g.add(m);
+}
+
 /** An iron ring of candles hung from the roof. */
 function chandelier(B: Boxes, glow: Boxes, x: number, z: number, y: number, top: number): void {
   B.b(x, y + 0.1, z, 0.04, top - y, 0.04, 0x1a1820);
@@ -71,8 +84,11 @@ const breast = (B: Boxes, x0: number, x1: number, z0: number, z1: number, H: num
 export const DRESS: Record<string, Dress> = {
   'THE CHURCH': {
     rug: 0x5a1e22,
-    wins: [...back([3.5, 7.5, 16.5, 20.5], 3, 6.4, true), ...back([11.3, 12.7], 2.8, 6.6, true, 1), ...side('W', [5, 10, 15], 2, 5.8, true), ...side('E', [5, 10, 15], 2, 5.8, true)],
-    build(B, glow, _g, m, r) {
+    wins: [...back([3.5, 7.5, 16.5, 20.5], 3, 6.4, true), ...side('W', [5, 10, 15], 2, 5.8, true), ...side('E', [5, 10, 15], 2, 5.8, true)],
+    build(B, glow, g, m, r) {
+      // The rose window over the altar, and the moon through it.
+      piece(g, 'rose', 12, 4.75, 0.03, 3.6, false);
+      g.add(shaft(new THREE.Vector3(12, 6, 0.1), new THREE.Vector3(12, 0, 5.4), 2.6, new THREE.Vector3(1, 0, 0), 0.8));
       // The arcade: the pillars run up to their capitals, pointed arches between them, a wall over them.
       const zs = [3.5, 6.5, 9.5, 12.5, 15.5];
       for (const x of [7, 17]) {
@@ -106,6 +122,7 @@ export const DRESS: Record<string, Dress> = {
       gallery(B, 'x', 0, -0.9, m.w + 0.9, 1.3, 3.6, r);
       for (const x of [3.4, 7, 15, 18.6]) banner(g, x, 3.9, 6.2, 1.1);
       clock(g, 11, 5.1, 1.4);
+      piece(g, 'map', 11, 1.72, 0.035, 5.2);
       breast(B, m.w + 0.1, m.w + 0.9, 5.8, 8.8, m.wallH!, r);
       chandelier(B, glow, 8, 5.6, 4.4, m.wallH!), chandelier(B, glow, 14, 5.6, 4.4, m.wallH!);
     },
@@ -113,8 +130,9 @@ export const DRESS: Record<string, Dress> = {
   'THE DROWNED RAT': {
     rug: 0x4a2a1e,
     wins: side('E', [6.5, 11.5], 1.4, 3.4),
-    build(B, glow, _g, m, r) {
+    build(B, glow, g, m, r) {
       gallery(B, 'x', 0, 2.4, m.w + 0.9, 1.2, 3.2, r);
+      piece(g, 'ratsign', 10.5, 3.62, 1.26, 2.6);
       breast(B, -0.9, 0.9, 9.2, 12.2, m.wallH!, r);
       for (const [x, z] of [[8, 6.2], [17, 10]]) chandelier(B, glow, x, z, 3.6, m.wallH!);
     },
