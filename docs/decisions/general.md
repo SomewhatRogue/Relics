@@ -75,3 +75,13 @@ Claude Opus 5.5
   on anyone inside (combat.ts hitHero, shelteredFrom). Kept on Hero.dome; drawn in spellground.ts.
 
 Claude Opus 5.5
+
+## 2026-11-16: the blink trap; the shadow to the Rogue (Kyle)
+
+- The Mage's trainer lesson at level 5 is TRAP ON THE BLINK (was IMAGE ON THE BLINK): a blink leaves a
+  trap of the Mage's element (sim/blinktrap.ts, zone kind 'trap', BLINK_TRAP in shared/ladder.ts): r 0.6,
+  springs on the first goblin, 30 and the element to all within 1.6 (fire burns, frost freezes, storm
+  stuns small ones 1 s); 12 s, two at most, one per 4 s. LONG TRAP (was LONG IMAGE) adds 6 s.
+- The image goes to the Rogue: SHADOW ON THE DASH, the same lesson; any Rogue dash leaves the decoy.
+
+Claude Opus 5.5

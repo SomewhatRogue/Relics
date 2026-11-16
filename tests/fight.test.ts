@@ -131,9 +131,9 @@ describe('guarding against the butcher', () => {
     expect(mage.h.hp).toBeLessThan(HERO.hp);
   });
 
-  it("a Mage's blink leaves an image behind, and the butcher goes for it", () => {
+  it("a Rogue's dash leaves a shadow behind, and the butcher goes for it (the Mage's blink did, till 2026-11-16)", () => {
     const { room, h, b } = setup();
-    h.weapon = 'wand';
+    h.weapon = 'daggers';
     Object.assign(b, { attack: null, act: 'chase', cooldown: 5 });
     room.setIntent('me', intent({ rollSeq: 1, mx: 1 }));
     run(room, ticks(0.3));

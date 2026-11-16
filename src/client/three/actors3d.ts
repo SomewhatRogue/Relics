@@ -156,7 +156,7 @@ export class Actors {
     for (const b of room.bolts) placeBolt(this.things.get('b' + b.id, boltLook(b), () => ({ root: makeBolt(b) })).root, b, 0);
     for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, 0);
     // (A wind-up bow's reach is dotted on the overlay, as in the flat view: found3d.ts.)
-    room.zones.forEach((z, i) => z.kind !== 'sentry' && z.kind !== 'firewall' && z.kind !== 'stormring' && z.kind !== 'caltrops' && z.kind !== 'blinkburst' && z.kind !== 'taunt' && z.kind !== 'skystrike' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
+    room.zones.forEach((z, i) => z.kind !== 'sentry' && z.kind !== 'firewall' && z.kind !== 'stormring' && z.kind !== 'caltrops' && z.kind !== 'blinkburst' && z.kind !== 'taunt' && z.kind !== 'skystrike' && z.kind !== 'trap' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
     // (Snares, smoke and steam, poison and oil: hazards3d.ts.)
     const ex = room.map.exit;
     if (ex && ex.y < 1) this.things.get('exit', String(room.exitOpen), () => ({ root: makeExit(ex.w, room.exitOpen) })).root.position.set(ex.x, 0, ex.y - 0.4);

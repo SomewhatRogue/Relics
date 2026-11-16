@@ -75,7 +75,7 @@ export function drillGain(id: DrillId, cls: HeroClass, ranks: number): string {
 /**
  * What your trainer teaches, once you've the level and the gold: your class skill (a new hero comes
  * out of the wood with only a dodge and their weapon), and later what a Ranger's or Mage's dodge
- * leaves behind (a snare where they jumped from, an image where they blinked from).
+ * leaves behind (a snare where they jumped from, a trap where they blinked from, a shadow where they dashed from).
  */
 export const TEACHES = { skill: { level: 3, price: jobs(3) }, leave: { level: 5, price: jobs(4) } } as const;
 /** Each class's three skills (SKILL_CHOICES order), taught one by one: the first is the `skill` lesson
@@ -84,5 +84,6 @@ export const TEACHES = { skill: { level: 3, price: jobs(3) }, leave: { level: 5,
 export const SKILL_STEPS = [TEACHES.skill, { level: 5, price: jobs(5) }, { level: 7, price: jobs(6) }] as const;
 export const LEAVES: Partial<Record<HeroClass, { name: string; short: string; text: string; gain: string }>> = {
   RANGER: { name: 'SNARE ON THE JUMP', short: 'SNARE', text: 'Your jump leaves a snare where you stood', gain: 'a snare where you jumped' },
-  MAGE: { name: 'IMAGE ON THE BLINK', short: 'IMAGE', text: 'Your blink leaves an image behind that goblins go for', gain: 'an image where you blinked' },
+  MAGE: { name: 'TRAP ON THE BLINK', short: 'TRAP', text: 'Your blink leaves a trap of your element where you stood', gain: 'a trap where you blinked' },
+  ROGUE: { name: 'SHADOW ON THE DASH', short: 'SHADOW', text: 'Your dash leaves a shadow behind that goblins go for', gain: 'a shadow where you dashed' },
 };

@@ -62,6 +62,8 @@ export const LANDING = { r: 1.3, down: 0.8, knock: 4 };
 /** BLINK BURST: `r` tiles round where you blinked from, `dmg` and your element on each goblin in it,
  *  drawn for `show` s at the same size. */
 export const BLINK_BURST = { r: 1.4, dmg: 10, show: 0.35 };
+/** A Mage's blink trap, the trainer's lesson (sim/blinktrap.ts). */
+export const BLINK_TRAP = { r: 0.6, burst: 1.6, dmg: 30, stun: 1, life: 12, max: 2, cooldown: 4 };
 /** BLINK THROUGH: a goblin within `aim` tiles of the blink's line and in its reach is gone through; you
  *  come out `gap` tiles past its back (at most `extra` past the blink's own reach). */
 export const BLINK_THROUGH = { aim: 0.5, gap: 0.15, extra: 1 };

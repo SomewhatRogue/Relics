@@ -76,7 +76,7 @@ export type Learned = 'skill' | 'leave';
 export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
 
 /** A Mage's held spells, by kit and element (shared/spellbook.ts). */
-export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'firewall' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash' | 'chainbolt' | 'icedome';
+export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'firewall' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash' | 'chainbolt' | 'icedome' | 'trap';
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam' | 'cut';
 
@@ -143,6 +143,8 @@ export interface Hero extends Body {
   decoyUntil: number;
   /** A Ranger's: when the next snare is ready, and the hound (`noHound` keeps it away). */
   snareReady: number;
+  /** A Mage's next blink trap, no sooner (sim/blinktrap.ts). */
+  trapReady?: number;
   hound: Hound | null;
   noHound?: boolean;
   /** The block press we last told this hero their class can't hold a block on (told once a press). */
@@ -776,7 +778,7 @@ export interface Zone {
   /** Not blessed ground but a skill's area (sim/areas.ts): a Ranger's volley (falling from `at`), a
    *  Mage's fire ring burning on, a staff's wall of fire (sim/firewall.ts: rolling to (`tx`, `ty`) along
    *  (`ax`, `ay`), `r` half its length, standing from `at`) or charged ring (sim/staffrings.ts). */
-  kind?: 'volley' | 'fire' | 'sentry' | 'firewall' | 'stormring' | 'skystrike' | LadderZone;
+  kind?: 'volley' | 'fire' | 'sentry' | 'firewall' | 'stormring' | 'skystrike' | 'trap' | LadderZone;
   /** A staff's wall or ring: let go on the flash, and what it deals a touch (`n`). */
   big?: boolean;
   n?: number;

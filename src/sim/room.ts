@@ -75,6 +75,7 @@ import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { throwSpear } from './spearchain';
 import { stepDomes } from './staffholds';
+import { layTrap, stepTraps } from './blinktrap';
 import { stepJavelin, throwJavelin } from './javelin';
 import { laySnare, stepHound, stepSnare } from './ranger';
 import { burstMult, healOf, healReach, perfectMult, smiteStun } from './knacks';
@@ -95,7 +96,7 @@ import { litMult } from './charge';
 import { fireFound, stepSentries } from './foundrelics';
 import { grow } from './grow';
 import { awake, merge } from './sleep';
-import { NO_INTENT, type Ice, type Puddle, type Strike, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type LootRoll, type Javelin, type Snare, type Survivor } from './types';
+import { NO_INTENT, knows, type Ice, type Puddle, type Strike, type Zone, type Bolt, type Drop, type Enemy, type Prop, type FightEvent, type Hero, type Hook, type Intent, type LootRoll, type Javelin, type Snare, type Survivor } from './types';
 import { stun } from './stuns';
 import { stepDread, type DreadRule } from './dread';
 import { stepExped, type ExpedState } from './exped';
@@ -442,6 +443,8 @@ export class ArenaRoom {
     stepRise(this.heroes, this.enemies, this.time, this.events);
     // A Ranger who has just jumped back leaves a snare where they stood.
     for (const h of this.heroes) if (h.act === 'roll' && h.actT === 0) laySnare(h, this.snares, this.time, this.events);
+    // A Mage who has just blinked leaves a trap of their element where they stood (sim/blinktrap.ts).
+    for (const h of this.heroes) if (h.act === 'roll' && h.actT === 0 && WEAPONS[h.weapon].cls === 'MAGE' && knows(h, 'leave')) layTrap(h, this.zones, this.time, w);
     this.snares = this.snares.filter((s) => stepSnare(s, this.enemies, this.time, this.events));
     // The movement ladder: what a dodge (or a Warrior's taunt) does now, and caltrops on the floor (sim/ladder.ts).
     stepLadder(this.heroes, this, w);
@@ -519,7 +522,7 @@ export class ArenaRoom {
     // A staff's wall of fire rolls on and burns whoever it touches, friends too (sim/firewall.ts); its charged ring zaps what's
     // in it (sim/staffrings.ts); a wand's storm stream ticks on the goblin it holds (sim/stream.ts), and the
     // lightning it calls falls when it's due (sim/skystrike.ts).
-    stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w), stepDomes(this.heroes, this.enemies, this.time);
+    stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w), stepDomes(this.heroes, this.enemies, this.time), stepTraps(this.zones, w);
     this.landings();
     // Steam scalds; fire turns bodies to ash and ice to steam (sim/steam.ts, worldfire.ts).
     stepSteam(w);

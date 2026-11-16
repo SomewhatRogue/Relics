@@ -74,7 +74,7 @@ const LIST = {
   // The Mage: the blink, the channel, the spells, the breath.
   m_blink: { name: 'QUICK BLINK', text: 'Blink recharges 20% faster', gain: 'blink 20% sooner', fx: { dodge: 0.2 } },
   m_leap: { name: 'FAR BLINK', text: 'Blink goes 20% further', gain: 'blink +20% further', fx: { leap: 0.2 } },
-  m_image: { name: 'LONG IMAGE', text: 'Blink image lasts 1.5 s longer', gain: 'image +1.5 s', fx: { image: 1.5 } },
+  m_image: { name: 'LONG TRAP', text: 'Blink trap lasts 6 s longer', gain: 'trap +6 s', fx: { image: 6 } },
   m_primed: { name: 'PRIMED POWER', text: 'Primed spells do 25% more damage', gain: 'primed +25%', fx: { primed: 0.25 } },
   m_clear: { name: 'MAGIC ON SWITCH', text: 'Switching element gives back 15 magic', gain: '+15 magic a switch', fx: { clear: 15 } },
   m_twice: { name: 'TWICE PRIMED', text: 'First two spells after a switch are primed', gain: 'two primed', fx: { twice: 1 } },

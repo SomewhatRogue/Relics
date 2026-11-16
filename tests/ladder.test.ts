@@ -144,6 +144,8 @@ describe('the Mage: the blink', () => {
   it('BLINK BURST: a burst of the element where you blinked from, drawn at the size judged', () => {
     for (const rungs of [0, 1]) {
       const h = hero('wand', rungs), e = goblin(1, 9.9, 9);
+      // (No blink trap here: that's the trainer's lesson, sim/blinktrap.ts.)
+      Object.assign(h, { trapReady: 99 });
       h.augments.channel = 'fire';
       const { room, run } = arena([h], [e]);
       run(TICK, { rollSeq: 1, my: -1 });

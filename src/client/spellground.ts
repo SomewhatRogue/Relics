@@ -84,6 +84,22 @@ function dome(g: CanvasRenderingContext2D, d: NonNullable<Hero['dome']>, P: Proj
   }
 }
 
+/** A Mage's blink trap (sim/blinktrap.ts): a small rune on the floor in its element, pulsing, its ring
+ *  at the size it springs at, a cross of light in it. */
+const TRAP_COL: Record<string, string[]> = { fire: ['#ff8a3a', '#ffd27a'], frost: ['#9fd8ff', '#ffffff'], storm: ['#fff27a', '#ffffff'] };
+function trap(g: CanvasRenderingContext2D, z: Zone, P: Proj, ppu: number, t: number): void {
+  const [c0, c1] = TRAP_COL[z.el] ?? TRAP_COL.fire, k = Math.max(0, Math.min(1, (z.until - t) / 1.5, (t - (z.at ?? t)) / 0.2));
+  const pulse = 0.55 + 0.35 * Math.sin(t * 5 + z.x), n = Math.max(16, Math.round(z.r * 2 * Math.PI * ppu));
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2, [sx, sy] = P(z.x + Math.cos(a) * z.r, 0.02, z.y + Math.sin(a) * z.r);
+    dot(g, sx, sy, i % 3 ? c0 : c1, pulse * k);
+  }
+  for (let i = -3; i <= 3; i++) {
+    const f = (i / 3) * z.r * 0.6, [ax, ay] = P(z.x + f, 0.02, z.y), [bx, by] = P(z.x, 0.02, z.y + f);
+    dot(g, ax, ay, c1, pulse * k * 0.8), dot(g, bx, by, c1, pulse * k * 0.8);
+  }
+}
+
 /** Where a body is drawn now (the 2.5D view eases them). */
 type At = (key: string, x: number, y: number) => [number, number];
 
@@ -95,6 +111,7 @@ function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number
   else drawWalls(g, room, P, ppu);
   for (const z of room.zones) if (z.kind === 'stormring' && room.time < z.until) charged(g, z, P, room.time);
   for (const h of room.heroes) if (h.dome && room.time < h.dome.until) dome(g, h.dome, P, ppu, room.time);
+  for (const z of room.zones) if (z.kind === 'trap' && room.time < z.until) trap(g, z, P, ppu, room.time);
   // The movement ladder's caltrops, burst and roar, the same way (ladderground.ts).
   drawLadderGround(g, room, P, ppu);
   drawSkyMarks(g, room, P, ppu);

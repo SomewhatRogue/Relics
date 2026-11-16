@@ -468,8 +468,9 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   // The movement ladder's per-dodge marks (sim/ladder.ts sets them again as the dodge begins).
   h.rollReach = undefined;
   h.airShot = false;
-  // A blink leaves an image of you where you stood, and the goblins near it go for that.
-  if (kind === 'blink' && knows(h, 'leave')) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + decoyTime(h) });
+  // A Rogue's dash leaves a shadow of you where you stood, and the goblins near it go for that (Kyle,
+  // 2026-11-16: it was the Mage's blink; a Mage's blink leaves a trap now: sim/blinktrap.ts, in the room).
+  if (WEAPONS[h.weapon].cls === 'ROGUE' && knows(h, 'leave')) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + decoyTime(h) });
   h.rollQueuedAt = -9;
   spend(h, WEAPONS[h.weapon].dodge.stamina * DODGE.cost * dodgeBreath(h) * blinkCost(h, now, ev), now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });
