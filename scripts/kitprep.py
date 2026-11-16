@@ -9,6 +9,8 @@ Sets (all by default, each only if its raw sheets are there):
   shops      shop0..3.png, four two-storey shop fronts each -> shop-<n>-<i>
   landmarks  land0..3.png, church, town hall, the Drowned Rat, the forge -> land-<kind>-<n>
   sides      side0..3.png, four long side walls stacked: timber, stone, shop, nave -> side-<kind>-<n>
+  parts      parts0.png, a 4x3 grid: plaster, beam, thatch, fieldstone tiles; four windows; four doors
+             -> part-<tile> (two tiles square), part-win-<i>, part-door-<i> (each with its glow)
 Every front and side wall also gets a -glow.png mask (the lit windows, in their own colours).
 Every picture scaled to 32 px a tile and snapped to a small palette with no dither, so it stays crisp pixel art.
 """
@@ -18,7 +20,7 @@ from PIL import Image
 from scipy import ndimage
 
 RAW, OUT = sys.argv[1], sys.argv[2]
-SETS = set(sys.argv[3:]) or {'facades', 'swatch', 'props', 'cottages', 'shops', 'landmarks', 'sides'}
+SETS = set(sys.argv[3:]) or {'facades', 'swatch', 'props', 'cottages', 'shops', 'landmarks', 'sides', 'parts'}
 os.makedirs(OUT, exist_ok=True)
 PX = 32
 # How tall each front stands, in tiles (its gable included): two to three storeys.
@@ -184,6 +186,31 @@ if 'props' in SETS and has('props1.png'):
         h = PX * 2
         w = max(8, round(h * sub.shape[1] / sub.shape[0]))
         crisp(sub, keep.astype(float), w, h, 48).save(os.path.join(OUT, f'sign-{name}.png'))
+
+# House parts (the test lane, streethouse.ts): a 4x3 grid on black. The top row's tiles cut to their middles at two
+# tiles square; windows a tile tall and doors two, at their own widths.
+if 'parts' in SETS and has('parts0.png'):
+    a = load('parts0.png')
+    bg = background(a)
+    lab, _ = ndimage.label(ndimage.binary_closing(~bg, iterations=2))
+    boxes = [(s, i + 1) for i, s in enumerate(ndimage.find_objects(lab)) if (s[0].stop - s[0].start) * (s[1].stop - s[1].start) > 4000]
+    boxes.sort(key=lambda b: (b[0][0].start + b[0][0].stop) / 2)
+    rows = [sorted(boxes[i:i + 4], key=lambda b: b[0][1].start) for i in range(0, 12, 4)]
+    for name, (s, idx) in zip(['plaster', 'beam', 'thatch', 'field'], rows[0]):
+        r0, r1, c0, c1 = s[0].start, s[0].stop, s[1].start, s[1].stop
+        ins = 0.06
+        cell = a[r0 + int((r1 - r0) * ins): r1 - int((r1 - r0) * ins), c0 + int((c1 - c0) * ins): c1 - int((c1 - c0) * ins)]
+        # (The plaster toned down to sit with the night's stone and timber.)
+        if name == 'plaster': cell = (cell.astype(float) * [0.62, 0.6, 0.58]).astype(np.uint8)
+        crisp(cell, np.ones(cell.shape[:2]), PX * 2, PX * 2, 48).save(os.path.join(OUT, f'part-{name}.png'))
+    for kind, tall, row in (('win', 1.0, rows[1]), ('door', 2.0, rows[2])):
+        for i, (s, idx) in enumerate(row):
+            sub, keep = a[s], (lab[s] == idx) & ~bg[s]
+            h = round(tall * PX)
+            w = max(8, round(h * sub.shape[1] / sub.shape[0]))
+            img = crisp(sub, keep.astype(float), w, h, 48)
+            img.save(os.path.join(OUT, f'part-{kind}-{i}.png'))
+            glow(img).save(os.path.join(OUT, f'part-{kind}-{i}-glow.png'))
 
 # Each picture's size in pixels (32 a tile), for the game to lay fronts at their natural width.
 sizes = {f[:-4]: Image.open(os.path.join(OUT, f)).size for f in sorted(os.listdir(OUT)) if f.endswith('.png') and not f.endswith('-glow.png')}

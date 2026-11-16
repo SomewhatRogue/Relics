@@ -127,3 +127,21 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
 - scripts/street-look.cjs now keeps the camera off the arrival scene and stands the hero on its level (as
   town-look.cjs does).
   (Claude Opus 5.5)
+
+## 2026-11-15: houses from parts, a test lane (`&parts`)
+
+- Kyle: the houses look blocky, not made of parts. Behind `&parts`, plain houses (the homes, the unnamed ones) are
+  built from parts in place of a picture on a box (three/streethouse.ts on three/streetparts.ts): a stone plinth;
+  fieldstone or plaster below; an upper storey jettied over the street on joists with a sill beam; every wall framed
+  in oak standing proud (posts, rails, a brace) and windowed (cheeks, lintel and sill standing out from the face);
+  the door with posts, lintel and a step; a roof with real eaves, fascia, bargeboards and ridge, gable or eaves to
+  the street, slate or thatch, a dormer now and then; windows in the gables; a capped chimney. Each wall is built in
+  its own frame and turned onto its side (Parts.map), so backs and sides get the same as fronts. Merged by material:
+  a house is a handful of draws.
+- Art: one sheet "Kit: house parts" in the flow (plaster, oak beam, thatch, fieldstone tiles; four windows; four
+  doors), cut by kitprep.py's new `parts` set (the plaster toned down for the night). The flow's ElevenLabs plan ran
+  out of credits on it (three of four variations refused; 93 credits left).
+- Landmarks and named buildings keep their picture fronts.
+- Open, for Kyle: in town, a closer camera that turns all the way round behind you (so north-facing doors such as
+  the Hunters' Lodge are easy to find), jobs keeping the wide view.
+  (Claude Opus 5.5)

@@ -11,6 +11,7 @@ import { doorAt, type Block } from '../../shared/arena';
 import { mat, quad, tri } from './streetkit';
 import { front, MID, openEnd, PX, rowOf, seeded, size, type Front, type Side } from './streetrow';
 import { dressing } from './streetprops';
+import { partsHouse } from './streethouse';
 import SIZES from './kit/kit.json';
 
 const SIDES = Object.keys(SIZES).filter((k) => k.startsWith('side-'));
@@ -114,6 +115,9 @@ function signOf(b: Block, f: Front): string | null {
 }
 
 /** How far a block's front is turned from facing south (radians about y), by its `face` (the way you walk in). */
+/** Houses from parts in place of pictures (`&parts`): the test lane, docs/decisions/new-look-buildings.md. */
+const PARTS = typeof location !== 'undefined' && new URLSearchParams(location.search).has('parts');
+
 const FACING: Record<string, number> = { N: 0, S: Math.PI, W: Math.PI / 2, E: -Math.PI / 2 };
 
 /**
@@ -137,6 +141,19 @@ export function kitBlock(b: Block, group: THREE.Group): { roof: THREE.Group; top
 }
 
 function kitFrame(b: Block, at: Block, group: THREE.Group, turn: number, world: (lx: number, lz: number) => [number, number]): { roof: THREE.Group; top: number } {
+  // The test lane (`&parts`): a plain house built from parts, one to every three tiles or so of its width.
+  if (PARTS && b.kind === 'house' && !b.label) {
+    const n = Math.max(1, Math.round(b.w / 3.2)), w = b.w / n, roofs = new THREE.Group();
+    let top = 0;
+    for (let i = 0; i < n; i++) {
+      const h = partsHouse({ w: w - 0.04, d: b.h, door: !!b.door && i === Math.floor(n / 2), seed: Math.round(at.x * 7 + at.y * 13) + i * 31 });
+      h.g.position.set(b.x + w * (i + 0.5), 0, b.y + b.h);
+      group.add(h.g);
+      roofs.add(h.roof.clone(false));
+      top = Math.max(top, h.top);
+    }
+    return { roof: roofs, top };
+  }
   const row = rowOf(b, at, turn), rnd = seeded({ ...at, x: at.x + 0.5 }), roofs = new THREE.Group(), z1 = b.y + b.h, d = b.h, total = row.reduce((s, f) => s + f.w, 0);
   let x = b.x + (b.w - total) / 2, top = 0;
   row.forEach((f, i) => {

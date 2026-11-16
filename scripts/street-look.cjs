@@ -1,6 +1,7 @@
 // The new look's town (docs/design/new-look.md, `?look=3d&hd&street`): shots of spots in Wickhold with the swing held.
 // node scripts/street-look.cjs <out prefix> <day 0..1> x,y[,yawDeg] [x,y,yaw ...]
-// LAPTOP=1 for a 1440x900 laptop at 2x (else an upright phone). BASE= the server (default localhost:4173).
+// LAPTOP=1 for a 1440x900 laptop at 2x (else an upright phone). BASE= the server (default localhost:4173). Q= more of
+// the address (Q=&parts).
 // The hero is pinned a few steps south of each spot (in the swing's frame), so the camera looks at it from behind.
 const { chromium } = require('playwright');
 const [out = 'shots/street', day = '0.9', ...rest] = process.argv.slice(2);
@@ -13,7 +14,7 @@ const base = process.env.BASE || 'http://localhost:4173';
   const page = await (await browser.newContext(ctx)).newPage();
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  await page.goto(`${base}/?hero=WARRIOR&look=3d&hd&street&day=${day}`);
+  await page.goto(`${base}/?hero=WARRIOR&look=3d&hd&street&day=${day}${process.env.Q ?? ""}`);
   await page.waitForFunction(() => window.__game);
   await page.waitForTimeout(1200);
   await page.addStyleTag({ content: '#caption { display: none !important; }' });

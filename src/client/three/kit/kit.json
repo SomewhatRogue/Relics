@@ -215,6 +215,54 @@
 64,
 64
 ],
+"part-beam": [
+64,
+64
+],
+"part-door-0": [
+46,
+64
+],
+"part-door-1": [
+55,
+64
+],
+"part-door-2": [
+54,
+64
+],
+"part-door-3": [
+59,
+64
+],
+"part-field": [
+64,
+64
+],
+"part-plaster": [
+64,
+64
+],
+"part-thatch": [
+64,
+64
+],
+"part-win-0": [
+28,
+32
+],
+"part-win-1": [
+30,
+32
+],
+"part-win-2": [
+27,
+32
+],
+"part-win-3": [
+44,
+32
+],
 "prop-barrel": [
 25,
 35
