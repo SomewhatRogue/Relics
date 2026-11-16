@@ -54,11 +54,12 @@ export function tri(a: number[], b: number[], c: number[], uv: number[], m: THRE
   return new THREE.Mesh(g, m);
 }
 
-/** The floor laid with the cobble swatch, a copy every 1.2 tiles (`?street`), so cobbles sit small beside the people. */
-export function streetFloor(m: THREE.MeshLambertMaterial, w: number, h: number): void {
-  const t = kitTex('mat-cobble', true).clone();
+/** The floor laid with the cobble swatch, a copy every 1.2 tiles (`?street`), so cobbles sit small beside the people.
+ *  (`swatch`: another of the kit's floors at its own size, two tiles a copy: the new look's insides, insidekit.ts.) */
+export function streetFloor(m: THREE.MeshLambertMaterial, w: number, h: number, swatch?: string): void {
+  const t = kitTex(swatch ?? 'mat-cobble', true).clone(), k = swatch ? 2 : 1.2;
   t.needsUpdate = true;
-  t.repeat.set(w / 1.2, h / 1.2);
+  t.repeat.set(w / k, h / k);
   m.map = t;
 }
 

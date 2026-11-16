@@ -56,6 +56,9 @@ export const LOOK: Record<Block['kind'], Look> = {
   casks: { tall: 14, roof: '#3a2818', ridge: '#3a2818', wall: '#2a1d12', windows: false, furniture: true },
   pen: { tall: 9, roof: '#8a7448', ridge: '#6b4a2b', wall: '#5a3d22', windows: false, furniture: true },
   shack: { tall: 12, roof: '#8a7a5a', ridge: '#6a5a48', wall: '#4a3420', windows: false },
+  font: { tall: 10, roof: '#57525e', ridge: '#6a6470', wall: '#3a3640', windows: false, furniture: true },
+  stand: { tall: 18, roof: '#6a6470', ridge: '#8a8494', wall: '#3a2818', windows: false, furniture: true },
+  table: { tall: 8, roof: '#5a3d22', ridge: '#6b4a2b', wall: '#3a2818', windows: false, furniture: true },
   // Layout 4's pieces: painted from their boxes in both views (pieces.ts); `tall` covers the highest.
   headframe: { tall: 56, roof: '#4a3420', ridge: '#2e2016', wall: '#4a3420', windows: false },
   log: { tall: 12, roof: '#4a3a2a', ridge: '#3e3022', wall: '#4a3a2a', windows: false },

@@ -13,6 +13,7 @@ import { tent } from './roofs3d';
 import { siegeBlock } from './siege3d';
 import { furnish3d } from './furnish3d';
 import { hallFurn3d } from './hallfurn3d';
+import { insideFurn3d } from './insidefurn3d';
 import { PIECE_BLOCKS, blockBoxes } from '../pieces';
 import { putBoxes } from './pieces3d';
 import { fence3d } from './fence3d';
@@ -87,7 +88,7 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
       for (let z = cz - b.h * 0.3; z < cz + b.h * 0.31; z += 0.26) B.lump(cx, 0.78, z, b.w * 0.8, 0.2, 0.24, jit(0x6a6670, 0.08, r), 0);
       B.b(x1 - 0.22, 0.72, cz + 0.1, 0.1, 0.14, 0.12, 0x2a1e14);
     }
-  } else if (furnish3d(B, b, r, dk, group) || hallFurn3d(B, b, r, dk)) {
+  } else if (furnish3d(B, b, r, dk, group) || hallFurn3d(B, b, r, dk) || insideFurn3d(B, b, r, dk)) {
     // Built as the flat view paints it.
   } else {
     // Furniture and the rest: a box as tall as it stands in 2D, its top in its own colour.

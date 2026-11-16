@@ -41,6 +41,8 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   | 'gate'
   // A shack of scrap boards and sailcloth (a shanty, a camp).
   | 'shack'
+  // The new look's insides (shared/bighalls.ts, client/three/insidefurn3d.ts): the church's font, an armour stand, a tavern table.
+  | 'font' | 'stand' | 'table'
   // A side way out of a job's room to a dead end (shared/sideway.ts): a gap at the edge, drawn as one.
   | 'sideway'
   // Inside the halls, each its own (client/hallsdraw.ts).

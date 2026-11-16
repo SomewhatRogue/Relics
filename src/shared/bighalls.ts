@@ -29,7 +29,7 @@ const church = (): GameMap => {
   const pillars = [3.5, 6.5, 9.5, 12.5, 15.5].flatMap((y) => [rd('pillar', 7, y, 0.45), rd('pillar', 17, y, 0.45)]);
   const pews = [7, 9, 11, 13].flatMap((y) => [b('pew', 7.8, y, 3.2, 0.6), b('pew', 13, y, 3.2, 0.6)]);
   return big('THE CHURCH', 24, 20, 7, STONE,
-    [b('altar', 11, 1.4, 2, 1), b('bed', 1.2, 2.8, 1, 2.2), b('counter', 2.4, 16.4, 2, 0.6), ...pews],
+    [b('altar', 11, 1.4, 2, 1), b('bed', 1.2, 2.8, 1, 2.2), b('counter', 2.4, 16.4, 2, 0.6), b('font', 19.6, 16.2, 1.2, 1.2), ...pews],
     [n('FATHER ODRIC', 12, 2.9, 'church', 'priest'), n('MOTHER ISOLDE', 3.4, 4.2, 'trainer', 'healer', 4), n('MARTA', 9.4, 10.5, 'chat', 'villager', 2),
       n('VERGER OSWIN', 3.4, 15.6, 'vendor', 'priest', 4), folk(14.6, 12.5, 'villager', 5), folk(9, 8.5, 'elder', 3), folk(15.2, 6.5, 'villager', 7)],
     { rounds: [...pillars, rd('candles', 9.8, 1.2, 0.2), rd('candles', 14.2, 1.2, 0.2), rd('candles', 0.8, 2.2, 0.2), rd('candles', 5.2, 2.2, 0.2), rd('candles', 23.2, 2.4, 0.2)],
@@ -40,7 +40,7 @@ const church = (): GameMap => {
 
 const barracks = (): GameMap => big('THE BARRACKS', 24, 16, 5.5, STONE,
   [b('rack', 1, 0.2, 4, 0.5), b('rack', 15.6, 0.2, 7, 0.5), b('counter', 17.6, 2.8, 3.6, 0.6), b('maptable', 10.4, 6.4, 3.2, 1.2), b('dummy', 4.6, 7.2, 0.8, 0.6),
-    b('bunk', 22.4, 5.6, 1.2, 2.4), b('bunk', 22.4, 8.8, 1.2, 2.4), b('bunk', 22.4, 12, 1.2, 2.4), b('sacks', 0.4, 13.6, 1.4, 1)],
+    b('stand', 16.2, 2.5, 0.7, 0.5), b('stand', 21.6, 2.5, 0.7, 0.5), b('bunk', 22.4, 5.6, 1.2, 2.4), b('bunk', 22.4, 8.8, 1.2, 2.4), b('bunk', 22.4, 12, 1.2, 2.4), b('sacks', 0.4, 13.6, 1.4, 1)],
   [n('MASTER COLE', 3.4, 9.6, 'trainer', 'trainer', 0), n('SQUIRE PELL', 6.4, 9.6, 'yard', 'squire'), { ...n('CORPORAL BRISK', 12, 8.4, 'map', 'guard', 13), reach: 1.6 },
     n('QUARTERMASTER NELL', 19.4, 2.1, 'vendor', 'squire', 0), folk(14.4, 7, 'guard'), folk(20.6, 10.4, 'guard')],
   { rounds: [rd('post', 2, 5, 0.12), rd('post', 8, 5, 0.12), rd('post', 2, 11.6, 0.12), rd('post', 8, 11.6, 0.12), rd('support', 21.2, 5, 0.3), rd('support', 21.2, 8.4, 0.3), rd('support', 21.2, 11.8, 0.3)],
@@ -60,11 +60,11 @@ const tavern = (): GameMap => {
   const arm = at('arm', ARM_TABLE.table.x, ARM_TABLE.table.y), armBy = at('arm', ARM_TABLE.npc[0], ARM_TABLE.npc[1]), sharp = at('knives', KNIFE_LINE.npc[0], KNIFE_LINE.npc[1]);
   return big('THE DROWNED RAT', 26, 16, 5, { ...HOME, ambient: [0.26, 0.19, 0.16] },
     [b('counter', 6, 2.6, 9, 0.8), b('shelf', 6, 0.1, 9, 0.5), b('casks', 15.6, 0.2, 1.2, 2), b('stair', 0.4, 2.4, 2, 4), b('hearth', 0.1, 9.4, 1, 2.6),
-      b('dicetable', 11.6, 7.4, 2.2, 0.8), b('booth', 19.4, 0.2, 3, 1.4), b('bench', 3.6, 8.6, 2.4, 0.9), b('bench', 16, 7.8, 2.4, 0.9), b('bench', 4.8, 12.6, 2.4, 0.9),
-      b('bench', 14.6, 11.6, 2.4, 0.9), b('armtable', arm[0], arm[1], ARM_TABLE.table.w, ARM_TABLE.table.h)],
+      b('dicetable', 11.6, 7.4, 2.2, 0.8), b('booth', 19.4, 0.2, 3, 1.4), b('table', 3.6, 8.6, 2.4, 0.9), b('bench', 3.6, 9.7, 2.4, 0.5), b('table', 16, 7.8, 2.4, 0.9),
+      b('table', 4.8, 12.6, 2.4, 0.9), b('table', 14.6, 11.6, 2.4, 0.9), b('bench', 14.6, 10.8, 2.4, 0.5), b('table', 20.2, 9.4, 2.2, 0.9), b('armtable', arm[0], arm[1], ARM_TABLE.table.w, ARM_TABLE.table.h)],
     [n('BARKEEP GANNET', 10.5, 1.8, 'tavern', 'villager'), n('DICER MOLL', 12.7, 8.8, 'dice', 'rogue'), n('WHISPER', 20.9, 2.1, 'trainer', 'rogue', 2), n('NETTLE', 18.4, 2, 'vendor', 'rogue', 2),
       n('A DRUNK', 7, 11, 'chat', 'villager', 11), n('A CARD SHARP', sharp[0], sharp[1], 'knives', 'rogue', 12), n('A WATCHMAN OFF DUTY', armBy[0], armBy[1], 'arm', 'guard'),
-      folk(4.4, 8.1, 'villager', 3), folk(17.4, 7.3, 'villager', 8), folk(6, 14, 'villager', 9), folk(15.6, 13, 'guard'), folk(8.2, 3.9, 'villager', 4)],
+      folk(4.4, 8.1, 'villager', 3), folk(17.4, 7.3, 'villager', 8), folk(6, 14, 'villager', 9), folk(15.6, 13, 'guard'), folk(8.2, 3.9, 'villager', 4), folk(21.2, 8.9, 'villager', 6)],
     { braziers: [{ x: 1.4, y: 10.7, r: 0.5 }], marks: [mk('sawdust', 0.4, 2.2, 25, 13.4)],
       hangs: [hang('notices', 3.2, 0.9), hang('sign', 9.7, 1.6), hang('knifeboard', KNIFE_LINE.board.x + SHIFT.knives[0], KNIFE_LINE.board.w)],
       torches: torch(3, 13, 23) });

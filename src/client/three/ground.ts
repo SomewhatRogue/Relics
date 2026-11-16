@@ -59,7 +59,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   fg.drawImage(bg, OX, OY, fc.width, fc.height, 0, 0, fc.width, fc.height);
   const floorTex = texture(fc), floorMat = toonize(new THREE.MeshLambertMaterial({ map: floorTex }));
   // The new look's test street: the generated cobbles (streetkit.ts).
-  if (STREET) streetFloor(floorMat, m.w, m.h);
+  // (The new look's insides lay their own floor, planks or flags: insidekit.ts.)
+  if (STREET) streetFloor(floorMat, m.w, m.h, m.wallH ? (m.theme.floor === 'planks' ? 'mat-planks' : 'mat-flags') : undefined);
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(m.w, m.h), floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.set(m.w / 2, 0, m.h / 2);

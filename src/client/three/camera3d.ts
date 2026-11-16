@@ -128,6 +128,8 @@ export class Cam {
 /** Where to look so a view `hw` tiles half-wide and `hd` half-deep on the floor stays in the room (centred if it's smaller). */
 function inRoom(m: GameMap, x: number, z: number, hw: number, hd: number): [number, number] {
   const fit = (v: number, lo: number, hi: number) => (lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, v)));
-  // (Never so far up the room that your hero by the door drops off the foot of the screen.)
-  return [fit(x, hw - 1, m.w + 1 - hw), Math.max(z - hd * 0.4, fit(z, hd * 0.6, m.h + 2.4 - hd))];
+  // Your hero low on the screen and the room rising behind them, up to the back wall's top (the concepts' framing);
+  // never so far up the room that your hero by the door drops off the foot of the screen.
+  const H = m.wallH ?? 0, t = z - hd * 0.35;
+  return [fit(x, hw - 1, m.w + 1 - hw), Math.max(z - hd * 0.4, fit(t, hd * 0.6 - H * 0.9, m.h + 2.4 - hd))];
 }

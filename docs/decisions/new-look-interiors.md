@@ -43,3 +43,29 @@ Claude Opus 5.5
 - Seen: the floor is the street's cobble swatch in every room under `?street` (the town hall's planks too). Slice 2.
 
 Claude Opus 5.5
+
+## 2026-11-15: slice 2 in, the structure
+
+- `three/insidekit.ts`: plates along the walls' tops, rafter ends, a tie beam near the back (never across the room,
+  where it would hide the floor), posts down timbered walls, the low front wall across the cutaway with the door's gap
+  (the forge's open mouth wider), and the floor's marks laid back over the kit's floor (rugs, rushes, sawdust, soot,
+  the sand ring), since the street look's floor hides the painted one.
+- `three/insideparts.ts` (new): leaded or stained windows that glow, moonlight falling from them (soft additive
+  planes), the marks' paintings, a gallery with its balustrade, beams, arch ribs.
+- `three/insidedress.ts` (new), each room by name: the church's arcade of pointed arches on its pillars, high
+  stained lancets and a candle ring over the altar, its three low steps and tomb slabs; the barracks' gallery over the
+  bunks, tower banners, a rope round the sand ring; the town hall's back gallery, four tree banners, the clock, the
+  chimney breast, two candle rings over the table; the Rat's gallery along the back and the hearth's chimney breast,
+  candle rings; the forge's hood narrowing into its chimney, glowing underneath; the infirmary's curtains between the
+  beds and herbs hung from a beam by the hearth.
+- `three/insidefurn3d.ts` (new) and three BlockKinds (arena.ts): the church's `font`, armour `stand`s by the
+  quartermaster, tavern `table`s (the Rat's benches are tables now, a fifth added). Small edits, for the record: Art's
+  blocklook.ts (their LOOK entries), walls3d.ts (one call), and the Buildings and camera chat's streetkit.ts
+  (`streetFloor` takes another of the kit's floors) and ground.ts (an inside lays planks or flags, not cobbles).
+- The camera inside: your hero low on the screen and the room rising to the back wall's top behind them, as the
+  concepts frame it (camera3d.ts `inRoom`).
+- `scripts/inside-look.cjs`: UP=1 stands you halfway up each room to see its back wall. Full suite 1963 passed.
+- Next: slice 3, the showpieces (the rose window, the valley map, the rat sign and bottle wall, the forge's mouth)
+  generated in the flow and cut into the kit.
+
+Claude Opus 5.5
