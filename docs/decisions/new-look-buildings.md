@@ -160,3 +160,17 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
   covered anything sunk deeper (the pond). It now stops at the town's own ground (`uTown`, beside the layout chat's
   gorge cut). Pond blue again with its ripples. Not the zoom.
   (Claude Opus 5.5)
+
+## 2026-11-16: the lodge faces out; arriving in town (Kyle)
+
+- Kyle: coming into town the first time is a pain: narrow streets, stalls in the street, and he keeps going into the
+  Hunters' Lodge by accident. Cause of the last: you arrive at the north gate and the Gate Road ran straight down
+  into the lodge's door (`face: 'S'`), and walking into a door goes in.
+- Done here, a small edit in the town layout chat's layoutplan.ts (asked twice by Kyle): the lodge's `face` dropped,
+  so its door is on its south front, toward the camera, on the lane above the fence; the Gate Road now meets its
+  back. tests/layout.test.ts passes.
+- **For the town layout chat:** the rest is yours. The two market stalls (EMPTY/TRADER and PAWN, layoutmove.ts at
+  39.8 and 43.5, 19.8, STALL size) stand right where the Gate Road comes into the square, pinching the way a new
+  hero walks first; and the Gate Road itself is about 4.5 tiles between the hall's annex and the tower. Kyle wants
+  the first walk in to feel open: the stalls somewhere off that path, and the road in wider if it can be.
+  (Claude Opus 5.5)

@@ -55,8 +55,9 @@ export function planBlocks(w: WorldState, homes: number): Block[] {
     // The north gate's yard: the keep and the tower facing the Gate Road.
     bl(49, 1, 6, 8, 'wall', { label: 'THE KEEP', door: 'keep', locked: true, face: 'E' }),
     bl(49.5, 10.5, 5, 6, 'tower', { label: 'TOWER', door: 'tower', face: 'E' }),
-    // Market Lane: the hunters' lodge on its south side, the gate road coming straight down to its door.
-    bl(43, 24, 7.5, 6, 'house', { label: "HUNTERS' LODGE", door: 'lodge', face: 'S' }),
+    // Market Lane: the hunters' lodge on its south side, the gate road coming down to its back. Its door faces out,
+    // south toward the camera (Kyle, 2026-11-16: walking down the Gate Road took you straight in by mistake).
+    bl(43, 24, 7.5, 6, 'house', { label: "HUNTERS' LODGE", door: 'lodge' }),
     house(50.5, 24, 2.25, 5), house(52.75, 24, 2.25, 5), house(50.5, 29.5, 4.5, 5, 'E'),
     // The lower quarter: the Drowned Rat in its bottom-left corner, out of the square's view, its front on Rat Lane
     // along the south wall, facing the camera (Kyle, 2026-11-15); the millpond below the Rat Steps in its place.
