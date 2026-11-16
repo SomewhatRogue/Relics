@@ -47,6 +47,10 @@ export interface Swing {
   skewer?: boolean;
   /** A shield bash: stuns the goblin it strikes (shared/warrior.ts SHIELD_BASH). */
   shieldBash?: boolean;
+  /** The spear thrown on its chain: reels in a small goblin, or you to a big one (shared/warrior.ts SPEAR_CHAIN). */
+  chain?: boolean;
+  /** PRECISE: goes past a shield-bearer's board (the spear's last thrust). */
+  precise?: boolean;
   /** An overhead: released on the white flash it sends out a shockwave (shared/warrior.ts QUAKE). */
   quake?: boolean;
   /** A longbow's draw: released on the white flash it is a sure crit and blinds (shared/ranger.ts BLIND). */
@@ -194,18 +198,18 @@ export const WEAPONS: Record<KitId, Weapon> = {
     dodge: { kind: 'roll', distance: 1.9, time: 0.4, iFrom: 0.06, iTo: 0.28, stamina: 34, cooldown: 1.4 },
   },
   spear: {
-    name: 'SPEAR',
+    name: 'SPEAR AND SHIELD',
     cls: 'WARRIOR',
     combo: [
-      // Long thrusts with a small push, to keep goblins at the point.
-      { windup: 0.08, active: 0.07, recover: 0.16, dmg: 9, range: 2.5, arc: 26, lunge: 0.25, knock: 4, thrust: true },
-      { windup: 0.07, active: 0.07, recover: 0.16, dmg: 9, range: 2.5, arc: 26, lunge: 0.25, knock: 4, thrust: true },
-      { windup: 0.08, active: 0.07, recover: 0.16, dmg: 10, range: 2.5, arc: 26, lunge: 0.25, knock: 5, thrust: true },
-      { windup: 0.18, active: 0.1, recover: 0.36, dmg: 18, range: 2.7, arc: 30, lunge: 1.1, knock: 9, thrust: true },
+      // Thrusts with a little reach past the sword's; the third, PRECISE, goes past a shield-bearer's board.
+      { windup: 0.09, active: 0.07, recover: 0.18, dmg: 11, range: 2.3, arc: 40, lunge: 0.3, knock: 3, thrust: true },
+      { windup: 0.08, active: 0.07, recover: 0.18, dmg: 11, range: 2.3, arc: 40, lunge: 0.3, knock: 3, thrust: true },
+      { windup: 0.16, active: 0.1, recover: 0.34, dmg: 20, range: 2.5, arc: 34, lunge: 0.7, knock: 7, thrust: true, precise: true },
     ],
-    // Held: a lunge that runs through up to three in a line.
-    heavy: { windup: 0.06, active: 0.14, recover: 0.4, dmg: 22, dmgFull: 42, range: 3.0, arc: 34, lunge: 2.4, knock: 9, knockFull: 16, thrust: true, hits: 3 },
-    blockSpeed: 0.4, chargeSpeed: 0.35, guardArc: 120, guardCost: 1.3, speed: 0.8, pins: true, shaft: true,
+    // Held: thrown on its chain (shared/warrior.ts SPEAR_CHAIN): a small goblin reeled in, or you to a big one.
+    heavy: { windup: 0.08, active: 0.04, recover: 0.3, dmg: 14, dmgFull: 30, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, chain: true },
+    // The sword's shield (Kyle, 2026-11-16: "same as sword and shield but it's spear and shield").
+    blockSpeed: 0.45, chargeSpeed: 0.4, guardArc: 170, guardCost: 1, speed: 0.8, pins: true, shaft: true,
     dodge: { kind: 'backstep', distance: 2, time: 0.26, iFrom: 0.02, iTo: 0.18, stamina: 22, cooldown: 1.0 },
   },
   /** The Rogue's kit: weak from the front, brutal from behind, and the only one quick on its feet. */
@@ -267,14 +271,15 @@ export const WEAPONS: Record<KitId, Weapon> = {
     blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.8, castWalk: 0.9,
     dodge: BLINK,
   },
-  /** Close and slow: a slash in the Mage's element in front. Held, rooted, the element's spell (it costs
-   *  magic): a wall of fire rolled out at a goblin, or all round you a frost nova or a charged ring (shared/spellbook.ts). */
+  /** The wand's spells, much harder, but rooted (Kyle, 2026-11-16: "you can't attack and move but all
+   *  attacks are MUCH more impactful and powerful"): a heavy tap that bursts, and the wand's holds bigger
+   *  (shared/spellbook.ts STAFF_SIZE). No walking while it casts or draws. */
   staff: {
     name: 'FOCUS STAFF',
     cls: 'MAGE',
-    combo: [{ windup: 0.3, active: 0.1, recover: 0.42, dmg: 15, range: 1.9, arc: 150, lunge: 0.15, knock: 5, slash: true }],
-    heavy: { windup: 0.12, active: 0.05, recover: 0.45, dmg: 12, dmgFull: 20, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, spell: true },
-    draw: 1, early: 'fizzle',
+    combo: [{ windup: 0.42, active: 0.04, recover: 0.34, dmg: 22, range: 8, arc: 0, lunge: 0, knock: 4, shot: 'spark', speed: 15, burst: 0.9 }],
+    heavy: { windup: 0.1, active: 0.04, recover: 0.45, dmg: 24, dmgFull: 56, range: 9, arc: 0, lunge: 0, knock: 6, knockFull: 12, shot: 'spark', speed: 17, burst: 1.2, interrupts: true, spell: true },
+    draw: 0.9, early: 'fizzle',
     blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.8,
     dodge: BLINK,
   },

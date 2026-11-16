@@ -73,6 +73,7 @@ import { bladeStruck, looseBlade } from './spellblade';
 import { fireSkill, stepSkills } from './skills';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
+import { throwSpear } from './spearchain';
 import { stepJavelin, throwJavelin } from './javelin';
 import { laySnare, stepHound, stepSnare } from './ranger';
 import { burstMult, healOf, healReach, perfectMult, smiteStun } from './knacks';
@@ -643,6 +644,8 @@ export class ArenaRoom {
     if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
     // The high ground: shots from up on a ledge.
     if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;
+    // The spear thrown on its chain (sim/spearchain.ts).
+    if (s.chain) return void this.hooks.push(throwSpear(h, s, mult));
     // A forged weapon's element rides a full draw (and every crossbow bolt); spells otherwise take the relic's.
     const full = (h.heavy && h.power >= 1) || !!WEAPONS[h.weapon].noCharge, forged = full ? forgedElement(h) : '';
     // Spendthrift: a gold an arrow, and a full draw lands double and pierces.

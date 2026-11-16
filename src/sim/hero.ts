@@ -4,7 +4,7 @@
  */
 import { isDead } from './damage';
 import { collide, wadeAt } from '../shared/arena';
-import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, HERO, INPUT_BUFFER, RELICS, WEAPONS, FAITH, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
+import { DODGE, CLASS_DODGES, DECOY, AUGMENTS, CHARGE, GRAB, HORN, CLASS_KITS, CLASS_ORDER, abilitiesOf, ELEMENT_NAME, HERO, INPUT_BUFFER, RELICS, WEAPONS, FAITH, SPEAR_CHAIN, type Swing, type Weapon, drilled, STEALTH, dodgeOf, guardOf } from '../shared/tuning';
 import { slide } from './bodies';
 import { BAG } from '../shared/bags';
 import { applyGear, turnBelt } from './pack';
@@ -402,7 +402,7 @@ function startCharge(h: Hero, now: number): void {
 function startSwing(h: Hero, i: number, inp: Intent, enemies: Enemy[], now: number, ev: FightEvent[]): void {
   // Bows and staffs look for a goblin as far as they shoot.
   const shot = i < 0 ? WEAPONS[h.weapon].heavy : WEAPONS[h.weapon].combo[0];
-  face(h, inp, enemies, true, shot.shot ? shot.range * 0.9 : shot.thrust && shot.lunge > 1.5 ? shot.range + shot.lunge : 3.2);
+  face(h, inp, enemies, true, shot.chain ? SPEAR_CHAIN.range * 0.9 : shot.shot ? shot.range * 0.9 : shot.thrust && shot.lunge > 1.5 ? shot.range + shot.lunge : 3.2);
   // A long lunge (the rapier's) bends onto a goblin close to where you aimed, so it doesn't sail past (Kyle, 2026-11-04).
   if (shot.thrust && shot.lunge > 1.5) lungeOnto(h, enemies, shot.range + shot.lunge);
   h.act = 'attack';

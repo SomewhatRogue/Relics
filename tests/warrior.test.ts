@@ -1,6 +1,6 @@
 /** The Warrior's rework (shared/warrior.ts, sim/warrior.ts): no dodge, the shield bash, the counter after a block, the greatsword, the spear. */
 import { describe, expect, it } from 'vitest';
-import { GUARD, PIN, QUAKE, SHAFT, SHIELD_BASH, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
+import { GUARD, PIN, QUAKE, SHAFT, SHIELD_BASH, SPEAR_CHAIN, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { hitHero } from '../src/sim/combat';
@@ -136,13 +136,44 @@ describe('the greatsword', () => {
   });
 });
 
-describe('the spear', () => {
-  it('the held lunge runs through three goblins in a line', () => {
-    const { es, loose } = arena('spear', [7.4, 6.8, 6.2, 5.6]);
-    const ev = loose(0.9 + 0.5, 0.4);
-    // (The fourth may still be bowled over by the others: a body blow, not the point.)
-    expect(ev.filter((x) => x.k === 'hit' && x.src === 'spear').length).toBe(3);
-    expect(lost(es[0])).toBe(WEAPONS.spear.heavy.dmgFull);
+describe('the spear and shield', () => {
+  it('held, it flies on its chain and reels a small goblin to your feet, knocked down', () => {
+    const { e, loose } = arena('spear', [5], 'scrapper', true);
+    const ev = loose(1.4, 1.2);
+    expect(ev.some((x) => x.k === 'yank')).toBe(true);
+    expect(e.y).toBeGreaterThan(7.6);
+    expect(e.act).toBe('stunned');
+    expect(lost(e)).toBe(WEAPONS.spear.heavy.dmgFull);
+  });
+  it('a big one pulls you to it instead', () => {
+    const { h, e, loose } = arena('spear', [5]);
+    e.weight = 3;
+    const ev = loose(1.3, 0.8);
+    expect(ev.some((x) => x.k === 'yank')).toBe(false);
+    expect(ev.some((x) => x.k === 'latch')).toBe(true);
+    expect(h.y).toBeLessThan(6.5);
+  });
+  it('out of reach it comes back with nothing; on the white flash it flies further', () => {
+    // (From y 12: the hook's reach is its range plus its catch, about a tile and a half more.)
+    const late = arena('spear', [12 - SPEAR_CHAIN.range - 2.4]);
+    late.h.y = 12;
+    late.loose(1.4, 1.4);
+    expect(lost(late.e)).toBe(0);
+    const flash = arena('spear', [12 - SPEAR_CHAIN.range - 2.4]);
+    flash.h.y = 12;
+    const ev = flash.loose(1, 1.4);
+    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
+    expect(lost(flash.e)).toBeGreaterThan(0);
+  });
+  it('the third thrust is PRECISE: past a shield-bearer\'s board, where the first two are stopped', () => {
+    const { e, tap } = arena('spear', [7.2]);
+    e.variant = 'shield';
+    tap(0.32);
+    expect(lost(e)).toBe(0);
+    tap(0.32);
+    expect(lost(e)).toBe(0);
+    tap(0.6);
+    expect(lost(e)).toBeGreaterThan(0);
   });
   it('a goblin caught mid-charge is stopped dead and pinned, longer: a bonus, no PERFECT', () => {
     const { e, tap } = arena('spear', [7.4]);
@@ -154,15 +185,6 @@ describe('the spear', () => {
     expect(e.actDur).toBe(PIN.caught);
     expect(e.attack).toBe(null);
     expect(PIN.caught).toBeGreaterThan(PIN.flash);
-  });
-  it('the lunge let go on the white flash pins whatever it runs through, PERFECT; past the flash, nothing', () => {
-    const flash = arena('spear', [7.4, 6.8]);
-    const ev = flash.loose(1, 0.2);
-    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
-    for (const e of flash.es) expect(e.act).toBe('pinned'), expect(e.actDur).toBe(PIN.flash);
-    const late = arena('spear', [7.4]);
-    late.loose(1.4, 0.2);
-    expect(late.e.act).not.toBe('pinned');
   });
   it('too close, the shaft does less than the point', () => {
     const near = arena('spear', [8.3]), far = arena('spear', [7.2]);

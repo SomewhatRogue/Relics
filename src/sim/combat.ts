@@ -81,7 +81,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
   // A shield-bearer's board stops a blow from the front dead, whatever it is (sim/board.ts), unless it's lowered
   // for its own swing, or the goblin is held fast or caught unaware.
-  const storm = stormCut(h, s), boarded = !rear && shieldFaces(e, tx, ty, now);
+  const storm = stormCut(h, s), boarded = !rear && !s.precise && shieldFaces(e, tx, ty, now);
   if (boarded) {
     const stop = HITSTOP.light;
     (h.hitstop = Math.max(h.hitstop, stop)), (e.hitstop = Math.max(e.hitstop, stop));

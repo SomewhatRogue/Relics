@@ -1039,6 +1039,8 @@ export interface Hook {
   /** Enemy hooked (0 for a wall). */
   enemy: number;
   el: Augment;
+  /** The spear on its chain (sim/spearchain.ts): its own damage and reach, and only a small goblin reeled in. */
+  spear?: { dmg: number; range: number };
 }
 
 /** A thrown relic javelin: flying (maybe carrying a goblin), or stuck in a wall, the floor or a body. */

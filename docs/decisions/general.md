@@ -37,3 +37,19 @@ entry with the model name.
 - The streak, slices 2 and 3: STREAK n under the hero card's bars from 3 up, coloured by step, a flare at each step, struck red for a moment when broken (streakhud.ts, streak.css); a ring at a step and a crack at a break, your own only. The job's best streak is a recap row (BEST STREAK) and a call (LONGEST STREAK), and goes on BEST IN WICKHOLD (LONGEST STREAK ON A JOB: each hero once at their best, top ten; api/_world.ts keeps a whole number under 10,000). (Claude Opus 5.5)
 - Relics spec (docs/design/relics.md, Kyle approved): relics from church quests and great bosses' first kills only, one of each, no rolls; carry one, chosen in town, no swap on a job; the fanfare; existing heroes keep only the javelin (re-earn). Takes over holy-and-hungry section 4, built first. Waiting on the board. (Claude Opus 5.5)
 - Relics spec: relic quests are rare, one at a time, offered only now and then (a level milestone or a long stretch of days); a reliquary at the church shows every relic you have and the ones still to win (dark), and is where you choose which to carry; the Keeping Room gets the same shelf for corrupt heroes (Kyle). (Claude Opus 5.5)
+
+## 2026-11-16: the staff and the spear reworked (Kyle: "spear is pretty lame ... ditto mage staff")
+
+- **Focus staff**: the wand's spells, much harder, rooted (Kyle: "you can't attack and move but all attacks
+  are MUCH more impactful and powerful"). Tap: a heavy shot (22, bursts 0.9, knock 4, 0.76 s); hold: the
+  wand's fireball, cold blast and sky strike, 1.35x across (shared/spellbook.ts STAFF_SIZE), 24 to 56. No
+  castWalk, chargeSpeed 0. Taps do about 1.8x the wand's a second; in the clear bot it clears rooms about
+  37% faster than the wand (the bot never pays for standing still). The old fire wall, nova and rings are
+  unrouted (sim/firewall.ts, staffrings.ts kept for a ward later); firewall.test.ts gone.
+- **Spear and shield**: the sword's guard (170, cost 1). Three thrusts at 2.3; the third PRECISE (goes past
+  a shield board). Hold: thrown on its chain (sim/spearchain.ts, via sim/hook.ts): a goblin of weight 1 or
+  less is reeled in and knocked down, anything heavier pulls you to it; range 6, 8 on the flash
+  (shared/warrior.ts SPEAR_CHAIN). The lunge through three is gone.
+- Not yet: the hero's hand still shows the spear while it's out on the chain.
+
+Claude Opus 5.5

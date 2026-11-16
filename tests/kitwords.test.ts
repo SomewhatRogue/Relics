@@ -25,7 +25,7 @@ describe('GUARD and DODGE areas, from the numbers', () => {
   it('rates the guards as the kits are built', () => {
     expect([guardRating('sword'), guardKind('sword')]).toEqual(['HIGH', 'BLOCK']);
     expect([guardRating('mace'), guardRating('censer')]).toEqual(['HIGH', 'HIGH']);
-    expect([guardRating('spear'), guardRating('flail')]).toEqual(['MED', 'MED']);
+    expect([guardRating('spear'), guardRating('flail')]).toEqual(['HIGH', 'MED']);
     // No parry anywhere (2026-11-05): the greatsword holds a slow, dear block; the bows and the spellblade none.
     expect([guardRating('greatsword'), guardKind('greatsword')]).toEqual(['LOW', 'BLOCK']);
     expect(guardKind('longbow')).toBe('NONE');
@@ -44,11 +44,10 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     expect(KIT.spellblade.also).toBe('Magic shields, blinks top up');
     for (const w of Object.keys(KIT)) expect(Object.values(KIT[w as keyof typeof KIT]).join(' '), w).not.toMatch(/parry|riposte/i);
     expect(kitRows('spellblade', 'fire').find(([l]) => l === 'COST')?.[1]).toBe(`${SPELL.spellblade} magic a hold`);
-    // The staff's wall of fire (Kyle, 2026-11-05): rolled at a goblin, and the card says once that it burns friends.
-    expect(kitLine('staff', 'fire')).toBe('TAP: FLAME SWEEP, BURNS  HOLD: ROLLING WALL OF FIRE  PERFECT: WIDER, BURNS LONGER');
-    for (const el of ['', 'fire'] as const) expect(kitRows('staff', el).filter(([, v]) => /friends/i.test(v)).length).toBe(1);
-    for (const el of ['frost', 'storm'] as const) expect(kitRows('staff', el).some(([, v]) => /friends/i.test(v))).toBe(false);
-    expect(kitRows('staff').find(([l]) => l === 'FIRE')?.[1]).toBe('Tap flame sweep, hold wall of fire');
+    // The staff is the wand, harder and rooted (Kyle, 2026-11-16): the card says so.
+    expect(kitLine('staff', 'fire')).toBe('TAP: HEAVY FIREBOLT, BURSTS  HOLD: BIG FIREBALL, BURNS A CROWD  PERFECT: BIGGER, INTERRUPTS ANY BLOW');
+    expect(kitRows('staff', 'frost').find(([l]) => l === 'ALSO')?.[1]).toBe('Hits hard, cast standing still');
+    expect(kitRows('staff').find(([l]) => l === 'FIRE')?.[1]).toBe('Tap heavy firebolt, hold big fireball');
     expect(barWords('Shorter dodge, costs more stamina', 'MAGE')).toBe('Shorter dodge, costs more magic');
     expect(barWords('STAMINA RECOVERY', 'RANGER')).toBe('STAMINA RECOVERY');
   });

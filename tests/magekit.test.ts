@@ -91,44 +91,23 @@ describe('magic costs', () => {
 });
 
 describe('the staff', () => {
-  it('its quick slash strikes close in front, not behind and not far, in the element', () => {
-    const a = arena('staff', [[9, 7.6], [10.1, 8.2], [9, 10.4], [9, 5.6]]);
-    a.tap(1);
-    const [front, side, back, far] = a.es;
-    expect(lost(front)).toBeGreaterThan(0);
-    expect(lost(side)).toBeGreaterThan(0);
-    expect(back.hp).toBe(400);
-    expect(far.hp).toBe(400);
-    expect(front.burnUntil).toBeGreaterThan(a.room.time);
-  });
-
-  it('a hold is rooted while it gathers, its ring is centred on the Mage, and let go early it fizzles', () => {
-    // (The fire hold is a wall rolled at a goblin now: firewall.test.ts. Storm's ring stays round the Mage.)
+  it('a hold is rooted while it gathers, and let go early it fizzles', () => {
     const b = arena('staff', [[2, 2]], 'storm');
     b.run(0.25, { attackSeq: 1, attack: true, mx: 1 });
     const x = b.h.x;
     b.run(0.5, { attackSeq: 1, attack: true, mx: 1 });
     expect(b.h.act).toBe('charge');
     expect(b.h.x).toBeCloseTo(x, 3);
-    const a = arena('staff', [[2, 2]], 'storm');
-    // (Let go before the full gather it fizzles: Kyle, 2026-11-08. So every ring that goes is full; past the flash, not the biggest.)
-    a.loose(WEAPONS.staff.draw! + 0.6, 0.2);
-    const z = rings(a.room)[0];
-    expect([z.x, z.y]).toEqual([9, 9]);
-    expect(z.r).toBeCloseTo(STAFF_RING.rFull, 5);
-    expect(z.big).toBe(false);
     const f = arena('staff', [[2, 2]], 'storm'), ev = f.loose(0.5, 0.2);
-    expect(rings(f.room)).toHaveLength(0);
     expect(ev.some((x) => x.k === 'early')).toBe(true);
+    expect(f.room.zones.some((z) => z.kind === 'skystrike')).toBe(false);
   });
 
-  it('let go on the white flash: the biggest ring', () => {
+  it('let go on the white flash: a perfect, the bigger strike', () => {
     const a = arena('staff', [[2, 2]], 'storm');
-    const ev = a.loose(WEAPONS.staff.draw! + 0.05, 0.2);
+    const ev = a.loose(WEAPONS.staff.draw! + 0.05, 0.3);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
-    const z = rings(a.room)[0];
-    expect(z.big).toBe(true);
-    expect(z.r).toBeCloseTo(STAFF_RING.rBig, 5);
+    expect(a.room.zones.find((z) => z.kind === 'skystrike')?.big).toBe(true);
   });
 });
 

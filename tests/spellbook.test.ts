@@ -1,6 +1,6 @@
 /** The Mage's spellbook (shared/spellbook.ts, sim/holds.ts and friends): each element's tap and hold on each kit, and their balance. */
 import { describe, expect, it } from 'vitest';
-import { COLD_BLAST, DASH, FIRE_WALL, HERO, LUNGE, MAGE_KITS, SHATTER_BLOW, STAFF_RING, STORM_RING, TICK, type Element, type MageKit } from '../src/shared/tuning';
+import { COLD_BLAST, DASH, HERO, LUNGE, MAGE_KITS, SHATTER_BLOW, SKY_STRIKE, STAFF_SIZE, TICK, type Element, type MageKit } from '../src/shared/tuning';
 import { frozen } from '../src/sim/damage';
 import { burning, chilled } from '../src/sim/elements';
 import type { FightEvent, Zone } from '../src/sim/types';
@@ -9,7 +9,7 @@ import { lost, mageArena } from './magearena';
 const spell = (ev: FightEvent[]) => ev.find((x): x is Extract<FightEvent, { k: 'spell' }> => x.k === 'spell');
 const zone = (z: Zone[], kind: Zone['kind']) => z.find((x) => x.kind === kind)!;
 /** Held a little past the flash: not a perfect. */
-const PLAIN: Record<MageKit, number> = { wand: 0.9, staff: 1.4, spellblade: 0.9 };
+const PLAIN: Record<MageKit, number> = { wand: 0.9, staff: 1.2, spellblade: 0.9 };
 
 describe('the wand', () => {
   it('fire: a firebolt that sets alight; held, a fireball that bursts and sets all of it alight', () => {
@@ -68,42 +68,48 @@ describe('the wand', () => {
   });
 });
 
-describe('the staff', () => {
-  it('fire: a flame sweep; held, a wall of fire rolled at the goblin in front that burns it (sim/firewall.ts: firewall.test.ts)', () => {
-    const a = mageArena('staff', [[9, 7.6]], 'fire');
-    a.tap(0.8);
-    expect(burning(a.e, a.room.time)).toBe(true);
-    const b = mageArena('staff', [[9, 5], [9, 10]], 'fire');
-    b.loose(PLAIN.staff, 0.2 + (4 - FIRE_WALL.start) / FIRE_WALL.speed);
-    const z = zone(b.room.zones, 'firewall');
-    expect([z.x, z.y, z.r]).toEqual([9, 5, FIRE_WALL.len / 2]);
-    expect(burning(b.es[0], b.room.time)).toBe(true);
-    expect(lost(b.es[0])).toBeGreaterThanOrEqual(FIRE_WALL.dmg);
-    expect(lost(b.es[1])).toBe(0);
-    expect(z.until - z.at!).toBeCloseTo(FIRE_WALL.life, 5);
+describe('the staff: the wand, much harder, standing still (Kyle, 2026-11-16)', () => {
+  it('a tap does far more than the wand\'s and bursts round what it hits', () => {
+    const w = mageArena('wand', [[9, 5], [9.8, 5]], 'fire'), st = mageArena('staff', [[9, 5], [9.8, 5]], 'fire');
+    w.tap(0.6), st.tap(0.8);
+    expect(lost(st.e)).toBeGreaterThanOrEqual(lost(w.e) * 2);
+    expect(lost(st.es[1])).toBeGreaterThan(0);
+    expect(lost(w.es[1])).toBe(0);
   });
 
-  it('frost: a slash that slows wind-ups; held, a frost nova that freezes all round you', () => {
-    const a = mageArena('staff', [[9, 7.6]], 'frost');
-    a.tap(0.8);
-    expect(chilled(a.e, a.room.time)).toBe(true);
-    const b = mageArena('staff', [[9, 7.2], [10.5, 9.5], [9, 9 + STAFF_RING.rFull + 1]], 'frost');
-    const ev = b.loose(PLAIN.staff, 0.2);
-    expect(spell(ev)).toMatchObject({ what: 'nova' });
-    expect(b.es.map((e) => frozen(e, b.room.time))).toEqual([true, true, false]);
+  it('rooted: no step while it casts a tap or gathers a hold (the wand walks as it casts)', () => {
+    const w = mageArena('wand', [[2, 2]], 'fire'), st = mageArena('staff', [[2, 2]], 'fire');
+    for (const a of [w, st]) a.run(0.3, { attackSeq: 1, attack: false, mx: 1 });
+    expect(w.h.x).toBeGreaterThan(9.05);
+    expect(st.h.x).toBeCloseTo(9, 3);
+    const h = mageArena('staff', [[2, 2]], 'fire');
+    h.run(0.25, { attackSeq: 1, attack: true, mx: 1 });
+    const x = h.h.x;
+    h.run(0.5, { attackSeq: 1, attack: true, mx: 1 });
+    expect(h.h.act).toBe('charge');
+    expect(h.h.x).toBeCloseTo(x, 3);
   });
 
-  it('storm: a crackling sweep that jumps nowhere dry; held, a charged ring that zaps what is in it', () => {
-    const a = mageArena('staff', [[9, 7.6], [11, 7], [7, 7]], 'storm');
-    a.tap(0.8);
-    expect(lost(a.es[0])).toBeGreaterThan(0);
-    expect(a.es.slice(1).filter((e) => lost(e) > 0).length).toBe(0);
-    const b = mageArena('staff', [[9, 7.5]], 'storm');
-    b.loose(PLAIN.staff, 0.2);
-    const was = lost(b.e);
-    b.run(2);
-    expect(lost(b.e) - was).toBeGreaterThanOrEqual(STORM_RING.zap * 3);
-    expect(zone(b.room.zones, 'stormring').until - b.room.time).toBeGreaterThan(0);
+  it('the holds are the wand\'s, bigger: the fireball burns further out, the cold blast reaches further', () => {
+    const at: [number, number][] = [[9, 5], [11.2, 5]];
+    const w = mageArena('wand', at, 'fire'), st = mageArena('staff', at, 'fire');
+    w.loose(PLAIN.wand, 0.6), st.loose(PLAIN.staff, 0.6);
+    expect(burning(w.es[1], w.room.time)).toBe(false);
+    expect(burning(st.es[1], st.room.time)).toBe(true);
+    const far: [number, number][] = [[9, 9 - COLD_BLAST.range - 0.8]];
+    const b = mageArena('staff', far, 'frost'), ev = b.loose(PLAIN.staff, 0.3);
+    expect(spell(ev)).toMatchObject({ what: 'coldblast', r: COLD_BLAST.range * STAFF_SIZE });
+    expect(frozen(b.e, b.room.time)).toBe(true);
+  });
+
+  it('storm: a lightning bolt, no stream; held, a bigger strike where you aim', () => {
+    const a = mageArena('staff', [[9, 6]], 'storm');
+    const ev = a.tap(0.6);
+    expect(ev.some((x) => x.k === 'shoot')).toBe(true);
+    expect(a.h.stream).toBeUndefined();
+    expect(lost(a.e)).toBeGreaterThan(0);
+    const b = mageArena('staff', [[9, 6]], 'storm'), ev2 = b.loose(PLAIN.staff, 0.3, { ay: -3 });
+    expect(spell(ev2)?.r).toBeCloseTo(SKY_STRIKE.r * STAFF_SIZE, 5);
   });
 });
 
@@ -161,7 +167,7 @@ describe('the spellblade', () => {
 
 /** What one goblin loses to taps alone over `secs` (fire's burn counted), pressing as fast as the kit lets you. */
 function tapDps(kit: MageKit, el: Element, secs = 6): number {
-  const at: [number, number] = kit === 'wand' ? [9, 5.5] : [9, 7.7];
+  const at: [number, number] = kit === 'spellblade' ? [9, 7.7] : [9, 5.5];
   const a = mageArena(kit, [at], el);
   for (let t = 0; t < secs; t += 0.1) a.tap(0.1);
   return lost(a.e) / secs;
@@ -175,23 +181,10 @@ describe('balance', () => {
     }
   });
 
-  it("the staff's holds, one each (30 magic): the wall of fire does about what the charged ring does, frost trades damage for freezing", () => {
-    // One hold, everything it does over the 4 s after the release (fire's burn counted), on one goblin in
-    // it and on a pack of four: the wall rolled out at them (three where it stands, one it rolls through),
-    // the rings round the Mage.
-    const held = (el: Element, at: [number, number][], secs = 4) => {
-      const a = mageArena('staff', at, el);
-      a.run(PLAIN.staff, { attackSeq: 1, attack: true });
-      a.run(secs, { attackSeq: 1, attack: false });
-      return a.es.reduce((n, e) => n + lost(e), 0);
-    };
-    const near: [number, number][] = [[9, 7.5], [10.2, 8.2], [7.8, 8.2], [9, 10.4]], far: [number, number][] = [[9, 6], [9.9, 6.1], [8.1, 6.1], [10.3, 8]];
-    const one = { fire: held('fire', far.slice(0, 1)), frost: held('frost', near.slice(0, 1)), storm: held('storm', near.slice(0, 1)) };
-    const pack = { fire: held('fire', far), frost: held('frost', near), storm: held('storm', near) };
-    const say = `one ${JSON.stringify(one)} pack ${JSON.stringify(pack)}`;
-    expect(Math.abs(one.fire - one.storm) / one.storm, say).toBeLessThan(0.15);
-    expect(Math.abs(pack.fire - pack.storm) / pack.storm, say).toBeLessThan(0.15);
-    expect(one.frost, say).toBeLessThan(one.storm / 2);
+  it('the staff hits about twice as hard a second as the wand, for standing still', () => {
+    const w = tapDps('wand', 'fire'), st = tapDps('staff', 'fire');
+    expect(st / w, `${w.toFixed(1)} / ${st.toFixed(1)}`).toBeGreaterThan(1.6);
+    expect(st / w).toBeLessThan(2.8);
   });
 
   it('a hold costs magic in any element; the bar waits and refills as before', () => {

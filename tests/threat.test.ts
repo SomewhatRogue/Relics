@@ -329,11 +329,17 @@ describe('the same every time', () => {
 });
 
 describe('a single-target kit clears a room comfortably', () => {
-  it('twin daggers clear the same rooms in about the time a focus staff does, without taking far more', { timeout: 600000 }, () => {
-    const r = clearTimes(sampleRooms(2, 3), ['daggers', 'staff']);
-    expect(r.daggers.unclear + r.staff.unclear).toBe(0);
-    expect(r.daggers.mean / r.staff.mean).toBeLessThan(1.15);
+  it('twin daggers clear the same rooms in about the time a spark wand does, without taking far more', { timeout: 600000 }, () => {
+    // (The staff was the yardstick till 2026-11-16; now it's the wand's spells, harder and rooted, and a
+    // bot that never needs to move clears faster with it: below.)
+    const r = clearTimes(sampleRooms(2, 3), ['daggers', 'wand', 'staff']);
+    expect(r.daggers.unclear + r.wand.unclear + r.staff.unclear).toBe(0);
+    expect(r.daggers.mean / r.wand.mean).toBeLessThan(1.15);
     // (Goblins swing sooner since 2026-11-11, which tells more on a knife fighter up close.)
-    expect(r.daggers.taken / Math.max(1, r.staff.taken)).toBeLessThan(1.45);
+    expect(r.daggers.taken / Math.max(1, r.wand.taken)).toBeLessThan(1.45);
+    // The staff clears faster than the wand, standing still, but not twice as fast.
+    expect(r.staff.mean).toBeLessThan(r.wand.mean);
+    expect(r.wand.mean / r.staff.mean).toBeLessThan(1.8);
   });
+
 });

@@ -67,13 +67,15 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
       for (const t of enemies) {
         if (t.act === 'dead' || t.act === 'carried' || Math.hypot(t.x - k.x, t.y - k.y) > t.radius + HOOK.catch) continue;
         k.enemy = t.id;
-        t.hp -= t.kind === 'dummy' || t.kind === 'swingDummy' ? 0 : HOOK.dmg;
+        const dmg = k.spear?.dmg ?? HOOK.dmg;
+        t.hp -= t.kind === 'dummy' || t.kind === 'swingDummy' ? 0 : dmg;
         t.hitAt = now;
         ev.push({ k: 'latch', x: k.x, y: k.y, dx: k.dx, dy: k.dy });
-        afflict(t, k.el, HOOK.dmg);
+        afflict(t, k.el, dmg);
         if (isDead(t)) return false;
         t.lastBy = h.id;
-        if (Number.isFinite(t.weight) && t.act !== 'pinned') {
+        // (The spear's chain reels in only a small goblin: anything bigger pulls you to it.)
+        if (Number.isFinite(t.weight) && t.act !== 'pinned' && (!k.spear || t.weight <= 1)) {
           k.state = 'yank';
           Object.assign(t, { act: 'carried', attack: null, kvx: 0, kvy: 0 });
           ev.push({ k: 'yank', x: t.x, y: t.y, dx: -k.dx, dy: -k.dy });
@@ -84,7 +86,7 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
         return true;
       }
     }
-    if (k.travelled >= HOOK.range) k.state = 'back';
+    if (k.travelled >= (k.spear?.range ?? HOOK.range)) k.state = 'back';
     return true;
   }
   if (k.state === 'back') {

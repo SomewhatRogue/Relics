@@ -55,7 +55,7 @@ function spotOf(h: Hero, enemies: Enemy[], dx: number, dy: number, dist: number)
 }
 
 /** Call it: `s` the hold, `mult` the hero's damage now, `aim(range, fallback)` how far the hero aims. */
-export function callStrike(h: Hero, s: Swing, mult: number, aim: (range: number, fallback: number) => number, zones: Zone[], w: World): void {
+export function callStrike(h: Hero, s: Swing, mult: number, aim: (range: number, fallback: number) => number, zones: Zone[], w: World, wide = 1): void {
   const [dx, dy] = aimOf(h, w.enemies), big = h.perfect;
   (h.fx = dx), (h.fy = dy);
   const aimed = spotOf(h, w.enemies, dx, dy, Math.min(SKY_STRIKE.range, aim(SKY_STRIKE.range, SKY_STRIKE.fallback)));
@@ -63,7 +63,7 @@ export function callStrike(h: Hero, s: Swing, mult: number, aim: (range: number,
   // near it draws it (sim/rods.ts): it falls on the iron instead.
   const gear = gearAt(aimed.x, aimed.y), rod = gear ? undefined : rodNear(w.enemies, aimed.x, aimed.y), { x, y } = gear ?? (rod ? { x: rod.x, y: rod.y } : aimed);
   // (WIDE BURST widens it as it does any burst.)
-  const r = (big ? SKY_STRIKE.bigR : SKY_STRIKE.r) * burstMult(h), at = w.now + SKY_STRIKE.delay;
+  const r = (big ? SKY_STRIKE.bigR : SKY_STRIKE.r) * burstMult(h) * wide, at = w.now + SKY_STRIKE.delay;
   const n = Math.max(1, Math.round(s.dmg * SKY_STRIKE.dmg * mult));
   zones.push({ kind: 'skystrike', x, y, r, at, until: at + SKY_STRIKE.show, next: at, owner: h.id, el: 'storm', big, n, ...(rod ? { rod: rod.id, rx: aimed.x, ry: aimed.y } : {}) });
   w.ev.push({ k: 'spell', x, y, dx, dy, el: 'storm', what: 'strike', r, big });

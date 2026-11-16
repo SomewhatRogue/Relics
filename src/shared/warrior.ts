@@ -17,3 +17,7 @@ export const QUAKE = { ahead: 1.4, radius: 2.6, down: 1.2, big: 0.5, dmg: 12, kn
 export const PIN = { flash: 1.0, caught: 1.6 };
 /** The spear's weakness: a goblin inside `near` of its reach takes `mult` from a quick thrust (the shaft, not the point). */
 export const SHAFT = { near: 0.5, mult: 0.5 };
+/** The spear on its chain (Kyle, 2026-11-16: "fly out and then pull back, pulling small enemies towards you
+ *  or you towards big enemies"): the hold throws it `range` tiles (`big` let go on the flash); a small goblin
+ *  it reaches is reeled in and knocked down, anything bigger pulls you to it (sim/hook.ts). */
+export const SPEAR_CHAIN = { range: 6, big: 8 };

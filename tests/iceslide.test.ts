@@ -55,9 +55,7 @@ describe('heavy hits send a frozen small goblin skidding', () => {
   const kinds: [string, Hero['weapon'], (w: Hero['weapon']) => Swing, boolean][] = [
     ['a greatsword blow', 'greatsword', (k) => WEAPONS[k].combo[0], false],
     ['a mace blow', 'mace', (k) => WEAPONS[k].combo[0], false],
-    ["the staff's tap", 'staff', (k) => WEAPONS[k].combo[0], false],
     ['a charged sword bash', 'sword', (k) => WEAPONS[k].heavy, true],
-    ["a charged spear lunge", 'spear', (k) => WEAPONS[k].heavy, true],
     ["the flail's heavy", 'flail', (k) => WEAPONS[k].heavy, true],
   ];
   for (const [name, kit, swing, charged] of kinds)
@@ -71,18 +69,6 @@ describe('heavy hits send a frozen small goblin skidding', () => {
       expect(Math.hypot(e.sled!.vx, e.sled!.vy)).toBeCloseTo(charged ? FLING.hardSpeed : FLING.speed, 5);
       expect(room.events.some((v) => v.k === 'fling')).toBe(true);
     });
-
-  it("the staff's tap keeps it frozen: its fire doesn't turn to steam on the way", () => {
-    const { room, me } = yard();
-    const e = goblin(room, 1, 9, 7), s = WEAPONS.staff.combo[0];
-    freeze(room, e);
-    me.augments.channel = 'fire';
-    const n = blow(room, me, 'staff', s, e);
-    bladeStruck(me, s, e, n, world(room));
-    expect(e.sled).toBeTruthy();
-    expect(e.frozenUntil).toBeGreaterThan(room.time);
-    expect(room.events.some((v) => v.k === 'steam')).toBe(false);
-  });
 
   it("a mace's smite sends it skidding off from where it fell, and doesn't stun it", () => {
     const { room, me } = yard();

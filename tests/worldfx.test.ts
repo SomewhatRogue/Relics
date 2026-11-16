@@ -232,18 +232,13 @@ describe('ice on the shallows', () => {
     expect(a.room.ices.length).toBe(0);
   });
 
-  it('a frost tap on a goblin wading ices round it; the staff nova (hard frost) ices round you', () => {
+  it('a frost tap on a goblin wading ices round it', () => {
     const room = new ArenaRoom(1, { scrappers: false, props: false, map: FORD });
     room.join('me');
     const e = Object.assign(newEnemy(1, 'scrapper', 6, 3.5), { alert: true, respawns: false });
     room.enemies = [e];
     chill(world(room), e);
     expect(iceUnder(room.ices, 6, 3.5, room.time)).toBe(true);
-    const a = mageArena('staff', [], 'frost', false, 'scrapper', FORD);
-    Object.assign(a.h, { y: 4 });
-    const ev = a.loose(1.2, 0.6);
-    expect(evs(ev, 'spell')[0]?.what).toBe('nova');
-    expect(iceUnder(a.room.ices, 9, 4, a.room.time)).toBe(true);
   });
 
   it('waders on it are held', () => {

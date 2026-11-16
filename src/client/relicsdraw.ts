@@ -56,6 +56,8 @@ export function drawHook(c: Ctx, k: Hook, hx: number, hy: number, x: number, y: 
     c.lit.fillRect(Math.round(sx + (ex - sx) * t), Math.round(sy + (ey - sy) * t + sag), 1, 1);
   }
   const a = Math.atan2(k.dy, k.dx);
+  // The spear on its chain: a shaft behind the point (sim/spearchain.ts).
+  if (k.spear) return line(c.lit, ex, ey, a + Math.PI, 0, 7, '#7a5a34'), line(c.lit, ex, ey, a, 0, 2, '#cfd6dc'), void (c.glow.fillStyle = '#9fe8ff', c.glow.fillRect(Math.round(ex), Math.round(ey), 1, 1));
   line(c.lit, ex, ey, a + 2.4, 0, 3, '#cfd6dc');
   line(c.lit, ex, ey, a - 2.4, 0, 3, '#cfd6dc');
   c.glow.fillStyle = '#9fe8ff';

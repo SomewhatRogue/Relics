@@ -22,9 +22,11 @@ export const MAGE_KITS: MageKit[] = ['wand', 'staff', 'spellblade'];
  */
 export const TAPS: Record<MageKit, Record<Element, { dmg: number }>> = {
   wand: { fire: { dmg: 0.9 }, frost: { dmg: 0.45 }, storm: { dmg: 1 } },
-  staff: { fire: { dmg: 0.65 }, frost: { dmg: 1.05 }, storm: { dmg: 1.05 } },
+  staff: { fire: { dmg: 0.9 }, frost: { dmg: 0.4 }, storm: { dmg: 1.15 } },
   spellblade: { fire: { dmg: 0.6 }, frost: { dmg: 1 }, storm: { dmg: 1 } },
 };
+/** The staff's holds are the wand's, this much bigger across (its damage is its own, shared/weapons.ts). */
+export const STAFF_SIZE = 1.35;
 /** The wand's frost tap: `n` icicles fanned `spread` radians apart, flying `speed` times the spark's. */
 export const ICICLES = { n: 3, spread: 0.12, speed: 1.2 };
 
