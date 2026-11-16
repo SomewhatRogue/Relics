@@ -374,3 +374,16 @@ not killing quickly, so kind of anticlimactic".
   heap of fallen rock lit along its top; a faint chalk tick at each grid corner. client/wayfind.ts: a stretch with an
   unsolved puzzle points at the nearest tub off its plate. 'trample' marks out of my places (sorting floor, reckoning
   house, loading stage). Phone screenshots checked; full suite green. (Claude Opus 5.5)
+
+## 2026-11-16: every trick readable after the art pass; puzzle waves solo too
+
+- Kyle: "make sure any and all other puzzles are clear"; "have mobs come in to hassle you a little in solo player (in
+  waves so you can do things in between), and more in multiplayer."
+- Phone screenshots of each: the incline reads (striped lane, rails, the spent cart). Fixed: the lamp room (the art
+  pass's tall posts made the lamps small, a dark one a plain post: client/lampmandraw.ts, a bigger cage near the top,
+  a dark one edged faint on the glow layer); the fork yard (the two ways' names ran off a phone's edges and under the
+  yard's fire baskets: client/waycues.ts keeps a vote road's name whole on screen, 16 px in; scene.ts passes the
+  view's width).
+- Puzzle waves (sim/tubs.ts, PUZZLE.wave): anyone near and it unsolved, goblins out of the drift in waves with a lull
+  between: alone 2 every 20 s, with friends 2 + 1 a hero past the first every 12 s; the next waits while the last is
+  about. tests/puzzles.test.ts. Full suite green. (Claude Opus 5.5)

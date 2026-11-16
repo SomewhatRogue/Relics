@@ -544,7 +544,7 @@ export class Scene {
       const e = r.area, ex = OX + e.x * PX - cx, ey = OY + e.y * PX - cy;
       // Under a gap in the back wall; beside one in a side wall, inside the room.
       const [tx, ty] = r.side === 'W' ? [ex + e.w * PX + 26, ey + (e.h * PX) / 2 - 3] : r.side === 'E' ? [ex - 26, ey + (e.h * PX) / 2 - 3] : [ex + (e.w * PX) / 2, ey + e.h * PX + 34];
-      drawWayWord(glow, r, tx, ty, room.exitOpen);
+      drawWayWord(glow, r, tx, ty, room.exitOpen, this.vw);
     }
     // An expedition: the rings where a job is done by standing there, and the beacon (expeddraw.ts).
     const ground = (x: number, y: number): [number, number] => [OX + x * PX - cx, OY + y * PX - cy];

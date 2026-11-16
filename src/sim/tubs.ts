@@ -5,8 +5,8 @@
  *   if that square is on the grid, not a wall, and has no tub (a tub's never pulled, only pushed).
  * - GRAB by the lever puts every tub back where it started (a stuck one is never a dead run).
  * - Every plate with a tub on it: solved, and the stretch's gate is ready (sim/stretches.ts). The tubs stay put.
- * - Two or more heroes up near the grid and it unsolved: goblins out of the drift (`from`) while you work it, a few
- *   at once (PUZZLE.wave). Alone, just the puzzle.
+ * - Anyone near the grid and it unsolved: goblins out of the drift (`from`) in waves while you work it, a lull
+ *   between: two alone, one more a hero with friends (PUZZLE.wave). A wave waits while the last's still about.
  * The tubs are props, so a friend's screen and a handed-on room have them; who's pushing and the wave's clock are
  * kept here only (they start over after a handover).
  */
@@ -94,17 +94,20 @@ function stepOne(w: World, p: TubPuzzle, i: number, s: State, intents: Map<strin
     t.to = centre(p, to);
     w.ev.push({ k: 'tub', what: 'push', x: t.x, y: t.y, by: h.id });
   }
-  // Two or more at it: goblins out of the drift while it's worked, a few at once.
+  // Anyone at it: goblins out of the drift in waves while it's worked, a lull between; more with friends.
   const near = players(w.heroes).filter((h) => h.act !== 'down' && !h.out && h.x > p.x - PUZZLE.near && h.x < p.x + p.cols * p.cell + PUZZLE.near && h.y > p.y - PUZZLE.near && h.y < p.y + p.rows * p.cell + PUZZLE.near);
-  if (near.length < 2) return;
-  if (s.next[i] < 0) s.next[i] = w.now + PUZZLE.wave.first;
+  if (!near.length) return;
+  const party = players(w.heroes).filter((h) => !h.out).length, W = PUZZLE.wave;
+  if (s.next[i] < 0) s.next[i] = w.now + W.first;
   s.waves[i] = s.waves[i].filter((e) => !isDead(e));
-  if (w.now < s.next[i]) return;
-  s.next[i] = w.now + PUZZLE.wave.every;
-  if (s.waves[i].length >= PUZZLE.wave.most) return;
-  const e = spawn(p.from.x, p.from.y), T = INSTANCE.tough;
-  Object.assign(e, { alert: true, fierce: true, hp: Math.round(e.maxHp * T.hp), maxHp: Math.round(e.maxHp * T.hp), harm: +((e.harm ?? 1) * T.harm).toFixed(3) });
-  s.waves[i].push(e);
+  if (w.now < s.next[i] || s.waves[i].length) return;
+  s.next[i] = w.now + (party > 1 ? W.every : W.soloEvery);
+  const n = W.solo + (party - 1) * W.perHero, T = INSTANCE.tough;
+  for (let k = 0; k < n; k++) {
+    const e = spawn(p.from.x + ((k % 3) - 1) * 0.7, p.from.y + Math.floor(k / 3) * 0.7);
+    Object.assign(e, { alert: true, fierce: true, hp: Math.round(e.maxHp * T.hp), maxHp: Math.round(e.maxHp * T.hp), harm: +((e.harm ?? 1) * T.harm).toFixed(3) });
+    s.waves[i].push(e);
+  }
 }
 
 /** A puzzle still to solve: a plate without a tub, or one still sliding. */

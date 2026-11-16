@@ -114,9 +114,13 @@ export function drawCue(c: Ctx, way: WayKind, x: number, y: number, seed: number
 }
 
 /** A way's word, beside its gap (as the old road labels sat), dim till the way's open. */
-export function drawWayWord(g: CanvasRenderingContext2D, r: Road, x: number, y: number, open: boolean): void {
+export function drawWayWord(g: CanvasRenderingContext2D, r: Road, x: number, y: number, open: boolean, vw = g.canvas.width): void {
   const word = r.way ? WAYS[r.way].word : r.label, tw = textWidth(word);
-  const tx = r.side === 'W' ? x : r.side === 'E' ? x - tw : x - tw / 2;
+  // (An Instance's fork: kept whole on the screen, a way's name being what you vote on. Kyle, 2026-11-16, after
+  // the art pass scaled the world up and both ran off a phone's edges.)
+  const raw = r.side === 'W' ? x : r.side === 'E' ? x - tw : x - tw / 2;
+  // (Clear of the yard's fire baskets at a phone's edges too.)
+  const tx = r.vote ? Math.max(16, Math.min(vw - tw - 16, raw)) : raw;
   g.globalAlpha = open ? 1 : 0.7;
   drawText(g, word, Math.round(tx), Math.round(y), r.way ? WAY_COL[r.way] : r.road === 'high' ? '#ffd27a' : '#9fe8ff');
   g.globalAlpha = 1;

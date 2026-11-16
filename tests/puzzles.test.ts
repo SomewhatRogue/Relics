@@ -125,19 +125,22 @@ describe('pushing tubs', () => {
     expect(goal(run, room).text).not.toContain('tubs');
   });
 
-  it('two or more at it: goblins out of the drift while it`s worked, a few at once; alone, none', () => {
-    const near = (ids: string[]) => {
+  it('goblins out of the drift in waves while it`s worked, a lull between: two alone, more with friends', () => {
+    const watch = (ids: string[]) => {
       const { room, hs, p } = floor(ids);
-      const m = centre(p, [3, 4]);
-      for (let n = 0; n < Math.round((PUZZLE.wave.first + PUZZLE.wave.every * 4 + 0.5) / TICK); n++) {
+      const m = centre(p, [3, 4]), counts: number[] = [];
+      for (let n = 0; n < Math.round((PUZZLE.wave.first + 0.5) / TICK); n++) {
         hs.forEach((h, i) => Object.assign(h, { x: m.x + i * 0.8, y: m.y + 2.2, hp: 9999 }));
         room.step();
       }
-      return { n: room.enemies.length, at: room.enemies.every((e) => Math.hypot(e.x - p.from.x, e.y - p.from.y) < 12) };
+      counts.push(room.enemies.length);
+      // Killed off, the next waits its lull.
+      for (const e of room.enemies) Object.assign(e, { hp: 0, act: 'dead' });
+      for (let n = 0; n < Math.round(2 / TICK); n++) hs.forEach((h) => Object.assign(h, { hp: 9999 })), room.step();
+      counts.push(room.enemies.filter((e) => e.act !== 'dead').length);
+      return counts;
     };
-    expect(near(['me']).n).toBe(0);
-    const two = near(['a', 'b']);
-    expect(two.n).toBeGreaterThan(0);
-    expect(two.n).toBeLessThanOrEqual(PUZZLE.wave.most);
+    expect(watch(['me'])).toEqual([PUZZLE.wave.solo, 0]);
+    expect(watch(['a', 'b', 'c'])[0]).toBe(PUZZLE.wave.solo + 2 * PUZZLE.wave.perHero);
   });
 });

@@ -54,10 +54,12 @@ export const INSTANCE = {
 /**
  * Instance puzzles (sim/tubs.ts, docs/design/instance-puzzles.md). A tub goes a square when a hero holds the stick
  * into it `push` s, touching it (within `touch` of it); it slides at `speed` tiles a second. GRAB within `lever` of
- * the lever puts the tubs back. Two or more up and near (`near` tiles of the grid), and it's unsolved: one of
- * `wave.kinds` out of its drift every `wave.every` s (the first after `wave.first`), `wave.most` of them about at once.
+ * the lever puts the tubs back. Anyone near it (`near` tiles of the grid) and it unsolved: goblins out of its drift
+ * in waves with a lull between, the first after `wave.first` s. Alone, `wave.solo` of them every `wave.soloEvery` s;
+ * with friends, `wave.solo` more a hero past the first... (Kyle, 2026-11-16: "mobs come in to hassle you a little in
+ * solo, in waves so you can do things in between, and more in multiplayer".) A wave waits while the last is about.
  */
-export const PUZZLE = { push: 0.3, touch: 0.32, speed: 4.5, lever: 1.6, near: 4, wave: { first: 5, every: 9, most: 3 } };
+export const PUZZLE = { push: 0.3, touch: 0.32, speed: 4.5, lever: 1.6, near: 4, wave: { first: 6, solo: 2, soloEvery: 20, perHero: 1, every: 12 } };
 /**
  * THE LAMPMAN (sim/lampman.ts). A lamp lights `r` tiles round it. Every `every` s (the first `first` s after it's
  * roused) it goes for the lit lamp nearest the nearest hero, walking at `walk`, and stood within `reach` snuffs it
