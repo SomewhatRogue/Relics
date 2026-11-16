@@ -9,6 +9,8 @@ import type { GameMap } from './arena.js';
 import type { WorldState } from './story.js';
 
 import { HOME, b, hall, infirmary, n, room } from './townhalls.js';
+import { bigHall, bigInfirmary } from './bighalls.js';
+import { LAYOUT } from './town.js';
 
 /** The families who take the houses on Rescue Row, in the order the houses are lit. */
 export const FAMILIES = [
@@ -25,9 +27,12 @@ export const PATIENTS = ['AMOS', 'LETTY', 'CORIN'];
 
 /** A Wickhold building's inside, by its door. */
 export function townInterior(door: string, w: WorldState): GameMap {
+  // The new town's insides at the new scale (docs/design/new-look-interiors.md), behind `?street` with it.
+  const big = LAYOUT.on ? bigHall(door) : null;
+  if (big) return big;
   const h = hall(door);
   if (h) return h;
-  if (door === 'infirmary') return infirmary(PATIENTS, Math.min(PATIENTS.length, w.rescued));
+  if (door === 'infirmary') return (LAYOUT.on ? bigInfirmary : infirmary)(PATIENTS, Math.min(PATIENTS.length, w.rescued));
   if (door === 'granary') return room('THE GRANARY', 10, 7, { ...HOME, floor: 'dirt' },
     [b('sacks', 0.8, 0.6, 2, 1), b('sacks', 7.2, 0.6, 2, 1), b('sacks', 0.8, 2.2, 1.4, 1)],
     [n('FARMER JOS', 5, 2.2, 'granary', 'farmer')]);

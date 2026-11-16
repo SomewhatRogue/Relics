@@ -14,7 +14,7 @@ import { SWING } from '../swing';
 // (The new look's test street, `?hd&street`: a perspective chase camera, lower, looking down 26 degrees at your hero
 // through a 28 degree lens, turning up to 45 degrees toward where you walk in town; streetkit.ts, swing.ts.)
 export const PITCH = ((STREET ? 26 : 36) * Math.PI) / 180;
-const FOV = 28, SWING_MAX = Math.PI / 4;
+const FOV = 28, SWING_MAX = Math.PI / 4, IN_PITCH = (36 * Math.PI) / 180;
 export const NEAR = 20;
 export const FAR = 110;
 const DIST = 60;
@@ -104,13 +104,16 @@ export class Cam {
       }
     } else if (map.name !== 'WICKHOLD') SWING.yaw = 0;
     this.last = [x, z];
+    // Inside (the new look's bigger rooms), the view stays in the room: no looking out past its front or sides.
+    if (map.wallH) [x, z] = inRoom(map, x, z, this.W / this.ppu / 2, this.H / this.ppu / 2 / Math.sin(IN_PITCH));
     this.at.x += (x - this.at.x) * k;
     this.at.z += (z - this.at.z) * k;
     this.ready = true;
     // Up on a raised level (the new town's Kirkhill), the camera rises with you, easing so a step doesn't jolt it.
     this.lift += ((map.ledges ? levelAt(map, x, z) * LEDGE_H : 0) - this.lift) * k;
-    const y = SWING.yaw, cp = Math.cos(PITCH), ly = 0.8 + this.lift;
-    this.cam.position.set(this.at.x - Math.sin(y) * cp * this.dist, ly - 0.8 + Math.sin(PITCH) * this.dist, this.at.z + Math.cos(y) * cp * this.dist);
+    // (The new look's insides look down a little steeper, at the room and its back wall: shared/bighalls.ts.)
+    const p = map.wallH ? IN_PITCH : PITCH, y = SWING.yaw, cp = Math.cos(p), ly = 0.8 + this.lift;
+    this.cam.position.set(this.at.x - Math.sin(y) * cp * this.dist, ly - 0.8 + Math.sin(p) * this.dist, this.at.z + Math.cos(y) * cp * this.dist);
     this.cam.lookAt(this.at.x, ly, this.at.z);
     this.cam.updateMatrixWorld();
   }
@@ -120,4 +123,11 @@ export class Cam {
     this.v.set(x, y, z).project(this.cam);
     return [((this.v.x + 1) / 2) * this.W, ((1 - this.v.y) / 2) * this.H];
   }
+}
+
+/** Where to look so a view `hw` tiles half-wide and `hd` half-deep on the floor stays in the room (centred if it's smaller). */
+function inRoom(m: GameMap, x: number, z: number, hw: number, hd: number): [number, number] {
+  const fit = (v: number, lo: number, hi: number) => (lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, v)));
+  // (Never so far up the room that your hero by the door drops off the foot of the screen.)
+  return [fit(x, hw - 1, m.w + 1 - hw), Math.max(z - hd * 0.4, fit(z, hd * 0.6, m.h + 2.4 - hd))];
 }

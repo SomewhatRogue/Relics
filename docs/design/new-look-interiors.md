@@ -84,9 +84,12 @@ Same door ids and the same rule in (`townInterior`); you come in at the bottom a
 2. **The structure.** insidekit.ts: pillars, posts, galleries, beams, windows with moonlight, the low front wall, the
    kit's materials; insidefurn3d.ts's new pieces. Screenshots, land each building.
 3. **The showpieces.** The back-wall sheet, cut and hung. Screenshots against the concepts.
+4. **Buildings out on jobs and in the dungeons** (Kyle, 2026-11-15: "I want this same idea to extend to inside of
+   buildings within the dungeons etc."): the cottages, barns, longhouses, manors and tithe barns (shared/inside.ts,
+   halls.ts) and any rooms built inside the dungeons, at the same scale and with the same tall walls. A short addition
+   to this spec first, once slices 1 to 3 have settled the look.
 
-## Open, for Kyle
+## Kyle's calls (2026-11-15)
 
-- Any pick swapped for another take?
-- Extra drinkers in the Rat and folk at prayer in the church (look only, nothing to say), or keep to today's people?
-- The counting house, the tower and the lodge are out of this pass; after, or never?
+"Yes to all of these... I love this." The picks stand; extra drinkers in the Rat, folk at prayer and in the hall
+(look only); the counting house, the tower and the hunters' lodge after these six; and slice 4.

@@ -23,6 +23,7 @@ import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
 import { burningAt } from '../../shared/blaze';
 import { buildGround, type Ground } from './ground';
+import { disposeInside, insideKit } from './insidekit';
 import { lampsNow } from './lamps3d';
 import { Lights, type L3 } from './lights3d';
 import { BOXFIGS, QUALITY, brightGamma, perfOn, quality, type Quality } from './look';
@@ -70,6 +71,8 @@ export class View3D {
   private actors = new Actors();
   private figs = new Figs();
   private buildings = new Buildings();
+  /** The new look's tall inside walls (insidekit.ts). */
+  private inside: THREE.Group | null = null;
   private people = new People();
   private grim = new Grim3D();
   private witch = new WitchFires();
@@ -308,15 +311,18 @@ export class View3D {
 
   private setMap(map: GameMap): void {
     this.sky?.build(map);
-    const town = map.name === 'WICKHOLD';
+    // (The new look's insides take the town's zoom: shared/bighalls.ts.)
+    const town = map.name === 'WICKHOLD' || !!map.wallH;
     if (STREET && town !== this.town) (this.town = town), this.resize();
     if (this.ground) this.scene.remove(this.ground.group), this.ground.dispose();
+    if (this.inside) this.scene.remove(this.inside), disposeInside(this.inside), (this.inside = null);
     this.buildings.clear();
     this.people.clear();
     this.grim.build(map);
     this.witch.build(map);
     this.ground = buildGround(map, paintMap(map, false));
     this.scene.add(this.ground.group);
+    if ((this.inside = insideKit(map))) this.scene.add(this.inside);
     this.map = map;
     this.view.reset();
   }

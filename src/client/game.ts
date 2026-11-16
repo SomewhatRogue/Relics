@@ -10,6 +10,7 @@ import { QUESTW } from './questwords';
 import { normName } from '../shared/names';
 import { releaseName } from './names';
 import { placeOf, spotOf, type PastimeId } from '../shared/pastimes';
+import { bigSeat } from '../shared/bighalls';
 import { petSpots, type Dog } from './petting';
 import { ownPetOk } from './petwhen';
 import { doorAt, inArea, npcAt, pushingInto, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
@@ -584,7 +585,8 @@ export class Game {
     if (this.mode !== 'town' || this.room.map.name !== placeOf(id)) return;
     const h = this.hero, sp = spotOf(id);
     // (Out in the street, where the seat stands in the town being played: the new town moves it, town-layout.md.)
-    const [sx, sy] = this.room.map.name === 'WICKHOLD' ? townPoint(sp.seat[0], sp.seat[1]) : [sp.seat[0], sp.seat[1]];
+    // (Inside, the new look's bigger rooms move the Rat's tables and the anvil: shared/bighalls.ts.)
+    const [sx, sy] = this.room.map.name === 'WICKHOLD' ? townPoint(sp.seat[0], sp.seat[1]) : this.room.map.wallH ? bigSeat(id, sp.seat) : [sp.seat[0], sp.seat[1]];
     Object.assign(h, { x: sx, y: sy, fx: sp.face[0], fy: sp.face[1], moving: false });
     this.pastime = id;
     this.mode = 'pastime';

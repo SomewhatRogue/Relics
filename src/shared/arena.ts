@@ -299,6 +299,8 @@ export interface GameMap {
   h: number;
   /** Height of the back wall's face, in tiles (three-quarter view). */
   wallFace: number;
+  /** The new look's insides (shared/bighalls.ts): how tall the walls rise in 2.5D, in tiles (three/insidekit.ts). */
+  wallH?: number;
   rounds: Round[];
   blocks: Block[];
   /** Paint only, never collided or walked round: animals about the streets (shared/townlife.ts). */
