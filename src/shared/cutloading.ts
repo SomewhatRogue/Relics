@@ -35,7 +35,7 @@ export function loadingPlan(job: Job): RoomPlan {
   k.water.push(at(s.sump));
   // The ropeway's pylons down the stage's sides; spilled ore; a loader who didn't get out.
   for (const y of [5, 11, 17]) round(k, 'support', 1.2, y, 0.3), round(k, 'support', w - 1.2, y + 1, 0.3);
-  mark(k, 'debris', dx + 4.6, dy + 12.6, 3, 1.4), mark(k, 'trample', dx + 4.4, dy + 4.8, 3.6, 3.2);
+  mark(k, 'debris', dx + 4.6, dy + 12.6, 3, 1.4);
   body(k, dx + 1.4, dy + 12.4, 'villager');
   k.braziers.push(at({ x: 0.9, y: 5.0, r: 0.3 }), at({ x: 11.1, y: 5.0, r: 0.3 }), at({ x: 10.8, y: 9.6, r: 0.3 }), { x: 2.2, y: h - 2.4, r: 0.3, wild: true });
   // THE HAULIER on its stage, the carts at their stops, the chained chest behind.

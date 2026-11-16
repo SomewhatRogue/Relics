@@ -16,6 +16,10 @@ const fill = (g: CanvasRenderingContext2D, col: string, x: number, y: number, w:
 /** The plates, on the floor (the lit layer, and the glow layer for a plate with a tub on it). */
 export function drawPlates(c: Ctx, map: GameMap, props: Prop[], cx: number, cy: number, now: number): void {
   for (const p of map.puzzles ?? []) {
+    // The grid, a chalk tick at each square's corner, faint on the glow layer: a tub goes a square at a time.
+    c.glow.globalAlpha = 0.22;
+    for (let r = 0; r <= p.rows; r++) for (let q = 0; q <= p.cols; q++) fill(c.glow, CHALK, Math.round(OX + (p.x + q * p.cell) * PX - cx) - 1, Math.round(OY + (p.y + r * p.cell) * PX - cy), 3, 1);
+    c.glow.globalAlpha = 1;
     const on = props.filter((q) => q.kind === 'tub' && !q.broken && !q.to).map((q) => cellAt(p, q.x, q.y));
     for (const cell of p.plates) {
       const m = centre(p, cell), s = Math.round(p.cell * PX * 0.78), x = Math.round(OX + m.x * PX - cx - s / 2), y = Math.round(OY + m.y * PX - cy - s / 2);
@@ -43,20 +47,51 @@ function drawLever(c: Ctx, x: number, y: number): void {
   fill(g, '#9a3a2a', x + 4, y - 17, 3, 2);
 }
 
-/** An ore tub at its foot (x, y) on screen. */
+/**
+ * An ore tub at its foot (x, y) on screen: planks bound in iron, heaped with ore, with a faint pale edge on the glow
+ * layer so it reads as a thing to push in the adit's dark (Kyle, 2026-11-16: "there's no tubs": since the darker
+ * art pass they were dark boxes among the floor's clutter).
+ */
 export function drawTub(c: Ctx, p: Prop, x: number, y: number): void {
-  const g = c.lit, w = Math.round(PX * 1.0), h = Math.round(PX * 0.62), x0 = Math.round(x - w / 2), y0 = Math.round(y - h) - 1;
+  const g = c.lit, w = Math.round(PX * 1.2), h = Math.round(PX * 0.72), x0 = Math.round(x - w / 2), y0 = Math.round(y - h) - 1;
   shadow(c, x, y, Math.round(w * 0.55));
   fill(g, WOOD_LO, x0, y0, w, h);
-  for (let i = 1; i < h - 1; i += 3) fill(g, i % 2 ? WOOD : WOOD_HI, x0 + 1, y0 + i, w - 2, 2);
-  fill(g, IRON, x0, y0 + 1, w, 1), fill(g, IRON, x0, y0 + h - 2, w, 1);
-  fill(g, IRON_HI, x0 + 2, y0 + 1, 1, 1), fill(g, IRON_HI, x0 + w - 3, y0 + 1, 1, 1);
+  for (let i = 1; i < h - 1; i += 3) fill(g, i % 2 ? '#a0703c' : '#c08a4e', x0 + 1, y0 + i, w - 2, 2);
+  fill(g, '#8a8494', x0, y0 + 1, w, 1), fill(g, '#8a8494', x0, y0 + h - 2, w, 1), fill(g, '#d8d4e0', x0 + 2, y0 + 1, w - 4, 1);
+  fill(g, IRON, x0 + 2, y0 + 2, 1, h - 4), fill(g, IRON, x0 + w - 3, y0 + 2, 1, h - 4);
   // Heaped with ore, a fleck or two of copper.
-  for (let i = 0; i < 4; i++) fill(g, ORE, x0 + 2 + i * Math.round((w - 6) / 3), y0 - 2 - (i % 2), Math.round((w - 4) / 3), 3);
-  fill(g, COPPER, x0 + Math.round(w * 0.3), y0 - 2, 1, 1), fill(g, COPPER, x0 + Math.round(w * 0.65), y0 - 1, 1, 1);
+  for (let i = 0; i < 4; i++) fill(g, i % 2 ? '#7a6a5e' : ORE, x0 + 2 + i * Math.round((w - 6) / 3), y0 - 3 - (i % 2), Math.round((w - 4) / 3), 4);
+  fill(g, COPPER, x0 + Math.round(w * 0.3), y0 - 3, 2, 1), fill(g, COPPER, x0 + Math.round(w * 0.65), y0 - 2, 1, 1);
+  // Its edge, faint on the glow layer (gold once it's on a plate is the plate's own: drawPlates).
+  const e = c.glow;
+  e.globalAlpha = p.to ? 0.5 : 0.3;
+  fill(e, CHALK, x0 - 1, y0 - 4, w + 2, 1), fill(e, CHALK, x0 - 1, y0 + h, w + 2, 1), fill(e, CHALK, x0 - 1, y0 - 4, 1, h + 5), fill(e, CHALK, x0 + w, y0 - 4, 1, h + 5);
+  e.globalAlpha = 1;
 }
 
-/** The puzzles' levers as scene items, sorted with the bodies by their foot. */
+/** A heap of fallen rock filling a wall square of the grid, its foot (x, y) on screen, lit along its top. */
+function drawBoulder(c: Ctx, x: number, y: number, s: number, seed: number): void {
+  const g = c.lit, w = Math.round(s * 0.92), x0 = Math.round(x - w / 2);
+  shadow(c, x, y, Math.round(w * 0.55));
+  const lumps: [number, number, number][] = [[0.28, 0.5, 0.36], [0.68, 0.46, 0.34], [0.5, 0.22, 0.4]];
+  for (const [i, [lx, ly, lr]] of lumps.entries()) {
+    const cx0 = x0 + Math.round(lx * w), r = Math.round(lr * w * (0.9 + ((seed + i) % 3) * 0.06)), top = y - Math.round(s * 0.18) - Math.round((1 - ly) * s * 0.7);
+    for (let dy = -r; dy <= r; dy++) {
+      const half = Math.round(Math.sqrt(Math.max(0, r * r - dy * dy)) * 1.1);
+      fill(g, dy < -r * 0.45 ? '#9a96a4' : dy < r * 0.2 ? '#6e6a78' : '#4a4652', cx0 - half, top + Math.round(dy * 0.8), half * 2, 1);
+    }
+    fill(g, '#c8c4d0', cx0 - Math.round(r * 0.4), top - Math.round(r * 0.75), Math.max(2, Math.round(r * 0.5)), 1);
+  }
+  fill(g, '#34313a', x0 + Math.round(w * 0.45), y - Math.round(s * 0.5), 1, Math.round(s * 0.25));
+}
+
+/** The puzzles' levers and their grids' fallen rock as scene items, sorted with the bodies by their foot. */
 export function leverItems(c: Ctx, map: GameMap, cx: number, cy: number): { y: number; draw: () => void }[] {
-  return (map.puzzles ?? []).map((p) => ({ y: OY + p.lever.y * PX, draw: () => drawLever(c, Math.round(OX + p.lever.x * PX - cx), Math.round(OY + p.lever.y * PX - cy)) }));
+  return (map.puzzles ?? []).flatMap((p) => [
+    { y: OY + p.lever.y * PX, draw: () => drawLever(c, Math.round(OX + p.lever.x * PX - cx), Math.round(OY + p.lever.y * PX - cy)) },
+    ...p.walls.map((cell, i) => {
+      const m = centre(p, cell), foot = m.y + p.cell * 0.42;
+      return { y: OY + foot * PX, draw: () => drawBoulder(c, Math.round(OX + m.x * PX - cx), Math.round(OY + foot * PX - cy), Math.round(p.cell * PX), i * 7 + cell[0]) };
+    }),
+  ]);
 }

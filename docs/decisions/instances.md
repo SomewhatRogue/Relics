@@ -362,3 +362,15 @@ not killing quickly, so kind of anticlimactic".
   doesn't. Nothing of mine changes the map mid-run: gates are blocks (they come piece by piece), the tubs props, the
   lamps and the Brakesman's state on goblins; the Haulier's fight changes nothing in it. Full suite green.
   Not checked in two browsers. (Claude Opus 5.5)
+
+## 2026-11-16: the sorting floor unreadable after the darker art
+
+- Kyle: "stuck outside a gate that says push three tubs but there's no tubs and nothing to push and no one to attack."
+  The room had its three tubs (checked, live build too). Since the "Dark and gold" art pass and the strewn ground:
+  the tubs were small dark boxes among the clutter, the boulders (round 'rock', a small fixed sprite) dark ovals like
+  shadows, and my 'trample' marks now a hard dark square like a pit; and with no goblins the marker pointed at the
+  gate, walking him past the tubs to it.
+- client/tubdraw.ts: tubs bigger, lighter planks, bright iron, a faint pale edge on the glow layer; each wall square a
+  heap of fallen rock lit along its top; a faint chalk tick at each grid corner. client/wayfind.ts: a stretch with an
+  unsolved puzzle points at the nearest tub off its plate. 'trample' marks out of my places (sorting floor, reckoning
+  house, loading stage). Phone screenshots checked; full suite green. (Claude Opus 5.5)

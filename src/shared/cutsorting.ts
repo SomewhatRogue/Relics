@@ -40,7 +40,7 @@ export function sortingPlan(job: Job): RoomPlan {
   for (const [c, r] of p.walls) round(k, 'rock', A.x + (c + 0.5) * A.cell, A.y + (r + 0.5) * A.cell, 0.6);
   // The tubs where they were left.
   for (const cell of p.tubs) k.props.push({ kind: 'tub', ...centre(p, cell) });
-  mark(k, 'debris', 2.4, 17.4, 3, 1.4), mark(k, 'trample', 7.4, 14.2, 3.4, 3.4);
+  mark(k, 'debris', 2.4, 17.4, 3, 1.4);
   body(k, 14.6, 15.6, 'villager');
   // Fire baskets at the grid's corners (never where you push from: you walk round them), so it reads; one by the way in.
   const gx = A.x + p.cols * A.cell, gy = A.y + p.rows * A.cell;

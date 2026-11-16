@@ -26,6 +26,8 @@ function nearest(me: P, list: P[]): P | null {
 }
 
 import { keepers, lastStretch, stretchOf } from '../sim/stretches';
+import { unsolved } from '../sim/tubs';
+import { cellAt } from '../shared/puzzle';
 
 export function wayTarget(game: Game): P | null {
   const room = game.room, me = game.hero;
@@ -34,7 +36,11 @@ export function wayTarget(game: Game): P | null {
   const st = stretchOf(game.run, room.map);
   if (st && !lastStretch(game.run, room.map)) {
     const keep = keepers(st, room), g = st.at;
-    const p = keep.length ? nearest(me, keep) : g ? { x: g.x + g.w / 2, y: g.y + g.h / 2 } : null;
+    // A puzzle keeping it: the nearest tub still off its plate, not the shut gate (Kyle, 2026-11-16: it led him past
+    // the tubs to the gate; sim/tubs.ts).
+    const pz = st.puzzle !== undefined && unsolved(room.map, room.props, st.puzzle) ? room.map.puzzles![st.puzzle] : undefined;
+    const tubs = pz ? room.props.filter((q) => q.kind === 'tub' && !q.broken && !pz.plates.some(([c, r]) => { const [a, b] = cellAt(pz, q.x, q.y); return a === c && b === r; })) : [];
+    const p = keep.length ? nearest(me, keep) : tubs.length ? nearest(me, tubs) : g ? { x: g.x + g.w / 2, y: g.y + g.h / 2 } : null;
     return p && Math.hypot(p.x - me.x, p.y - me.y) > NEAR ? p : null;
   }
   const t = target(room, me, game.houses());

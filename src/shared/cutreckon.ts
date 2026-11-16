@@ -29,7 +29,7 @@ export function reckonPlan(job: Job): RoomPlan {
   for (const y of [9.6, 13.2, 16.8]) block(k, 'books', 2.8, y, 0.8, 2.6);
   block(k, 'counter', 4.8, 19.6, 4.6, 0.8), block(k, 'counter', 11.6, 19.6, 2.6, 0.8);
   block(k, 'desk', 5.6, 11.4, 1.8, 1), block(k, 'desk', 9.4, 14.2, 1.8, 1), block(k, 'sacks', 16.2, 21.4, 2.2, 1.2);
-  mark(k, 'debris', 4.4, 12.6, 3.4, 4.2), mark(k, 'debris', 9, 16.2, 2.6, 2), mark(k, 'trample', 9.6, 20.4, 2.8, 3.6);
+  mark(k, 'debris', 4.4, 12.6, 3.4, 4.2), mark(k, 'debris', 9, 16.2, 2.6, 2);
   // The clerk's room: its desk, the clerk, a chest.
   block(k, 'desk', 16.6, 9.2, 1.8, 0.9);
   body(k, A.clerk.x, A.clerk.y, 'villager');
