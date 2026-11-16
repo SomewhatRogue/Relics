@@ -7,7 +7,7 @@
  * An oil slick works on the stick before it gets here (sim/oil.ts slipIntent), the same on both sides.
  */
 import { wadeAt } from '../shared/arena';
-import { HERO, STEALTH, WEAPONS, guardOf } from '../shared/tuning';
+import { HERO, STEALTH, STREAM, WEAPONS, guardOf } from '../shared/tuning';
 import { brandySpeed } from './brandy';
 import { quickMult } from './charge';
 import { statsOf } from './gearstats';
@@ -23,7 +23,9 @@ export const guardUp = (h: Hero, inp: Intent) => inp.block && h.stamina > 0 && !
 export function walkSpeed(h: Hero, inp: Intent, now: number, k = 1): number {
   const m = Math.min(1, Math.hypot(inp.mx, inp.my));
   if (m < 0.05) return 0;
-  return HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
+  // (A storm stream at its full build slows you: shared/spellbook.ts STREAM.topWalk.)
+  const heavy = h.stream && h.stream.step >= STREAM.steps.length ? STREAM.topWalk : 1;
+  return HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * heavy * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
 }
 
 /** The walking pace of what the hero is doing now (`null`: this act doesn't walk on the stick). */

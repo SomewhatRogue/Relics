@@ -63,10 +63,11 @@ describe("the Mage's techniques", () => {
   it('SPELLTHIEF: a PERFECT hold gives back half its magic; a plain one nothing', () => {
     for (const rank of [2, 3])
       for (const perfect of [false, true]) {
-        const h = Object.assign(mage('wand', rank), { stamina: 100, perfect, heavy: true }), ev: FightEvent[] = [];
+        // (The staff: the wand's perfect is half price already.)
+        const h = Object.assign(mage('staff', rank), { stamina: 100, perfect, heavy: true }), ev: FightEvent[] = [];
         expect(paySpell(h, 10, ev)).toBe(true);
-        const back = rank === 3 && perfect ? Math.round(SPELL.wand * SPELLTHIEF.back) : 0;
-        expect(h.stamina).toBe(100 - SPELL.wand + back);
+        const back = rank === 3 && perfect ? Math.round(SPELL.staff * SPELLTHIEF.back) : 0;
+        expect(h.stamina).toBe(100 - SPELL.staff + back);
         expect(ev.some((x) => x.k === 'spellthief')).toBe(back > 0);
       }
     // A spellblade's perfect is free already: it gives back half of what the hold would have cost.

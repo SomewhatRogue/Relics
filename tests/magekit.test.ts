@@ -71,11 +71,16 @@ describe('the wand', () => {
 });
 
 describe('magic costs', () => {
-  it("the wand's hold spends 20 and says so", () => {
+  it("the wand's hold spends 20 and says so; let go on its tight flash, half (Kyle, 2026-11-16)", () => {
     const a = arena('wand', [[9, 4]]);
-    const ev = a.loose(0.7, 0.1);
+    const ev = a.loose(0.85, 0.1);
     expect(ev.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.wand });
     expect(a.h.stamina).toBeLessThan(HERO.stamina - SPELL.wand + 5);
+    const b = arena('wand', [[9, 4]]), ev2 = b.loose(0.65, 0.1);
+    expect(ev2.some((x) => x.k === 'perfect')).toBe(true);
+    expect(ev2.find((x) => x.k === 'magic')).toMatchObject({ n: Math.round(SPELL.wand * WAND.flashCost) });
+    // (The flash is short: 0.12 s, where other kits have 0.25.)
+    expect(arena('wand', [[9, 4]]).loose(0.78, 0.1).some((x) => x.k === 'perfect')).toBe(false);
   });
 
   it('a spell you cannot pay for fizzles at once, and nothing is cast or spent', () => {

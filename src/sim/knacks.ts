@@ -11,7 +11,7 @@ export const counterWindow = (h: Hero) => GUARD.counterWindow + knack(h, 'counte
 /** How wide the block covers, in degrees: the kit's, and WIDE GUARD's. */
 export const guardArc = (h: Hero) => WEAPONS[h.weapon].guardArc + knack(h, 'guardArc');
 /** How long after a full draw a release is perfect (the white flash). */
-export const releaseWindow = (h: Hero) => RELEASE.perfect + knack(h, 'flash');
+export const releaseWindow = (h: Hero) => (WEAPONS[h.weapon].flashWindow ?? RELEASE.perfect) + knack(h, 'flash');
 /** A shot loosed on the white flash: this times as hard (DEADEYE on top). */
 export const perfectMult = (h: Hero) => 1 + knack(h, 'perfect');
 

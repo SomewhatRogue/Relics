@@ -35,7 +35,8 @@ export function refuseSpell(h: Hero, now: number, ev: FightEvent[]): boolean {
 
 /** The release: pay for the spell (false: it fizzled, nothing spent). Let go on the flash, a spellblade's is free. */
 export function paySpell(h: Hero, now: number, ev: FightEvent[]): boolean {
-  const cost = spellCost(h), free = blade(h) && h.perfect, n = free ? 0 : cost;
+  // (A wand's let go on the flash costs WAND.flashCost of it.)
+  const cost = spellCost(h), free = blade(h) && h.perfect, n = free ? 0 : h.weapon === 'wand' && h.perfect ? Math.max(1, Math.round(cost * WAND.flashCost)) : cost;
   if (!free && short(h)) return ev.push({ k: 'fizzle', x: h.x, y: h.y }), false;
   if (n > 0) Object.assign(h, { stamina: Math.max(0, h.stamina - n), staminaAt: now }), ev.push({ k: 'magic', x: h.x, y: h.y, n });
   // SPELLTHIEF: on the flash, half of it back (sim/techmage.ts).

@@ -13,6 +13,8 @@ import { newEnemy } from '../src/sim/enemies';
 import { wet } from '../src/sim/wet';
 import type { FightEvent, Zone } from '../src/sim/types';
 import { inSkyStrike } from '../src/sim/skystrike';
+import { walkSpeed } from '../src/sim/walkspeed';
+import { NO_INTENT } from '../src/sim/types';
 import { Decoder, Encoder, stateOf } from '../src/client/snap';
 import { lost, mageArena } from './magearena';
 
@@ -124,6 +126,16 @@ describe('storm jumps only between wet goblins', () => {
 });
 
 describe("the wand's storm stream", () => {
+  it('fully built it slows your walk (Kyle, 2026-11-16: "a little too strong")', () => {
+    const pace = (step: number) => {
+      const h = mageArena('wand', [[2, 2]], 'storm').h;
+      h.stream = { id: 1, step, at: 0, until: 99, next: 0, tick: 0, owe: 0, oweJump: 0 };
+      return walkSpeed(h, { ...NO_INTENT, mx: 1 }, 0);
+    };
+    expect(pace(STREAM.steps.length)).toBeCloseTo(pace(1) * STREAM.topWalk, 5);
+    expect(pace(STREAM.steps.length - 1)).toBeCloseTo(pace(1), 5);
+  });
+
   // (A press is a change of `attackSeq`: after `taps`, running on with LAST is no new tap.)
   const LAST = 89;
   /** Damage a second over `secs` with no new tap. */
@@ -151,8 +163,8 @@ describe("the wand's storm stream", () => {
     expect(lost(a.e)).toBe(after);
   });
 
-  it('three taps build it to 2.5x, and a fourth or fifth go no further (each starts the 1.5 s again)', () => {
-    expect(STREAM.steps).toEqual([1, 1.75, 2.5]);
+  it('three taps build it to 2.25x, and a fourth or fifth go no further (each starts the 1.5 s again)', () => {
+    expect(STREAM.steps).toEqual([1, 1.75, 2.25]);
     const one = mageArena('wand', [[9, 6]], 'storm');
     one.h.primed = false;
     taps(one, 1);
@@ -162,8 +174,8 @@ describe("the wand's storm stream", () => {
     taps(three, 3);
     expect(three.h.stream?.step).toBe(3);
     const r3 = rate(three, 1);
-    expect(r3 / r1).toBeGreaterThan(2.3);
-    expect(r3 / r1).toBeLessThan(2.7);
+    expect(r3 / r1).toBeGreaterThan(2.05);
+    expect(r3 / r1).toBeLessThan(2.45);
     const five = mageArena('wand', [[9, 6]], 'storm');
     five.h.primed = false;
     taps(five, 5);
@@ -205,7 +217,7 @@ describe("the wand's storm stream", () => {
     expect(a.h.stream?.step).toBe(3);
   });
 
-  it('walking with it on is no slower than with a fire or frost wand tap', () => {
+  it('walking with it on is no slower than with a fire or frost wand tap, till it\'s fully built', () => {
     /** How far the Mage walks in 1.5 s right, tapping every 0.3 s in `el` (or not at all). */
     const walked = (el: 'fire' | 'frost' | 'storm' | '', every = 0.3) => {
       const a = mageArena('wand', [[9, 3]], el || 'storm');
@@ -213,9 +225,16 @@ describe("the wand's storm stream", () => {
       for (let t = 0; t < 1.5 - 1e-6; t += every) el ? a.tap(every, { mx: 1 }) : a.run(every, { mx: 1 });
       return a.h.x - x;
     };
-    const storm = walked('storm'), fire = walked('fire'), frost = walked('frost'), free = walked('');
+    // (Two taps: under its full build. Fully built it slows you: STREAM.topWalk, tested above.)
+    const walked2 = (el: 'fire' | 'frost' | 'storm' | '') => {
+      const a = mageArena('wand', [[9, 3]], el || 'storm'), x = a.h.x;
+      for (let n = 0; n < 2; n++) el ? a.tap(0.3, { mx: 1 }) : a.run(0.3, { mx: 1 });
+      return a.h.x - x;
+    };
+    const storm = walked2('storm'), fire = walked2('fire'), frost = walked2('frost'), free = walked2('');
     expect(storm).toBeGreaterThanOrEqual(Math.max(fire, frost) - 0.01);
     expect(storm / free).toBeGreaterThan(0.89);
+    expect(walked('storm')).toBeLessThan(walked('fire'));
     // On by itself between taps: your own pace.
     const a = mageArena('wand', [[9, 3]], 'storm');
     taps(a, 3);
@@ -225,7 +244,7 @@ describe("the wand's storm stream", () => {
     expect((a.h.x - x) / (free / 1.5)).toBeGreaterThan(0.98);
   });
 
-  it('kept at three steps it sits a little over the other wand taps, not by a mile', () => {
+  it('kept at three steps it sits about level with the other wand taps (2026-11-16: trimmed, it was too strong)', () => {
     const dps = (el: 'fire' | 'frost') => {
       const a = mageArena('wand', [[9, 5.5]], el);
       a.h.primed = false;
@@ -239,7 +258,7 @@ describe("the wand's storm stream", () => {
     // Kept built with a tap a second.
     for (let t = 0; t < 6; t += 1) a.tap(1, { attackSeq: 200 + t });
     const kept = (lost(a.e) - was) / 6, others = (dps('fire') + dps('frost')) / 2;
-    expect(kept / others).toBeGreaterThan(1.02);
+    expect(kept / others).toBeGreaterThan(0.93);
     expect(kept / others).toBeLessThan(1.25);
   });
 });

@@ -12,8 +12,9 @@ export const SPELL = { wand: 20, staff: 30, spellblade: 35 };
 
 /** The wand. Its quick bolt is cast on the move at `walk` of your pace, turning to the aim as it comes
  *  up. Its holds let go on the white flash break off whatever the goblins they hit are doing and stagger
- *  them `stun` s (a butcher `big` as long). A bonus: any tap that lands on a goblin mid wind-up does the same. */
-export const WAND = { walk: 0.9, stun: 0.6, big: 0.5 };
+ *  them `stun` s (a butcher `big` as long). A bonus: any tap that lands on a goblin mid wind-up does the same.
+ *  Let go on the flash, a hold costs `flashCost` of its magic (Kyle, 2026-11-16). */
+export const WAND = { walk: 0.9, stun: 0.6, big: 0.5, flashCost: 0.5 };
 
 /**
  * The spellblade's mana shield (Kyle, 2026-11-05: "Magic is your shield"). With it in hand, a blow, a

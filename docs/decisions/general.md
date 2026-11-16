@@ -55,3 +55,12 @@ entry with the model name.
   only (Kyle: "risk reward").
 
 Claude Opus 5.5
+
+## 2026-11-16: the wand trimmed (Kyle: "too strong ... more timing based to hit a perfect")
+
+- Its flash is 0.12 s (Weapon.flashWindow; other kits keep RELEASE.perfect 0.25). Let go on it, a hold costs
+  half its magic (WAND.flashCost). Hold damage 10 to 18 (was 24), under the staff's 24 to 56.
+- The storm stream tops out at 2.25x (was 2.5), and fully built you walk at 0.6 of your pace while it's on
+  (STREAM.topWalk, in sim/walkspeed.ts so the client predicts it too).
+
+Claude Opus 5.5

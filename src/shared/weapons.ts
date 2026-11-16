@@ -157,6 +157,8 @@ export interface Weapon {
    * weaker the earlier it's let go (the longbow, the blades). Held past the flash, any kit stays at full.
    */
   early?: 'fizzle' | 'full';
+  /** How long after the white flash a let-go still counts as perfect (default RELEASE.perfect, 0.25 s). */
+  flashWindow?: number;
   /** A bolt has to be wound on: a hold aims a loaded crossbow and winds an empty one (shared/ranger.ts XBOW). */
   reloads?: boolean;
   /** The quick attack is cast on the move, at this share of your pace (the wand; the flail, swung as you walk). */
@@ -266,8 +268,9 @@ export const WEAPONS: Record<KitId, Weapon> = {
     cls: 'MAGE',
     // Cast walking (Kyle, 2026-11-04): the left click never stops you.
     combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17 }],
-    heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 24, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
-    draw: 0.6, early: 'fizzle',
+    heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 18, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
+    // (Kyle, 2026-11-16: the wand's hold is about timing: a tight flash, half the magic on it, and less than the staff's.)
+    draw: 0.6, early: 'fizzle', flashWindow: 0.12,
     blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.8, castWalk: 0.9,
     dodge: BLINK,
   },
