@@ -83,3 +83,22 @@ doesn't come out nicely from the blade"; "the attack looks lame, not a pull back
   plan's 40,000. See the estimate in the chat of 2026-11-15; roughly 220,000 credits for every hero kit, goblin,
   boss and townsperson with weapons baked into the sheets, about 170,000 with weapons drawn by code.
   (Claude Opus 5.5)
+
+## 2026-11-15: the generated characters off; today's figures painted sharper instead (`?sharp`)
+
+- Kyle, on the generated characters: "they all just seem... flat", and the flat sprites fit the game; not 3D either
+  ("that's lame"). He'd rather today's little figures looked "a little sharper and more nuanced, cooler or deadlier".
+  So `&chars=sheet` and `&chars=parts` are no longer the street's default (they stay, to be asked for).
+- **`?sharp`** (charpaint.ts, a line in sprites.ts `makeSprite`): every figure keeps its shapes, pixel maps, poses
+  and timing; only the painting changes (Kyle gave the go-ahead to touch the Art chat's files for this, behind the
+  switch). Each piece (the touching pixels of one colour) is a rounded thing lit from the top left; the
+  silhouette's lit edge catches a rim, its far edge sinks; a piece's bottom and right edge against another creases;
+  the far side of the body darkens; lights warm toward gold, shadows cool toward violet (warm colours toward
+  red-brown, gently: a red flush on a face read as a wound); steel and gold push harder and glint where the light
+  first strikes each piece. The Warrior's cape from behind (herolife.ts, behind the switch) gets a lit left edge,
+  a shadowed right side and hem, a shadow under the shoulders and folds its whole length.
+- Not yet: meaner shapes (a visor slit, spiked pauldrons, longer ears, brighter eyes), the cloaks and capes facing
+  you or side-on, held weapons (held.ts) and the 3D view's torchlight on figure edges. Kyle expects to say no; if
+  so, `?sharp` comes out with this log entry kept.
+- Check: shots/figures-today-vs-sharper.png, shots/today-vs-sharper.mp4 (chars-play.cjs's mode `sharp`).
+  (Claude Opus 5.5)

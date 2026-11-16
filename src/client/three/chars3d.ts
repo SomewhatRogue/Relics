@@ -4,7 +4,7 @@
  * tall), each on its own card standing at its feet and turned to the chase camera, lit by the 3D lights like the flat
  * figures' cards (figmat.ts).
  *
- * `&chars=sheet` (the default) plays the generated frames (charkit/, scripts/charprep.py: per facing a walk of eight,
+ * `&chars=sheet` plays the generated frames (charkit/, scripts/charprep.py: per facing a walk of eight,
  * each blow in five, the reactions), picked by the pose code's phase (charframe.ts), and moves the card the way the
  * pose code moves today's figures: it leans (sheared from the feet), squashes into a blow's landing and a crouch,
  * shifts by the pose's offsets (a lunge, a stagger's shake), flashes white then red when struck, rolls over in a
@@ -13,7 +13,7 @@
  * swept in the world at the blade's height, along the arc the room judges (held.ts), bright at the blade and fading
  * behind it (in place of extras3d.ts's dotted trail at the old figures' waist). A goblin falls through its death and
  * dissolves away; burned, it is charred.
- * `&chars=parts` moves the idle frame's parts with the pose code (charparts.ts); `&chars=old` keeps today's figures.
+ * `&chars=parts` moves the idle frame's parts with the pose code (charparts.ts). Without either, today's figures.
  * The old card is kept for its shadow and left empty. Only draws.
  */
 import * as THREE from 'three';
@@ -37,8 +37,9 @@ import { drawParts, type Kit } from './charparts';
 import META from './charkit/chars.json';
 
 const Q = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('chars') : null;
-/** Which way this screen makes the new characters, or '' for today's figures. */
-export const CHARS: '' | 'sheet' | 'parts' = !STREET || Q === 'old' ? '' : Q === 'parts' ? 'parts' : 'sheet';
+/** Which way this screen makes the new characters, or '' for today's figures (the default since 2026-11-15: Kyle
+ *  found them flat; they stay to be asked for, `&chars=sheet` or `&chars=parts`). */
+export const CHARS: '' | 'sheet' | 'parts' = !STREET ? '' : Q === 'parts' ? 'parts' : Q === 'sheet' ? 'sheet' : '';
 
 /** Whether this hero is drawn new (its swing's danger area drawn here too, not as extras3d.ts's dotted trail). */
 export const drawnNew = (h: Hero): boolean => CHARS !== '' && WEAPONS[h.weapon].cls === 'WARRIOR';

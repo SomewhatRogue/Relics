@@ -14,6 +14,7 @@ import { OUTLINE } from './sprites';
 import { mix } from './heroeyes';
 import { drawMantle } from './cloaklife';
 import { HERO_W, HS } from './heroscale';
+import { SHARP, shadeHex } from './charpaint';
 
 /** A stable number in [0, 1) from a hero's id (their sway's phase, their step's timing). */
 export function idPhase(id: string): number {
@@ -117,7 +118,15 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
       } else if (L.cape || r > 11 + t) {
         const x0 = (low ? 1 : 2) - ext + sw, x1 = (low ? 10 : 9) + sw;
         rect('front', x0 + hem, r, x1 - x0 + 1 - hem * 2, 1, col);
-        if (low && L.cape) rect('front', 4 + sw, r, 1, 1, lin), rect('front', 7 + sw, r, 1, 1, lin);
+        if (SHARP) {
+          // (The new look's sharper figures, charpaint.ts: the cape lit from the top left, a shadow under the
+          // shoulders, its right side and hem in shadow, its folds the length of it with a lit edge each.)
+          const a = x0 + hem, w = x1 - x0 + 1 - hem * 2;
+          rect('front', a, r, 1, 1, shadeHex(col, i < 2 ? 0.5 : 1));
+          rect('front', a + w - 2, r, 2, 1, shadeHex(col, -1));
+          if (i < 2 || r === bottom) rect('front', a + 1, r, w - 3, 1, shadeHex(col, -0.5));
+          if (L.cape && i >= 2) for (const f of [4, 7]) rect('front', f + sw, r, 1, 1, lin), rect('front', f - 1 + sw, r, 1, 1, shadeHex(col, 0.5));
+        } else if (low && L.cape) rect('front', 4 + sw, r, 1, 1, lin), rect('front', 7 + sw, r, 1, 1, lin);
       }
     }
   }

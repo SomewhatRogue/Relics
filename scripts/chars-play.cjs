@@ -3,7 +3,7 @@
 // exactly 30 frames a second of game time (the page's clock stepped by hand, so a slow machine still shows the real
 // timing: the page's frame callbacks and clocks are driven from here, a thirtieth of a second a frame). Frames to
 // <out>/f0000.png...; make a video with ffmpeg after.
-// Usage: node scripts/chars-play.cjs [url] [out] [chars mode] [seconds]
+// Usage: node scripts/chars-play.cjs [url] [out] [mode: sheet, parts, old, or sharp (today's figures painted sharper)] [seconds]
 const { chromium } = require('playwright');
 const url = process.argv[2] || 'http://localhost:4173/';
 const out = process.argv[3] || 'shots/play';
@@ -33,7 +33,7 @@ const HOLD_OFF = 5.0, WEAKEN = 6.4;
     Date.now = () => noon + now;
     window.__advance = (ms) => { now += ms; const run = q; q = []; for (const cb of run) cb(now); };
   }, NOON);
-  await page.goto(url + '?look=3d&hd&street&chars=' + mode);
+  await page.goto(url + '?look=3d&hd&street&' + (mode === 'sharp' ? 'sharp' : 'chars=' + mode));
   for (let i = 0; i < 200 && !(await page.evaluate(() => !!window.__game)); i++) await page.waitForTimeout(50);
   await page.evaluate(() => {
     const g = window.__game;

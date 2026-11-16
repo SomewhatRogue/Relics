@@ -5,6 +5,7 @@
 import { LOOK_DEFS, type Cls, type LookDef } from './herolooks';
 import { HERO_W } from './heroscale';
 import { PLAIN_BUTCHER, butcherParts, headlessParts } from './butcherparts';
+import { SHARP, paintSharp } from './charpaint';
 
 export type Part = ['r', number, number, number, number, string] | ['e', number, number, number, number, string] | ['p', number, number, string] | ['t', number, number, number, number, string];
 
@@ -48,6 +49,8 @@ export function makeSprite(w: number, h: number, parts: Part[]): Sprite {
       }
     }
   }
+  // (The new look's sharper painting, behind ?sharp: charpaint.ts.)
+  if (SHARP) return paintSharp(g, w, h, OUTLINE, GLOW);
   const W = w + 2, H = h + 2;
   const c = document.createElement('canvas'), white = document.createElement('canvas');
   c.width = white.width = W;

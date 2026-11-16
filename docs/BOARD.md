@@ -48,10 +48,6 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
-- **New look: characters**: heroes, goblins and townsfolk in the concepts' style (the sprite sheet in Kyle's
-  ElevenLabs flow "Relic: HD-2D look tests"); first a test of one hero and one goblin, walking and attacking, to
-  choose how they're made (generated sheets cleaned up, or drawn parts the pose code moves).
-
 - **A lived-in world, slices 4 and 5** (docs/design/lived-in-world.md): a vignette and glow, a wider camera to try (slice 3, drawn buildings in 2.5D, is the Dark and gold chat's). Slices 1 and 2 are the Lived-in world chat's (above).
 
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
