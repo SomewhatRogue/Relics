@@ -153,11 +153,14 @@ describe('the spear and shield', () => {
     expect(ev.some((x) => x.k === 'latch')).toBe(true);
     expect(h.y).toBeLessThan(6.5);
   });
-  it('the hand is empty while the spear is out on its chain, and holds it again once it\'s back', () => {
+  it('no spear in hand while it\'s out on its chain: no thrusts till it\'s back', () => {
     // (Nothing to catch: it flies its length and comes back.)
-    const { h, loose } = arena('spear', []);
+    const { h, loose, tap } = arena('spear', []);
     loose(1.4, 0.2);
     expect(h.chainOut).toBe(true);
+    // (And nothing to thrust with till then: a tap does nothing.)
+    const ev = tap(0.15);
+    expect(ev.some((x) => x.k === 'swing')).toBe(false);
     loose(0, 1.5);
     expect(h.chainOut).toBe(false);
   });

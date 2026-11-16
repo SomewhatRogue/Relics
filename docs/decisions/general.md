@@ -51,6 +51,7 @@ entry with the model name.
   less is reeled in and knocked down, anything heavier pulls you to it; range 6, 8 on the flash
   (shared/warrior.ts SPEAR_CHAIN). The lunge through three is gone.
 - Follow-up: the hand is drawn empty while the spear is out (Hero.chainOut, both views), and the spear and
-  shield now shows the sword's shield (it never had one drawn).
+  shield now shows the sword's shield (it never had one drawn). No thrusts while the spear is out, shield
+  only (Kyle: "risk reward").
 
 Claude Opus 5.5

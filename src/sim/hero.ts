@@ -369,6 +369,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   }
   // Spendthrift won't draw with an empty purse.
   if (wears(h, 'spendthrift') && h.purse <= 0) h.attackQueuedAt = -9;
+  // No spear in hand while it's out on its chain: the shield only till it's back (Kyle, 2026-11-16: "risk reward").
+  if (h.chainOut) h.attackQueuedAt = -9;
   if (now - h.attackQueuedAt < CHARGE.start + INPUT_BUFFER && h.attackQueuedAt > -9) {
     // The crossbow looses on the press; everything else waits to see if it's a tap or a hold.
     if (!inp.attack || w.noCharge) {
