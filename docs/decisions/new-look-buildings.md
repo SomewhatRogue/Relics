@@ -107,5 +107,6 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
 - Kyle: `&zoom=4` is solid for town. Town now aims at 42 CSS px a tile upright and 64 lying down, so a 3x phone and a
   retina laptop both land on 4 screen pixels an art pixel; jobs keep the earlier aim. view3d.ts re-sizes when you go
   between town and a job (`streetScale(..., town)`).
-- The see-through hole: 3.5 tiles across your hero, was 2.2.
+- The see-through hole: a radius of 3.5 tiles round your hero, was 2.2. Then Kyle: still annoying, bigger: 5.5 tiles
+  (11 across, wider than a phone at zoom 4).
   (Claude Opus 5.5)

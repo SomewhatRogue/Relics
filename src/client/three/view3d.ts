@@ -192,7 +192,7 @@ export class View3D {
       // The new look's test street: the see-through hole round your hero in a building that hides them (streetkit.ts).
       if (STREET) {
         const [sx, sy] = this.view.px(hx, 0.9, hy);
-        HOLE.value.set(sx, this.view.H - sy, this.view.ppu * 3.5);
+        HOLE.value.set(sx, this.view.H - sy, this.view.ppu * 5.5);
       }
       // A cutscene's point of interest (the Stoker coming): the camera eases there instead.
       if (f) this.view.follow(map, f.x, f.y, f.snap ? 99 : dt * 0.36, fx.shake);
