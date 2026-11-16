@@ -63,3 +63,17 @@ Kyle: fix these once the layout is confirmed, not before.
 Also still open: the Drowned Rat (camera turns all the way round, or the Rat moves off the square's line).
 
 Claude Opus 5.5
+
+## 2026-11-15: the Rat down, the square open, back in front of the board (Kyle)
+
+- The Drowned Rat further down, front toward the camera: the map is 64 by 58; the Rat at the bottom of town past a
+  yard below the Rat Steps, its front on Rat Lane along the south wall; its district moves by translation again (no
+  turn). Five cottages down Wall Lane now.
+- The square open, never hidden behind anything in it: the square's district moves 1.3 tiles less far south, so the
+  job and works boards stand flush against the north edge; the trader's and pawnbroker's stalls side by side against
+  the hall and the house at Market Lane's mouth (Dessa and Tobin in front, the market spot between); the two trees
+  in the middle gone; the gallows against the tower. Spots can now be set by hand (layoutmove OVERRIDES, kind 'spot').
+- Back from a job: game.ts `boardFront()`, a step in front of the job board wherever it stands (the same point as
+  before in the old town). Was a fixed (24.1, 14.8), behind the board in the new town.
+
+Claude Opus 5.5

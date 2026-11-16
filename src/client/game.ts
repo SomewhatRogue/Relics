@@ -510,6 +510,12 @@ export class Game {
   }
 
   /** Back to Wickhold, at `at` (in front of a door) or the square. */
+  /** Back from a job: a step in front of the job board (toward the camera), wherever the board stands. */
+  boardFront(): { x: number; y: number } {
+    const b = townSpots(this.world).find((s) => s.id === 'board');
+    return b ? { x: b.x, y: b.y + 1 } : { x: 24.1, y: 14.8 };
+  }
+
   enterTown(at?: { x: number; y: number }): void {
     this.mode = 'town';
     this.outside = null;
@@ -1192,7 +1198,7 @@ export class Game {
     this.holdUntil = 0;
     forgetSession();
     this.run = null;
-    this.enterTown({ x: 24.1, y: 14.8 });
+    this.enterTown(this.boardFront());
     void this.settle();
   }
 
@@ -1269,7 +1275,7 @@ export class Game {
     this.coop = null;
     this.holdUntil = 0;
     // Paid already (a reload in the middle of paying it): never twice.
-    if (key && p.paid?.includes(key)) return void ((this.run = null), unbank(p.id), this.enterTown({ x: 24.1, y: 14.8 }));
+    if (key && p.paid?.includes(key)) return void ((this.run = null), unbank(p.id), this.enterTown(this.boardFront()));
     // The Deep (shared/deepkit.ts): up at a checkpoint keeps it all; gone early, as at the last checkpoint; dead, as at the way down.
     const deepEnd: 'out' | 'early' | 'dead' | null = isDeep(run.job) && p.deep ? (won || this.deepUp ? 'out' : how === 'beaten' ? 'dead' : 'early') : null;
     // (The deepest floor reached goes on the board whatever the end, with the gold banked: shared/deepboard.ts.)
@@ -1329,7 +1335,7 @@ export class Game {
     this.questEnd({ job: run.job, won, rescued, dens: run.dens ?? 0 });
     unbank(p.id);
     if (ONLINE && key && !key.startsWith('solo-')) dropOwed(p.id, key);
-    this.enterTown({ x: 24.1, y: 14.8 });
+    this.enterTown(this.boardFront());
   }
 
   /** The nearest thing to use where the hero stands: a person, a door, a spot in the open. */

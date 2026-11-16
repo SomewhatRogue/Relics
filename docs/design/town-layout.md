@@ -32,9 +32,15 @@ down by the millpond.
     houses on its west side.
   - The counting house on the square's west side, its front on the square.
 - **The lower quarter (level 0), the bottom.** Down the Rat Steps or the East Stair from the square's south edge,
-  which is a parapet looking over it. The Lower Lane runs along the foot of the wall. The Drowned Rat at the foot of
-  the Rat Steps, front looking up them; the sewer grate in the alley beside it (Cobb, Whisper's back door); the
+  which is a parapet looking over it. The Lower Lane runs along the foot of the wall, a yard below the Rat Steps.
+  The Drowned Rat at the bottom of town past the yard, far enough down never to stand over the square, its front
+  toward the camera on Rat Lane along the south wall, the sewer grate by it (Cobb, Whisper's back door). The
   millpond to the west; Rescue Row to the east, its eight homes in two rows facing each other across the row.
+  (Kyle, 2026-11-15; the sketch predates this: the map is now 64 by 58.)
+- **The square kept open** (Kyle, 2026-11-15): never hidden behind anything in it. Everything tall stands flush
+  against its north edge with nothing walkable behind it: the job and works boards, the market's two stalls side by
+  side against the hall and the house at Market Lane's mouth. No trees in its middle; the gallows (under siege)
+  against the tower. Back from a job you stand a step in front of the job board.
 - **The Old Quarter** past the east wall, as now.
 
 Every building's door stays the same interior: same door ids, same people inside.
@@ -47,7 +53,7 @@ Each landmark sits where a lane or stair ends, front-on to it, so walking that w
 1. **Up the Rat Steps** (and where you arrive, on the square's south side): the Lantern, the town hall behind it,
    the church on its hill above. The money shot.
 2. **Up the Kirk Steps:** the church door, lit.
-3. **Down the Rat Steps:** the Drowned Rat, its tankard sign, firelight in the door.
+3. **Down the Rat Steps and round to Rat Lane:** the Drowned Rat's front, its tankard sign, firelight in the door.
 4. **West along Smiths' Lane:** the barracks; the forge glowing on your right.
 5. **East along Market Lane:** the rubble; later the Old Chapel through the gap.
 6. **In at the north gate:** straight down the Gate Road to the hunters' lodge door, the square opening on the right.

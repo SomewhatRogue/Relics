@@ -26,7 +26,7 @@ export function layoutPoint(x: number, y: number): [number, number] {
 
 export function layoutSpots<T extends { x: number; y: number }>(spots: T[]): T[] {
   return spots.flatMap((s) => {
-    const p = movePoint(s.x, s.y);
+    const p = place('spot', s.x, s.y);
     return p ? [{ ...s, x: p[0], y: p[1] }] : [];
   });
 }

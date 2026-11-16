@@ -9,7 +9,7 @@ import type { Block, Ledge, Round, Soil } from './arena.js';
 import type { WorldState } from './story.js';
 import { workDone } from './works.js';
 
-export const LW = 64, LH = 52;
+export const LW = 64, LH = 58;
 /** Where you arrive: the square's south side, looking north up to the Lantern, the hall and the church. */
 export const ARRIVE = { x: 29.5, y: 31.5 };
 
@@ -18,9 +18,9 @@ export const LEDGES: Ledge[] = [
   // The town, with the Rat Steps and the East Stair down off the square's south side.
   { x: 0, y: 0, w: 64, h: 36, lv: 1, kind: 'rock', ramps: [{ x: 27, y: 34, w: 5, h: 4 }, { x: 38, y: 34, w: 3, h: 4 }] },
   // Down the west wall: Wall Lane's cottages, its slope down east to the Lower Lane.
-  { x: 0, y: 36, w: 13, h: 16, lv: 1, kind: 'rock', ramps: [{ x: 11, y: 36, w: 3.5, h: 3.5 }] },
+  { x: 0, y: 36, w: 13, h: 22, lv: 1, kind: 'rock', ramps: [{ x: 11, y: 36, w: 3.5, h: 3.5 }] },
   // The Old Quarter past the east wall.
-  { x: 55, y: 36, w: 9, h: 16, lv: 1, kind: 'rock', ramps: [] },
+  { x: 55, y: 36, w: 9, h: 22, lv: 1, kind: 'rock', ramps: [] },
   // Kirkhill: the church, its close and graves, up the Kirk Steps from the square.
   { x: 13, y: 0, w: 27, h: 13, lv: 2, kind: 'rock', ramps: [{ x: 27, y: 11, w: 5, h: 4.5 }] },
 ];
@@ -51,19 +51,20 @@ export function planBlocks(w: WorldState, homes: number): Block[] {
     bl(16.5, 28.5, 6.5, 5.5, 'hall', { label: 'COUNTING HOUSE', door: 'bank', worn: true, face: 'W' }),
     ...[0, 1, 2].map((i) => house(12.5, 27 + i * 2.7, 4, 2.7, 'E')),
     bl(1.5, 29, 7.5, 7, 'house', { label: 'INFIRMARY', door: 'infirmary', face: 'W' }),
-    ...[0, 1, 2].map((i) => house(1.5, 37 + i * 4.6, 7.5, 4.4, 'W')),
+    ...[0, 1, 2, 3, 4].map((i) => house(1.5, 37 + i * 4, 7.5, 3.9, 'W')),
     // The north gate's yard: the keep and the tower facing the Gate Road.
     bl(49, 1, 6, 8, 'wall', { label: 'THE KEEP', door: 'keep', locked: true, face: 'E' }),
     bl(49.5, 10.5, 5, 6, 'tower', { label: 'TOWER', door: 'tower', face: 'E' }),
     // Market Lane: the hunters' lodge on its south side, the gate road coming straight down to its door.
     bl(43, 24, 7.5, 6, 'house', { label: "HUNTERS' LODGE", door: 'lodge', face: 'S' }),
     house(50.5, 24, 2.25, 5), house(52.75, 24, 2.25, 5), house(50.5, 29.5, 4.5, 5, 'E'),
-    // The lower quarter: the Drowned Rat at the foot of the Rat Steps, its front up them.
-    bl(25, 39.5, 9, 6.5, 'tavern', { label: 'THE DROWNED RAT', door: 'tavern', face: 'S' }),
+    // The lower quarter: the Drowned Rat down at the bottom of town, past the yard at the foot of the Rat Steps, far enough down that it never stands over the square, its
+    // front on Rat Lane along the south wall (facing the camera: Kyle, 2026-11-15).
+    bl(25.25, 48, 8.5, 6.5, 'tavern', { label: 'THE DROWNED RAT', door: 'tavern' }),
     // The Old Quarter: the chapel seen through the gap in the wall, down Market Lane.
     bl(57.5, 18.5, 5.5, 7, 'house', { label: 'OLD CHAPEL', door: 'chapel', locked: true, face: 'E' }),
     // The town walls: west, south, and the east wall with its gap.
-    bl(0, 0, 0.8, LH, 'wall'), bl(0, LH - 0.8, LW, 0.8, 'wall'), bl(55, 0, 1.5, 20, 'wall'), bl(55, 24, 1.5, 28, 'wall'),
+    bl(0, 0, 0.8, LH, 'wall'), bl(0, LH - 0.8, LW, 0.8, 'wall'), bl(55, 0, 1.5, 20, 'wall'), bl(55, 24, 1.5, LH - 24, 'wall'),
     ...FENCES.map(([x, y, fw, fh]) => bl(x, y, fw, fh, 'fence')),
   ];
   if (!quarter) out.push(bl(55.1, 20, 1.3, 4, 'rubble'));
@@ -77,7 +78,7 @@ const FENCES: [number, number, number, number][] = [
   // The square's south edge, over the lower quarter.
   [13, 35.6, 14, 0.3], [32, 35.6, 6, 0.3], [41, 35.6, 14, 0.3],
   // Wall Lane's east edge, over the lower quarter.
-  [12.6, 39.5, 0.3, 11.7],
+  [12.6, 39.5, 0.3, LH - 40.3],
   // Kirkhill: the graveyard's wall over the training yard and Smiths' Lane, and over the gate yard.
   [13.05, 0.8, 0.3, 12], [13.05, 12.65, 8.9, 0.3], [39.6, 0.8, 0.3, 12],
 ];
@@ -86,10 +87,10 @@ const FENCES: [number, number, number, number][] = [
 export const OWN_ROUNDS: Round[] = [
   ...[0, 1, 2, 3].flatMap((i) => [0, 1, 2, 3].map((j): Round => ({ kind: 'stone', x: 15 + i * 2.1 + (j % 2) * 0.5, y: 2.6 + j * 2.4, r: 0.25 }))),
   { kind: 'tree', x: 23, y: 11, r: 0.6 }, { kind: 'tree', x: 37.5, y: 10.5, r: 0.6 }, { kind: 'tree', x: 2.5, y: 2.5, r: 0.6 },
-  { kind: 'tree', x: 11.5, y: 2.4, r: 0.6 }, { kind: 'tree', x: 23.2, y: 49.5, r: 0.6 }, { kind: 'tree', x: 61.5, y: 3, r: 0.6 },
-  { kind: 'tree', x: 61, y: 45, r: 0.6 }, { kind: 'bush', x: 13.8, y: 49.5, r: 0.35 }, { kind: 'bush', x: 53, y: 35.1, r: 0.35 },
+  { kind: 'tree', x: 11.5, y: 2.4, r: 0.6 }, { kind: 'tree', x: 22.6, y: 55.6, r: 0.6 }, { kind: 'tree', x: 61.5, y: 3, r: 0.6 },
+  { kind: 'tree', x: 61, y: 47, r: 0.6 }, { kind: 'bush', x: 13.8, y: 55.5, r: 0.35 }, { kind: 'bush', x: 53, y: 35.1, r: 0.35 },
   { kind: 'post', x: 22.6, y: 19.6, r: 0.15 }, { kind: 'post', x: 24, y: 34.2, r: 0.15 }, { kind: 'post', x: 11, y: 30.5, r: 0.15 },
-  { kind: 'post', x: 44.2, y: 37.6, r: 0.15 }, { kind: 'post', x: 10.9, y: 44, r: 0.15 },
+  { kind: 'post', x: 44.2, y: 37.6, r: 0.15 }, { kind: 'post', x: 10.9, y: 44, r: 0.15 }, { kind: 'post', x: 24.6, y: 56.6, r: 0.15 }, { kind: 'post', x: 34.4, y: 56.6, r: 0.15 },
 ];
 
 /** The millpond, west of the Rat (Old Pennock's rods and seat come with the pond's district). */
@@ -99,7 +100,7 @@ export const POND = { x: 15.2, y: 41, w: 6, h: 6.4 };
 export const SOIL: Soil[] = [
   { mat: 'earth', x: 1, y: 1, w: 12, h: 13 }, { mat: 'grass', x: 13.5, y: 0.5, w: 9.5, h: 12 },
   { mat: 'flags', x: 24, y: 8.5, w: 15.5, h: 4.5 }, { mat: 'flags', x: 24, y: 19, w: 17, h: 15 },
-  { mat: 'earth', x: 13, y: 39.5, w: 12, h: 12 }, { mat: 'earth', x: 41, y: 48.5, w: 14, h: 2.7 },
-  { mat: 'earth', x: 56.5, y: 0.5, w: 7, h: 51 }, { mat: 'mud', x: 34.5, y: 46, w: 6, h: 5 },
-  { mat: 'swept', x: 42, y: 30, w: 8.5, h: 4.5 }, { mat: 'earth', x: 1, y: 36.5, w: 0.5, h: 15 },
+  { mat: 'earth', x: 13, y: 39.5, w: 12, h: 18 }, { mat: 'earth', x: 41, y: 48.5, w: 14, h: 8.7 },
+  { mat: 'earth', x: 56.5, y: 0.5, w: 7, h: 57 }, { mat: 'mud', x: 34, y: 52, w: 7, h: 5 }, { mat: 'swept', x: 24, y: 39.5, w: 11, h: 8.5 },
+  { mat: 'swept', x: 42, y: 30, w: 8.5, h: 4.5 }, { mat: 'earth', x: 1, y: 36.5, w: 0.5, h: 21 },
 ];
