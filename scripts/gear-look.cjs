@@ -17,7 +17,7 @@ const [url = 'http://localhost:4173/', out = 'shots/gear', which = ''] = process
   await page.setViewportSize({ width: Math.max(390, size.w), height: Math.min(4000, size.h + 900) });
   await page.waitForTimeout(400);
   await page.locator('#gearlook canvas').screenshot({ path: out + '-held.png', scale: 'css' });
-  if (!which) await page.locator('#gearbag').screenshot({ path: out + '-bag.png', scale: 'css' });
+  await page.locator('#gearbag').screenshot({ path: out + '-bag.png', scale: 'css' });
   console.log(JSON.stringify({ size, errors: errors.slice(0, 12) }));
   await browser.close();
 })();

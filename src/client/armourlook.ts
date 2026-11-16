@@ -102,7 +102,8 @@ export function armourOn(body: Jointed, a: ArmourLook | null, l: ArmourLook | nu
       if (at) {
         const i = (at[1] * W + at[0]) * 4;
         hex(ringStuff(ring), out, i), hex(ringStuff(ring), all, i), (any = true);
-        if (glint) glow.push([at[0], at[1], ringGlint(ring)]);
+        // The glint: a small four-point sparkle, white at the middle, the tier's colour round it.
+        if (glint) glow.push([at[0], at[1], '#ffffff'], ...([[1, 0], [-1, 0], [0, 1], [0, -1]] as const).map(([dx, dy]): [number, number, string] => [at[0] + dx, at[1] + dy, ringGlint(ring)]));
       }
     }
     if (!any) continue;

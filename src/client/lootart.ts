@@ -10,6 +10,7 @@ import { makeSprite, type Part, type Sprite } from './sprites';
 import { lookKey, type WeaponLook } from '../shared/gearlook';
 import { elCol, tintPixel } from './weaponlook';
 import { NAMED_FLOOR } from './namedart';
+import { NAMED_ARMOUR_ART } from './namedarmourart';
 
 /** A pixel map to a sprite: '.' empty, a letter a colour from `pal`. */
 function art(rows: string[], pal: Record<string, string>, tint?: (hex: string, x: number, y: number) => string): Sprite {
@@ -54,6 +55,16 @@ const ARMOUR: Record<string, Sprite> = Object.fromEntries(
     k, art(['.AA...AA.', 'AAAAAAAAA', 'AaAAAAAaA', '.AAAAAAA.', '.AAaAaAA.', '.AAAAAAA.', '.aaaaaaa.'], { A, a }),
   ]),
 );
+
+/** A named body piece on the floor in its own cloth or metal, with its marks (namedarmourart.ts). */
+const namedArmours = new Map<string, Sprite | null>();
+function namedArmour(id: string): Sprite | null {
+  if (namedArmours.has(id)) return namedArmours.get(id)!;
+  const n = NAMED_ARMOUR_ART[id], rows = ['.AA...AA.', 'AAAAAAAAA', 'AaAAAAAaA', '.AAAAAAA.', '.AAaAaAA.', '.AAAAAAA.', '.aaaaaaa.'];
+  const s = n ? art(rows, { A: n.main, a: n.dark }, (col, x, y) => n.floor.find(([mx, my]) => mx === x && my === y)?.[2] ?? col) : null;
+  namedArmours.set(id, s);
+  return s;
+}
 
 const COIN = art(['.yy.', 'yYYy', '.yy.'], { Y: '#ecc860', y: '#b08a3a' });
 const HEAP = art(['....yY....', '..yYYyYy..', '.yYYyYYyy.', 'yYyYYyYYYy', 'YYyYYYyYyY', '.yyyyyyyy.'], { Y: '#ecc860', y: '#b08a3a' });
@@ -115,7 +126,7 @@ export function drawGear(c: Ctx, kind: string, kit: string | undefined, armor: s
       c.glow.fillRect(left + a, top + row, b - a + 1, 1);
     }
     c.glow.globalAlpha = alpha;
-  } else if (kind === 'armor') blit(c, ARMOUR[armor ?? 'medium'] ?? ARMOUR.medium, x, y + 1);
+  } else if (kind === 'armor') blit(c, (look.named && namedArmour(look.named)) || ARMOUR[armor ?? 'medium'] || ARMOUR.medium, x, y + 1);
   else {
     blit(c, charm(tierCol), x, y + 1);
     c.glow.fillStyle = tierCol;

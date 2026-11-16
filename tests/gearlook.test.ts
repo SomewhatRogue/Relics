@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { armourLookOf, heldLook, legsLook, packArmour, packLook, packRing, ringLook, unpackArmour, unpackLook, unpackRing, weaponLookOf, wornLook } from '../src/shared/gearlook';
 import { NAMED_ARMOUR } from '../src/client/namedarmour';
+import { NAMED_ARMOUR_ART } from '../src/client/namedarmourart';
 import { TIER_ORDER } from '../src/shared/gear';
 import { PAINT, tintOf, tintPixel, VEIN } from '../src/client/weaponlook';
 import { NAMED } from '../src/client/namedlooks';
@@ -96,8 +97,8 @@ describe('weapon looks', () => {
   });
 
   it('every named body piece has its own look; a ring shows the best worn, packed small', () => {
-    for (const [id, u] of Object.entries(UNIQUES)) if (u.slot === 'armor') expect(NAMED_ARMOUR[id], id).toBeTypeOf('function');
-    for (const id of HUNGRY_ORDER) if (HUNGRY[id].slot === 'armor') expect(NAMED_ARMOUR[id], id).toBeTypeOf('function');
+    for (const [id, u] of Object.entries(UNIQUES)) if (u.slot === 'armor') expect(NAMED_ARMOUR[id], id).toBeTypeOf('function'), expect(NAMED_ARMOUR_ART[id], id).toBeDefined();
+    for (const id of HUNGRY_ORDER) if (HUNGRY[id].slot === 'armor') expect(NAMED_ARMOUR[id], id).toBeTypeOf('function'), expect(NAMED_ARMOUR_ART[id], id).toBeDefined();
     const ring = (quality: Item['quality'], hungry?: string): Item => ({ slot: 'ring', quality, traits: [], ...(hungry ? { hungry } : {}) });
     expect(ringLook({ rings: [] })).toBeNull();
     expect(ringLook({ rings: [ring('fine'), ring('hungry', 'wedding'), ring('plain')] })).toEqual({ tier: 'hungry', named: 'wedding' });

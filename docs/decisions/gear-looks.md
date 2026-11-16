@@ -123,3 +123,14 @@ The gear-looks chat's log (docs/design/gear-looks.md). Newest at the foot.
   a RINGS row (every tier, the two Hungry rings, a unique), glints held on.
 - Open: unique and Hungry armour's own floor sprites and bag pictures; an elemental bow's element in hand.
 (Opus 5.5)
+
+## 2026-11-16: the open bits closed
+
+- Named body pieces on the floor, in 2.5D and in the bag: `client/namedarmourart.ts` (each piece's own cloth
+  or metal and its marks: rivets, lacing, teeth, scars, stains, seams, blood, coins), read by lootart.ts,
+  three/loot3d.ts and itemicons.ts (one branch each). `?gearlook=armour` shows them on the floor under the
+  profile row and in a bag strip.
+- An element on a bow or crossbow now shows in hand: its colour breathing along the bow's stave (the same
+  curve held.ts draws) or the crossbow's prod (lifted when aiming), in weaponmarks.ts.
+- The ring's glint is a small four-point sparkle (white middle, the tier's colour round it), not one pixel.
+(Opus 5.5)

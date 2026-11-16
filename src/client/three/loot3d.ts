@@ -10,6 +10,7 @@ import { G, M, hex } from './mats';
 import { part, pivot } from './rig';
 import { weaponLookOf, type WeaponLook } from '../../shared/gearlook';
 import { VEIN_GLOW, elCol, tintNum } from '../weaponlook';
+import { NAMED_ARMOUR_ART } from '../namedarmourart';
 
 const STEEL = 0xe4eaf2, DARK = 0x9aa6b2, WOOD = 0x8b6a3a, GRIP = 0x5a3d22, GOLD = 0xd4a537;
 
@@ -56,7 +57,7 @@ export function makeLoot(item: Item, col: string, id: number): THREE.Group {
   let run: [number, number] | null = null;
   if (kind === 'weapon') run = weapon(g, item.kit ?? 'sword', tier, look);
   else if (kind === 'armor') {
-    const a = item.armor === 'heavy' ? 0xb4bcc6 : item.armor === 'light' ? 0x7a5a34 : 0x8a929c;
+    const na = NAMED_ARMOUR_ART[item.unique ?? item.hungry ?? ''], a = na ? parseInt(na.main.slice(1), 16) : item.armor === 'heavy' ? 0xb4bcc6 : item.armor === 'light' ? 0x7a5a34 : 0x8a929c;
     part(g, 0.42, 0.4, 0.07, M(a), 0, 0.35, 0), part(g, 0.14, 0.12, 0.08, M(a), -0.2, 0.55, 0), part(g, 0.14, 0.12, 0.08, M(a), 0.2, 0.55, 0);
   } else part(g, 0.1, 0.1, 0.05, G(tier), 0, 0.3, 0), part(g, 0.18, 0.02, 0.02, M(GOLD), 0, 0.42, 0, 0, 0, 0.6), part(g, 0.18, 0.02, 0.02, M(GOLD), 0, 0.42, 0, 0, 0, -0.6);
   if (run) {

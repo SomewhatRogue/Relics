@@ -15,6 +15,9 @@ import { UNIQUES } from '../shared/uniques';
 import { HUNGRY, HUNGRY_ORDER } from '../shared/hungry';
 import { TIER_ORDER } from '../shared/gear';
 import { RING_SHOW } from './ringlook';
+import { itemIcon } from './itemicons';
+import { drawGear } from './lootart';
+import { weaponLookOf } from '../shared/gearlook';
 
 type Weight = 'light' | 'medium' | 'heavy';
 const COLS: { label: string; w: Weight; tier: Tier }[] = [
@@ -48,7 +51,16 @@ export function openArmourLooks(): void {
   page.id = 'gearlook';
   page.style.cssText = 'position:fixed;inset:0;z-index:9999;overflow:auto;background:#0d0b10;-webkit-overflow-scrolling:touch';
   out.style.cssText = `display:block;width:${W * SCALE}px;height:${H * SCALE}px;image-rendering:pixelated`;
-  page.append(out);
+  // The named body pieces' bag pictures (namedarmourart.ts).
+  const bag = document.createElement('div');
+  bag.id = 'gearbag';
+  bag.style.cssText = `display:flex;gap:${CELL * SCALE - 32}px;padding:8px 0 8px ${LEFT * SCALE}px`;
+  for (const it of NAMED_BODY) {
+    const img = Object.assign(document.createElement('img'), { src: itemIcon(it) });
+    img.style.cssText = `width:28px;height:28px;image-rendering:pixelated;background:#1a1720;border:2px solid ${TIERS[it.quality].col};padding:2px;flex:none`;
+    bag.append(img);
+  }
+  page.append(out, bag);
   document.body.append(page);
   const light = new Lighting(out);
   const c: Ctx = { lit: lit.getContext('2d')!, glow: glow.getContext('2d')!, now: 0 };
@@ -88,6 +100,8 @@ export function openArmourLooks(): void {
         }
       };
       for (const side of [false, true]) row(side ? 1 : 0, 'NAMED', '#d8b0ff', (i) => (NAMED_BODY[i] ? { cls: WEARER[NAMED_BODY[i].armor as Weight], set: { armor: NAMED_BODY[i] }, side } : null));
+      // (Each named piece lying on the floor too, under the profile row.)
+      NAMED_BODY.forEach((it, i) => drawGear(c, 'armor', undefined, it.armor, TIERS[it.quality].col, LEFT + i * CELL + CELL / 2, TOP + (ROWS.length + 1) * ROW + 48, 700 + i, 1, weaponLookOf(it)));
       row(2, 'RINGS', '#ffd860', (i) => (RINGS[i] ? { cls: 'RANGER', set: { armor: null, rings: [RINGS[i]] } } : null));
     } finally {
       BARE.on = false;

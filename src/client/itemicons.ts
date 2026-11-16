@@ -8,6 +8,7 @@ import { ELEMENT_TRAITS, POTIONS, slotOf, type Item, type PotionId } from '../sh
 import { lookKey, weaponLookOf } from '../shared/gearlook';
 import { elCol, tintPixel } from './weaponlook';
 import { NAMED_ICON } from './namedart';
+import { NAMED_ARMOUR_ART } from './namedarmourart';
 
 const S = 12;
 const M = '#c4cad4', MD = '#6a7280', W = '#8a5a30', WD = '#5a3a1e', G = '#d9b13a', C = '#9a6a3a';
@@ -91,6 +92,9 @@ export function draw(key: string, paint: Paint): string {
 export function itemIcon(it: Item): string {
   const s = slotOf(it), key = s === 'weapon' ? it.kit ?? 'sword' : s === 'armor' ? it.armor ?? 'light' : s === 'legs' ? 'legs-' + (it.armor ?? 'light') : 'ring';
   const el = it.traits.find((t) => ELEMENT_TRAITS.includes(t)), look = s === 'weapon' ? weaponLookOf(it) : null, tint = look && tintPixel(look);
+  // A named body piece in its own cloth or metal, with its marks (namedarmourart.ts).
+  const na = s === 'armor' && (it.unique || it.hungry) ? NAMED_ARMOUR_ART[(it.unique ?? it.hungry)!] : undefined;
+  if (na) return draw('armor/' + (it.unique ?? it.hungry), (px, line) => (tunic(px, line, na.main, na.dark), na.bag.forEach(([x, y, col]) => px(x, y, col))));
   return draw(key + (el ?? '') + (look ? '/' + lookKey(look) : ''), (px0, line0) => {
     // (An element's blade: its bright line in the element's colour, as it glows in the hand; a bow keeps its string.)
     const elc = look && !/bow/.test(key) && elCol(look), px = tint ? (x: number, y: number, c: string) => px0(x, y, elc && c === M ? elc : tint(c, x, y)) : px0;

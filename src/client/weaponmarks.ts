@@ -44,7 +44,7 @@ export function weaponMarks(c: Ctx, h: Hero, ox: number, oy: number, p: Pose): v
 /** Veins through cursed metal and an element along the edge, along the kit's metal. */
 function metal(c: Ctx, h: Hero, look: ReturnType<typeof heldLook>, named: boolean, ox: number, oy: number, p: Pose, nx: number, ny: number): void {
   const span = METAL[h.weapon];
-  if (!span) return;
+  if (!span) return rangedEdge(c, h, elCol(look), ox, oy, p.a);
   // (A named piece shows its shape first: fewer veins on a Hungry one, none on a unique.)
   const n = !named ? VEINS[look.tier] : NAMED[look.named!]?.tierStuff ? Math.min(3, VEINS[look.tier]) : 0, el = elCol(look), [r0, r1] = span;
   if (!n && !el) return;
@@ -89,4 +89,26 @@ function strokes(c: Ctx, ox: number, oy: number, a: number): Strokes {
       if (glow) (c.glow.globalAlpha = glow), (c.glow.fillStyle = col), c.glow.fillRect(x, y, 1, 1), (c.glow.globalAlpha = 1);
     },
   };
+}
+
+/**
+ * An element on a bow or crossbow, in hand: its colour breathing along the bow's stave (the curve held.ts draws:
+ * the grip three units out, the limbs bending back) or along a crossbow's prod (lifted to the shoulder to aim).
+ */
+function rangedEdge(c: Ctx, h: Hero, el: string | undefined, ox: number, oy: number, a: number): void {
+  if (!el || (h.weapon !== 'longbow' && h.weapon !== 'shortbow' && h.weapon !== 'crossbow')) return;
+  const dx = Math.cos(a), dy = Math.sin(a), nx = -dy, ny = dx;
+  c.glow.globalAlpha = 0.5 + 0.2 * Math.sin(c.now * 4);
+  c.glow.fillStyle = el;
+  if (h.weapon === 'crossbow') {
+    const up = h.act === 'charge' || h.act === 'attack' ? 1.5 * HS : 0, px = ox + dx * 5 * HS, py = oy - up + dy * 5 * HS;
+    for (let k = -4 * HS; k <= 4 * HS; k += 0.5) c.glow.fillRect(Math.round(px + nx * k), Math.round(py + ny * k), 1, 1);
+  } else {
+    const r = (h.weapon === 'longbow' ? 7 : 4) * HS, gx = ox + dx * 3 * HS, gy = oy + dy * 3 * HS;
+    for (let k = -r; k <= r; k += 0.5) {
+      const back = (k * k) / (r * 2.4);
+      c.glow.fillRect(Math.round(gx + nx * k - dx * back), Math.round(gy + ny * k - dy * back), 1, 1);
+    }
+  }
+  c.glow.globalAlpha = 1;
 }
