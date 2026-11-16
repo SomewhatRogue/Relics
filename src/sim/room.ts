@@ -446,6 +446,8 @@ export class ArenaRoom {
     stepLadder(this.heroes, this, w);
     this.javelins = this.javelins.filter((j) => stepJavelin(j, this.enemies, this.time, TICK, this.events, hit, this.heroes));
     this.hooks = this.hooks.filter((k) => stepHook(k, this.heroes, this.enemies, this.time, TICK, this.events, hit, w));
+    // (The spear back in hand once its chain is done: sim/spearchain.ts.)
+    for (const h of this.heroes) if (h.chainOut && !this.hooks.some((k) => k.spear && k.owner === h.id)) h.chainOut = false;
     this.bolts = this.bolts.filter((b) => (b.kind === 'flask' ? stepFlask(b, w, TICK, this.smokes) : stepBolt(b, w, TICK)));
     // Who hears a drum this tick (sim/backline.ts), before anyone moves.
     rouse(this.enemies, this.time);
@@ -645,7 +647,7 @@ export class ArenaRoom {
     // The high ground: shots from up on a ledge.
     if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;
     // The spear thrown on its chain (sim/spearchain.ts).
-    if (s.chain) return void this.hooks.push(throwSpear(h, s, mult));
+    if (s.chain) return void (this.hooks.push(throwSpear(h, s, mult)), (h.chainOut = true));
     // A forged weapon's element rides a full draw (and every crossbow bolt); spells otherwise take the relic's.
     const full = (h.heavy && h.power >= 1) || !!WEAPONS[h.weapon].noCharge, forged = full ? forgedElement(h) : '';
     // Spendthrift: a gold an arrow, and a full draw lands double and pierces.

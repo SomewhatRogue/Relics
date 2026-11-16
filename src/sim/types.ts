@@ -366,6 +366,8 @@ export interface Hero extends Body {
   /** A wand's storm stream (sim/stream.ts): on until `until`, held on goblin `id` (0 none yet), built to
    *  `step` (1 to 3), last tapped at `at`, its next tick, the spark's share a tick, and what's owed below a
    *  whole point. */
+  /** The spear is out on its chain (sim/spearchain.ts): the hand is drawn empty till it's back. */
+  chainOut?: boolean;
   stream?: { id: number; step: number; at: number; until: number; next: number; tick: number; owe: number; oweJump: number; hop?: number; oweHop?: number };
   /** The pack rush (sim/packrush.ts) this hero last met with a guard, the instant it landed, how, and how many blows. */
   rushGuard?: { id: number; at: number; n: number };

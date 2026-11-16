@@ -151,14 +151,15 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   if (idl?.ext != null) p.ext = idl.ext;
   if (idl?.hide) p.hide = true;
   // The sword and shield's release: the shield flashes as the blow goes out (the blade too, held.ts).
-  const snap = h.weapon === 'sword' && (pz.phase === 'release' || pz.phase === 'contact');
+  const snap = (h.weapon === 'sword' || h.weapon === 'spear') && (pz.phase === 'release' || pz.phase === 'contact');
   // (From the side the shield is on the far arm, held up before the chest, its face forward: seen edge-on.)
   const shieldAt: [number, number] = idl?.shield ? [bx + Math.round(idl.shield[0] * HS), by + Math.round(idl.shield[1] * HS)] : sv ? [bx + mid + side * (h.blocking ? SIDE_SHIELD + 2 : SIDE_SHIELD), gy - (h.blocking ? hs(7) : hs(6) - SIDE_DROP) + low] : h.blocking ? [bx + mid + Math.round(h.fx * hs(6)), gy - hs(7) + low + Math.round(h.fy * hs(4))] : [bx + mid - side * hs(4), gy - hs(6) + low];
   const drawGear = () => {
     OFF.reach = sv ? SIDE_REACH : 1;
     const sh = h.shieldLook ? shieldSprite(h.shieldLook) : SPRITES.shield;
-    if (h.weapon === 'sword') blitPose(c, sh, shieldAt[0], shieldAt[1] + hs(4), false, sv ? SIDE_EDGE : 1, 1, 0, snap ? 0.85 : 0);
-    drawWeapon(c, hw, px, py, p);
+    // (The spear and shield carries the sword's shield; the spear itself is gone while it's out on its chain.)
+    if (h.weapon === 'sword' || h.weapon === 'spear') blitPose(c, sh, shieldAt[0], shieldAt[1] + hs(4), false, sv ? SIDE_EDGE : 1, 1, 0, snap ? 0.85 : 0);
+    if (!h.chainOut) drawWeapon(c, hw, px, py, p);
     if (h.act === 'throw' && h.actT < 0.2) {
       const a = Math.atan2(h.fy, h.fx) + Math.PI;
       if (h.relic === 'javelin') hline(c.lit, bx - side * hs(2), gy - hs(10), a, -4, 10, '#d8c48a');

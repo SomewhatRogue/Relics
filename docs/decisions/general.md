@@ -50,6 +50,7 @@ entry with the model name.
   a shield board). Hold: thrown on its chain (sim/spearchain.ts, via sim/hook.ts): a goblin of weight 1 or
   less is reeled in and knocked down, anything heavier pulls you to it; range 6, 8 on the flash
   (shared/warrior.ts SPEAR_CHAIN). The lunge through three is gone.
-- Not yet: the hero's hand still shows the spear while it's out on the chain.
+- Follow-up: the hand is drawn empty while the spear is out (Hero.chainOut, both views), and the spear and
+  shield now shows the sword's shield (it never had one drawn).
 
 Claude Opus 5.5

@@ -32,11 +32,14 @@ function blowgun(g: THREE.Group): void {
 export function hands(cls: string, w: WeaponId, held: THREE.Group, off: THREE.Group, c: Pal): THREE.Mesh | null {
   const metal = M(hex(c[2]));
   if (cls === 'WARRIOR') {
-    if (w === 'spear') return part(held, 0.05, 2.1, 0.05, wood, 0, 0.35, 0.1, 0.25), part(held, 0.08, 0.28, 0.04, steel, 0, 1.45, 0.38, 0.25), null;
+    if (w === 'spear') part(held, 0.05, 2.1, 0.05, wood, 0, 0.35, 0.1, 0.25), part(held, 0.08, 0.28, 0.04, steel, 0, 1.45, 0.38, 0.25);
     const long = w === 'greatsword';
-    part(held, long ? 0.36 : 0.28, 0.06, 0.07, metal, 0, -0.04, 0);
-    part(held, long ? 0.12 : 0.09, long ? 1.2 : 0.8, 0.035, steel, 0, long ? -0.66 : -0.46, 0);
-    part(held, 0.05, long ? 0.22 : 0.12, 0.05, long ? wood : gold, 0, long ? 0.1 : 0.06, 0);
+    if (w !== 'spear') {
+      part(held, long ? 0.36 : 0.28, 0.06, 0.07, metal, 0, -0.04, 0);
+      part(held, long ? 0.12 : 0.09, long ? 1.2 : 0.8, 0.035, steel, 0, long ? -0.66 : -0.46, 0);
+      part(held, 0.05, long ? 0.22 : 0.12, 0.05, long ? wood : gold, 0, long ? 0.1 : 0.06, 0);
+    }
+    // (The spear and shield carries the sword's shield.)
     if (!long) {
       part(off, 0.5, 0.58, 0.08, M(hex(c[4])), 0, 0, 0.12);
       part(off, 0.54, 0.06, 0.1, metal, 0, 0.29, 0.12);

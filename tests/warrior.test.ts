@@ -153,6 +153,14 @@ describe('the spear and shield', () => {
     expect(ev.some((x) => x.k === 'latch')).toBe(true);
     expect(h.y).toBeLessThan(6.5);
   });
+  it('the hand is empty while the spear is out on its chain, and holds it again once it\'s back', () => {
+    // (Nothing to catch: it flies its length and comes back.)
+    const { h, loose } = arena('spear', []);
+    loose(1.4, 0.2);
+    expect(h.chainOut).toBe(true);
+    loose(0, 1.5);
+    expect(h.chainOut).toBe(false);
+  });
   it('out of reach it comes back with nothing; on the white flash it flies further', () => {
     // (From y 12: the hook's reach is its range plus its catch, about a tile and a half more.)
     const late = arena('spear', [12 - SPEAR_CHAIN.range - 2.4]);

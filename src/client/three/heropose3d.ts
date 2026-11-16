@@ -17,6 +17,8 @@ const ease = (k: number) => 1 - (1 - Math.min(1, Math.max(0, k))) ** 2;
 export function poseHero(f: HeroFig, h: Hero, now: number, walked: number): void {
   rest(f);
   f.root.visible = true;
+  // (The spear is out on its chain: the hand is empty till it's back, sim/spearchain.ts.)
+  f.held.visible = !h.chainOut;
   f.root.rotation.y = Math.atan2(h.fx, h.fy);
   const k = h.actDur > 0 ? Math.min(1, h.actT / h.actDur) : 0, w = WEAPONS[h.weapon], cls = f.cls, side = h.combo % 2 ? -1 : 1;
   const bow = cls === 'RANGER', caster = cls === 'MAGE';
