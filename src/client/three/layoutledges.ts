@@ -81,3 +81,44 @@ export function stackLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THR
     for (const q of l.ramps) steps(B, q, m, H, r);
   }
 }
+
+/** How far the gorge drops below the lower quarter, and how wide it is to the far bank. */
+const GORGE = { deep: 9, wide: 13 };
+/** Where the gorge runs past a map's south edge (z from, to), for the land past the walls to leave open (streetsky.ts). */
+export const gorgeSpan = (m: GameMap): [number, number] | null => (stacked(m) ? [m.h, m.h + GORGE.wide + 1] : null);
+
+/** Rock shaded by how far down it is, banded in strata: darker toward the river. */
+function rockAt(y: number, r: Seed, base = 1): number {
+  const t = Math.min(1, Math.max(0, -y / GORGE.deep)), band = Math.sin(y * 2.3) * 0.08;
+  const c = new THREE.Color(0x6e665e).lerp(new THREE.Color(0x24222a), t * 0.85).multiplyScalar(base + band);
+  return jit(c.getHex(), 0.12, r);
+}
+
+/** The bluff's south face down into the gorge, the river at its foot, the far bank: in front of the camera. Lit like
+ *  the rest of the town (`mat`), so it falls into the dark at night. */
+export function gorge(m: GameMap, H: number, mat: THREE.Material): THREE.Mesh | null {
+  const B = new Boxes(), r = new Seed(m.w * 7 + 3), z0 = m.h, bottom = -GORGE.deep;
+  // The face, in narrow columns of stacked stones with dark seams between, jutting more the further down.
+  for (let x = -40; x < m.w + 40; ) {
+    const w = 0.35 + r.next() * 0.5, inTown = x > -1.5 && x < m.w + 1.5;
+    const top = inTown ? levelAt(m, Math.min(m.w - 0.1, Math.max(0.1, x + w / 2)), z0 - 0.1) * H : 0;
+    for (let y = top; y > bottom; ) {
+      const h = 0.35 + r.next() * 0.8, out = 0.12 + ((top - y) / GORGE.deep) * 1.8 + r.next() * 0.3, y0 = Math.max(bottom, y - h);
+      const moss = y > top - 1.5 && r.next() < 0.25;
+      B.b(x + w / 2, y0, z0 + out / 2, w - 0.04, y - y0 - 0.03, out, moss ? jit(0x3a4a2c, 0.15, r) : rockAt(y0, r, r.next() < 0.5 ? 1 : 0.88));
+      y -= h;
+    }
+    // The brink's lip: turf and stones along the top.
+    B.b(x + w / 2, top - 0.12, z0 + 0.12, w + 0.02, 0.16, 0.3, jit(0x3a4030, 0.15, r));
+    x += w;
+  }
+  // The river: dark water down the gorge's floor, a few paler streaks of current.
+  B.b(m.w / 2, bottom - 0.05, z0 + GORGE.wide / 2 + 1, m.w + 90, 0.05, GORGE.wide + 2, 0x101a26);
+  for (let i = 0; i < 60; i++) B.b(-30 + r.next() * (m.w + 60), bottom + 0.005, z0 + 2.5 + r.next() * (GORGE.wide - 4), 1 + r.next() * 2.5, 0.02, 0.08, jit(0x2a4258, 0.2, r));
+  // The far bank: rock rising back up out of the river to the land beyond.
+  for (let x = -40; x < m.w + 40; x += 2) {
+    const h = GORGE.deep - 0.1 - r.next() * 1.5;
+    B.b(x + 1, bottom, z0 + GORGE.wide + 0.4 + r.next() * 0.8, 2.1, h, 2, rockAt(bottom + h * 0.4, r, 0.9));
+  }
+  return B.mesh(mat, false);
+}

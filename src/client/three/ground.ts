@@ -30,7 +30,7 @@ import { addBrazier } from './brazier3d';
 import { palisadeRun } from './palisade3d';
 import { addMounds } from './mounds3d';
 import { levelAt as standAt } from '../../shared/arena';
-import { stackLedges, stacked } from './layoutledges';
+import { gorge, stackLedges, stacked } from './layoutledges';
 import { soilOver } from './layoutsoil';
 
 /** How high the back wall stands, and a ledge (tiles). */
@@ -68,10 +68,12 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   group.add(floor);
   // The Haulier's tunnel mouths at its tracks' ends (three/tracks3d.ts).
   if (m.tracks) group.add(trackMouths3d(m));
-  const under = new THREE.Mesh(new THREE.PlaneGeometry(m.w + 60, m.h + 60), VCOL);
+  // (The new town's stops at its south edge, where the gorge drops away: layoutledges.ts.)
+  const deep = stacked(m) ? 30 : 60;
+  const under = new THREE.Mesh(new THREE.PlaneGeometry(m.w + 60, m.h + deep), VCOL);
   under.geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Array(12).fill(0.05), 3));
   under.rotation.x = -Math.PI / 2;
-  under.position.set(m.w / 2, -0.02, m.h / 2);
+  under.position.set(m.w / 2, -0.02, stacked(m) ? (m.h - 30) / 2 : m.h / 2);
   group.add(under);
   // The water, below the bank (water3d.ts): the floor is cut where it lies, so what's under goes lower.
   const water = buildWater(m, floorMat, floorTex);
@@ -126,8 +128,11 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     for (const [z0, z1] of holes) for (const z of [z0, z1]) B.b(sx, 0, z, 0.3, 1.5, 0.3, 0x3a3640);
   }
   const kerb = cuts.filter((g) => g.side === 'S').map((g): [number, number] => [g.a.x, g.a.x + g.a.w]);
-  for (const [x0, x1] of runs(-0.9, m.w + 0.9, kerb)) B.b((x0 + x1) / 2, 0, m.h + 0.3, x1 - x0, 0.25, 0.6, body);
-  for (const [x0, x1] of kerb) for (const x of [x0, x1]) B.b(x, 0, m.h + 0.3, 0.3, 0.9, 0.3, 0x3a3640);
+  // (The new town's front is a cliff over a gorge, not a kerb: layoutledges.ts.)
+  const cliff = stacked(m) ? gorge(m, LEDGE_H, VCOL) : null;
+  if (cliff) group.add(cliff);
+  if (!stacked(m)) for (const [x0, x1] of runs(-0.9, m.w + 0.9, kerb)) B.b((x0 + x1) / 2, 0, m.h + 0.3, x1 - x0, 0.25, 0.6, body);
+  if (!stacked(m)) for (const [x0, x1] of kerb) for (const x of [x0, x1]) B.b(x, 0, m.h + 0.3, 0.3, 0.9, 0.3, 0x3a3640);
   // The new town's stacked levels: tops in the floor's material, stone faces, steps (layoutledges.ts).
   if (stacked(m)) stackLedges(B, group, m, floorMat, LEDGE_H);
   else for (const l of m.ledges ?? []) {

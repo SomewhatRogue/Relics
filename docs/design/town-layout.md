@@ -35,7 +35,8 @@ down by the millpond.
   which is a parapet looking over it. The Lower Lane runs along the foot of the wall, a yard below the Rat Steps.
   The millpond below the Rat Steps; the town works beside it, east of the Rat's front (Kyle). The whole end in dirt
   and mud. The Drowned Rat in the bottom-left corner, out of the square's view, its front
-  toward the camera on Rat Lane along the south wall, the sewer grate by it (Cobb, Whisper's back door). Rescue Row
+  toward the camera on Rat Lane along the town's south edge, which is no wall but a cliff: the town on a bluff over
+  a gorge with a river in it, a timber rail along the brink (Kyle, 2026-11-15), the sewer grate by it (Cobb, Whisper's back door). Rescue Row
   to the east, its eight homes in two rows facing each other across the row.
   (Kyle, 2026-11-15; the sketch predates this: the map is now 64 by 58.)
 - **The square kept open** (Kyle, 2026-11-15): never hidden behind anything in it. Everything tall stands flush

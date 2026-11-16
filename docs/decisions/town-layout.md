@@ -111,3 +111,16 @@ Claude Opus 5.5
   change between. Not the soil layer: off, same slab.
 
 Claude Opus 5.5
+
+## 2026-11-15: a cliff over a gorge, not a wall in front of the Drowned Rat (Kyle)
+
+- No south town wall: the town stands on a bluff. A timber rail runs along the brink (three fence runs, one per
+  level). three/layoutledges.ts `gorge()`: the bluff's face in narrow columns of stacked stones (strata bands, moss
+  near the top, dark seams), jutting further the deeper they go, down 9 tiles to a dark river, a far bank, the cliff
+  running on past the town either side. Its own mesh in the town's lit material, so night darkens it.
+- Two things hid it, both small edits logged here: ground.ts's near-black `under` plane ran 60 tiles past every
+  edge (the new town's now stops at its south edge); the Buildings and camera chat's land past the walls
+  (streetsky.ts) is now cut open over the gorge's strip (`gorgeSpan`). Neither changes the old town.
+- The pond: not the `under` plane either (it's been there since 08:36 and the pond was blue at 13:00). Still flagged.
+
+Claude Opus 5.5

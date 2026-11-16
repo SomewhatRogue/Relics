@@ -6,6 +6,7 @@
  * coloured by the hour. Drawing only.
  */
 import * as THREE from 'three';
+import { gorgeSpan } from './layoutledges';
 import type { GameMap, Theme } from '../../shared/arena';
 
 type C3 = [number, number, number];
@@ -59,6 +60,9 @@ function skyline(seed: number, hills: boolean): [HTMLCanvasElement, HTMLCanvasEl
   return [c, w];
 }
 
+/** The strip of land left open for a gorge (z from, to). */
+const GAP = { value: new THREE.Vector2(1e6, 1e6) };
+
 /** Only the side of a ring beyond the town's middle (as the camera sees it): the camera backs off outside the ring. */
 const MID = { value: new THREE.Vector3() };
 function farSide(m: THREE.MeshBasicMaterial): THREE.MeshBasicMaterial {
@@ -94,6 +98,14 @@ export class StreetSky {
   private key = '';
 
   constructor() {
+    // (Open where a gorge runs past the town's south edge, the new town's: three/layoutledges.ts.)
+    const lm = this.land.material as THREE.MeshBasicMaterial;
+    lm.onBeforeCompile = (sh) => {
+      sh.uniforms.uGap = GAP;
+      sh.vertexShader = 'varying vec3 vW;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = 'varying vec3 vW;\nuniform vec2 uGap;\n' + sh.fragmentShader.replace('void main() {', 'void main() {\n  if (vW.z > uGap.x && vW.z < uGap.y) discard;');
+    };
+    lm.customProgramCacheKey = () => 'streetland';
     const g = this.dome.geometry;
     g.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count * 3), 3));
     this.dome.renderOrder = -10;
@@ -109,6 +121,8 @@ export class StreetSky {
     const cx = map.w / 2, cz = map.h / 2, R = Math.max(map.w, map.h) * 0.5;
     this.R = R;
     this.land.position.set(cx, -0.08, cz);
+    const gap = gorgeSpan(map);
+    GAP.value.set(gap ? gap[0] : 1e6, gap ? gap[1] : 1e6);
     this.key = '';
     const [town, lights] = skyline(7, false), [hills] = skyline(3, true);
     this.dome.position.set(cx, 0, cz);

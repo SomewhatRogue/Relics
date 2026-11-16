@@ -63,8 +63,10 @@ export function planBlocks(w: WorldState, homes: number): Block[] {
     bl(13.5, 48, 8.5, 6.5, 'tavern', { label: 'THE DROWNED RAT', door: 'tavern' }),
     // The Old Quarter: the chapel seen through the gap in the wall, down Market Lane.
     bl(57.5, 18.5, 5.5, 7, 'house', { label: 'OLD CHAPEL', door: 'chapel', locked: true, face: 'E' }),
-    // The town walls: west, south, and the east wall with its gap.
-    bl(0, 0, 0.8, LH, 'wall'), bl(0, LH - 0.8, LW, 0.8, 'wall'), bl(55, 0, 1.5, 20, 'wall'), bl(55, 24, 1.5, LH - 24, 'wall'),
+    // The town walls: west, and the east wall with its gap. No wall south: the town stands on a bluff over a gorge
+    // (Kyle, 2026-11-15), a timber rail along the brink (three/layoutledges.ts draws the drop).
+    bl(0, 0, 0.8, LH - 0.6, 'wall'), bl(55, 0, 1.5, 20, 'wall'), bl(55, 24, 1.5, LH - 24.6, 'wall'),
+    bl(0.8, LH - 0.45, 12.2, 0.25, 'fence'), bl(13, LH - 0.45, 42, 0.25, 'fence'), bl(56.5, LH - 0.45, 7.5, 0.25, 'fence'),
     ...FENCES.map(([x, y, fw, fh]) => bl(x, y, fw, fh, 'fence')),
   ];
   if (!quarter) out.push(bl(55.1, 20, 1.3, 4, 'rubble'));
