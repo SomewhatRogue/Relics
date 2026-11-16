@@ -59,7 +59,7 @@ export function shaft(top: THREE.Vector3, foot: THREE.Vector3, w: number, across
 }
 
 /** A floor mark laid over the kit's floor, as the flat view paints it (the kit's floor would hide the painted one). */
-export function markMesh(k: Mark, rug: number, r: Seed): THREE.Mesh | null {
+export function markMesh(k: Mark, rug: number, r: Seed, sand = false): THREE.Mesh | null {
   const paint: Record<string, (g: CanvasRenderingContext2D, W: number, H: number) => void> = {
     rug: (g, W, H) => {
       g.fillStyle = css(rug), g.fillRect(0, 0, W, H);
@@ -76,9 +76,20 @@ export function markMesh(k: Mark, rug: number, r: Seed): THREE.Mesh | null {
         gr.addColorStop(0, 'rgba(10,8,8,0.55)'), gr.addColorStop(1, 'rgba(10,8,8,0)'), (g.fillStyle = gr), g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
       }
     },
+    // Chalk: a circle drawn on the floor with marks round it (the tower's); `sand`: a sparring ring's sand (the barracks').
     chalk: (g, W, H) => {
-      g.fillStyle = css(0x7a6a4a), g.fillRect(0, 0, W, H);
-      for (let i = 0; i < W * H * 0.08; i++) (g.fillStyle = css(r.next() < 0.5 ? 0x8a7a58 : 0x6a5a3e)), g.fillRect(r.next() * W, r.next() * H, 1, 1);
+      if (sand) {
+        g.fillStyle = css(0x7a6a4a), g.fillRect(0, 0, W, H);
+        for (let i = 0; i < W * H * 0.08; i++) (g.fillStyle = css(r.next() < 0.5 ? 0x8a7a58 : 0x6a5a3e)), g.fillRect(r.next() * W, r.next() * H, 1, 1);
+        return;
+      }
+      g.strokeStyle = css(0xd8d4e8, 0.7), g.lineWidth = 2;
+      for (const k of [0.46, 0.38]) g.beginPath(), g.ellipse(W / 2, H / 2, W * k, H * k, 0, 0, Math.PI * 2), g.stroke();
+      g.fillStyle = css(0xd8d4e8, 0.7);
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2, x = W / 2 + Math.cos(a) * W * 0.42, y = H / 2 + Math.sin(a) * H * 0.42;
+        g.fillRect(x - 2, y - 3, 2, 6), g.fillRect(x, y - 1, 3, 2);
+      }
     },
   };
   const p = paint[k.kind];

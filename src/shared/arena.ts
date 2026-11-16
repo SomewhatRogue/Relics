@@ -303,6 +303,8 @@ export interface GameMap {
   wallFace: number;
   /** The new look's insides (shared/bighalls.ts): how tall the walls rise in 2.5D, in tiles (three/insidekit.ts). */
   wallH?: number;
+  /** One of Wickhold's own insides at the new scale (bighalls.ts): it takes the town's zoom, not a job's. */
+  hall?: boolean;
   rounds: Round[];
   blocks: Block[];
   /** Paint only, never collided or walked round: animals about the streets (shared/townlife.ts). */

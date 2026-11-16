@@ -15,8 +15,8 @@ const hang = (kind: NonNullable<GameMap['hangs']>[number]['kind'], x: number, w:
 const torch = (...xs: number[]) => xs.map((x) => ({ x, y: -1.6 }));
 /** Somebody only there to be seen: no mark, nothing to say. */
 const folk = (x: number, y: number, look: string, arg?: number): Npc => ({ name: '', x, y, talk: '', look, arg, mute: true });
-const big = (name: string, w: number, h: number, wallH: number, theme: Theme, blocks: Block[], npcs: Npc[], more: Partial<GameMap>): GameMap =>
-  ({ ...room(name, w, h, theme, blocks, npcs, more), wallH });
+export const big = (name: string, w: number, h: number, wallH: number, theme: Theme, blocks: Block[], npcs: Npc[], more: Partial<GameMap>): GameMap =>
+  ({ ...room(name, w, h, theme, blocks, npcs, more), wallH, hall: true });
 
 /** How far each pastime's corner moved from the old room to the new (its table, its keeper and your seat move together). */
 export const SHIFT = { arm: [3.3, 6.6], knives: [7.5, 0], anvil: [7, 0.9] } as const;
@@ -90,7 +90,39 @@ export function bigInfirmary(patients: string[], home: number): GameMap {
       hangs: [hang('herbs', 0.6, 3.6), hang('window', 5.4, 1.2), hang('window', 15.4, 1.2), hang('herbs', 17.6, 3.6)], torches: torch(3, 8.4, 13.6, 19) });
 }
 
+// The three halls after the six (Kyle: yes): the mage's tower, the hunters' lodge, the counting house.
+const tower = (): GameMap => big('THE TOWER', 20, 16, 8, { ...STONE, ambient: [0.16, 0.14, 0.27] },
+  [b('books', 0.4, 0.2, 5, 0.7), b('books', 6, 0.2, 3.4, 0.7), b('stair', 16.4, 0.4, 3, 5), b('desk', 11.6, 4.6, 3, 0.9), b('books', 0.3, 5, 0.7, 4)],
+  [n('MAGISTER VELL', 8.6, 4.2, 'trainer', 'mage', 3), n('APPRENTICE LIS', 13, 4, 'vendor', 'mage', 3), folk(4.6, 12, 'mage', 3)],
+  { rounds: [rd('witchfire', 9.6, 9.6, 0.4), rd('candles', 13.4, 4.8, 0.2), rd('candles', 2.6, 1.6, 0.2)], marks: [mk('chalk', 6.2, 7.2, 7, 5)],
+    hangs: [hang('stars', 9.6, 2.4)], torches: torch(4, 15) });
+
+const lodge = (): GameMap => big("THE HUNTERS' LODGE", 20, 14, 5, HOME,
+  [b('rack', 1, 0.2, 6, 0.5), b('rack', 13.4, 0.2, 5.6, 0.5), b('skinbench', 11.6, 4.6, 2.8, 0.8), b('hearth', 0.1, 6, 1, 2.6), b('sacks', 17.6, 8, 1.4, 1),
+    b('table', 8, 9, 2.4, 0.9), b('bench', 8, 10.1, 2.4, 0.5)],
+  [n('HUNTRESS MAEVE', 7, 4.2, 'trainer', 'ranger', 1), n('BOWYER TEMS', 13, 3.9, 'vendor', 'ranger', 1), folk(10.8, 8.6, 'ranger', 1)],
+  { braziers: [{ x: 1.4, y: 7.3, r: 0.45 }], marks: [mk('pelt', 5.6, 6.4, 3.4, 1.8), mk('bowls', 2, 11.6, 1.6, 0.5), mk('rushes', 2, 2, 16, 10)],
+    hangs: [hang('bows', 1.2, 4.8), hang('antlers', 8.6, 1.8), hang('pelts', 10.8, 2.6), hang('bows', 14, 4.4)], torches: torch(4, 10, 16) });
+
+const bank = (): GameMap => big('THE COUNTING HOUSE', 20, 14, 6, { ...STONE, ambient: [0.26, 0.25, 0.32], moon: 0.4 },
+  [b('counter', 6, 2.4, 8, 0.8), b('shelf', 6, 0.1, 8, 0.5), b('rubble', 15, 0.4, 4.2, 2), b('rubble', 16.6, 9, 2.4, 1.4), b('rubble', 0.4, 10.6, 2.4, 1.5), b('sacks', 1, 1, 1.4, 1)],
+  [n('KEEPER EDDA', 10, 1.6, 'bank', 'villager')],
+  { marks: [mk('rushes', 5, 4, 10, 5)], hangs: [hang('notices', 9.3, 1.4)], braziers: [{ x: 4, y: 5, r: 0.35 }], torches: torch(3, 12) });
+
+/** A house on Rescue Row: a family, their beds, the table, a hearth. */
+export function bigHome(name: string, adult: string, child: string, i: number): GameMap {
+  return big(name, 16, 11, 4.5, HOME,
+    [b('bed', 1, 0.6, 1.2, 2), b('bed', 2.8, 0.6, 1, 1.6), b('hearth', 7, 0.1, 2, 1), b('table', 10.4, 4, 2.6, 0.9), b('bench', 10.4, 5.1, 2.6, 0.5), b('shelf', 12.6, 0.1, 2.6, 0.5)],
+    [n(adult, 6.6, 2.8, 'home', 'villager', i), n(child, 4.4, 6, 'home', 'child', i)],
+    { braziers: [{ x: 8, y: 0.9, r: 0.35 }], marks: [mk('rug', 5.4, 4.4, 3.6, 2.4)], torches: torch(4, 12) });
+}
+
+/** The granary, when the north fields are farmed. */
+export const bigGranary = (): GameMap => big('THE GRANARY', 16, 11, 5, { ...HOME, floor: 'dirt' },
+  [b('sacks', 0.8, 0.6, 2.4, 1.2), b('sacks', 12.8, 0.6, 2.4, 1.2), b('sacks', 0.8, 2.6, 1.6, 1.2), b('sacks', 13.6, 3.2, 1.6, 1.2), b('cart', 9.6, 6.4, 2.8, 1.2)],
+  [n('FARMER JOS', 8, 3.2, 'granary', 'farmer')], { marks: [mk('rushes', 1, 1, 14, 8)], torches: torch(4, 12) });
+
 /** A Wickhold hall's inside at the new scale, by its door, or null if this pass doesn't redo it. */
 export function bigHall(door: string): GameMap | null {
-  return ({ church, hall: barracks, townhall, tavern, forge } as Record<string, () => GameMap>)[door]?.() ?? null;
+  return ({ church, hall: barracks, townhall, tavern, forge, tower, lodge, bank, granary: bigGranary } as Record<string, () => GameMap>)[door]?.() ?? null;
 }

@@ -9,7 +9,7 @@ import type { GameMap } from './arena.js';
 import type { WorldState } from './story.js';
 
 import { HOME, b, hall, infirmary, n, room } from './townhalls.js';
-import { bigHall, bigInfirmary } from './bighalls.js';
+import { bigHall, bigHome, bigInfirmary } from './bighalls.js';
 import { LAYOUT } from './town.js';
 
 /** The families who take the houses on Rescue Row, in the order the houses are lit. */
@@ -38,6 +38,7 @@ export function townInterior(door: string, w: WorldState): GameMap {
     [n('FARMER JOS', 5, 2.2, 'granary', 'farmer')]);
   // A house on Rescue Row: a family, a bed, a hearth.
   const i = Number(door.split(':')[1]) || 0, f = FAMILIES[i % FAMILIES.length];
+  if (LAYOUT.on) return bigHome(f.name, f.adult, f.child, i);
   return room(f.name, 10, 7, HOME, [b('bed', 0.8, 0.6, 1.2, 2), b('bench', 4.6, 2.6, 2, 0.8)],
     [n(f.adult, 4.2, 1.6, 'home', 'villager', i), n(f.child, 7.4, 3.2, 'home', 'child', i)], { braziers: [{ x: 8.2, y: 1, r: 0.35 }] });
 }

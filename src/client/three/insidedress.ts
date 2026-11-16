@@ -16,6 +16,8 @@ export interface Dress {
   wins: Win[];
   /** A rug's colour (the flat view's rugs are painted in the room's own). */
   rug: number;
+  /** Its chalk is a sparring ring's sand (the barracks'), not a chalked circle. */
+  sand?: boolean;
   /** How wide the low front wall's gap is (the door's, or the forge's open mouth). */
   gap?: number;
   build?(B: Boxes, glow: Boxes, g: THREE.Group, m: GameMap, r: Seed): void;
@@ -107,6 +109,7 @@ export const DRESS: Record<string, Dress> = {
   },
   'THE BARRACKS': {
     rug: 0x3a2a1e,
+    sand: true,
     wins: side('W', [3, 8, 13], 2, 4.2),
     build(B, _glow, g, m, r) {
       gallery(B, 'z', m.w + 0.9, 4.6, 15.2, -1.4, 2.8, r);
@@ -148,6 +151,23 @@ export const DRESS: Record<string, Dress> = {
       glow.b(11, 1.48, 0.75, 3, 0.1, 1.3, 0xff8a3a);
     },
   },
+  'THE TOWER': {
+    rug: 0x2a1e3a,
+    wins: [...back([3, 17], 4.8, 7.4, true, 0.7), ...side('W', [4, 10], 2.4, 5.6, true), ...side('E', [9, 13], 2.4, 5.6, true)],
+    build(B, glow, g, m, r) {
+      // A gallery of books round the back, a ring of candles over the chalked circle.
+      gallery(B, 'x', 0, -0.9, 15.8, 1.2, 4.6, r);
+      for (let x = 0; x < 15.4; x += 0.5) B.b(x + 0.25, 4.6, 0.3, 0.46, 1.1, 0.4, jit([0x6a2a2a, 0x2a4a6a, 0x5a5a2a, 0x3a2a5a][Math.floor(r.next() * 4)], 0.1, r));
+      chandelier(B, glow, 9.6, 9.6, 5, m.wallH!);
+    },
+  },
+  "THE HUNTERS' LODGE": {
+    rug: 0x4a3a24,
+    wins: [...side('W', [2.5, 11], 1.4, 3.2), ...side('E', [4, 10], 1.4, 3.2)],
+    build(B, _glow, _g, m, r) {
+      breast(B, -0.9, 0.9, 5.8, 8.8, m.wallH!, r);
+    },
+  },
   'THE INFIRMARY': {
     rug: 0x2e3a2a,
     wins: [...side('W', [3.6, 8.8], 1.4, 4.4), ...side('E', [3.6, 8.8], 1.4, 4.4)],
@@ -161,7 +181,7 @@ export const DRESS: Record<string, Dress> = {
 };
 
 /** Wickhold's own halls (these take the town's zoom; a house on a job keeps the job's, for the fight: view3d.ts). */
-export const townInside = (m: GameMap) => !!m.wallH && m.name in DRESS;
+export const townInside = (m: GameMap) => !!m.wallH && !!m.hall;
 
 /** Any other room with `wallH` (a house on a job): small leaded windows down both side walls, the moon through them. */
 export function plainDress(m: GameMap): Dress {

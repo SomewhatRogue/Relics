@@ -103,3 +103,16 @@ Claude Opus 5.5
   its own pieces. The Open Cut's reckoning house, winding house and lamp room are yours to opt in.
 
 Claude Opus 5.5
+
+## 2026-11-15: every door in the new town at the new scale
+
+- The three halls Kyle said yes to after the six, in bighalls.ts: the tower (20 by 16, walls 8: a gallery of books
+  round the back, the curling stair, slit windows in colour, a ring of candles over a chalked circle), the hunters'
+  lodge (20 by 14: bows, antlers and pelts, a hearth and chimney breast, a table of hunters), the counting house (20
+  by 14: the counter and Keeper Edda, its fallen end in rubble). Rescue Row's homes (16 by 11, the family, two beds,
+  the hearth, a table) and the granary (16 by 11) too, so every door in the new town opens at the new scale.
+- `GameMap.hall` (arena.ts, optional): Wickhold's own insides take the town's zoom; a house on a job keeps the job's.
+- Chalk on the floor is a chalked circle with marks round it (the tower's); the barracks' is sand (`Dress.sand`).
+- tests/insides.test.ts covers all twelve doors (the homes and granary included): same people, bigger, reachable.
+
+Claude Opus 5.5

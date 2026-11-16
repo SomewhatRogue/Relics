@@ -49,7 +49,7 @@ export function insideKit(m: GameMap): THREE.Group | null {
   for (const x of [ga, gb]) B.b(x, 0, m.h + 0.45, 0.36, 1.4, 0.6, timber ? 0x2a1d12 : 0x4a4652);
   // The floor's marks back over the kit's floor.
   for (const k of m.marks ?? []) {
-    const mm = markMesh(k, dress?.rug ?? 0x4a2a1e, r);
+    const mm = markMesh(k, dress?.rug ?? 0x4a2a1e, r, dress?.sand);
     if (mm) g.add(mm);
   }
   if (dress) windows(g, m, dress.wins, r), dress.build?.(B, glow, g, m, r);

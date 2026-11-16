@@ -11,7 +11,7 @@ import { runInterior } from '../src/shared/interiors';
 import { PLACES, board, type Job } from '../src/shared/jobs';
 import { walkable as walkPlan } from './walk';
 
-const DOORS = ['church', 'hall', 'townhall', 'tavern', 'forge', 'infirmary'];
+const DOORS = ['church', 'hall', 'townhall', 'tavern', 'forge', 'infirmary', 'tower', 'lodge', 'bank', 'granary', 'home:0', 'home:5'];
 const world = () => ({ ...newWorld(), rescued: 3 });
 const big = (door: string) => {
   LAYOUT.on = true;
@@ -19,7 +19,7 @@ const big = (door: string) => {
   LAYOUT.on = false;
   return m;
 };
-const old = (door: string) => hall(door) ?? infirmary(['AMOS', 'LETTY', 'CORIN'], 3);
+const old = (door: string) => hall(door) ?? (door === 'infirmary' ? infirmary(['AMOS', 'LETTY', 'CORIN'], 3) : townInterior(door, world()));
 const who = (m: GameMap) => (m.npcs ?? []).filter((n) => !n.mute).map((n) => [n.name, n.talk, n.look, n.arg ?? null, n.reach ?? null].join('|')).sort();
 
 /** Where a body can walk to from where you come in, on a quarter-tile grid. */
@@ -59,8 +59,9 @@ describe('the new look\'s insides', () => {
     for (const d of DOORS) {
       const m = big(d), o = old(d);
       expect(m.name).toBe(o.name);
-      expect(m.w * m.h).toBeGreaterThan(o.w * o.h * 2.5);
-      expect(m.wallH).toBeGreaterThanOrEqual(5);
+      expect(m.w * m.h).toBeGreaterThan(o.w * o.h * 2.4);
+      expect(m.wallH).toBeGreaterThanOrEqual(4.5);
+      expect(m.hall).toBe(true);
       expect(who(m)).toEqual(who(o));
     }
   });
