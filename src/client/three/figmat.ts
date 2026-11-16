@@ -46,14 +46,14 @@ const VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMat
 
 /**
  * A hero's card seen through whatever stands in front of them: the dithered violet silhouette of
- * mats.ts XRAY, cut to the figure's own shape.
+ * mats.ts XRAY, cut to the figure's own shape (a foe's in its own tint).
  */
-export function xrayMaterial(lit: { value: THREE.Texture | null }): THREE.ShaderMaterial {
+export function xrayMaterial(lit: { value: THREE.Texture | null }, tint: [number, number, number] = [0.86, 0.8, 1]): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    uniforms: { map: lit },
+    uniforms: { map: lit, uTint: { value: new THREE.Vector3(...tint) } },
     vertexShader: VS,
-    fragmentShader: `uniform sampler2D map; varying vec2 vUv;
-void main(){ if (texture2D(map, vUv).a < 0.9) discard; if (mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard; gl_FragColor = vec4(0.86, 0.8, 1.0, 0.35); }`,
+    fragmentShader: `uniform sampler2D map; uniform vec3 uTint; varying vec2 vUv;
+void main(){ if (texture2D(map, vUv).a < 0.9) discard; if (mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard; gl_FragColor = vec4(uTint, 0.35); }`,
     depthFunc: THREE.GreaterDepth,
     depthWrite: false,
     side: THREE.DoubleSide,

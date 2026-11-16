@@ -81,6 +81,13 @@ export function streetScale(dpr: number, cssW: number, cssH: number, town: boole
 /** Where your hero is on the render (x, y from the bottom) and the see-through hole's radius, in render pixels. */
 export const HOLE = { value: new THREE.Vector3(-1e4, -1e4, 0) };
 
+/**
+ * How a kit building lets you see what's behind it (docs/decisions/new-look-buildings.md): by default your hero shows
+ * as a silhouette through it and, when it matters, the whole building fades (`fadeKit`). `&hole=old` brings back the
+ * round hole that follows your hero (`ghostKit`), for comparing.
+ */
+export const OLD_HOLE = typeof location !== 'undefined' && new URLSearchParams(location.search).get('hole') === 'old';
+
 const ghosts = new WeakMap<THREE.Material, THREE.Material>();
 /** A material's see-through twin: a soft round hole round your hero, its edge dithered (no blending, no sorting). */
 function ghostOf(m: THREE.Material): THREE.Material {
@@ -109,5 +116,35 @@ export function ghostKit(group: THREE.Group, on: boolean): void {
     if (!own.has(q)) own.set(q, q.material as THREE.Material);
     const m = own.get(q)!;
     q.material = on ? ghostOf(m) : m;
+  });
+}
+
+/** A building's fade: its own copy of each material, every pixel dithered away past its share (no blending, no sorting). */
+const fades = new WeakMap<THREE.Group, { u: { value: number }; mats: Map<THREE.Material, THREE.Material> }>();
+const BAY = 'float fb2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }\nfloat fb4(vec2 a){ return fb2(0.5 * a) * 0.25 + fb2(a); }\n';
+/** Fade a kit building as one piece: `k` 1 solid (its own materials back), down to 0 gone. */
+export function fadeKit(group: THREE.Group, k: number): void {
+  let st = fades.get(group);
+  if (!st) fades.set(group, (st = { u: { value: 1 }, mats: new Map() }));
+  st.u.value = k;
+  const solid = k >= 0.999;
+  group.traverse((o) => {
+    const q = o as THREE.Mesh;
+    if (!q.isMesh) return;
+    if (!own.has(q)) own.set(q, q.material as THREE.Material);
+    const m = own.get(q)!;
+    if (solid) return void (q.material = m);
+    let f = st!.mats.get(m);
+    if (!f) {
+      f = m.clone();
+      const u = st!.u;
+      f.onBeforeCompile = (sh) => {
+        sh.uniforms.uFade = u;
+        sh.fragmentShader = sh.fragmentShader.replace('void main() {', `uniform float uFade;\n${BAY}void main() {\n  if (fb4(gl_FragCoord.xy) >= uFade) discard;`);
+      };
+      f.customProgramCacheKey = () => 'kitfade';
+      st!.mats.set(m, f);
+    }
+    q.material = f;
   });
 }

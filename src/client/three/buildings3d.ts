@@ -12,17 +12,21 @@ import type { Spot } from './rounds3d';
 import { setLampMeshes } from './lamps3d';
 import { houseAlight, kindling } from '../../shared/kindling';
 import { gradeBuilt } from './darkgold3d';
-import { ghostKit, STREET } from './streetkit';
+import { fadeKit, ghostKit, OLD_HOLE, STREET } from './streetkit';
 import { streetAround } from './streetrow';
 import { PITCH } from './camera3d';
 import { SWING } from '../swing';
 import { hides } from '../streethole';
 
+/** How far a kit building fades when it's in the way: three pixels in ten still drawn. */
+const FADE_TO = 0.3;
+
 
 export class Buildings {
   readonly group = new THREE.Group();
   /** By the block's place in the map's list (a friend's copy of the room gets new block objects on every update). */
-  private built = new Map<number, { b: Built; key: string; ghost?: boolean }>();
+  private built = new Map<number, { b: Built; key: string; ghost?: boolean; fade?: number; behind?: number }>();
+  private last = 0;
 
   clear(): void {
     for (const { b } of this.built.values()) this.drop(b);
@@ -34,8 +38,13 @@ export class Buildings {
     b.group.traverse((o) => (o as THREE.Mesh).isMesh && (o as THREE.Mesh).geometry.dispose());
   }
 
-  /** Bring every block up to date; `me` (tiles) lifts the roof of a building you're behind. Adds flames to `fires`. */
-  update(map: GameMap, me: [number, number] | null, fires: Spot[]): void {
+  /**
+   * Bring every block up to date; `me` (tiles) lifts the roof of a building you're behind (under `?street`, fades it),
+   * `foes` (tiles, live and near) fade one that hides them. Adds flames to `fires`.
+   */
+  update(map: GameMap, me: [number, number] | null, fires: Spot[], foes: [number, number][] = []): void {
+    const now = performance.now(), dt = Math.min(0.1, (now - (this.last || now)) / 1000);
+    this.last = now;
     if (STREET) streetAround(map.blocks, map.w, map.h);
     map.blocks.forEach((blk, i) => {
       if (blk.kind === 'sideway') return;
@@ -56,7 +65,17 @@ export class Buildings {
       // round them instead; nothing lifts or drops.
       if (STREET && roof) {
         const hid = !!me && hides(me, blk.x, blk.y, blk.x + blk.w, blk.y + blk.h, e.b.top, SWING.yaw, PITCH);
-        if (e.ghost !== hid) ghostKit(e.b.group, (e.ghost = hid));
+        if (OLD_HOLE) {
+          if (e.ghost !== hid) ghostKit(e.b.group, (e.ghost = hid));
+        } else {
+          // Your silhouette shows through at once (the x-ray pass); the whole building fades once you've been behind
+          // it half a second, or straight away if it hides a foe near you. A quarter second down, a quarter back.
+          e.behind = hid ? (e.behind ?? 0) + dt : 0;
+          const foe = foes.some((f) => hides(f, blk.x, blk.y, blk.x + blk.w, blk.y + blk.h, e.b.top, SWING.yaw, PITCH));
+          const want = (hid && e.behind > 0.5) || foe ? FADE_TO : 1, was = e.fade ?? 1;
+          const k = want < was ? Math.max(want, was - (dt * (1 - FADE_TO)) / 0.25) : Math.min(want, was + (dt * (1 - FADE_TO)) / 0.25);
+          if (k !== was || e.fade === undefined) fadeKit(e.b.group, (e.fade = k));
+        }
         for (const f of e.b.fires) fires.push(f);
         setLampMeshes(map.theme, blk.x, blk.y, e.b.lamps);
         return;

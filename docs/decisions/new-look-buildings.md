@@ -110,3 +110,20 @@ This chat's log (docs/design/new-look.md; inherited from docs/decisions/dark-gol
 - The see-through hole: a radius of 3.5 tiles round your hero, was 2.2. Then Kyle: still annoying, bigger: 5.5 tiles
   (11 across, wider than a phone at zoom 4).
   (Claude Opus 5.5)
+
+## 2026-11-15: no hole; silhouettes and a whole-building fade
+
+- Kyle found the big hole dizzying. Research (Diablo fades what's in the way softly; Torchlight 2 draws characters
+  through walls as a silhouette; Octopath designs it out with fixed views and places kept to one screen): a circle
+  that follows you over hollow box buildings moves, pops and shows their insides. Kyle agreed the plan:
+  - Your hero's silhouette through a building straight away (the x-ray pass that was there); foes now too, in red
+    (cards3d.ts, a small edit: `xray: 'foe'` for live foes not lurking, under `?street` only; figs3d.ts and
+    figmat.ts take a tint).
+  - The whole building fades as one piece (streetkit.ts `fadeKit`: its own copies of its materials, a dither
+    screen down to 30% of pixels, no blending or sorting) once you've been behind it half a second, or straight
+    away if it hides a live foe within 10 tiles; a quarter second down, a quarter back (buildings3d.ts).
+  - `&hole=old` brings back the round hole for comparing.
+- For the town layout chat: lanes behind buildings as short cut-throughs, not places to stand about.
+- scripts/street-look.cjs now keeps the camera off the arrival scene and stands the hero on its level (as
+  town-look.cjs does).
+  (Claude Opus 5.5)

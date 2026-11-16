@@ -24,10 +24,10 @@ const BACK = new THREE.Vector3(0, SIN, COS);
 const DISC = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 
 export type Draw = (c: Ctx, x: number, y: number) => void;
-/** `xray`: a hero, shown as a silhouette behind walls; `pool`: the shadow's radius (tiles); `bias`: nearer the camera (tiles), to sit over another at the same spot. */
-export interface Opts { xray?: boolean; pool?: number; bias?: number }
+/** `xray`: shown as a silhouette behind walls (a hero, or 'foe' in a foe's colour); `pool`: the shadow's radius (tiles); `bias`: nearer the camera (tiles), to sit over another at the same spot. */
+export interface Opts { xray?: boolean | 'foe'; pool?: number; bias?: number }
 
-interface Slot { i: number; card: THREE.Mesh; pool: THREE.Mesh; seen: number; hero: boolean }
+interface Slot { i: number; card: THREE.Mesh; pool: THREE.Mesh; seen: number; hero: boolean | 'foe' }
 
 export class Figs {
   readonly group = new THREE.Group();
@@ -40,6 +40,7 @@ export class Figs {
   private mat = cardMaterial(this.litTex, this.glowTex);
   private xLit = { value: this.litTex as THREE.Texture | null };
   private xmat = xrayMaterial(this.xLit);
+  private xfoe = xrayMaterial(this.xLit, [1, 0.42, 0.36]);
   private slots = new Map<string, Slot>();
   private byIndex: Slot[] = [];
   private free: number[] = [];
@@ -88,7 +89,7 @@ export class Figs {
     if (sx < -mx || sy < -my || sx > this.W + mx || sy > this.H + my) return;
     const s = this.slot(key);
     s.seen = this.frame;
-    s.hero = !!o.xray;
+    s.hero = o.xray === 'foe' ? 'foe' : !!o.xray;
     const ox = (s.i % COLS) * CELL.w, oy = Math.floor(s.i / COLS) * CELL.h;
     for (const g of [this.lit, this.glow]) g.save(), g.clearRect(ox, oy, CELL.w, CELL.h), g.beginPath(), g.rect(ox, oy, CELL.w, CELL.h), g.clip();
     BARE.on = true;
@@ -127,7 +128,7 @@ export class Figs {
 
   /** The heroes' cards as their silhouette (for the pass that shows them behind walls), or back. */
   xray(on: boolean): void {
-    for (const s of this.slots.values()) if (s.hero) s.card.material = on ? this.xmat : this.mat;
+    for (const s of this.slots.values()) if (s.hero) s.card.material = on ? (s.hero === 'foe' ? this.xfoe : this.xmat) : this.mat;
   }
 
   get count(): number {

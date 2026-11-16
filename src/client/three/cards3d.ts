@@ -44,6 +44,7 @@ import { woodFigs } from '../wooddraw';
 import { noteKneels } from '../kneel';
 import { putStatue } from './statue3d';
 import { lifeFigs } from '../townbeasts';
+import { STREET } from './streetkit';
 
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 
@@ -96,7 +97,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       continue;
     }
     const pz = pulledAt(room, e), [x, y] = pz ?? lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
-    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0 });
+    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0, xray: STREET && !dead && !lurking(e) ? 'foe' : undefined });
   }
   // A keg about to go, its fuse spitting; a Smouldering one's embers coming up through it (../blastdraw.ts).
   for (const e of room.enemies) {

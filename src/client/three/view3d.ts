@@ -207,7 +207,9 @@ export class View3D {
     }
     const at = this.view.at, fires: Spot[] = [...this.ground!.fires], ls: L3[] = [...this.ground!.lights];
     lampsNow(map.theme, this.ground!.lamps, fires, ls);
-    this.buildings.update(map, this.heroAt, fires);
+    // (Live foes near your hero, for the new look's fade: a building hiding one of them fades.)
+    const ha = this.heroAt, near = STREET && ha ? room.enemies.filter((e) => e.act !== 'dead' && Math.hypot(e.x - ha[0], e.y - ha[1]) < 10).map((e) => [e.x, e.y] as [number, number]) : [];
+    this.buildings.update(map, this.heroAt, fires, near);
     for (const e of room.enemies) if (e.act !== 'dead' && e.burnUntil > room.time) {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       fires.push([x, 0.5, y, e.kind === 'butcher' || e.ashAt ? 1.3 : 0.8]);

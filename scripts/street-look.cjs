@@ -25,7 +25,15 @@ const base = process.env.BASE || 'http://localhost:4173';
     await page.evaluate(([x, y, yaw]) => {
       const a = (yaw * Math.PI) / 180, back = 2.6;
       clearInterval(window.__pin);
-      window.__pin = setInterval(() => { window.__swing.yaw = a; Object.assign(window.__game.hero, { x: x - Math.sin(a) * back, y: y + Math.cos(a) * back }); }, 16);
+      const h = window.__game.hero;
+      // (The camera on the hero, not on a new hero's arrival scene; stood on the level under them: shared/arena.ts.)
+      window.__game.cutFocus = () => ({ x: h.x, y: h.y - 0.4 });
+      window.__pin = setInterval(() => {
+        const hx = x - Math.sin(a) * back, hy = y + Math.cos(a) * back;
+        const z = (window.__game.room.map.ledges ?? []).reduce((v, l) => (hx > l.x && hx < l.x + l.w && hy > l.y && hy < l.y + l.h ? Math.max(v, l.lv ?? 1) : v), 0);
+        window.__swing.yaw = a;
+        Object.assign(h, { x: hx, y: hy, z });
+      }, 16);
     }, [x, y, yaw]);
     await page.waitForTimeout(2500);
     await page.screenshot({ path: `${out}-${x}_${y}_${yaw}.png` });
