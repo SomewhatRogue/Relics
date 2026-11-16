@@ -7,7 +7,7 @@ const [url = 'http://localhost:4173/?hero=WARRIOR', out = 'shots/town', day = '0
 const VIEWS = {
   1: [[29.5, 37.5], [29.5, 30]], 2: [[29.5, 19.5], [29.5, 11]], 3: [[29.5, 31], [29.5, 37]], 4: [[22.5, 22], [12, 22]],
   5: [[43, 22], [53, 22]], 6: [[46.75, 3], [46.75, 19]], 7: [[42.5, 44], [53, 44]], 8: [[10.75, 24], [10.75, 34]],
-  9: [[20, 37.6], [45, 37.6]], 0: [[29.5, 33], [29.5, 26]], p: [[18, 50.6], [18.5, 49.6]], r: [[17.75, 57.4], [17.75, 56]], b: [[25.6, 22.2], [25.6, 20.7]], s: [[33, 31], [33, 28.6]],
+  9: [[20, 37.6], [45, 37.6]], 0: [[29.5, 33], [29.5, 26]], p: [[22, 57.4], [22, 55.6]], r: [[17.75, 57.4], [17.75, 56]], b: [[25.6, 22.2], [25.6, 20.7]], s: [[33, 31], [33, 28.6]], w: [[27, 57.4], [27, 54.6]],
 };
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : Object.keys(VIEWS);
 (async () => {
@@ -16,6 +16,7 @@ const only = process.env.VIEWS ? process.env.VIEWS.split(',') : Object.keys(VIEW
   const ctx = process.env.LAPTOP ? { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 } : { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
   const page = await (await browser.newContext(ctx)).newPage();
   page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('console', (m) => m.type() === 'error' && errors.push(m.text().slice(0, 300)));
   await page.goto(`${url}${url.includes('?') ? '&' : '?'}look=3d&hd&street&day=${day}`);
   await page.waitForFunction(() => window.__game);
   await page.waitForTimeout(1500);

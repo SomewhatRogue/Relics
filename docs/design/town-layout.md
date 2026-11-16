@@ -33,7 +33,8 @@ down by the millpond.
   - The counting house on the square's west side, its front on the square.
 - **The lower quarter (level 0), the bottom.** Down the Rat Steps or the East Stair from the square's south edge,
   which is a parapet looking over it. The Lower Lane runs along the foot of the wall, a yard below the Rat Steps.
-  The millpond below the Rat Steps. The Drowned Rat in the bottom-left corner, out of the square's view, its front
+  The millpond below the Rat Steps; the town works beside it, east of the Rat's front (Kyle). The whole end in dirt
+  and mud. The Drowned Rat in the bottom-left corner, out of the square's view, its front
   toward the camera on Rat Lane along the south wall, the sewer grate by it (Cobb, Whisper's back door). Rescue Row
   to the east, its eight homes in two rows facing each other across the row.
   (Kyle, 2026-11-15; the sketch predates this: the map is now 64 by 58.)

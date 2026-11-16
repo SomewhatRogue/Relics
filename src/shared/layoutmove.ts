@@ -20,7 +20,11 @@ export const DISTRICTS: District[] = [
   { name: 'hall', from: { x: 14.5, y: 2, w: 7.5, h: 8.5 }, d: [19.25, 11.5] },
   { name: 'gate', from: { x: 22, y: 0, w: 11, h: 11 }, d: [18.75, 0] },
   { name: 'garden', from: { x: 11, y: 17.5, w: 9.5, h: 8.5 }, d: [-9, -13.6] },
-  // (The job and works boards flush against the square's north edge, so no one stands behind them.)
+  // The town works down by the Drowned Rat, off to the side (Kyle, 2026-11-15: less of the square taken up): the
+  // works stall, Judd and his sweeper, their brazier; and their cart beside them.
+  { name: 'works', from: { x: 29.2, y: 11.5, w: 5.8, h: 4.9 }, d: [-4, 36.6] },
+  { name: 'workscart', from: { x: 34.5, y: 20.5, w: 3, h: 2.2 }, d: [-4.1, 29] },
+  // (The job board flush against the square's north edge, so no one stands behind it.)
   { name: 'square', from: { x: 19.5, y: 11, w: 22.5, h: 17 }, d: [1.5, 5.9] },
   { name: 'pond', from: { x: 47, y: 28.5, w: 7, h: 9.5 }, d: [-23.6, 11.1] },
   { name: 'wash', from: { x: 33, y: 36, w: 10, h: 3.5 }, d: [8.5, 13.2] },
@@ -65,7 +69,7 @@ export const OVERRIDES: { kind: string; at: [number, number]; to: [number, numbe
   { kind: 'stall', at: [38.5, 12.5], to: [39.8, 19.8] }, { kind: 'stall', at: [38.5, 16.5], to: [43.5, 19.8] },
   { kind: 'spot', at: [38.5, 14.2], to: [41.65, 22.2] }, { kind: 'crates', at: [42.25, 14.45], to: [46.1, 20.7] },
   { kind: 'crate', at: [40.5, 12.7], to: [46.2, 19.2] }, { kind: 'crate', at: [40.5, 16.6], to: [45.9, 22.4] },
-  { kind: 'gallows', at: [37.3, 24.85], to: [51, 17.05] },
+  { kind: 'gallows', at: [37.3, 24.85], to: [51, 17.05] }, { kind: 'rubble', at: [26.2, 31.5], to: [37, 38.3] },
 ];
 export const overrideOf = (kind: string, x: number, y: number) => OVERRIDES.find((o) => o.kind === kind && Math.hypot(o.at[0] - x, o.at[1] - y) < 0.05);
 

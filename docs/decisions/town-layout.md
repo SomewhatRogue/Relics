@@ -93,3 +93,21 @@ Claude Opus 5.5
   and plinth are the flat view's plain boxes (olive steps, a grey block crossing them) beside the new kit art.
 
 Claude Opus 5.5
+
+## 2026-11-15: the Rat's end in dirt and mud, the works down by the Rat (Kyle)
+
+- Dirt and mud: the street floor is one cobble picture, so soil never showed under `?street`. three/layoutsoil.ts
+  (new) paints the plan's earth, mud and grass as pixel art (32 a tile, ragged dithered edges, flecks) and lays it
+  over the floor in its shader by the floor's UVs, after the water's cut (cache key chained), so it runs up the
+  raised levels too. Only the new town. The Rat's whole end is earth, with mud along Rat Lane, round the pond, by
+  the works and Rescue Row's backs; never over the pond itself.
+- The town works down by the Rat, off to the side: districts `works` (the stall, Judd, his sweeper, their brazier)
+  and `workscart`, east of the Rat's front between the pond and Rat Lane. The south lane's old rubble now lies on
+  the Lower Lane (it came along with the Rat).
+- **For Buildings and camera** (Kyle, 16:22): the trees are bad; every house has the same roofs and look, some
+  variation wanted; the job board wants a redesign. All yours (streetprops.ts, streetbuild.ts, the JOBS stall).
+- **For Buildings and camera:** the millpond draws as a flat grey slab under `?street`, day and night, wherever it
+  sits (moved it as a test: same). It was blue with its ripples at 13:00; your whole-pixel zoom (15:52) is the
+  change between. Not the soil layer: off, same slab.
+
+Claude Opus 5.5

@@ -31,6 +31,7 @@ import { palisadeRun } from './palisade3d';
 import { addMounds } from './mounds3d';
 import { levelAt as standAt } from '../../shared/arena';
 import { stackLedges, stacked } from './layoutledges';
+import { soilOver } from './layoutsoil';
 
 /** How high the back wall stands, and a ledge (tiles). */
 export const WALL_H = 2.4;
@@ -73,6 +74,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   group.add(under);
   // The water, below the bank (water3d.ts): the floor is cut where it lies, so what's under goes lower.
   const water = buildWater(m, floorMat, floorTex);
+  // The new town's dirt and mud over the street's cobbles (layoutsoil.ts).
+  if (STREET && stacked(m)) soilOver(floorMat, m);
   if (water) group.add(...water.meshes), (under.position.y = -0.6);
   // The back wall: its painted face (from the 2D painting) on a wall with thickness, cut for the way out.
   const wc = document.createElement('canvas');

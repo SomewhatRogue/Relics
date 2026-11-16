@@ -99,8 +99,11 @@ export const POND = { x: 26, y: 41.5, w: 6, h: 6.4 };
 /** The ground's paint: earth in the yards, flags on Kirkhill's close, a worn way down the lanes. */
 export const SOIL: Soil[] = [
   { mat: 'earth', x: 1, y: 1, w: 12, h: 13 }, { mat: 'grass', x: 13.5, y: 0.5, w: 9.5, h: 12 },
-  { mat: 'flags', x: 24, y: 8.5, w: 15.5, h: 4.5 }, { mat: 'flags', x: 24, y: 19, w: 17, h: 15 },
-  { mat: 'earth', x: 13, y: 39.5, w: 12, h: 18 }, { mat: 'earth', x: 41, y: 48.5, w: 14, h: 8.7 },
-  { mat: 'earth', x: 56.5, y: 0.5, w: 7, h: 57 }, { mat: 'mud', x: 22, y: 52, w: 7, h: 5 }, { mat: 'swept', x: 13.5, y: 54.5, w: 9, h: 3 },
-  { mat: 'swept', x: 42, y: 30, w: 8.5, h: 4.5 }, { mat: 'earth', x: 1, y: 36.5, w: 0.5, h: 21 },
+  // The Drowned Rat's end of town, all dirt and mud (Kyle, 2026-11-15): the yard below the steps, the pond's banks,
+  // Rat Lane, the Lower Lane's west end and the slope down from Wall Lane; Rescue Row's lane and backs. (Mud never
+  // over the pond itself: the water takes its colour from the ground painted under it.)
+  { mat: 'earth', x: 13, y: 36, w: 30, h: 21.5 }, { mat: 'earth', x: 9, y: 36, w: 4, h: 21.5 },
+  { mat: 'mud', x: 13, y: 52.5, w: 12, h: 5 }, { mat: 'mud', x: 22.5, y: 40, w: 3.4, h: 9 }, { mat: 'mud', x: 22.5, y: 48.1, w: 12, h: 4.5 }, { mat: 'mud', x: 32.1, y: 40.5, w: 2, h: 8 }, { mat: 'mud', x: 14, y: 39.5, w: 5, h: 4 },
+  { mat: 'mud', x: 34, y: 46, w: 7, h: 11 }, { mat: 'earth', x: 41, y: 42.5, w: 14, h: 3 }, { mat: 'earth', x: 41, y: 48.5, w: 14, h: 9 },
+  { mat: 'earth', x: 56.5, y: 0.5, w: 7, h: 57 },
 ];
