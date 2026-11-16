@@ -6,6 +6,10 @@ import { bigSeat } from '../src/shared/bighalls';
 import { ARM_TABLE, KNIFE_LINE, ANVIL } from '../src/shared/pastimes';
 import { LAYOUT } from '../src/shared/town';
 import { newWorld } from '../src/shared/story';
+import { inArea } from '../src/shared/arena';
+import { runInterior } from '../src/shared/interiors';
+import { PLACES, board, type Job } from '../src/shared/jobs';
+import { walkable as walkPlan } from './walk';
 
 const DOORS = ['church', 'hall', 'townhall', 'tavern', 'forge', 'infirmary'];
 const world = () => ({ ...newWorld(), rescued: 3 });
@@ -76,5 +80,36 @@ describe('the new look\'s insides', () => {
     }
     const rat = big('tavern'), table = rat.blocks.find((b) => b.kind === 'armtable')!, [sx, sy] = bigSeat('arm', ARM_TABLE.seat);
     expect([+(sx - table.x).toFixed(2), +(sy - table.y).toFixed(2)]).toEqual([+(ARM_TABLE.seat[0] - ARM_TABLE.table.x).toFixed(2), +(ARM_TABLE.seat[1] - ARM_TABLE.table.y).toFixed(2)]);
+  });
+});
+
+const job = (seed: number, objective: Job['objective'], ruin: number): Job =>
+  ({ ...board(1)[0], layout: undefined, rooms: 3, place: { ...PLACES.find((p) => p.kind === 'farm')!, ruin }, objective, seed });
+
+describe('houses on a job, in the new look', () => {
+  afterEach(() => void (LAYOUT.on = false));
+
+  it('grow, rise, and still let you get at everyone and everything in them from the door', () => {
+    const seen = new Set<string>();
+    for (let s = 1; s <= 120; s++) for (const door of ['cottage', 'barn']) {
+      const j = job(s * 7 + 3, s % 5 ? 'hunt' : 'rescue', s % 4);
+      LAYOUT.on = false;
+      const before = runInterior(j, s % 3, s % 4, door).map;
+      LAYOUT.on = true;
+      const plan = runInterior(j, s % 3, s % 4, door), m = plan.map, w = walkPlan(plan), where = `${door} seed ${j.seed}: ${m.name}`;
+      seen.add(m.name);
+      expect(m.w, where).toBeCloseTo(before.w * (before.w > 15 ? 1.35 : 1.6));
+      expect(m.w, where).toBeLessThanOrEqual(30);
+      expect(m.wallH, where).toBeGreaterThanOrEqual(4.5);
+      expect(w.open(m.hero.x, m.hero.y), where).toBe(true);
+      expect(inArea(m.exit, m.w / 2, m.h - 0.3), where).toBe(true);
+      expect(w.reached / w.all, where).toBeGreaterThan(0.85);
+      for (const f of plan.foes) expect(w.reach(f.x, f.y, 0.9), `${where}: ${f.kind}`).toBe(true);
+      for (const q of plan.props.filter((q) => q.kind === 'cage')) expect(w.reach(q.x, q.y, 1.2), `${where}: cage`).toBe(true);
+      for (const q of plan.chests) expect(w.reach(q.x, q.y, 1.2), `${where}: chest`).toBe(true);
+      for (const n of m.npcs ?? []) expect(w.reach(n.x, n.y, 1), `${where}: body`).toBe(true);
+      for (const t of m.torches) expect(m.blocks.some((q) => q.kind === 'hearth' && q.look === 2 && inArea(q, t.x, t.y)), where).toBe(true);
+    }
+    expect(seen.size).toBeGreaterThan(6);
   });
 });

@@ -160,6 +160,16 @@ export const DRESS: Record<string, Dress> = {
   },
 };
 
+/** Wickhold's own halls (these take the town's zoom; a house on a job keeps the job's, for the fight: view3d.ts). */
+export const townInside = (m: GameMap) => !!m.wallH && m.name in DRESS;
+
+/** Any other room with `wallH` (a house on a job): small leaded windows down both side walls, the moon through them. */
+export function plainDress(m: GameMap): Dress {
+  const zs: number[] = [];
+  for (let z = 2.5; z < m.h - 2.5; z += 4.5) zs.push(z);
+  return { rug: 0x4a2a1e, wins: [...side('W', zs, 1.3, 2.9), ...side('E', zs, 1.3, 2.9)].map((w) => ({ ...w, w: 0.9 })) };
+}
+
 /** The windows and the moonlight from them. */
 export function windows(g: THREE.Group, m: GameMap, wins: Win[], r: Seed): void {
   const W = m.w + 0.88;

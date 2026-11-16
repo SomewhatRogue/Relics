@@ -24,6 +24,7 @@ import { Fires } from './fire3d';
 import { burningAt } from '../../shared/blaze';
 import { buildGround, type Ground } from './ground';
 import { disposeInside, insideKit } from './insidekit';
+import { townInside } from './insidedress';
 import { lampsNow } from './lamps3d';
 import { Lights, type L3 } from './lights3d';
 import { BOXFIGS, QUALITY, brightGamma, perfOn, quality, type Quality } from './look';
@@ -313,8 +314,8 @@ export class View3D {
 
   private setMap(map: GameMap): void {
     this.sky?.build(map);
-    // (The new look's insides take the town's zoom: shared/bighalls.ts.)
-    const town = map.name === 'WICKHOLD' || !!map.wallH;
+    // (Wickhold's halls in the new look take the town's zoom; a house on a job keeps the job's: insidedress.ts.)
+    const town = map.name === 'WICKHOLD' || townInside(map);
     if (STREET && town !== this.town) (this.town = town), this.resize();
     if (this.ground) this.scene.remove(this.ground.group), this.ground.dispose();
     if (this.inside) this.scene.remove(this.inside), disposeInside(this.inside), (this.inside = null);

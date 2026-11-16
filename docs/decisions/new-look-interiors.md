@@ -84,3 +84,22 @@ Claude Opus 5.5
 - Checks: tsc and tests/insides.test.ts (drawing and pictures only, no rules touched).
 
 Claude Opus 5.5
+
+## 2026-11-15: slice 4 in, houses on a job (Kyle: "Continue")
+
+- Spec addition (new-look-interiors.md, "Slice 4"). `shared/housegrow.ts` (new): under `?street` a house's layout
+  grows before anyone is put in it, 1.6 times (a cottage or barn) or 1.35 (the longhouse, hall house, tithe barn, so
+  none outgrows the church). Inner walls stretch (doorways wider), furniture keeps its size and its wall, everything
+  else spreads with the room: where goblins stand and sleep, the cage's corner, the body, the lantern, tables,
+  barrels. `wallH` 4.5, or 5.5 for the big ones. One small edit in shared/inside.ts (nobody's on the board).
+- Drawn by insidekit.ts with a plain dressing (insidedress.ts `plainDress`): small leaded windows down both side
+  walls with the moon through them, plus the walls, beams, posts and the low front wall every inside gets. Houses on a
+  job keep the job's zoom for the fight; only Wickhold's halls take the town's (`townInside`, view3d.ts).
+- Tests (tests/insides.test.ts): 240 houses and barns of every kind, grown: everyone, every goblin, cage, chest and
+  body reached from the door, the floor one space, the fire in its hearth. The houses, grim, doors and buildings tests
+  unchanged without the switch. `scripts/house-look.cjs` shoots four kinds of house on a village job.
+- **For the Instances and Deep chats:** any room in an instance or the Deep gets the same tall walls, beams, front wall
+  and windows by setting `wallH` on its GameMap; an entry in client/three/insidedress.ts (by the map's name) gives it
+  its own pieces. The Open Cut's reckoning house, winding house and lamp room are yours to opt in.
+
+Claude Opus 5.5

@@ -18,6 +18,8 @@ import { Rng } from './rng.js';
 import type { Foe, RoomPlan } from './terrain.js';
 import { sideRoom } from './sideroom.js';
 import { baseDoor, mergedOf, promoted } from './doors.js';
+import { growHouse, houseWallH } from './housegrow.js';
+import { LAYOUT } from './town.js';
 
 const LAYOUTS: Record<HouseKind, (rng: Rng) => Layout> = { cottage, backroom, weaver, smith, looted, store, stalls, haybarn, longhouse, manor, tithebarn };
 /** Who the dead were, by the place. */
@@ -34,6 +36,8 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
   const ruin = job.place.ruin, barn = baseDoor(door) === 'barn', end = held ? 'standing' : fate(job, roomIndex, seed), g = grimness(job, roomIndex), more = promoted(door);
   let l = LAYOUTS[more || big(job, roomIndex, seed) ? bigKind(seed, door) : home.kind](rng);
   if (rng.next() < 0.5) l = mirror(l);
+  // The new look (behind `?street`): the house grown to the new scale before anyone is put in it (housegrow.ts).
+  if (LAYOUT.on) l = growHouse(l);
   const { w, h } = l, props = [...l.props], foes: Foe[] = [], npcs: Npc[] = [], sleepers: P[] = [], marks: Mark[] = [];
   const open = (q: P) => isFree(l, q.x, q.y, 0.35, 0.1), fire = end === 'burning';
   // Half fallen in: heaps of what came down, the sky through the roof.
@@ -84,6 +88,7 @@ export function runInterior(job: Job, roomIndex: number, blockIndex: number, doo
     npcs: npcs.length ? npcs : undefined, sleepers: sleepers.length ? sleepers : undefined,
     grim: grim.length ? grim : undefined, marks: marks.length ? marks : undefined,
     blaze: fire ? planBlaze({ ...l, props }, new Rng(seed * 19 + 5), cage) : undefined,
+    ...(LAYOUT.on ? { wallH: houseWallH(l) } : {}),
   };
   // Now and then a chest worth the trip in (on a stream of its own, so nothing else about the house moves).
   const cr = new Rng(seed * 43 + 19), want = big(job, roomIndex, seed) ? 0.4 : barn ? 0.15 : home.kind === 'looted' ? 0.06 : 0.2;

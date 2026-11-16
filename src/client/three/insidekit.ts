@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { Boxes, Seed, jit } from './boxes';
 import { WALL_H } from './ground';
-import { DRESS, windows } from './insidedress';
+import { DRESS, plainDress, windows } from './insidedress';
 import { beam, markMesh } from './insideparts';
 import { VCOL } from './mats';
 import { mat, quad } from './streetkit';
@@ -24,7 +24,7 @@ const GLOW = new THREE.MeshBasicMaterial({ vertexColors: true });
 export function insideKit(m: GameMap): THREE.Group | null {
   const H = m.wallH;
   if (!H) return null;
-  const g = new THREE.Group(), B = new Boxes(), glow = new Boxes(), r = new Seed(m.w * 13 + m.h * 7), dress = DRESS[m.name];
+  const g = new THREE.Group(), B = new Boxes(), glow = new Boxes(), r = new Seed(m.w * 13 + m.h * 7), dress = DRESS[m.name] ?? plainDress(m);
   const timber = m.theme.back === 'plaster', wall = mat(timber ? 'mat-timber' : 'mat-stone', true);
   const x0 = -0.9, x1 = m.w + 0.9, z0 = -1.1, z1 = m.h + 0.2, keep = (o: THREE.Mesh) => ((o.userData.keep = true), o);
   // The back wall, from the painted face's top up (the face itself is ground.ts's), a little proud so it overlaps.

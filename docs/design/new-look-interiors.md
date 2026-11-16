@@ -87,7 +87,25 @@ Same door ids and the same rule in (`townInterior`); you come in at the bottom a
 4. **Buildings out on jobs and in the dungeons** (Kyle, 2026-11-15: "I want this same idea to extend to inside of
    buildings within the dungeons etc."): the cottages, barns, longhouses, manors and tithe barns (shared/inside.ts,
    halls.ts) and any rooms built inside the dungeons, at the same scale and with the same tall walls. A short addition
-   to this spec first, once slices 1 to 3 have settled the look.
+   to this spec first, once slices 1 to 3 have settled the look. (Kyle, after slice 3: "Continue".) Below.
+
+## Slice 4: houses on jobs, and any room that wants it
+
+- **The houses on a job** (shared/inside.ts: the cottage, back room, weaver's, smithy, looted house, store, stalls,
+  hay barn, longhouse, hall house, tithe barn) are made by seed and fought in. Under `?street` each layout grows to
+  1.6 times across and deep (the big ones 1.35, so none outgrows the church; `shared/housegrow.ts`) before anything is put in it: inner walls stretch to the new walls
+  (their doorways wider), furniture keeps its size and keeps to its wall (a bed against the back stays against the
+  back), everything else spreads with the room: where goblins stand and sleep, the cage's corner, the body, the barn's
+  lantern, tables and barrels. Then goblins, the dead, the grim, the fire and chests go in as now, on the same seeds.
+  `wallH` 4.5 for a cottage or barn, 5.5 for the big ones.
+- **Their walls and dressing** are insidekit.ts's, with a plain dressing for any room it has no entry for: small
+  leaded windows in the side walls with the moon through them, posts down timbered walls, beams near the back, the low
+  front wall with the door's gap. A burning or fallen-in house keeps what the fight shows it (fire, rubble, sky).
+- **Any room in a dungeon or instance** gets the same by setting `wallH` on its map (and an entry in insidedress.ts
+  for its own pieces). The Open Cut's buildings (the reckoning house, the winding house, the lamp room) are the
+  Instances chat's, the Deep's rooms the Deep chat's: a note to each on the board, theirs to take up.
+- Tests: with the switch, every house kind on many seeds still lets you reach every goblin, sleeper, cage, chest and
+  the way out from the door; without it, the same rooms as today.
 
 ## Kyle's calls (2026-11-15)
 
