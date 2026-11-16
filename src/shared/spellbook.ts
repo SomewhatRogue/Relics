@@ -22,10 +22,14 @@ export const MAGE_KITS: MageKit[] = ['wand', 'staff', 'spellblade'];
  */
 export const TAPS: Record<MageKit, Record<Element, { dmg: number }>> = {
   wand: { fire: { dmg: 0.9 }, frost: { dmg: 0.45 }, storm: { dmg: 1 } },
-  staff: { fire: { dmg: 0.9 }, frost: { dmg: 0.4 }, storm: { dmg: 1.15 } },
+  staff: { fire: { dmg: 0.65 }, frost: { dmg: 1.05 }, storm: { dmg: 1.05 } },
   spellblade: { fire: { dmg: 0.6 }, frost: { dmg: 1 }, storm: { dmg: 1 } },
 };
-/** The staff's holds are the wand's, this much bigger across (its damage is its own, shared/weapons.ts). */
+/** The staff's storm hold: a chain bolt (sim/staffholds.ts). `dmg` of the hold on the first goblin, `fall` of that on each after. */
+export const CHAIN_BOLT = { range: 8, cone: 30, jumps: 4, bigJumps: 7, reach: 4, dmg: 1.6, fall: 0.85, stun: 0.5 };
+/** The staff's frost hold: an ice dome round you (sim/staffholds.ts); `dmg` of the hold on each goblin it freezes. */
+export const ICE_DOME = { r: 2.6, bigR: 3.2, time: 4, bigTime: 5.5, edge: 0.9, dmg: 0.4 };
+/** The staff's fire hold is the wand's fireball, this much bigger across (its damage is its own, shared/weapons.ts). */
 export const STAFF_SIZE = 1.35;
 /** The wand's frost tap: `n` icicles fanned `spread` radians apart, flying `speed` times the spark's. */
 export const ICICLES = { n: 3, spread: 0.12, speed: 1.2 };

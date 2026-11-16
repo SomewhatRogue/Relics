@@ -45,9 +45,9 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     for (const w of Object.keys(KIT)) expect(Object.values(KIT[w as keyof typeof KIT]).join(' '), w).not.toMatch(/parry|riposte/i);
     expect(kitRows('spellblade', 'fire').find(([l]) => l === 'COST')?.[1]).toBe(`${SPELL.spellblade} magic a hold`);
     // The staff is the wand, harder and rooted (Kyle, 2026-11-16): the card says so.
-    expect(kitLine('staff', 'fire')).toBe('TAP: HEAVY FIREBOLT, BURSTS  HOLD: BIG FIREBALL, BURNS A CROWD  PERFECT: BIGGER, INTERRUPTS ANY BLOW');
-    expect(kitRows('staff', 'frost').find(([l]) => l === 'ALSO')?.[1]).toBe('Hits hard, cast standing still');
-    expect(kitRows('staff').find(([l]) => l === 'FIRE')?.[1]).toBe('Tap heavy firebolt, hold big fireball');
+    expect(kitLine('staff', 'fire')).toBe('TAP: SWEEP, KNOCKS BACK, BURNS  HOLD: BIG FIREBALL, BURNS A CROWD  PERFECT: BIGGER, INTERRUPTS ANY BLOW');
+    expect(kitRows('staff', 'frost').find(([l]) => l === 'HOLD')?.[1]).toBe('Ice dome, nothing gets in');
+    expect(kitRows('staff').find(([l]) => l === 'STORM')?.[1]).toBe('Tap sweep, hold chain lightning');
     expect(barWords('Shorter dodge, costs more stamina', 'MAGE')).toBe('Shorter dodge, costs more magic');
     expect(barWords('STAMINA RECOVERY', 'RANGER')).toBe('STAMINA RECOVERY');
   });

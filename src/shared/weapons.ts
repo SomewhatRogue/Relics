@@ -274,13 +274,13 @@ export const WEAPONS: Record<KitId, Weapon> = {
     blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.8, castWalk: 0.9,
     dodge: BLINK,
   },
-  /** The wand's spells, much harder, but rooted (Kyle, 2026-11-16: "you can't attack and move but all
-   *  attacks are MUCH more impactful and powerful"): a heavy tap that bursts, and the wand's holds bigger
-   *  (shared/spellbook.ts STAFF_SIZE). No walking while it casts or draws. */
+  /** Rooted and heavy (Kyle, 2026-11-16): a quick sweep that knocks back most goblins; held, the wand's
+   *  fireball bigger, a chain bolt, or an ice dome round you (sim/holds.ts, sim/staffholds.ts). No walking
+   *  while it sweeps or draws. */
   staff: {
     name: 'FOCUS STAFF',
     cls: 'MAGE',
-    combo: [{ windup: 0.42, active: 0.04, recover: 0.34, dmg: 22, range: 8, arc: 0, lunge: 0, knock: 4, shot: 'spark', speed: 15, burst: 0.9 }],
+    combo: [{ windup: 0.18, active: 0.1, recover: 0.32, dmg: 12, range: 2, arc: 160, lunge: 0.1, knock: 9, slash: true }],
     heavy: { windup: 0.1, active: 0.04, recover: 0.45, dmg: 24, dmgFull: 56, range: 9, arc: 0, lunge: 0, knock: 6, knockFull: 12, shot: 'spark', speed: 17, burst: 1.2, interrupts: true, spell: true },
     draw: 0.9, early: 'fizzle',
     blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.8,

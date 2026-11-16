@@ -6,7 +6,7 @@
  * the light each gives off. Cosmetic only: Math.random is fine here.
  */
 import type { ArenaRoom } from '../sim/room';
-import type { Zone } from '../sim/types';
+import type { Hero, Zone } from '../sim/types';
 import type { Light } from './light';
 import { EL_LIGHT } from './palette';
 import { drawStreams, streamLights } from './streamdraw';
@@ -57,6 +57,33 @@ function charged(g: CanvasRenderingContext2D, z: Zone, P: Proj, t: number): void
   }
 }
 
+const ICE = ['#9fd8ff', '#d8f2ff', '#ffffff'];
+
+/** A staff's ice dome (sim/staffholds.ts): its edge on the floor unbroken, rings of frost up its curve
+ *  thinning to the top, glints running over it; fading in its last second. */
+function dome(g: CanvasRenderingContext2D, d: NonNullable<Hero['dome']>, P: Proj, ppu: number, t: number): void {
+  const k = Math.max(0, Math.min(1, (d.until - t) / 1));
+  const n = Math.max(32, Math.round(d.r * 2 * Math.PI * ppu));
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2, [sx, sy] = P(d.x + Math.cos(a) * d.r, 0, d.y + Math.sin(a) * d.r);
+    dot(g, sx, sy, i % 4 ? ICE[0] : ICE[2], 0.85 * k);
+  }
+  // Up its curve: rings at a few heights, dithered (every other dot), fainter toward the top.
+  for (const f of [0.35, 0.6, 0.8, 0.93]) {
+    const rr = d.r * Math.cos(Math.asin(f)), up = d.r * f * 0.7, m = Math.max(16, Math.round(rr * 2 * Math.PI * ppu));
+    for (let i = 0; i < m; i += 2) {
+      const a = (i / m) * Math.PI * 2, [sx, sy] = P(d.x + Math.cos(a) * rr, up, d.y + Math.sin(a) * rr);
+      dot(g, sx, sy, ICE[1], (0.5 - f * 0.3) * k);
+    }
+  }
+  // Glints running round it.
+  for (let i = 0; i < 6; i++) {
+    const a = t * 1.3 + i * 1.05, f = 0.2 + 0.6 * Math.abs(Math.sin(t * 0.7 + i)), rr = d.r * Math.cos(Math.asin(f));
+    const [sx, sy] = P(d.x + Math.cos(a) * rr, d.r * f * 0.7, d.y + Math.sin(a) * rr);
+    dot(g, sx, sy, ICE[2], 0.9 * k);
+  }
+}
+
 /** Where a body is drawn now (the 2.5D view eases them). */
 type At = (key: string, x: number, y: number) => [number, number];
 
@@ -67,6 +94,7 @@ function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number
   if (over) drawWalls3(g, room, P, ppu, at);
   else drawWalls(g, room, P, ppu);
   for (const z of room.zones) if (z.kind === 'stormring' && room.time < z.until) charged(g, z, P, room.time);
+  for (const h of room.heroes) if (h.dome && room.time < h.dome.until) dome(g, h.dome, P, ppu, room.time);
   // The movement ladder's caltrops, burst and roar, the same way (ladderground.ts).
   drawLadderGround(g, room, P, ppu);
   drawSkyMarks(g, room, P, ppu);
@@ -94,6 +122,8 @@ export function spellLights<L>(room: ArenaRoom, at: (x: number, y: number, r: nu
     if (z.kind !== 'stormring' || room.time >= z.until) continue;
     out.push(at(z.x, z.y, z.r + 1.2, (0.55 + Math.random() * 0.2) * fade(z, room.time), EL_LIGHT[z.el]));
   }
+  // An ice dome's cold light.
+  for (const h of room.heroes) if (h.dome && room.time < h.dome.until) out.push(at(h.dome.x, h.dome.y, h.dome.r + 1, 0.45, [150, 205, 255]));
   return out.concat(streamLights(room, at), skyLights(room, at), worldLights(room, at));
 }
 

@@ -64,3 +64,14 @@ Claude Opus 5.5
   (STREAM.topWalk, in sim/walkspeed.ts so the client predicts it too).
 
 Claude Opus 5.5
+
+## 2026-11-16: the staff again (Kyle: "left click is just a quick swing that knocks back")
+
+- Tap: a sweep again (12, range 2, arc 160, knock 9), the element on it as before (TAPS.staff back to
+  0.65/1.05/1.05). Still rooted. Hold fire: the wand's fireball 1.35x. Hold storm: CHAIN_BOLT (sim/
+  staffholds.ts), the aimed goblin then 4 jumps (7 on the flash) up to 4 tiles each, 1.6x the hold falling
+  0.85 a jump, small ones stunned. Hold frost: ICE_DOME, r 2.6 (3.2) for 4 s (5.5) round where you cast:
+  goblins at its edge or inside frozen and set outside, none come in, and no goblin blow from outside lands
+  on anyone inside (combat.ts hitHero, shelteredFrom). Kept on Hero.dome; drawn in spellground.ts.
+
+Claude Opus 5.5

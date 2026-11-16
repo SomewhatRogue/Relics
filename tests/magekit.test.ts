@@ -1,6 +1,6 @@
 /** The Mage's kits (shared/mage.ts, sim/spells.ts, sim/spellblade.ts): magic costs, the wand, the staff's slash and rooted hold, the spellblade's charge and its blink through a blow. Each element's spells: spellbook.test.ts. */
 import { describe, expect, it } from 'vitest';
-import { BUTCHER, HERO, MANA_SHIELD, SPELL, STAFF_RING, TICK, WAND, WEAPONS, type WeaponId, type Element } from '../src/shared/tuning';
+import { BUTCHER, HERO, ICE_DOME, MANA_SHIELD, SPELL, STAFF_RING, TICK, WAND, WEAPONS, type WeaponId, type Element } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { renameKits } from '../src/shared/oldkits';
@@ -108,11 +108,11 @@ describe('the staff', () => {
     expect(f.room.zones.some((z) => z.kind === 'skystrike')).toBe(false);
   });
 
-  it('let go on the white flash: a perfect, the bigger strike', () => {
-    const a = arena('staff', [[2, 2]], 'storm');
+  it('let go on the white flash: a perfect, the bigger dome', () => {
+    const a = arena('staff', [[2, 2]], 'frost');
     const ev = a.loose(WEAPONS.staff.draw! + 0.05, 0.3);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
-    expect(a.room.zones.find((z) => z.kind === 'skystrike')?.big).toBe(true);
+    expect(a.h.dome?.r).toBe(ICE_DOME.bigR);
   });
 });
 

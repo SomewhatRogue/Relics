@@ -76,7 +76,7 @@ export type Learned = 'skill' | 'leave';
 export const knows = (h: { learned?: Learned[] }, l: Learned) => !h.learned || h.learned.includes(l);
 
 /** A Mage's held spells, by kit and element (shared/spellbook.ts). */
-export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'firewall' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash';
+export type SpellWhat = 'fireball' | 'coldblast' | 'strike' | 'firewall' | 'nova' | 'stormring' | 'lunge' | 'shatter' | 'dash' | 'chainbolt' | 'icedome';
 
 export type HeroAct = 'idle' | 'charge' | 'attack' | 'throw' | 'zip' | 'bash' | 'roll' | 'hurt' | 'stun' | 'down' | 'carry' | 'slam' | 'cut';
 
@@ -366,6 +366,8 @@ export interface Hero extends Body {
   /** A wand's storm stream (sim/stream.ts): on until `until`, held on goblin `id` (0 none yet), built to
    *  `step` (1 to 3), last tapped at `at`, its next tick, the spark's share a tick, and what's owed below a
    *  whole point. */
+  /** A staff's ice dome round where they cast it (sim/staffholds.ts): no goblin in, no blow from outside lands. */
+  dome?: { x: number; y: number; r: number; until: number };
   /** The spear is out on its chain (sim/spearchain.ts): the hand is drawn empty till it's back. */
   chainOut?: boolean;
   stream?: { id: number; step: number; at: number; until: number; next: number; tick: number; owe: number; oweJump: number; hop?: number; oweHop?: number };

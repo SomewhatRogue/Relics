@@ -1,4 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, roll, or taken). */
+import { shelteredFrom } from './staffholds';
 import { dashing } from './samuraicut';
 import { wetMult } from './techmage';
 import { litMult } from './charge';
@@ -245,6 +246,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // Just come into the room: nothing lands yet.
   if (h.safeT) return;
   if (h.act === 'down') return;
+  // Inside a staff's ice dome, nothing from outside it lands (sim/staffholds.ts).
+  if (shelteredFrom(e, h, heroes, now)) return;
   // A boss's blow: a press a moment late still counts (sim/bossgrace.ts); else a friend's lag (sim/latelist.ts).
   if (!late && attackCovers(a, h) && (graceDefer(e, a, h, heroes, now) || defer(e, a, h, now))) return;
   // Dodged by their own screen: through it (the goblin reels, as below), or out from under it.

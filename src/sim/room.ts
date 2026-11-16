@@ -74,6 +74,7 @@ import { fireSkill, stepSkills } from './skills';
 import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { throwSpear } from './spearchain';
+import { stepDomes } from './staffholds';
 import { stepJavelin, throwJavelin } from './javelin';
 import { laySnare, stepHound, stepSnare } from './ranger';
 import { burstMult, healOf, healReach, perfectMult, smiteStun } from './knacks';
@@ -518,7 +519,7 @@ export class ArenaRoom {
     // A staff's wall of fire rolls on and burns whoever it touches, friends too (sim/firewall.ts); its charged ring zaps what's
     // in it (sim/staffrings.ts); a wand's storm stream ticks on the goblin it holds (sim/stream.ts), and the
     // lightning it calls falls when it's due (sim/skystrike.ts).
-    stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w);
+    stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w), stepDomes(this.heroes, this.enemies, this.time);
     this.landings();
     // Steam scalds; fire turns bodies to ash and ice to steam (sim/steam.ts, worldfire.ts).
     stepSteam(w);
