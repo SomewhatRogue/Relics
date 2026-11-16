@@ -22,10 +22,10 @@ export const DISTRICTS: District[] = [
   { name: 'garden', from: { x: 11, y: 17.5, w: 9.5, h: 8.5 }, d: [-9, -13.6] },
   // (The job and works boards flush against the square's north edge, so no one stands behind them.)
   { name: 'square', from: { x: 19.5, y: 11, w: 22.5, h: 17 }, d: [1.5, 5.9] },
-  { name: 'pond', from: { x: 47, y: 28.5, w: 7, h: 9.5 }, d: [-34.4, 10.6] },
+  { name: 'pond', from: { x: 47, y: 28.5, w: 7, h: 9.5 }, d: [-23.6, 11.1] },
   { name: 'wash', from: { x: 33, y: 36, w: 10, h: 3.5 }, d: [8.5, 13.2] },
   { name: 'rescue', from: { x: 31, y: 27.5, w: 16, h: 12 }, d: [8.5, 12] },
-  { name: 'rat', from: { x: 10, y: 29.5, w: 17, h: 8 }, d: [12.5, 20.5] },
+  { name: 'rat', from: { x: 10, y: 29.5, w: 17, h: 8 }, d: [0.75, 20.5] },
   { name: 'oldquarter', from: { x: 54.5, y: 0, w: 8, h: 40 }, d: [2, 6] },
 ];
 
@@ -56,31 +56,38 @@ export const OVERRIDES: { kind: string; at: [number, number]; to: [number, numbe
   { kind: 'tree', at: [10, 38], to: null }, { kind: 'tree', at: [13, 5], to: null }, { kind: 'bush', at: [19, 37], to: [18.6, 38.9] },
   { kind: 'smoke', at: [45, 0.2], to: [30, 0.2] },
   { kind: 'hurdle', at: [31.5, 2.925], to: [41.5, 5.2] },
-  { kind: 'barrel', at: [21.7, 32.6], to: [34.5, 53.4] }, { kind: 'barrels', at: [21.7, 32.6], to: [34.5, 53.4] },
-  { kind: 'barrel', at: [12.3, 32.6], to: [24.4, 53.4] }, { kind: 'crate', at: [12.3, 33.7], to: [24.3, 54.7] },
+  { kind: 'barrel', at: [21.7, 32.6], to: [22.7, 53.4] }, { kind: 'barrels', at: [21.7, 32.6], to: [22.7, 53.4] },
+  { kind: 'barrel', at: [12.3, 32.6], to: [23.6, 52.4] }, { kind: 'crate', at: [12.3, 33.7], to: [24.1, 53.5] },
+  { kind: 'handcart', at: [11.6, 35.6], to: [13.9, 56.4] },
   // The square kept open (Kyle, 2026-11-15: never hidden behind anything in it): no trees in its middle, the market
   // stalls side by side against the hall and the house on its north edge, the gallows against the tower.
   { kind: 'tree', at: [22.6, 25.3], to: null }, { kind: 'tree', at: [33.6, 25.3], to: null }, { kind: 'post', at: [36.3, 12.2], to: null },
-  { kind: 'stall', at: [38.5, 12.5], to: [39.95, 19.5] }, { kind: 'stall', at: [38.5, 16.5], to: [43, 19.5] },
-  { kind: 'spot', at: [38.5, 14.2], to: [41.5, 21.6] }, { kind: 'crates', at: [42.25, 14.45], to: [45.6, 20.4] },
-  { kind: 'crate', at: [40.5, 12.7], to: [45.5, 19.2] }, { kind: 'crate', at: [40.5, 16.6], to: [44.8, 21.3] },
+  { kind: 'stall', at: [38.5, 12.5], to: [39.8, 19.8] }, { kind: 'stall', at: [38.5, 16.5], to: [43.5, 19.8] },
+  { kind: 'spot', at: [38.5, 14.2], to: [41.65, 22.2] }, { kind: 'crates', at: [42.25, 14.45], to: [46.1, 20.7] },
+  { kind: 'crate', at: [40.5, 12.7], to: [46.2, 19.2] }, { kind: 'crate', at: [40.5, 16.6], to: [45.9, 22.4] },
   { kind: 'gallows', at: [37.3, 24.85], to: [51, 17.05] },
 ];
 export const overrideOf = (kind: string, x: number, y: number) => OVERRIDES.find((o) => o.kind === kind && Math.hypot(o.at[0] - x, o.at[1] - y) < 0.05);
 
 /** New rounds for those who walked across today's town, by name. */
 export const ROUNDS: Record<string, { path: [number, number][]; stops?: number[] }> = {
-  'SERGEANT DUNN': { path: [[24, 21.6], [42.2, 21.6], [42.2, 33.6], [24, 33.6]] },
+  'SERGEANT DUNN': { path: [[24, 22.6], [41.6, 22.6], [41.6, 33.6], [24, 33.6]] },
   'WATCHMAN HOB': { path: [[10.6, 21.6], [22.6, 21.6]] },
   'WATCHMAN PIKE': { path: [[14.8, 37.6], [54, 37.6]] },
   'ORLA OF THE WATCH': { path: [[43, 21.6], [54, 21.6], [46.75, 21.6], [46.75, 4], [46.75, 21.6]] },
-  'A CARTER': { path: [[15, 37.9], [52, 37.9]], stops: [6, 6] },
-  'A WASHERWOMAN': { path: [[22, 44], [23.5, 42], [36, 42], [38, 50.2], [47.95, 50.5], [50.2, 50.15], [38, 50.6], [36, 42.6], [23.5, 42.6]], stops: [4, 0, 0, 0, 8, 5, 0, 0, 0] },
+  'A WASHERWOMAN': { path: [[32.8, 44.5], [36, 46], [38, 50.2], [47.95, 50.5], [50.2, 50.15], [38, 50.6], [36, 46.4]], stops: [4, 0, 0, 8, 5, 0, 0] },
   'A DIGGER': { path: [[54.3, 21.2], [53, 22.6], [51.6, 21.4]], stops: [7, 0, 3] },
   'OLD MERREN': { path: [[58.6, 27]] },
   'RECRUIT WAT': { path: [[10.9, 25.2]] },
-  'DESSA THE TRADER': { path: [[40, 21.2]] },
-  'TOBIN THE PAWNBROKER': { path: [[43, 21.2]] },
+  'DESSA THE TRADER': { path: [[39.8, 21.7]] },
+  'TOBIN THE PAWNBROKER': { path: [[43.5, 21.7]] },
 };
 /** The ducks' file out of the millpond and back. */
-export const DUCKS: [number, number][] = [[21.4, 46.2], [23, 47.6], [23.6, 49.6], [21, 50.2], [18.8, 48.6], [20.6, 47.2]];
+export const DUCKS: [number, number][] = [[32.2, 46.7], [33.8, 48.1], [34.4, 50.1], [31.8, 50.7], [29.6, 49.1], [31.4, 47.7]];
+
+/** The new town kept quiet (Kyle, 2026-11-15: "too much happening"): the ambient walkers who aren't at a job of their
+ *  own, and the birds, left out. Everyone you can talk to stays, and the folk at their work (the smith, the
+ *  washerwoman, the woodcutter, the potboy, the digger, Judd's sweeper). */
+export const QUIET = { npcs: new Set(['A CHILD', 'A HAULER', 'A CARTER']), life: new Set(['pigeons']), rounds: new Set(['crows']) };
+/** The market's stalls, bigger than today's so a vendor stands in proportion: w, h. */
+export const STALL = [3.6, 2.6];

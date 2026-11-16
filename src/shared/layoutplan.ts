@@ -58,9 +58,9 @@ export function planBlocks(w: WorldState, homes: number): Block[] {
     // Market Lane: the hunters' lodge on its south side, the gate road coming straight down to its door.
     bl(43, 24, 7.5, 6, 'house', { label: "HUNTERS' LODGE", door: 'lodge', face: 'S' }),
     house(50.5, 24, 2.25, 5), house(52.75, 24, 2.25, 5), house(50.5, 29.5, 4.5, 5, 'E'),
-    // The lower quarter: the Drowned Rat down at the bottom of town, past the yard at the foot of the Rat Steps, far enough down that it never stands over the square, its
-    // front on Rat Lane along the south wall (facing the camera: Kyle, 2026-11-15).
-    bl(25.25, 48, 8.5, 6.5, 'tavern', { label: 'THE DROWNED RAT', door: 'tavern' }),
+    // The lower quarter: the Drowned Rat in its bottom-left corner, out of the square's view, its front on Rat Lane
+    // along the south wall, facing the camera (Kyle, 2026-11-15); the millpond below the Rat Steps in its place.
+    bl(13.5, 48, 8.5, 6.5, 'tavern', { label: 'THE DROWNED RAT', door: 'tavern' }),
     // The Old Quarter: the chapel seen through the gap in the wall, down Market Lane.
     bl(57.5, 18.5, 5.5, 7, 'house', { label: 'OLD CHAPEL', door: 'chapel', locked: true, face: 'E' }),
     // The town walls: west, south, and the east wall with its gap.
@@ -87,20 +87,20 @@ const FENCES: [number, number, number, number][] = [
 export const OWN_ROUNDS: Round[] = [
   ...[0, 1, 2, 3].flatMap((i) => [0, 1, 2, 3].map((j): Round => ({ kind: 'stone', x: 15 + i * 2.1 + (j % 2) * 0.5, y: 2.6 + j * 2.4, r: 0.25 }))),
   { kind: 'tree', x: 23, y: 11, r: 0.6 }, { kind: 'tree', x: 37.5, y: 10.5, r: 0.6 }, { kind: 'tree', x: 2.5, y: 2.5, r: 0.6 },
-  { kind: 'tree', x: 11.5, y: 2.4, r: 0.6 }, { kind: 'tree', x: 22.6, y: 55.6, r: 0.6 }, { kind: 'tree', x: 61.5, y: 3, r: 0.6 },
+  { kind: 'tree', x: 11.5, y: 2.4, r: 0.6 }, { kind: 'tree', x: 35.5, y: 55.6, r: 0.6 }, { kind: 'tree', x: 61.5, y: 3, r: 0.6 },
   { kind: 'tree', x: 61, y: 47, r: 0.6 }, { kind: 'bush', x: 13.8, y: 55.5, r: 0.35 }, { kind: 'bush', x: 53, y: 35.1, r: 0.35 },
   { kind: 'post', x: 22.6, y: 19.6, r: 0.15 }, { kind: 'post', x: 24, y: 34.2, r: 0.15 }, { kind: 'post', x: 11, y: 30.5, r: 0.15 },
-  { kind: 'post', x: 44.2, y: 37.6, r: 0.15 }, { kind: 'post', x: 10.9, y: 44, r: 0.15 }, { kind: 'post', x: 24.6, y: 56.6, r: 0.15 }, { kind: 'post', x: 34.4, y: 56.6, r: 0.15 },
+  { kind: 'post', x: 44.2, y: 37.6, r: 0.15 }, { kind: 'post', x: 10.9, y: 44, r: 0.15 }, { kind: 'post', x: 13.4, y: 56.6, r: 0.15 }, { kind: 'post', x: 22.6, y: 56.6, r: 0.15 },
 ];
 
-/** The millpond, west of the Rat (Old Pennock's rods and seat come with the pond's district). */
-export const POND = { x: 15.2, y: 41, w: 6, h: 6.4 };
+/** The millpond, below the Rat Steps (Old Pennock's rods and seat come with the pond's district). */
+export const POND = { x: 26, y: 41.5, w: 6, h: 6.4 };
 
 /** The ground's paint: earth in the yards, flags on Kirkhill's close, a worn way down the lanes. */
 export const SOIL: Soil[] = [
   { mat: 'earth', x: 1, y: 1, w: 12, h: 13 }, { mat: 'grass', x: 13.5, y: 0.5, w: 9.5, h: 12 },
   { mat: 'flags', x: 24, y: 8.5, w: 15.5, h: 4.5 }, { mat: 'flags', x: 24, y: 19, w: 17, h: 15 },
   { mat: 'earth', x: 13, y: 39.5, w: 12, h: 18 }, { mat: 'earth', x: 41, y: 48.5, w: 14, h: 8.7 },
-  { mat: 'earth', x: 56.5, y: 0.5, w: 7, h: 57 }, { mat: 'mud', x: 34, y: 52, w: 7, h: 5 }, { mat: 'swept', x: 24, y: 39.5, w: 11, h: 8.5 },
+  { mat: 'earth', x: 56.5, y: 0.5, w: 7, h: 57 }, { mat: 'mud', x: 22, y: 52, w: 7, h: 5 }, { mat: 'swept', x: 13.5, y: 54.5, w: 9, h: 3 },
   { mat: 'swept', x: 42, y: 30, w: 8.5, h: 4.5 }, { mat: 'earth', x: 1, y: 36.5, w: 0.5, h: 21 },
 ];

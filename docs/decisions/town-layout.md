@@ -77,3 +77,19 @@ Claude Opus 5.5
   before in the old town). Was a fixed (24.1, 14.8), behind the board in the new town.
 
 Claude Opus 5.5
+
+## 2026-11-15: quieter, bigger stalls, the Rat in the corner, the statue (Kyle)
+
+- Quieter (layoutmove QUIET): the children, Judd's hauler, the carter, pigeons and crows left out of the new town.
+  Everyone you can talk to stays, and the folk at their work. The test allows these and only these to go.
+- The market's stalls 3.6 by 2.6 (STALL), vendors in front; Dunn's round a tile further south to pass them.
+- The Drowned Rat in the bottom-left corner (13.5, 48), out of the square's view, front on Rat Lane; the millpond
+  under the Rat Steps in its place (26, 41.5), Pennock, the coop and the ducks with it; the washerwoman's round redrawn.
+- The statue: its figure and name plate are cards drawn at ground height while the plinth's stone is lifted with the
+  square (my lifts): the figure sat 0.75 tiles inside the plinth. statue3d.ts lifts them too (small edit).
+- **For Buildings and camera:** Kyle finds the props standing as boards that turn with the camera noisy (benches and
+  the like): "shouldn't pivot as the screen does, it reads really noisy." Yours (streetprops.ts).
+- **For Art (or whoever owns the dais):** Kyle: "the statue looks awful now". Past the sunk figure (fixed), the dais
+  and plinth are the flat view's plain boxes (olive steps, a grey block crossing them) beside the new kit art.
+
+Claude Opus 5.5

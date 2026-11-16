@@ -33,14 +33,17 @@ down by the millpond.
   - The counting house on the square's west side, its front on the square.
 - **The lower quarter (level 0), the bottom.** Down the Rat Steps or the East Stair from the square's south edge,
   which is a parapet looking over it. The Lower Lane runs along the foot of the wall, a yard below the Rat Steps.
-  The Drowned Rat at the bottom of town past the yard, far enough down never to stand over the square, its front
-  toward the camera on Rat Lane along the south wall, the sewer grate by it (Cobb, Whisper's back door). The
-  millpond to the west; Rescue Row to the east, its eight homes in two rows facing each other across the row.
+  The millpond below the Rat Steps. The Drowned Rat in the bottom-left corner, out of the square's view, its front
+  toward the camera on Rat Lane along the south wall, the sewer grate by it (Cobb, Whisper's back door). Rescue Row
+  to the east, its eight homes in two rows facing each other across the row.
   (Kyle, 2026-11-15; the sketch predates this: the map is now 64 by 58.)
 - **The square kept open** (Kyle, 2026-11-15): never hidden behind anything in it. Everything tall stands flush
   against its north edge with nothing walkable behind it: the job and works boards, the market's two stalls side by
   side against the hall and the house at Market Lane's mouth. No trees in its middle; the gallows (under siege)
-  against the tower. Back from a job you stand a step in front of the job board.
+  against the tower. The market's stalls bigger (3.6 by 2.6). Back from a job you stand a step in front of the job
+  board.
+- **Quiet** (Kyle, 2026-11-15: too much happening): the ambient walkers without a job of their own (the children,
+  Judd's hauler, the carter) and the birds left out. Everyone you can talk to stays, and the folk at their work.
 - **The Old Quarter** past the east wall, as now.
 
 Every building's door stays the same interior: same door ids, same people inside.

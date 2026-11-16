@@ -4,7 +4,8 @@
  * the plate with their name stands at its front face, each drawn by the flat view's own code
  * (../statuedraw.ts), so both views show the same figure and the same name. Only draws.
  */
-import type { GameMap } from '../../shared/arena';
+import { levelAt, type GameMap } from '../../shared/arena';
+import { LEDGE_H } from './ground';
 import { STATUE_TALL, drawPlate, drawStatueTop } from '../statuedraw';
 import { PLATE, PLINTH_TOP } from '../statuepieces';
 import { PX } from '../world';
@@ -15,11 +16,13 @@ const UPPER = CELL.fy - 8;
 
 export function putStatue(f: Figs, map: GameMap): void {
   for (const r of map.rounds) if (r.kind === 'plinth') {
+    // On a raised level (the new town's square), up with the plinth's stone (ground.ts lifts the round's boxes).
+    const up = map.ledges ? levelAt(map, r.x, r.y) * LEDGE_H : 0;
     // A card holds CELL.fy pixels above its foot: a figure taller than that would stand on two, its lower part on
     // the cap and a second card raised UPPER pixels (each drawing only its own rows). At a hero's size one does.
-    f.put('st-top', r.x, PLINTH_TOP, r.y, (c, px, py) => drawStatueTop(c, r.hero, px, py, 0, UPPER), { pool: 0 });
-    if (r.hero && STATUE_TALL > UPPER) f.put('st-top2', r.x, PLINTH_TOP + UPPER / PX, r.y, (c, px, py) => drawStatueTop(c, r.hero, px, py + UPPER, UPPER), { pool: 0 });
+    f.put('st-top', r.x, PLINTH_TOP + up, r.y, (c, px, py) => drawStatueTop(c, r.hero, px, py, 0, UPPER), { pool: 0 });
+    if (r.hero && STATUE_TALL > UPPER) f.put('st-top2', r.x, PLINTH_TOP + up + UPPER / PX, r.y, (c, px, py) => drawStatueTop(c, r.hero, px, py + UPPER, UPPER), { pool: 0 });
     // The plate's card stands at the face, its foot on the floor: the face's foot is the slab's height up it.
-    if (r.hero) f.put('st-plate', r.x, 0, r.y + PLATE.z + 0.02, (c, px, py) => drawPlate(c.lit, r.hero!.name, px, Math.round(py - PLATE.y0 * PX)), { pool: 0 });
+    if (r.hero) f.put('st-plate', r.x, up, r.y + PLATE.z + 0.02, (c, px, py) => drawPlate(c.lit, r.hero!.name, px, Math.round(py - PLATE.y0 * PX)), { pool: 0 });
   }
 }

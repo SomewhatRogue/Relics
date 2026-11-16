@@ -58,6 +58,7 @@ describe('stacked levels', () => {
 import { doorAt, inRamp, npcAt } from '../src/shared/arena';
 import { CHAPTER_1, newWorld } from '../src/shared/story';
 import { LAYOUT, SPOT_REACH, oldTown, townMap, townProps, townSpots } from '../src/shared/town';
+import { QUIET } from '../src/shared/layoutmove';
 import { WORKS } from '../src/shared/works';
 
 const ready = () => Object.assign(newWorld(), { rescued: 6, storyDone: [CHAPTER_1.goals.story] });
@@ -120,7 +121,7 @@ describe('the new town', () => {
         const m = townMap(w), old = oldTown(w);
         expect(m.blocks.filter((b) => b.door).map((b) => b.door).sort()).toEqual(old.blocks.filter((b) => b.door).map((b) => b.door).sort());
         const left = (old.npcs ?? []).map((n) => n.name).filter((n) => !m.npcs!.some((x) => x.name === n));
-        expect(left).toEqual([]);
+        expect(left.filter((n) => !QUIET.npcs.has(n))).toEqual([]);
         expect(townProps().length).toBeGreaterThan(5);
       }
     } finally {

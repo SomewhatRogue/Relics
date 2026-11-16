@@ -8,7 +8,7 @@ import type { Block, GameMap, Npc, Round } from './arena.js';
 import type { Life } from './townlife.js';
 import type { PropKind } from './props.js';
 import type { WorldState } from './story.js';
-import { DUCKS, ROUNDS, moveBox, movePoint, overrideOf } from './layoutmove.js';
+import { DUCKS, QUIET, ROUNDS, STALL, moveBox, movePoint, overrideOf } from './layoutmove.js';
 import { ARRIVE, LEDGES, LH, LW, OWN_ROUNDS, POND, SOIL, planBlocks } from './layoutplan.js';
 
 /** What a building is, rather than a thing standing in the street: the plan has its own. */
@@ -52,7 +52,9 @@ function moveNpc(n: Npc): Npc | null {
 function moveBlock(b: Block): Block | null {
   if (BUILT.has(b.kind) || (b.kind === 'rubble' && b.h > 5)) return null;
   const c = place(b.kind, b.x + b.w / 2, b.y + b.h / 2);
-  return c ? { ...b, x: c[0] - b.w / 2, y: c[1] - b.h / 2 } : null;
+  // The market's two stalls (2 deep today) made bigger; the job and works boards keep their size.
+  const [w, h] = b.kind === 'stall' && b.h > 1 ? STALL : [b.w, b.h];
+  return c ? { ...b, w, h, x: c[0] - w / 2, y: c[1] - h / 2 } : null;
 }
 
 /** How many of Rescue Row's homes stand (today's map has them as doors `home:i`). */
@@ -61,13 +63,14 @@ const homesOf = (m: GameMap) => m.blocks.filter((b) => b.door?.startsWith('home:
 export function layoutTown(w: WorldState, old: GameMap): GameMap {
   const rounds: Round[] = [...OWN_ROUNDS];
   for (const o of old.rounds) {
+    if (QUIET.rounds.has(o.kind)) continue;
     const p = place(o.kind, o.x, o.y);
     if (p) rounds.push({ ...o, x: p[0], y: p[1] });
   }
   const blocks = [...planBlocks(w, homesOf(old)), ...old.blocks.flatMap((b) => moveBlock(b) ?? [])];
-  const npcs = (old.npcs ?? []).flatMap((n) => moveNpc(n) ?? []);
+  const npcs = (old.npcs ?? []).filter((n) => !QUIET.npcs.has(n.name)).flatMap((n) => moveNpc(n) ?? []);
   const marks = (old.marks ?? []).flatMap((k) => moveBox(k) ?? []);
-  const life = (old.life ?? []).flatMap((l): Life[] => {
+  const life = (old.life ?? []).filter((l) => !QUIET.life.has(l.kind)).flatMap((l): Life[] => {
     if (l.kind === 'ducks') return [{ ...l, x: DUCKS[0][0], y: DUCKS[0][1], path: DUCKS }];
     const p = movePoint(l.x, l.y);
     return p ? [{ ...l, x: p[0], y: p[1], path: undefined }] : [];
