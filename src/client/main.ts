@@ -149,8 +149,11 @@ import { QUESTW } from './questwords';
 import { echoes } from './runnerecho';
 import { LAYOUT, townSpots } from '../shared/town';
 import { STREET } from './three/streetkit';
+import { BIG } from '../shared/bighalls';
 // The new town behind `?street` (docs/design/town-layout.md): set before the town is first built.
 LAYOUT.on = STREET;
+// The bigger rooms on their own switch, on unless `?rooms=small` (shared/bighalls.ts): set before anyone goes in.
+BIG.on = new URLSearchParams(location.search).get('rooms') !== 'small';
 import { GearHint } from './gearhint';
 import './goal.css';
 import { UnlockFlash } from './unlockflash';

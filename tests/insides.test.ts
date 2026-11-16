@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { collide, useMap, type GameMap } from '../src/shared/arena';
 import { townInterior } from '../src/shared/interiors';
 import { hall, infirmary } from '../src/shared/townhalls';
-import { bigSeat } from '../src/shared/bighalls';
+import { BIG, bigSeat } from '../src/shared/bighalls';
 import { ARM_TABLE, KNIFE_LINE, ANVIL } from '../src/shared/pastimes';
 import { LAYOUT } from '../src/shared/town';
 import { newWorld } from '../src/shared/story';
@@ -14,9 +14,9 @@ import { walkable as walkPlan } from './walk';
 const DOORS = ['church', 'hall', 'townhall', 'tavern', 'forge', 'infirmary', 'tower', 'lodge', 'bank', 'granary', 'home:0', 'home:5'];
 const world = () => ({ ...newWorld(), rescued: 3 });
 const big = (door: string) => {
-  LAYOUT.on = true;
+  BIG.on = true;
   const m = townInterior(door, world());
-  LAYOUT.on = false;
+  BIG.on = false;
   return m;
 };
 const old = (door: string) => hall(door) ?? (door === 'infirmary' ? infirmary(['AMOS', 'LETTY', 'CORIN'], 3) : townInterior(door, world()));
@@ -48,21 +48,29 @@ function walkable(m: GameMap) {
   };
 }
 
-describe('the new look\'s insides', () => {
-  afterEach(() => void (LAYOUT.on = false));
+describe('the bigger rooms', () => {
+  afterEach(() => void ((LAYOUT.on = false), (BIG.on = false)));
 
-  it('are today\'s rooms until a screen asks for the new town', () => {
+  it('are the old rooms with their switch off (`?rooms=small`)', () => {
     for (const d of DOORS) expect(townInterior(d, world()).w).toBe(old(d).w);
   });
 
-  it('are bigger, with tall walls, and keep every person with their words, looks and trades', () => {
+  it('are bigger and keep every person with their words, looks and trades', () => {
     for (const d of DOORS) {
       const m = big(d), o = old(d);
       expect(m.name).toBe(o.name);
       expect(m.w * m.h).toBeGreaterThan(o.w * o.h * 2.4);
-      expect(m.wallH).toBeGreaterThanOrEqual(4.5);
       expect(m.hall).toBe(true);
       expect(who(m)).toEqual(who(o));
+    }
+  });
+
+  it('draw the normal way: tall walls only in the parked street look', () => {
+    for (const d of DOORS) {
+      expect(big(d).wallH, d).toBeUndefined();
+      LAYOUT.on = true;
+      expect(townInterior(d, world()).wallH, d).toBeGreaterThanOrEqual(4.5);
+      LAYOUT.on = false;
     }
   });
 

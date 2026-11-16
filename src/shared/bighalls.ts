@@ -1,5 +1,6 @@
 /**
- * Wickhold's insides at the new scale (docs/design/new-look-interiors.md), behind `?street` with the new town:
+ * Wickhold's insides at the new scale (docs/design/new-look-interiors.md), on their own switch (`BIG`), from the old
+ * town's doors or the parked new town's:
  * the church, the barracks, the town hall, the Drowned Rat, the forge and the infirmary, about twice as wide and
  * deep as townhalls.ts's, their walls three heroes tall in 2.5D (`wallH`). Everyone who stands in the old rooms
  * stands here, with the same words, looks and trades; a few more folk at prayer, in the hall and at the Rat's
@@ -8,6 +9,7 @@
 import type { Block, GameMap, Mark, Npc, Round, Theme } from './arena.js';
 import { ARM_TABLE, KNIFE_LINE } from './pastimes.js';
 import { HOME, STONE, b, n, room } from './townhalls.js';
+import { LAYOUT } from './town.js';
 
 const mk = (kind: Mark['kind'], x: number, y: number, w: number, h: number): Mark => ({ kind, x, y, w, h });
 const rd = (kind: Round['kind'], x: number, y: number, r: number): Round => ({ kind, x, y, r });
@@ -15,8 +17,13 @@ const hang = (kind: NonNullable<GameMap['hangs']>[number]['kind'], x: number, w:
 const torch = (...xs: number[]) => xs.map((x) => ({ x, y: -1.6 }));
 /** Somebody only there to be seen: no mark, nothing to say. */
 const folk = (x: number, y: number, look: string, arg?: number): Npc => ({ name: '', x, y, talk: '', look, arg, mute: true });
+/** The bigger rooms, on their own switch (Kyle, 2026-11-16: "take just the bigger rooms into the old style"): on
+ *  unless a screen asks for `?rooms=small` (main.ts), set before the town is built; online, the room's screen decides. */
+export const BIG = { on: false };
+/** A bigger room. `hall` marks it as one (game.ts finds the pastimes' moved seats by it). Its walls rise tall
+ *  (`wallH`, three/insidekit.ts) only in the parked street look (`?street`); otherwise it draws the normal way. */
 export const big = (name: string, w: number, h: number, wallH: number, theme: Theme, blocks: Block[], npcs: Npc[], more: Partial<GameMap>): GameMap =>
-  ({ ...room(name, w, h, theme, blocks, npcs, more), wallH, hall: true });
+  ({ ...room(name, w, h, theme, blocks, npcs, more), ...(LAYOUT.on ? { wallH } : {}), hall: true });
 
 /** How far each pastime's corner moved from the old room to the new (its table, its keeper and your seat move together). */
 export const SHIFT = { arm: [3.3, 6.6], knives: [7.5, 0], anvil: [7, 0.9] } as const;

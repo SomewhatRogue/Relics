@@ -116,3 +116,24 @@ Claude Opus 5.5
 - tests/insides.test.ts covers all twelve doors (the homes and granary included): same people, bigger, reachable.
 
 Claude Opus 5.5
+
+## 2026-11-16: the bigger rooms in the old style, on their own switch (Kyle)
+
+- Kyle: the street look and the new town are parked (not working for him), but he likes the bigger interiors: "take
+  just the bigger rooms into the old style... opening from the old town's doors, drawn the normal way".
+- `BIG` (shared/bighalls.ts): the bigger rooms' own switch, on unless a screen asks for `?rooms=small` (main.ts, set
+  before anyone goes in; online, the room's screen decides). interiors.ts gives them from the old town's doors (and
+  still from the parked new town's). All twelve: the church, barracks, town hall, Rat, forge, infirmary, tower,
+  lodge, counting house, the granary and Rescue Row's homes.
+- Drawn the normal way: `wallH` (the street's tall walls, kit and close camera) only under `?street` now, so in the
+  flat view and the regular 2.5D view they draw as any room does. `GameMap.hall` marks a bigger room; game.ts finds
+  the pastimes' moved seats by it, not by the street.
+- `client/insidepaint.ts` (new): the font, armour stands and tavern tables in the flat view (one line in furnish.ts);
+  three/insidefurn3d.ts already drew them in 2.5D.
+- Houses on a job stay as they were (their growing is still only under `?street`).
+- Checked: tests/insides.test.ts (the old rooms with `?rooms=small`; bigger, same people, no tall walls off the street,
+  everyone, the way out and the pastimes' seats reached), tsc, the full suite; shots of all six in flat and 2.5D on
+  laptop and phone; the watchman's arm-wrestling, the card sharp's knives and the smith's anvil shift open from their
+  keepers in the bigger rooms.
+
+Claude Opus 5.5

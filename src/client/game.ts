@@ -585,8 +585,8 @@ export class Game {
     if (this.mode !== 'town' || this.room.map.name !== placeOf(id)) return;
     const h = this.hero, sp = spotOf(id);
     // (Out in the street, where the seat stands in the town being played: the new town moves it, town-layout.md.)
-    // (Inside, the new look's bigger rooms move the Rat's tables and the anvil: shared/bighalls.ts.)
-    const [sx, sy] = this.room.map.name === 'WICKHOLD' ? townPoint(sp.seat[0], sp.seat[1]) : this.room.map.wallH ? bigSeat(id, sp.seat) : [sp.seat[0], sp.seat[1]];
+    // (The bigger rooms move the Rat's tables and the anvil: shared/bighalls.ts.)
+    const [sx, sy] = this.room.map.name === 'WICKHOLD' ? townPoint(sp.seat[0], sp.seat[1]) : this.room.map.hall ? bigSeat(id, sp.seat) : [sp.seat[0], sp.seat[1]];
     Object.assign(h, { x: sx, y: sy, fx: sp.face[0], fy: sp.face[1], moving: false });
     this.pastime = id;
     this.mode = 'pastime';
