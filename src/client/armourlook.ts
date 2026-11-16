@@ -9,15 +9,19 @@
  * Made from each body's own pixels: a second figure in parts (joints.ts) holding only the armour's pixels,
  * laid over the body's inside pixels (never its outline, so every look keeps its silhouette), each in a
  * tone matching the shading under it. It's drawn by `drawFigure` right after the body, so it walks, leans,
- * crouches and turns with it, front, back and side, for every class and look. Drawing only.
+ * crouches and turns with it, front, back and side, for every class and look. A named body piece (a unique,
+ * the Hungry apron and coat) is its own thing: namedarmour.ts. A worn ring goes on the off hand: ringlook.ts.
+ * Drawing only.
  */
 import type { Hero } from '../sim/types';
-import { legsLook, packArmour, wornLook, type ArmourLook } from '../shared/gearlook';
+import { legsLook, packArmour, packRing, ringLook, wornLook, type ArmourLook, type RingLook } from '../shared/gearlook';
+import { glinting, handOf, ringGlint, ringStuff } from './ringlook';
 import type { Ctx } from './draw';
 import { drawFigure } from './figure';
 import type { Joint, JointKind, Jointed } from './joints';
 import type { BodyPose } from './motion';
 import { tintPixel } from './weaponlook';
+import { NAMED_ARMOUR } from './namedarmour';
 
 // Today's weapon art's colours, by role (weaponlook.ts), so a tier recolours armour the way it does a weapon.
 const PLATE = ['#6a727c', '#8a929c', '#aab2be'], MAIL = ['#6a727c', '#9aa4ae'], RIVET = '#d4a537', LEATHER = ['#4a3420', '#8b6a3a'];
@@ -66,45 +70,61 @@ const hex = (s: string, out: Rgba, i: number) => { for (let k = 0; k < 3; k++) o
 
 /** The armour figure for a body, made once per body and look, then kept (null: nothing shows). */
 const made = new WeakMap<Jointed, Map<string, Jointed | null>>();
-export function armourOn(body: Jointed, a: ArmourLook | null, l: ArmourLook | null): Jointed | null {
+export function armourOn(body: Jointed, a: ArmourLook | null, l: ArmourLook | null, ring: RingLook | null = null, glint = false): Jointed | null {
   let m = made.get(body);
   if (!m) made.set(body, (m = new Map()));
-  const key = packArmour(a) + '|' + packArmour(l);
+  const key = packArmour(a) + '|' + packArmour(l) + '|' + packRing(ring) + (glint ? '*' : '');
   if (m.has(key)) return m.get(key)!;
   const { w: W, h: H } = body.s, full = read(body.s.c, W, H), ta = a && tintPixel(tintLook(a)), tl = l && tintPixel(tintLook(l));
   const inside = (X: number, Y: number) => X > 0 && Y > 0 && X < W - 1 && Y < H - 1 && [0, 4, -4, W * 4, -W * 4].every((d) => full[(Y * W + X) * 4 + d + 3] > 0);
-  const all = new Uint8ClampedArray(W * H * 4), parts: Joint[] = [];
+  const all = new Uint8ClampedArray(W * H * 4), parts: Joint[] = [], glows: [number, number, string][] = [];
+  // The ring's hand: the off arm's (facing you or away), else the near arm's (in profile, the far one's behind the body).
+  const ringOn = ring && (body.parts.some((q) => q.kind === 'back') ? 'back' : 'arm');
   for (const p of body.parts) {
     const own = read(p.c, W, H), out = new Uint8ClampedArray(W * H * 4), legRows = p.y1 - p.y0;
     let any = false;
     for (let Y = p.y0; Y < p.y1; Y++) for (let X = p.x0; X < p.x1; X++) {
       const i = (Y * W + X) * 4;
       if (!own[i + 3] || !inside(X, Y) || pale(own, i)) continue;
-      const col = paint(p.kind, a, l, Y - p.y0, p.y1 - 1 - Y, legRows, X, tone(own, i));
+      const r = Y - p.y0, rb = p.y1 - 1 - Y, t = tone(own, i), leg = p.kind === 'legL' || p.kind === 'legR';
+      // A named body piece says its own colour first (namedarmour.ts), else its weight's look.
+      const own_ = !leg && a?.named ? NAMED_ARMOUR[a.named]?.({ kind: p.kind, r, rb, cx: (X - p.x0) / Math.max(1, p.x1 - p.x0 - 1), t, n: (X * 7 + Y * 13 + ((X * Y) % 5)) }) : undefined;
+      const col = own_ !== undefined ? own_ : paint(p.kind, a, l, r, rb, legRows, X, t);
       if (!col) continue;
-      const leg = p.kind === 'legL' || p.kind === 'legR', tint = leg ? tl : ta;
+      const tint = leg ? tl : ta;
       hex(tint ? tint(col, X, Y) : col, out, i);
       hex(tint ? tint(col, X, Y) : col, all, i);
       any = true;
     }
+    const glow: [number, number, string][] = [];
+    if (ring && p.kind === ringOn) {
+      const at = handOf(p, inside, own, W);
+      if (at) {
+        const i = (at[1] * W + at[0]) * 4;
+        hex(ringStuff(ring), out, i), hex(ringStuff(ring), all, i), (any = true);
+        if (glint) glow.push([at[0], at[1], ringGlint(ring)]);
+      }
+    }
     if (!any) continue;
+    glows.push(...glow);
     const white = new Uint8ClampedArray(out);
     for (let i = 0; i < white.length; i += 4) if (white[i + 3]) white[i] = white[i + 1] = white[i + 2] = 255;
-    parts.push({ ...p, c: canvas(out, W, H), white: canvas(white, W, H), glow: [] });
+    parts.push({ ...p, c: canvas(out, W, H), white: canvas(white, W, H), glow });
   }
   const whiteAll = new Uint8ClampedArray(all);
   for (let i = 0; i < whiteAll.length; i += 4) if (whiteAll[i + 3]) whiteAll[i] = whiteAll[i + 1] = whiteAll[i + 2] = 255;
-  const j = parts.length ? { s: { c: canvas(all, W, H), white: canvas(whiteAll, W, H), w: W, h: H, glow: [] }, parts, cut: body.cut } : null;
+  const j = parts.length ? { s: { c: canvas(all, W, H), white: canvas(whiteAll, W, H), w: W, h: H, glow: glows }, parts, cut: body.cut } : null;
   m.set(key, j);
   return j;
 }
 
 const POSE = {} as BodyPose;
+const seed = (id: string) => [...id].reduce((s, ch) => s + ch.charCodeAt(0), 0);
 /** Draw what the hero wears over the body just drawn (after `layout` and `drawFigure` for that body). */
 export function drawArmour(c: Ctx, h: Hero, body: Jointed, x: number, y: number, p: BodyPose): void {
-  const a = wornLook(h), l = legsLook(h);
-  if (!a && !l) return;
-  const j = armourOn(body, a, l);
+  const a = wornLook(h), l = legsLook(h), ring = ringLook(h);
+  if (!a && !l && !ring) return;
+  const j = armourOn(body, a, l, ring, !!ring && glinting(c.now, seed(h.id)));
   // (The body already left its afterimage; the armour takes the pose's flash with it.)
   if (j) drawFigure(c, j, x, y, Object.assign(POSE, p, { ghost: 0 }));
 }

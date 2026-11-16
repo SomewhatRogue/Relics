@@ -104,3 +104,22 @@ The gear-looks chat's log (docs/design/gear-looks.md). Newest at the foot.
   (slice 4). The Warrior's shield covers most of the chest, so on the Warrior it shows at the sword shoulder,
   the neck and the shins.
 (Opus 5.5)
+
+## 2026-11-16: named body pieces, and slice 4, rings; the spec's four slices in
+
+- `client/namedarmour.ts`: the seven unique body pieces and the Hungry apron and coat as their lines say, over
+  the armour shapes (armourlook.ts asks the named piece for a pixel's colour first, else its weight's look):
+  the Haulier's Plate dull riveted iron, dented; Laced Plate dark plates laced with leather; Damp Mail dark wet
+  mail with glints; Mawl's Belt a belt at the waist hung with teeth; Skarn's Hide raw scarred hide; Old Spoon's
+  Smock a stained leather smock on straps; the Fen-Black Jerkin black leather, waxed seams shining; the
+  Butcher's Apron a pale apron down the front, bloodied (still hungry-veined); the Ransom Coat dark with coins
+  sewn on. On the hero only for now: on the floor and in the bag they're still drawn by weight.
+- Slice 4, `client/ringlook.ts`: the best ring worn (through `shownItem`) is one pixel on the off hand (the
+  near hand in profile, since the far one's behind the body), in its stuff (plain iron, fine gold, forged
+  silver, cursed tarnished; a named ring its own: bone, dripstone, the wedding ring gold), and a fifth of a
+  second every few seconds it glints in its tier's colour (a unique's a plain bright glint). It's part of the
+  armour figure, so it moves with the hand. Friends in town get it as `gr`.
+- `?gearlook=armour` has NAMED rows (each piece on a class that would wear it, facing you and in profile) and
+  a RINGS row (every tier, the two Hungry rings, a unique), glints held on.
+- Open: unique and Hungry armour's own floor sprites and bag pictures; an elemental bow's element in hand.
+(Opus 5.5)

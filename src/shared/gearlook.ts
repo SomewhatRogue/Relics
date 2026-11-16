@@ -16,8 +16,10 @@ export type GearEl = 'fire' | 'frost' | 'storm';
 export interface WeaponLook { tier: Tier; el?: GearEl; named?: string }
 /** A worn body or legs piece's look (slice 3): its weight and tier, and its name if it's a named piece. */
 export interface ArmourLook { weight: 'light' | 'medium' | 'heavy'; tier: Tier; named?: string }
-/** Weapon, body (`a`) and legs (`l`); rings come in slice 4. */
-export interface GearLook { w?: WeaponLook; a?: ArmourLook | null; l?: ArmourLook | null }
+/** A worn ring's look (slice 4): its tier, and its name if it's a named ring. */
+export interface RingLook { tier: Tier; named?: string }
+/** Weapon, body (`a`), legs (`l`) and ring (`r`). */
+export interface GearLook { w?: WeaponLook; a?: ArmourLook | null; l?: ArmourLook | null; r?: RingLook | null }
 
 const EL: Partial<Record<TraitId, GearEl>> = { ember: 'fire', rime: 'frost', storm: 'storm' };
 
@@ -54,7 +56,7 @@ export function armourLookOf(it: Item | null | undefined): ArmourLook | null {
   const weight = it.armor === 'heavy' || it.armor === 'medium' ? it.armor : 'light';
   return { weight, tier: TIER_ORDER.includes(it.quality) ? it.quality : 'plain', ...(it.hungry || it.unique ? { named: it.hungry ?? it.unique } : {}) };
 }
-type Wearer = { gearLook?: GearLook; armor?: Item | null; legs?: Item | null; keep?: Looks['keep'] };
+type Wearer = { gearLook?: GearLook; armor?: Item | null; legs?: Item | null; rings?: Item[]; keep?: Looks['keep'] };
 /** What a hero wears on the body and the legs, as shown (a kept look over it), or what a friend's word said. */
 export const wornLook = (h: Wearer): ArmourLook | null => (h.gearLook && 'a' in h.gearLook ? h.gearLook.a ?? null : armourLookOf(shownItem(h.armor, h.keep, kitFor)));
 export const legsLook = (h: Wearer): ArmourLook | null => (h.gearLook && 'l' in h.gearLook ? h.gearLook.l ?? null : armourLookOf(shownItem(h.legs, h.keep, kitFor)));
@@ -67,4 +69,17 @@ export function unpackArmour(s: unknown): ArmourLook | null {
   if (!m) return null;
   const weight = ({ l: 'light', m: 'medium', h: 'heavy' } as const)[m[2] as 'l' | 'm' | 'h'];
   return { weight, tier: TIER_ORDER[Number(m[1])], ...(m[3] ? { named: m[3] } : {}) };
+}
+
+/** The ring that shows: the best tier worn (a kept look over it), or what a friend's word said; none worn, none. */
+export function ringLook(h: Wearer): RingLook | null {
+  if (h.gearLook && 'r' in h.gearLook) return h.gearLook.r ?? null;
+  const best = (h.rings ?? []).reduce<Item | null>((b, it) => (!b || TIER_ORDER.indexOf(it.quality) > TIER_ORDER.indexOf(b.quality) ? it : b), null);
+  const it = shownItem(best, h.keep, kitFor);
+  return it ? { tier: TIER_ORDER.includes(it.quality) ? it.quality : 'plain', ...(it.hungry || it.unique ? { named: it.hungry ?? it.unique } : {}) } : null;
+}
+export const packRing = (l: RingLook | null) => (l ? TIER_ORDER.indexOf(l.tier) + (l.named ? ':' + l.named : '') : '');
+export function unpackRing(s: unknown): RingLook | null {
+  const m = typeof s === 'string' ? /^([0-6])(?::([a-z]{1,16}))?$/.exec(s) : null;
+  return m ? { tier: TIER_ORDER[Number(m[1])], ...(m[2] ? { named: m[2] } : {}) } : null;
 }

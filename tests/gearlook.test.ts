@@ -1,6 +1,7 @@
 /** Gear you can see, slice 1 (docs/design/gear-looks.md): a weapon's look from the piece, packed for town, and the colour table. */
 import { describe, expect, it } from 'vitest';
-import { armourLookOf, heldLook, legsLook, packArmour, packLook, unpackArmour, unpackLook, weaponLookOf, wornLook } from '../src/shared/gearlook';
+import { armourLookOf, heldLook, legsLook, packArmour, packLook, packRing, ringLook, unpackArmour, unpackLook, unpackRing, weaponLookOf, wornLook } from '../src/shared/gearlook';
+import { NAMED_ARMOUR } from '../src/client/namedarmour';
 import { TIER_ORDER } from '../src/shared/gear';
 import { PAINT, tintOf, tintPixel, VEIN } from '../src/client/weaponlook';
 import { NAMED } from '../src/client/namedlooks';
@@ -92,5 +93,16 @@ describe('weapon looks', () => {
     for (const l of [{ weight: 'medium', tier: 'turning' }, { weight: 'heavy', tier: 'hungry', named: 'apron' }] as const) expect(unpackArmour(packArmour(l))).toEqual(l);
     expect(packArmour(null)).toBe('');
     for (const bad of [undefined, '', '9h', '2x', 7]) expect(unpackArmour(bad)).toBeNull();
+  });
+
+  it('every named body piece has its own look; a ring shows the best worn, packed small', () => {
+    for (const [id, u] of Object.entries(UNIQUES)) if (u.slot === 'armor') expect(NAMED_ARMOUR[id], id).toBeTypeOf('function');
+    for (const id of HUNGRY_ORDER) if (HUNGRY[id].slot === 'armor') expect(NAMED_ARMOUR[id], id).toBeTypeOf('function');
+    const ring = (quality: Item['quality'], hungry?: string): Item => ({ slot: 'ring', quality, traits: [], ...(hungry ? { hungry } : {}) });
+    expect(ringLook({ rings: [] })).toBeNull();
+    expect(ringLook({ rings: [ring('fine'), ring('hungry', 'wedding'), ring('plain')] })).toEqual({ tier: 'hungry', named: 'wedding' });
+    expect(ringLook({ rings: [ring('fine')], gearLook: { r: null } })).toBeNull();
+    for (const l of [{ tier: 'forged' }, { tier: 'tolmouth', named: 'dripring' }] as const) expect(unpackRing(packRing(l))).toEqual(l);
+    for (const bad of [undefined, '', '8', 'x:y']) expect(unpackRing(bad)).toBeNull();
   });
 });
