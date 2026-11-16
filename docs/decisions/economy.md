@@ -115,3 +115,11 @@ The economy chat's log (docs/design/economy.md). Newest at the foot.
   spot stays empty for LEGS). **For the UI chat:** pack.css still names the `skill` grid area; harmless.
 - Kyle asked for item level, real rarity, uniques that change your look and a LEGS slot: drafted as
   `docs/design/gear-levels.md`, waiting on his yes. Nothing built yet.
+
+## 2026-11-16: the works show coins (Opus 5.5)
+
+- Kyle: the town works still read as gold. The works panel (`client/worksui.ts`, no owner on the board)
+  showed a work's progress and need as bare numbers ("120/400", "120 of 400 gold") and gifts as
+  "GIVE 25". All three go through the coin formatter now (`0c / 4s`, `GIVE 25c`); dens burned stay a
+  count. Phone shots checked. The needs themselves are unchanged (copper, the old numbers): still Kyle's
+  call whether they scale with the new income.
