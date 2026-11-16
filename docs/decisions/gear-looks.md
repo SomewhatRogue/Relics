@@ -57,3 +57,27 @@ The gear-looks chat's log (docs/design/gear-looks.md). Newest at the foot.
 - Next: the twelve unique weapons by their lines (uniques.ts), the same way, so a kept look shows as its
   own thing. The Deep chat owns what a unique looks like; drawn from its `line` unless they say otherwise.
 (Opus 5.5)
+
+## 2026-11-16: the twelve unique weapons, each its own thing (so a kept look at Cole's shows)
+
+- Each unique weapon drawn as its `line` in shared/uniques.ts says, on its kit's shape: data in
+  `client/uniquelooks.ts` (stuff and strokes in hand) and `client/uniqueart.ts` (floor and bag), merged into
+  namedlooks.ts and namedart.ts. The Haulier's Pick a quarry pick on the greatsword; the Hinge Pin an iron
+  rod with a head at the butt; the Old-Oak Bow a plank with its nail hole; Mawl's Teeth yellowed teeth in
+  bone; Skarn's Hook a bright worn hook and chain (in hand, the flail's head and chain recoloured; its hook
+  shape shows on the floor and in the bag, since the flail's head swings on its own angle in heldkits.ts);
+  Old Knuckles' Maul a dented lump on an ash haft; Old Spoon's Ladle a black iron ladle, the spell's light
+  in its bowl; Gutchain's Chain Bow chain links across the prod; Mother Rust's Shears a wedge blade, ring
+  handle and pivot; the Slab Blade shield-wide iron with a rag grip; the Hushed Maul a black wet hammer
+  head on a rag-wrapped haft; the Bog-Oak Hook a black pole tarred at the hands, a hook bent back.
+- A unique's stuff is over today's art, not its PRE-WAR tier, and it carries no veins: it is itself whatever
+  its tier (`tierStuff` on a named look keeps the tier's stuff and thinned veins: the Hungry six).
+- The weapons were lengthened (dark-gold, the side-view chat): vein spans moved to the new sizes (sword to
+  17.4, greatsword to 24.4, spear head 16 to 21, staff to 14.6), and the Cleaver's slab and the Pike's
+  barbs moved with them.
+- Strokes can `lift` (a crossbow comes up to the shoulder to aim), and get the hero.
+- `?gearlook`: two UNIQUE rows under HUNGRY; a Ranger's piece shown standing (their wind-up is the short sword).
+- For the Deep chat: these follow the lines; say if a unique should look otherwise and it's a data edit.
+- For the new-look characters chat: generated sheets with the weapon baked in would hide all of this; keep
+  the weapon drawn by held.ts over them, as your log says.
+(Opus 5.5)

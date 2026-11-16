@@ -15,6 +15,8 @@ import { Lighting, type Light } from './light';
 import { drawText } from './pixfont';
 import { heroIn } from './lineupcast';
 import { HUNGRY, HUNGRY_ORDER } from '../shared/hungry';
+import { UNIQUES } from '../shared/uniques';
+import { WEAPONS } from '../shared/weapons';
 
 /** The columns: each tier, the forged one in each element too. */
 const LOOKS: { label: string; tier: Tier; el?: TraitId }[] = [
@@ -25,11 +27,14 @@ const LOOKS: { label: string; tier: Tier; el?: TraitId }[] = [
 const KITS = (Object.entries(CLASS_KITS) as [HeroClass, WeaponId[]][]).flatMap(([cls, ks]) => ks.map((kit) => ({ cls, kit })));
 const CELL = 34, ROW = 58, LEFT = 50, TOP = 20, SCALE = 2;
 const item = (kit: WeaponId, l: (typeof LOOKS)[number]): Item => ({ slot: 'weapon', kit, quality: l.tier, traits: l.el ? [l.el] : [] });
-/** The last row: the named Hungry weapons, each held by its class (namedlooks.ts). */
-const NAMED = HUNGRY_ORDER.filter((id) => HUNGRY[id].slot === 'weapon').map((id) => ({ id, cls: HUNGRY[id].cls!, kit: HUNGRY[id].kit!, it: { slot: 'weapon', kit: HUNGRY[id].kit!, quality: 'hungry', traits: [], hungry: id } as Item }));
+/** The last rows: the named weapons, each held by its class (namedlooks.ts): the Hungry six, then the uniques six a row. */
+const named = (kit: WeaponId, it: Item) => ({ cls: WEAPONS[kit].cls, kit, it });
+const HUNGRY_ROW = HUNGRY_ORDER.filter((id) => HUNGRY[id].slot === 'weapon').map((id) => named(HUNGRY[id].kit!, { slot: 'weapon', kit: HUNGRY[id].kit!, quality: 'hungry', traits: [], hungry: id }));
+const UNIQUE_ALL = (Object.entries(UNIQUES) as [string, { slot: string; kit?: WeaponId }][]).filter(([, u]) => u.slot === 'weapon' && u.kit).map(([id, u]) => named(u.kit!, { slot: 'weapon', kit: u.kit!, quality: 'tolmouth', traits: [], unique: id }));
+const NAMED_ROWS = [{ label: 'HUNGRY', col: '#ff6a5a', pieces: HUNGRY_ROW }, { label: 'UNIQUE', col: '#d8b0ff', pieces: UNIQUE_ALL.slice(0, 6) }, { label: 'UNIQUE', col: '#d8b0ff', pieces: UNIQUE_ALL.slice(6) }];
 
 export function openGearLooks(): void {
-  const W = LEFT + LOOKS.length * CELL + 4, H = TOP + (KITS.length + 1) * ROW + 6;
+  const W = LEFT + LOOKS.length * CELL + 4, H = TOP + (KITS.length + NAMED_ROWS.length) * ROW + 6;
   const mk = () => Object.assign(document.createElement('canvas'), { width: W, height: H });
   const lit = mk(), glow = mk(), out = mk();
   const page = document.createElement('div');
@@ -42,7 +47,9 @@ export function openGearLooks(): void {
   const c: Ctx = { lit: lit.getContext('2d')!, glow: glow.getContext('2d')!, now: 0 };
   for (const g of [c.lit, c.glow]) g.imageSmoothingEnabled = false;
   // Two torches a row, so every column is lit about the same.
-  const lights: Light[] = [...KITS, null].flatMap((_, r) => [0.28, 0.76].map((k) => ({ x: W * k, y: TOP + r * ROW + 20, r: W * 0.36, i: 0.45, c: [1, 0.76, 0.5] as [number, number, number] }))).slice(0, 32);
+  const torch = (x: number, y: number, r: number): Light => ({ x, y, r, i: 0.45, c: [1, 0.76, 0.5] });
+  // (The lighting pass takes 32: two a kit row, and two for the named rows below.)
+  const lights: Light[] = [...KITS.flatMap((_, r) => [0.28, 0.76].map((k) => torch(W * k, TOP + r * ROW + 20, W * 0.36))), torch(W * 0.32, TOP + (KITS.length + 0.6) * ROW, W * 0.42), torch(W * 0.32, TOP + (KITS.length + 2.2) * ROW, W * 0.42)];
 
   const frame = () => {
     if (!page.isConnected) return;
@@ -66,16 +73,18 @@ export function openGearLooks(): void {
           drawGear(c, 'weapon', kit, undefined, TIERS[l.tier].col, x, fy + 16, r * 10 + i, 1, weaponLookOf(it));
         });
       });
-      const fy = TOP + KITS.length * ROW + 34;
-      drawText(c.glow, 'HUNGRY', 2, fy - 12, '#ff6a5a');
-      NAMED.forEach(({ cls, kit, it }, i) => {
+      NAMED_ROWS.forEach(({ label, col, pieces }, nr) => {
+      const fy = TOP + (KITS.length + nr) * ROW + 34;
+      drawText(c.glow, label, 2, fy - 12, col);
+      pieces.forEach(({ cls, kit, it }, i) => {
         const x = LEFT + i * CELL + CELL / 2;
-        // (Mid-swing, so the piece is out where it can be seen; a bow as it stands.)
-        const { h, t } = heroIn({ cls, look: 0, weapon: kit }, kit === 'longbow' ? 'stand' : 'wind up', 'named' + i, now);
+        // (Mid-swing, so the piece is out where it can be seen; a Ranger's as it stands, since their wind-up is the short sword.)
+        const bow = cls === 'RANGER', { h, t } = heroIn({ cls, look: 0, weapon: kit }, bow ? 'stand' : 'wind up', 'named' + nr + '-' + i, now);
         Object.assign(h, { arms: { [kit]: it } });
-        if (kit === 'longbow') Object.assign(h, { fx: 1, fy: 0.15 });
+        if (bow) Object.assign(h, { fx: 1, fy: 0.15 });
         drawHero(c, h, x, fy, 'bare', t);
-        drawGear(c, 'weapon', kit, undefined, TIERS.hungry.col, x, fy + 16, 900 + i, 1, weaponLookOf(it));
+        drawGear(c, 'weapon', kit, undefined, TIERS[it.quality].col, x, fy + 16, 900 + nr * 10 + i, 1, weaponLookOf(it));
+      });
       });
     } finally {
       BARE.on = false;
@@ -99,11 +108,13 @@ function bag(): HTMLElement {
       t.append(img);
     }
   }
-  t.append(Object.assign(document.createElement('div'), { textContent: 'hungry' }));
-  for (const { it } of NAMED) {
-    const img = Object.assign(document.createElement('img'), { src: itemIcon(it) });
-    img.style.cssText = `width:28px;height:28px;image-rendering:pixelated;background:#1a1720;border:2px solid ${TIERS.hungry.col};padding:2px`;
-    t.append(img);
+  for (const { label, pieces } of NAMED_ROWS) {
+    t.append(Object.assign(document.createElement('div'), { textContent: label.toLowerCase() }));
+    for (let i = 0; i < LOOKS.length; i++) {
+      const it = pieces[i]?.it, img = Object.assign(document.createElement(it ? 'img' : 'div'), it ? { src: itemIcon(it) } : {});
+      if (it) img.style.cssText = `width:28px;height:28px;image-rendering:pixelated;background:#1a1720;border:2px solid ${TIERS[it.quality].col};padding:2px`;
+      t.append(img);
+    }
   }
   return t;
 }

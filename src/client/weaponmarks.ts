@@ -17,8 +17,8 @@ import { WEAPONS } from '../shared/weapons';
 
 /** Where each kit's metal runs along it from the hand (hero units, as held.ts draws them). */
 const METAL: Partial<Record<Hero['weapon'], [number, number]>> = {
-  sword: [3.6, 14.4], greatsword: [5, 20.4], spear: [13.2, 16.6], mace: [9.8, 14.6], daggers: [2.4, 6.6], rapier: [2.6, 14.6],
-  spellblade: [2.4, 11.6], poisoner: [2.4, 8.6], censer: [2.4, 10.6], wand: [0.4, 5.6], staff: [-5, 11.6],
+  sword: [3.6, 17.4], greatsword: [5, 24.4], spear: [16.2, 20.6], mace: [9.8, 14.6], daggers: [2.4, 6.6], rapier: [2.6, 14.6],
+  spellblade: [2.4, 11.6], poisoner: [2.4, 8.6], censer: [2.4, 10.6], wand: [0.4, 5.6], staff: [-7, 14.6],
 };
 const VEINS: Record<Tier, number> = { plain: 0, fine: 0, forged: 0, tolmouth: 2, touched: 4, turning: 6, hungry: 8 };
 
@@ -38,15 +38,15 @@ export function weaponMarks(c: Ctx, h: Hero, ox: number, oy: number, p: Pose): v
   const nx = -Math.sin(p.a), ny = Math.cos(p.a);
   metal(c, h, look, !!named, ox, oy, p, nx, ny);
   // (Last, so the piece's own shape is never hidden under its veins.)
-  if (named?.held) named.held(strokes(c, ox, oy, p.a));
+  if (named?.held) named.held(strokes(c, ox, oy, p.a), h);
 }
 
 /** Veins through cursed metal and an element along the edge, along the kit's metal. */
 function metal(c: Ctx, h: Hero, look: ReturnType<typeof heldLook>, named: boolean, ox: number, oy: number, p: Pose, nx: number, ny: number): void {
   const span = METAL[h.weapon];
   if (!span) return;
-  // (A named piece shows its shape first: fewer veins on it.)
-  const n = named ? Math.min(3, VEINS[look.tier]) : VEINS[look.tier], el = elCol(look), [r0, r1] = span;
+  // (A named piece shows its shape first: fewer veins on a Hungry one, none on a unique.)
+  const n = !named ? VEINS[look.tier] : NAMED[look.named!]?.tierStuff ? Math.min(3, VEINS[look.tier]) : 0, el = elCol(look), [r0, r1] = span;
   if (!n && !el) return;
   for (let i = 0; i < n; i++) {
     const r = r0 + (r1 - r0) * ((i * 0.618 + 0.13) % 1), o = ((i % 3) - 1) * 0.6, x = ox + nx * o, y = oy + ny * o;
@@ -79,6 +79,7 @@ function strokes(c: Ctx, ox: number, oy: number, a: number): Strokes {
   const ca = Math.cos(a), sa = Math.sin(a), at = (r: number, o: number): [number, number] => [ox + (ca * r - sa * o) * HS, oy + (sa * r + ca * o) * HS];
   return {
     now: c.now,
+    lift: (k) => void (oy -= k * HS),
     along: (r0, r1, o, col, w) => hline(c.lit, ox - sa * o * HS, oy + ca * o * HS, a, r0, r1, col, w),
     across: (r, o0, o1, col, w) => hline(c.lit, ox + ca * r * HS, oy + sa * r * HS, a + Math.PI / 2, o0, o1, col, w),
     dot: (r, o, col, glow) => {

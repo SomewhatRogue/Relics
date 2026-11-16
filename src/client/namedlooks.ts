@@ -3,9 +3,11 @@
  * thing it's named for, on its kit's shape. A named look is its own stuff (ramps by role over its tier's, and
  * exact colours swapped, weaponlook.ts) and a few strokes along the weapon in hand, drawn after the kit
  * (weaponmarks.ts), so the hands hold it as they hold the kit. Its floor sprite and bag picture: namedart.ts.
- * Uniques (shared/uniques.ts) join here by their ids. Drawing only.
+ * The unique weapons (shared/uniques.ts) are in uniquelooks.ts, by their ids. Drawing only.
  */
+import type { Hero } from '../sim/types';
 import type { Ramp, Role } from './weaponlook';
+import { UNIQUE_LOOKS } from './uniquelooks';
 
 /** Strokes in the hand's frame: `r` along the weapon from the hand, `o` across it (hero units), as held.ts draws. */
 export interface Strokes {
@@ -13,34 +15,40 @@ export interface Strokes {
   across(r: number, o0: number, o1: number, col: string, w?: number): void;
   /** A pixel; with `glow`, drawn unlit at that strength too. */
   dot(r: number, o: number, col: string, glow?: number): void;
+  /** Raise everything after this by `k` hero units (a crossbow comes up to the shoulder to aim). */
+  lift(k: number): void;
   now: number;
 }
 export interface Named {
+  /** Its own stuff over the tier's (a Hungry piece, still veined) rather than over today's art (a unique, which is itself). */
+  tierStuff?: boolean;
   paint?: Partial<Record<Role, Ramp>>;
   swap?: Record<string, string>;
-  held?: (s: Strokes) => void;
+  held?: (s: Strokes, h: Hero) => void;
 }
 
-const RAG: Ramp = ['#4a3e32', '#6a5a48', '#857260', 0.5];
+export const RAG: Ramp = ['#4a3e32', '#6a5a48', '#857260', 0.5];
 const pulse = (now: number, k = 3) => 0.5 + 0.5 * Math.sin(now * k);
 
-export const NAMED: Record<string, Named> = {
+const HUNGRY_LOOKS: Record<string, Named> = {
   // Skarn's Cleaver: a butcher's cleaver, a slab of black iron off the spine, squared, with a hole to hang it by.
   cleaver: {
+    tierStuff: true,
     paint: { grip: RAG },
     held: (s) => {
-      for (const o of [1.1, 1.9, 2.7]) s.along(8, 19.4, o, '#38363c', 2);
-      s.along(8, 19.4, 3.5, '#9a9ea6');
-      s.across(19.4, -0.6, 3.5, '#2c2a30', 2);
-      s.along(8, 19.4, -0.5, '#242226');
-      s.dot(17.2, 2.2, '#0c0a0e');
+      for (const o of [1.1, 1.9, 2.7]) s.along(8, 24, o, '#38363c', 2);
+      s.along(8, 24, 3.5, '#9a9ea6');
+      s.across(24, -0.6, 3.5, '#2c2a30', 2);
+      s.along(8, 24, -0.5, '#242226');
+      s.dot(21.6, 2.2, '#0c0a0e');
     },
   },
   // The Larder Pike: a barbed head, and meat hooks hung down the haft.
   pike: {
+    tierStuff: true,
     paint: { wood: ['#3a2a1c', '#4e3a26', '#644c32', 0.5] },
     held: (s) => {
-      s.across(14, -1.4, 1.4, '#b8bcc2');
+      s.across(17.4, -1.4, 1.4, '#b8bcc2');
       for (const r of [4.5, 7.6, 10.6]) {
         s.across(r, 0.4, 1.9, '#8a7266');
         s.along(r - 1, r, 1.9, '#8a7266');
@@ -50,6 +58,7 @@ export const NAMED: Record<string, Named> = {
   },
   // Spendthrift: a black bow on a gold string, coins tied at the grip.
   spendthrift: {
+    tierStuff: true,
     paint: { wood: ['#1e181c', '#2c2428', '#3e3238', 0.5] },
     swap: { '#d8d0bc': '#e8c050' },
     held: (s) => {
@@ -59,6 +68,7 @@ export const NAMED: Record<string, Named> = {
   },
   // Mother Rust's Needles: long rusted needles bound in red thread.
   needles: {
+    tierStuff: true,
     paint: { steel: ['#4a2a1e', '#7a4a32', '#c08a62', 0.6], grip: ['#5a1e1e', '#7a2a2a', '#9a3a3a', 0.5] },
     held: (s) => {
       s.along(7, 10.6, 0, '#9a5e40');
@@ -67,6 +77,7 @@ export const NAMED: Record<string, Named> = {
   },
   // The Jealous Wand: black twisted wood, a green eye at its tip that never stops looking.
   jealous: {
+    tierStuff: true,
     paint: { wood: ['#1c1820', '#2e2630', '#403444', 0.5] },
     held: (s) => {
       for (const r of [1.5, 3, 4.5]) s.dot(r, 0.6, '#4a3a50');
@@ -76,6 +87,7 @@ export const NAMED: Record<string, Named> = {
   },
   // The Keeping Mace: its head an iron cage, a coal kept burning in it.
   keeping: {
+    tierStuff: true,
     paint: { fit: ['#5a4a2a', '#7a6234', '#8a7040', 0.5] },
     held: (s) => {
       s.dot(11.6, 0, '#ff8a3a', 0.55 + 0.35 * pulse(s.now, 5));
@@ -83,3 +95,6 @@ export const NAMED: Record<string, Named> = {
     },
   },
 };
+
+/** Every named weapon look: the Hungry six and the uniques. */
+export const NAMED: Record<string, Named> = { ...HUNGRY_LOOKS, ...UNIQUE_LOOKS };

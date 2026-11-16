@@ -1,8 +1,10 @@
 /**
  * Named pieces on the floor (lootart.ts's pixel rows, the kit's size) and in the bag (itemicons.ts's 12 by 12
  * pictures, hilt low left, tip up right). Their steel, fittings, grip and wood use the art's own role colours,
- * so their stuff (namedlooks.ts) and a cursed tier's veins follow; anything else is drawn as it is.
+ * so their stuff (namedlooks.ts) and a cursed tier's veins follow; anything else is drawn as it is. The unique
+ * weapons' art is in uniqueart.ts, merged in here.
  */
+import { UNIQUE_FLOOR, UNIQUE_ICON } from './uniqueart';
 type Px = (x: number, y: number, col: string) => void;
 type Ln = (x0: number, y0: number, x1: number, y1: number, col: string) => void;
 
@@ -10,7 +12,7 @@ type Ln = (x0: number, y0: number, x1: number, y1: number, col: string) => void;
 const W = '#e8eef2', w = '#9aa6b2', F = '#b89a4a', G = '#4a3420', H = '#8b6a3a';
 const IM = '#c4cad4', IMD = '#6a7280', IW = '#8a5a30', IWD = '#5a3a1e', IG = '#d9b13a';
 
-export const NAMED_FLOOR: Record<string, { rows: string[]; pal: Record<string, string>; glint?: [number, number, number] }> = {
+const HUNGRY_FLOOR: Record<string, { rows: string[]; pal: Record<string, string>; glint?: [number, number, number] }> = {
   cleaver: { rows: ['.....c.SSSSSSSSSSSS', 'gggggcSSSSSSSSSSxSS', 'gggggcSSSSSSSSSSSSS', '.....c.EEEEEEEEEEEE'], pal: { c: F, g: G, S: w, E: W, x: '#0c0a0e' }, glint: [7, 18, 3] },
   pike: { rows: ['.....................w..', 'HHHHHHHHHHHHHHHHHHHHWWWW', '......q....q....q....w..', '.....qq...qq...qq.......'], pal: { H, W, w, q: '#8a7266' }, glint: [20, 23, 1] },
   spendthrift: { rows: ['..HHHHHHggHHHHHH..', '.H......$.......H.', 'HssssssssssssssssH', '........$$........'], pal: { H, g: G, s: '#e8c050', $: '#ffd860' } },
@@ -19,7 +21,7 @@ export const NAMED_FLOOR: Record<string, { rows: string[]; pal: Record<string, s
   keeping: { rows: ['.........m...', '........MxM..', 'oHHHHHHHxyxM.', '........MxM..', '.........m...'], pal: { o: F, H, M: w, m: '#6a727c', x: '#ff8a3a', y: '#ffd27a' } },
 };
 
-export const NAMED_ICON: Record<string, (px: Px, line: Ln) => void> = {
+const HUNGRY_ICON: Record<string, (px: Px, line: Ln) => void> = {
   cleaver: (px, line) => { line(0, 11, 3, 8, IWD); px(4, 8, IG); line(4, 7, 9, 2, IMD); line(5, 8, 10, 3, IM); line(6, 9, 11, 4, '#eef2f5'); line(9, 2, 11, 4, IMD); px(9, 4, '#0c0a0e'); },
   pike: (px, line) => {
     line(0, 11, 8, 3, IW); line(9, 2, 11, 0, IM); px(8, 1, IM), px(10, 3, IM);
@@ -39,3 +41,6 @@ export const NAMED_ICON: Record<string, (px: Px, line: Ln) => void> = {
     px(8, 3, '#ff8a3a'), px(9, 3, '#ffd27a'), px(8, 2, '#ff6a2a'), px(9, 4, '#ff6a2a');
   },
 };
+
+export const NAMED_FLOOR = { ...HUNGRY_FLOOR, ...UNIQUE_FLOOR };
+export const NAMED_ICON = { ...HUNGRY_ICON, ...UNIQUE_ICON };

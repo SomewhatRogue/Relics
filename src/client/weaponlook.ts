@@ -7,7 +7,8 @@
  * - forged: dark steel with a silver edge and silver fittings, the grip in black leather;
  * - PRE-WAR, touched, turning: the metal blackening and veined in the hungry's sickly green, more each tier;
  * - hungry: blackest, most veined.
- * A named piece (a Hungry weapon, a unique) has its own stuff over its tier's (namedlooks.ts).
+ * A named piece has its own stuff (namedlooks.ts): a Hungry weapon's over its tier's, still veined; a unique's
+ * over today's art, no veins, since it is itself whatever its tier.
  * An element (fire, frost, storm) runs along the edge in the spells' colours with a faint glow (weaponmarks.ts).
  *
  * Every colour today's weapon art uses has a role (steel, fittings, grip, wood); a tier's ramp maps each
@@ -66,7 +67,7 @@ export function tintOf(l: WeaponLook): (hex: string) => string {
   const key = lookKey(l);
   let f = tints.get(key);
   if (f) return f;
-  const n = l.named ? NAMED[l.named] : undefined, p: Paint = { ...PAINT[l.tier], ...(n?.paint ?? {}) }, swap = n?.swap ?? {}, done = new Map<string, string>();
+  const n = l.named ? NAMED[l.named] : undefined, p: Paint = { ...(n && !n.tierStuff ? PAINT.fine : PAINT[l.tier]), ...(n?.paint ?? {}) }, swap = n?.swap ?? {}, done = new Map<string, string>();
   f = (hex: string) => {
     const k = hex.toLowerCase(), had = done.get(k);
     if (had) return had;
@@ -85,8 +86,8 @@ export function tintOf(l: WeaponLook): (hex: string) => string {
 
 /** For pixel maps (the floor, the bag): the tint, and on cursed metal a green vein pixel here and there. */
 export function tintPixel(l: WeaponLook): (hex: string, x: number, y: number) => string {
-  // (A named piece shows its shape first: half the veins.)
-  const t = tintOf(l), v = PAINT[l.tier].veins, n = v && l.named ? v * 2 : v;
+  // (A named piece shows its shape first: half the veins on a Hungry one, none on a unique.)
+  const t = tintOf(l), v = PAINT[l.tier].veins, named = l.named ? NAMED[l.named] : undefined, n = !v || !named ? v : named.tierStuff ? v * 2 : 0;
   return (hex, x, y) => (n && ROLE_OF.get(hex.toLowerCase()) === 'steel' && (x * 7 + y * 13 + ((x * y) % 5)) % n === 0 ? VEIN : t(hex));
 }
 

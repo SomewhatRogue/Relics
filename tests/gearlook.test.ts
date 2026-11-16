@@ -7,6 +7,7 @@ import { NAMED } from '../src/client/namedlooks';
 import { NAMED_FLOOR, NAMED_ICON } from '../src/client/namedart';
 import { HUNGRY, HUNGRY_ORDER } from '../src/shared/hungry';
 import type { Item } from '../src/shared/loot';
+import { UNIQUES } from '../src/shared/uniques';
 
 describe('weapon looks', () => {
   it('reads tier, element and name (Hungry or unique) off the piece; no piece is plain', () => {
@@ -65,5 +66,19 @@ describe('weapon looks', () => {
     const fine: Item = { kit: 'greatsword', quality: 'fine', traits: [] };
     expect(heldLook({ weapon: 'greatsword', arms: { greatsword: { ...fine } }, keep: { weapon: 'haulpick' } })).toEqual({ tier: 'fine', named: 'haulpick' });
     expect(heldLook({ weapon: 'sword', arms: { sword: { ...fine, kit: 'sword' } }, keep: { weapon: 'haulpick' } })).toEqual({ tier: 'fine' });
+  });
+
+  it('every unique weapon is its own thing: held, floor and bag, its own colours and no veins', () => {
+    const ids = Object.entries(UNIQUES).filter(([, u]) => u.slot === 'weapon').map(([id]) => id);
+    expect(ids.length).toBeGreaterThan(0);
+    for (const id of ids) {
+      expect(NAMED[id], id).toBeDefined();
+      expect(NAMED_FLOOR[id], id).toBeDefined();
+      expect(NAMED_ICON[id], id).toBeTypeOf('function');
+      const t = tintPixel({ tier: 'tolmouth', named: id });
+      for (let x = 0; x < 20; x++) expect(t('#e8eef2', x, 0)).not.toBe(VEIN);
+    }
+    // Over today's art, not its PRE-WAR tier: a unique's gold stays gold unless it swaps it.
+    expect(tintOf({ tier: 'tolmouth', named: 'doorbow' })('#d4a537')).toBe('#d4a537');
   });
 });
