@@ -297,3 +297,24 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   retakes, against a plan of 65,000 a month. Weapons and armour looks drawn by the game over the sprite, as now,
   keep that from multiplying.
   (Claude Fable 5.2)
+
+## 2026-11-17: new figures paused; the overhaul goes slowly, a month's credits at a time
+
+- Kyle: "any way that we can make this sort of knight in the standard drawn pixel style that we're doing today? If
+  not we should pause it for now. I refill credits each month. Like we can slowly make the graphics overhaul as a
+  whole but honestly it's sort of just the style that I like but not enough to full yolo into it yet."
+- The answer given: only partly. At today's size (18 by about 35) the design's big ideas fit (a long cloak with a
+  red lining and a gold edge, darker plate, the greatsword carried upright), and today's knight already has the
+  closed helm, blackened plate and red cape; the fine look does not fit, since the reference itself is a blob at that
+  size. So the new figures are **paused**, not dropped.
+- Where they stand, to pick up when credits refill (65,000 a month, about a hundred kept pictures):
+  1. The knight's back and side from take 2 as the reference, then a run (the same cut, a longer stride) and a blow.
+     The first thing to learn is whether the generator keeps one character across views.
+  2. One goblin and one more hero the same way; all three in the 2.5D view behind a switch.
+  3. Then a few figures a month. Nothing new shown to players until a whole set (the five heroes and the common
+     goblins) exists, so the game never has two kinds of figure at once.
+  The takes, the description, the shrink and the walk demo are in docs/design/ref/knight-gen/ and
+  scripts/figures/shrink/. The 3D knight's scripts stay as a record.
+- Live and staying: smooth light, slate stone. Open again in the sweep: the rest of slice 2 (brightness tiers,
+  dusk), slice 3 (phone readability), slices 4 to 7.
+  (Claude Fable 5.2)

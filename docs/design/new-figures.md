@@ -1,5 +1,11 @@
 # New figures: heroes and enemies at twice the pixels
 
+**PAUSED by Kyle, 2026-11-17** ("it's sort of just the style that I like but not enough to full yolo into it yet").
+What worked: a figure generated from a written description, shrunk to 70 pixels, cut and walked by the game's own
+kind of code (docs/design/ref/knight-gen/, https://claude.ai/artifact/QqBTqamaBdq6zYtD5FNntv). What did not: 3D
+models drawn as pixels, and pixel maps typed by hand. It resumes a month's credits at a time; the order is in
+docs/decisions/graphics-overhaul.md (2026-11-17, "new figures paused"). The rest of this file is the history.
+
 Spec, 2026-11-17 (Kyle and Claude Fable 5.2). Slice 8 of docs/design/graphics-overhaul.md, grown into its own piece.
 **Not in the game. The knight's bench is up (https://claude.ai/artifact/GgoKXqc7Arzz1NbNbL3Ypy): walk him in real
 frames of the game, baked or live. Nothing else starts until Kyle has judged him.**
