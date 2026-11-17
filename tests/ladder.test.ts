@@ -80,7 +80,7 @@ describe('the ladder at the trainer', () => {
     expect(knowsRung({ weapon: 'sword', drills: { ladder: 3 } }, 'blinkburst')).toBe(false);
   });
 
-  it("a Ranger's TWO SHOTS waits on the jump shot lesson", () => {
+  it("a Ranger's TWO ARROWS waits on the leap shot lesson", () => {
     const r = Object.assign(newProfile('RANGER'), { level: 10, gold: 2000, learned: ['skill' as const], drills: { ladder: 1 } });
     const row = trainerRows(r).find((x) => x.rung === 'twinsnare')!;
     expect(row.tag).toBe('NEEDS SHOT');
@@ -92,7 +92,7 @@ describe('the ladder at the trainer', () => {
 });
 
 describe('the Ranger: the jump', () => {
-  it("the trainer's lesson: a jump looses a quick arrow by itself, at the goblins; TWO SHOTS two, fanned", () => {
+  it("the trainer's lesson: a jump looses a quick arrow by itself, at the goblins; TWO ARROWS two, fanned", () => {
     for (const rungs of [0, 2]) {
       const h = hero('longbow', rungs), e = goblin(1, 9, 3), { room, run } = arena([h], [e]);
       run(TICK * 4, { rollSeq: 1, my: 1 });

@@ -32,7 +32,7 @@ export function airSwing(h: Hero): Swing {
 }
 
 /** The jump's own shot, the trainer's lesson: once a jump, `JUMP_SHOT.at` s in, if it's ready. The swings to loose
- *  (one, or more with TWO SHOTS and TWIN SHOT), or none. */
+ *  (one, or more with TWO ARROWS and EXTRA ARROW), or none. */
 export function jumpShot(h: Hero, now: number, ev: FightEvent[]): Swing[] {
   const w = WEAPONS[h.weapon];
   if (w.cls !== 'RANGER' || !w.heavy.shot || h.jumpShot || h.actT < JUMP_SHOT.at || now < h.snareReady || !knows(h, 'leave')) return [];
@@ -40,7 +40,7 @@ export function jumpShot(h: Hero, now: number, ev: FightEvent[]): Swing[] {
   // (QUICK SHOT: sooner; the knack kept its old id, r_snare.)
   h.snareReady = now + JUMP_SHOT.cooldown * (1 - knack(h, 'snareCd'));
   ev.push({ k: 'airshot', x: h.x, y: h.y });
-  // (HARD SHOT: harder; TWIN SHOT one more arrow: r_hold and r_three, as were.)
+  // (HARD SHOT: harder; EXTRA ARROW one more arrow: r_hold and r_three, as were.)
   const hv = w.heavy, k = JUMP_SHOT.draw, more = (1 + statsOf(h).damage) * (1 + knack(h, 'snareHold'));
   const s: Swing = { ...hv, dmg: Math.round((hv.dmg + (hv.dmgFull - hv.dmg) * k) * more), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: knowsTech(h, 'trapper') };
   const n = 1 + (knowsRung(h, 'twinsnare') ? 1 : 0) + knack(h, 'snares');

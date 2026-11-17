@@ -76,6 +76,14 @@ function dome(g: CanvasRenderingContext2D, d: NonNullable<Hero['dome']>, P: Proj
       dot(g, sx, sy, ICE[1], (0.5 - f * 0.3) * k);
     }
   }
+  // Arcs over the top, edge to crown, so it reads as a dome and not a ring on the floor.
+  for (let j = 0; j < 8; j++) {
+    const a = (j / 8) * Math.PI * 2 + 0.2, m = Math.max(10, Math.round(d.r * 1.6 * ppu));
+    for (let i = 0; i <= m; i += 2) {
+      const f = i / m, rr = d.r * Math.cos((f * Math.PI) / 2), [sx, sy] = P(d.x + Math.cos(a) * rr, d.r * Math.sin((f * Math.PI) / 2) * 0.7, d.y + Math.sin(a) * rr);
+      dot(g, sx, sy, ICE[1], (0.55 - f * 0.25) * k);
+    }
+  }
   // Glints running round it.
   for (let i = 0; i < 6; i++) {
     const a = t * 1.3 + i * 1.05, f = 0.2 + 0.6 * Math.abs(Math.sin(t * 0.7 + i)), rr = d.r * Math.cos(Math.asin(f));
@@ -86,10 +94,10 @@ function dome(g: CanvasRenderingContext2D, d: NonNullable<Hero['dome']>, P: Proj
 
 /** A Mage's blink trap (sim/blinktrap.ts): a small rune on the floor in its element, pulsing, its ring
  *  at the size it springs at, a cross of light in it. */
-const TRAP_COL: Record<string, string[]> = { fire: ['#ff8a3a', '#ffd27a'], frost: ['#9fd8ff', '#ffffff'], storm: ['#fff27a', '#ffffff'] };
+const TRAP_COL: Record<string, string[]> = { fire: ['#ff8a3a', '#ffd27a'], frost: ['#9fd8ff', '#ffffff'], storm: ['#ffe14a', '#ffffff'] };
 function trap(g: CanvasRenderingContext2D, z: Zone, P: Proj, ppu: number, t: number): void {
   const [c0, c1] = TRAP_COL[z.el] ?? TRAP_COL.fire, k = Math.max(0, Math.min(1, (z.until - t) / 1.5, (t - (z.at ?? t)) / 0.2));
-  const pulse = 0.55 + 0.35 * Math.sin(t * 5 + z.x), n = Math.max(16, Math.round(z.r * 2 * Math.PI * ppu));
+  const pulse = 0.7 + 0.3 * Math.sin(t * 5 + z.x), n = Math.max(16, Math.round(z.r * 2 * Math.PI * ppu));
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2, [sx, sy] = P(z.x + Math.cos(a) * z.r, 0.02, z.y + Math.sin(a) * z.r);
     dot(g, sx, sy, i % 3 ? c0 : c1, pulse * k);

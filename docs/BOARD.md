@@ -49,6 +49,11 @@ The Deep chat, until it finishes (then the general chat).
 
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
 
+- **The new town layout in the normal look** (docs/decisions/town-layout.md, parked with the street look): Kyle
+  likes the layout (three levels, the square, the lanes) but not the HD street look. Today it's only on with
+  `?look=3d&hd&street` (`LAYOUT.on = STREET`, main.ts) and its levels are drawn only by three/layoutledges.ts.
+  Wanted: the layout on in the flat view and the plain 2.5D view, levels drawn in both, then the default.
+
 - **Holy and hungry** (docs/design/holy-and-hungry.md). Last: it changes loot everything above uses.
 
 ## Collisions to settle

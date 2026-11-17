@@ -13,7 +13,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   // Warrior (shared/warrior.ts): the bash stuns every goblin in front on the flash; the charge pin is a bonus (the sword's riposte went with parry).
   sword: { tap: 'Three quick cuts', hold: 'Shield bash', perfect: 'Stuns all in front' },
   greatsword: { tap: 'Wide, slow sweeps', hold: 'Overhead', perfect: 'Shockwave, knocks flat' },
-  spear: { tap: 'Thrusts, third past shields', hold: 'Throw on chain, pulls', perfect: 'Flies further', also: 'Small ones come to you' },
+  spear: { tap: 'Thrusts, 3rd pierces shields', hold: 'Throws it on a chain', perfect: 'Flies further', also: 'Reels in small ones, pulls you to big ones' },
   // Ranger (shared/ranger.ts): the short sword on a tap, the bow on a hold.
   longbow: { tap: 'Short sword', hold: 'Draw bow', perfect: 'Blinds, critical hit' },
   shortbow: { tap: 'Short sword', hold: 'Quick shot, walking', perfect: `${SHORTBOW.perfect}x damage` },
@@ -25,7 +25,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   // Mage (shared/mage.ts): what a tap and a hold are, the element decides (MAGE_KIT below); these are fire's.
   wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow' },
   // The staff: a knockback sweep, and big holds, cast standing still (Kyle, 2026-11-16).
-  staff: { tap: 'Sweep, knocks back, burns', hold: 'Big fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Hits hard, cast standing still' },
+  staff: { tap: 'Sweep, knocks back, burns', hold: 'Big fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Hits hard, you stand still' },
   spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Magic shields, blinks top up' },
   // Cleric (shared/cleric.ts): every perfect shields friends near you.
   mace: { tap: 'Short blows, 3rd heals', hold: 'Smite, stuns', perfect: 'Harder, shields friends', also: 'Holding a smite costs faith' },
@@ -46,7 +46,7 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
   staff: {
     fire: KIT.staff,
     frost: { tap: 'Sweep, knocks back, chills', hold: 'Ice dome, nothing gets in', perfect: 'Bigger, lasts longer', also: 'Freezes goblins at its edge' },
-    storm: { tap: 'Sweep, knocks back, past shields', hold: 'Chain lightning, jumps goblins', perfect: 'Jumps to more goblins', also: 'Stuns the small ones' },
+    storm: { tap: 'Sweep, knocks back, past shields', hold: 'Chain lightning jumps between goblins', perfect: 'Jumps to more goblins', also: 'Stuns the small ones' },
   },
   spellblade: {
     fire: KIT.spellblade,
@@ -63,7 +63,7 @@ const BOOK: Record<MageKit, Record<Element, string>> = {
 };
 const COST: Record<MageKit, string> = { wand: `${SPELL.wand} magic a hold`, staff: `${SPELL.staff} magic a hold`, spellblade: `${SPELL.spellblade} magic a hold` };
 /** The ALSO row of a kit's card with no element in hand, where the book needs one. */
-const BOOK_ALSO: Partial<Record<MageKit, string>> = { staff: 'Hits hard, cast standing still' };
+const BOOK_ALSO: Partial<Record<MageKit, string>> = { staff: 'Hits hard, you stand still' };
 const isMage = (w: WeaponId): w is MageKit => w in MAGE_KIT;
 
 /** The rows in order, labelled, for a card or a legend (ALSO only where there is one). A Mage's kit in

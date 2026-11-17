@@ -198,7 +198,7 @@ describe('the Rogue', () => {
 });
 
 describe('the Ranger', () => {
-  it('PIERCING JUMP (was TRAPPER): the jump shot goes through goblins; without it, it stops at one', () => {
+  it('PIERCING SHOT (was TRAPPER): the leap shot goes through goblins; without it, it stops at one', () => {
     for (const rank of [0, 1]) {
       const h = Object.assign(hero('shortbow', rank), { act: 'roll', actT: 0.1, snareReady: 0, jumpShot: false });
       const [s] = jumpShot(h, 1, []);

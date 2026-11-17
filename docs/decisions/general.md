@@ -97,3 +97,16 @@ Claude Opus 5.5
   the shield-bearer is gone (the net and the hound stay).
 
 Claude Opus 5.5
+
+## 2026-11-16: today's lines through the lore keeper and line editor; a look at the new pieces
+
+- Renamed: the Ranger's lesson LEAP SHOT (fires by itself; the ladder's JUMP SHOT is the tap mid-jump), knack
+  chain LEAP SHOT, EXTRA ARROW (was TWIN SHOT), rung TWO ARROWS, technique PIERCING SHOT. Lines shortened
+  (drills.ts, perks.ts, ladder.ts, techniques.ts, kitlines.ts).
+- Screenshots (phone, flat and 2.5D): the dome read as a pool of light on the floor, so it has arcs over the
+  top now; the storm trap was faint, brighter now; the spear and shield shows its shield. No page errors.
+- For the bible (lore keeper): the Mage's trap replaces the image (not beside it); the Ranger's leap shot
+  replaces the snare on the jump; the staff's tap is a sweep and its storm hold chain lightning.
+- Board: the new town layout in the normal look added to Waiting (Kyle likes the layout, not the street look).
+
+Claude Opus 5.5
