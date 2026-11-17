@@ -17,7 +17,10 @@ const VIG = { night: 0.62, day: 0.38 };
 const LAMP = { r: 2.7, k: 0.34 };
 const PANE = { r: 1.3, k: 0.24, c: [1, 0.74, 0.42] as const };
 
-/** The post pass's lines: `airHalo` (warm haze added) and `airVig` (how much to darken), both in low-res pixels. */
+/**
+ * The post pass's lines: `airHalo` (warm haze added) and `airVig` (how much to darken), both in low-res pixels.
+ * Stepped and dithered, or neither while the post pass's `uSmooth` is 1 (LIGHT: SMOOTH, ../lightswitch.ts).
+ */
 export const AIR_GLSL = `
 uniform vec4 uHalo[${HALO_MAX}]; uniform vec4 uHaloC[${HALO_MAX}]; uniform int uHN; uniform float uVig;
 vec3 airHalo(vec2 px, float dHere, float bz){
@@ -31,13 +34,13 @@ vec3 airHalo(vec2 px, float dHere, float bz){
   }
   float L = max(max(h.r, h.g), h.b);
   if (L <= 0.0) return h;
-  float q = floor(min(L, 0.5) * 16.0 + bz * 0.5 + 0.5) / 16.0;
+  float q = mix(floor(min(L, 0.5) * 16.0 + bz * 0.5 + 0.5) / 16.0, min(L, 0.5), uSmooth);
   return h * (q / L);
 }
 float airVig(vec2 px, vec2 res, float bz){
   vec2 v = (px + 0.5) / res * 2.0 - 1.0;
   float t = clamp((length(v * vec2(1.0, 0.92)) - 0.5) / 0.8, 0.0, 1.0);
-  return uVig * clamp(floor(t * t * 8.0 + bz * 0.5 + 0.5) / 8.0, 0.0, 1.0);
+  return uVig * clamp(mix(floor(t * t * 8.0 + bz * 0.5 + 0.5) / 8.0, t * t, uSmooth), 0.0, 1.0);
 }`;
 
 export function airUniforms(): Record<string, THREE.IUniform> {

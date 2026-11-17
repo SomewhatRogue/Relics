@@ -1,7 +1,19 @@
 # Graphics sweep and overhaul
 
-Plan, 2026-11-17 (Kyle and Claude Fable 5.2). **Not built. Nothing here starts until Kyle says yes**, slice by slice.
+Plan, 2026-11-17 (Kyle and Claude Fable 5.2). Approved the same day; built slice by slice. **In so far: slices 0
+and 1** (the yardstick; smooth light in both views, LIGHT: SMOOTH or BANDS in the options box, smooth the default).
 The assessment with screenshots and the side-by-side mocks are on the page linked from docs/decisions/graphics-overhaul.md.
+
+## Kyle's calls, 2026-11-17
+
+- **Light: smooth pools.** No bands, no dither; the art's pixels untouched.
+- **Stone: slate, 90 to 100 percent** of the way from today's olive.
+- **The slices as written:** "Agreed with your slice."
+- **The flat view is the weak-phone fallback; the polish goes into 2.5D.** Flat still gets the shared work (the light,
+  the grade, the ground), since both views paint from the same art, but nothing is drawn for flat alone from here.
+- **Lived-in world and Side view to Finished;** this chat takes `three/air3d.ts` and the scatter.
+- **New, to think about: the heroes and enemies redrawn**, "more stylized and cleaner, keeping the dark RPG look and
+  feel." Slice 8 below: mocks first, no drawing until he has picked a direction.
 
 ## The three changes that would make the biggest difference
 
@@ -86,9 +98,11 @@ the old path comes out a slice later.
 | 5 | A quieter ground, by place | A village's base is earth and grass, not cobbles; mortar and joints lower in contrast so floors recede; flecks and scatter in clusters of two or three pixels in place of lone ones | `groundpaint.ts`, `soil.ts`, `world.ts` (paintMap), `scatterpaint.ts`, `shared/ground.ts` (which base a place gets) | scatterpaint: Lived-in world; world.ts has their line; rest unclaimed | Sheet: the floor never the busiest thing in a shot. Layout hash pins unchanged (paint only) |
 | 6 | Interiors | The six big rooms and job houses under slice 2's value rule: floor, furniture, people in three steps; lamps doing the work | `insidepaint.ts`, `three/insidefurn3d.ts`, `insidekit.ts`, `furnish.ts` | New look: interiors | Their chat's own shots; findable people on a phone |
 | 7 | Spells and effects | One language for what glows: spells and fire bloom a little under the clean light, red stays for danger only, element colours checked against the new grade | `spellground.ts`, `three/skills3d.ts`, `fire3d.ts`, `fx.ts` | unclaimed; the Deep and Instances chats' own boss effects stay theirs | The spell fight shot: every effect readable, red only where you must move |
+| 8 | Heroes and enemies redrawn (Kyle, 2026-11-17: "more stylized and cleaner, keeping the dark RPG look and feel") | Mocks first: the knight, one caster and two goblins drawn two or three ways at the game's own size, on the game's floor under the smooth light, beside today's. What "cleaner" most likely means at this size: fewer colours a figure, bigger flat shapes, one dark outline, one accent (gold on heroes, the eyes on goblins), less shading noise inside the body. Kyle picks; then the looks are redrawn class by class in the same sizes, cuts and poses, so every move and timing carries over | `herolooks*.ts`, `herosides*.ts`, `sprites.ts` (goblin parts), `foekits*.ts`, `charpaint.ts`, `charmean.ts` | Art (sprites, herolooks, foekits); New look: characters (charpaint, charmean); Side view finished (herosides free) | The mock sheet first. Then the lineup page (`?lineup`) before and after, and a fight on a phone: each class and each goblin kind known from its outline alone |
 
 Sizes, roughly: 0 and 1a small; 1b medium; 2 medium; 3 small pieces; 4 the big one (six prop families, each a
-small slice); 5 medium; 6 with its own chat; 7 small.
+small slice); 5 medium; 6 with its own chat; 7 small; 8 a mock round, then large (every look), so it wants its own
+chat or the Art chat once a direction is picked.
 
 ## Overlaps with the chats on the board
 
@@ -112,12 +126,10 @@ small slice); 5 medium; 6 with its own chat; 7 small.
 - **Instances, Deep**. Their boss and arena draws are untouched; they get the new light and grade for free through
   the shared passes. A note in each log when 1 and 2 flip to default, so they reshoot their own bosses.
 
-## Questions for Kyle
+## Open for Kyle
 
-1. Light: clean bands or smooth pools (the mock shows both against today)?
-2. Colour: cool slate, or keep a little of the green (the mock has a slider between them)?
-3. The flat view: freeze it as the weak-phone fallback and put the polish into 2.5D?
-4. Lived-in world and Side view rows to Finished, and this plan takes `air3d.ts` and the scatter?
+- Slice 8's direction, once its mocks are up.
+- LIVING WORLD's sun and figure shadows as a default, once the light is smooth.
 
 ## Cost and checking
 

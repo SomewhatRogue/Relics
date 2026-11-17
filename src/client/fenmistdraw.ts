@@ -13,14 +13,15 @@ export const MIST_MAX = 8;
 export interface MistU { banks: Float32Array; n: number; yr: number; hero: [number, number, number, number]; c: [number, number, number] }
 
 /**
- * The GLSL for how thick the mist lies at screen pixel `px` (stepped into bands, 0 to 1). Each pass mixes a
+ * The GLSL for how thick the mist lies at screen pixel `px` (`mistK` stepped into bands, 0 to 1; `mistRaw` unstepped,
+ * for the smooth light, graphics-overhaul.md). Each pass mixes a
  * lit pixel toward uMC by it only where nothing glows within MIST_KEEP pixels (`glowNear` is the pass's own),
  * so a telegraph's whole footprint, dithered or not, stays clear.
  */
 export const MIST_KEEP = 2;
 export const MIST_GLSL = `
 uniform vec4 uMist[${MIST_MAX}]; uniform int uMN; uniform float uMY; uniform vec4 uMH; uniform vec3 uMC;
-float mistK(vec2 px, float bz){
+float mistRaw(vec2 px){
   if (uMN == 0) return 0.0;
   float mk = 0.0;
   for (int i = 0; i < ${MIST_MAX}; i++) {
@@ -28,8 +29,10 @@ float mistK(vec2 px, float bz){
     vec4 M = uMist[i]; vec2 d = (px - M.xy) / vec2(M.z, M.z * uMY);
     mk = max(mk, M.w * clamp((1.0 - dot(d, d)) * 2.0, 0.0, 1.0));
   }
-  mk *= clamp((length(px - uMH.xy) - uMH.z) / max(1.0, uMH.w - uMH.z), 0.0, 1.0);
-  return clamp(floor(mk * 4.0 + bz * 0.9 + 0.5) / 4.0, 0.0, 1.0) * 0.88;
+  return mk * clamp((length(px - uMH.xy) - uMH.z) / max(1.0, uMH.w - uMH.z), 0.0, 1.0);
+}
+float mistK(vec2 px, float bz){
+  return clamp(floor(mistRaw(px) * 4.0 + bz * 0.9 + 0.5) / 4.0, 0.0, 1.0) * 0.88;
 }
 `;
 

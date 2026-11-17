@@ -6,6 +6,8 @@
  * thicker the further from your hero; the glowing layer (eyes, telegraphs) still shows through it.
  */
 import { MIST_GLSL, MIST_KEEP, type MistU } from './fenmistdraw';
+import { LIGHT } from './lightswitch';
+import { SmoothPass } from './smoothlight';
 
 /** Fog for one frame: your hero on screen (x, y), how thick at its thickest (0: none), pixels a tile, its colour. */
 export interface Fog { x: number; y: number; k: number; px: number; c: [number, number, number] }
@@ -20,8 +22,9 @@ export interface Light {
 }
 
 const MAX = 32;
-const VS = `#version 300 es
-in vec2 p; out vec2 uv;
+export const MAX_LIGHTS = MAX;
+export const LIGHT_VS = `#version 300 es
+layout(location = 0) in vec2 p; out vec2 uv;
 void main(){ uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
 const FS = `#version 300 es
 precision highp float;
@@ -69,11 +72,23 @@ export class Lighting {
   private tex: WebGLTexture[] = [];
   private lbuf = new Float32Array(MAX * 4);
   private cbuf = new Float32Array(MAX * 3);
+  private prog: WebGLProgram | null = null;
+  /** The smooth light's two draws (smoothlight.ts), built the first time it's wanted. */
+  private smooth: SmoothPass | null = null;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false });
     this.ok = !!this.gl && this.setup();
     if (!this.ok) this.g2 = canvas.getContext('2d');
+  }
+
+  private link: (fs: string) => WebGLProgram | null = () => null;
+
+  /** Smooth light is on and this device can draw it: the canvas is then the screen's own size (scene.ts). */
+  full(): boolean {
+    if (!this.ok || !LIGHT.smooth) return false;
+    this.smooth ??= new SmoothPass(this.gl!, this.link);
+    return this.smooth.ok;
   }
 
   private setup(): boolean {
@@ -84,20 +99,24 @@ export class Lighting {
       gl.compileShader(s);
       return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
     };
-    const v = sh(gl.VERTEX_SHADER, VS), f = sh(gl.FRAGMENT_SHADER, FS);
-    if (!v || !f) return false;
-    const p = gl.createProgram()!;
-    gl.attachShader(p, v);
-    gl.attachShader(p, f);
-    gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) return false;
+    const v = sh(gl.VERTEX_SHADER, LIGHT_VS);
+    // One program from a fragment shader, over the one full-screen strip every pass draws.
+    this.link = (fs) => {
+      const f = sh(gl.FRAGMENT_SHADER, fs), p = gl.createProgram()!;
+      if (!v || !f) return null;
+      gl.attachShader(p, v);
+      gl.attachShader(p, f);
+      gl.linkProgram(p);
+      return gl.getProgramParameter(p, gl.LINK_STATUS) ? p : null;
+    };
+    const p = (this.prog = this.link(FS));
+    if (!p) return false;
     gl.useProgram(p);
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(p, 'p');
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     for (const n of ['uBase', 'uEmis', 'uRes', 'uL', 'uC', 'uN', 'uAmb', 'uFog', 'uFogC', 'uMist', 'uMN', 'uMY', 'uMH', 'uMC']) this.u[n] = gl.getUniformLocation(p, n);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     for (let i = 0; i < 2; i++) {
@@ -125,7 +144,6 @@ export class Lighting {
       return;
     }
     const gl = this.gl!;
-    gl.viewport(0, 0, w, h);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.tex[0]);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, base);
@@ -138,6 +156,10 @@ export class Lighting {
       this.lbuf.set([l.x, l.y, l.r, l.i], i * 4);
       this.cbuf.set(l.c, i * 3);
     }
+    // Smooth: the light alone at the art's size, then the picture at the screen's (smoothlight.ts).
+    if (this.full()) return this.smooth!.render(base.width, base.height, w, h, this.lbuf, this.cbuf, n, amb, fog, mist);
+    gl.viewport(0, 0, w, h);
+    gl.useProgram(this.prog);
     gl.uniform2f(this.u.uRes, w, h);
     gl.uniform4fv(this.u.uL, this.lbuf);
     gl.uniform3fv(this.u.uC, this.cbuf);

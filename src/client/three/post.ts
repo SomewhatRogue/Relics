@@ -11,6 +11,12 @@ import { MIST_GLSL, MIST_KEEP, MIST_MAX } from '../fenmistdraw';
 import { HD, hdPostMaterial } from './hdlook';
 import { AIR_GLSL, airUniforms } from './air3d';
 
+/**
+ * 1 while LIGHT is SMOOTH (../lightswitch.ts, docs/design/graphics-overhaul.md slice 1b): every material and the post
+ * pass then leave light, fog, mist, haze and bloom unstepped and undithered. view3d.ts sets it each frame.
+ */
+export const SMOOTH_U = { value: 0 };
+
 export const BAYER = `
 float bay2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
 float bay4(vec2 a){ return bay2(0.5 * a) * 0.25 + bay2(a); }
@@ -34,7 +40,7 @@ const TOON = `
   irr = max(irr, vec3(0.19));
   float L = max(max(irr.r, irr.g), irr.b);
   float bz = bay4(gl_FragCoord.xy) - 0.5;
-  float q = floor(sqrt(L) * 5.0 + bz * 0.6 + 0.5) / 5.0;
+  float q = mix(floor(sqrt(L) * 5.0 + bz * 0.6 + 0.5), sqrt(L) * 5.0, uSmooth) / 5.0;
   q = clamp(q * q, 0.0, 2.6);
   irr *= q / max(L, 0.0001);
   reflectedLight.directDiffuse = irr * alb;
@@ -50,7 +56,8 @@ export function toonize<T extends THREE.Material>(m: T): T {
     return m;
   }
   m.onBeforeCompile = (sh) => {
-    sh.fragmentShader = sh.fragmentShader.replace('void main() {', BAYER + '\nvoid main() {').replace('vec3 outgoingLight =', TOON + '\nvec3 outgoingLight =');
+    sh.uniforms.uSmooth = SMOOTH_U;
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'uniform float uSmooth;\n' + BAYER + '\nvoid main() {').replace('vec3 outgoingLight =', TOON + '\nvec3 outgoingLight =');
   };
   return m;
 }
@@ -67,11 +74,12 @@ export function postMaterial(near: number, far: number): THREE.ShaderMaterial {
       uMist: { value: Array.from({ length: MIST_MAX }, () => new THREE.Vector4()) }, uMN: { value: 0 }, uMY: { value: 1 }, uMH: { value: new THREE.Vector4(-1e5, -1e5, 0, 1) }, uMC: { value: new THREE.Vector3() },
       // The vignette and the lamps' haze (air3d.ts).
       ...airUniforms(),
+      uSmooth: SMOOTH_U,
     },
     vertexShader: QUAD_VS,
     fragmentShader: BAYER + `
 uniform sampler2D tCol; uniform sampler2D tDep; uniform vec2 uRes; uniform float uGamma;
-uniform vec4 uFog; uniform vec3 uFogC; uniform float uFogY;
+uniform vec4 uFog; uniform vec3 uFogC; uniform float uFogY; uniform float uSmooth;
 ${MIST_GLSL}
 ${AIR_GLSL}
 float D(vec2 p){ return ${near.toFixed(1)} + texture2D(tDep, p).x * ${(far - near).toFixed(1)}; }
@@ -97,10 +105,11 @@ void main(){
     vec2 fd = px - uFog.xy; fd.y /= uFogY;
     float ft = clamp((length(fd) / uFog.w - ${FOG_BANDS.near.toFixed(1)}) / ${(FOG_BANDS.far - FOG_BANDS.near).toFixed(1)}, 0.0, 1.0);
     float fs = floor(ft * ${FOG_BANDS.steps.toFixed(1)} + (bay4(px) - 0.5) * 0.9 + 0.5) / ${FOG_BANDS.steps.toFixed(1)};
-    col = mix(col, uFogC, clamp(fs, 0.0, 1.0) * uFog.z * c.a);
+    col = mix(col, uFogC, clamp(mix(fs, ft, uSmooth), 0.0, 1.0) * uFog.z * c.a);
   }
   // Fenmere's mist: over ordinary surfaces only, and nowhere near anything glowing (a telegraph's whole footprint stays clear).
   float mk = c.a > 0.995 ? mistK(px, bay4(px) - 0.5) : 0.0;
+  if (c.a > 0.995) mk = mix(mk, mistRaw(px) * 0.88, uSmooth);
   if (mk > 0.0) {
     float near = 1.0;
     for (int j = -${MIST_KEEP}; j <= ${MIST_KEEP}; j++) for (int i = -${MIST_KEEP}; i <= ${MIST_KEEP}; i++) near = min(near, texture2D(tCol, uv + vec2(float(i), float(j)) * t).a);
@@ -114,7 +123,7 @@ void main(){
   vec3 g = vec3(0.0);
   g += (glowAt(uv + vec2(t.x, 0.0)) + glowAt(uv - vec2(t.x, 0.0)) + glowAt(uv + vec2(0.0, t.y)) + glowAt(uv - vec2(0.0, t.y))) * 0.2;
   g += (glowAt(uv + t) + glowAt(uv - t) + glowAt(uv + vec2(t.x, -t.y)) + glowAt(uv + vec2(-t.x, t.y))) * 0.1;
-  g = floor(g * 5.0 + bay4(px)) / 5.0;
+  g = mix(floor(g * 5.0 + bay4(px)) / 5.0, g, uSmooth);
   gl_FragColor = vec4(pow(max(col + g * (1.0 - c.a * 0.3), 0.0), vec3(uGamma)), 1.0);
 }`,
     depthTest: false,

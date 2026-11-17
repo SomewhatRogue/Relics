@@ -25,3 +25,46 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Waiting on Kyle: smooth pools or clean bands; how far to slate; whether the flat view is frozen as the fallback;
   whether Lived-in world and Side view move to Finished.
   (Claude Fable 5.2)
+
+## 2026-11-17: Kyle's calls; building starts
+
+- Kyle: smooth pools; slate at 90 to 100 percent; "Agreed with your slice"; flat is the weak-phone fallback and the
+  polish goes to 2.5D; yes to moving Lived-in world and Side view to Finished (done on the board, at his word; this
+  chat takes `three/air3d.ts` and the scatter). New: he wants to think about redrawing the heroes and enemies, "more
+  stylized and cleaner, keeping the dark RPG look and feel": slice 8 in the spec, mocks first.
+- To build here Kyle chose a portable Node in this session's folder (the official Node 26 zip, checksum checked,
+  nothing installed on the machine), with the project's own `npm ci`.
+  (Claude Fable 5.2)
+
+## 2026-11-17: slice 0 (the yardstick) and slice 1 (smooth light) in
+
+- **The yardstick:** `node scripts/sweep-look.cjs <tag> [url] [switches]` shoots eight fixed spots (town day and night,
+  a village at dusk, a wood by day in fog and by night, the Open Cut, the Drowned Rat, a Mage's fight held still) in
+  both views on a phone and a laptop, into `shots/sweep/<tag>/` with an `index.html` that lays them out as one sheet.
+  The world's clock is pinned so a job's sky is the same each run; a new hero's arrival scene is ended first (in a door
+  and out again). `ONLY=` reshoots a few; `CHANNEL=chrome` drives an installed Chrome.
+- **LIGHT: SMOOTH or BANDS** (`client/lightswitch.ts`): a button in the options box under CAMERA, live, remembered on
+  the device; `?light=smooth` or `?light=bands` wins. **Smooth is the default** (Kyle picked it from the mock); BANDS is
+  the light as it was, kept to compare until he has played it, then it comes out.
+- **Flat view** (`client/smoothlight.ts`, from `light.ts`): two draws. The light alone at the art's small size, unstepped
+  (half floats where the device has them, bytes otherwise), with the fog's thickness beside it; then the picture at the
+  screen's own pixels, the art and the glow read crisp and the light read back smooth. `scene.ts` makes the output
+  canvas the screen's size while smooth is on (the art is still painted small). Fenmere's mist unstepped too
+  (`fenmistdraw.ts` gained `mistRaw`; `mistK` is as it was). The same pass serves the hero ring, the lineup, the gear
+  pages, the pastimes and the Deep's and the watch's views (they all use `Lighting`): checked the ring and the lineup.
+- **2.5D** (`three/post.ts`, `three/air3d.ts`, one line in `view3d.ts`): one shared `uSmooth` in every toon material
+  and the post pass. With it on, the light's five steps, the fog's four, the mist, the lamps' haze, the vignette and the
+  glow's bloom are all unstepped and undithered. Outlines, telegraph hatching, see-through cards and the blob shadows
+  under figures keep their dither (they are marks, not light). Here the light is smooth from one art pixel to the next,
+  not inside a pixel as in the flat view: geometry in 2.5D is drawn at the art's size, so the light is too. If steps
+  ever show, the next move is the light in its own buffer, laid on at the screen's pixels as flat does.
+- A side effect to know: the bands rounded each channel of the night's ambient on its own (0.27, 0.25, 0.33 became
+  0.2, 0.2, 0.4), which is where the violet night came from. Smooth keeps the numbers as written, so night is a
+  little brighter and less violet. Slice 2 (the regrade) sets the night's colour on purpose.
+- Checks: tsc clean; the full suite 1976 of 1977. The one failure, `tests/relaybudget.test.ts` (a heartbeat's write
+  count against the clock), fails the same way on this Windows machine before any change, so it is this machine's
+  timing, not the build. `tests/fen.test.ts` reads the mist's lines in `post.ts` and `light.ts` as text: kept as they
+  were. Before and after sheets shot (`bands` and `smooth`). Not measured on a real phone; the flat view's second draw
+  is three texture reads a pixel.
+- For other chats: your look scripts now shoot the smooth light. Add `&light=bands` for the old.
+  (Claude Fable 5.2)

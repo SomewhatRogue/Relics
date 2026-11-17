@@ -199,7 +199,10 @@ export class Scene {
     this.scale = zoom ?? camScale(W, H);
     this.vw = Math.ceil(W / this.scale);
     this.vh = Math.ceil(H / this.scale);
-    for (const c of [this.out, this.base, this.glowC]) (c.width = this.vw), (c.height = this.vh);
+    // (Smooth light, lightswitch.ts: the picture is laid at the screen's own pixels, the art still painted small.)
+    const k = this.lighting.full() ? this.scale : 1;
+    for (const c of [this.base, this.glowC]) (c.width = this.vw), (c.height = this.vh);
+    (this.out.width = this.vw * k), (this.out.height = this.vh * k);
     this.out.style.width = (this.vw * this.scale) / this.dpr + 'px';
     this.out.style.height = (this.vh * this.scale) / this.dpr + 'px';
     for (const g of [this.lit, this.glow]) g.imageSmoothingEnabled = false;
