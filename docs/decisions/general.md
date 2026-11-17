@@ -142,3 +142,11 @@ Claude Opus 5.5
   door sits behind the roof of the building in front. Worth a door drawn on the side face, and a wider gap.
 
 Claude Opus 5.5
+
+## 2026-11-16: firebolt and fireball (Kyle: "smaller and quicker for the wand, bigger and slower aoe for the staff")
+
+- shared/spellbook.ts: FIREBOLT (the wand's fire hold) bursts 0.8 (1.2 on the flash) and flies 1.4x the hold's
+  speed; FIREBALL (the staff's) bursts 2.4 (3.2) and flies 0.6x. STAFF_SIZE gone. The wand fills in 0.5 s (was
+  0.6). Card: the wand's hold is "Heavy firebolt, small burst". Wand tests read its draw, not fixed times.
+
+Claude Opus 5.5

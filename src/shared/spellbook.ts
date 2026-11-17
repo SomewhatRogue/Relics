@@ -29,14 +29,14 @@ export const TAPS: Record<MageKit, Record<Element, { dmg: number }>> = {
 export const CHAIN_BOLT = { range: 8, cone: 30, jumps: 4, bigJumps: 7, reach: 4, dmg: 1.6, fall: 0.85, stun: 0.5 };
 /** The staff's frost hold: an ice dome round you (sim/staffholds.ts); `dmg` of the hold on each goblin it freezes. */
 export const ICE_DOME = { r: 2.6, bigR: 3.2, time: 4, bigTime: 5.5, edge: 0.9, dmg: 0.4 };
-/** The staff's fire hold is the wand's fireball, this much bigger across (its damage is its own, shared/weapons.ts). */
-export const STAFF_SIZE = 1.35;
 /** The wand's frost tap: `n` icicles fanned `spread` radians apart, flying `speed` times the spark's. */
 export const ICICLES = { n: 3, spread: 0.12, speed: 1.2 };
 
-/** Wand, fire: the held spell is a fireball that bursts `burst` round where it lands and sets all of it
- *  alight (fire then spreads by touch). Let go on the white flash: `big` across, and it breaks blows off. */
-export const FIREBALL = { burst: 1.8, big: 2.6 };
+/** Fire held (Kyle, 2026-11-16: "firebolt v fireball"): the wand's is a FIREBOLT, small and quick, `speed`
+ *  times the hold's own; the staff's a FIREBALL, big and slow. Each bursts `burst` round where it lands and sets
+ *  all of it alight (fire then spreads by touch); let go on the white flash, `big` across, and it breaks blows off. */
+export const FIREBOLT = { burst: 0.8, big: 1.2, speed: 1.4 };
+export const FIREBALL = { burst: 2.4, big: 3.2, speed: 0.6 };
 
 /** Wand, frost: a cold blast in a cone from your hand, `range` tiles and `arc` degrees, for `dmg` of the
  *  hold's damage and a shove; everything in it freezes solid. On the flash: `bigRange`, `bigArc`, and it

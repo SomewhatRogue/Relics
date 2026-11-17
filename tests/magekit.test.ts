@@ -58,7 +58,7 @@ describe('the wand', () => {
     const striped = (): EnemyAttack => ({ kind: 'cleave', t: 0.9, windup: 0.5, active: 5, recover: 0.3, dmg: 10, knock: 2, unblockable: true, dx: 0, dy: 1, ox: 9, oy: 5, range: 1.3, arc: 90, cx: 0, cy: 0, radius: 0, done: false });
     const a = arena('wand', [[9, 5]]);
     Object.assign(a.e, { act: 'attack', attack: striped() });
-    const ev = a.loose(0.7, 0.4);
+    const ev = a.loose(WEAPONS.wand.draw! + 0.05, 0.4);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
     expect(ev.some((x) => x.k === 'interrupt')).toBe(true);
     expect(a.e.attack).toBeNull();
@@ -76,11 +76,11 @@ describe('magic costs', () => {
     const ev = a.loose(0.85, 0.1);
     expect(ev.find((x) => x.k === 'magic')).toMatchObject({ n: SPELL.wand });
     expect(a.h.stamina).toBeLessThan(HERO.stamina - SPELL.wand + 5);
-    const b = arena('wand', [[9, 4]]), ev2 = b.loose(0.65, 0.1);
+    const b = arena('wand', [[9, 4]]), ev2 = b.loose(WEAPONS.wand.draw! + 0.05, 0.1);
     expect(ev2.some((x) => x.k === 'perfect')).toBe(true);
     expect(ev2.find((x) => x.k === 'magic')).toMatchObject({ n: Math.round(SPELL.wand * WAND.flashCost) });
     // (The flash is short: 0.12 s, where other kits have 0.25.)
-    expect(arena('wand', [[9, 4]]).loose(0.78, 0.1).some((x) => x.k === 'perfect')).toBe(false);
+    expect(arena('wand', [[9, 4]]).loose(WEAPONS.wand.draw! + 0.18, 0.1).some((x) => x.k === 'perfect')).toBe(false);
   });
 
   it('a spell you cannot pay for fizzles at once, and nothing is cast or spent', () => {

@@ -270,7 +270,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: [{ windup: 0.3, active: 0.04, recover: 0.2, dmg: 8, range: 8, arc: 0, lunge: 0, knock: 2, shot: 'spark', speed: 17 }],
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 18, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
     // (Kyle, 2026-11-16: the wand's hold is about timing: a tight flash, half the magic on it, and less than the staff's.)
-    draw: 0.6, early: 'fizzle', flashWindow: 0.12,
+    draw: 0.5, early: 'fizzle', flashWindow: 0.12,
     blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.8, castWalk: 0.9,
     dodge: BLINK,
   },

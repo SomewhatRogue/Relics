@@ -1,6 +1,6 @@
 /** The Mage's spellbook (shared/spellbook.ts, sim/holds.ts and friends): each element's tap and hold on each kit, and their balance. */
 import { describe, expect, it } from 'vitest';
-import { COLD_BLAST, DASH, HERO, LUNGE, MAGE_KITS, SHATTER_BLOW, SKY_STRIKE, STAFF_SIZE, TICK, CHAIN_BOLT, ICE_DOME, WEAPONS, type Element, type MageKit } from '../src/shared/tuning';
+import { COLD_BLAST, DASH, HERO, LUNGE, MAGE_KITS, SHATTER_BLOW, SKY_STRIKE, TICK, CHAIN_BOLT, ICE_DOME, WEAPONS, type Element, type MageKit } from '../src/shared/tuning';
 import { frozen } from '../src/sim/damage';
 import { shelteredFrom } from '../src/sim/staffholds';
 import { burning, chilled } from '../src/sim/elements';
@@ -13,12 +13,12 @@ const zone = (z: Zone[], kind: Zone['kind']) => z.find((x) => x.kind === kind)!;
 const PLAIN: Record<MageKit, number> = { wand: 0.9, staff: 1.2, spellblade: 0.9 };
 
 describe('the wand', () => {
-  it('fire: a firebolt that sets alight; held, a fireball that bursts and sets all of it alight', () => {
+  it('fire: a firebolt that sets alight; held, a heavy firebolt, quick, a small burst that sets what\'s close alight', () => {
     const a = mageArena('wand', [[9, 5]], 'fire');
     a.tap(0.6);
     expect(lost(a.e)).toBeGreaterThan(0);
     expect(burning(a.e, a.room.time)).toBe(true);
-    const b = mageArena('wand', [[9, 5], [10.4, 5], [13, 5]], 'fire');
+    const b = mageArena('wand', [[9, 5], [9.9, 5], [11.2, 5]], 'fire');
     const ev = b.loose(PLAIN.wand, 0.6);
     expect(ev.some((x) => x.k === 'burst')).toBe(true);
     expect(b.es.map((e) => burning(e, b.room.time))).toEqual([true, true, false]);
@@ -97,7 +97,7 @@ describe('the staff (Kyle, 2026-11-16): a knockback sweep, and big holds cast st
     expect(h.h.x).toBeCloseTo(x, 3);
   });
 
-  it('fire: the wand\'s fireball, bigger, burning further out', () => {
+  it('fire: the staff\'s fireball, big and slow, burns far wider than the wand\'s heavy firebolt', () => {
     const at: [number, number][] = [[9, 5], [11.2, 5]];
     const w = mageArena('wand', at, 'fire'), st = mageArena('staff', at, 'fire');
     w.loose(PLAIN.wand, 0.6), st.loose(PLAIN.staff, 0.6);

@@ -23,7 +23,7 @@ export const KIT: Record<WeaponId, KitRow> = {
   rapier: { tap: 'Long thrusts', hold: 'Lunge through two', perfect: 'Skewers, bleeds' },
   poisoner: { tap: 'Short sword, hits two', hold: 'Poison dart', perfect: 'Stuns, stronger poison' },
   // Mage (shared/mage.ts): what a tap and a hold are, the element decides (MAGE_KIT below); these are fire's.
-  wand: { tap: 'Firebolt, burns', hold: 'Fireball, burns a crowd', perfect: 'Bigger, interrupts any blow' },
+  wand: { tap: 'Firebolt, burns', hold: 'Heavy firebolt, small burst', perfect: 'Bigger, interrupts any blow' },
   // The staff: a knockback sweep, and big holds, cast standing still (Kyle, 2026-11-16).
   staff: { tap: 'Sweep, knocks back, burns', hold: 'Big fireball, burns a crowd', perfect: 'Bigger, interrupts any blow', also: 'Hits hard, you stand still' },
   spellblade: { tap: 'Cuts burn', hold: 'Burning lunge', perfect: 'Longer, costs nothing', also: 'Magic shields, blinks top up' },
@@ -57,7 +57,7 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
 
 /** A Mage's spellbook by element, for a weapon card that isn't in anyone's hand: "Tap firebolt, hold fireball". */
 const BOOK: Record<MageKit, Record<Element, string>> = {
-  wand: { fire: 'Tap firebolt, hold fireball', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning strike' },
+  wand: { fire: 'Tap firebolt, hold heavy firebolt', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning strike' },
   staff: { fire: 'Tap sweep, hold big fireball', frost: 'Tap sweep, hold ice dome', storm: 'Tap sweep, hold chain lightning' },
   spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts ignore shields, hold lightning rush' },
 };

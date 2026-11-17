@@ -5,7 +5,7 @@
  * lunge, a shatter, a lightning dash). Let go on the white flash, each is its bigger self. Judged here,
  * into the room's own lists (bolts, zones), so a guest sees what was judged.
  */
-import { FIREBALL, STAFF_SIZE, LUNGE, DASH, type MageKit, type Swing, type TraitId } from '../shared/tuning';
+import { FIREBALL, FIREBOLT, LUNGE, DASH, type MageKit, type Swing, type TraitId } from '../shared/tuning';
 import { shoot } from './bolts';
 import { castElement } from './channel';
 import type { World } from './elements';
@@ -21,12 +21,13 @@ export interface HoldRoom { zones: Zone[]; bolts: Bolt[]; aim: (range: number, f
 
 /** The wand's (and the staff's, `wide` bigger): a fireball, a cold blast, or lightning called down where you
  *  aim (sim/skystrike.ts). */
-function wand(h: Hero, s: Swing, mult: number, r: HoldRoom, w: World, traits: TraitId[], wide = 1): void {
+function wand(h: Hero, s: Swing, mult: number, r: HoldRoom, w: World, traits: TraitId[], fire = FIREBOLT): void {
   const el = castElement(h), big = h.perfect;
   // (WIDE BURST widens the fireball as it does any burst: sim/room.ts.)
-  if (el === 'frost') return coldBlast(h, s, mult, w, burstMult(h) * wide);
-  if (el === 'storm') return callStrike(h, s, mult, r.aim, r.zones, w, wide);
-  r.bolts.push(shoot(h, { ...s, burst: (big ? FIREBALL.big : FIREBALL.burst) * wide }, 'fire', mult, traits));
+  if (el === 'frost') return coldBlast(h, s, mult, w, burstMult(h));
+  if (el === 'storm') return callStrike(h, s, mult, r.aim, r.zones, w);
+  // A firebolt off the wand, a fireball off the staff (shared/spellbook.ts).
+  r.bolts.push(shoot(h, { ...s, burst: big ? fire.big : fire.burst, speed: (s.speed ?? 17) * fire.speed }, 'fire', mult, traits));
   w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: 'spark', el });
 }
 
@@ -35,7 +36,7 @@ function staffHold(h: Hero, s: Swing, mult: number, r: HoldRoom, w: World, trait
   const el = castElement(h);
   if (el === 'storm') return chainBolt(h, s, mult, w);
   if (el === 'frost') return iceDome(h, s, mult, w);
-  wand(h, s, mult, r, w, traits, STAFF_SIZE);
+  wand(h, s, mult, r, w, traits, FIREBALL);
 }
 
 /** The spellblade's: a burning lunge, a shatter, or a lightning dash. */
