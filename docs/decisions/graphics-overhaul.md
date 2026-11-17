@@ -367,3 +367,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - It waits on six calls from Kyle (free or not, the default, the colours, the cut, the pale robe of the Healer, who
   builds it). Nothing is built.
   (Claude Fable 5.2)
+
+## 2026-11-17: the cloak spec reworked: earned by deeds, made by a tailor (not built)
+
+- Kyle: "Lets make it something you can unlock - also where does it come from? Like doing x number of things
+  killing goblins, quests, etc let you unlock a new color or effect to a new article of clothing. Maybe its a new
+  vendor in town."
+- docs/design/cloak-choice.md now says: each dye, edge and cut is earned by a deed the game already counts (the
+  tallies of the Roll of the Brave in shared/progress.ts, the level, the deepest floor, the hero quests), so nothing
+  new is counted and deeds already done count; one tailor in town for all classes shows what is earned and how far
+  along the rest is; only what is worn is saved. A first table of deeds is in the spec, its numbers first guesses
+  for the balance thread.
+- One rule written down: an effect is never red eyes, embers or ash, which are the mark of the eye dial.
+- It waits on seven calls from Kyle. Nothing is built.
+  (Claude Fable 5.2)
