@@ -14,6 +14,7 @@ const BY_KIND: Partial<Record<FightEvent['k'], SfxName>> = {
   quake: 'ground_slam',
   loaded: 'crossbow_wind',
   blinkthrough: 'blink',
+  recall: 'blink',
   halfblink: 'blink',
   spellthief: 'blink',
   smokebomb: 'smoke_puff',

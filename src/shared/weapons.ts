@@ -271,7 +271,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     heavy: { windup: 0.06, active: 0.04, recover: 0.3, dmg: 10, dmgFull: 18, range: 9, arc: 0, lunge: 0, knock: 3, knockFull: 7, shot: 'spark', speed: 19, burst: 0.8, interrupts: true, spell: true },
     // (Kyle, 2026-11-16: the wand's hold is about timing: a tight flash, half the magic on it, and less than the staff's.)
     draw: 0.5, early: 'fizzle', flashWindow: 0.12,
-    blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.8, castWalk: 0.9,
+    blockSpeed: 0.4, chargeSpeed: 0.55, guardArc: 100, guardCost: 2, speed: 0.7, castWalk: 0.9,
     dodge: BLINK,
   },
   /** Rooted and heavy (Kyle, 2026-11-16): a quick sweep that knocks back most goblins; held, the wand's
@@ -283,7 +283,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: [{ windup: 0.18, active: 0.1, recover: 0.32, dmg: 12, range: 2, arc: 160, lunge: 0.1, knock: 9, slash: true }],
     heavy: { windup: 0.1, active: 0.04, recover: 0.45, dmg: 24, dmgFull: 56, range: 9, arc: 0, lunge: 0, knock: 6, knockFull: 12, shot: 'spark', speed: 17, burst: 1.2, interrupts: true, spell: true },
     draw: 0.9, early: 'fizzle',
-    blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.8,
+    blockSpeed: 0.35, chargeSpeed: 0, guardArc: 100, guardCost: 2, speed: 0.7,
     dodge: BLINK,
   },
   /** The combat Mage: a sword in three cuts in the element, and the element's blade spell on a hold (shared/mage.ts). */
@@ -301,7 +301,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     ],
     heavy: { windup: 0.15, active: 0.05, recover: 0.55, dmg: 24, dmgFull: 70, range: 6, arc: 0, lunge: 0, knock: 4, knockFull: 10, shot: 'smite', burst: 1.3, stun: 1.2, holy: true },
     draw: 1.2, early: 'fizzle', // The holy smite falls only on a full charge.
-    blockSpeed: 0.45, chargeSpeed: 0.35, guardArc: 150, guardCost: 1.1, speed: 0.8, blunt: true,
+    blockSpeed: 0.45, chargeSpeed: 0.35, guardArc: 150, guardCost: 1.1, speed: 0.74, blunt: true,
     dodge: { kind: 'roll', distance: 2, time: 0.36, iFrom: 0.05, iTo: 0.28, stamina: 28, cooldown: 1.3 },
   },
   // The Rogue's and Cleric's other kits (kits.ts).

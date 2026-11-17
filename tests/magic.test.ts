@@ -98,13 +98,12 @@ describe('class weapons', () => {
     expect(t.act).toBe('stunned');
   });
 
-  it('Rogues and Rangers walk at one quick pace; Warriors, Mages and Clerics at one slow one (Kyle, 2026-11-13)', () => {
+  it('Rogues and Rangers walk at one quick pace (Kyle, 2026-11-13); the slow three: tests/pace.test.ts, with their armour', () => {
     const ks = Object.keys(WEAPONS) as (keyof typeof WEAPONS)[];
     const fast = new Set(ks.filter((k) => ['ROGUE', 'RANGER'].includes(WEAPONS[k].cls)).map((k) => WEAPONS[k].speed));
-    const slow = new Set(ks.filter((k) => !['ROGUE', 'RANGER'].includes(WEAPONS[k].cls)).map((k) => WEAPONS[k].speed));
     expect([...fast]).toEqual([1.1]);
-    expect([...slow]).toEqual([0.8]);
   });
+
 });
 
 describe('class relics', () => {

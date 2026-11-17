@@ -108,7 +108,7 @@ export class Soundscape {
     if (ev.k === 'streakbreak') return void (ev.id === 'me' && sfx.wardbreak());
     if (ev.k === 'landing' || ev.k === 'braced') return sfx.bodyhit();
     if (ev.k === 'airshot' || ev.k === 'twinsnare') return sfx.latch();
-    if (ev.k === 'blinkthrough' || ev.k === 'halfblink' || ev.k === 'spellthief') return sfx.channeled();
+    if (ev.k === 'blinkthrough' || ev.k === 'recall' || ev.k === 'halfblink' || ev.k === 'spellthief') return sfx.channeled();
     if (ev.k === 'caltrops' && ev.r) return sfx.gold();
     if (ev.k === 'legstab') return sfx.backstab();
     if (ev.k === 'blockmend' || ev.k === 'coverfor') return sfx.blessed();

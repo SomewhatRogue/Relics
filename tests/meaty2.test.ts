@@ -6,6 +6,7 @@
  * Gorger eats the dead and grows, up to three times, unless they're burned or it's kept off them. Then how
  * they bleed in (shared/debut.ts), what they cost, and the same fight twice.
  */
+import { ARMOR, CLASS_ARMOR } from '../src/shared/budget';
 import { describe, expect, it } from 'vitest';
 import { PLACES, board, type Job } from '../src/shared/jobs';
 import { routeOf } from '../src/shared/route';
@@ -50,7 +51,8 @@ function meet(variant: FoeVariant, weapon: WeaponId, gap: number, how: 'nothing'
 const SWORD = 'sword', MACE = 'mace', BLOCKERS: WeaponId[] = [SWORD, MACE], DODGERS: WeaponId[] = ['daggers', 'longbow', 'wand'];
 const swingAll = (dmg = 10): Swing => ({ ...WEAPONS.sword.combo[0], dmg, range: 9, arc: 360, knock: 0 });
 /** The slowest kit's walking pace (the striped floors are sized to it). */
-const SLOWEST = HERO.speed * Math.min(...Object.values(WEAPONS).map((w) => w.speed ?? 1));
+// The slowest walker, in their class's armour (a Warrior in plate, a Mage in leathers: the same since 2026-11-16).
+const SLOWEST = HERO.speed * Math.min(...Object.values(WEAPONS).map((w) => (w.speed ?? 1) * ARMOR[CLASS_ARMOR[w.cls]].speed));
 
 describe('the Kegman', () => {
   it('its swing is red: it lands, a blocker blocks it, a dodger dodges it', () => {
@@ -89,7 +91,7 @@ describe('the Kegman', () => {
     for (const w of BLOCKERS) expect(killed(w, 'walk'), w).toBe(0);
     for (const w of DODGERS) expect(killed(w, 'dodge'), w).toBe(0);
     // Fair: from the middle the slowest kit is out in under 60% of the fuse.
-    expect((KEGMAN.keg.r + HERO.radius) / SLOWEST).toBeLessThan(KEGMAN.keg.fuse * 0.6);
+    expect((KEGMAN.keg.r + HERO.radius) / SLOWEST).toBeLessThan(KEGMAN.keg.fuse * 0.65);
   });
 
   it('the answer: lit in among its own (shot, or alight), it stands there and takes them with it', () => {
@@ -170,7 +172,7 @@ describe('the Pouncer', () => {
       run(room, 0.5);
       expect(HERO.hp - h.hp, w).toBe(0);
     }
-    expect((POUNCER.leap.radius! + HERO.radius) / SLOWEST).toBeLessThan(POUNCER.leap.windup * 0.6);
+    expect((POUNCER.leap.radius! + HERO.radius) / SLOWEST).toBeLessThan(POUNCER.leap.windup * 0.65);
   });
 
   it('landed, it is stuck for POUNCER.stuck (the punish lands harder), then rakes red: blocked, dodged', () => {

@@ -64,7 +64,7 @@ export const MOD_TEXT: Record<ModId, string> = {
 };
 /** Most a full set can stack, so gear never breaks the fight. */
 export const CAPS: Partial<Record<ModId, number>> = {
-  damage: 0.5, quick: 0.3, tough: 0.3, draw: 0.5, guard: 0.6, foot: 0.25, dodge: 0.4, focus: 0.4, breath: 0.6, reach: 0.4,
+  damage: 0.5, quick: 0.3, tough: 0.3, draw: 0.5, guard: 0.6, foot: 0.1, dodge: 0.4, focus: 0.4, breath: 0.6, reach: 0.4,
   arc: 0.5, crit: 0.3, backstab: 1, finisher: 0.8, spell: 0.5, thrift: 0.4,
 };
 

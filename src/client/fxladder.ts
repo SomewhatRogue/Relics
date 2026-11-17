@@ -36,11 +36,13 @@ export function ladderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean 
       fx.flashes.push({ x, y: y - 6, r: (ev.r ?? BLINK_BURST.r) * PX * 1.6, i: 1, c: EL_LIGHT[ev.el ?? ''], life: 0.18, max: 0.18 });
       return true;
     }
+    case 'recall':
     case 'blinkthrough': {
-      // A violet streak from the goblin's back to where you came out.
+      // A violet streak from where you were to where you snapped back to (RECALL; was BLINK THROUGH's).
       const [x2, y2] = toPx(ev.x2 ?? ev.x, ev.y2 ?? ev.y);
       fx.arcs.push({ x: x2, y: y2, x2: x, y2: y, life: 0.25, col: '#c9a8ff', straight: true });
       fx.rings.push({ x: x2, y: y2 - 10, life: 0.25, max: 0.25, col: '#c9a8ff', size: 10 });
+      if (ev.k === 'recall') fx.rings.push({ x, y: y - 10, life: 0.3, max: 0.3, col: '#c9a8ff', size: 14 });
       return true;
     }
     case 'halfblink':

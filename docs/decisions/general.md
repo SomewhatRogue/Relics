@@ -153,3 +153,15 @@ Claude Opus 5.5
 - Follow-up (Kyle: "a lot smaller than the staff's"): a held spell's ball is drawn sized by its burst
   (`ballSize`, shared/spellbook.ts) in both views (spelldraw.ts, three/shots3d.ts): the staff's fireball full,
   the wand's firebolt 0.4 of it (0.5 on the flash).
+
+## 2026-11-16: slow is slow; RECALL for BLINK THROUGH (Kyle: "the wizard is wayyyy too fast"; "shouldn't be any perks or skills around move speed")
+
+- Pace: the slow three walk the same in their own armour now (the Mage's leathers didn't slow it, plate does a
+  Warrior): Mage weapons 0.7, Cleric 0.74 (mail 0.95), Warrior 0.8 (plate 0.88): all about 3.1. tests/pace.test.ts.
+- No knack for speed: QUICK FEET is LIGHT FEET (dodge 10% cheaper) for the Ranger and Rogue, SECOND WIND
+  (stamina 15% faster) for the Warrior (he blocks, no dodge). Ids kept. SPEED on gear capped at 10% (was 25%).
+  The bone bell's quickening stays (a relic). Keg and pouncer tests count armour now, at 65% of the fuse.
+- RECALL (rung id `blinkthrough`, Kyle's pick): for 3 s after a blink, a dodge press snaps you back where it
+  began, at once, for nothing, once (sim/laddermage.ts, RECALL in shared/ladder.ts). BLINK THROUGH is gone.
+
+Claude Opus 5.5

@@ -265,6 +265,8 @@ export interface Hero extends Body {
    *  next CALTROPS; THROUGH THE LEGS until then, and the goblin it was spent on; fireproof (SHAKE IT OFF)
    *  until then; the TAUNT ready again, and the roar lasting (STAND FAST). Room times. */
   airShot?: boolean;
+  /** RECALL: where the last blink began, till when (sim/laddermage.ts). */
+  recall?: { x: number; y: number; z: number; until: number };
   /** This jump's own shot is gone (sim/ladderranger.ts jumpShot). */
   jumpShot?: boolean;
   /** When the last dodge ended (room time). */
@@ -988,7 +990,7 @@ export type FightEvent =
       | 'slamburst' | 'shoulderready' | 'shoulder' | 'ironfeet' | 'cutbleed' | 'slipaway' | 'cutpurse' | 'quicknock' | 'steady' | 'mending' | 'sanctstep' | 'judged'; x: number; y: number }
   /** The movement ladder and the Mage's techniques firing (shared/ladder.ts, techniques.ts): `r` a reach,
    *  `el` an element, `n` magic given back, (x2, y2) the friend covered or the goblin gone through. */
-  | { k: 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'blockmend' | 'coverfor' | 'ironstance' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
+  | { k: 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'recall' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'blockmend' | 'coverfor' | 'ironstance' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }

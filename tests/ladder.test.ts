@@ -2,7 +2,7 @@
 import { coinsHtml } from '../src/shared/coins';
 import { describe, expect, it } from 'vitest';
 import { BLINK, DODGE, HERO, SNARE, TEACHES, TICK, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
-import { ALLY_WARD, BLINK_BURST, BLOCK_MEND, CALTROPS, IRON_STANCE, LADDER_LEVELS, LADDER_TITLE, LANDING, RUNGS, RUNG_WORDS, SHELTER, STAND_FAST, TAUNT_GUARD, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
+import { ALLY_WARD, BLINK_BURST, RECALL, BLOCK_MEND, CALTROPS, IRON_STANCE, LADDER_LEVELS, LADDER_TITLE, LANDING, RUNGS, RUNG_WORDS, SHELTER, STAND_FAST, TAUNT_GUARD, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
 import { buyDrill, drillState, learnLesson } from '../src/shared/training';
 import { trainerRows } from '../src/shared/trainrows';
 import { ArenaRoom } from '../src/sim/room';
@@ -175,16 +175,28 @@ describe('the Mage: the blink', () => {
     }
   });
 
-  it('BLINK THROUGH: a blink at a goblin comes out at its back, facing it', () => {
+  it('RECALL (was BLINK THROUGH): a dodge press within 3 s of a blink snaps you back where it began, once', () => {
     for (const rungs of [1, 2]) {
-      const h = hero('wand', rungs), e = goblin(1, 9, 7.5);
-      const { run } = arena([h], [e]);
-      run(TICK, { rollSeq: 1, my: -1 });
-      run(0.3, { rollSeq: 1 });
+      const h = hero('wand', rungs), { room, run } = arena([h], []);
+      const ev = [...run(TICK, { rollSeq: 1, my: -1 }), ...run(0.3, { rollSeq: 1 })];
+      const out = h.y;
+      expect(out).toBeLessThan(9 - BLINK.distance + 0.01);
+      // Still in the blink's wait: pressed again.
+      ev.push(...run(TICK * 2, { rollSeq: 2 }));
       if (rungs === 2) {
-        expect(h.y).toBeCloseTo(7.5 - e.radius - HERO.radius - 0.15, 1);
-        expect(h.fy).toBeGreaterThan(0.9);
-      } else expect(h.y).toBeLessThan(9 - BLINK.distance + 0.01);
+        expect(h.y).toBeCloseTo(9, 3);
+        expect(ev.some((x) => x.k === 'recall')).toBe(true);
+        // Once: a press after does nothing till the blink's wait is up.
+        run(TICK * 2, { rollSeq: 3 });
+        expect(h.y).toBeCloseTo(9, 1);
+      } else expect(h.y).toBeCloseTo(out, 3);
+      // Too late: past the window, nothing to go back to.
+      const late = hero('wand', 2), a = arena([late], []);
+      a.run(TICK, { rollSeq: 1, my: -1 }), a.run(RECALL.window + 0.1, { rollSeq: 1 });
+      const at = late.y;
+      a.run(TICK * 2, { rollSeq: 2, my: 1 });
+      expect(a.room.heroes[0].y === at || late.act === 'roll').toBe(true);
+      void room;
     }
   });
 

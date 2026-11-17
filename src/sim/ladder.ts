@@ -8,7 +8,7 @@
 import { TICK, WEAPONS } from '../shared/tuning';
 import type { World } from './elements';
 import { hardLanding } from './ladderranger';
-import { blinkBurst, blinkThrough, cameThrough } from './laddermage';
+import { markRecall, blinkBurst } from './laddermage';
 import { dashStart, dashThrough, stepCaltrops } from './ladderrogue';
 import { stepTaunt } from './taunt';
 import { stepHolyGuard } from './holyguard';
@@ -27,7 +27,7 @@ export function stepLadder(heroes: Hero[], r: LadderRoom, w: World): void {
   for (const h of heroes) {
     const cls = WEAPONS[h.weapon]?.cls, now = w.now;
     if (h.act === 'roll' && h.lastRollAt === now) {
-      if (cls === 'MAGE') blinkBurst(h, r.zones, w), blinkThrough(h, w.enemies);
+      if (cls === 'MAGE') blinkBurst(h, r.zones, w), markRecall(h, now);
       else if (cls === 'ROGUE') dashStart(h, r.zones, w);
     } else if (h.act === 'roll' && cls === 'ROGUE') {
       const [px, py] = r.prev.get('h:' + h.id) ?? [h.x, h.y];
@@ -35,7 +35,6 @@ export function stepLadder(heroes: Hero[], r: LadderRoom, w: World): void {
     }
     if (h.landedAt === now) {
       if (cls === 'RANGER') hardLanding(h, w.enemies, now, w.ev);
-      else if (cls === 'MAGE') cameThrough(h, w.enemies, w.ev);
     }
     if (cls === 'WARRIOR') stepTaunt(h, w.enemies, r.zones, now, w.ev);
   }

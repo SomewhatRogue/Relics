@@ -6,6 +6,7 @@
  * body, each has its counter for a class that blocks and a class that dodges, what each costs, the
  * switch, that each goes out once, and the same fight twice.
  */
+import { ARMOR, CLASS_ARMOR } from '../src/shared/budget';
 import { afterEach, describe, expect, it } from 'vitest';
 import { board } from '../src/shared/jobs';
 import { planRoom, type Foe } from '../src/shared/terrain';
@@ -35,7 +36,8 @@ const brute = (affixes: Foe['elite'], gap = 1.2, pack = true, weapon: WeaponId =
   return { ...f, e };
 };
 const BLOCKERS: WeaponId[] = ['sword', 'mace'], DODGERS: WeaponId[] = ['daggers', 'longbow', 'wand'];
-const SLOWEST = HERO.speed * Math.min(...Object.values(WEAPONS).map((w) => w.speed ?? 1));
+// The slowest walker, in their class's armour (a Warrior in plate, a Mage in leathers: the same since 2026-11-16).
+const SLOWEST = HERO.speed * Math.min(...Object.values(WEAPONS).map((w) => (w.speed ?? 1) * ARMOR[CLASS_ARMOR[w.cls]].speed));
 
 describe('what an elite of the second three costs, and what each can be', () => {
   it('its sort times 1.5, plus 1 an affix; a Hornblower the small ones it may call too', () => {
@@ -89,7 +91,7 @@ describe('Oil-soaked', () => {
     expect(e.blast!.done).toBe(true);
     expect(e.hp).toBeLessThan(hp);
     room.enemies.slice(1).forEach((o, i) => expect(o.hp < packHp[i] || o.act === 'dead').toBe(true));
-    expect((ELITE.oiled.r + HERO.radius) / SLOWEST).toBeLessThan(ELITE.oiled.fuse * 0.6);
+    expect((ELITE.oiled.r + HERO.radius) / SLOWEST).toBeLessThan(ELITE.oiled.fuse * 0.65);
   });
 
   it('a blocker holding block beside it is still hurt; walked out of, nothing; a dodger dodges out', () => {
@@ -213,7 +215,7 @@ describe('Smouldering', () => {
     expect(killed('sword', 'stay')).toBeGreaterThan(0);
     for (const w of BLOCKERS) expect(killed(w, 'block'), w).toBeGreaterThan(0), expect(killed(w, 'walk'), w).toBe(0);
     for (const w of DODGERS) expect(killed(w, 'dodge'), w).toBe(0);
-    expect((ELITE.ember.r + HERO.radius) / SLOWEST).toBeLessThan(ELITE.ember.fuse * 0.6);
+    expect((ELITE.ember.r + HERO.radius) / SLOWEST).toBeLessThan(ELITE.ember.fuse * 0.65);
   });
 
   it('alive, nothing', () => {

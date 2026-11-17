@@ -1,16 +1,15 @@
 /**
  * The Mage's movement ladder, the blink (numbers: shared/ladder.ts). BLINK BURST: a burst of the element
  * the Mage is in, round where they blinked from, judged at once and drawn at that size (a zone the
- * client paints). BLINK THROUGH: a blink at a goblin goes through it and comes out at its back. PERFECT
+ * client paints). RECALL: a dodge press soon after snaps you back to where the blink began. PERFECT
  * BLINK: a blink just after a PERFECT hold costs half.
  */
-import { HERO, TICK, WEAPONS } from '../shared/tuning';
-import { BLINK_BURST, BLINK_THROUGH, HALF_BLINK, knowsRung } from '../shared/ladder';
+import { WEAPONS } from '../shared/tuning';
+import { BLINK_BURST, HALF_BLINK, RECALL, knowsRung } from '../shared/ladder';
 import { castElement } from './channel';
 import { damage, isDead, isDummy } from './damage';
 import { afflict, chill, type World } from './elements';
-import { dodgeReach } from './knacks';
-import type { Enemy, FightEvent, Hero, Zone } from './types';
+import type { FightEvent, Hero, Zone } from './types';
 
 const isMage = (h: Hero) => WEAPONS[h.weapon]?.cls === 'MAGE';
 
@@ -37,34 +36,18 @@ export function blinkBurst(h: Hero, zones: Zone[], w: World): void {
   }
 }
 
-/**
- * BLINK THROUGH, as the blink starts: the nearest goblin on its line within its reach is gone through,
- * the blink running on to just past its back (a little further than its own reach at most).
- */
-export function blinkThrough(h: Hero, enemies: Enemy[]): void {
-  h.throughId = undefined;
+/** RECALL, as a blink starts: where it began is kept, to snap back to (sim/hero.ts recall). */
+export function markRecall(h: Hero, now: number): void {
   if (!isMage(h) || !knowsRung(h, 'blinkthrough')) return;
-  const reach = dodgeReach(h), dx = h.rollDx, dy = h.rollDy;
-  let best: Enemy | null = null, along = Infinity;
-  for (const e of enemies) {
-    if (isDead(e) || isDummy(e) || e.kind === 'nest' || (e.z ?? 0) !== (h.z ?? 0)) continue;
-    const ex = e.x - h.x, ey = e.y - h.y, a = ex * dx + ey * dy, off = Math.abs(ex * dy - ey * dx);
-    if (a <= 0.2 || a - e.radius > reach || off > e.radius + BLINK_THROUGH.aim || a >= along) continue;
-    (best = e), (along = a);
-  }
-  if (!best) return;
-  // (A dodge runs whole ticks, so it goes a touch past its time: the reach is set so it stops just there.)
-  const time = WEAPONS[h.weapon].dodge.time, ticks = Math.ceil(time / TICK - 1e-6) * TICK;
-  h.rollReach = (Math.min(reach + BLINK_THROUGH.extra, along + best.radius + HERO.radius + BLINK_THROUGH.gap) * time) / ticks;
-  h.throughId = best.id;
+  h.recall = { x: h.rollX, y: h.rollY, z: h.z ?? 0, until: now + RECALL.window };
 }
 
-/** Out the far side: turned to face the goblin's back. */
-export function cameThrough(h: Hero, enemies: Enemy[], ev: FightEvent[]): void {
-  const e = h.throughId !== undefined ? enemies.find((o) => o.id === h.throughId) : undefined;
-  h.throughId = undefined;
-  if (!e || isDead(e)) return;
-  const dx = e.x - h.x, dy = e.y - h.y, l = Math.hypot(dx, dy) || 1;
-  (h.fx = dx / l), (h.fy = dy / l);
-  ev.push({ k: 'blinkthrough', x: h.x, y: h.y, x2: e.x, y2: e.y });
+/** RECALL: a dodge pressed within its window, once the blink's done: back where it began, at once, for nothing. */
+export function recall(h: Hero, now: number, ev: FightEvent[]): boolean {
+  const r = h.recall;
+  if (!r || now >= r.until || h.act === 'roll' || h.act === 'down') return false;
+  h.recall = undefined;
+  ev.push({ k: 'recall', x: r.x, y: r.y, x2: h.x, y2: h.y });
+  Object.assign(h, { x: r.x, y: r.y, z: r.z, kvx: 0, kvy: 0, act: 'idle', actT: 0, safeT: Math.max(h.safeT ?? 0, RECALL.safe), rollQueuedAt: -9 });
+  return true;
 }

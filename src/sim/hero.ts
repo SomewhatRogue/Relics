@@ -29,7 +29,7 @@ import { primeShoulder, stride } from './techwarrior';
 import { nockHead, quickNock } from './techranger';
 import { airShot, airSwing, jumpShot } from './ladderranger';
 import { JUMP_SHOT } from '../shared/ladder';
-import { blinkCost } from './laddermage';
+import { blinkCost, recall } from './laddermage';
 
 export function newHero(id: string, x: number, y: number): Hero {
   return {
@@ -229,9 +229,10 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
   const w = WEAPONS[h.weapon];
   // A Warrior's or Healer's dodge press does nothing (they have no dodge).
   const dodge = w.dodge;
+  // RECALL: a Mage's dodge press soon after a blink snaps them back, whatever the blink's wait (sim/laddermage.ts).
+  if (now - h.rollQueuedAt < INPUT_BUFFER && recall(h, now, ev)) return;
   const wantsRoll = now - h.rollQueuedAt < INPUT_BUFFER && canRoll(h, now);
   if (h.act === 'roll') {
-    // (BLINK THROUGH sets a blink's own reach, to just past a goblin's back: sim/laddermage.ts.)
     const k = (h.rollReach ?? dodgeReach(h)) / dodge.time;
     // (A blink covers over a tile a tick: in small steps, so it never comes out the far side of a wall.)
     travel(h, h.rollDx * k * dt, h.rollDy * k * dt, HERO.radius);

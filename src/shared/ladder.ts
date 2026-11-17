@@ -37,7 +37,8 @@ export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
   twinsnare: { name: 'TWO ARROWS', text: 'Leap shot fires two arrows.' },
   landing: { name: 'HARD LANDING', text: 'Landing a jump knocks small goblins next to you flat for 0.8 s.' },
   blinkburst: { name: 'BLINK BURST', text: 'Blinking leaves a burst of your element where you stood: 100 damage to goblins in it.' },
-  blinkthrough: { name: 'BLINK THROUGH', text: 'Blink at a goblin to come out behind it, facing its back.' },
+  // (Kept its old id: it was BLINK THROUGH, out behind a goblin, till 2026-11-16, Kyle: "not super helpful".)
+  blinkthrough: { name: 'RECALL', text: 'Blink again within 3 s to snap back to where you started.' },
   halfblink: { name: 'PERFECT BLINK', text: 'A blink within 2 s of a PERFECT hold costs half the magic.' },
   caltrops: { name: 'CALTROPS', text: 'Your dash drops caltrops where you started, once every 5 s. Goblins on them slow down and bleed.' },
   underlegs: { name: 'DASH THROUGH', text: 'Dash through a goblin and your next hit within 2 s is a backstab.' },
@@ -68,9 +69,9 @@ export const LANDING = { r: 1.3, down: 0.8, knock: 4 };
 export const BLINK_BURST = { r: 1.4, dmg: 10, show: 0.35 };
 /** A Mage's blink trap, the trainer's lesson (sim/blinktrap.ts). */
 export const BLINK_TRAP = { r: 0.6, burst: 1.6, dmg: 30, stun: 1, life: 12, max: 2, cooldown: 4 };
-/** BLINK THROUGH: a goblin within `aim` tiles of the blink's line and in its reach is gone through; you
- *  come out `gap` tiles past its back (at most `extra` past the blink's own reach). */
-export const BLINK_THROUGH = { aim: 0.5, gap: 0.15, extra: 1 };
+/** RECALL (the rung's id is still `blinkthrough`): for `window` s after a blink, a dodge press snaps you back
+ *  to where it started, whatever the blink's wait, for nothing; once a blink. `safe` s of i-frames on arrival. */
+export const RECALL = { window: 3, safe: 0.15 };
 /** PERFECT BLINK: a blink begun within `within` s of a PERFECT hold costs `cost` of its magic. */
 export const HALF_BLINK = { within: 2, cost: 0.5 };
 /** CALTROPS: dropped where the dash began, at most every `every` s, `r` tiles round, for `life` s, `most`
