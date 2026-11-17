@@ -103,3 +103,41 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   painter goes in behind a switch, with New look: characters' go-ahead for `charpaint.ts` (theirs) or folded into this
   chat at Kyle's word.
   (Claude Fable 5.2)
+
+## 2026-11-17: the paints look alike; how many pixels a figure needs (research)
+
+- Kyle on the three painters: "they all look kind of the same... it's not huge differences. Maybe we have too few
+  pixels and need to do a LOT of pixels and then shrink down or something? ... lets do research and figure out how to
+  do this right." So paint alone is not slice 8; no painter goes in.
+- Why they look alike: a hero is 18 by about 35 pixels, some 350 filled pixels, a face three wide. Paint moves the
+  colour of those pixels; it cannot add a shape. The pictures Kyle gave as the feel (docs/design/ref/heroes-four.jpg,
+  hooded-reaper.jpg) are drawn about 100 pixels tall.
+- The scale test (first section of the page): those reference figures cut out, shrunk to 35, 52, 70, 105 and 210
+  pixels tall with no blending left (alpha snapped, a locked palette, the outline redrawn) and stood on a real shot of
+  Wickhold's square at a hero's size on screen. At 35 nothing of them survives; at 70 (a figure pixel half a world
+  pixel, 3 screen pixels on a 3x phone or retina laptop) they read as themselves.
+- What the research says:
+  - Detail is set by the final pixel count, not by how big the source was drawn. Shrinking a painting gives mud
+    (blended edges, too many colours, stray pixels); it works only as a pipeline that shrinks without blending, locks
+    the palette and puts the outline back.
+  - Dead Cells is the known case of that pipeline: simple 3D models, a homebrew tool that "renders the mesh in a very
+    small size and without antialiasing", figures about 50 pixels tall, a toon shader over normal maps. One artist;
+    they chose it because every retake of a hand-drawn frame was too slow, and say they "chose animation over detail".
+  - Tools exist for the other routes: PixelOver (bones over art, output as pixel art, not AI), and pixel-native
+    generators such as PixelLab (a sprite as a skeleton to pose and turn, output on a true grid). Our own try with a
+    general image model's sheets (New look: characters, 2026-11-15) was found flat and dear.
+  - Tile and figure size are one decision in most games: 16 px tiles with figures about a tile and a half to two
+    tall, 32 px tiles with figures 32 to 64. Mixing a finer figure onto a coarser world is what HD-2D does the other
+    way round; here it would be figures at half-size pixels on today's 16 px world.
+- What it means here: twice the height is four times the pixels in every frame of every pose, so typing pixel maps
+  stops being the way to make figures. The routes: (1) simple 3D figures drawn straight into the 2.5D view at half-size
+  pixels, banded and outlined (the Dead Cells way; turning, walking, striking and gear swaps come free; `?figs=3d` box
+  figures and the parked `?hd` double resolution are a start; KayKit's rigged adventurers are CC0 and Kyle already
+  works with that rig in another game); (2) each look's parts drawn once at double size and posed by today's pose code;
+  (3) pixel-native generated sheets, cleaned up. Kyle said of 3D-looking figures on 2026-11-15 "that's lame", so (1)
+  has to be judged in motion, as pixels, before anything is decided.
+- Proposed next: a bench with one knight made each way at 70 tall in the same real street, walking and striking.
+  Waiting on Kyle.
+  Sources: gamedeveloper.com "Art Design Deep Dive: Using a 3D pipeline for 2D animation in Dead Cells";
+  80.lv "Case study: Dead Cells character art pipeline"; pixelover.io/docs; kaylousberg.itch.io/kaykit-adventurers.
+  (Claude Fable 5.2)
