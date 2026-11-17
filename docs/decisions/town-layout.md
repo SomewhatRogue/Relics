@@ -228,3 +228,13 @@ Kyle asked for these, so small edits in Town quests' files (runnerpath.ts) and i
   Screenshots of the plain game (no street) clean.
 
 Claude Opus 5.5
+
+## 2026-11-16 (night): townsfolk walking away seen from behind (Kyle: Dunn "walking backwards")
+
+- Walkers had a side profile walking across but their front walking north, so going up the screen they faced you,
+  walking backwards. src/client/npcback.ts (new): the front's recipe from behind (no face, no apron or buttons, the
+  back of the head in the hair's colour, beards dropped). npcs.ts `drawNpc` takes `fy` and picks it walking mostly
+  north (the same exclusions as the profile); scene.ts and three/cards3d.ts pass `at.fy`. For the Side view chat:
+  small edits in npcs.ts. Screenshots: Dunn north from behind, south from the front. Full suite 1973 passed.
+
+Claude Opus 5.5

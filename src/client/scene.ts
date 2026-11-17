@@ -480,7 +480,7 @@ export class Scene {
     }
     for (const n of map.npcs ?? []) {
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
-      items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy - lv(at.x, at.y), near && !n.mute, at.fx, !!n.path && !at.still, at.x) });
+      items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy - lv(at.x, at.y), near && !n.mute, at.fx, !!n.path && !at.still, at.x, at.fy) });
     }
     // Layout 4's scenes: a body being hauled, the prisoners' rope (scenedraw.ts).
     for (const e of room.enemies) if (e.task?.k === 'tally') { const k = e.task; items.push({ y: OY + k.y * PX, draw: () => drawTally(c, k.n, OX + k.x * PX - cx, OY + k.y * PX - cy) }); }

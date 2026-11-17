@@ -14,6 +14,7 @@ import { CREW, drawCrew } from './crewdraw';
 import { drawFolk, FOLK } from './folkwork';
 import { COBB_SIT, drawCobbCrate, drawCobbThings } from './cobbdraw';
 import { sidePerson, tallPerson } from './npcside';
+import { backPerson } from './npcback';
 
 type Part = Parameters<typeof makeSprite>[2][number];
 export interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
@@ -139,7 +140,7 @@ function drawArrowIn(c: Ctx, x: number, y: number): void {
   g.fillRect(bx + 6, by - 6, 1, 2);
 }
 
-export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false, tx = n.x): void {
+export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx = 0, walking = false, tx = n.x, fy = 1): void {
   // Dark and gold, slice 4 (darkfoe.ts): the heroes' palette without the gold. Names and marks are on the glow layer.
   c = darkFolk(c);
   walking ||= !!n.walking;
@@ -149,7 +150,9 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   // Walking mostly across, in profile (npcside.ts): contact on the low beat, passing on the high. Not for anyone
   // carrying work, sitting, sneaking, kneeling or hurt, whose things in hand are placed for the front.
   const side = walking && Math.abs(fx) > 0.7 && !n.work && !n.pose && !n.sneak && !n.kneel && !n.arrow && n.look !== 'child';
-  const look = LOOKS[n.look] ? n.look : 'villager', s = side ? sidePerson(look, LOOKS[look], !bob) : SPRITES[n.look] ?? SPRITES.villager;
+  // Walking mostly north, away up the screen: from behind (npcback.ts), not their front walking backwards.
+  const away = walking && !side && fy < -0.7 && !n.work && !n.pose && !n.sneak && !n.kneel && !n.arrow && n.look !== 'child' && !!LOOKS[n.look];
+  const look = LOOKS[n.look] ? n.look : 'villager', s = side ? sidePerson(look, LOOKS[look], !bob) : away ? backPerson(look, LOOKS[look]) : SPRITES[n.look] ?? SPRITES.villager;
   shadow(c, x, y, hs(5));
   if (n.pose === 'corpse') return drawCorpse(c, s, x, y, n);
   if (n.smear) drawSmear(c, x, y, n.smear, n.lift ?? 0);
