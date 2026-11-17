@@ -1,8 +1,8 @@
 /**
  * Light and air in 2.5D (docs/design/lived-in-world.md slice 4, after Riteborn's warm-in-cool): a dark vignette at
  * the screen's edges, and a soft warm haze round each lit lamp and lit window, both laid on in the post pass
- * (post.ts) in stepped, dithered bands like the rest of the light. The haze comes from the lamps themselves, not
- * from everything that glows, so a telegraph's edge never blooms past where it is. A body well in front of a lamp
+ * (post.ts) in fine steps with a light dither (Kyle, 2026-11-16: not too noisy), so neither adds a checker of its
+ * own. The haze comes from the lamps themselves, not from everything that glows, so a telegraph's edge never blooms past where it is. A body well in front of a lamp
  * stays clear of its haze (by depth). `?air=0` in the address turns both off, to compare. Only draws.
  */
 import * as THREE from 'three';
@@ -31,13 +31,13 @@ vec3 airHalo(vec2 px, float dHere, float bz){
   }
   float L = max(max(h.r, h.g), h.b);
   if (L <= 0.0) return h;
-  float q = floor(min(L, 0.5) * 10.0 + bz * 0.9 + 0.5) / 10.0;
+  float q = floor(min(L, 0.5) * 16.0 + bz * 0.5 + 0.5) / 16.0;
   return h * (q / L);
 }
 float airVig(vec2 px, vec2 res, float bz){
   vec2 v = (px + 0.5) / res * 2.0 - 1.0;
   float t = clamp((length(v * vec2(1.0, 0.92)) - 0.5) / 0.8, 0.0, 1.0);
-  return uVig * clamp(floor(t * 4.0 + bz * 0.9 + 0.5) / 4.0, 0.0, 1.0);
+  return uVig * clamp(floor(t * t * 8.0 + bz * 0.5 + 0.5) / 8.0, 0.0, 1.0);
 }`;
 
 export function airUniforms(): Record<string, THREE.IUniform> {

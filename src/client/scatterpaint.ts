@@ -2,7 +2,8 @@
  * A lived-in world, slice 2: a job's ground strewn by what it is (shared/scatter.ts), painted into the floor
  * both views share (world.ts paintMap): tufts of grass, stones with a lit top, twigs, a bone or a skull, dead
  * leaves, low leafy clumps, moss, mushrooms at the roots of trees, the odd flower, gravel, and along water a dark wet edge and
- * reeds. Muted, so the light passes still do the work. Each from the map's own seed: every screen the same.
+ * reeds. Muted, so the light passes still do the work: bones and pale petals kept near the ground's own value, so
+ * nothing on the floor reads like something to pick up. Each from the map's own seed: every screen the same.
  */
 import type { GameMap } from '../shared/arena';
 import { Rng } from '../shared/rng';
@@ -62,10 +63,10 @@ function one(rect: Rect, rng: Rng, k: Scatter, x: number, y: number): void {
     case 'bone':
       if (rng.next() < 0.18) {
         // Now and then a skull, staring.
-        rect(x, y - 2, 4, 3, '#bab4a4'), rect(x, y - 2, 4, 1, '#d0cabc'), rect(x + 1, y - 1, 1, 1, '#1e1a16'), rect(x + 3, y - 1, 1, 1, '#1e1a16');
+        rect(x, y - 2, 4, 3, '#8e887c'), rect(x, y - 2, 4, 1, '#9e988a'), rect(x + 1, y - 1, 1, 1, '#1e1a16'), rect(x + 3, y - 1, 1, 1, '#1e1a16');
         return;
       }
-      rect(x, y, 4 + Math.round(s), 1, '#a8a294'), rect(x - 1, y - 1, 1, 3, '#bab4a4'), rect(x + 4 + Math.round(s), y - 1, 1, 3, '#bab4a4');
+      rect(x, y, 4 + Math.round(s), 1, '#7e796e'), rect(x - 1, y - 1, 1, 3, '#8e887c'), rect(x + 4 + Math.round(s), y - 1, 1, 3, '#8e887c');
       return;
     case 'leaf':
       for (let i = 0; i < 3 + rng.int(4); i++) rect(x + rng.int(7) - 3, y + rng.int(5) - 2, 2, 1, p(LEAF));
@@ -85,7 +86,7 @@ function one(rect: Rect, rng: Rng, k: Scatter, x: number, y: number): void {
       return;
     case 'flower':
       rect(x, y - 2, 1, 2, TUFT[0]), rect(x, y - 3, 1, 1, rng.next() < 0.5 ? '#b8a040' : '#9a6a8a');
-      if (rng.next() < 0.5) rect(x + 2, y - 2, 1, 2, TUFT[1]), rect(x + 2, y - 3, 1, 1, '#c8c0a8');
+      if (rng.next() < 0.5) rect(x + 2, y - 2, 1, 2, TUFT[1]), rect(x + 2, y - 3, 1, 1, '#a49c88');
       return;
     case 'wet': {
       // The soft dark edge by water: a dithered patch, darker toward its middle.

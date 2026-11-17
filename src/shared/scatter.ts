@@ -17,12 +17,12 @@ export interface Scatter { k: ScatterKind; x: number; y: number; s: number }
 
 /** What each floor is strewn with, and how likely each is (relative). */
 const STREWN: Partial<Record<GameMap['theme']['floor'], [ScatterKind, number][]>> = {
-  grass: [['clump', 2.5], ['tuft', 6], ['stone', 2], ['twig', 2], ['leaf', 2], ['moss', 1.5], ['flower', 1], ['shroom', 0.4], ['bone', 0.2]],
-  dirt: [['stone', 3], ['tuft', 3], ['clump', 0.8], ['twig', 2.5], ['leaf', 2], ['gravel', 2], ['bone', 0.5], ['moss', 0.6]],
-  mud: [['clump', 2], ['tuft', 3], ['twig', 2], ['stone', 1.5], ['moss', 1.5], ['leaf', 1], ['bone', 0.5], ['shroom', 0.3]],
+  grass: [['clump', 2.5], ['tuft', 6], ['stone', 2], ['twig', 2], ['leaf', 2], ['moss', 1.5], ['flower', 0.6], ['shroom', 0.4], ['bone', 0.08]],
+  dirt: [['stone', 3], ['tuft', 3], ['clump', 0.8], ['twig', 2.5], ['leaf', 2], ['gravel', 2], ['bone', 0.2], ['moss', 0.6]],
+  mud: [['clump', 2], ['tuft', 3], ['twig', 2], ['stone', 1.5], ['moss', 1.5], ['leaf', 1], ['bone', 0.2], ['shroom', 0.3]],
   wheat: [['stone', 2], ['twig', 1], ['tuft', 2], ['flower', 1]],
-  rock: [['gravel', 4], ['stone', 3], ['bone', 1], ['moss', 0.6]],
-  flagstone: [['gravel', 3], ['stone', 1], ['moss', 1], ['bone', 0.4], ['tuft', 0.6]],
+  rock: [['gravel', 4], ['stone', 3], ['bone', 0.4], ['moss', 0.6]],
+  flagstone: [['gravel', 3], ['stone', 1], ['moss', 1], ['bone', 0.2], ['tuft', 0.6]],
 };
 
 /** Is this a job's ground to crowd (not the town, not a room indoors)? */
@@ -44,7 +44,8 @@ function crowd(m: GameMap, x: number, y: number): number {
   for (const b of g.blocks) if (inRect(b, x, y, 1.2)) near = Math.max(near, 0.6);
   for (const w of g.water ?? []) if (inRect(w, x, y, 1.6)) near = Math.max(near, 0.9);
   const mid = Math.hypot((x - m.w / 2) / (m.w / 2), (y - m.h / 2) / (m.h / 2));
-  return Math.min(1, 0.2 + e * 0.7 + near * 0.6 + Math.max(0, mid - 0.5) * 0.4);
+  // (Kyle, 2026-11-16, not too cluttered: the open middle all but bare, the crowding kept to edges and round things.)
+  return Math.min(1, 0.06 + e * 0.7 + near * 0.55 + Math.max(0, mid - 0.55) * 0.35);
 }
 
 const cache = new WeakMap<GameMap, { floor: Scatter[]; stand: Round[] }>();
@@ -66,7 +67,7 @@ export function scatterOf(m: GameMap): { floor: Scatter[]; stand: Round[] } {
   const solid = (x: number, y: number) => m.blocks.some((b) => inRect(b, x, y)) || (m.water ?? []).some((w) => inRect(w, x, y));
   const wet = (x: number, y: number) => (m.water ?? []).some((w) => inRect(w, x, y, 0.9) && !inRect(w, x, y));
   // The floor: a few tries a tile, kept by how crowded it is there.
-  for (let i = 0, n = Math.round(m.w * m.h * 4.5); i < n; i++) {
+  for (let i = 0, n = Math.round(m.w * m.h * 3.4); i < n; i++) {
     const x = rng.next() * m.w, y = rng.next() * m.h, c = crowd(m, x, y);
     if (rng.next() > c || solid(x, y)) continue;
     if (wet(x, y)) {

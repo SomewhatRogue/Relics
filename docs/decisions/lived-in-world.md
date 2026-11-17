@@ -31,3 +31,18 @@ maps) are logged in docs/decisions/art.md, 2026-11-15. Slice 3 (drawn buildings 
   2.5D cards too). Left as it is; if it reads too loud or too small in WIDE, it's Art's file.
 - Kyle decides which camera stays; then the button goes and the step is set.
   (Claude Opus 5.5)
+
+## 2026-11-16: not too cluttered
+
+- Kyle on slices 4 and 5: "feels good", but make sure it isn't too noisy and cluttered now. Looked at the town by day
+  and night and four job maps (forest, marsh, village, mine), flat and 2.5D, both cameras.
+- The job maps' scatter (shared/scatter.ts) thinned: about a quarter fewer tries a tile, and the open middle where the
+  fights are all but bare (0.06 there, was 0.2); the edges and round rocks, trees and water stay crowded. Bones much
+  rarer (about two in five of before), and bones, skulls and the pale petals painted near the ground's own value
+  (client/scatterpaint.ts), so nothing on the floor reads like something to pick up.
+- The vignette and haze (three/air3d.ts) in finer steps with half the dither, the vignette easing in: they no longer
+  lay a checker of their own over the fog's.
+- The town's crowd reads fine (folk and street things at the edges, the square clear). What reads busy there in 2.5D is
+  the moss speckle on the new town's cobbles and roofs, the town layout and dark and gold work: not touched.
+- scripts/air-look.cjs closes each page (it ran out of room on its third).
+  (Claude Opus 5.5)
