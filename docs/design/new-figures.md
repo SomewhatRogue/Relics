@@ -1,7 +1,8 @@
 # New figures: heroes and enemies at twice the pixels
 
 Spec, 2026-11-17 (Kyle and Claude Fable 5.2). Slice 8 of docs/design/graphics-overhaul.md, grown into its own piece.
-**Not built. One knight is the test; nothing else starts until Kyle has seen him move.**
+**Not in the game. The knight's bench is up (https://claude.ai/artifact/GgoKXqc7Arzz1NbNbL3Ypy): walk him in real
+frames of the game, baked or live. Nothing else starts until Kyle has judged him.**
 
 ## What Kyle said
 

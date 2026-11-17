@@ -157,3 +157,25 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   stout beside them, so the finish needs a real modelling pass. Not in the game.
 - Next, on Kyle's word: the knight end to end (finished, rigged, walking and striking, in a real street at 70).
   (Claude Fable 5.2)
+
+## 2026-11-17: the knight end to end (a bench, not in the game)
+
+- Kyle: "Yes, do the knight." Rebuilt slimmer on a skeleton (`scripts/figures/rig.py`: joints, rigid parts, no
+  skinning), with guard, walk and one sword blow as poses (`moves.py`: the walk by ground covered, the blow by its
+  own time with the wind-up as the tell, as the room's clocks would drive them). `bake.py` puts out, in 16 seconds,
+  a sheet of 160 frames (8 facings by 20, 70 pixels tall, no smoothing) and the model with every move's samples.
+- The bench (https://claude.ai/artifact/GgoKXqc7Arzz1NbNbL3Ypy): the knight walked and struck with by keys or touch
+  in three real frames of the live game (the Open Cut's street, Wickhold by day and night: the flat view's unlit art,
+  glow and lights, captured), drawn at half-size pixels and lit by the game's smooth light, today's knight and
+  goblins frozen in the frame beside him. Three ways to draw him: Blender's baked frames; the model drawn live in the
+  same 8 facings and frame steps; the model drawn live and free. Plus the same model large and smooth.
+- Measured: live in steps against baked, 25 poses and facings: the outline differs by 0 to 7 pixels of about 1,700
+  and the colour by about 1 percent (one frame 13 percent, a band falling either side of its edge). So the two are
+  the same picture, and the choice between them is about cost, not look: baked needs a sheet for every look and
+  weapon; live needs none. Live and free is the one that shows edges crawling as he turns.
+- What it is not: he is not in the game (no card, no switch, nothing in Art's or the characters chat's files). Three
+  moves only. He walks over things, not behind them. The design is mine in the references' language and scripted from
+  simple shapes; beside today's stocky knight he is slim and reads lighter, which a phone may not forgive.
+- Waiting on Kyle: whether the figure is right in motion, and baked or live in steps. Then the game: a figure layer
+  at twice the art's pixels in the 2.5D view, the hook where the parked `three/chars3d.ts` hung.
+  (Claude Fable 5.2)
