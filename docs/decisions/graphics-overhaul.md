@@ -356,3 +356,14 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   theirs)." Not built. It is a system of its own (a choice saved, sent to the party, a page at the barracks, a cloak
   or its like for five classes), so it wants a short spec and his yes first.
   (Claude Fable 5.2)
+
+## 2026-11-17: a spec for cloaks chosen at the trainer, for every class (not built)
+
+- Kyle said yes to a spec for his idea ("make it like the shield ... and we let all classes customize theirs"):
+  docs/design/cloak-choice.md. A colour (the look as drawn, or the six fields of the shield), an edge (none, gold,
+  silver, iron) and, for the Warrior, a cut; kept and sent as the shield is; drawn by swapping the colours of the
+  cloth in each look before the sharp painting. Three slices: the Warrior first, then Ranger and Rogue, then Mage
+  and Healer.
+- It waits on six calls from Kyle (free or not, the default, the colours, the cut, the pale robe of the Healer, who
+  builds it). Nothing is built.
+  (Claude Fable 5.2)
