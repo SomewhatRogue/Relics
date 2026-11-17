@@ -141,3 +141,19 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   Sources: gamedeveloper.com "Art Design Deep Dive: Using a 3D pipeline for 2D animation in Dead Cells";
   80.lv "Case study: Dead Cells character art pipeline"; pixelover.io/docs; kaylousberg.itch.io/kaykit-adventurers.
   (Claude Fable 5.2)
+
+## 2026-11-17: Kyle wants the reference figures' look; the new-figures spec; a first knight in Blender
+
+- Kyle on the scale test: 70 and 210 "both look so good, especially with 32 colors", "can we have both", "we'd have to
+  rebuild EVERYTHING", "Basically I want those figures" (the knight's legs look weird), and builder agents and Blender
+  on his PC are there to use.
+- docs/design/new-figures.md: 70 tall and 32 colours in play; the same model with no visible pixels wherever a
+  figure is shown big and still (so both, from one model); the world to 32 px a tile after. The references are other
+  artists' work: their language, our own designs, a line a class. One skeleton, poses from the room's clocks, and the
+  model either drawn live in 2.5D with a pixel pass or baked to sheets: the knight's bench decides.
+- Blender 5.2 on Kyle's PC runs scripts headless. `scripts/figures/kit.py` and `knight.py` build and render a first
+  knight (blackened plate, gold rims, crimson surcoat and cape, sword and heater shield) in about an hour. Put through
+  the scale test's shrink beside the references (the page, last figure): the route works; the figure is plain and
+  stout beside them, so the finish needs a real modelling pass. Not in the game.
+- Next, on Kyle's word: the knight end to end (finished, rigged, walking and striking, in a real street at 70).
+  (Claude Fable 5.2)
