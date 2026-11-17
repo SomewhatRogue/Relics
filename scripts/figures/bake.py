@@ -13,7 +13,7 @@ import kit, knight, moves
 
 # The camera looks down on the figure from this many degrees above level (a little: figures are drawn nearly from
 # the front even on a floor seen from above, as the game's own sprites are); PPM pixels a metre makes him 70 tall.
-EL, PPM, CELL, FEET = 12.0, 38, (128, 152), (64, 132)
+EL, PPM, CELL, FEET = 6.0, 37, (144, 152), (72, 136)
 args = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 out = args[0] if args else 'out'
 os.makedirs(out, exist_ok=True)
@@ -77,7 +77,7 @@ tmp = os.path.join(out, '_frame.png')
 # raised and through.
 k = 3
 frame(CELL[0] * k, CELL[1] * k, PPM * k, (FEET[0] * k, FEET[1] * k), True)
-looks = [(moves.idle(0), 0), (moves.idle(0), 90), (moves.idle(0), 180), (moves.walk(0.25), 45), (moves.strike(moves.WINDUP), 0), (moves.strike(moves.WINDUP + 0.12), 0)]
+looks = [(moves.idle(0), 0), (moves.idle(0), 90), (moves.idle(0), 180), (moves.walk(0.25), 45), (moves.strike(moves.WINDUP), 90), (moves.strike(moves.WINDUP + 0.12), 90)]
 cw, ch = CELL[0] * k, CELL[1] * k
 big = np.zeros((ch * 2, cw * 3, 4), dtype=np.float32)
 for i, (p, yaw) in enumerate(looks):

@@ -28,10 +28,13 @@ class Rig:
             self.parts.append((name, o))
 
     def pose(self, p, yaw=0.0):
-        """`p`: joint name to (x, y, z) degrees; `_at` moves the whole figure; `yaw` turns it (0 faces the viewer)."""
+        """`p`: joint name to (x, y, z) degrees, and `<joint>_at` to metres it is moved from where it rests; `_at`
+        moves the whole figure; `yaw` turns it (0 faces the viewer)."""
         for n, e in self.j.items():
             r = p.get(n, (0, 0, 0))
             e.rotation_euler = Euler([math.radians(v) for v in r], 'XYZ')
+            if n != 'root':
+                e.location = Vector(self.rest[n]) - Vector(self.rest[self.parent[n]]) + Vector(p.get(n + '_at', (0, 0, 0)))
         root, r = self.j['root'], p.get('root', (0, 0, 0))
         root.rotation_euler = Euler((math.radians(r[0]), math.radians(r[1]), math.radians(r[2] + yaw)), 'XYZ')
         root.location = Vector(p.get('_at', (0, 0, 0)))
@@ -56,7 +59,7 @@ class Rig:
                     pos += [round(c * 1000) for c in v]
                     nor += [round(c * 1000) for c in n]
             for key, (pos, nor) in by.items():
-                out.append({'joint': name, 'col': key[:7], 'glow': key.endswith('*'), 'pos': pos, 'nor': nor})
+                out.append({'joint': name, 'name': o.name.split('.')[0], 'col': key[:7], 'glow': key.endswith('*'), 'inner': o.get('inner'), 'pos': pos, 'nor': nor})
         return out
 
     def sample(self, p):

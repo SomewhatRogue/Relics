@@ -19,6 +19,14 @@ drawn as dark pixel art (near-black parts in many small pieces, gold as one-pixe
 lines between limbs, a big outline shape, a stance), in the 8 facings and frame steps only. The size is open between
 70 and 105 tall; 105 is the look in his screenshot and means the world at three times today's pixels, not two.
 
+## After the second bench (Kyle, 2026-11-17)
+
+"I want the reference at 70 tall in that same sort of style... that's the exact look and feel that I want... That
+sort of pixel shaded but still clean look... less about height, more about the actual design of the knight itself."
+So each figure is designed on what makes its reference work (for the knight: the upright greatsword, the shell of a
+cloak with a ringed lining and a gold edge, banded plate, a wide stance), as our own model, and shaded as those
+pictures are: four tones a colour, a checker of two where they meet, black between the parts, a black outline.
+
 ## The target
 
 - **In play: figures 70 pixels tall, 32 colours each.** A figure pixel is half a world pixel today (3 screen pixels on

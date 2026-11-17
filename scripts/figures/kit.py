@@ -102,22 +102,26 @@ def _mesh(name, bm, col, smooth):
     return o
 
 
-def sheet(name, rows, col, n=7, rag=0.0):
+def sheet(name, rows, col, n=7, rag=0.0, span=(-1.0, 1.0), inner=None, folds=0.02):
     """A cloth: rows of (z, half width, y at the middle, y at the edges), joined into a sheet with soft folds.
-    `rag` lifts every other point of its last row by that much: a torn hem."""
+    `rag` lifts every other point of its last row by that much: a torn hem. `span` keeps only part of its width
+    (-1 its left edge, 1 its right: a border strip). `inner`: its lining's colour, seen from the body's side."""
     bm = bmesh.new()
     grid = []
     for k, (z, hw, ym, ye) in enumerate(rows):
         line = []
         for i in range(n):
-            t = i / (n - 1) * 2 - 1
+            t = span[0] + (span[1] - span[0]) * i / (n - 1)
             up = rag * (i % 2) if k == len(rows) - 1 else 0.0
-            line.append(bm.verts.new((t * hw, ym + (ye - ym) * t * t + 0.02 * math.sin(i * 2.1), z + up)))
+            line.append(bm.verts.new((t * hw, ym + (ye - ym) * t * t + folds * math.sin(t * 6.5), z + up)))
         grid.append(line)
     for a, b in zip(grid, grid[1:]):
         for i in range(n - 1):
             bm.faces.new((a[i], b[i], b[i + 1], a[i + 1]))
-    return _mesh(name, bm, col, True)
+    o = _mesh(name, bm, col, True)
+    if inner:
+        o['inner'] = inner
+    return o
 
 
 def plate(name, pts, thick, loc, col, rot=(0, 0, 0)):

@@ -208,3 +208,32 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   inside the shapes; ours are cleaner inside, and his red and his edge light are still stronger than theirs.
 - Waiting on Kyle: is this the look; 70 or 105 (105 means the world at three times today's pixels to match, not two).
   (Claude Fable 5.2)
+
+## 2026-11-17: the knight's third pass: the reference's design, and checker shading
+
+- Kyle on the second pass: "I want the reference at 70 tall in that same sort of style. I get that it's a reference
+  but that's the exact look and feel that I want, not what we've had to this point. That sort of pixel shaded but
+  still clean look. Same at 105, so less about height, more about the actual design of the knight itself."
+- The reference knight studied at its own pixels (docs/design/ref/heroes-four.jpg, the fourth figure). What it is made
+  of: a greatsword held upright before him in both hands, the blade half a body again above the helm; a great cloak
+  from the shoulders to the ankle that wraps him like a shell, dark outside, a red lining drawn in concentric rings,
+  a gold line all round; round pauldrons under a collar plate with a gold edge; the waist in alternating light and
+  dark bands; a wide stance, feet out. And how it is shaded: about four tones a colour from black to a pale light,
+  with a one-pixel checker of two tones wherever they meet, black between the plates, a black outline, no edge light.
+  That checker is the "pixel shaded" look.
+- The third knight (`scripts/figures/knight.py`, our own model on those ideas; the picture itself is not used): all of
+  the above. The sword has a joint of its own at the grip with both fists on it (rig.py: a pose can now move a joint
+  as well as turn it), so the blow is the sword carried up and back, then over and down, the arms following. The
+  cloak is three lengths of a sheet that curves round to flank him, carrying its lining's colour (kit.py `sheet`
+  `inner`), its gold line laid just past its own edge so it shows from every side. The camera on a figure 6 degrees
+  above level. `moves.py`: guard, walk (the sword carried upright), a two-handed overhead blow.
+- The drawer's pixel pass now: four tones a colour (black, a dark, the part's own, a light) with the checker where
+  two meet, the light kept rare; a cloak seen from the body's side draws its lining in rings round three centres;
+  each part has a number, and a black line is drawn where two parts meet (never over gold); a dark outline. The
+  edge light of the second pass is gone.
+- On the bench (same link): the four reference heroes at 70 and 105 with ours from the front, turned and behind;
+  then the street. Where ours still differs: stiffer (arms a straight bar, legs straight), plainer inside the plates,
+  the rings more regular. It is a model shaded by rule beside a figure whose every pixel was placed.
+- A note for the game: the Warrior blocks with a shield. This knight is the greatsword look; sword and shield wants
+  its own guard on the same body, and each other class its own model on the same skeleton.
+  (Claude Fable 5.2)
