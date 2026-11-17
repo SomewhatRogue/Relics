@@ -6,7 +6,11 @@
 import { isPost } from '../postkind';
 import { POST_WORD_Y } from './posts3d';
 import type { GameMap } from '../../shared/arena';
-import { npcAt } from '../../shared/arena';
+import { levelAt, npcAt } from '../../shared/arena';
+import { nameAt, roofNamed } from '../hallnames';
+import { TALL } from './houses3d';
+import { LEDGE_H } from './ground';
+import { stacked } from './layoutledges';
 import { SPOT_REACH } from '../../shared/town';
 import type { Hero } from '../../sim/types';
 import { drawText, textWidth } from '../pixfont';
@@ -17,6 +21,14 @@ import { BOXFIGS } from './look';
 export function drawTags(g: CanvasRenderingContext2D, map: GameMap, t: number, me: { x: number; y: number } | null, others: Hero[], P: Proj, _now: number): void {
   for (const b of map.blocks) {
     if (!b.label || b.kind === 'wall') continue;
+    // A building's name up over its roof's ridge, on top of everything (../hallnames.ts), lifted with its level.
+    if (roofNamed(b)) {
+      if (b.ruined) continue;
+      const cxb = b.x + b.w / 2, cyb = b.y + b.h / 2, lift = stacked(map) ? levelAt(map, cxb, cyb) * LEDGE_H : 0;
+      const [x, y] = P(cxb, lift + (TALL[b.kind] ?? 1.4) + Math.min(b.w, b.h) * 0.3, cyb);
+      if (x > -60 && y > -10 && x < g.canvas.width + 60 && y < g.canvas.height + 10) nameAt(g, b.label, x, y);
+      continue;
+    }
     // (The job board's and the works' words on their fascia and top board: posts3d.ts.)
     const word = isPost(b) ? (b.label === 'PUBLIC WORKS' ? 'WORKS' : b.label) : b.label;
     const [x, y] = P(b.x + b.w / 2, POST_WORD_Y[b.label] ?? (b.kind === 'stall' ? 1.15 : 1.05), b.y + b.h / 2 + (isPost(b) ? 0.12 : b.h / 2 + 0.02)), w = textWidth(word);

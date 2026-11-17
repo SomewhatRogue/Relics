@@ -255,3 +255,12 @@ Claude Opus 5.5
 - Full suite 1973 passed.
 
 Claude Opus 5.5
+
+## 2026-11-16: buildings' names on their roofs (Kyle: "with the labels under things it's hard to see the barracks")
+
+- client/hallnames.ts (new): a building's name in the middle of its roof, over everything, a dark shadow under the
+  letters; flat on the glow layer after every sprite (scene.ts), 2.5D over the ridge on the overlay (tags3d.ts),
+  lifted with its level. No longer painted on the front wall (blocks.ts), which now isn't always the door's side.
+  Stalls, the job board and the works keep their words as they were. Full suite 1973 passed.
+
+Claude Opus 5.5

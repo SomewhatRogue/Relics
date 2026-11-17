@@ -65,7 +65,8 @@ import { waiting } from '../sim/practice';
 import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
 import { lifter, upAt } from './levelpaint';
 import { drawText, textWidth } from './pixfont';
-import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
+import { LOOK, blockAt, blockFoot, drawBlock, drawRound } from './blocks';
+import { drawHallNames } from './hallnames';
 import { DECKS } from './pieces';
 import { drawPunt, drawStaitheGround, puntAt, staitheLights } from './staithedraw';
 import { doorLights } from './shutdraw';
@@ -581,6 +582,8 @@ export class Scene {
     // Anyone you've freed who's fallen behind out of sight: a mark at the edge, toward them (clear of the HUD).
     const tall = this.vh > this.vw * 1.2, view = { vw: this.vw, vh: this.vh, top: tall ? this.vh * 0.2 : 20, bottom: tall ? this.vh * 0.3 : 20 };
     behindMarks(c, room.survivors ?? [], cx, cy, view, now);
+    // Buildings' names on their roofs, over everything (hallnames.ts).
+    drawHallNames(c.glow, map, cx, cy, (b) => LOOK[b.kind]?.tall ?? 0, lv);
     // What the goal is about: a gold mark over each, or a point at the edge toward the nearest.
     // (A door, a spot or someone standing on the new town's raised levels: marked over them up there.)
     const markAt = (t: (typeof this.marks)[number]): [number, number] => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : [onScreen(t)[0], onScreen(t)[1] - lv(t.x, t.y)]);
