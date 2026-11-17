@@ -6,6 +6,7 @@
  * darker) and no near arm: that is its own map, drawn over the body with its own outline so it can swing
  * without leaving a hole. Letters are the front's palette (herolooks.ts).
  */
+import { SHARP } from './charpaint';
 
 // Shoulders under the pauldron, the chest with the tabard's band down its front edge, the belt and buckle,
 // the tabard's front and back panels with the thigh between, then the near leg: knee plate, boot, toe.
@@ -25,10 +26,15 @@ export const W_SIDE_ARM = [
 /** Seven empty rows over the arm (it starts at the shoulder). */
 export const SIDE_NO_HEAD = Array(7).fill('..................');
 
+/** The knight's closed great helm in profile (charmean.ts KNIGHT_HEAD's; Kyle, 2026-11-17: "the full face mask ...
+ *  more than seeing the face sideways"): the visor slit at the front with one dim glint at the eye, breathing holes
+ *  under it. Its letters are the knight's palette (charmean.ts KNIGHT_PAL). */
+const W_SIDE_HELM = ['......hAAAa.......', '.....hAAAAAAa.....', '.....hAAAAAAa.....', '.....aAAAOOEO.....', '.....aAAAAAAa.....', '.....aAAAAaAa.....', '......aaAAAAa.....'];
+
 // One head a look, the face to the right: the knight's open helm, the sellsword's black crop and beard,
 // Blackiron's long pale hair and scar. The eye is on row 3 at x 11 (each look's `side.eyes`).
 export const W_SIDE_HEADS = [
-  ['......hAAAa.......', '.....hAAAAAA......', '.....AAAAAAAA.....', '.....aAAAAAES.....', '.....aAAAAASSS....', '.....aAAAAAsS.....', '......aaAAASs.....'],
+  SHARP ? W_SIDE_HELM : ['......hAAAa.......', '.....hAAAAAA......', '.....AAAAAAAA.....', '.....aAAAAAES.....', '.....aAAAAASSS....', '.....aAAAAAsS.....', '......aaAAASs.....'],
   ['......hHHHH.......', '.....hHHHHHH......', '.....HHHHHHSS.....', '.....HHHsSSES.....', '.....HHHSSSSSS....', '......HHsHHHHH....', '.......HHHHHH.....'],
   ['......hHHHH.......', '.....hHHHHHH......', '....HHHHHHHSS.....', '....HHHHsSSES.....', '....HHHHSSrSSS....', '....HHHHSsSSs.....', '....HHHHHsSs......'],
 ];

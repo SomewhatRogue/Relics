@@ -333,3 +333,26 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   ?lineup=warrior&cloak or &cloak=red; it also adds a walking-away column to the lineup). If Kyle picks one it wants
   doing properly: no URL switch, the lookkit fields named for good, the herolife test run.
   (Claude Fable 5.2)
+
+## 2026-11-17: the knight's cloak B is in, and his helm is closed from the side
+
+- Kyle on the mock: "Ya B is good. this is solid btw fits our theme still." And: "I think I like the full face mask /
+  templar style helmat more than seeing the face sideways."
+- **Cloak B** (Warrior look 1, the sharp knight only): his red a touch brighter outside, a darker lining, the cloak two
+  pixels wider a side toward the hem, a gold edge down its open sides and along the hem. Facing you, from behind and
+  in profile. New file `src/client/capelined.ts` (the colours and the lined rows); a look asks for it with `lining`
+  and `trim` (lookkit.ts `Life`); herolife.ts calls it from the cape's own loop, so sway, trail, wind and the eye
+  dial's darkening carry over. The other two Warrior looks and `?sharp=0` are as they were.
+- **The helm in profile**: the knight's side head was still the old open helm with a face. Now the closed great helm
+  (`herosides.ts` `W_SIDE_HELM`): the visor slit at the front with one dim glint at the eye pixel (so the eye dial
+  still reddens it), breathing holes under it. The neck under it is steel from the front and the side too
+  (herolooks.ts `warrior`, `closed`). His hands are still bare; say if he should wear gauntlets.
+- The lineup has a walking-away column now (`walk n`), so every look's back shows.
+- The Art chat owns herolife.ts, herolooks.ts, lookkit.ts and lineupcast.ts: these are small edits with Kyle's
+  go-ahead, as the board row says. charmean.ts is untouched (its `KNIGHT_CAPE` is no longer read).
+- Checked: tsc clean; the full suite 1962 of 1963 run (the one failure is tests/relaybudget.test.ts, which fails on
+  this PC without the change); the lineup shot before and after on the laptop size. Not shot in 2.5D or on a phone.
+- Kyle also floated: "Or we make it like the shield - you can customize it (and we let all classes customize
+  theirs)." Not built. It is a system of its own (a choice saved, sent to the party, a page at the barracks, a cloak
+  or its like for five classes), so it wants a short spec and his yes first.
+  (Claude Fable 5.2)

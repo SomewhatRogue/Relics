@@ -13,7 +13,8 @@ import { CLERIC, MAGE } from './herolooks2';
 import { SIDE_NO_HEAD, W_SIDE_ARM, W_SIDE_BODY, W_SIDE_HEADS } from './herosides';
 import { G_SIDE_ARM, G_SIDE_BODY, G_SIDE_HEAD, R_SIDE_ARM, R_SIDE_BODY, R_SIDE_HEADS } from './herosides2';
 import { SHARP } from './charpaint';
-import { KNIGHT_BACK, KNIGHT_CAPE, KNIGHT_HEAD, KNIGHT_PAL } from './charmean';
+import { KNIGHT_BACK, KNIGHT_HEAD, KNIGHT_PAL } from './charmean';
+import { KNIGHT_CLOAK } from './capelined';
 
 export type { Cls, LookDef, Life } from './lookkit';
 
@@ -30,11 +31,13 @@ const W_BODY = [
 const W_CUT: LookDef['cut'] = { headTo: 7, hip: 22, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] };
 /** `neck`: the four pixels at the back of the neck walking away (the helm's guard, hair, or skin). */
 /** `look`: which of the three, for its head in profile (herosides.ts). */
-const warrior = (head: string[], back: string[], neck: string, pal: Record<string, string>, life: LookDef['life'], look: number): LookDef => {
+/** `closed`: a helm closed all round, so the neck under it is steel from the front and the side too. */
+const warrior = (head: string[], back: string[], neck: string, pal: Record<string, string>, life: LookDef['life'], look: number, closed = false): LookDef => {
   const p = { A: pal.P, G: '#ecd078', l: darker(pal.L), f: darker(pal.F), ...pal };
   const wb = W_BODY.map((r, i) => (i === 0 ? `.pPPPPp${neck}pPPPPp.` : r.replace(/T/g, 'B').replace(/G/g, 'K').replace(/k/g, 'P')));
-  const side = { body: art([...W_SIDE_HEADS[look], ...W_SIDE_BODY], p), arm: art([...SIDE_NO_HEAD, ...W_SIDE_ARM], p), eyes: [3, 11, 11] as [number, number, number] };
-  return { down: art([...head, ...W_BODY], p), up: art([...back, ...wb], p), h: 31, tall: 0, eyes: [3, 7, 10], life, cut: W_CUT, lift: 6, side };
+  const sb = closed ? [W_SIDE_BODY[0].replace('sS', 'aA'), ...W_SIDE_BODY.slice(1)] : W_SIDE_BODY;
+  const side = { body: art([...W_SIDE_HEADS[look], ...sb], p), arm: art([...SIDE_NO_HEAD, ...W_SIDE_ARM], p), eyes: [3, 11, 11] as [number, number, number] };
+  return { down: art([...head, ...(closed ? [wb[0], ...W_BODY.slice(1)] : W_BODY)], p), up: art([...back, ...wb], p), h: 31, tall: 0, eyes: [3, 7, 10], life, cut: W_CUT, lift: 6, side };
 };
 
 // The Ranger: a peaked hood over a 5-row face, the quiver's fletching over the shoulder, a cloak to the
@@ -107,8 +110,9 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
 export const LOOK_DEFS: Record<Cls, LookDef[]> = {
   WARRIOR: [
     // The knight: an open-faced helm with a red plume, blue and gold, a red cape.
-    // (Under ?sharp, the concepts' knight: a closed great helm, blackened plate, no plume: charmean.ts.)
-    SHARP ? warrior(KNIGHT_HEAD, KNIGHT_BACK, 'aAAa', { ...skin('fair'), ...KNIGHT_PAL }, { cape: KNIGHT_CAPE }, 0) :
+    // (Under ?sharp, the concepts' knight: a closed great helm, blackened plate, no plume: charmean.ts. His cloak is
+    // lined and edged in gold, capelined.ts.)
+    SHARP ? warrior(KNIGHT_HEAD, KNIGHT_BACK, 'aAAa', { ...skin('fair'), ...KNIGHT_PAL }, KNIGHT_CLOAK, 0, true) :
     warrior(['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....ASEAAESa.....', '.....ASSAASSa.....', '.....aASssSAa.....', '......aSSSSa......'],
       ['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....aAAAAAAa.....', '......aAAAAa......'], 'aAAa',
       { ...skin('fair'), A: '#5e6670', a: '#363c46', h: '#8a929e', P: '#4e5660', p: '#c8962e', B: '#1c2638', b: '#141c2a', T: '#d4a537', M: '#4a5058', m: '#343a42', K: '#241a14', k: '#d4a537', L: '#262a32', F: '#18141a' },

@@ -9,10 +9,13 @@ export type Cls = 'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER';
  * to the calves and trails; `ragged` notches its hem. `plume`: off the top of the helm. `hair`: long
  * hair that sways. `cloak`: a Ranger's cloak edges flutter. `mantle`: a Rogue's long cloak, swaying,
  * trailing and flaring (cloaklife.ts). `hem`: a robe's hem flares at its foot (row). `tabard`: its foot flicks. `tip`: a hat's
- * crooked tip that nods.
+ * crooked tip that nods. `lining`, `trim`: a cape lined and edged (capelined.ts): it widens toward the hem, shows
+ * the lining facing you, and carries the trim down its open sides and along the hem.
  */
 export interface Life {
   cape?: [string, string];
+  lining?: [string, string];
+  trim?: string;
   ragged?: boolean;
   plume?: string;
   hair?: string;

@@ -16,6 +16,7 @@ import { drawMantle } from './cloaklife';
 import { HERO_W, HS } from './heroscale';
 import { SHARP, shadeHex } from './charpaint';
 import { ALIVE, gust } from './alive';
+import { flare, linedFront, linedSide } from './capelined';
 
 /** A stable number in [0, 1) from a hero's id (their sway's phase, their step's timing). */
 export function idPhase(id: string): number {
@@ -115,20 +116,22 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
   const cloth = L.cape ?? L.cloak;
   if (cloth) {
     const [col, lin] = [shade(cloth[0]), shade(cloth[1])], top = L.cape ? 6 + t : 9 + t, n = bottom - top;
+    // (A lined cloak, capelined.ts: wider toward the hem, its lining shown facing you, a trim at its edge and hem.)
+    const inn = L.lining ? ([shade(L.lining[0]), shade(L.lining[1])] as [string, string]) : null, trim = L.trim ? shade(L.trim) : '';
     for (let r = top; r <= bottom; r++) {
       const i = r - top, low = i > n / 2, ext = Math.round(side * 3.5 * (i / n) ** 1.2), sw = i >= n - 1 ? wave(i, k > 0.2 || g > 0.35 ? 1 : 0.6) : k > 0.2 || (g > 0.5 && i > n * 0.6) ? wave(i) : 0;
-      const hem = r === bottom && rag && (Math.floor(now * 3 + ph) + r) % 2 ? 1 : 0;
+      const hem = r === bottom && rag && (Math.floor(now * 3 + ph) + r) % 2 ? 1 : 0, fl = inn ? flare(i, n) : 0;
       if (sv) {
         // In profile: hanging down the back from the shoulders, a little off it at the hem, streaming behind walking.
         const x0 = (low ? 1.3 : 2) - ext * 1.2 + Math.min(0, sw), x1 = 3.7;
-        rect('back', x0 + hem, r, x1 - x0 - hem, 1, col);
-        rect('back', x0 + hem, r, 0.7, 1, lin);
+        if (inn) linedSide(rect, x0 - fl + hem, x1, r, r === bottom, col, lin, trim);
+        else rect('back', x0 + hem, r, x1 - x0 - hem, 1, col), rect('back', x0 + hem, r, 0.7, 1, lin);
       } else if (!up) {
         const x0 = (low ? 0 : 1) - ext + Math.min(0, sw), x1 = (low ? 11 : 10) + Math.max(0, sw);
-        rect('back', x0, r, x1 - x0 + 1 - hem, 1, lin);
-        if (ext > 0) rect('back', x0, r, ext, 1, col);
+        if (inn) linedFront(rect, x0 - fl, x1 + 1 + fl - hem, r, i, n, r === bottom, ext, col, inn, trim);
+        else rect('back', x0, r, x1 - x0 + 1 - hem, 1, lin), ext > 0 && rect('back', x0, r, ext, 1, col);
       } else if (L.cape || r > 11 + t) {
-        const x0 = (low ? 1 : 2) - ext + sw, x1 = (low ? 10 : 9) + sw;
+        const x0 = (low ? 1 : 2) - ext + sw - fl, x1 = (low ? 10 : 9) + sw + fl;
         rect('front', x0 + hem, r, x1 - x0 + 1 - hem * 2, 1, col);
         if (SHARP) {
           // (The new look's sharper figures, charpaint.ts: the cape lit from the top left, a shadow under the
@@ -139,6 +142,7 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
           if (i < 2 || r === bottom) rect('front', a + 1, r, w - 3, 1, shadeHex(col, -0.5));
           if (L.cape && i >= 2) for (const f of [4, 7]) rect('front', f + sw, r, 1, 1, lin), rect('front', f - 1 + sw, r, 1, 1, shadeHex(col, 0.5));
         } else if (low && L.cape) rect('front', 4 + sw, r, 1, 1, lin), rect('front', 7 + sw, r, 1, 1, lin);
+        if (trim && r === bottom) rect('front', x0 + hem, r + 0.6, x1 - x0 + 1 - hem * 2, 0.4, trim);
       }
     }
   }

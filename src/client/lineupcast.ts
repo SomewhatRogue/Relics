@@ -11,7 +11,7 @@ import { CLASS_KITS, type HeroClass } from '../shared/tuning';
 import type { WeaponId } from '../shared/weapons';
 import type { FoeVariant } from '../shared/terrain';
 
-export const MOVES = ['stand', 'walk', 'wind up', 'strike', 'recover', 'hurt', 'flinch', 'stagger', 'die', 'walk e', 'walk w', 'strike e', 'block e'] as const;
+export const MOVES = ['stand', 'walk', 'walk n', 'wind up', 'strike', 'recover', 'hurt', 'flinch', 'stagger', 'die', 'walk e', 'walk w', 'strike e', 'block e'] as const;
 /** The side columns (docs/design/side-view.md): facing due east or west, drawn as the game draws them. The others
  *  keep the front view (lineup.ts sets sideview.ts VIEW.front for them) so each look's two views sit side by side. */
 export const SIDE_MOVES: readonly Move[] = ['walk e', 'walk w', 'strike e', 'block e'];
@@ -81,6 +81,8 @@ export function heroIn(u: { cls: HeroClass; look: number; weapon?: WeaponId }, m
   // Stepped a hair every 3 s (never drawn) so a class's idle never starts: this column is the plain stand.
   h.x = (Math.floor(now / 3) % 2) * 0.05;
   if (m === 'walk') Object.assign(h, { fx: 1, fy: 0.1, moving: true });
+  // (Walking away, so each look's back shows.)
+  if (m === 'walk n') Object.assign(h, { fx: 0.1, fy: -1, moving: true });
   if (m === 'walk e' || m === 'walk w') Object.assign(h, { fx: m === 'walk e' ? 1 : -1, fy: 0, moving: true });
   if (m === 'block e') Object.assign(h, { fx: 1, fy: 0, blocking: true });
   if (m === 'strike e') {
