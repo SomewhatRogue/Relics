@@ -16,7 +16,7 @@ export const CHAINS = {
   w_skill: { name: 'CHARGE OR CRY', steps: ['w_focus', 'w_far', 'w_hold'] },
   r_bow: { name: 'BOW', steps: ['r_draw', 'r_true', 'r_flash'] },
   r_jump: { name: 'JUMP', steps: ['r_jump', 'r_leap', 'r_foot'] },
-  r_snare: { name: 'SNARE', steps: ['r_snare', 'r_hold', 'r_three'] },
+  r_snare: { name: 'JUMP SHOT', steps: ['r_snare', 'r_hold', 'r_three'] },
   r_hound: { name: 'HOUND', steps: ['r_hound', 'r_bite', 'r_bites'] },
   g_dash: { name: 'DASH', steps: ['g_light', 'g_leap', 'g_slip'] },
   g_back: { name: 'BACKSTAB', steps: ['g_angle', 'g_rear', 'g_ambush'] },

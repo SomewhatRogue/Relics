@@ -62,6 +62,8 @@ function scripted(): Run {
   k.press({ attackSeq: 1, ay: -1 }), k.step(ticks(0.6));
   const d = fight(run, 'friend');
   d.h.weapon = 'longbow';
+  // (No jump shot: this is the dodge alone. sim/ladderranger.ts jumpShot.)
+  d.h.snareReady = 99;
   d.until(0.15), d.press({ rollSeq: 1 }), d.step(ticks(0.4));
   const t = fight(run, 'friend');
   t.h.weapon = 'longbow';

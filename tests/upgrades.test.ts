@@ -32,7 +32,7 @@ describe('tiles', () => {
     for (const t of allTiles(upgradeTabs(p, at, true))) expect(t.icon && t.name && t.line).toBeTruthy();
   });
 
-  it('a technique waits on the one before it; a Ranger\'s first waits on the snare', () => {
+  it('a technique waits on the one before it; a Ranger\'s first waits on the jump shot', () => {
     const p = hero('WARRIOR', 7, 5000);
     expect(tile(p, 'tech:slam')).toMatchObject({ state: 'buy' });
     expect(tile(p, 'tech:shoulder')).toMatchObject({ state: 'locked', lock: 'NEEDS WIDE SLAM FIRST' });
@@ -41,7 +41,7 @@ describe('tiles', () => {
     expect(tile(p, 'tech:shoulder')).toMatchObject({ state: 'buy' });
     expect(tile(p, 'tech:ironfeet')).toMatchObject({ state: 'locked', lock: 'NEEDS LEVEL 10' });
     const r = hero('RANGER', 5, 5000);
-    expect(tile(r, 'tech:trapper')).toMatchObject({ state: 'locked', lock: 'NEEDS SNARE FIRST' });
+    expect(tile(r, 'tech:trapper')).toMatchObject({ state: 'locked', lock: 'NEEDS SHOT FIRST' });
     expect(tile(r, 'learn:leave')).toMatchObject({ state: 'buy', icon: 's:net' });
   });
 

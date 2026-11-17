@@ -34,7 +34,8 @@ export const TECH_WORDS: Record<TechId, { name: string; text: string }> = {
   knifework: { name: 'KNIFEWORK', text: 'Backstabs make the goblin bleed for 3 s.' },
   slip: { name: 'SLIP AWAY', text: 'Kill with a backstab and goblins lose you for 2 s.' },
   cutpurse: { name: 'CUTPURSE', text: 'A backstab has a 1 in 4 chance to knock a few coins loose, once per goblin.' },
-  trapper: { name: 'TRAPPER', text: 'Each snare catches two goblins, not one.' },
+  // (Kept its old id: it was TRAPPER, for the snare the jump used to leave.)
+  trapper: { name: 'PIERCING JUMP', text: 'Your jump shot goes through every goblin in its line.' },
   quicknock: { name: 'QUICK NOCK', text: 'After a PERFECT shot, your next draw starts part drawn. A crossbow loads at once.' },
   steady: { name: 'STEADY AIM', text: 'Your shots don\'t drift while you move.' },
   mending: { name: 'HELPING HAND', text: 'Help friends up 50% faster.' },

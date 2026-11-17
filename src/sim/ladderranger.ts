@@ -5,12 +5,13 @@
  * land go over.
  */
 import { INPUT_BUFFER, WEAPONS, type Swing } from '../shared/tuning';
-import { AIR_SHOT, LANDING, TWIN_SNARE, knowsRung } from '../shared/ladder';
+import { AIR_SHOT, JUMP_SHOT, LANDING, TWIN_SNARE, knowsRung } from '../shared/ladder';
 import { shove } from './bodies';
 import { isDead, isDummy, small } from './damage';
-import { statsOf } from './gearstats';
+import { knack, statsOf } from './gearstats';
+import { knowsTech } from '../shared/techniques';
 import { stun } from './stuns';
-import type { Enemy, FightEvent, Hero } from './types';
+import { knows, type Enemy, type FightEvent, type Hero } from './types';
 
 /** Mid-jump, a fresh attack press: shoot now (once a jump; a crossbow only with a bolt on). The press is spent. */
 export function airShot(h: Hero, now: number, ev: FightEvent[]): boolean {
@@ -28,6 +29,22 @@ export function airShot(h: Hero, now: number, ev: FightEvent[]): boolean {
 export function airSwing(h: Hero): Swing {
   const w = WEAPONS[h.weapon], hv = w.heavy, k = w.reloads ? 1 : AIR_SHOT.draw, more = 1 + statsOf(h).damage;
   return { ...hv, dmg: Math.round((hv.dmg + (hv.dmgFull - hv.dmg) * k) * more), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: !!hv.pierce && k >= 1 };
+}
+
+/** The jump's own shot, the trainer's lesson: once a jump, `JUMP_SHOT.at` s in, if it's ready. The swings to loose
+ *  (one, or more with TWO SHOTS and TWIN SHOT), or none. */
+export function jumpShot(h: Hero, now: number, ev: FightEvent[]): Swing[] {
+  const w = WEAPONS[h.weapon];
+  if (w.cls !== 'RANGER' || !w.heavy.shot || h.jumpShot || h.actT < JUMP_SHOT.at || now < h.snareReady || !knows(h, 'leave')) return [];
+  h.jumpShot = true;
+  // (QUICK SHOT: sooner; the knack kept its old id, r_snare.)
+  h.snareReady = now + JUMP_SHOT.cooldown * (1 - knack(h, 'snareCd'));
+  ev.push({ k: 'airshot', x: h.x, y: h.y });
+  // (HARD SHOT: harder; TWIN SHOT one more arrow: r_hold and r_three, as were.)
+  const hv = w.heavy, k = JUMP_SHOT.draw, more = (1 + statsOf(h).damage) * (1 + knack(h, 'snareHold'));
+  const s: Swing = { ...hv, dmg: Math.round((hv.dmg + (hv.dmgFull - hv.dmg) * k) * more), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: knowsTech(h, 'trapper') };
+  const n = 1 + (knowsRung(h, 'twinsnare') ? 1 : 0) + knack(h, 'snares');
+  return Array.from({ length: n }, () => s);
 }
 
 /** Where the jump's snares go: where you stood, or (TWO SNARES) a pair across the jump. */

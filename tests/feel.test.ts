@@ -91,7 +91,7 @@ function strike(o: { lag: number; delay?: number; press?: number; what?: 'roll' 
   const delay = o.delay ?? o.lag, id = o.host ? 'me' : 'sam';
   const room = new ArenaRoom(9, { map: MAP, foes: [{ kind: 'scrapper', x: MAP.hero.x, y: MAP.hero.y - 1.3, awake: true }] });
   const h = room.join(id), e = room.enemies[0];
-  Object.assign(h, { x: MAP.hero.x, y: MAP.hero.y, weapon: o.weapon ?? 'longbow', fx: 0, fy: -1, safeT: 0, hp: 100, maxHp: 100, lag: o.host || o.comp === false ? 0 : o.lag });
+  Object.assign(h, { x: MAP.hero.x, y: MAP.hero.y, weapon: o.weapon ?? 'longbow', fx: 0, fy: -1, safeT: 0, hp: 100, maxHp: 100, snareReady: 99, lag: o.host || o.comp === false ? 0 : o.lag });
   const ev: FightEvent[] = [];
   begin(e, 'stab', { windup: 0.6, active: 0.1, recover: 0.6, dmg: 20, knock: 3, range: 2.4, arc: 70, unblockable: false }, h, ev);
   e.cooldown = 99;
@@ -174,7 +174,7 @@ describe('defensive lag compensation', () => {
     // A blow waiting, handed on mid-wait (a takeover): the loaded room judges it the same.
     const room = new ArenaRoom(9, { map: MAP, foes: [{ kind: 'scrapper', x: MAP.hero.x, y: MAP.hero.y - 1.3, awake: true }] });
     const h = room.join('sam'), e = room.enemies[0];
-    Object.assign(h, { x: MAP.hero.x, y: MAP.hero.y, weapon: 'longbow', fx: 0, fy: -1, safeT: 0, hp: 100, lag: 0.12 });
+    Object.assign(h, { x: MAP.hero.x, y: MAP.hero.y, weapon: 'longbow', fx: 0, fy: -1, safeT: 0, hp: 100, snareReady: 99, lag: 0.12 });
     begin(e, 'stab', { windup: 0.6, active: 0.1, recover: 0.6, dmg: 20, knock: 3, range: 2.4, arc: 70, unblockable: false }, h, []);
     room.setIntent('sam', { ...NO_INTENT, vt: 0 });
     for (let k = 0; k < 19; k++) room.step();

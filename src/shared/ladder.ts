@@ -34,7 +34,7 @@ export const LADDER_TITLE: Record<HeroClass, string> = { RANGER: 'JUMP', MAGE: '
 /** The name on the trainer's row and what it does (Kyle's style: the effect first, plainly). */
 export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
   airshot: { name: 'JUMP SHOT', text: 'Tap attack mid-jump to shoot, 60% drawn.' },
-  twinsnare: { name: 'TWO SNARES', text: 'Your jump leaves two snares side by side, not one.' },
+  twinsnare: { name: 'TWO SHOTS', text: 'Your jump shot looses two arrows, not one.' },
   landing: { name: 'HARD LANDING', text: 'Landing a jump knocks small goblins next to you flat for 0.8 s.' },
   blinkburst: { name: 'BLINK BURST', text: 'Blinking leaves a burst of your element where you stood: 100 damage to goblins in it.' },
   blinkthrough: { name: 'BLINK THROUGH', text: 'Blink at a goblin to come out behind it, facing its back.' },
@@ -57,6 +57,10 @@ export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
 export const AIR_SHOT = { draw: 0.6 };
 /** TWO SNARES: the jump's snares sit `apart` tiles apart across the jump, and twice as many can be down. */
 export const TWIN_SNARE = { apart: 1.1 };
+/** The Ranger's trainer lesson (Kyle, 2026-11-16: "a quick shot WHILE it jumps back - not a trap"): `at` s
+ *  into the jump it looses an arrow at `draw` of a full draw, turned to the goblins, no sooner than every
+ *  `cooldown` s; TWO SHOTS and TWIN SHOT add one each, `spread` radians apart (sim/ladderranger.ts). */
+export const JUMP_SHOT = { at: 0.06, draw: 0.5, cooldown: 2.5, spread: 0.2 };
 /** HARD LANDING: small goblins within `r` tiles of where you land are down `down` s, shoved `knock` outward. */
 export const LANDING = { r: 1.3, down: 0.8, knock: 4 };
 /** BLINK BURST: `r` tiles round where you blinked from, `dmg` and your element on each goblin in it,

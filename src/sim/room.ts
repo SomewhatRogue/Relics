@@ -77,7 +77,7 @@ import { throwSpear } from './spearchain';
 import { stepDomes } from './staffholds';
 import { layTrap, stepTraps } from './blinktrap';
 import { stepJavelin, throwJavelin } from './javelin';
-import { laySnare, stepHound, stepSnare } from './ranger';
+import { stepHound, stepSnare } from './ranger';
 import { burstMult, healOf, healReach, perfectMult, smiteStun } from './knacks';
 import { stepNests } from './spiders';
 import { startTorch, stepTorch } from './torch';
@@ -441,8 +441,6 @@ export class ArenaRoom {
     stepParty(this.heroes, TICK, this.events);
     // A Cleric raising a friend who is out (sim/raise.ts).
     stepRise(this.heroes, this.enemies, this.time, this.events);
-    // A Ranger who has just jumped back leaves a snare where they stood.
-    for (const h of this.heroes) if (h.act === 'roll' && h.actT === 0) laySnare(h, this.snares, this.time, this.events);
     // A Mage who has just blinked leaves a trap of their element where they stood (sim/blinktrap.ts).
     for (const h of this.heroes) if (h.act === 'roll' && h.actT === 0 && WEAPONS[h.weapon].cls === 'MAGE' && knows(h, 'leave')) layTrap(h, this.zones, this.time, w);
     this.snares = this.snares.filter((s) => stepSnare(s, this.enemies, this.time, this.events));

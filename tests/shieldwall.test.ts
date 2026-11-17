@@ -219,17 +219,6 @@ describe("every class's answer", () => {
     expect(g.e.hp).toBeLessThan(999);
   });
 
-  it('Ranger: jump back from it and it walks into the snare, held, and takes it all', () => {
-    const { room, h, e } = yard('longbow');
-    Object.assign(e, { cooldown: 99 });
-    h.snareReady = 0;
-    room.setIntent('me', { ...NO_INTENT, ay: -1, rollSeq: 1 });
-    run(room, 3, () => e.act === 'stunned');
-    expect(e.act).toBe('stunned');
-    Object.assign(h, { x: e.x, y: e.y + 1.2, fx: 0, fy: -1 });
-    expect(strike(h, e, room.time, [])).toBeGreaterThanOrEqual(20);
-  });
-
   it('Healer: a smite on top of it stuns it', () => {
     const { room, h, e } = yard('mace');
     const w = world(h, e, room.time);

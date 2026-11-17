@@ -85,3 +85,15 @@ Claude Opus 5.5
 - The image goes to the Rogue: SHADOW ON THE DASH, the same lesson; any Rogue dash leaves the decoy.
 
 Claude Opus 5.5
+
+## 2026-11-16: the Ranger's jump shoots, no snare (Kyle: "a quick shot WHILE it jumps back - not a trap")
+
+- The lesson is SHOT ON THE JUMP (sim/ladderranger.ts jumpShot, JUMP_SHOT in shared/ladder.ts): 0.06 s into
+  the jump an arrow at half draw, at the nearest goblin in reach, once per 2.5 s. The jump no longer lays a
+  snare (room.ts; laySnare kept, unused). Ids kept, words changed: QUICK SHOT (r_snare, sooner), HARD SHOT
+  (r_hold, +25%), TWIN SHOT (r_three, +1 arrow), ladder TWO SHOTS (twinsnare, +1 arrow), technique
+  PIERCING JUMP (trapper, the jump shot pierces). JUMP SHOT (a tap mid-jump) is unchanged.
+- feel/recapboard tests keep the shot out with snareReady 99 (they're about the dodge); the snare answer to
+  the shield-bearer is gone (the net and the hound stay).
+
+Claude Opus 5.5

@@ -1,6 +1,7 @@
 /** The class techniques (shared/techniques.ts): taught in order, kept from old saves, and each one firing in the room. */
 import { coinsHtml } from '../src/shared/coins';
 import { describe, expect, it } from 'vitest';
+import { jumpShot } from '../src/sim/ladderranger';
 import { CHARGE, PARTY, TICK, WEAPONS, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
 import { AIM_DRIFT, CUTPURSE, JUDGEMENT, MENDING, QUICK_NOCK, SANCT_STEP, SHOULDER, TECHS, TECH_WORDS, knowsTech } from '../src/shared/techniques';
 import { buyDrill, drillState, learnLesson } from '../src/shared/training';
@@ -81,9 +82,9 @@ describe('techniques at the trainer', () => {
     expect(mage.map((r) => r.name)).toEqual(['TRAP ON THE BLINK', 'PRIMED SPELLS', 'ATTUNED', 'MAGIC BACK']);
   });
 
-  it("a Ranger's first technique waits on the snare lesson", () => {
+  it("a Ranger's first technique waits on the jump shot lesson", () => {
     const r = Object.assign(newProfile('RANGER'), { level: 5, gold: 1000 });
-    expect(trainerRows(r).find((x) => x.tech === 'trapper')!.tag).toBe('NEEDS SNARE');
+    expect(trainerRows(r).find((x) => x.tech === 'trapper')!.tag).toBe('NEEDS SHOT');
     expect(learnLesson(r, 'leave')).toBe(true);
     expect(buyDrill(r, 'technique')).toBe(true);
   });
@@ -197,15 +198,11 @@ describe('the Rogue', () => {
 });
 
 describe('the Ranger', () => {
-  it('TRAPPER: a snare catches two goblins; without it, one', () => {
+  it('PIERCING JUMP (was TRAPPER): the jump shot goes through goblins; without it, it stops at one', () => {
     for (const rank of [0, 1]) {
-      const h = hero('shortbow', rank), a = goblin(1, 5, 5), b = goblin(2, 5.1, 5), ev: FightEvent[] = [];
-      const s = { owner: h.id, x: 5, y: 5, until: 99, hold: 2, left: catches(h) };
-      const set = stepSnare(s, [a, b], 1, ev);
-      expect(set).toBe(rank === 1);
-      if (set) stepSnare(s, [a, b], 1.1, ev);
-      expect(ev.filter((x) => x.k === 'snared')).toHaveLength(rank ? 2 : 1);
-      expect(b.snareUntil > 1).toBe(rank === 1);
+      const h = Object.assign(hero('shortbow', rank), { act: 'roll', actT: 0.1, snareReady: 0, jumpShot: false });
+      const [s] = jumpShot(h, 1, []);
+      expect(s.pierce).toBe(rank === 1);
     }
   });
 

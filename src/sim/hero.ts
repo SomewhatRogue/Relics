@@ -27,7 +27,8 @@ import { streamFace } from './stream';
 import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './types';
 import { primeShoulder, stride } from './techwarrior';
 import { nockHead, quickNock } from './techranger';
-import { airShot, airSwing } from './ladderranger';
+import { airShot, airSwing, jumpShot } from './ladderranger';
+import { JUMP_SHOT } from '../shared/ladder';
 import { blinkCost } from './laddermage';
 
 export function newHero(id: string, x: number, y: number): Hero {
@@ -236,6 +237,23 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
     travel(h, h.rollDx * k * dt, h.rollDy * k * dt, HERO.radius);
     // JUMP SHOT: an attack press mid-jump looses the bow, turned to the aim (sim/ladderranger.ts).
     if (airShot(h, now, ev)) face(h, inp, enemies, true, w.heavy.range * 0.9), acts.loose(h, airSwing(h));
+    // The trainer's lesson: a quick shot loosed as you jump, turned to the goblins, fanned if more than one.
+    const shots = jumpShot(h, now, ev);
+    if (shots.length) {
+      // At the nearest goblin in reach (the jump goes the other way, so not the stick); none, straight on.
+      const near = enemies.filter((e) => !isDead(e) && Math.hypot(e.x - h.x, e.y - h.y) <= w.heavy.range).sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y))[0];
+      if (near) {
+        const d = Math.hypot(near.x - h.x, near.y - h.y) || 1;
+        Object.assign(h, { fx: (near.x - h.x) / d, fy: (near.y - h.y) / d });
+      }
+      const [fx, fy] = [h.fx, h.fy];
+      shots.forEach((s, i) => {
+        const a = (i - (shots.length - 1) / 2) * JUMP_SHOT.spread, c = Math.cos(a), n = Math.sin(a);
+        Object.assign(h, { fx: fx * c - fy * n, fy: fx * n + fy * c });
+        acts.loose(h, s);
+      });
+      Object.assign(h, { fx, fy });
+    }
     if (h.actT >= dodge.time) (h.act = 'idle'), (h.actT = 0), (h.landedAt = now);
     return;
   }
@@ -468,6 +486,7 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   // The movement ladder's per-dodge marks (sim/ladder.ts sets them again as the dodge begins).
   h.rollReach = undefined;
   h.airShot = false;
+  h.jumpShot = false;
   // A Rogue's dash leaves a shadow of you where you stood, and the goblins near it go for that (Kyle,
   // 2026-11-16: it was the Mage's blink; a Mage's blink leaves a trap now: sim/blinktrap.ts, in the room).
   if (WEAPONS[h.weapon].cls === 'ROGUE' && knows(h, 'leave')) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + decoyTime(h) });

@@ -265,6 +265,8 @@ export interface Hero extends Body {
    *  next CALTROPS; THROUGH THE LEGS until then, and the goblin it was spent on; fireproof (SHAKE IT OFF)
    *  until then; the TAUNT ready again, and the roar lasting (STAND FAST). Room times. */
   airShot?: boolean;
+  /** This jump's own shot is gone (sim/ladderranger.ts jumpShot). */
+  jumpShot?: boolean;
   /** When the last dodge ended (room time). */
   landedAt?: number;
   rollReach?: number;

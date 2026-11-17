@@ -80,10 +80,10 @@ describe('the ladder at the trainer', () => {
     expect(knowsRung({ weapon: 'sword', drills: { ladder: 3 } }, 'blinkburst')).toBe(false);
   });
 
-  it("a Ranger's TWO SNARES waits on the snare lesson", () => {
+  it("a Ranger's TWO SHOTS waits on the jump shot lesson", () => {
     const r = Object.assign(newProfile('RANGER'), { level: 10, gold: 2000, learned: ['skill' as const], drills: { ladder: 1 } });
     const row = trainerRows(r).find((x) => x.rung === 'twinsnare')!;
-    expect(row.tag).toBe('NEEDS SNARE');
+    expect(row.tag).toBe('NEEDS SHOT');
     expect(buyDrill(r, 'ladder')).toBe(false);
     expect(learnLesson(r, 'leave')).toBe(true);
     expect(TEACHES.leave.level).toBeLessThanOrEqual(10);
@@ -92,9 +92,27 @@ describe('the ladder at the trainer', () => {
 });
 
 describe('the Ranger: the jump', () => {
+  it("the trainer's lesson: a jump looses a quick arrow by itself, at the goblins; TWO SHOTS two, fanned", () => {
+    for (const rungs of [0, 2]) {
+      const h = hero('longbow', rungs), e = goblin(1, 9, 3), { room, run } = arena([h], [e]);
+      run(TICK * 4, { rollSeq: 1, my: 1 });
+      const arrows = room.bolts.filter((b) => b.owner === h.id);
+      expect(arrows.length).toBe(rungs >= 2 ? 2 : 1);
+      // Toward the goblin (up the screen), while the jump goes the other way.
+      for (const b of arrows) expect(b.dy).toBeLessThan(0);
+      expect(h.snareReady).toBeGreaterThan(room.time);
+      // Not again on the next jump straight after: it waits JUMP_SHOT.cooldown.
+      run(0.6);
+      run(TICK * 4, { rollSeq: 2, my: 1 });
+      expect(room.bolts.filter((b) => b.owner === h.id).length).toBeLessThanOrEqual(arrows.length);
+    }
+  });
+
   it('JUMP SHOT: attack mid-jump looses an arrow at once, part drawn; nothing without it', () => {
     for (const rungs of [0, 1]) {
       const h = hero('longbow', rungs), { room, run } = arena([h], []);
+      // (Not the trainer's shot on the jump, which looses by itself: sim/ladderranger.ts jumpShot.)
+      h.snareReady = 99;
       run(TICK, { rollSeq: 1 });
       expect(h.act).toBe('roll');
       const ev = run(TICK * 2, { rollSeq: 1, attackSeq: 1 });
@@ -103,7 +121,7 @@ describe('the Ranger: the jump', () => {
       expect(ev.some((x) => x.k === 'airshot')).toBe(rungs === 1);
     }
     // A crossbow with no bolt on shoots nothing.
-    const x = Object.assign(hero('crossbow', 1), { xbowEmpty: true }), a = arena([x], []);
+    const x = Object.assign(hero('crossbow', 1), { xbowEmpty: true, snareReady: 99 }), a = arena([x], []);
     a.run(TICK, { rollSeq: 1 });
     a.run(TICK * 2, { rollSeq: 1, attackSeq: 1 });
     expect(a.room.bolts).toHaveLength(0);
