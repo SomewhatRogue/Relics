@@ -237,3 +237,26 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - A note for the game: the Warrior blocks with a shield. This knight is the greatsword look; sword and shield wants
   its own guard on the same body, and each other class its own model on the same skeleton.
   (Claude Fable 5.2)
+
+## 2026-11-17: the reference's look is not reached; stop iterating, choose where the art comes from
+
+- Kyle on the third (3D) knight: "I prefer the design but can we just do it pixel, maybe we DON'T do it as a full 3d
+  honestly. I kinda like the older pixel style." Then: "ours looks nothing like that reference, it looks fat and
+  weird."
+- He is right. Four tries now: a clean 3D knight, a dark one, one on the reference's own design, and (not published)
+  the same design typed by hand as a pixel map at today's size and doubled by rule. The 3D ones come out wide and
+  stiff; the hand-typed one a rectangle with a sword. None has the reference's slim, bent, hand-placed drawing.
+- What that says: the look he wants is a skilled pixel artist's drawing. Shapes scripted in Blender and pixel maps
+  typed by a model do not reach it, and more passes of either will not. Also seen: at today's pixel size (35 tall)
+  the reference itself is an unreadable blob; it needs about 70.
+- What did work and stays useful whatever the art's source: (1) the shrink (scale test): any good large drawing in
+  that style becomes a clean 70 or 105 tall sprite with no blending, a locked palette and its outline back; (2) the
+  game's own way of moving a sprite (cut into head, arms and legs, posed by figure.ts), which is the "older pixel
+  style" of motion and works on any sprite; (3) smooth light and slate, which are live.
+- So the question is where the drawings come from, not how to render them: (a) the artist or pack the reference
+  pictures came from, licensed or commissioned, for exactly that look; (b) our own figures made with an image
+  generator from a written description of the style (never from that artist's picture), then shrunk, cut and posed
+  by the game: cheap to test on one knight, quality not known, and the generated sheets of 2026-11-15 were found
+  flat, though those were whole animation sheets in another style; (c) today's sprites kept.
+- The 3D knight's scripts stay in `scripts/figures/` as a record; nothing of them is in the game.
+  (Claude Fable 5.2)
