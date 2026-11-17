@@ -15,6 +15,7 @@ import { paintSoil } from './soil';
 import { paintGaps } from './wayout';
 import { paintWater } from './waterpaint';
 import { gradeCanvas, MOSS } from './darkgold';
+import { paintLevels, stacked, upAt } from './levelpaint';
 
 export const PX = 16;
 export const OX = 8;
@@ -88,7 +89,11 @@ export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
   paintGrim(m, rect);
   g.fillStyle = 'rgba(0,0,0,0.35)';
   g.fillRect(OX, OY, fw, 4);
-  for (const l of m.ledges ?? []) ledge(l, rect, rng, pick);
+  // The new town's stacked levels in the pixel view (levelpaint.ts; the 2.5D view builds them on this floor as it
+  // is: three/layoutledges.ts); a job's rock shelves.
+  if (stacked(m)) {
+    if (flat) paintLevels(m, g);
+  } else for (const l of m.ledges ?? []) ledge(l, rect, rng, pick);
   // Side and front walls.
   const side = m.theme.back === 'trees' ? '#141a12' : m.theme.back === 'palisade' || m.theme.back === 'plaster' ? '#2a2018' : '#2a2733';
   rect(0, 0, OX, H, side);
@@ -98,7 +103,7 @@ export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
   // The ways out: a gap in the back wall, a house's doorway in the front (wayout.ts).
   paintGaps(m, rect);
   for (const t of m.torches) {
-    const [x, y] = toPx(t.x, t.y);
+    const [x, y0] = toPx(t.x, t.y), y = y0 - (flat ? upAt(m, t.x, t.y) : 0);
     rect(x - 1, y, 3, 8, '#3a2a1a');
     rect(x - 2, y + 7, 5, 1, '#3a2a1a');
   }

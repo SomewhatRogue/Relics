@@ -8,8 +8,10 @@ import * as THREE from 'three';
 import { levelAt, type Area, type GameMap, type Ledge } from '../../shared/arena';
 import { Boxes, Seed, jit } from './boxes';
 
-/** Whether a map's ledges are stacked levels (drawn here) rather than a job's rock shelves (ground.ts). */
-export const stacked = (m: GameMap) => !!m.ledges?.some((l) => l.lv !== undefined);
+import { stacked } from '../levelpaint';
+/** Whether a map's ledges are stacked levels (drawn here) rather than a job's rock shelves (ground.ts). One source with
+ *  the flat view's levelpaint.ts. */
+export { stacked };
 
 /** A level's top: a flat quad in the floor's material, its UVs the floor's, so the ground lines up. */
 function top(l: Ledge, y: number, m: GameMap, mat: THREE.Material): THREE.Mesh {

@@ -150,8 +150,10 @@ import { echoes } from './runnerecho';
 import { LAYOUT, townSpots } from '../shared/town';
 import { STREET } from './three/streetkit';
 import { BIG } from '../shared/bighalls';
-// The new town behind `?street` (docs/design/town-layout.md): set before the town is first built.
+// The new town (docs/design/town-layout.md) behind `?layout`, or with the parked street look: set before the town is
+// first built. `LAYOUT.on` is the street look itself, for the insides' tall walls.
 LAYOUT.on = STREET;
+LAYOUT.town = STREET || new URLSearchParams(location.search).has('layout');
 // The bigger rooms on their own switch, on unless `?rooms=small` (shared/bighalls.ts): set before anyone goes in.
 BIG.on = new URLSearchParams(location.search).get('rooms') !== 'small';
 import { GearHint } from './gearhint';

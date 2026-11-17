@@ -140,3 +140,51 @@ Claude Opus 5.5
   under the street; the notes for Buildings and camera and Art above.
 
 Claude Opus 5.5
+
+## 2026-11-16: the new town in the normal look (picked up from Waiting)
+
+Kyle likes the layout, not the HD street look. Goal: the new town in the flat view and the plain 2.5D view, its levels
+drawn in both, behind `?layout` first, then the default once he has walked it. Board row "Town layout, normal look".
+
+The plan, in slices:
+1. **The switch.** `LAYOUT.on` stays what the insides read as "the street look is on" (bighalls.ts, inside.ts,
+   interiors.ts and tests/insides.test.ts treat it so: tall walls, bigger job houses), so I don't touch the
+   interiors chat's files. The map gets its own flag, `LAYOUT.town` (town.ts: `townMap`, `townSpots`, `townProps`,
+   `townPoint`); main.ts: `LAYOUT.town = STREET || ?layout`. Off the switch nothing changes.
+2. **Plain 2.5D.** ground.ts already draws stacked levels, steps and the gorge for any stacked map; only the soil
+   overlay is street-only (the plain view's floor is the flat painting, which paints soil itself). Check it, fix
+   what looks wrong.
+3. **Flat levels** (new `client/levelpaint.ts`, called from world.ts for a stacked map): each level's top is the
+   floor already painted under it, lifted `lv` times LIFT (12 px, the same 0.75 tiles as 2.5D), a coursed stone face
+   below its front where the ground is lower, a dark edge at its sides, ramps as flights of steps, the gorge's brink
+   along the south edge.
+4. **Flat lifts** (scene.ts, small edits through one helper in new `client/levels.ts`): buildings, rounds, townsfolk,
+   braziers, barrels and their lights drawn at their level, as 2.5D already does. Heroes already rise with `z`.
+5. Then Kyle walks it; on his yes, `?layout` becomes the default (`?layout=old` for the old town), and the to-dos
+   above (trainers' directions, quest markers, first-time runners) get done.
+
+Claude Opus 5.5
+
+## 2026-11-16: slices 1 to 4 in, behind `?layout`
+
+- **The switch:** `LAYOUT.town` (shared/town.ts) is the new town's map, spots, props and seats; main.ts sets it with
+  `?layout` or the street look. `LAYOUT.on` stays the street look itself, which is what the insides read (their tall
+  walls and bigger job houses don't come with `?layout`). tests/layout.test.ts uses `LAYOUT.town`.
+- **Plain 2.5D** (`?layout&look=3d`): nothing needed. ground.ts already drew stacked levels, steps, the gorge and
+  lifted rounds, braziers, buildings and townsfolk for any stacked map; the floor is the flat painting, so soil shows.
+- **Flat levels** (client/levelpaint.ts, new; world.ts calls it for a stacked map in the pixel view only, since the
+  2.5D floor is the same painting unlifted): each level's top is the floor painted under it moved up `lv` times
+  LIFT (12 px, the same 0.75 tiles as 2.5D), a pale coursed face with a lit coping below its front where the ground is
+  lower, a seam at its sides, ramps as flights of about 3 px steps cut into the upper level. Torches lifted.
+  `stacked` lives here now; three/layoutledges.ts re-exports it (one source).
+- **Flat lifts:** `lifter(map)` (levelpaint.ts) in scene.ts: buildings, rounds, townsfolk, braziers, barrels, the
+  town's animals and the lights of rounds, buildings and Cobb's lamp at their level; `tileScreen` (bubbles, the under
+  buttons, dread) the floor at its level. **Small edit in Art's lampsdraw.ts** (three lines: torches, braziers and lamp
+  posts lifted with their level, off a stacked map unchanged): Kyle, flagging it as the board asks.
+- Not lifted yet: blood and decals (nobody fights in town), quest marks and door marks (Town quests' files; with
+  the to-dos above, once Kyle confirms the town).
+- Online: the town is built on each screen, so both players need the same switch until it's the default.
+- `scripts/town-look.cjs`: `LOOK=layout` (flat) or `LOOK='layout&look=3d'` (plain 2.5D); default still the street.
+- Full suite 1968 passed. Next: Kyle walks it (`?layout`, and `?layout&look=3d`); on his yes it becomes the default.
+
+Claude Opus 5.5

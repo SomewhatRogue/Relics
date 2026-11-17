@@ -100,7 +100,7 @@ describe('the new town', () => {
   });
 
   it('every spot, door and person standing still can be reached from where you arrive, up and down the steps', () => {
-    LAYOUT.on = true;
+    LAYOUT.town = true;
     try {
       for (const w of WORLDS()) {
         const m = townMap(w), near = walkable(m), miss: string[] = [];
@@ -110,12 +110,12 @@ describe('the new town', () => {
         expect(miss).toEqual([]);
       }
     } finally {
-      LAYOUT.on = false;
+      LAYOUT.town = false;
     }
   });
 
   it('keeps every door, its interior, and the people the old town has', () => {
-    LAYOUT.on = true;
+    LAYOUT.town = true;
     try {
       for (const w of WORLDS()) {
         const m = townMap(w), old = oldTown(w);
@@ -125,12 +125,12 @@ describe('the new town', () => {
         expect(townProps().length).toBeGreaterThan(5);
       }
     } finally {
-      LAYOUT.on = false;
+      LAYOUT.town = false;
     }
   });
 
   it('the rounds walk clear lanes, and nothing stands inside a building', () => {
-    LAYOUT.on = true;
+    LAYOUT.town = true;
     try {
       for (const w of WORLDS()) {
         const m = townMap(w), bad: string[] = [];
@@ -145,7 +145,7 @@ describe('the new town', () => {
         expect(bad).toEqual([]);
       }
     } finally {
-      LAYOUT.on = false;
+      LAYOUT.town = false;
     }
   });
 });

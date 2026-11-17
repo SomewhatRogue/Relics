@@ -1,6 +1,7 @@
 // The new town (docs/design/town-layout.md): walk the hero along each of the chase camera's views and shoot.
 // node scripts/town-look.cjs [url] [out prefix] [day 0..1]   (LAPTOP=1 for a 1440x900 laptop, else a phone)
-// VIEWS=1,3 to shoot only some.
+// VIEWS=1,3 to shoot only some. LOOK='layout' for the flat view, LOOK='layout&look=3d' for the plain 2.5D view
+// (default the parked street look).
 const { chromium } = require('playwright');
 const [url = 'http://localhost:4173/?hero=WARRIOR', out = 'shots/town', day = '0.9'] = process.argv.slice(2);
 // From, to (tiles): the hero walks from one toward the other and the shot is taken near its end.
@@ -17,7 +18,7 @@ const only = process.env.VIEWS ? process.env.VIEWS.split(',') : Object.keys(VIEW
   const page = await (await browser.newContext(ctx)).newPage();
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text().slice(0, 300)));
-  await page.goto(`${url}${url.includes('?') ? '&' : '?'}look=3d&hd&street&day=${day}`);
+  await page.goto(`${url}${url.includes('?') ? '&' : '?'}${process.env.LOOK ?? 'look=3d&hd&street'}&day=${day}`);
   await page.waitForFunction(() => window.__game);
   await page.waitForTimeout(1500);
   await page.addStyleTag({ content: '#caption { display: none !important; }' });

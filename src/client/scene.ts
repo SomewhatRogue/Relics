@@ -61,6 +61,7 @@ import { drawFoe } from './strawman';
 import { RACK } from '../shared/practice';
 import { waiting } from '../sim/practice';
 import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
+import { lifter, upAt } from './levelpaint';
 import { drawText, textWidth } from './pixfont';
 import { blockAt, blockFoot, drawBlock, drawRound } from './blocks';
 import { DECKS } from './pieces';
@@ -206,7 +207,8 @@ export class Scene {
   /** A spot in the room (tiles) on screen, `up` tiles above it, in CSS pixels (speech bubbles over heads: bubbles.ts). */
   tileScreen(x: number, y: number, up = 0): [number, number] {
     const k = this.scale / this.dpr;
-    y -= up;
+    // (On the new town's raised levels, the floor there: levelpaint.ts.)
+    y -= up + (this.painted ? upAt(this.painted, x, y) / PX : 0);
     return [(OX + x * PX - this.cam.x) * k, (OY + y * PX - this.cam.y) * k];
   }
 
@@ -239,6 +241,8 @@ export class Scene {
       this.cam.ready = true;
     }
     const map = room.map;
+    // How far up anything standing at a point is drawn: on the new town's raised levels (levelpaint.ts), else 0.
+    const lv = lifter(map);
     if (this.painted !== map) (this.bg = paintMap(map)), (this.painted = map), (this.cam.ready = false);
     const clamp = (v: number, size: number, world: number) => (size >= world ? (world - size) / 2 : Math.max(0, Math.min(world - size, v)));
     this.cam.x = clamp(this.cam.x, this.vw, worldW(map));
@@ -384,7 +388,7 @@ export class Scene {
         items.push({ y: hy + 0.5, draw: () => drawLifted(c, p, hx - cx, hy - cy, carrier.fx, carrier.fy, slam) });
         continue;
       }
-      const x = OX + p.x * PX - cx, y = OY + p.y * PX - cy;
+      const x = OX + p.x * PX - cx, y = OY + p.y * PX - cy - lv(p.x, p.y);
       items.push({ y: p.kind === 'column' && p.fallen ? -1e6 + 3 : OY + p.y * PX, draw: () => drawProp(c, p, x, y, room.time) });
       // Someone caged: a mark over them, and their call when you're close.
       if (p.kind === 'cage' && !p.broken) {
@@ -441,11 +445,11 @@ export class Scene {
     // (The windlass's post is drawn with the windlass: fendraw.ts.)
     fenScene(map, c, cx, cy, room.heroes, items);
     // A lived-in town's animals, each at its own spot (townbeasts.ts).
-    if (map.life) for (const b of lifeFigs(map, now, others.length ? [...room.heroes, ...others] : room.heroes)) items.push({ y: OY + b.y * PX, draw: () => b.draw(c, OX + b.x * PX - cx, OY + b.y * PX - cy - Math.round(b.up * PX)) });
-    for (const r of [...map.rounds, ...scatterOf(map).stand]) if ((r.kind !== 'post' || !map.windlass) && (!big || !off(OX + r.x * PX - cx, OY + r.y * PX - cy))) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy) });
+    if (map.life) for (const b of lifeFigs(map, now, others.length ? [...room.heroes, ...others] : room.heroes)) items.push({ y: OY + b.y * PX, draw: () => b.draw(c, OX + b.x * PX - cx, OY + b.y * PX - cy - Math.round(b.up * PX) - lv(b.x, b.y)) });
+    for (const r of [...map.rounds, ...scatterOf(map).stand]) if ((r.kind !== 'post' || !map.windlass) && (!big || !off(OX + r.x * PX - cx, OY + r.y * PX - cy))) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy - lv(r.x, r.y)) });
     for (const b of map.blocks) {
       if (b.kind === 'sideway') continue;
-      const [bx, by] = blockAt(b);
+      const [bx, by0] = blockAt(b), by = by0 - lv(b.x + b.w / 2, b.y + b.h / 2);
       // Boards you walk on (the Staithe's jetty, a log laid across): under everyone standing on them.
       if (DECKS.has(b.kind)) {
         items.push({ y: -1e6 + b.y, draw: () => drawBlock(c, b, bx - cx, by - cy, false) });
@@ -469,7 +473,7 @@ export class Scene {
     }
     for (const n of map.npcs ?? []) {
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
-      items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy, near && !n.mute, at.fx, !!n.path && !at.still, at.x) });
+      items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy - lv(at.x, at.y), near && !n.mute, at.fx, !!n.path && !at.still, at.x) });
     }
     // Layout 4's scenes: a body being hauled, the prisoners' rope (scenedraw.ts).
     for (const e of room.enemies) if (e.task?.k === 'tally') { const k = e.task; items.push({ y: OY + k.y * PX, draw: () => drawTally(c, k.n, OX + k.x * PX - cx, OY + k.y * PX - cy) }); }
@@ -497,7 +501,7 @@ export class Scene {
       items.push({ y: -1e6 + 2, draw: () => drawIncline(c, map, cx, cy) });
       for (const p of room.props) if (p.goAt !== undefined || (p.roll ?? 0) > 0) items.push({ y: -1e6 + 3, draw: () => drawBrakeLane(c, map, p, cx, cy, now) });
     }
-    for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy, now, brazierOn(map, b)) });
+    for (const b of map.braziers) items.push({ y: OY + b.y * PX, draw: () => drawBrazier(c, OX + b.x * PX - cx, OY + b.y * PX + 2 - cy - lv(b.x, b.y), now, brazierOn(map, b)) });
     // What the goblins left that moves: one hung from a hook, the pot on their fire (grimdraw.ts).
     for (const q of map.grim ?? []) {
       const x = OX + q.x * PX - cx, y = OY + q.y * PX - cy;
@@ -614,17 +618,17 @@ export class Scene {
     // Perrin's garden after dark: a soft pool of lamplight over the benches and the beds.
     // Inside the halls: candlelight, and the tower's coloured fire.
     for (const r of map.rounds) {
-      if (r.kind === 'candles') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 18, r: 46 + Math.sin(now * 11 + r.x) * 2, i: 0.7, c: [1, 0.78, 0.48] });
-      if (r.kind === 'witchfire') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 10, r: 90 + Math.sin(now * 5) * 4, i: 1.1, c: witchColour(now) });
+      if (r.kind === 'candles') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - lv(r.x, r.y) - 18, r: 46 + Math.sin(now * 11 + r.x) * 2, i: 0.7, c: [1, 0.78, 0.48] });
+      if (r.kind === 'witchfire') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - lv(r.x, r.y) - 10, r: 90 + Math.sin(now * 5) * 4, i: 1.1, c: witchColour(now) });
     }
-    for (const r of map.rounds) if (r.kind === 'moths' && !map.theme.day) lights.push({ x: OX + r.x * PX - cx - 36, y: OY + r.y * PX - cy - 34, r: 84, i: 0.4 * dusk(), c: [1, 0.84, 0.58] });
+    for (const r of map.rounds) if (r.kind === 'moths' && !map.theme.day) lights.push({ x: OX + r.x * PX - cx - 36, y: OY + r.y * PX - cy - lv(r.x, r.y) - 34, r: 84, i: 0.4 * dusk(), c: [1, 0.84, 0.58] });
     // Cobb's lamp by the Deep's ladder (client/cobbdraw.ts).
-    for (const n of map.npcs ?? []) if (n.work === 'ladder') lights.push({ x: OX + n.x * PX - cx + 12, y: OY + n.y * PX - cy - 6, r: 56 + Math.sin(now * 9) * 3, i: 0.85, c: [1, 0.76, 0.42] });
-    for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25 * tk, c: [1, 0.78, 0.45] });
+    for (const n of map.npcs ?? []) if (n.work === 'ladder') lights.push({ x: OX + n.x * PX - cx + 12, y: OY + n.y * PX - cy - lv(n.x, n.y) - 6, r: 56 + Math.sin(now * 9) * 3, i: 0.85, c: [1, 0.76, 0.42] });
+    for (const r of map.rounds) if (r.kind === 'lantern') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - lv(r.x, r.y) - 28, r: 150 + Math.sin(now * 3) * 4, i: 1.25 * tk, c: [1, 0.78, 0.45] });
     // The Last Lantern high on its dais's column: the square's light (daispieces.ts).
-    for (const r of map.rounds) if (r.kind === 'dais') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - 70, r: 180 + Math.sin(now * 3) * 4, i: 0.95 * tk, c: [1, 0.78, 0.45] });
+    for (const r of map.rounds) if (r.kind === 'dais') lights.push({ x: OX + r.x * PX - cx, y: OY + r.y * PX - cy - lv(r.x, r.y) - 70, r: 180 + Math.sin(now * 3) * 4, i: 0.95 * tk, c: [1, 0.78, 0.45] });
     for (const b of map.blocks) {
-      const [bx, by] = blockAt(b), mx = bx + (b.w * PX) / 2 - cx;
+      const [bx, by0] = blockAt(b), by = by0 - lv(b.x + b.w / 2, b.y + b.h / 2), mx = bx + (b.w * PX) / 2 - cx;
       // A building on fire lights the whole street; its ashes smoulder.
       if (((b.burning ?? -1) >= 0 || b.smoulder) && !b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy - 10, r: 70 + b.w * 10 + Math.sin(now * 13 + bx) * 6, i: 1.2, c: [1, 0.55, 0.25] });
       if (b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy, r: 22 + b.w * 3, i: 0.35, c: [1, 0.35, 0.15] });
