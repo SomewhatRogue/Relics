@@ -60,16 +60,9 @@ describe('heroes', () => {
 
   it('an old save keeps the weapon in hand; its other weapons go in the pack', () => {
     const fine = { kit: 'greatsword', quality: 'fine', traits: ['brutal'] }, held = { kit: 'sword', quality: 'fine', traits: ['riposte'] };
-    store.set('relic.save.v2', JSON.stringify({ heroes: [{ name: 'OLD', cls: 'WARRIOR', weapon: 'sword', arms: { sword: held, greatsword: fine } }], current: 0, world: newWorld() }));
+    store.set('relic.save.v2', JSON.stringify({ heroes: [{ name: 'OLD', cls: 'WARRIOR', weapon: 'sword', arms: { sword: held, greatsword: fine } }], current: 0, world: newWorld(), epoch: 2 }));
     expect(load().heroes[0]).toMatchObject({ weapon: 'sword', arms: { sword: { kit: 'sword', quality: 'tolmouth', traits: ['riposte'] } }, bag: [{ kit: 'greatsword', quality: 'tolmouth', traits: ['brutal'], mods: [] }] });
     expect(load().heroes[0].armor).toMatchObject({ slot: 'armor', armor: 'heavy' });
-  });
-
-  it("carry an old save's hero across, class from its weapon", () => {
-    store.set('relic.save.v1', JSON.stringify({ profile: { gold: 90, xp: 120, level: 2, perks: [], picks: 1, arms: {}, weapon: 'staff', runs: 3 }, world: { ...newWorld(), day: 4 } }));
-    const s = load();
-    expect(s.heroes[0]).toMatchObject({ cls: 'MAGE', gold: Math.round(90 * PURSE_RATIO), name: 'HERO' });
-    expect(s.world.day).toBe(4);
   });
 
   it('the relic-wright fits elements for gold', () => {

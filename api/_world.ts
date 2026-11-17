@@ -144,7 +144,10 @@ export async function redisWorldStore(url: string, meter = new Meter()): Promise
   r.on('error', (e) => console.log(JSON.stringify({ world: 1, ev: 'err', msg: String(e?.message ?? e) })));
   await r.connect();
   meter.attach({ incrBy: (k, n) => r.incrBy(k, n), expire: (k, t) => r.expire(k, t) });
-  const wk = (g: string) => `rl:world:${g}`, bk = (g: string, k: string) => `rl:b:${g}:${k}`, nk = (g: string) => `rl:n:${g}`, rk = (g: string) => `rl:roll:${g}`;
+  // (Under `rl:e2:` since the testers' fresh start, 2026-11-16 (Kyle): a new world, Best in Wickhold and Roll. The
+  // old keys, `rl:world:` and the rest, are left in Redis, unread.)
+  const E = 'rl:e2:';
+  const wk = (g: string) => `${E}world:${g}`, bk = (g: string, k: string) => `${E}b:${g}:${k}`, nk = (g: string) => `${E}n:${g}`, rk = (g: string) => `${E}roll:${g}`;
   const read = (raw: string | null): WorldState => ({ ...newWorld(), ...(raw ? JSON.parse(raw) : {}) });
   const seen = new Map<string, { at: number; raw: string | null; board: Board }>();
   /** The Roll worked out from the sorted sets (14 or 15 commands), and kept as one value (1 more). */

@@ -7,7 +7,7 @@
  * server (vite.solo.config.ts sets VITE_SOLO).
  */
 import { keyOf, parseCode, showCode } from '../shared/recovery';
-import { fromJson, onStore, type Save } from './save';
+import { fromStored, onStore, type Save } from './save';
 
 export const RECOVERY = !import.meta.env?.VITE_SOLO;
 const KEY = 'relic.recovery', API = '/api/save', QUIET = 20_000, LONGEST = 120_000, TIMEOUT = 8000;
@@ -124,7 +124,7 @@ export class Recovery {
   private async pull(code: string): Promise<Found | 'none' | null> {
     const r = await call(`${API}?code=${encodeURIComponent(code)}`);
     if (r?.status === 404) return 'none';
-    const b = r?.status === 200 ? r.body : null, save = b && fromJson(b.save as Save);
+    const b = r?.status === 200 ? r.body : null, save = b && fromStored(b.save as Save);
     if (!b || !save || typeof b.code !== 'string' || typeof b.token !== 'string') return null;
     return { code: b.code, save: { ...save, savedAt: Number(b.savedAt) || 0 }, token: b.token, savedAt: Number(b.savedAt) || 0 };
   }

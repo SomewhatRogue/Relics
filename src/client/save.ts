@@ -30,7 +30,7 @@ import { fitRanks } from '../shared/drills';
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
 /** `trade`: one this browser accepted on the server and hasn't settled yet (client/tradesave.ts). */
-export interface Save { heroes: Profile[]; current: number; world: WorldState; savedAt?: number; trade?: Pending; /** A class being tried (trial.ts): never written. */ trial?: boolean }
+export interface Save { heroes: Profile[]; current: number; world: WorldState; savedAt?: number; /** The fresh start it's been through (FRESH). */ epoch?: number; trade?: Pending; /** A class being tried (trial.ts): never written. */ trial?: boolean }
 
 /** Fill in fields a saved hero predates. */
 const hero = (old: Partial<Profile>): Profile => {
@@ -99,27 +99,43 @@ const hero = (old: Partial<Profile>): Profile => {
   return out;
 };
 
-/** A save as kept (here, or on the server under a recovery code), with older heroes filled in. */
+/** The testers' fresh start (Kyle, 2026-11-16: "reset all characters ... I want my testers to try it net new"):
+ *  a save from before it (here or brought from the server) loses every hero but those kept, and with none kept
+ *  its town starts over too. The shared world, Best in Wickhold, the Roll and the names start over on the
+ *  server (api/_world.ts, api/_names.ts). Raise FRESH to do it again. */
+export const FRESH = 2;
+const KEPT = (p: Partial<Profile>) => p.name === 'ASHE' && p.cls === 'MAGE';
+
+/** A save as it comes in from outside (this browser, or the server under a recovery code): past the fresh
+ *  start, then filled in. */
+export const fromStored = (s: Partial<Save> | null) => fromJson(fresh(s));
+
+/** Through the fresh start, if it's from before it. */
+export function fresh(s: Partial<Save> | null): Partial<Save> | null {
+  if (!s || !Array.isArray(s.heroes) || !s.world || (s.epoch ?? 1) >= FRESH) return s;
+  const kept = s.heroes.filter(KEPT);
+  return { ...s, heroes: kept, current: -1, world: kept.length ? s.world : newWorld(), epoch: FRESH };
+}
+
+/** A save as kept, with older heroes filled in. */
 export function fromJson(s: Partial<Save> | null): Save | null {
   if (!s || !Array.isArray(s.heroes) || !s.world) return null;
-  const heroes = s.heroes.slice(0, HERO_SLOTS).map(hero);
+  const heroes = s.heroes!.slice(0, HERO_SLOTS).map(hero);
   // The Deep's deepest floor (shared/deepskill.ts): an older hero's from their saved run or the Deep's boards.
-  for (const h of heroes) if (h.deepBest || h.deep || s.world.deepSolo || s.world.deepParty) h.deepBest = fitDeepBest(h, [s.world.deepSolo, s.world.deepParty]) || undefined;
-  return { heroes, current: Math.min(s.current ?? -1, heroes.length - 1), world: { ...newWorld(), ...s.world }, savedAt: Number(s.savedAt) || 0, ...(s.trade ? { trade: s.trade } : {}) };
+  for (const h of heroes) if (h.deepBest || h.deep || s.world!.deepSolo || s.world!.deepParty) h.deepBest = fitDeepBest(h, [s.world!.deepSolo, s.world!.deepParty]) || undefined;
+  return { heroes, current: Math.min(s.current ?? -1, heroes.length - 1), world: { ...newWorld(), ...s.world! }, savedAt: Number(s.savedAt) || 0, epoch: FRESH, ...(s.trade ? { trade: s.trade } : {}) };
 }
 
 export function load(): Save {
   try {
-    const s = fromJson(JSON.parse(localStorage.getItem(KEY) ?? 'null'));
+    const s = fromStored(JSON.parse(localStorage.getItem(KEY) ?? 'null'));
     // (Test hooks: ?deepbest=20, &deepskill=1: client/deeptest.ts.)
     if (s) return s.heroes.forEach(deepTest), s;
-    // The first save kept one hero, unnamed: they come across as HERO, their class from their weapon.
-    const v1 = JSON.parse(localStorage.getItem(OLD) ?? 'null');
-    if (v1 && v1.profile && v1.world) return { heroes: [hero(v1.profile)], current: -1, world: { ...newWorld(), ...v1.world } };
+    // (The first save, one hero unnamed, is from before the fresh start: FRESH. It starts over.)
   } catch {
     /* no storage here: a fresh start */
   }
-  return { heroes: [], current: -1, world: newWorld() };
+  return { heroes: [], current: -1, world: newWorld(), epoch: FRESH };
 }
 
 let listener: (() => void) | null = null;
@@ -129,6 +145,8 @@ export const onStore = (f: () => void) => void (listener = f);
 /** Keep it; `at` keeps a copy's own time (one brought from the server), else it moves forward. */
 export function store(s: Save, at?: number): void {
   if (s.trial) return;
+  // (Every save kept is past the fresh start, however it was made.)
+  s.epoch = FRESH;
   s.savedAt = at ?? Math.max(Date.now(), (s.savedAt ?? 0) + 1);
   try {
     localStorage.setItem(KEY, JSON.stringify(s));

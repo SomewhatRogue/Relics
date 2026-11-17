@@ -1,5 +1,7 @@
 /**
- * Who holds each hero name (api/names.ts, shared/names.ts): `relic:name:<NAME>` is the hero id that has it.
+ * Who holds each hero name (api/names.ts, shared/names.ts): `relic:name2:<NAME>` is the hero id that has it.
+ * (`relic:name:` till the testers' fresh start, 2026-11-16: left in Redis, unread. Every hero's name is claimed
+ * again as their save loads, client/main.ts, so the kept heroes have theirs back.)
  * Claimed with SET NX, so two heroes can never both have one; given up only by the hero holding it.
  */
 import { Meter } from './_meter.js';
@@ -13,7 +15,7 @@ export interface NameStore {
   release(name: string, hero: string): Promise<void>;
 }
 
-const key = (n: string) => 'relic:name:' + n;
+const key = (n: string) => 'relic:name2:' + n;
 const RELEASE = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end return 0";
 
 export function memoryNameStore(): NameStore {

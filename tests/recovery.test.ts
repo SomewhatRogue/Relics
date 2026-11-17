@@ -3,6 +3,7 @@
  * store and, when `redis-server` is installed, its Lua scripts on a real Redis; and the browser side
  * (client/recovery.ts) with fetch routed straight to the handler.
  */
+import { FRESH } from '../src/client/save';
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -31,7 +32,7 @@ async function api(method: string, url: string, body?: unknown): Promise<{ statu
   return { status, body: JSON.parse(out) };
 }
 const aSave = (names = ['WREN'], savedAt = Date.now() - 1000) =>
-  ({ heroes: names.map((n) => newProfile('RANGER', n)), current: 0, world: newWorld(), savedAt });
+  ({ heroes: names.map((n) => newProfile('RANGER', n)), current: 0, world: newWorld(), savedAt, epoch: FRESH });
 
 describe('recovery codes', () => {
   it('two lists of 128 plain words, no repeats, every word two letters or more from every other', () => {

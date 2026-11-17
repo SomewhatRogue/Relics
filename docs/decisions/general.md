@@ -110,3 +110,17 @@ Claude Opus 5.5
 - Board: the new town layout in the normal look added to Waiting (Kyle likes the layout, not the street look).
 
 Claude Opus 5.5
+
+## 2026-11-16: the testers' fresh start (Kyle: "reset all characters and classes and the best of board and the status")
+
+- Saves: client/save.ts FRESH = 2. A save read from this browser or from a recovery code (`fromStored`, in load()
+  and recovery.ts) from before it keeps only ASHE the Mage (Kyle's level 9, for testing), with that save's town;
+  with nobody kept, the town starts over too. store() stamps every save kept since. `fromJson` (the fill-ins,
+  and the tests of them) is untouched. The one-hero v1 save is no longer carried over.
+- Server: the world, Best in Wickhold, the counts and the Roll under `rl:e2:` (api/_world.ts), names under
+  `relic:name2:` (api/_names.ts). The old keys are left in Redis, unread, so nothing is deleted. Every hero's
+  name is claimed again as a save loads (main.ts), so Ashe has his back.
+- Not reset: the trade ledger and owed runs (keyed by item and hero; the old heroes' simply go unused), saves
+  under recovery codes on the server (reset as they're read). To do it again: raise FRESH and the two prefixes.
+
+Claude Opus 5.5
