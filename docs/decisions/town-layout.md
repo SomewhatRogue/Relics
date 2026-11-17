@@ -220,5 +220,11 @@ Kyle asked for these, so small edits in Town quests' files (runnerpath.ts) and i
   directions switch with the town. The arrival at the north gate stays as it was.
 - docs/design/town-layout.md: the grate and Cobb by the millpond, the works off the square (the lore keeper's notes).
 - Full suite 1972 passed.
+## 2026-11-16 (evening): `?sharp` on for everyone (Kyle)
+
+- Kyle: "push the fine mode, I actually do like it" (the sharper figures and the meaner knight and goblins). For the
+  characters chat: one line in your charpaint.ts, `SHARP` now on unless `?sharp=0`, which shows today's figures as
+  they were. Tests run without a page address, so they still see the old figures (full suite 1969 passed).
+  Screenshots of the plain game (no street) clean.
 
 Claude Opus 5.5

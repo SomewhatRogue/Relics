@@ -14,7 +14,8 @@
  */
 import type { Sprite } from './sprites';
 
-export const SHARP = typeof location !== 'undefined' && new URLSearchParams(location.search).has('sharp');
+/** On for everyone since 2026-11-16 (Kyle: "I actually do like it"); `?sharp=0` shows today's figures as they were. */
+export const SHARP = typeof location !== 'undefined' && new URLSearchParams(location.search).get('sharp') !== '0';
 
 /** Light from the top left (screen: +x right, +y down). */
 const L = [-0.62, -0.78];
