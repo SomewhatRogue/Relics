@@ -47,6 +47,8 @@ The Deep chat, until it finishes (then the general chat).
 
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
 
+- **Balance: the bench** (docs/design/balance.md): a bench over every kit, element, skill level, level and tier
+  (clearbot taking hits, a skill dial), a Dashboard report, then tuning passes and the level gap's pay.
 - **Holy and hungry** (docs/design/holy-and-hungry.md). Last: it changes loot everything above uses.
 
 ## Collisions to settle
