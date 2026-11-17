@@ -130,3 +130,16 @@ doesn't come out nicely from the blade"; "the attack looks lame, not a pull back
   within a few tiles, otherwise glances about on their own uneven rhythm, and shifts their weight a pixel now and
   then (npcs.ts `drawNpc`; scene.ts and cards3d.ts say where you are first).
   (Claude Opus 5.5)
+
+## 2026-11-16: LIVING WORLD slice 2, the landscape (2.5D)
+
+Behind the same LIVING WORLD toggle (`src/client/alive.ts`), new `src/client/three/wind3d.ts`, outdoors only (a room
+with trees, bushes or water, so halls, houses and mines stay still):
+- Wind through the trees: leaf-green vertices of the merged map mesh (`VCOL`) above the trunk bend along the wind in
+  gusts (the same `gust` sum the capes use, so a hem stirs as the treetops do), bushes less, with a flutter on top.
+- Cloud shadows: soft value-noise clouds drifting along the wind, darkening the floor and everything in `VCOL` by a
+  fifth, edges ordered-dithered to stay pixel.
+- Water: foam along the bank breathing in and out, a thinner line rolling toward the shore, glints twinkling.
+Hooks (small, in files I don't own): `ground.ts` wraps the floor material and moves the clock each frame through
+`wet()`; `water3d.ts` adds the uniforms and one GLSL insert before the blood clouding. Off, every shader path skips
+on one uniform. Opus 5.5.

@@ -13,6 +13,7 @@ import { DEEP, DRY, SHALLOW, waterField } from '../waterfield';
 import { cloudStrength, ringStrength, WET, type Wet } from '../wetfx';
 import { VCOL } from './mats';
 import { toonize } from './post';
+import { LIFE, LIFE_GLSL, WATER_LIFE } from './wind3d';
 
 /** How far below the bank each kind of water lies (tiles). */
 export const SINK = { [SHALLOW]: 0.07, [DEEP]: 0.22 } as Record<number, number>;
@@ -50,6 +51,8 @@ if (deep) {
   col = mix(col, vec3(0.478, 0.635, 0.643), lo * 0.8);
   col = mix(col, vec3(0.659, 0.8, 0.8), hi);
 }
+// (The living world, wind3d.ts: foam at the bank, a line rolling in, glints.)
+${WATER_LIFE}
 // Blood clouding in the water, billowing as it goes.
 float red = 0.0;
 for (int i = 0; i < ${WET.clouds}; i++) {
@@ -137,9 +140,9 @@ export function buildWater(m: GameMap, floor: THREE.MeshLambertMaterial, bed: TH
     if (!f.level.includes(kind)) continue;
     const mat = toonize(new THREE.MeshLambertMaterial({ map: bed }));
     also(mat, (sh) => {
-      Object.assign(sh.uniforms, { uWater: { value: tex }, uSize: { value: size }, uTime: time, uKind: { value: kind }, uClouds: { value: clouds }, uNC: nc, uRings: { value: rings }, uNR: nr });
+      Object.assign(sh.uniforms, { uWater: { value: tex }, uSize: { value: size }, uTime: time, uKind: { value: kind }, uClouds: { value: clouds }, uNC: nc, uRings: { value: rings }, uNR: nr, ...LIFE });
       // (The toon edit has already put the dither's bay4 in.)
-      sh.fragmentShader = sh.fragmentShader.replace('void main() {', HEAD + 'void main() {').replace('#include <map_fragment>', SURFACE);
+      sh.fragmentShader = sh.fragmentShader.replace('void main() {', HEAD + LIFE_GLSL + 'void main() {').replace('#include <map_fragment>', SURFACE);
     });
     mat.customProgramCacheKey = () => 'water';
     const p = new THREE.Mesh(new THREE.PlaneGeometry(m.w, m.h), mat);

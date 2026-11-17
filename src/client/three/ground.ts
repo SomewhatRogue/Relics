@@ -24,6 +24,7 @@ import { addBridge } from './bridge3d';
 import { sideGaps } from '../sidegaps';
 import { waysOut } from '../wayout';
 import { buildWater, SINK } from './water3d';
+import { clouded, lifeFrame } from './wind3d';
 import type { Wet } from '../wetfx';
 import { DEEP, levelAt, waterField } from '../waterfield';
 import { addBrazier } from './brazier3d';
@@ -58,6 +59,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   const fg = fc.getContext('2d')!;
   fg.drawImage(bg, OX, OY, fc.width, fc.height, 0, 0, fc.width, fc.height);
   const floorTex = texture(fc), floorMat = toonize(new THREE.MeshLambertMaterial({ map: floorTex }));
+  // (The living world, wind3d.ts: cloud shadows drifting over the floor.)
+  clouded(floorMat);
   // The new look's test street: the generated cobbles (streetkit.ts).
   // (The new look's insides lay their own floor, planks or flags: insidekit.ts.)
   if (STREET) streetFloor(floorMat, m.w, m.h, m.wallH ? (m.theme.floor === 'planks' ? 'mat-planks' : 'mat-flags') : undefined);
@@ -212,6 +215,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     const mm = o as THREE.Mesh;
     if (mm.isMesh && mm.geometry !== statics?.geometry) mm.geometry.dispose();
   });
-  const wet = (w: Wet, now: number) => water?.update(w, now);
+  // (Each frame: the living world's clock and whether it's on here, wind3d.ts.)
+  const wet = (w: Wet, now: number) => (lifeFrame(m, now, !!water), water?.update(w, now));
   return { group, fires, lights, lamps, decals, wet, dispose: () => (dispose(), water?.dispose(), statics?.geometry.dispose(), floorTex.dispose(), floorMat.dispose(), wallMat.map?.dispose(), wallMat.dispose()) };
 }
