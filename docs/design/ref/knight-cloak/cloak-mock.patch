@@ -1,0 +1,137 @@
+diff --git a/src/client/charmean.ts b/src/client/charmean.ts
+index e019694..509241b 100644
+--- a/src/client/charmean.ts
++++ b/src/client/charmean.ts
+@@ -20,6 +20,16 @@ export const KNIGHT_PAL: Record<string, string> = {
+   T: '#6a1a1c', M: '#30343c', m: '#1e2128', K: '#1a1412', k: '#d4a537', L: '#20232a', F: '#121014',
+ };
+ export const KNIGHT_CAPE: [string, string] = ['#5a1416', '#2e0a0c'];
++/** MOCK (?cloak): a long charcoal cloak lined in red and edged in gold, over greyer, greener steel with no surcoat. */
++export const CLOAK = typeof location !== 'undefined' && new URLSearchParams(location.search).has('cloak');
++/** (`?cloak=red`: today's steel and today's red outside, a darker lining, the same flare and gold edge.) */
++const RED = typeof location !== 'undefined' && new URLSearchParams(location.search).get('cloak') === 'red';
++export const KNIGHT_PAL2: Record<string, string> = RED ? {} : {
++  A: '#566060', a: '#2a3030', h: '#98a2a0', P: '#465050', B: '#2c3234', b: '#1c2022', T: '#3c4444', M: '#383e3e', m: '#242a2a', L: '#30383a', F: '#1c2022',
++};
++export const KNIGHT_CLOAK = RED
++  ? { cape: ['#641618', '#340a0c'] as [string, string], lining: ['#3c0c0e', '#240608'] as [string, string], trim: '#c8962e' }
++  : { cape: ['#2e3436', '#1a1e20'] as [string, string], lining: ['#761a1a', '#480e10'] as [string, string], trim: '#c8962e' };
+ /** The knight's heater shield (sprites.ts shieldParts): a blackened steel rim, a deep crimson field, old gold. */
+ export const SHIELD_MEAN = ['#7a828c', '#3a3f48', '#c8a040', '#8a6a24', '#5a1416', '#3e0e10'];
+ 
+diff --git a/src/client/herolife.ts b/src/client/herolife.ts
+index 9a5f38e..2afa7c7 100644
+--- a/src/client/herolife.ts
++++ b/src/client/herolife.ts
+@@ -115,20 +115,45 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
+   const cloth = L.cape ?? L.cloak;
+   if (cloth) {
+     const [col, lin] = [shade(cloth[0]), shade(cloth[1])], top = L.cape ? 6 + t : 9 + t, n = bottom - top;
++    // MOCK (?cloak): a lined cloak shows its lining facing you, flares toward the hem, and carries a gold edge.
++    const inn = L.lining ? [shade(L.lining[0]), shade(L.lining[1])] : null, trim = L.trim ? shade(L.trim) : '', P1 = 1 / HS;
+     for (let r = top; r <= bottom; r++) {
+       const i = r - top, low = i > n / 2, ext = Math.round(side * 3.5 * (i / n) ** 1.2), sw = i >= n - 1 ? wave(i, k > 0.2 || g > 0.35 ? 1 : 0.6) : k > 0.2 || (g > 0.5 && i > n * 0.6) ? wave(i) : 0;
+       const hem = r === bottom && rag && (Math.floor(now * 3 + ph) + r) % 2 ? 1 : 0;
++      const fl = inn ? (i > n * 0.72 ? 2 : i > n * 0.36 ? 1 : 0) * P1 : 0;
+       if (sv) {
+         // In profile: hanging down the back from the shoulders, a little off it at the hem, streaming behind walking.
+         const x0 = (low ? 1.3 : 2) - ext * 1.2 + Math.min(0, sw), x1 = 3.7;
++        if (inn) {
++          const b0 = x0 - fl + hem;
++          rect('back', b0, r, x1 - b0, 1, col);
++          rect('back', b0 + P1, r, P1, 1, lin);
++          rect('back', b0, r, P1, 1, trim);
++          if (r === bottom) rect('back', b0, r + 0.6, x1 - b0, 0.4, trim);
++        } else {
+         rect('back', x0 + hem, r, x1 - x0 - hem, 1, col);
+         rect('back', x0 + hem, r, 0.7, 1, lin);
++        }
+       } else if (!up) {
+         const x0 = (low ? 0 : 1) - ext + Math.min(0, sw), x1 = (low ? 11 : 10) + Math.max(0, sw);
++        if (inn) {
++          // From the outside in: the cloak's dark outer turned forward, its gold edge, then the red lining (in shadow
++          // under the shoulders and between the legs).
++          const a = x0 - fl, b = x1 + 1 + fl - hem, bw = (i > n * 0.72 ? 2 : 1) * P1;
++          rect('back', a, r, b - a, 1, col);
++          if (i >= 2) {
++            rect('back', a + bw, r, b - a - 2 * bw, 1, i < 4 ? inn[1] : inn[0]);
++            rect('back', 5, r, 2, 1, inn[1]);
++            if (ext > 0) rect('back', a, r, ext, 1, col);
++            rect('back', a + bw, r, P1, 1, trim), rect('back', b - bw - P1, r, P1, 1, trim);
++            if (r === bottom) rect('back', a + bw, r + 0.6, b - a - 2 * bw, 0.4, trim);
++          }
++        } else {
+         rect('back', x0, r, x1 - x0 + 1 - hem, 1, lin);
+         if (ext > 0) rect('back', x0, r, ext, 1, col);
++        }
+       } else if (L.cape || r > 11 + t) {
+-        const x0 = (low ? 1 : 2) - ext + sw, x1 = (low ? 10 : 9) + sw;
++        const x0 = (low ? 1 : 2) - ext + sw - fl, x1 = (low ? 10 : 9) + sw + fl;
+         rect('front', x0 + hem, r, x1 - x0 + 1 - hem * 2, 1, col);
+         if (SHARP) {
+           // (The new look's sharper figures, charpaint.ts: the cape lit from the top left, a shadow under the
+@@ -138,6 +163,7 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
+           rect('front', a + w - 2, r, 2, 1, shadeHex(col, -1));
+           if (i < 2 || r === bottom) rect('front', a + 1, r, w - 3, 1, shadeHex(col, -0.5));
+           if (L.cape && i >= 2) for (const f of [4, 7]) rect('front', f + sw, r, 1, 1, lin), rect('front', f - 1 + sw, r, 1, 1, shadeHex(col, 0.5));
++          if (trim && r === bottom) rect('front', a, r + 0.6, w, 0.4, trim);
+         } else if (low && L.cape) rect('front', 4 + sw, r, 1, 1, lin), rect('front', 7 + sw, r, 1, 1, lin);
+       }
+     }
+diff --git a/src/client/herolooks.ts b/src/client/herolooks.ts
+index 604c8ff..7d7be3f 100644
+--- a/src/client/herolooks.ts
++++ b/src/client/herolooks.ts
+@@ -13,7 +13,7 @@ import { CLERIC, MAGE } from './herolooks2';
+ import { SIDE_NO_HEAD, W_SIDE_ARM, W_SIDE_BODY, W_SIDE_HEADS } from './herosides';
+ import { G_SIDE_ARM, G_SIDE_BODY, G_SIDE_HEAD, R_SIDE_ARM, R_SIDE_BODY, R_SIDE_HEADS } from './herosides2';
+ import { SHARP } from './charpaint';
+-import { KNIGHT_BACK, KNIGHT_CAPE, KNIGHT_HEAD, KNIGHT_PAL } from './charmean';
++import { CLOAK, KNIGHT_BACK, KNIGHT_CAPE, KNIGHT_CLOAK, KNIGHT_HEAD, KNIGHT_PAL, KNIGHT_PAL2 } from './charmean';
+ 
+ export type { Cls, LookDef, Life } from './lookkit';
+ 
+@@ -108,7 +108,7 @@ export const LOOK_DEFS: Record<Cls, LookDef[]> = {
+   WARRIOR: [
+     // The knight: an open-faced helm with a red plume, blue and gold, a red cape.
+     // (Under ?sharp, the concepts' knight: a closed great helm, blackened plate, no plume: charmean.ts.)
+-    SHARP ? warrior(KNIGHT_HEAD, KNIGHT_BACK, 'aAAa', { ...skin('fair'), ...KNIGHT_PAL }, { cape: KNIGHT_CAPE }, 0) :
++    SHARP ? warrior(KNIGHT_HEAD, KNIGHT_BACK, 'aAAa', { ...skin('fair'), ...KNIGHT_PAL, ...(CLOAK ? KNIGHT_PAL2 : {}) }, CLOAK ? KNIGHT_CLOAK : { cape: KNIGHT_CAPE }, 0) :
+     warrior(['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....ASEAAESa.....', '.....ASSAASSa.....', '.....aASssSAa.....', '......aSSSSa......'],
+       ['......hAAAAa......', '.....hAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....AAAAAAAa.....', '.....aAAAAAAa.....', '......aAAAAa......'], 'aAAa',
+       { ...skin('fair'), A: '#5e6670', a: '#363c46', h: '#8a929e', P: '#4e5660', p: '#c8962e', B: '#1c2638', b: '#141c2a', T: '#d4a537', M: '#4a5058', m: '#343a42', K: '#241a14', k: '#d4a537', L: '#262a32', F: '#18141a' },
+diff --git a/src/client/lineupcast.ts b/src/client/lineupcast.ts
+index 2cf8be6..4b9b1bd 100644
+--- a/src/client/lineupcast.ts
++++ b/src/client/lineupcast.ts
+@@ -11,7 +11,7 @@ import { CLASS_KITS, type HeroClass } from '../shared/tuning';
+ import type { WeaponId } from '../shared/weapons';
+ import type { FoeVariant } from '../shared/terrain';
+ 
+-export const MOVES = ['stand', 'walk', 'wind up', 'strike', 'recover', 'hurt', 'flinch', 'stagger', 'die', 'walk e', 'walk w', 'strike e', 'block e'] as const;
++export const MOVES = ['stand', 'walk', 'walk n', 'wind up', 'strike', 'recover', 'hurt', 'flinch', 'stagger', 'die', 'walk e', 'walk w', 'strike e', 'block e'] as const;
+ /** The side columns (docs/design/side-view.md): facing due east or west, drawn as the game draws them. The others
+  *  keep the front view (lineup.ts sets sideview.ts VIEW.front for them) so each look's two views sit side by side. */
+ export const SIDE_MOVES: readonly Move[] = ['walk e', 'walk w', 'strike e', 'block e'];
+@@ -81,6 +81,7 @@ export function heroIn(u: { cls: HeroClass; look: number; weapon?: WeaponId }, m
+   // Stepped a hair every 3 s (never drawn) so a class's idle never starts: this column is the plain stand.
+   h.x = (Math.floor(now / 3) % 2) * 0.05;
+   if (m === 'walk') Object.assign(h, { fx: 1, fy: 0.1, moving: true });
++  if ((m as string) === 'walk n') Object.assign(h, { fx: 0.1, fy: -1, moving: true });
+   if (m === 'walk e' || m === 'walk w') Object.assign(h, { fx: m === 'walk e' ? 1 : -1, fy: 0, moving: true });
+   if (m === 'block e') Object.assign(h, { fx: 1, fy: 0, blocking: true });
+   if (m === 'strike e') {
+diff --git a/src/client/lookkit.ts b/src/client/lookkit.ts
+index 240261c..ad52f89 100644
+--- a/src/client/lookkit.ts
++++ b/src/client/lookkit.ts
+@@ -13,6 +13,9 @@ export type Cls = 'WARRIOR' | 'RANGER' | 'ROGUE' | 'MAGE' | 'HEALER';
+  */
+ export interface Life {
+   cape?: [string, string];
++  /** MOCK (?cloak): the cape's inside, seen facing you, and a gold edge and hem. */
++  lining?: [string, string];
++  trim?: string;
+   ragged?: boolean;
+   plume?: string;
+   hair?: string;

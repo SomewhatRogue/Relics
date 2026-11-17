@@ -318,3 +318,18 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Live and staying: smooth light, slate stone. Open again in the sweep: the rest of slice 2 (brightness tiers,
   dusk), slice 3 (phone readability), slices 4 to 7.
   (Claude Fable 5.2)
+
+## 2026-11-17: a cloak-and-colours mock on the knight of today (shown, not in the game)
+
+- Kyle said yes to a small mock. Two versions of Warrior look 1 at the size of today, drawn by the game code on the
+  lineup page, beside the knight as he is: https://claude.ai/artifact/P6vwTqrcQ9FV4EuSmaZH1z
+  - A: a charcoal cloak lined in red, steel a shade lighter and greener, the red surcoat stripe gone.
+  - B: the red of today outside, a darker lining, the steel of today.
+  - Both: the cloak widens two pixels a side toward the hem and carries a gold edge and hem.
+- What it showed: the gold edge reads facing you; from behind A is a dark slab (the red cape is how the knight is
+  picked out walking away), B keeps it; the steel change in A barely shows by torchlight. Shot on the flat lineup
+  only, not in 2.5D.
+- Nothing in the game changed. The mock is docs/design/ref/knight-cloak/cloak-mock.patch (git apply; then
+  ?lineup=warrior&cloak or &cloak=red; it also adds a walking-away column to the lineup). If Kyle picks one it wants
+  doing properly: no URL switch, the lookkit fields named for good, the herolife test run.
+  (Claude Fable 5.2)
