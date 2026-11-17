@@ -82,3 +82,24 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Still to do in slice 2: the three brightness tiers (ground, walls and props, figures), faces less orange, the dusk
   and day tints against goblin skin. Those need the yardstick sheets side by side and Kyle's eye.
   (Claude Fable 5.2)
+
+## 2026-11-17: slice 8, the mock: three ways to paint the same figures
+
+- Kyle: "Yes, mock them" (the heroes and enemies, "more stylized and cleaner, keeping the dark RPG look and feel").
+- Every figure is painted from its colour grid by one function (`charpaint.ts` `paintSharp`, from `sprites.ts`
+  `makeSprite`), and capes and cloaks shade through the same `shade`. So a new look for every hero, goblin, boss and
+  townsperson is one painter, with no sprite redrawn. Three painters tried, in a local build only (not committed, not in
+  the game), shot with the game's own lineup page and in real play (the Open Cut, the town):
+  - **A, clean:** lone near-tone pixels merged into their neighbours (the mail's checker, shading flecks), then flat
+    shapes with one shadow (the far side of the body and the edges facing away) and one lit edge; black outline.
+  - **B, ink and accent:** A, with everything but gold, strong red, goblin green and glowing eyes pushed dark and
+    cool, and the lit edge a cold rim of light so a dark figure parts from a dark floor.
+  - **C, bold:** A, a step brighter than the world, accents richer, faces paler and less orange, the outline a deep
+    shade of the colour beside it in place of black.
+- What the shots say: paint alone changes goblins, butchers and townsfolk a lot (today's speckle goes) and the knight
+  least (his shield and cape cover him). Shapes were left alone: Kyle liked the redrawn knight and goblins on
+  2026-11-16. The three can be mixed.
+- On the page (https://claude.ai/artifact/LxogAoZ4Stfj95Mgm89tbj), first section. Waiting on Kyle's pick. Then the
+  painter goes in behind a switch, with New look: characters' go-ahead for `charpaint.ts` (theirs) or folded into this
+  chat at Kyle's word.
+  (Claude Fable 5.2)
