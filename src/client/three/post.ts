@@ -12,10 +12,11 @@ import { HD, hdPostMaterial } from './hdlook';
 import { AIR_GLSL, airUniforms } from './air3d';
 
 /**
- * 1 while LIGHT is SMOOTH (../lightswitch.ts, docs/design/graphics-overhaul.md slice 1b): every material and the post
- * pass then leave light, fog, mist, haze and bloom unstepped and undithered. view3d.ts sets it each frame.
+ * Smooth light (docs/design/graphics-overhaul.md slice 1b; the only light since Kyle's "should kill bands",
+ * 2026-11-17): at 1 every material and the post pass leave light, fog, mist, haze and bloom unstepped and
+ * undithered. Always 1; the stepped sums it switches off are still written out in the shaders.
  */
-export const SMOOTH_U = { value: 0 };
+export const SMOOTH_U = { value: 1 };
 
 export const BAYER = `
 float bay2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }

@@ -90,7 +90,7 @@ Several chats build at once. They talk through files, not each other:
 ## The look (approved 2026-10-31)
 
 Three-quarter view; pixel sprites (placeholders in `src/client/sprites.ts`); cool grey stone lit only by
-torches, braziers, moonlight and spells, in stepped bands with a little ordered dither
+torches, braziers, moonlight and spells, in smooth pools of light over the crisp art
 (`src/client/light.ts`); goblins in sickly greens with glowing eyes; red floor telegraphs, striped edge
 for unblockable ones. A 2.5D three.js view shares the same art.
 

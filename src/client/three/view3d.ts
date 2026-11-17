@@ -46,8 +46,7 @@ import { drawMendMark } from '../mendmark';
 import { skyFlash } from '../skystrikedraw';
 import { drawFound3 } from './found3d';
 import { Perf } from './perf3d';
-import { makeRT, postMaterial, SMOOTH_U } from './post';
-import { LIGHT } from '../lightswitch';
+import { makeRT, postMaterial } from './post';
 import { placeAir } from './air3d';
 import { roomLights } from './roomlights';
 import type { Spot } from './rounds3d';
@@ -283,7 +282,6 @@ export class View3D {
     gl.autoClear = true;
     cam.layers.set(0);
     this.post.uniforms.tCol.value = this.rt!.texture;
-    SMOOTH_U.value = LIGHT.smooth ? 1 : 0;
     // Fog thickening away from your hero, in the post pass (post.ts).
     const fl = fogLook(map.theme), u = this.post.uniforms;
     if (fl && this.heroAt) {

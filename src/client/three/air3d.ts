@@ -19,7 +19,7 @@ const PANE = { r: 1.3, k: 0.24, c: [1, 0.74, 0.42] as const };
 
 /**
  * The post pass's lines: `airHalo` (warm haze added) and `airVig` (how much to darken), both in low-res pixels.
- * Stepped and dithered, or neither while the post pass's `uSmooth` is 1 (LIGHT: SMOOTH, ../lightswitch.ts).
+ * Stepped and dithered, or neither while the post pass's `uSmooth` is 1 (always, now: post.ts).
  */
 export const AIR_GLSL = `
 uniform vec4 uHalo[${HALO_MAX}]; uniform vec4 uHaloC[${HALO_MAX}]; uniform int uHN; uniform float uVig;

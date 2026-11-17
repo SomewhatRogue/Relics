@@ -412,3 +412,18 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   her own. Her first spot was in front of the hall's door, so she was moved between the stalls. The coin tally shows
   as a bare number. The page waits for her line to type out before the rows show, as the shield's does.
   (Claude Fable 5.2)
+
+## 2026-11-17: bands are gone; smooth light is the light
+
+- Kyle: "light (smooth) is the right option shoudl kill bands."
+- The LIGHT button, its saved setting and `?light=` are removed (`lightswitch.ts` and its css deleted). The flat view
+  draws smooth light wherever the device can (light.ts `full`); the old banded pass stays in light.ts only as what a
+  device that cannot make the smooth pass falls back to. In 2.5D `SMOOTH_U` is fixed at 1; the stepped sums it
+  switches off are still written in the shaders (post.ts, air3d.ts), left there because tests/fen.test.ts matches one
+  of those lines. A device with "bands" saved from before simply gets smooth light.
+- CLAUDE.md, "The look": "in stepped bands with a little ordered dither" now reads "in smooth pools of light over the
+  crisp art".
+- Checked: tsc clean; fen, daylight and cloth tests; both views and an old saved "bands" setting loaded in the local
+  build at night with no errors and no button. The full suite ran a few minutes before on the cloth change (two
+  known timing failures on this PC, relaybudget and the heavy hound test, which passes alone).
+  (Claude Fable 5.2)

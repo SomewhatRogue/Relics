@@ -6,7 +6,6 @@
  * thicker the further from your hero; the glowing layer (eyes, telegraphs) still shows through it.
  */
 import { MIST_GLSL, MIST_KEEP, type MistU } from './fenmistdraw';
-import { LIGHT } from './lightswitch';
 import { SmoothPass } from './smoothlight';
 
 /** Fog for one frame: your hero on screen (x, y), how thick at its thickest (0: none), pixels a tile, its colour. */
@@ -84,9 +83,10 @@ export class Lighting {
 
   private link: (fs: string) => WebGLProgram | null = () => null;
 
-  /** Smooth light is on and this device can draw it: the canvas is then the screen's own size (scene.ts). */
+  /** This device can draw smooth light (the light everyone gets, Kyle 2026-11-17; the banded pass below it is only
+   *  what a device that can't falls back to): the canvas is then the screen's own size (scene.ts). */
   full(): boolean {
-    if (!this.ok || !LIGHT.smooth) return false;
+    if (!this.ok) return false;
     this.smooth ??= new SmoothPass(this.gl!, this.link);
     return this.smooth.ok;
   }

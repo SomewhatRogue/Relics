@@ -1,7 +1,7 @@
 // The graphics sweep's yardstick (docs/design/graphics-overhaul.md, slice 0): eight fixed spots, both views, a phone
 // and a laptop, into shots/sweep/<tag>/ with an index.html that lays them out as one sheet. Shoot a tag before a
 // change and another after, and open the two sheets side by side.
-// node scripts/sweep-look.cjs [tag] [url] [extra switches]     e.g.  node scripts/sweep-look.cjs after http://localhost:4173/ light=smooth
+// node scripts/sweep-look.cjs [tag] [url] [extra switches]     e.g.  node scripts/sweep-look.cjs after http://localhost:4173/
 // ONLY=townnight,cut for some scenes; CHANNEL=chrome to drive an installed Chrome in place of Playwright's own.
 const fs = require('fs');
 const { chromium } = require('playwright');

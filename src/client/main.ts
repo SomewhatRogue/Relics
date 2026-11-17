@@ -107,7 +107,6 @@ import { Scene } from './scene';
 import { Views } from './three/views';
 import { options } from './options';
 import { camButton } from './camwide';
-import { lightButton } from './lightswitch';
 import { aliveButton } from './alive';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
@@ -840,8 +839,6 @@ $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.conta
 options();
 // CAMERA: CLOSE or WIDE, the wider camera to try (camwide.ts).
 camButton();
-// LIGHT: SMOOTH or BANDS (lightswitch.ts, docs/design/graphics-overhaul.md slice 1).
-lightButton();
 // LIVING WORLD: characters and landscapes that move more, to compare (alive.ts).
 aliveButton();
 ironUi();

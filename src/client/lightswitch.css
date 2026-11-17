@@ -1,3 +1,0 @@
-/* The LIGHT button in the options box (lightswitch.ts), as CAMERA's (camwide.css). */
-#options #lightbtn::before { background-image: var(--ic-view); }
-#options #lightbtn.on { border-image-source: var(--f-iron); color: var(--bone); }
