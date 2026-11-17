@@ -288,3 +288,15 @@ Claude Opus 5.5
 - scripts/town-spot.cjs: stand the hero at spots in the default view and shoot. Full suite before the merge 1973.
 
 Claude Opus 5.5
+
+## 2026-11-16: the millpond's park; the line through the pond
+
+- **Park** (layoutplan.ts): the pond's banks in grass (`PARK_GRASS`, in place of the mud strips), a tree at each
+  corner, bushes and more reeds between (`PARK`), a bench on the north bank looking out over the water; clear of
+  Old Pennock's seat, the ducks' way out, the washerwoman and the paths round it. Reachability tests unchanged.
+- **The line through the pond** (Kyle): a weeds mark 17 tiles long along today's east lane, whose middle falls in
+  the pond's district, so it came along and ran straight across the water. layouttown.ts leaves out any moved mark
+  that would land on the millpond (only that one). `scripts/town-look.cjs` view `o` (the pond from the works).
+- Full suite 1973 passed.
+
+Claude Opus 5.5

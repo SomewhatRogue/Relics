@@ -73,6 +73,8 @@ export function planBlocks(w: WorldState, homes: number): Block[] {
     bl(0.8, LH - 0.45, 12.2, 0.25, 'fence'), bl(13, LH - 0.45, 42, 0.25, 'fence'), bl(56.5, LH - 0.45, 7.5, 0.25, 'fence'),
     ...FENCES.map(([x, y, fw, fh]) => bl(x, y, fw, fh, 'fence')),
   ];
+  // A bench on the millpond's north bank, looking out over the water (its little park, Kyle 2026-11-16).
+  out.push(bl(28.2, 40.05, 1.8, 0.5, 'bench'));
   if (!quarter) out.push(bl(55.1, 20, 1.3, 4, 'rubble'));
   for (let i = 0; i < homes; i++) out.push(bl(HOMES[i][0], HOMES[i][1], 3.5, 3, 'house', { door: 'home:' + i, ...(HOMES[i][2] ? { face: HOMES[i][2] } : {}) }));
   if (w.flags['north-fields'] === 'farm') out.push(bl(35, 2.5, 4.5, 4.5, 'granary', { label: 'GRANARY', door: 'granary' }));
@@ -89,18 +91,30 @@ const FENCES: [number, number, number, number][] = [
   [13.05, 0.8, 0.3, 12], [13.05, 12.65, 8.9, 0.3], [39.6, 0.8, 0.3, 12],
 ];
 
+/** The millpond, below the Rat Steps (Old Pennock's rods and seat come with the pond's district). */
+export const POND = { x: 26, y: 41.5, w: 6, h: 6.4 };
+/** The grass of the pond's park, round the water (the water paints over it). */
+export const PARK_GRASS = { x: 22.8, y: 39.3, w: 12.6, h: 9.3 };
+/** The park's trees, bushes and reeds. */
+const PARK: Round[] = [
+  { kind: 'tree', x: 23.3, y: 39.9, r: 0.6 }, { kind: 'tree', x: 34.6, y: 40.1, r: 0.6 }, { kind: 'tree', x: 23.1, y: 47.4, r: 0.6 },
+  { kind: 'tree', x: 34.9, y: 42.6, r: 0.6 }, { kind: 'bush', x: 35.2, y: 47.4, r: 0.35 }, { kind: 'bush', x: 25.3, y: 39.6, r: 0.35 },
+  { kind: 'bush', x: 33.2, y: 39.7, r: 0.35 }, { kind: 'bush', x: 23.4, y: 44.9, r: 0.35 },
+  { kind: 'reed', x: 32.15, y: 42.3, r: 0.2 }, { kind: 'reed', x: 32.2, y: 45.6, r: 0.2 }, { kind: 'reed', x: 30.6, y: 41.35, r: 0.2 },
+];
+
 /** Graves (Kirkhill's yard), trees and bushes of the new town's own. */
 export const OWN_ROUNDS: Round[] = [
   ...[0, 1, 2, 3].flatMap((i) => [0, 1, 2, 3].map((j): Round => ({ kind: 'stone', x: 15 + i * 2.1 + (j % 2) * 0.5, y: 2.6 + j * 2.4, r: 0.25 }))),
   { kind: 'tree', x: 23, y: 11, r: 0.6 }, { kind: 'tree', x: 37.5, y: 10.5, r: 0.6 }, { kind: 'tree', x: 2.5, y: 2.5, r: 0.6 },
   { kind: 'tree', x: 11.5, y: 2.4, r: 0.6 }, { kind: 'tree', x: 35.5, y: 55.6, r: 0.6 }, { kind: 'tree', x: 61.5, y: 3, r: 0.6 },
   { kind: 'tree', x: 61, y: 47, r: 0.6 }, { kind: 'bush', x: 13.8, y: 55.5, r: 0.35 }, { kind: 'bush', x: 53, y: 35.1, r: 0.35 },
+  // The millpond's little park (Kyle, 2026-11-16: "more pond like with some trees around it"): a tree at each corner
+  // of its banks, clear of Old Pennock's seat, the ducks' way out and the paths round it; bushes and reeds between.
+  ...PARK,
   { kind: 'post', x: 22.6, y: 19.6, r: 0.15 }, { kind: 'post', x: 24, y: 34.2, r: 0.15 }, { kind: 'post', x: 11, y: 30.5, r: 0.15 },
   { kind: 'post', x: 44.2, y: 37.6, r: 0.15 }, { kind: 'post', x: 10.9, y: 44, r: 0.15 }, { kind: 'post', x: 13.4, y: 56.6, r: 0.15 }, { kind: 'post', x: 22.6, y: 56.6, r: 0.15 },
 ];
-
-/** The millpond, below the Rat Steps (Old Pennock's rods and seat come with the pond's district). */
-export const POND = { x: 26, y: 41.5, w: 6, h: 6.4 };
 
 /** The ground's paint: earth in the yards, flags on Kirkhill's close, a worn way down the lanes. */
 export const SOIL: Soil[] = [
@@ -109,7 +123,9 @@ export const SOIL: Soil[] = [
   // Rat Lane, the Lower Lane's west end and the slope down from Wall Lane; Rescue Row's lane and backs. (Mud never
   // over the pond itself: the water takes its colour from the ground painted under it.)
   { mat: 'earth', x: 13, y: 36, w: 30, h: 21.5 }, { mat: 'earth', x: 9, y: 36, w: 4, h: 21.5 },
-  { mat: 'mud', x: 13, y: 52.5, w: 12, h: 5 }, { mat: 'mud', x: 22.5, y: 40, w: 3.4, h: 9 }, { mat: 'mud', x: 22.5, y: 48.1, w: 12, h: 4.5 }, { mat: 'mud', x: 32.1, y: 40.5, w: 2, h: 8 }, { mat: 'mud', x: 14, y: 39.5, w: 5, h: 4 },
+  { mat: 'mud', x: 13, y: 52.5, w: 12, h: 5 }, { mat: 'mud', x: 22.5, y: 48.6, w: 12, h: 4 }, { mat: 'mud', x: 14, y: 39.5, w: 5, h: 4 },
+  // The pond's banks in grass, its little park (Kyle, 2026-11-16).
+  { mat: 'grass', ...PARK_GRASS },
   { mat: 'mud', x: 34, y: 46, w: 7, h: 11 }, { mat: 'earth', x: 41, y: 42.5, w: 14, h: 3 }, { mat: 'earth', x: 41, y: 48.5, w: 14, h: 9 },
   { mat: 'earth', x: 56.5, y: 0.5, w: 7, h: 57 },
 ];

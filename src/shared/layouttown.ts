@@ -9,6 +9,7 @@ import type { Life } from './townlife.js';
 import type { PropKind } from './props.js';
 import type { WorldState } from './story.js';
 import { DUCKS, QUIET, ROUNDS, STALL, moveBox, movePoint, overrideOf } from './layoutmove.js';
+
 import { ARRIVE, LEDGES, LH, LW, OWN_ROUNDS, POND, SOIL, planBlocks } from './layoutplan.js';
 
 /** What a building is, rather than a thing standing in the street: the plan has its own. */
@@ -69,7 +70,10 @@ export function layoutTown(w: WorldState, old: GameMap): GameMap {
   }
   const blocks = [...planBlocks(w, homesOf(old)), ...old.blocks.flatMap((b) => moveBlock(b) ?? [])];
   const npcs = (old.npcs ?? []).filter((n) => !QUIET.npcs.has(n.name)).flatMap((n) => moveNpc(n) ?? []);
-  const marks = (old.marks ?? []).flatMap((k) => moveBox(k) ?? []);
+  // (A mark on the ground that would land on the millpond is left out: the weeds along today's east lane came with
+  // the pond's district and ran right across the water. Kyle, 2026-11-16: "a weird line through the pond".)
+  const wet = (k: { x: number; y: number; w: number; h: number }) => k.x < POND.x + POND.w && k.x + k.w > POND.x && k.y < POND.y + POND.h && k.y + k.h > POND.y;
+  const marks = (old.marks ?? []).flatMap((k) => moveBox(k) ?? []).filter((k) => !wet(k));
   const life = (old.life ?? []).filter((l) => !QUIET.life.has(l.kind)).flatMap((l): Life[] => {
     if (l.kind === 'ducks') return [{ ...l, x: DUCKS[0][0], y: DUCKS[0][1], path: DUCKS }];
     const p = movePoint(l.x, l.y);
