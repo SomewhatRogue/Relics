@@ -69,7 +69,7 @@ export function useReflections(m: GameMap): () => void {
 }
 
 /** How much each thing moves and darkens. */
-const K = { treeBend: 0.16, bushBend: 0.06, flutter: 0.012, cloudScale: 9, cloudDrift: 0.7, cloudDark: 0.2, sheen: 0.16 };
+const K = { treeBend: 0.16, bushBend: 0.06, flutter: 0.012, cloudScale: 9, cloudDrift: 0.7, cloudDark: 0.2 };
 
 export const LIFE_GLSL = /* glsl */ `
 uniform float uLifeT; uniform float uLife; uniform sampler2D uRefl;
@@ -133,16 +133,7 @@ if (uLife > 0.5) {
 export function clouded(m: THREE.Material): void {
   chain(m, (sh) => {
     shadows(sh, '#include <map_fragment>');
-    // The wind over the grass: a gust passing lifts the green a shade (the blades turning their pale sides up), in
-    // dithered steps, rolling across a meadow a band at a time.
-    sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
-if (uLife > 0.5) {
-  vec3 gc = diffuseColor.rgb;
-  if (gc.g > gc.r * 1.05 && gc.g > gc.b * 1.1) {
-    float gs = lifeGust(vLifeW + vec2(0.0, 0.0), uLifeT) * (0.75 + 0.25 * sin(vLifeW.x * 3.1 + vLifeW.y * 2.3 + uLifeT * 4.0));
-    if (gs > bay4(floor(gl_FragCoord.xy)) * 0.8 + 0.1) diffuseColor.rgb = mix(gc, gc * vec3(1.12, 1.2, 1.02) + 0.02, ${K.sheen.toFixed(2)} / 0.16);
-  }
-}`);
+    // (No wind over the grass: its rolling bands of lighter green read as heat haze. Kyle, 2026-11-16: "Nix it".)
   }, '|lifefloor');
 }
 

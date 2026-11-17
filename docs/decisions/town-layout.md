@@ -312,3 +312,11 @@ Claude Opus 5.5
 - Full suite 1973 passed.
 
 Claude Opus 5.5
+
+## 2026-11-16: no wind over the grass (Kyle: "Wind is still too much and reads as heat or something. Nix it")
+
+- Small edit in the New look: characters chat's three/wind3d.ts, at Kyle's ask: the floor's grass sheen (a gust
+  lifting the green in rolling dithered bands, LIVING WORLD slice 3) taken out; it read as heat haze. The trees'
+  sway, the capes and the cloud shadows are as they were. No tests cover it; tsc clean.
+
+Claude Opus 5.5
