@@ -20,7 +20,7 @@ down by the millpond.
 - **Kirkhill (level 2), the top.** The church at the head of the Kirk Steps, its front looking down them; the
   graveyard beside it; Church Close, a flagged yard in front; the granary's plot (when the north fields are farmed).
 - **The town (level 1).** Lantern Square in the middle, big (19 by 16), the Last Lantern on its dais, the job board,
-  the works, the Roll, the well, the market stalls at its east corner. The town hall on its north side, its back to
+  the Roll, the well, the market stalls at its east corner. The town hall on its north side, its back to
   Kirkhill's wall, its front on the square. Lanes out of it every way:
   - **Smiths' Lane** west: the forge on its north side, a row of town houses facing it on the south, the barracks
     across its end, front looking down the lane.
@@ -33,14 +33,16 @@ down by the millpond.
   - The counting house on the square's west side, its front on the square.
 - **The lower quarter (level 0), the bottom.** Down the Rat Steps or the East Stair from the square's south edge,
   which is a parapet looking over it. The Lower Lane runs along the foot of the wall, a yard below the Rat Steps.
-  The millpond below the Rat Steps; the town works beside it, east of the Rat's front (Kyle). The whole end in dirt
+  The millpond below the Rat Steps; the town works beside it, east of the Rat's front (Kyle, 2026-11-15: Judd's crew
+  and their board off the square); the sewer grate and Cobb to the right of the pond, a way off (Kyle, 2026-11-16).
+  Whisper's back door is still the Rat's back. The whole end in dirt
   and mud. The Drowned Rat in the bottom-left corner, out of the square's view, its front
   toward the camera on Rat Lane along the town's south edge, which is no wall but a cliff: the town on a bluff over
-  a gorge with a river in it, a timber rail along the brink (Kyle, 2026-11-15), the sewer grate by it (Cobb, Whisper's back door). Rescue Row
+  a gorge with a river in it, a timber rail along the brink (Kyle, 2026-11-15), Rescue Row
   to the east, its eight homes in two rows facing each other across the row.
   (Kyle, 2026-11-15; the sketch predates this: the map is now 64 by 58.)
 - **The square kept open** (Kyle, 2026-11-15): never hidden behind anything in it. Everything tall stands flush
-  against its north edge with nothing walkable behind it: the job and works boards, the market's two stalls side by
+  against its north edge with nothing walkable behind it: the job board, the market's two stalls side by
   side against the hall and the house at Market Lane's mouth. No trees in its middle; the gallows (under siege)
   against the tower. The market's stalls bigger (3.6 by 2.6). Back from a job you stand a step in front of the job
   board.
@@ -102,7 +104,7 @@ pastimes.ts, publicworks.ts, statue.ts, mend.ts, siege.ts, ground.ts). Rather th
 graves, Rescue Row, the millpond, the butts, the barracks' yard, the Old Quarter...), each with where it goes in the
 new town and a quarter turn if it's turned (the barracks and the infirmary now front east, the Drowned Rat north).
 Whatever stands in a district goes with it: the smith stays at his anvil before the forge, the pots stay by the
-church door, Judd's crew in the square. What falls in no district is left out and listed in the log. New things
+church door, Judd's crew at their stall. What falls in no district is left out and listed in the log. New things
 added to those files later come along by the same rule.
 
 The guards' rounds (Sergeant Dunn, Watchmen Hob and Pike, Orla) are redrawn on the new lanes.

@@ -1,8 +1,9 @@
 /**
- * A runner's way through the street (runner.ts): around the buildings, not through them, on a half-tile
- * grid, then pulled straight wherever the way is clear. Drawing only; nothing the room decides.
+ * A runner's way through the street (runner.ts): around the buildings, not through them, and on the new town's
+ * levels from one to the next only by its steps (as shared/arena.ts lets a body), on a half-tile grid, then pulled
+ * straight wherever the way is clear. Drawing only; nothing the room decides.
  */
-import { doorAt, type GameMap } from '../shared/arena';
+import { doorAt, inRamp, levelAt, type GameMap } from '../shared/arena';
 
 type P = { x: number; y: number };
 const CELL = 0.5, MARGIN = 0.35;
@@ -13,10 +14,19 @@ export function blocked(map: GameMap, x: number, y: number): boolean {
   return map.blocks.some((b) => x > b.x - MARGIN && x < b.x + b.w + MARGIN && y > b.y - MARGIN && y < b.y + b.h + MARGIN);
 }
 
-/** Nothing in the way on the straight line from a to b. */
+/** From one point to the next beside it: the same level, or on the steps between two. */
+export const stepOk = (map: GameMap, ax: number, ay: number, bx: number, by: number) =>
+  !map.ledges?.length || levelAt(map, ax, ay) === levelAt(map, bx, by) || inRamp(map, ax, ay) || inRamp(map, bx, by);
+
+/** Nothing in the way on the straight line from a to b (no building, no drop or climb off the steps). */
 export function clearLine(map: GameMap, a: P, b: P): boolean {
   const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 0.2);
-  for (let i = 1; i < n; i++) if (blocked(map, a.x + ((b.x - a.x) * i) / n, a.y + ((b.y - a.y) * i) / n)) return false;
+  let px = a.x, py = a.y;
+  for (let i = 1; i <= n; i++) {
+    const x = a.x + ((b.x - a.x) * i) / n, y = a.y + ((b.y - a.y) * i) / n;
+    if ((i < n && blocked(map, x, y)) || !stepOk(map, px, py, x, y)) return false;
+    (px = x), (py = y);
+  }
   return true;
 }
 
@@ -34,6 +44,7 @@ export function wayThrough(map: GameMap, a: P, b: P): P[] {
       // (The ends may sit by a wall, a doorway: they're always allowed.)
       if (ni < 0 || nj < 0 || ni >= W || nj >= H || from[k] >= 0) continue;
       if (!free(ni, nj) && k !== ei + ej * W) continue;
+      if (!stepOk(map, (i + 0.5) * CELL, (j + 0.5) * CELL, (ni + 0.5) * CELL, (nj + 0.5) * CELL)) continue;
       if (di && dj && (!free(i + di, j) || !free(i, j + dj))) continue;
       from[k] = c, q.push(k);
     }

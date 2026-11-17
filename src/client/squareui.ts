@@ -11,7 +11,7 @@ import { openWorks } from './worksui';
 import { rollHtml, wireRoll } from './rollui';
 import { relicRollHtml } from './relicrollui';
 import { townSays } from '../shared/townsays';
-import type { SpotId } from '../shared/town';
+import { LAYOUT, type SpotId } from '../shared/town';
 import type { Game } from './game';
 import { line } from './speech';
 import { DEEP_WORDS } from './deepwords';
@@ -36,7 +36,12 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 const LOCKED: Record<string, string> = {
   keep: "Barred from the inside since the siege broke. Eleven years. Some nights there's a light in the high window. Nobody on the watch will say who's carrying it.",
   chapel: 'Planks across the door, nailed from outside, and prayers chalked over the planks. Whatever the church put in there, it was keeping it in.',
-  oldquarter: 'Siege rubble chokes the east lane, roof beams and somebody\'s bed. The Old Quarter is past it. The town can clear it together, coin by coin: PUBLIC WORKS, in the square.',
+  // (The works stall: by the millpond in the new town, in the square in the old: shared/town.ts LAYOUT.)
+  get oldquarter() {
+    return LAYOUT.town
+      ? "Siege rubble chokes the east lane, roof beams and somebody's bed. The Old Quarter is past it. The town can clear it together, coin by coin, at PUBLIC WORKS down by the millpond."
+      : 'Siege rubble chokes the east lane, roof beams and somebody\'s bed. The Old Quarter is past it. The town can clear it together, coin by coin: PUBLIC WORKS, in the square.';
+  },
 };
 
 /** Returns true if it handled the spot. */

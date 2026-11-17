@@ -203,3 +203,22 @@ Claude Opus 5.5
 - Now due (Kyle confirmed the town): trainers' directions, quest markers, first-time runners (the to-do above).
 
 Claude Opus 5.5
+
+## 2026-11-16: the to-dos done (Kyle: "fix it")
+
+Kyle asked for these, so small edits in Town quests' files (runnerpath.ts) and in squareui.ts and overlay3d.ts.
+- **Trainers' directions** follow the town (`LAYOUT.town`; `?layout=old` keeps the old words): Maeve "the hunters'
+  lodge east of the square, by the archery butts", Whisper "the back of the Drowned Rat, down the steps in the lower
+  quarter", Isolde "the church up on Kirkhill, north of the square"; Cole and Vell unchanged. The Old Quarter panel:
+  "...coin by coin, at PUBLIC WORKS down by the millpond." Lore keeper and line editor passed them (one call each).
+  `TRAINERS` entries are built by `trainer()` with a real getter (a spread would freeze the text at load).
+- **Quest marks:** the targets were already the new town's own spots, doors and people; what was off was the height.
+  Flat (scene.ts) and 2.5D (overlay3d.ts) now mark a door, spot or person standing still at their level.
+- **First-time runner:** runnerpath.ts changes level only on the steps (`stepOk`, the sim's own rule: a level change
+  only on a ramp), in both its straight-line check and its grid search. tests/runnerlevels.test.ts: from every door
+  to the board, Public Works and the north gate, never off the steps, most ways going up or down a level; and the
+  directions switch with the town. The arrival at the north gate stays as it was.
+- docs/design/town-layout.md: the grate and Cobb by the millpond, the works off the square (the lore keeper's notes).
+- Full suite 1972 passed.
+
+Claude Opus 5.5

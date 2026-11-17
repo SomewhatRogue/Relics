@@ -573,7 +573,9 @@ export class Scene {
     const tall = this.vh > this.vw * 1.2, view = { vw: this.vw, vh: this.vh, top: tall ? this.vh * 0.2 : 20, bottom: tall ? this.vh * 0.3 : 20 };
     behindMarks(c, room.survivors ?? [], cx, cy, view, now);
     // What the goal is about: a gold mark over each, or a point at the edge toward the nearest.
-    const markLights = drawQuestMarks(c, this.marks, (t) => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : onScreen(t)), cx, cy, view, me ?? null, now, this.markEach);
+    // (A door, a spot or someone standing on the new town's raised levels: marked over them up there.)
+    const markAt = (t: (typeof this.marks)[number]): [number, number] => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : [onScreen(t)[0], onScreen(t)[1] - lv(t.x, t.y)]);
+    const markLights = drawQuestMarks(c, this.marks, markAt, cx, cy, view, me ?? null, now, this.markEach);
     if (!room.indoors) markLights.push(...drawDoorMarks(c, this.doors, cx, cy));
     if (me) {
       // Goblins on your trail off screen: a red point at the edge toward each, and a count.

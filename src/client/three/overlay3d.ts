@@ -20,7 +20,9 @@ import { OX, OY, PX } from '../world';
 import type { Lerp } from './actors3d';
 import { BOXFIGS } from './look';
 import { ROWS, boardRows } from '../voteboards';
-import { WALL_H } from './ground';
+import { LEDGE_H, WALL_H } from './ground';
+import { stacked } from './layoutledges';
+import { levelAt } from '../../shared/arena';
 import { cueAt, drawCue, drawWayWord } from '../waycues';
 
 export type Proj = (x: number, y: number, z: number) => [number, number];
@@ -153,7 +155,9 @@ export class Overlay {
     const g = this.g, bob = Math.round(Math.sin(now * 4) * 1.5), pad = 8, top = this.H > this.W * 1.2 ? Math.round(this.H * 0.2) : pad;
     for (const t of m.marks) {
       const [tx, ty] = t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : [t.x, t.y];
-      let [x, y] = P(tx, t.kind === 'door' ? 2.6 : t.kind === 'boss' ? 3.4 : t.kind === 'folk' ? 2.75 : t.kind === 'hall' ? 1.6 : 2.0, ty);
+      // (On the new town's raised levels, the level's height under it too: layoutledges.ts.)
+      const up = t.id === undefined && stacked(room.map) ? levelAt(room.map, tx, ty) * LEDGE_H : 0;
+      let [x, y] = P(tx, up + (t.kind === 'door' ? 2.6 : t.kind === 'boss' ? 3.4 : t.kind === 'folk' ? 2.75 : t.kind === 'hall' ? 1.6 : 2.0), ty);
       const off = x < pad || y < top || x > this.W - pad || y > this.H - pad;
       x = Math.min(this.W - pad, Math.max(pad, x));
       y = Math.min(this.H - pad, Math.max(top, y));

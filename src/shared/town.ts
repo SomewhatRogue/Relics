@@ -69,13 +69,15 @@ const oldSpots = (w: WorldState) => SPOTS.filter((s) => (s.id !== 'market' || !m
 export const HOUSES = [[34, 30.5], [38, 30.5], [42, 30.5], [46, 30.5], [34, 35], [38, 35], [42, 35], [46, 35]] as const;
 export const housesFor = (rescued: number) => Math.min(HOUSES.length, Math.floor(rescued / 2));
 
-/** The class trainers, where they are (each tells the others' whereabouts). */
+/** The class trainers, where they are (each tells the others' whereabouts): in the new town (`LAYOUT.town`), or the
+ *  old one. */
+const trainer = (name: string, now: string, old = now) => ({ name, get where() { return LAYOUT.town ? now : old; } });
 export const TRAINERS = {
-  WARRIOR: { name: 'MASTER COLE', where: 'the barracks by the west wall' },
-  RANGER: { name: 'HUNTRESS MAEVE', where: "the hunters' lodge past the archery butts, east of the square" },
-  ROGUE: { name: 'WHISPER', where: 'the back of the Drowned Rat, down south by the sewer grate' },
-  MAGE: { name: 'MAGISTER VELL', where: 'the old tower in the north-east, by the keep' },
-  HEALER: { name: 'MOTHER ISOLDE', where: 'the church in the north-west' },
+  WARRIOR: trainer('MASTER COLE', 'the barracks by the west wall'),
+  RANGER: trainer('HUNTRESS MAEVE', "the hunters' lodge east of the square, by the archery butts", "the hunters' lodge past the archery butts, east of the square"),
+  ROGUE: trainer('WHISPER', 'the back of the Drowned Rat, down the steps in the lower quarter', 'the back of the Drowned Rat, down south by the sewer grate'),
+  MAGE: trainer('MAGISTER VELL', 'the old tower in the north-east, by the keep'),
+  HEALER: trainer('MOTHER ISOLDE', 'the church up on Kirkhill, north of the square', 'the church in the north-west'),
 };
 
 export const W = 62, H = 40;
