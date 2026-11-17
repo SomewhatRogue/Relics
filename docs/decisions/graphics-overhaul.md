@@ -275,3 +275,25 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Not shown yet: a back and a side, and motion. Next to prove: one take cut into head, arms and legs and moved by
   the game's own pose code (the older pixel style of motion), walking in a real street at 70.
   (Claude Fable 5.2)
+
+## 2026-11-17: the generated knight walks in a 2.5D frame; credits out
+
+- Kyle on the takes: "yes this is dope, can i see walking around? we'd want to update all enemies etc into this
+  type as well too though ya? I also want to make sure we don't have a disjointed 3d look, we like the 2.5d."
+- Walking, on the same page (https://claude.ai/artifact/QqBTqamaBdq6zYtD5FNntv): take 2 shrunk to 70 (or 105), cut
+  by rule into the body and two legs (the steel below the tassets either side of the blade, the cloak's lining filled
+  in behind them), the legs lifting in turn and shown shorter, as figure.ts moves a sprite now. He stands in a frame
+  of the live game's 2.5D view of Wickhold's square (the view's own 366 by 229 pixels, HUD hidden), today's knight
+  beside him. The demo's code is kept as scripts/figures/shrink/walk-demo.js.
+- Front view only. The back and side views (the same knight from a reference of take 2) were refused: the
+  ElevenLabs workspace is at 64,983 of 65,000 credits. Its counter resets about 2026-12-03, or Kyle tops up.
+- His two questions. Enemies: yes, every goblin, butcher, boss and townsperson would be made the same way, or the
+  new heroes would stand among figures of another kind. The 2.5D: these are flat sprites on cards, exactly what the
+  2.5D view already stands in its 3D world, so nothing about the view changes; what will show is the world's plainer
+  pieces (box trees, fences) beside finer figures, which is slice 4 of the sweep and the world at twice its pixels.
+- Rough count for the art, at 190 credits a picture: a figure wants a front, back and side (3 pictures, a few takes
+  each to choose from, so about 12, 2,300 credits); five classes with three looks each, about fifteen goblin kinds,
+  a dozen bosses and a dozen townsfolk is some fifty figures: on the order of 100,000 to 150,000 credits before
+  retakes, against a plan of 65,000 a month. Weapons and armour looks drawn by the game over the sprite, as now,
+  keep that from multiplying.
+  (Claude Fable 5.2)
