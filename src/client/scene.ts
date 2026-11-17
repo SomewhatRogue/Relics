@@ -192,7 +192,7 @@ export class Scene {
     const zoom = (globalThis as { __zoom?: number }).__zoom;
     // (A step further back since the heroic proportions, Kyle 2026-11-12: "scale it back down but keep the same
     // fidelity": the tall heroes about the old ones' size on screen, more of the town round them.)
-    // (CAMERA: WIDE, a step further out to try: camwide.ts.)
+    // (CAMERA: WIDE, a step further out, the player's choice: camwide.ts.)
     this.scale = zoom ?? camScale(W, H);
     this.vw = Math.ceil(W / this.scale);
     this.vh = Math.ceil(H / this.scale);

@@ -1,9 +1,9 @@
 /**
- * The camera to try (docs/design/lived-in-world.md slice 5, after Riteborn's small heroes in a wide view):
+ * How far out the camera sits, a player's choice (docs/design/lived-in-world.md slice 5, after Riteborn's wide view):
  * CLOSE, as it is, or WIDE, one whole step further out in both views (scene.ts and three/view3d.ts read the
  * step from here, so a tile stays a whole number of screen pixels and the two views keep showing the same
  * floor). A button in the options box flips it live; remembered on this device; `?cam=wide` or `?cam=close`
- * in the address wins. Kyle decides which stays.
+ * in the address wins. Kyle kept it as an option (2026-11-16), CLOSE the default.
  */
 import './camwide.css';
 

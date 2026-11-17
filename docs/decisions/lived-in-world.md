@@ -46,3 +46,9 @@ maps) are logged in docs/decisions/art.md, 2026-11-15. Slice 3 (drawn buildings 
   the moss speckle on the new town's cobbles and roofs, the town layout and dark and gold work: not touched.
 - scripts/air-look.cjs closes each page (it ran out of room on its third).
   (Claude Opus 5.5)
+
+## 2026-11-16: CAMERA stays as an option
+
+- Kyle likes being able to zoom from the options box, so CAMERA: CLOSE or WIDE stays as a player's choice instead of
+  a trial to settle. CLOSE is the default; the choice is remembered on each device.
+  (Claude Opus 5.5)
