@@ -237,4 +237,21 @@ Claude Opus 5.5
   north (the same exclusions as the profile); scene.ts and three/cards3d.ts pass `at.fy`. For the Side view chat:
   small edits in npcs.ts. Screenshots: Dunn north from behind, south from the front. Full suite 1973 passed.
 
+## 2026-11-16: doors on the side you go in by; the forge opened up (Kyle's playtest, general.md)
+
+- **Side and back doors, 2.5D** (three/turn3d.ts, new; houses3d.ts `buildBlock`): a building with a door whose
+  `face` isn't the front is built facing south on its footprint turned round, then turned to face its door: the
+  barracks, counting house and infirmary to the east, the keep, tower and old chapel to the west, Rescue Row's
+  north-facing homes (the Coopers' among them) to the north. Its door, windows, shields and signs go with it; its
+  woodpile stays; flames, the chimney's and the flue's smoke (`chimneyAt`, `flueAt`) where they end up. Not under
+  the parked `?street` kit.
+- **Side doors, flat** (client/doorside.ts, new): no door on the front; on the building's edge at the doorstep,
+  seen edge-on: the doorway's frame and dark, the door swung open with its planks to you, a step; barred planks on
+  the keep. A back door shows none on the front (the doorstep's arrow says where). blocks.ts paints from it,
+  darkdress.ts's columns and shutdraw.ts's boards and doorway glow follow it (no columns on a side door).
+- **The forge:** the row of four little houses across Smiths' Lane is now its two ends (layoutplan.ts), so the
+  forge's door is seen down the lane between them in both views. Reachability tests unchanged.
+- `scripts/town-look.cjs`: views `k` (barracks), `f` (forge), `c` (counting house).
+- Full suite 1973 passed.
+
 Claude Opus 5.5

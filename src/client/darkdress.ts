@@ -5,6 +5,7 @@
  * in the final colours, onto the block's cached canvas (blocks.ts), so it costs nothing per frame.
  * three/darkdress3d.ts is the same for 2.5D.
  */
+import { doorSlot } from './doorside';
 import type { Block } from '../shared/arena';
 import { MOSS } from './darkgold';
 
@@ -52,11 +53,12 @@ export function dressFlat(rect: Rect, b: Block, w: number, roofH: number, tall: 
   rect(sx + 3 + rnd(Math.max(1, sw - 8)), foot - 2, 1, 2, STONE[3]);
 }
 
-/** The door's left and right x on the canvas and its height, as blocks.ts paints it; null if it has none. */
+/** The door's left and right x on the canvas and its height, as blocks.ts paints it; null if it has none on its
+ *  front (doorside.ts: one on a side or the back has no columns). */
 function doorSpan(b: Block, w: number): [number, number, number] | null {
   if (!b.door && b.kind !== 'den' && b.kind !== 'granary') return null;
-  const dw = b.kind === 'barn' ? 24 : b.kind === 'den' ? 14 : 12, x = Math.round(w / 2 - dw / 2);
-  return [x, x + dw, b.kind === 'barn' ? 36 : 28];
+  const s = doorSlot(b, w, b.kind === 'barn' ? 24 : b.kind === 'den' ? 14 : 12);
+  return s && [s.x, s.x + s.w, b.kind === 'barn' ? 36 : 28];
 }
 
 /** A heap of fallen stones against the wall, its foot at `foot`. */

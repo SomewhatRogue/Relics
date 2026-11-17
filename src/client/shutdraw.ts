@@ -10,6 +10,7 @@ import type { Block } from '../shared/arena';
 import type { House } from '../shared/houses';
 import type { ArenaRoom } from '../sim/room';
 import { windowsOf } from './cottage';
+import { doorSlot } from './doorside';
 import type { Ctx } from './draw';
 
 type Rect = (x: number, y: number, w: number, h: number, c: string) => void;
@@ -18,8 +19,9 @@ const PLANK = ['#b09a72', '#9a845e', '#c4ae84'];
 /** The door's box on the house's canvas (as blocks.ts paints a door). */
 export function doorBox(b: Block, w: number, roofH: number, tall: number): { x: number; y: number; w: number; h: number } {
   // (The same door blocks.ts paints: sized to the tall heroes, 2026-11-12.)
-  const dw = b.kind === 'barn' ? 24 : 12, dh = Math.min(tall - 4, b.kind === 'barn' ? 36 : 28);
-  return { x: Math.round(w / 2 - dw / 2), y: roofH + tall - dh, w: dw, h: dh };
+  // (Round the side or at the back as doorside.ts puts it; none on the front: a box off the canvas.)
+  const dh = Math.min(tall - 4, b.kind === 'barn' ? 36 : 28), s = doorSlot(b, w, b.kind === 'barn' ? 24 : 12);
+  return s ? { x: s.x, y: roofH + tall - dh, w: s.w, h: dh } : { x: -99, y: 0, w: 0, h: 0 };
 }
 
 /** Boarded up or burnt out, over the painted house (its own door was never painted: it has none). */
@@ -55,6 +57,7 @@ export const enterable = (b: Block) => !!b.door && b.look !== undefined && (b.ki
 export function drawDoorGlow(c: Ctx, b: Block, x: number, top: number, w: number, roofH: number, tall: number): void {
   if (!enterable(b) || b.fate === 'burning') return;
   const d = doorBox(b, w, roofH, tall), g = c.glow, t = c.now + b.x * 0.37;
+  if (!d.w) return;
   g.globalAlpha = 0.5 + 0.18 * Math.sin(t * 7) + 0.08 * Math.sin(t * 17);
   g.fillStyle = '#a8441a', g.fillRect(Math.round(x + d.x + 1), Math.round(top + d.y + 2), d.w - 2, d.h - 2);
   g.fillStyle = '#ff9a3c', g.fillRect(Math.round(x + d.x + 1), Math.round(top + d.y + d.h - 4), d.w - 2, 3);

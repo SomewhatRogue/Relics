@@ -10,12 +10,15 @@ import { doorAt, type Block } from '../../shared/arena';
 import { Boxes, Seed, jit } from './boxes';
 import { asLamp } from './lamps3d';
 import { G } from './mats';
+import { asFront, turnOf, turned } from './turn3d';
 
 /** The roof's span (x) left open: the counting house's fallen-in end. */
 export const roofGap = (b: Block): [number, number] | undefined => (b.door === 'bank' ? [b.x + b.w * 0.58, b.x + b.w * 0.94] : undefined);
 
 /** The top of a hall's flue (x, y, z): the tower's on its cone, the forge's stack. Smoke rises off it (smoke3d.ts). */
 export function flueAt(b: Block, h: number): [number, number, number] {
+  // (A hall turned to face its door, turn3d.ts: its flue where it ends up.)
+  if (turnOf(b)) return turned(b, flueAt(asFront(b), h));
   if (b.door === 'forge') return [b.x + b.w - 1.0, h + 2.32, b.y + 0.6];
   const half = Math.max(b.w, b.h) / 2 + 0.25;
   return [b.x + b.w / 2 + half * 0.66, h + half * 2.4 * 0.5 + 0.1, b.y + b.h / 2];

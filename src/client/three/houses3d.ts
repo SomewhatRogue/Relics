@@ -23,12 +23,12 @@ import { dress3d } from './darkdress3d';
 import { STREET } from './streetkit';
 import { kitBlock } from './streetbuild';
 import { kitFurniture } from './streetprops';
+import { ROOFED, asFront, turnOf, turned } from './turn3d';
 
 /** Eave height (tiles) by kind. */
 // (Walls 1.7 times their first height since the heroic proportions, Kyle 2026-11-12: "houses now look way too tiny";
 // the heroes stand near two tiles, a house's wall a head over them, as the flat view's: ../blocklook.ts.)
 export const TALL: Partial<Record<Block['kind'], number>> = { house: 2.45, barn: 3.2, hall: 2.7, church: 4.1, forge: 3.05, tavern: 2.9, granary: 3.2, tower: 6.1, shack: 1.6, den: 1.2 };
-const ROOFED = new Set<Block['kind']>(['house', 'barn', 'hall', 'church', 'forge', 'tavern', 'granary', 'tower', 'shack', 'den']);
 const STONE = new Set<Block['kind']>(['church', 'forge', 'tower', 'hall']);
 
 export interface Built {
@@ -51,6 +51,11 @@ export const blockState = (b: Block) => (b.ruined ? 2 : b.maxHp && (b.hp ?? 0) <
  */
 export function chimneyAt(b: Block, home: House | null): [number, number, number] | null {
   if (b.kind !== 'house') return null;
+  // (A house turned to face its door, turn3d.ts: its chimney where it ends up.)
+  if (turnOf(b)) {
+    const c = chimneyAt(asFront(b), home);
+    return c && turned(b, c);
+  }
   const H = TALL.house!, top = H + (b.h / 2) * Math.tan(0.62) + 0.35;
   return [home ? b.x + (chimneyOf(asBuilt(b, home), Math.round(b.w * 16)) + 3) / 16 : b.x + b.w - 0.6, top, b.y + 0.5];
 }
@@ -60,7 +65,31 @@ const shade = (c: number, k: number) => {
   return col.setRGB(col.r * k, col.g * k, col.b * k).getHex();
 };
 
+/**
+ * A block in 3D. One whose way in isn't its front (turn3d.ts) is built facing south on its footprint turned round,
+ * then turned to face its door; its woodpile stays where it stands.
+ */
 export function buildBlock(b: Block, kin?: Kindling | null): Built {
+  const a = turnOf(b);
+  if (!a) return buildFront(b, kin);
+  const built = buildFront(asFront(b), null), cx = b.x + b.w / 2, cz = b.y + b.h / 2;
+  const turn = new THREE.Group(), holder = new THREE.Group();
+  built.group.position.set(-cx, 0, -cz);
+  turn.add(built.group);
+  turn.position.set(cx, 0, cz);
+  turn.rotation.y = a;
+  holder.add(turn);
+  if (kin) {
+    const K = new Boxes(), st = blockState(b);
+    woodpile(K, kin, st % 2 === 1, st >= 4);
+    const km = K.mesh(VCOL);
+    if (km) holder.add(km);
+  }
+  const fires = built.fires.map(([x, y, z, k]): Built['fires'][number] => [...turned(b, [x, y, z]), k]);
+  return { ...built, group: holder, fires };
+}
+
+function buildFront(b: Block, kin?: Kindling | null): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
   // The new look's stalls, benches and carts from the kit (streetprops.ts, `?hd&street`).
   const kf = STREET ? kitFurniture(b.kind, b.x, b.y, b.w, b.h) : null;

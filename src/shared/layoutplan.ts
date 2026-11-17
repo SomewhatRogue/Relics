@@ -44,7 +44,9 @@ export function planBlocks(w: WorldState, homes: number): Block[] {
     // Smiths' Lane: the forge on its north side, houses either side of it and facing it; the barracks across its end.
     bl(14, 14.5, 7.5, 6, 'forge', { label: 'FORGE', door: 'forge' }),
     house(9.5, 14.5, 2.25, 6), house(11.75, 14.5, 2.25, 6),
-    ...[0, 1, 2, 3].map((i) => house(12.5 + i * 2.625, 23.5, 2.625, 3.5, 'S')),
+    // (Only the two ends of the row across from it: the forge's door seen down the lane between them, Kyle's
+    // playtest 2026-11-16: it hid behind the middle two.)
+    ...[0, 3].map((i) => house(12.5 + i * 2.625, 23.5, 2.625, 3.5, 'S')),
     bl(1.5, 17, 7.5, 10, 'hall', { label: 'BARRACKS', door: 'hall', face: 'W' }),
     bl(6, 13.6, 2.2, 0.5, 'rack'),
     // The counting house on the square's west side; houses down Wall Lane; the infirmary across from them.

@@ -4,6 +4,7 @@
  * block is its footprint with a front wall rising from its bottom edge and a roof over it. Wooden ones
  * on a job char as they're hurt, burn with flames and smoke, and fall in to rubble.
  */
+import { doorSlot, drawSideDoor } from './doorside';
 import { drawGate } from './gatedraw';
 import type { Block, Round } from '../shared/arena';
 import { drawLit, houseOf, paintHouse } from './cottage';
@@ -111,22 +112,24 @@ function furnished(g: CanvasRenderingContext2D, b: Block, rect: Rect, w: number,
   furnish(g, b, rect, w, roofH, wallY, l);
 }
 
-/** A door in the middle of the front wall. */
+/** A door in the middle of the front wall; round the corner for a side door, none for one at the back (doorside.ts). */
 function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
   if (!b.door && b.kind !== 'den' && b.kind !== 'granary') return;
   // (Sized to the tall heroes, 2026-11-12: a little over their height; shutdraw.ts doorBox the same.)
-  const dw = b.kind === 'barn' ? 24 : b.kind === 'den' ? 14 : 12, dh = Math.min(l.tall - 4, b.kind === 'barn' ? 36 : 28);
-  rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, dh, b.kind === 'den' ? '#0d0b10' : '#2a1e14');
-  if (b.kind !== 'den') rect(Math.round(w / 2 - dw / 2), wallY + l.tall - dh, dw, 1, '#5a3d22');
+  const dh = Math.min(l.tall - 4, b.kind === 'barn' ? 36 : 28), slot = doorSlot(b, w, b.kind === 'barn' ? 24 : b.kind === 'den' ? 14 : 12);
+  if (!slot) return;
+  const dw = slot.w;
+  rect(slot.x, wallY + l.tall - dh, dw, dh, b.kind === 'den' ? '#0d0b10' : '#2a1e14');
+  if (b.kind !== 'den') rect(slot.x, wallY + l.tall - dh, dw, 1, '#5a3d22');
   // Detail (the art pass): its planks, iron hinge straps and a handle.
   if (b.kind !== 'den') {
-    const dx = Math.round(w / 2 - dw / 2);
+    const dx = slot.x;
     for (let x = dx + 3; x < dx + dw - 1; x += 3) rect(x, wallY + l.tall - dh + 1, 1, dh - 1, '#1e150e');
     for (const y of [wallY + l.tall - dh + 4, wallY + l.tall - 6]) rect(dx, y, Math.min(6, dw - 2), 1, '#6a6674');
     rect(dx + dw - 3, wallY + l.tall - Math.round(dh / 2), 1, 2, '#b89a4a');
   }
   // Barred: planks nailed across.
-  if (b.locked) for (const k of [0.35, 0.7]) rect(Math.round(w / 2 - dw / 2) - 2, Math.round(wallY + l.tall - dh * k), dw + 4, 2, '#7a5a34');
+  if (b.locked) for (const k of [0.35, 0.7]) rect(slot.x - 2, Math.round(wallY + l.tall - dh * k), dw + 4, 2, '#7a5a34');
 }
 
 /** (x, y) is the block's top-left on screen (the footprint's corner). */
@@ -154,6 +157,8 @@ export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean):
   if (!got || got.s !== st) cache.set(b, (got = { s: st, c: paint(b, st) }));
   const cv = got.c, l = LOOK[b.kind], tall = st === 2 ? RUBBLE : l.tall, top = Math.round(y - tall);
   c.lit.drawImage(cv, Math.round(x), top);
+  // A side door on its edge, where you go in (doorside.ts).
+  if (st !== 2 && b.door) drawSideDoor(c.lit, b, x, y, Math.min(l.tall - 4, 28));
   if (st === 2) {
     // Embers in the ash.
     for (let i = 0; i < 4; i++) if (Math.floor(c.now * 3 + i * 1.7 + b.x) % 3 === 0) {
