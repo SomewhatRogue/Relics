@@ -14,7 +14,7 @@ import { drawBlasts } from './blastdraw';
 import { pulledAt } from './wave2ground';
 import { drawWet } from './wetdraw';
 import { feetBand, topPush, upright } from './phoneband';
-import { ARENA, doorAt, npcAt, type GameMap } from '../shared/arena';
+import { ARENA, currentMap, doorAt, npcAt, type GameMap } from '../shared/arena';
 import { rats } from './rats';
 import { drawRat } from './ratdraw';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
@@ -99,6 +99,7 @@ import { flashOf } from '../sim/stormshape';
 import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
 import { drawSpellGround, drawSpellSky, spellLightsFlat } from './spellground';
+import { drawDoorsteps } from './doorsteps';
 import { drawHuntMarks } from './signdraw';
 import { drawMendMark } from './mendmark';
 import { skyFlash } from './skystrikedraw';
@@ -154,7 +155,9 @@ export class Scene {
   private hound(items: { y: number; draw: () => void }[], c: Ctx, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number, cx: number, cy: number, now: number, me?: Hero): void {
     const a = houndAt(h, ax, ay, hx, hy, now), tx = a ? a.x : ax, ty = a ? a.y : ay, x = OX + tx * PX, y = OY + ty * PX;
     const o = { ...(a ? { mood: a.mood, fx: a.fx, down: a.down } : {}), look: h.houndLook, name: houndTag(h, d, tx, ty, me, !!a), seed: seedOf(h.id) };
-    items.push({ y, draw: () => drawHound(c, d, x - cx, y - cy, o) });
+    // (At the level it's on, on the new town's raised levels.)
+    const up = lifter(currentMap())(tx, ty);
+    items.push({ y, draw: () => drawHound(c, d, x - cx, y - up - cy, o) });
   }
 
   private heldUp(c: Ctx, x: number, y: number, t: number): void {
@@ -325,8 +328,10 @@ export class Scene {
     // A Cleric raising a friend kneels by them (kneel.ts).
     noteKneels(room.heroes, room.time);
     for (const h of others) {
-      const x = OX + h.x * PX, y = OY + h.y * PX;
-      items.push({ y, draw: () => drawHero(c, h, x - cx, y - cy, false, room.time) });
+      // (At the level they stand on, as your own hero is: on the new town's raised levels they were drawn at the
+      // ground's, half hidden by the level's face, 2026-11-16.)
+      const x = OX + h.x * PX, y = OY + h.y * PX, up = lv(h.x, h.y);
+      items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, false, room.time) });
       // Another player's Ranger: their hound at heel, as this screen walks it (idlehound.ts).
       const d = companion(h, now);
       if (d) this.hound(items, c, h, d, d.x, d.y, h.x, h.y, cx, cy, now, me);
@@ -542,6 +547,8 @@ export class Scene {
     drawSkills(c, room, cx, cy);
     // A staff's ring of fire or charged ring, a wand's storm stream (spellground.ts).
     drawSpellGround(c.glow, room, cx, cy);
+    // Each door's step, its way in (doorsteps.ts).
+    drawDoorsteps(c.glow, room, meId, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], PX);
     drawFound(c, room, cx, cy);
     // At a fork, both ways out glow, each with its name.
     for (const r of map.roads ?? []) {

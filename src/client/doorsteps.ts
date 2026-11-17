@@ -1,0 +1,56 @@
+/**
+ * Every door's step, so you can tell where to go in (Kyle, 2026-11-16: "if it has a side door, it's hard to
+ * know this is the entrance"): on the ground where you stand to go in (shared/arena.ts doorAt), at its level,
+ * a warm patch of light and a chevron pointing the way in, faint from afar, brighter and bobbing as you come
+ * near. Drawn on the glow layer of either view through its projection `P(x, up, y)` (tiles), as the spells'
+ * ground marks are (spellground.ts). Doors locked, burning or in ruins get none.
+ */
+import { doorAt, levelAt, pushDir, type GameMap } from '../shared/arena';
+import type { ArenaRoom } from '../sim/room';
+
+type Proj = (x: number, y: number, z: number) => [number, number];
+
+/** A level's height in tiles (world.ts LIFT 12 px, three/ground.ts LEDGE_H). */
+const LEVEL = 0.75;
+/** Tiles from a door within which its mark brightens, and its faint and full strength. */
+const NEAR = 5, FAINT = 0.55, FULL = 1;
+const WARM = ['#ffcf7a', '#fff2c8'];
+
+const px = (g: CanvasRenderingContext2D, x: number, y: number, col: string, a: number) => {
+  g.globalAlpha = a;
+  g.fillStyle = col;
+  g.fillRect(Math.round(x), Math.round(y), 1, 1);
+};
+
+export function drawDoorsteps(g: CanvasRenderingContext2D, room: ArenaRoom, meId: string, P: Proj, ppu: number): void {
+  const map: GameMap = room.map;
+  if (room.indoors || !map.blocks?.length) return;
+  const me = room.heroes.find((h) => h.id === meId), t = room.time;
+  for (const b of map.blocks) {
+    if (!b.door || b.locked || b.ruined || (b.burning ?? -1) >= 0) continue;
+    const d = doorAt(b), [dx, dy] = pushDir(b), up = levelAt(map, d.x, d.y) * LEVEL;
+    const far = me ? Math.hypot(me.x - d.x, me.y - d.y) : NEAR * 2, k = Math.max(0, Math.min(1, 1 - (far - 1) / NEAR));
+    const a = FAINT + (FULL - FAINT) * k;
+    // The patch: a small dithered oval of warm light on the step.
+    const n = Math.max(6, Math.round(0.5 * ppu));
+    for (let j = -n; j <= n; j++) for (let i = -n; i <= n; i++) {
+      if ((i + j) & 1) continue;
+      const r = Math.hypot(i / n, j / n);
+      if (r > 1) continue;
+      const [sx, sy] = P(d.x + (i / n) * 0.5, up + 0.01, d.y + (j / n) * 0.32);
+      px(g, sx, sy, WARM[0], a * 0.7 * (1 - r * 0.6));
+    }
+    // The chevron: two arms meeting at its point, the way in, bobbing toward the door when you're near.
+    // Two chevrons, one behind the other, so it reads as "this way" even small.
+    const bob = k > 0 ? Math.sin(t * 5) * 0.08 * k : 0, [lx, ly] = [-dy, dx], steps = Math.max(6, Math.round(0.4 * ppu));
+    for (const back of [0, 0.3]) {
+      const cx = d.x + dx * (0.25 - back + bob), cy = d.y + dy * (0.25 - back + bob);
+      for (let s = 0; s <= steps; s++) for (const side of [-1, 1]) for (const thick of [0, 0.06]) {
+        const f = s / steps, wx = cx - dx * (0.28 * f + thick) + lx * side * 0.28 * f, wy = cy - dy * (0.28 * f + thick) + ly * side * 0.28 * f;
+        const [sx, sy] = P(wx, up + 0.02, wy);
+        px(g, sx, sy, WARM[1], a * (back ? 0.6 : 1));
+      }
+    }
+  }
+  g.globalAlpha = 1;
+}

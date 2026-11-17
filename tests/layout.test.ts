@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { collide, levelAt, useMap, type GameMap } from '../src/shared/arena';
+import { collide, doorOut, levelAt, useMap, type GameMap } from '../src/shared/arena';
 
 /** A body walking: small steps toward (tx, ty), colliding each step. */
 function walk(b: { x: number; y: number; z: number }, tx: number, ty: number, steps = 200) {
@@ -97,6 +97,24 @@ function walkable(m: GameMap) {
 describe('the new town', () => {
   it('is today\'s town until a screen asks for it', () => {
     expect(townMap(newWorld()).w).toBe(oldTown(newWorld()).w);
+  });
+
+  it('every door lets you out where you can walk, facing away from it (Kyle, 2026-11-16: stuck at the Coopers)', () => {
+    LAYOUT.town = true;
+    try {
+      for (const w of WORLDS()) {
+        const m = townMap(w), near = walkable(m), miss: string[] = [];
+        for (const b of m.blocks) if (b.door && !b.locked) {
+          const o = doorOut(b, 0.5), p = { x: o.x, y: o.y, z: levelAt(m, o.x, o.y) };
+          collide(p, 0.32);
+          // Not pushed by a wall (you'd be inside one), and somewhere you can walk on from.
+          if (Math.hypot(p.x - o.x, p.y - o.y) > 0.05 || !near(o.x, o.y, 0.4)) miss.push(`${b.door} (${b.face ?? 'N'})`);
+        }
+        expect(miss).toEqual([]);
+      }
+    } finally {
+      LAYOUT.town = false;
+    }
   });
 
   it('every spot, door and person standing still can be reached from where you arrive, up and down the steps', () => {

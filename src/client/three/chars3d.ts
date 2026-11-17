@@ -31,6 +31,7 @@ import type { Lerp } from './actors3d';
 import { PITCH } from './camera3d';
 import { cardMaterial } from './figmat';
 import type { Figs } from './figs3d';
+import { levelAt } from '../../shared/arena';
 import { LEDGE_H } from './ground';
 import { STREET } from './streetkit';
 import { drawParts, type Kit } from './charparts';
@@ -143,7 +144,8 @@ export class Chars {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       hero(h, 'h' + h.id, x, y);
     }
-    for (const h of others) hero(h, 'o' + h.id, h.x, h.y);
+    // (Another player's Warrior at the level they stand on.)
+    for (const h of others) hero({ ...h, z: levelAt(room.map, h.x, h.y) }, 'o' + h.id, h.x, h.y);
     for (const e of room.enemies) if (this.goblin(e, room)) {
       const [x, y] = lerp('e:' + e.id, e.x, e.y), up = Math.max(0, e.z ?? 0) * LEDGE_H, key = 'e' + e.id, g = this.fig(key, this.kits.goblin);
       if (!g) continue;

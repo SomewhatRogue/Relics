@@ -124,3 +124,21 @@ Claude Opus 5.5
   under recovery codes on the server (reset as they're read). To do it again: raise FRESH and the two prefixes.
 
 Claude Opus 5.5
+
+## 2026-11-16: the new town's playtest bugs (Kyle: stuck at the Coopers, friends half-drawn, side doors)
+
+- **Stuck coming out of a house:** game.ts `leave()` and `doorOf()` put you at the door spot + 0.5 down, right
+  only for a door you push up into. Rescue Row's home:1, 3, 5 and 7 (the Coopers is home:1) face S in the new
+  town, so you came out 0.37 tiles inside the house. Now `doorOut(b, 0.5)`, facing away from the door.
+  tests/layout.test.ts: every door's way out is open ground (small edit in the Town layout chat's test file).
+- **Friends half-drawn, floating:** other players in town (`others`) were drawn at the ground's height on the
+  raised levels, the level's face over their legs. Lifted by `levelAt` in the flat view (scene.ts), cards3d.ts
+  and chars3d.ts; hounds in the flat view too.
+- **Where the door is:** client/doorsteps.ts, every door's step in both views: a warm patch and a double chevron
+  pointing the way in, brighter and bobbing within 5 tiles. In 2.5D it's on the overlay, so a door hidden behind
+  the next building shows its mark over that roof.
+- **For the Town layout chat:** side-door buildings (the barracks `hall`, the counting house `bank`, the
+  infirmary) still draw their door on the front between the pillars while the way in is the side; the forge's
+  door sits behind the roof of the building in front. Worth a door drawn on the side face, and a wider gap.
+
+Claude Opus 5.5

@@ -13,7 +13,7 @@ import { placeOf, spotOf, type PastimeId } from '../shared/pastimes';
 import { bigSeat } from '../shared/bighalls';
 import { petSpots, type Dog } from './petting';
 import { ownPetOk } from './petwhen';
-import { doorAt, inArea, npcAt, pushingInto, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
+import { doorAt, doorOut, inArea, pushDir, npcAt, pushingInto, useMap, type Area, type Block, type Npc, type Theme } from '../shared/arena';
 import { travel } from '../shared/sweep';
 import type { DreadRule } from '../sim/dread';
 import { townInterior } from '../shared/interiors';
@@ -633,14 +633,15 @@ export class Game {
   /** Back out of the door you came in by. */
   leave(): void {
     if (this.mode === 'run') return this.comeOut(ME);
-    const o = this.outside!, inner = this.hero, d = doorAt(o.door), h = o.hero;
+    // (Out the way the door faces: half a tile out from its spot, never into the house behind it, 2026-11-16.)
+    const o = this.outside!, inner = this.hero, d = doorOut(o.door, 0.5), [px, py] = pushDir(o.door), h = o.hero;
     this.outside = null;
     this.room = o.room;
     this.room.heroes.push(h);
     // Dressed again from the save: what you bought, put on or swapped inside comes out with you (the
     // street's hero was left as it went in, and would otherwise be saved back over it).
     this.equip(h, inner);
-    Object.assign(h, { x: d.x, y: d.y + 0.5, fx: 0, fy: 1, hp: Math.max(1, inner.hp), relic: inner.relic, act: 'idle', actT: 0, kvx: 0, kvy: 0, rollQueuedAt: -9, attackQueuedAt: -9, relicQueuedAt: -9, grabQueuedAt: -9 });
+    Object.assign(h, { x: d.x, y: d.y, fx: -px, fy: -py, hp: Math.max(1, inner.hp), relic: inner.relic, act: 'idle', actT: 0, kvx: 0, kvy: 0, rollQueuedAt: -9, attackQueuedAt: -9, relicQueuedAt: -9, grabQueuedAt: -9 });
     syncSeen(h, this.lastIntent);
     this.room.prev.set('h:' + ME, [h.x, h.y]);
     this.roomKey++;
@@ -1256,7 +1257,7 @@ export class Game {
   /** In front of a Wickhold building's door. */
   private doorOf(door: string): { x: number; y: number } | undefined {
     const b = townMap(this.world).blocks.find((x) => x.door === door);
-    return b && { x: doorAt(b).x, y: doorAt(b).y + 0.5 };
+    return b && doorOut(b, 0.5);
   }
 
   /**

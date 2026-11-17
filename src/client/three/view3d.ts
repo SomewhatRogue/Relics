@@ -39,6 +39,7 @@ import { drawExtras, drawMist3 } from './extras3d';
 import { drawTags } from './tags3d';
 import { drawSkills3 } from './skills3d';
 import { drawSpellGround3 } from '../spellground';
+import { drawDoorsteps } from '../doorsteps';
 import { drawHuntMarks } from '../signdraw';
 import { drawMendMark } from '../mendmark';
 import { skyFlash } from '../skystrikedraw';
@@ -308,6 +309,7 @@ export class View3D {
     this.overlay.draw(room, meId, fx, marks, P, lerp, now, this.view.ppu);
     drawSkills3(og, room, P, lerp, this.view.ppu, now);
     drawSpellGround3(og, room, P, this.view.ppu, lerp);
+    drawDoorsteps(og, room, meId, P, this.view.ppu);
     drawHuntMarks(og, room, P, lerp, this.view.ppu);
     drawCuts(og, room, P, lerp, this.view.ppu);
     drawMendMark(og, room, meId, P, lerp, this.view.ppu);

@@ -77,7 +77,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     });
   }
   for (const h of others) {
-    f.put('o' + h.id, h.x, 0, h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
+    // (At the level they stand on: lifted, as your own hero is.)
+    f.put('o' + h.id, h.x, lift(levelAt(room.map, h.x, h.y)), h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
     // Another player's Ranger: their hound at heel, as this screen walks it (idlehound.ts).
     const d = companion(h, f.now);
     if (d) hound(f, h, d, d.x, d.y, h.x, h.y, me);
