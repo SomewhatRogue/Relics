@@ -264,3 +264,11 @@ Claude Opus 5.5
   Stalls, the job board and the works keep their words as they were. Full suite 1973 passed.
 
 Claude Opus 5.5
+
+## 2026-11-16: the sewer grate you can see (Kyle: "I don't even see the sewer grate")
+
+- 2.5D drew it from its round's radius (0.05, so you walk over it): bars a speck. Now its own size (rounds3d.ts):
+  a stone kerb 1.5 by 1 tiles round a dark pit, five iron bars and a cross bar. Flat: a bigger sprite (sprites.ts,
+  24 by 14) with the same kerb. Sprite and round tests passed.
+
+Claude Opus 5.5

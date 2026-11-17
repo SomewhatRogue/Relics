@@ -130,7 +130,11 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       B.c(x, 1.0, z + 0.03, 0.3, 0.3, 0.08, 0xa02820);
       break;
     case 'grate':
-      for (let i = -2; i <= 2; i++) B.b(x + i * R * 0.35, 0.0, z, 0.05, 0.03, R * 1.6, 0x2a2733);
+      // The sewer grate (the way down to the Deep): its own size, not its round's (a speck you walk over), a stone
+      // kerb round a dark pit, iron bars across it (Kyle, 2026-11-16: "I don't even see the sewer grate").
+      B.b(x, 0, z, 1.5, 0.07, 1.05, 0x6a6674), B.b(x, 0, z, 1.2, 0.075, 0.75, 0x0d0b10);
+      for (let i = -2; i <= 2; i++) B.b(x + i * 0.24, 0, z, 0.06, 0.1, 0.8, 0x4a4652);
+      B.b(x, 0, z, 1.25, 0.1, 0.06, 0x4a4652);
       break;
     case 'candles':
       // An iron stand, three candles of three heights, each with its own small flame (hallsdraw.ts).
