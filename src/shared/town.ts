@@ -73,7 +73,7 @@ export const housesFor = (rescued: number) => Math.min(HOUSES.length, Math.floor
  *  old one. */
 const trainer = (name: string, now: string, old = now) => ({ name, get where() { return LAYOUT.town ? now : old; } });
 export const TRAINERS = {
-  WARRIOR: trainer('MASTER COLE', 'the barracks by the west wall'),
+  WARRIOR: trainer('MASTER COLE', 'the barracks on the west side of the square', 'the barracks by the west wall'),
   RANGER: trainer('HUNTRESS MAEVE', "the hunters' lodge east of the square, by the archery butts", "the hunters' lodge past the archery butts, east of the square"),
   ROGUE: trainer('WHISPER', 'the back of the Drowned Rat, down the steps in the lower quarter', 'the back of the Drowned Rat, down south by the sewer grate'),
   MAGE: trainer('MAGISTER VELL', 'the old tower in the north-east, by the keep'),

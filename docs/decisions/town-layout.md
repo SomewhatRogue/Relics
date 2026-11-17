@@ -271,4 +271,20 @@ Claude Opus 5.5
   a stone kerb 1.5 by 1 tiles round a dark pit, five iron bars and a cross bar. Flat: a bigger sprite (sprites.ts,
   24 by 14) with the same kerb. Sprite and round tests passed.
 
+## 2026-11-16 (night): hanging signs, the barracks and counting house swapped (Kyle)
+
+- **Hanging signs** (client/doorsigns.ts, new): every public building's door gets an iron bracket off the wall beside
+  it, jutting into the lane the door opens on, a board hanging from it with what the building is (crossed swords,
+  a coin, a red cross, an anvil, a tankard, a bow, a star, a cross, a banner, a sheaf). Within a few tiles it swings.
+  Its name is on its roof (hallnames.ts), so none on the sign. Both views, beside doorsteps.ts (one line each in
+  scene.ts and three/view3d.ts).
+- My own fix for side doors painted on the front (a door at the front's corner) crossed with the new town chat's
+  doorside.ts, pushed first and further (the door edge-on on its true side, the 2.5D buildings turned): theirs kept,
+  mine dropped.
+- **Swapped:** the barracks to the square's west side (its door onto the square), the counting house to the end of
+  Smiths' Lane; each keeps its look. Recruit Wat by the barracks' new door. Master Cole's directions in the new
+  town: "the barracks on the west side of the square" (the old town keeps "by the west wall"; the approved words of
+  the other trainers' lines, so no lore pass). Merged with the forge's opened lane (two houses across from it).
+- scripts/town-spot.cjs: stand the hero at spots in the default view and shoot. Full suite before the merge 1973.
+
 Claude Opus 5.5

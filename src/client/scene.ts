@@ -102,6 +102,7 @@ import { drawPuddles } from './spiders';
 import { drawSkills, skillLights } from './skillsdraw';
 import { drawSpellGround, drawSpellSky, spellLightsFlat } from './spellground';
 import { drawDoorsteps } from './doorsteps';
+import { drawDoorSigns } from './doorsigns';
 import { drawHuntMarks } from './signdraw';
 import { drawMendMark } from './mendmark';
 import { skyFlash } from './skystrikedraw';
@@ -552,6 +553,8 @@ export class Scene {
     drawSpellGround(c.glow, room, cx, cy);
     // Each door's step, its way in (doorsteps.ts).
     drawDoorsteps(c.glow, room, meId, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], PX);
+    // And each public building's hanging sign (doorsigns.ts).
+    drawDoorSigns(c.glow, room, meId, (x, y, z) => [OX + x * PX - cx, OY + z * PX - cy - y * PX], PX);
     drawFound(c, room, cx, cy);
     // At a fork, both ways out glow, each with its name.
     for (const r of map.roads ?? []) {

@@ -47,10 +47,11 @@ export function planBlocks(w: WorldState, homes: number): Block[] {
     // (Only the two ends of the row across from it: the forge's door seen down the lane between them, Kyle's
     // playtest 2026-11-16: it hid behind the middle two.)
     ...[0, 3].map((i) => house(12.5 + i * 2.625, 23.5, 2.625, 3.5, 'S')),
-    bl(1.5, 17, 7.5, 10, 'hall', { label: 'BARRACKS', door: 'hall', face: 'W' }),
+    // (The counting house and the barracks swapped places, each its own look: Kyle, 2026-11-16.)
+    bl(1.5, 17, 7.5, 10, 'hall', { label: 'COUNTING HOUSE', door: 'bank', worn: true, face: 'W' }),
     bl(6, 13.6, 2.2, 0.5, 'rack'),
-    // The counting house on the square's west side; houses down Wall Lane; the infirmary across from them.
-    bl(16.5, 28.5, 6.5, 5.5, 'hall', { label: 'COUNTING HOUSE', door: 'bank', worn: true, face: 'W' }),
+    // The barracks on the square's west side; houses down Wall Lane; the infirmary across from them.
+    bl(16.5, 28.5, 6.5, 5.5, 'hall', { label: 'BARRACKS', door: 'hall', face: 'W' }),
     ...[0, 1, 2].map((i) => house(12.5, 27 + i * 2.7, 4, 2.7, 'E')),
     bl(1.5, 29, 7.5, 7, 'house', { label: 'INFIRMARY', door: 'infirmary', face: 'W' }),
     ...[0, 1, 2, 3, 4].map((i) => house(1.5, 37 + i * 4, 7.5, 3.9, 'W')),
