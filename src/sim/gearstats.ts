@@ -1,6 +1,6 @@
 /** What a hero's worn gear adds up to (shared/gear.ts), read wherever the fight uses a number. */
 import { streakBonus } from '../shared/streak';
-import { cutMax, drilled, gearStats, perkFx, type Fx, type GearStats } from '../shared/tuning';
+import { MAGE_PACE, WEAPONS, cutMax, drilled, gearStats, perkFx, type Fx, type GearStats } from '../shared/tuning';
 import type { Hero } from './types';
 import { markSum } from '../shared/deepmarks';
 
@@ -20,6 +20,8 @@ export function statsOf(h: Hero): Stats {
   // The streak's steps on top (shared/streak.ts): for as long as it lasts.
   const sb = streakBonus(h.streakStep ?? 0);
   Object.assign(s, { damage: s.damage + sb.damage, speed: s.speed * (1 + sb.speed), breath: s.breath + sb.breath, crit: s.crit + sb.crit });
+  // A Mage never more than MAGE_PACE.most faster, from everything together.
+  if (WEAPONS[h.weapon]?.cls === 'MAGE') s.speed = Math.min(s.speed, 1 + MAGE_PACE.most);
   cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join(), mk, h.streakStep ?? 0, h.legs ?? null], s });
   return s;
 }

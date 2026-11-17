@@ -165,3 +165,6 @@ Claude Opus 5.5
   began, at once, for nothing, once (sim/laddermage.ts, RECALL in shared/ladder.ts). BLINK THROUGH is gone.
 
 Claude Opus 5.5
+- Correction (Kyle: "Rogues and rangers and clerics etc can get speed perks just not mages"): QUICK FEET back
+  for the Warrior, Ranger and Rogue, SPEED gear back to 25%. A Mage alone is held: gear, the trainer's SPEED
+  rank and the streak together at most 10% faster (MAGE_PACE in shared/mage.ts, sim/gearstats.ts statsOf).

@@ -14,6 +14,9 @@ export const SPELL = { wand: 20, staff: 30, spellblade: 35 };
  *  up. Its holds let go on the white flash break off whatever the goblins they hit are doing and stagger
  *  them `stun` s (a butcher `big` as long). A bonus: any tap that lands on a goblin mid wind-up does the same.
  *  Let go on the flash, a hold costs `flashCost` of its magic (Kyle, 2026-11-16). */
+/** A Mage stays slow (Kyle, 2026-11-16: "Rogues and rangers and clerics etc can get speed perks just not
+ *  mages"): gear, the trainer's rank, the streak, all together, at most `most` faster (sim/gearstats.ts). */
+export const MAGE_PACE = { most: 0.1 };
 export const WAND = { walk: 0.9, stun: 0.6, big: 0.5, flashCost: 0.5 };
 
 /**
