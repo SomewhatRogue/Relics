@@ -143,3 +143,15 @@ with trees, bushes or water, so halls, houses and mines stay still):
 Hooks (small, in files I don't own): `ground.ts` wraps the floor material and moves the clock each frame through
 `wet()`; `water3d.ts` adds the uniforms and one GLSL insert before the blood clouding. Off, every shader path skips
 on one uniform. Opus 5.5.
+
+## 2026-11-16: LIVING WORLD slice 3, reflections and the grass (2.5D)
+
+- Kyle: skip the "weirdly 3D" question, keep on with the rest of the list.
+- Still water mirrors the trees beside it: wind3d.ts paints each room's trees, pines and bushes once into a mask,
+  mirrored down the screen as the tilted camera would see them (a thing h up shows h / tan(pitch) tiles south), and
+  the water (water3d.ts, one `useReflections` line) darkens to leaf or bark there, dithered, wobbling with its ripples.
+- The wind over the grass: on the floor, a gust passing lifts the green a shade in dithered steps, so it rolls across
+  a meadow in bands with the same gusts as the trees and capes.
+- Glints are now single surface pixels brightening the water, not 3-pixel white squares.
+- Left out: goblin ears swinging. They're baked into the 1.5x body sprite; worth it only with a head redraw in parts.
+  Opus 5.5.

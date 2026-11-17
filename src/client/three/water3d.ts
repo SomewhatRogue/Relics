@@ -13,7 +13,7 @@ import { DEEP, DRY, SHALLOW, waterField } from '../waterfield';
 import { cloudStrength, ringStrength, WET, type Wet } from '../wetfx';
 import { VCOL } from './mats';
 import { toonize } from './post';
-import { LIFE, LIFE_GLSL, WATER_LIFE } from './wind3d';
+import { LIFE, LIFE_GLSL, WATER_LIFE, useReflections } from './wind3d';
 
 /** How far below the bank each kind of water lies (tiles). */
 export const SINK = { [SHALLOW]: 0.07, [DEEP]: 0.22 } as Record<number, number>;
@@ -125,6 +125,8 @@ export function buildWater(m: GameMap, floor: THREE.MeshLambertMaterial, bed: TH
   const f = waterField(m);
   if (!f) return null;
   const tex = dataTexture(f), size = new THREE.Vector2(m.w, m.h), time = { value: 0 };
+  // (The living world, wind3d.ts: the trees mirrored in it.)
+  const unrefl = useReflections(m);
   // No floor where the water is: it's below.
   also(floor, (sh) => {
     // (Over the floor's own UVs: the street's cobbles repeat their texture, streetkit.ts, so undo the repeat.)
@@ -165,7 +167,7 @@ export function buildWater(m: GameMap, floor: THREE.MeshLambertMaterial, bed: TH
       nr.value = i;
     },
     dispose() {
-      tex.dispose();
+      tex.dispose(), unrefl();
       for (const x of mats) x.dispose();
       for (const x of meshes) (x as THREE.Mesh).geometry.dispose();
     },

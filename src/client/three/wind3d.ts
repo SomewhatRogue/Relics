@@ -9,13 +9,14 @@
  *   on the surface here and there.
  * One set of uniforms shared by every material it touches; view3d.ts moves the time on each frame.
  */
-import type * as THREE from 'three';
+import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { ALIVE, WIND } from '../alive';
 import { VCOL } from './mats';
+import { PITCH } from './camera3d';
 
 /** The shared uniforms: the time (seconds), whether it's on here (on, and outdoors). */
-export const LIFE = { uLifeT: { value: 0 }, uLife: { value: 0 } };
+export const LIFE = { uLifeT: { value: 0 }, uLife: { value: 0 }, uRefl: { value: null as THREE.Texture | null } };
 
 /** Outdoors enough for wind and clouds: trees, bushes or water about. */
 export function outdoors(m: GameMap): boolean {
@@ -28,11 +29,50 @@ export function lifeFrame(m: GameMap | null, now: number, hasWater: boolean): vo
   LIFE.uLife.value = ALIVE.on && m && (hasWater || outdoors(m)) ? 1 : 0;
 }
 
+/**
+ * What the water mirrors: the trees, mirrored down the screen as the tilted camera sees them in still water (a thing
+ * `h` up shows `h` / tan(pitch) tiles further south on the surface). Painted once per room at `REFL.px` pixels a tile:
+ * red how much is there, green 1 for leaves, 0 for a trunk. Only seen through the water (water3d.ts, WATER_LIFE).
+ */
+const REFL = { px: 8, trunk: 1.5, crown: 1.9, pineTop: 3.0 };
+export function reflections(m: GameMap): THREE.CanvasTexture | null {
+  if (typeof document === 'undefined') return null;
+  const cv = document.createElement('canvas'), P = REFL.px, cot = 1 / Math.tan(PITCH);
+  cv.width = m.w * P;
+  cv.height = m.h * P;
+  const g = cv.getContext('2d')!;
+  for (const r of m.rounds) {
+    const tree = r.kind === 'tree' || r.kind === 'deadtree', pine = r.kind === 'pine', bush = r.kind === 'bush';
+    if (!tree && !pine && !bush) continue;
+    const R = Math.max(0.25, r.r), x = r.x * P, z = r.y * P;
+    g.fillStyle = 'rgb(255,0,0)';
+    if (!bush) g.fillRect(x - 0.15 * P, z, 0.3 * P, (pine ? 1.2 : REFL.trunk) * cot * P);
+    if (r.kind === 'deadtree') continue;
+    g.fillStyle = 'rgb(255,255,0)';
+    g.beginPath();
+    if (bush) g.ellipse(x, z + 0.3 * cot * P, R * 1.2 * P, 0.35 * cot * P, 0, 0, 6.283);
+    else if (pine) g.moveTo(x - R * 1.25 * P, z + 1.1 * cot * P), g.lineTo(x + R * 1.25 * P, z + 1.1 * cot * P), g.lineTo(x, z + REFL.pineTop * cot * P);
+    else g.ellipse(x, z + REFL.crown * cot * P, R * 1.35 * P, R * 1.15 * cot * P, 0, 0, 6.283);
+    g.fill();
+  }
+  const t = new THREE.CanvasTexture(cv);
+  t.flipY = false;
+  t.magFilter = t.minFilter = THREE.NearestFilter;
+  return t;
+}
+
+/** A room with water: its reflections into the shared uniform (one room at a time); call what it returns to let go. */
+export function useReflections(m: GameMap): () => void {
+  const t = reflections(m);
+  LIFE.uRefl.value = t;
+  return () => (t?.dispose(), LIFE.uRefl.value === t && (LIFE.uRefl.value = null));
+}
+
 /** How much each thing moves and darkens. */
-const K = { treeBend: 0.16, bushBend: 0.06, flutter: 0.012, cloudScale: 9, cloudDrift: 0.7, cloudDark: 0.2 };
+const K = { treeBend: 0.16, bushBend: 0.06, flutter: 0.012, cloudScale: 9, cloudDrift: 0.7, cloudDark: 0.2, sheen: 0.16 };
 
 export const LIFE_GLSL = /* glsl */ `
-uniform float uLifeT; uniform float uLife;
+uniform float uLifeT; uniform float uLife; uniform sampler2D uRefl;
 float lifeGust(vec2 w, float t) {
   float along = dot(w, vec2(${WIND.dir[0]}, ${WIND.dir[1]}));
   float a = sin((along - t * ${WIND.speed.toFixed(3)}) / ${WIND.len[0].toFixed(2)} * 6.283);
@@ -91,7 +131,19 @@ if (uLife > 0.5) {
 
 /** A floor's material: cloud shadows over it. */
 export function clouded(m: THREE.Material): void {
-  chain(m, (sh) => shadows(sh, '#include <map_fragment>'), '|lifefloor');
+  chain(m, (sh) => {
+    shadows(sh, '#include <map_fragment>');
+    // The wind over the grass: a gust passing lifts the green a shade (the blades turning their pale sides up), in
+    // dithered steps, rolling across a meadow a band at a time.
+    sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+if (uLife > 0.5) {
+  vec3 gc = diffuseColor.rgb;
+  if (gc.g > gc.r * 1.05 && gc.g > gc.b * 1.1) {
+    float gs = lifeGust(vLifeW + vec2(0.0, 0.0), uLifeT) * (0.75 + 0.25 * sin(vLifeW.x * 3.1 + vLifeW.y * 2.3 + uLifeT * 4.0));
+    if (gs > bay4(floor(gl_FragCoord.xy)) * 0.8 + 0.1) diffuseColor.rgb = mix(gc, gc * vec3(1.12, 1.2, 1.02) + 0.02, ${K.sheen.toFixed(2)} / 0.16);
+  }
+}`);
+  }, '|lifefloor');
 }
 
 /** The water's surface (water3d.ts's SURFACE, after its colour and before the blood): foam at the bank coming and
@@ -99,14 +151,18 @@ export function clouded(m: THREE.Material): void {
  *  bank (pixels x4); `bz`: the dither; `a`, `b`: along and across the current; `deep`. */
 export const WATER_LIFE = /* glsl */ `
 if (uLife > 0.5) {
+  // The trees mirrored in it, broken up by the ripples, darker than the sky between them.
+  vec4 rf = texture2D(uRefl, (P + vec2(n * 0.06, 0.0)) / uSize);
+  if (rf.r > 0.5 && bz < (deep ? 0.8 : 0.55)) col = mix(col, rf.g > 0.5 ? vec3(0.10, 0.17, 0.12) : vec3(0.11, 0.09, 0.07), deep ? 0.68 : 0.42);
   float shore = W.g * 255.0 / 4.0;
   float reach = 1.6 + 1.4 * (0.5 + 0.5 * sin(uLifeT * 1.3 + dot(P, vec2(1.7, 2.3))));
   if (shore < reach && bz < 0.75) col = mix(col, vec3(0.80, 0.87, 0.86), 0.7);
   float roll = abs(shore - (2.5 + 3.5 * fract(uLifeT * 0.28 + lifeHash(floor(P * 0.5)) * 0.3)));
   if (roll < 0.45 && bz > 0.3 && shore < 7.0) col = mix(col, vec3(0.64, 0.76, 0.78), 0.55);
-  vec2 cell = floor(P * 16.0 / 3.0);
+  // Glints: a surface pixel here and there catching the light for a moment, brighter on a ripple's crest.
+  vec2 cell = floor(P * 16.0);
   float h = lifeHash(cell), tw = fract(h * 7.0 + uLifeT * (0.35 + h * 0.6));
-  if (h > 0.94 && tw < 0.1) col = vec3(0.95, 0.97, 0.9);
+  if (h > 0.985 - max(0.0, n) * 0.01 && tw < 0.12) col = mix(col, vec3(0.92, 0.95, 0.88), 0.55);
 }
 `;
 
