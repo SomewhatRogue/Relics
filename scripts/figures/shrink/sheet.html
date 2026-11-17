@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Generated knights, shrunk</title>
+<body style="margin:0;background:#14151a">
+<canvas id="c" style="display:block;image-rendering:pixelated"></canvas>
+<script>
+// The reference knight and each generated take, cut from their flat backgrounds and shrunk to 70 and to 105 tall
+// with nothing blended left (alpha snapped, the colours locked to 32, a dark outline put back), the same size on screen.
+(async () => {
+  const q = new URLSearchParams(location.search), takes = (q.get('takes') || '').split(',').filter(Boolean);
+  const load = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error(src)); i.src = src; });
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  // The background goes: flood in from the border through anything close to a corner's colour; keep the biggest figure.
+  const cut = (img, tol) => {
+    const c = mk(img.width, img.height), x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const d = x.getImageData(0, 0, c.width, c.height), p = d.data, w = c.width, h = c.height;
+    const corners = [[2, 2], [w - 3, 2], [2, h - 3], [w - 3, h - 3]].map(([a, b]) => { const i = (b * w + a) * 4; return [p[i], p[i + 1], p[i + 2]]; });
+    const bg = (i) => corners.some((k) => Math.abs(p[i] - k[0]) + Math.abs(p[i + 1] - k[1]) + Math.abs(p[i + 2] - k[2]) < tol);
+    const seen = new Uint8Array(w * h), stack = [];
+    for (let a = 0; a < w; a++) stack.push(a, (h - 1) * w + a);
+    for (let b = 0; b < h; b++) stack.push(b * w, b * w + w - 1);
+    while (stack.length) { const k = stack.pop(); if (seen[k] || !bg(k * 4)) continue; seen[k] = 1; p[k * 4 + 3] = 0; const a = k % w, b = (k - a) / w; if (a > 0) stack.push(k - 1); if (a < w - 1) stack.push(k + 1); if (b > 0) stack.push(k - w); if (b < h - 1) stack.push(k + w); }
+    x.putImageData(d, 0, 0);
+    const has = new Array(w).fill(0); for (let b = 0; b < h; b++) for (let a = 0; a < w; a++) if (p[(b * w + a) * 4 + 3]) has[a]++;
+    const runs = []; let from = -1;
+    for (let a = 0; a <= w; a++) { const on = a < w && has[a] > 2; if (on && from < 0) from = a; if (!on && from >= 0) { if (a - from > 20) runs.push([from, a]); from = -1; } }
+    return runs.map(([a0, a1]) => { let t = h, bt = 0; for (let b = 0; b < h; b++) for (let a = a0; a < a1; a++) if (p[(b * w + a) * 4 + 3]) { t = Math.min(t, b); bt = Math.max(bt, b); } const o = mk(a1 - a0, bt - t + 1); o.getContext('2d').drawImage(c, a0, t, a1 - a0, bt - t + 1, 0, 0, a1 - a0, bt - t + 1); return o; });
+  };
+  const shrink = (src, k) => { let c = src; while (c.width * 0.5 >= src.width * k && c.width > 4) { const n = mk(Math.max(1, c.width >> 1), Math.max(1, c.height >> 1)), x = n.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(c, 0, 0, n.width, n.height); c = n; } const o = mk(Math.max(2, Math.round(src.width * k)), Math.max(2, Math.round(src.height * k))), x = o.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(c, 0, 0, o.width, o.height); return o; };
+  const pixel = (c, n) => {
+    const w = c.width, h = c.height, p = c.getContext('2d').getImageData(0, 0, w, h).data, px = [];
+    for (let i = 0; i < p.length; i += 4) if (p[i + 3] >= 128) px.push(i);
+    const lum = (i) => p[i] * 0.3 + p[i + 1] * 0.55 + p[i + 2] * 0.15, sorted = px.slice().sort((a, b) => lum(a) - lum(b));
+    let cen = Array.from({ length: n }, (_, j) => { const i = sorted[Math.floor(((j + 0.5) / n) * sorted.length)]; return [p[i], p[i + 1], p[i + 2]]; });
+    const near = (i) => { let best = 0, bd = 1e9; for (let j = 0; j < cen.length; j++) { const k = cen[j], dd = (p[i] - k[0]) ** 2 + (p[i + 1] - k[1]) ** 2 + (p[i + 2] - k[2]) ** 2; if (dd < bd) (bd = dd), (best = j); } return best; };
+    for (let it = 0; it < 6; it++) { const sum = cen.map(() => [0, 0, 0, 0]); for (const i of px) { const s = sum[near(i)]; s[0] += p[i]; s[1] += p[i + 1]; s[2] += p[i + 2]; s[3]++; } cen = cen.map((k, j) => (sum[j][3] ? [sum[j][0] / sum[j][3], sum[j][1] / sum[j][3], sum[j][2] / sum[j][3]] : k)); }
+    const o = mk(w + 2, h + 2), x = o.getContext('2d'), od = x.createImageData(w + 2, h + 2), t = od.data, solid = (a, b) => a >= 0 && b >= 0 && a < w && b < h && p[(b * w + a) * 4 + 3] >= 128;
+    for (let b = -1; b <= h; b++) for (let a = -1; a <= w; a++) { const i = ((b + 1) * (w + 2) + a + 1) * 4; if (solid(a, b)) { const k = cen[near((b * w + a) * 4)]; t[i] = k[0]; t[i + 1] = k[1]; t[i + 2] = k[2]; t[i + 3] = 255; } else if (solid(a - 1, b) || solid(a + 1, b) || solid(a, b - 1) || solid(a, b + 1)) { t[i] = 13; t[i + 1] = 11; t[i + 2] = 16; t[i + 3] = 255; } }
+    x.putImageData(od, 0, 0); return o;
+  };
+  const biggest = (list) => list.sort((a, b) => b.width * b.height - a.width * a.height)[0];
+  const ref = cut(await load('heroes-four.jpg'), 34)[3];
+  const figs = [{ c: ref, name: 'REFERENCE, NOT OURS' }];
+  for (const [i, t] of takes.entries()) figs.push({ c: biggest(cut(await load(t), Number(q.get('tol') || 110))), name: 'GENERATED ' + (i + 1) });
+  const COL = 300, RH = 400, c = document.getElementById('c'), W = COL * figs.length;
+  c.width = W; c.height = RH * 2; const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+  [[70, 3], [105, 2]].forEach(([tall, S], row) => {
+    g.fillStyle = '#4c5159'; g.fillRect(0, row * RH, W, RH); g.fillStyle = '#444950'; g.fillRect(0, row * RH + RH - 52, W, 52);
+    figs.forEach((f, i) => {
+      // (Every figure the same height from helm to foot: the reference's body is 0.69 of its picture, sword and all.)
+      const s = pixel(shrink(f.c, (tall / (f.c.height * Number(i ? q.get('body') || 0.69 : 0.69)))), 32);
+      g.drawImage(s, Math.round(COL * (i + 0.5) - (s.width * S) / 2), row * RH + RH - 54 - s.height * S, s.width * S, s.height * S);
+      g.font = '18px monospace'; g.textAlign = 'center'; g.fillStyle = '#e8b85a'; g.fillText(f.name, COL * (i + 0.5), row * RH + RH - 18);
+    });
+    g.textAlign = 'left'; g.fillStyle = '#f0e6cc'; g.fillText(tall + ' TALL', 10, row * RH + 24);
+  });
+  document.title = 'done';
+})().catch((e) => { document.title = 'error ' + e.message; });
+</script>

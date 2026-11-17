@@ -260,3 +260,18 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   flat, though those were whole animation sheets in another style; (c) today's sprites kept.
 - The 3D knight's scripts stay in `scripts/figures/` as a record; nothing of them is in the game.
   (Claude Fable 5.2)
+
+## 2026-11-17: a generated knight reaches the look
+
+- Kyle: "Test generating one." Four takes of one knight in his ElevenLabs workspace from a written description of
+  the style and the design (no picture given to the generator): 760 credits, about 15 cents. Then the size test's
+  shrink (no blending left, 32 colours, the outline back) to 70 and 105 tall, beside the reference knight.
+- All four sit in the reference's family: slim, dark plate, the greatsword upright in both hands, a cloak with a
+  ringed red lining and a gold edge, pixel shading. The first try of any kind that does. Differences: steel a
+  little greener and lighter, the lining a brighter red, shading a little smoother; one take keeps a magenta pixel at
+  the sword's point (the cut-out's tolerance).
+- Kept in docs/design/ref/knight-gen/ with the description used; the shrink as scripts/figures/shrink/sheet.html.
+  The page: https://claude.ai/artifact/QqBTqamaBdq6zYtD5FNntv.
+- Not shown yet: a back and a side, and motion. Next to prove: one take cut into head, arms and legs and moved by
+  the game's own pose code (the older pixel style of motion), walking in a real street at 70.
+  (Claude Fable 5.2)
