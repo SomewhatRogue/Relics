@@ -107,6 +107,7 @@ import { Scene } from './scene';
 import { Views } from './three/views';
 import { options } from './options';
 import { camButton } from './camwide';
+import { aliveButton } from './alive';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { heroVoices, primeSpot, townVoice, voiceClock } from './voiceplay';
@@ -838,6 +839,8 @@ $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.conta
 options();
 // CAMERA: CLOSE or WIDE, the wider camera to try (camwide.ts).
 camButton();
+// LIVING WORLD: characters and landscapes that move more, to compare (alive.ts).
+aliveButton();
 ironUi();
 if (input.touch) document.body.classList.add('touch');
 

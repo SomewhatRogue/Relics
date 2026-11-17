@@ -7,18 +7,24 @@
 import type { Enemy } from '../sim/types';
 import { DRUMMER } from '../shared/tuning';
 import { MOTION, WHITE, clamp01, easeOut, newPose, pushDir, rest, struck, type BodyPose } from './motion';
+import { ALIVE } from './alive';
 
 const P = newPose(), D: [number, number] = [0, 0], F = MOTION.foe, B = MOTION.butcher;
+/** A blow on a goblin with the living world on: twice the push and lean, held longer, and `catch`: the sway past upright after. */
+const ALIVE_HIT = { shift: 4, time: 0.28, crouch: 0.2, lean: 4, catch: 1.5 };
 
 /** Struck: white while the blow is fresh (and through its hitstop), snapped back along the push. */
 export function foeHit(p: BodyPose, e: Enemy, t: number, heavy = 1): BodyPose {
   const age = t - e.hitAt;
   if (age < 0 || age > 0.3) return p;
   if (age < F.hit.flash || e.hitstop > 0) (p.flash = 0.9), (p.tint = WHITE);
-  if (age < F.hit.time) {
+  // (Living world, alive.ts: rocked back further and longer along the blow, then a sway past upright, catching itself.)
+  const H = ALIVE.on ? ALIVE_HIT : F.hit;
+  if (age < H.time) {
     pushDir(e.kvx, e.kvy, -e.fx, -e.fy, D);
     const ph = p.phase;
-    struck(p, age, D[0], D[1], { shift: F.hit.shift / heavy, time: F.hit.time, crouch: F.hit.crouch / heavy, lean: F.hit.lean });
+    struck(p, age, D[0], D[1], { shift: H.shift / heavy, time: H.time, crouch: H.crouch / heavy, lean: H.lean });
+    if (ALIVE.on && age > H.time * 0.55) p.lean -= Math.round(D[0] * ALIVE_HIT.catch * Math.sin(((age - H.time * 0.55) / (H.time * 0.45)) * Math.PI));
     // A wind-up carried through the hit (the butcher's) keeps its name.
     if (ph === 'windup') p.phase = ph;
   }

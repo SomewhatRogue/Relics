@@ -15,6 +15,7 @@ import { drawFolk, FOLK } from './folkwork';
 import { COBB_SIT, drawCobbCrate, drawCobbThings } from './cobbdraw';
 import { sidePerson, tallPerson } from './npcside';
 import { backPerson } from './npcback';
+import { ALIVE, idleStance } from './alive';
 
 type Part = Parameters<typeof makeSprite>[2][number];
 export interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
@@ -162,7 +163,10 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   // Cobb sits on his crate at the ladder: the crate behind, him up on it, his slate and lamp in front (cobbdraw.ts).
   const sits = n.work === 'ladder';
   if (sits) drawCobbCrate(c, x, y);
-  blit(c, s, x, y - (n.lift ?? 0) - (sits ? COBB_SIT : 0) + bob, walking || crew ? fx < 0 : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : n.kneel ? 0.7 : 1);
+  // (Living world, alive.ts: standing, they turn to look at you when you're near, glance about on their own rhythm,
+  // and shift their weight now and then.)
+  const idle = ALIVE.on && !walking && !crew && !sits && !n.work && !n.kneel && !n.sneak ? idleStance(n.name, tx, n.y, c.now) : null;
+  blit(c, s, x + (idle?.shift ?? 0), y - (n.lift ?? 0) - (sits ? COBB_SIT : 0) + bob, walking || crew ? fx < 0 : idle ? idle.left : Math.floor(c.now * 0.25 + n.y) % 2 === 0, 0, n.sneak ? 0.78 : n.kneel ? 0.7 : 1);
   // What they hold is drawn in the old pixels through the pen, onto the 1.5x body (gobpen.ts).
   const p = gobPen(c, x, y);
   // Hew with the archer's arrow in his leg, down on one knee (sim/woodheal.ts).

@@ -15,6 +15,7 @@ import { mix } from './heroeyes';
 import { drawMantle } from './cloaklife';
 import { HERO_W, HS } from './heroscale';
 import { SHARP, shadeHex } from './charpaint';
+import { ALIVE, gust } from './alive';
 
 /** A stable number in [0, 1) from a hero's id (their sway's phase, their step's timing). */
 export function idPhase(id: string): number {
@@ -24,12 +25,21 @@ export function idPhase(id: string): number {
 }
 
 /** How far each hero's cloth has swung out behind them (eased toward walking or still). */
-const swing = new Map<string, { k: number; at: number }>();
+const swing = new Map<string, { k: number; at: number; v: number }>();
+/** With the living world on (alive.ts), a spring: the cloth carries on past when you stop or start and settles, a
+ *  little below and above where it's going. Its stiffness and damping (underdamped: one swing past, a small second). */
+const SPRING = { stiff: 60, damp: 8.5 };
 function trail(h: Hero, now: number): number {
   let s = swing.get(h.id);
-  if (!s) swing.set(h.id, (s = { k: 0, at: now }));
+  if (!s) swing.set(h.id, (s = { k: 0, at: now, v: 0 }));
   const dt = Math.min(0.1, Math.max(0, now - s.at)), goal = h.moving && h.act !== 'roll' ? 1 : 0;
-  s.k += (goal - s.k) * Math.min(1, dt * 7);
+  if (ALIVE.on) {
+    for (let t = dt; t > 0; t -= 0.02) {
+      const step = Math.min(0.02, t);
+      s.v += ((goal - s.k) * SPRING.stiff - s.v * SPRING.damp) * step;
+      s.k += s.v * step;
+    }
+  } else (s.k += (goal - s.k) * Math.min(1, dt * 7)), (s.v = 0);
   s.at = now;
   return s.k;
 }
@@ -92,7 +102,9 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
   lay = layer;
   const up = view === true, sv = view === 'side';
   const now = c.now, ph = idPhase(h.id) * 6.283, k = layer === 'back' ? trail(h, now) : swing.get(h.id)?.k ?? 0;
-  const side = Math.abs(h.fx) > 0.35 ? k : 0, rate = 2 + 7 * k;
+  // (Living world, alive.ts: a gust of the shared wind stirs the hem even standing still.)
+  const g = ALIVE.on ? gust(h.x, h.y, now) : 0;
+  const side = Math.abs(h.fx) > 0.35 ? k : 0, rate = 2 + 7 * Math.max(k, g * 0.6);
   const wave = (i: number, amp = 1) => Math.round(Math.sin(now * rate + ph + i * 0.9) * amp);
   // (The look's height, hat and eyes in the old body's rows, which this file's numbers are written in.)
   // (A tall body keeps the old rows here; rect() maps them onto it.)
@@ -104,7 +116,7 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
   if (cloth) {
     const [col, lin] = [shade(cloth[0]), shade(cloth[1])], top = L.cape ? 6 + t : 9 + t, n = bottom - top;
     for (let r = top; r <= bottom; r++) {
-      const i = r - top, low = i > n / 2, ext = Math.round(side * 3.5 * (i / n) ** 1.2), sw = i >= n - 1 ? wave(i, k > 0.2 ? 1 : 0.6) : k > 0.2 ? wave(i) : 0;
+      const i = r - top, low = i > n / 2, ext = Math.round(side * 3.5 * (i / n) ** 1.2), sw = i >= n - 1 ? wave(i, k > 0.2 || g > 0.35 ? 1 : 0.6) : k > 0.2 || (g > 0.5 && i > n * 0.6) ? wave(i) : 0;
       const hem = r === bottom && rag && (Math.floor(now * 3 + ph) + r) % 2 ? 1 : 0;
       if (sv) {
         // In profile: hanging down the back from the shoulders, a little off it at the hem, streaming behind walking.

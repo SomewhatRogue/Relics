@@ -9,6 +9,10 @@ import { CHARGE, GRAB, RELICS, WEAPONS } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { HURT_RED, MOTION, WHITE, clamp01, easeOut, newPose, pushDir, rest, struck, type BodyPose } from './motion';
+import { ALIVE } from './alive';
+
+/** A blow on a hero with the living world on: a bigger rock back than today's (motion.ts `hit`), held a little longer. */
+const ALIVE_HIT = { shift: 3, time: 0.22, crouch: 0.2, lean: 3 };
 
 const P = newPose(), D: [number, number] = [0, 0], M = MOTION.hero;
 
@@ -118,7 +122,9 @@ function heroAct(p: BodyPose, h: Hero, t: number, now: number, w: (typeof WEAPON
   }
   if (h.act === 'hurt') {
     pushDir(h.kvx, h.kvy, -h.fx, -h.fy, D);
-    if (h.actT < M.hit.time) struck(p, h.actT, D[0], D[1], M.hit);
+    // (Living world, alive.ts: rocked back further and a little longer.)
+    const H = ALIVE.on ? ALIVE_HIT : M.hit;
+    if (h.actT < H.time) struck(p, h.actT, D[0], D[1], H);
     else (p.phase = 'stagger'), (p.ox = Math.round(Math.sin(now * 90) * 1.2));
     return flashHit(p, h.actT), p;
   }

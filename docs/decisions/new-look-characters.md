@@ -115,3 +115,18 @@ doesn't come out nicely from the blade"; "the attack looks lame, not a pull back
   shield (shieldart.ts, the barracks' choices kept) goes deeper: darker fields, older metal, blackened rims.
 - On the test page (the artifact "Relic: new look characters"; `#today` for today's figures).
   (Claude Opus 5.5)
+
+## 2026-11-16: LIVING WORLD, a toggle in the options box (alive.ts)
+
+- Kyle: characters and townsfolk should look "more dynamic", keeping the stylised look; and "beautiful landscapes
+  make a huge difference... things that look deep or nuanced, like water"; "put it behind an option I can toggle in
+  the UI to compare". So one button, LIVING WORLD: ON / OFF, under CAMERA (as camwide.ts: live, remembered on the
+  device, `?alive=1` / `?alive=0` wins), off by default. Everything below reads `ALIVE.on` each frame.
+- Slice 1, characters (both views; with Kyle's go-ahead in the Art and side-view chats' files, behind the toggle):
+  a cape's swing behind a walker is a spring (herolife.ts `trail`): it carries on past when you stop or start and
+  settles; a gust of the shared wind (alive.ts `gust`, the same one the trees will use) stirs its hem standing still.
+  A blow rocks a goblin back further and longer along the push, then it sways past upright catching itself
+  (foepose.ts `foeHit`); a hero rocks back a little more too (heropose.ts). A standing townsperson turns to face you
+  within a few tiles, otherwise glances about on their own uneven rhythm, and shifts their weight a pixel now and
+  then (npcs.ts `drawNpc`; scene.ts and cards3d.ts say where you are first).
+  (Claude Opus 5.5)

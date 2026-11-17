@@ -42,6 +42,7 @@ import { camKick } from './heropose';
 import { houseOf } from './cottage';
 import { EL_LIGHT, heldEl } from './palette';
 import { drawChest, drawFlask, drawPickup, drawSmoke } from './relicsdraw';
+import { watched } from './alive';
 /** A '#rrggbb' as light colour 0..1. */
 const tint = (h: string): [number, number, number] => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
 import { drawBolt, drawDrop, drawCoal, drawHook, drawJavelin } from './relicsdraw';
@@ -478,6 +479,7 @@ export class Scene {
       const door = doorAt(b), dx = OX + door.x * PX - cx, dy = OY + door.y * PX - cy;
       items.push({ y: blockFoot(b) + 0.1, draw: () => (drawGlint(c, kx, ky, d, b.look ?? 0), drawKindling(c, b, kx, ky), drawSceneRings(c, b, kx, ky, dx, dy)) });
     }
+    watched(me);
     for (const n of map.npcs ?? []) {
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
       items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy - lv(at.x, at.y), near && !n.mute, at.fx, !!n.path && !at.still, at.x, at.fy) });
