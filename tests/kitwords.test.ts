@@ -38,7 +38,7 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     for (const w of CLASS_KITS.MAGE) for (const el of ['', 'fire', 'frost', 'storm'] as const) expect(kitRows(w, el).find(([l]) => l === 'COST')?.[1]).toMatch(/magic/);
     // Five words a row.
     for (const w of CLASS_KITS.MAGE) for (const el of ['fire', 'frost', 'storm'] as const) for (const v of Object.values(MAGE_KIT[w as 'wand'][el])) expect(v.split(/\s+/).length, v).toBeLessThanOrEqual(5);
-    expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, TAP TO BUILD  HOLD: LIGHTNING STRIKE, STUNS  PERFECT: BIGGER, LONGER STUN');
+    expect(kitLine('wand', 'storm')).toBe('TAP: LIGHTNING STREAM, TAP TO BUILD  HOLD: CHAIN LIGHTNING, REACHES FAR  PERFECT: JUMPS TO MORE GOBLINS');
     // The stream doesn't break blows: the wand's storm says what's true of it instead.
     expect(kitRows('wand', 'storm').find(([l]) => l === 'ALSO')?.[1]).toBe('Ignores shields, spares friends');
     expect(KIT.spellblade.also).toBe('Magic shields, blinks top up');
@@ -47,7 +47,7 @@ describe('GUARD and DODGE areas, from the numbers', () => {
     // The staff is the wand, harder and rooted (Kyle, 2026-11-16): the card says so.
     expect(kitLine('staff', 'fire')).toBe('TAP: SWEEP, KNOCKS BACK, BURNS  HOLD: BIG FIREBALL, BURNS A CROWD  PERFECT: BIGGER, INTERRUPTS ANY BLOW');
     expect(kitRows('staff', 'frost').find(([l]) => l === 'HOLD')?.[1]).toBe('Ice dome, nothing gets in');
-    expect(kitRows('staff').find(([l]) => l === 'STORM')?.[1]).toBe('Tap sweep, hold chain lightning');
+    expect(kitRows('staff').find(([l]) => l === 'STORM')?.[1]).toBe('Tap sweep, hold lightning strike');
     expect(barWords('Shorter dodge, costs more stamina', 'MAGE')).toBe('Shorter dodge, costs more magic');
     expect(barWords('STAMINA RECOVERY', 'RANGER')).toBe('STAMINA RECOVERY');
   });

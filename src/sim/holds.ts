@@ -25,16 +25,17 @@ function wand(h: Hero, s: Swing, mult: number, r: HoldRoom, w: World, traits: Tr
   const el = castElement(h), big = h.perfect;
   // (WIDE BURST widens the fireball as it does any burst: sim/room.ts.)
   if (el === 'frost') return coldBlast(h, s, mult, w, burstMult(h));
-  if (el === 'storm') return callStrike(h, s, mult, r.aim, r.zones, w);
+  // (The wand's storm hold is chain lightning; the staff calls the strike down, staffHold.)
+  if (el === 'storm') return chainBolt(h, s, mult, w);
   // A firebolt off the wand, a fireball off the staff (shared/spellbook.ts).
   r.bolts.push(shoot(h, { ...s, burst: big ? fire.big : fire.burst, speed: (s.speed ?? 17) * fire.speed }, 'fire', mult, traits));
   w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: 'spark', el });
 }
 
-/** The staff's (Kyle, 2026-11-16): the wand's fireball bigger, a chain bolt, an ice dome (sim/staffholds.ts). */
+/** The staff's (Kyle, 2026-11-16): a big slow fireball, the lightning strike called down, an ice dome (sim/staffholds.ts). */
 function staffHold(h: Hero, s: Swing, mult: number, r: HoldRoom, w: World, traits: TraitId[]): void {
   const el = castElement(h);
-  if (el === 'storm') return chainBolt(h, s, mult, w);
+  if (el === 'storm') return callStrike(h, s, mult, r.aim, r.zones, w);
   if (el === 'frost') return iceDome(h, s, mult, w);
   wand(h, s, mult, r, w, traits, FIREBALL);
 }

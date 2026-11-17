@@ -1,12 +1,12 @@
 /**
- * The staff's storm and frost holds (Kyle, 2026-11-16; its fire hold is the wand's fireball, bigger:
- * sim/holds.ts). Numbers in shared/spellbook.ts.
+ * The wand's storm hold and the staff's frost hold (Kyle, 2026-11-16; the rest in sim/holds.ts). Numbers in
+ * shared/spellbook.ts.
  *
- * Storm, CHAIN_BOLT: lightning off the staff at the goblin you aim at, then jumping goblin to goblin,
+ * Storm (the wand), CHAIN_BOLT: lightning off the wand at the goblin you aim at, then jumping goblin to goblin,
  * `jumps` times (`bigJumps` on the white flash), each one up to `reach` tiles from the last and taking
  * `fall` of the one before. Small goblins it touches are stunned.
  *
- * Frost, ICE_DOME: an ice dome round you, `r` across (`bigR` on the flash), for `time` s (`bigTime`).
+ * Frost (the staff), ICE_DOME: an ice dome round you, `r` across (`bigR` on the flash), for `time` s (`bigTime`).
  * Goblins caught at its edge, or inside it, when it rises are frozen solid, and no goblin can come in:
  * they're pushed back out to its edge. Nothing outside it lands a blow or a shot on anyone inside it
  * (sim/combat.ts, shelteredFrom); your shots and friends' go out through it as ever. It's kept on the

@@ -41,12 +41,12 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
   wand: {
     fire: KIT.wand,
     frost: { tap: 'Three icicles, chill', hold: 'Cold blast, freezes', perfect: 'Wider, interrupts any blow' },
-    storm: { tap: 'Lightning stream, tap to build', hold: 'Lightning strike, stuns', perfect: 'Bigger, longer stun', also: 'Ignores shields, spares friends' },
+    storm: { tap: 'Lightning stream, tap to build', hold: 'Chain lightning, reaches far', perfect: 'Jumps to more goblins', also: 'Ignores shields, spares friends' },
   },
   staff: {
     fire: KIT.staff,
     frost: { tap: 'Sweep, knocks back, chills', hold: 'Ice dome, nothing gets in', perfect: 'Bigger, lasts longer', also: 'Freezes goblins at its edge' },
-    storm: { tap: 'Sweep, knocks back, past shields', hold: 'Chain lightning jumps between goblins', perfect: 'Jumps to more goblins', also: 'Stuns the small ones' },
+    storm: { tap: 'Sweep, knocks back, past shields', hold: 'Big lightning strike, stuns', perfect: 'Bigger, longer stun', also: 'Ignores shields, spares friends' },
   },
   spellblade: {
     fire: KIT.spellblade,
@@ -57,8 +57,8 @@ export const MAGE_KIT: Record<MageKit, Record<Element, KitRow>> = {
 
 /** A Mage's spellbook by element, for a weapon card that isn't in anyone's hand: "Tap firebolt, hold fireball". */
 const BOOK: Record<MageKit, Record<Element, string>> = {
-  wand: { fire: 'Tap firebolt, hold heavy firebolt', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold lightning strike' },
-  staff: { fire: 'Tap sweep, hold big fireball', frost: 'Tap sweep, hold ice dome', storm: 'Tap sweep, hold chain lightning' },
+  wand: { fire: 'Tap firebolt, hold heavy firebolt', frost: 'Tap icicles, hold cold blast', storm: 'Tap lightning stream, hold chain lightning' },
+  staff: { fire: 'Tap sweep, hold big fireball', frost: 'Tap sweep, hold ice dome', storm: 'Tap sweep, hold lightning strike' },
   spellblade: { fire: 'Cuts burn, hold burning lunge', frost: 'Cuts chill, hold shatter', storm: 'Cuts ignore shields, hold lightning rush' },
 };
 const COST: Record<MageKit, string> = { wand: `${SPELL.wand} magic a hold`, staff: `${SPELL.staff} magic a hold`, spellblade: `${SPELL.spellblade} magic a hold` };

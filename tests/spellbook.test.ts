@@ -55,9 +55,9 @@ describe('the wand', () => {
     expect(a.es.slice(1).every((e) => lost(e) === 0)).toBe(true);
   });
 
-  it('storm held: lightning called down where you aim, a gold mark first, no bolt loosed', () => {
-    const a = mageArena('wand', [[9, 6], [9, 3]], 'storm');
-    const ev = a.loose(PLAIN.wand, 0.1, { ay: -3 });
+  it('storm held (the staff\'s, 2026-11-16): lightning called down where you aim, a gold mark first, no bolt loosed', () => {
+    const a = mageArena('staff', [[9, 6], [9, 3]], 'storm');
+    const ev = a.loose(PLAIN.staff, 0.25, { ay: -3 });
     expect(spell(ev)).toMatchObject({ what: 'strike', big: false, x: 9, y: 6 });
     expect(a.room.bolts.length).toBe(0);
     expect(zone(a.room.zones, 'skystrike')).toBeDefined();
@@ -105,15 +105,15 @@ describe('the staff (Kyle, 2026-11-16): a knockback sweep, and big holds cast st
     expect(burning(st.es[1], st.room.time)).toBe(true);
   });
 
-  it('storm: chain lightning from goblin to goblin, each jump a little less; more jumps on the flash', () => {
-    const line: [number, number][] = [[9, 6], [9, 3], [11.5, 1.5], [14, 1.5], [16, 3], [16, 6], [16, 9]];
-    const a = mageArena('staff', line, 'storm'), ev = a.loose(PLAIN.staff, 0.3);
+  it('the wand\'s storm hold (was the staff\'s): chain lightning from goblin to goblin, each jump a little less; more jumps on the flash', () => {
+    const line: [number, number][] = [[9, 6], [9, 3], [11.5, 1.5], [14, 1.5], [16, 3], [16, 6], [16, 9]].slice(0, CHAIN_BOLT.bigJumps + 1) as [number, number][];
+    const a = mageArena('wand', line, 'storm'), ev = a.loose(PLAIN.wand, 0.3);
     expect(spell(ev)?.what).toBe('chainbolt');
     const hit = a.es.filter((e) => lost(e) > 0);
     expect(hit.length).toBe(CHAIN_BOLT.jumps + 1);
     expect(lost(a.es[0])).toBeGreaterThan(lost(a.es[1]));
     expect(ev.filter((x) => x.k === 'shock').length).toBe(CHAIN_BOLT.jumps + 1);
-    const b = mageArena('staff', line, 'storm'), ev2 = b.loose(WEAPONS.staff.draw! + 0.05, 0.3);
+    const b = mageArena('wand', line, 'storm'), ev2 = b.loose(WEAPONS.wand.draw! + 0.05, 0.3);
     expect(ev2.some((x) => x.k === 'perfect')).toBe(true);
     expect(b.es.filter((e) => lost(e) > 0).length).toBe(line.length);
   });

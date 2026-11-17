@@ -6,7 +6,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { ARENA, type GameMap } from '../src/shared/arena';
-import { BURN, SKY_STRIKE, STORM, STREAM, TICK } from '../src/shared/tuning';
+import { BURN, SKY_STRIKE, STORM, STREAM, TICK, WEAPONS } from '../src/shared/tuning';
 import { damage } from '../src/sim/damage';
 import { burning, stepElements, type World } from '../src/sim/elements';
 import { newEnemy } from '../src/sim/enemies';
@@ -65,11 +65,11 @@ describe('storm and shields', () => {
   });
 
   it('the lightning strike hits a shield wall from the front as hard as anything', () => {
-    const plain = mageArena('wand', [[9, 6]], 'storm');
-    plain.loose(0.9, 0.5, AIM);
-    const wall = mageArena('wand', [[9, 6], [10, 6]], 'storm');
+    const plain = mageArena('staff', [[9, 6]], 'storm');
+    plain.loose(1.3, 0.5, AIM);
+    const wall = mageArena('staff', [[9, 6], [10, 6]], 'storm');
     wall.es.forEach((e) => (e.variant = 'shield'));
-    wall.loose(0.9, 0.5, AIM);
+    wall.loose(1.3, 0.5, AIM);
     expect(lost(plain.e)).toBeGreaterThan(0);
     expect(lost(wall.e)).toBeGreaterThanOrEqual(lost(plain.e));
   });
@@ -80,8 +80,8 @@ describe('storm jumps only between wet goblins', () => {
   // 2.8 off on dry ground.
   const spots: [number, number][] = [[9, 6], [11.6, 6], [9, 6 - STORM.reach - 0.8], [6.2, 6]];
   const bolt = (map?: GameMap) => {
-    const a = mageArena('wand', spots, 'storm', false, 'scrapper', map);
-    a.loose(0.9, 0.5, AIM);
+    const a = mageArena('staff', spots, 'storm', false, 'scrapper', map);
+    a.loose(1.3, 0.5, AIM);
     return a.es.map(lost);
   };
 
@@ -116,8 +116,8 @@ describe('storm jumps only between wet goblins', () => {
   });
 
   it('a wet goblin is jumped to once a cast, and never one the strike itself reached', () => {
-    const a = mageArena('wand', [[9, 6], [9, 5.2], [11, 6], [11, 5.2]], 'storm', false, 'scrapper', POOL);
-    const ev = a.loose(0.9, 0.5, AIM);
+    const a = mageArena('staff', [[9, 6], [9, 5.2], [11, 6], [11, 5.2]], 'storm', false, 'scrapper', POOL);
+    const ev = a.loose(1.3, 0.5, AIM);
     // Two struck in the circle; each of the two in the water outside it jolted once (through the pool now).
     const to = ev.flatMap((x) => (x.k === 'pooljolt' ? x.to : x.k === 'shock' ? [[x.x2, x.y2] as [number, number]] : []));
     expect(to.map(([x]) => Math.round(x))).toEqual([11, 11]);
@@ -263,15 +263,15 @@ describe("the wand's storm stream", () => {
   });
 });
 
-describe("the wand's storm hold: lightning from the sky", () => {
+describe("the staff's storm hold (the wand's till 2026-11-16): lightning from the sky", () => {
   /** The strike called by `a`, if any. */
   const strikeOf = (a: ReturnType<typeof mageArena>) => a.room.zones.find((z) => z.kind === 'skystrike');
   const edge = SKY_STRIKE.r + 0.34;
 
   it('marks a circle where you aim, and falls on just that circle after its delay', () => {
     // Its goblin, one just inside the edge, one just outside.
-    const a = mageArena('wand', [[9, 6], [9 + edge - 0.05, 6], [9 - edge - 0.1, 6]], 'storm');
-    a.loose(0.9, 0.1, AIM);
+    const a = mageArena('staff', [[9, 6], [9 + edge - 0.05, 6], [9 - edge - 0.1, 6]], 'storm');
+    a.loose(1.3, 0.15, AIM);
     const z = strikeOf(a)!;
     expect(z).toMatchObject({ x: 9, y: 6, r: SKY_STRIKE.r, big: false });
     expect(z.at! - a.room.time).toBeGreaterThan(SKY_STRIKE.delay - 0.15);
@@ -284,22 +284,22 @@ describe("the wand's storm hold: lightning from the sky", () => {
   });
 
   it('with no goblin near the aim, it falls on the aim point', () => {
-    const a = mageArena('wand', [[14, 14]], 'storm');
-    a.loose(0.9, 0.1, { ay: -5 });
+    const a = mageArena('staff', [[14, 14]], 'storm');
+    a.loose(1.3, 0.3, { ay: -5 });
     expect(strikeOf(a)).toMatchObject({ x: 9, y: 4 });
-    const b = mageArena('wand', [[9, 5.3]], 'storm');
-    b.loose(0.9, 0.1, { ay: -4.5 });
+    const b = mageArena('staff', [[9, 5.3]], 'storm');
+    b.loose(1.3, 0.3, { ay: -4.5 });
     // Onto the goblin nearest the aim point.
     expect(strikeOf(b)).toMatchObject({ x: 9, y: 5.3 });
   });
 
   it('spares friends, stuns small goblins briefly, and hurts but never stuns a butcher', () => {
-    const a = mageArena('wand', [[9, 6], [10, 6.3]], 'storm');
+    const a = mageArena('staff', [[9, 6], [10, 6.3]], 'storm');
     a.es[1] = Object.assign(a.es[1], { kind: 'butcher', radius: 0.62, weight: 3.5 });
     const pal = a.room.join('pal');
     Object.assign(pal, { x: 8.3, y: 6.4 });
     const hp = pal.hp;
-    const ev = a.loose(0.9, 0.5, AIM);
+    const ev = a.loose(1.3, 0.5, AIM);
     expect(pal.hp).toBe(hp);
     expect(ev.some((x) => x.k === 'spared')).toBe(true);
     expect(a.e.act).toBe('stunned');
@@ -310,11 +310,11 @@ describe("the wand's storm hold: lightning from the sky", () => {
 
   it('let go on the flash, it is bigger and stuns longer', () => {
     const at: [number, number][] = [[9, 6], [9 + edge + 0.25, 6]];
-    const plain = mageArena('wand', at, 'storm');
-    plain.loose(0.9, 0.5, AIM);
+    const plain = mageArena('staff', at, 'storm');
+    plain.loose(1.3, 0.5, AIM);
     expect(lost(plain.es[1])).toBe(0);
-    const big = mageArena('wand', at, 'storm');
-    const ev = big.loose(0.62, 0.5, AIM);
+    const big = mageArena('staff', at, 'storm');
+    const ev = big.loose(WEAPONS.staff.draw! + 0.05, 0.5, AIM);
     expect(ev.find((x) => x.k === 'spell')).toMatchObject({ what: 'strike', big: true, r: SKY_STRIKE.bigR });
     expect(lost(big.es[1])).toBeGreaterThan(0);
     expect(big.e.actDur).toBe(SKY_STRIKE.bigStun);
@@ -322,8 +322,8 @@ describe("the wand's storm hold: lightning from the sky", () => {
   });
 
   it('a guest is sent the same circle at the same second, and it is the one judged', () => {
-    const a = mageArena('wand', [[9, 6], [9 + edge - 0.05, 6], [9 - edge - 0.1, 6]], 'storm');
-    a.loose(0.9, 0.1, AIM);
+    const a = mageArena('staff', [[9, 6], [9 + edge - 0.05, 6], [9 - edge - 0.1, 6]], 'storm');
+    a.loose(1.3, 0.15, AIM);
     const got = new Decoder().apply(new Encoder().encode(stateOf(a.room), true), true);
     const z = strikeOf(a)!, theirs = (got.zones as unknown as Zone[]).find((o) => o.kind === 'skystrike')!;
     expect(theirs).toMatchObject({ x: z.x, y: z.y, r: z.r, at: Math.round(z.at! * 100) / 100, big: false });

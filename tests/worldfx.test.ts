@@ -36,10 +36,10 @@ const cracked = (room: ArenaRoom, e: Enemy) => (e.crackUntil ?? -9) > room.time;
 const evs = <K extends FightEvent['k']>(ev: FightEvent[], k: K) => ev.filter((x): x is Extract<FightEvent, { k: K }> => x.k === k);
 
 describe('rods: an ironhide draws the lightning, and its guard breaks', () => {
-  it("the wand's strike aimed near an ironhide falls on it instead, and breaks its guard", () => {
-    const a = mageArena('wand', [[9, 3], [12, 3.5]], 'storm');
+  it("the staff's strike aimed near an ironhide falls on it instead, and breaks its guard", () => {
+    const a = mageArena('staff', [[9, 3], [12, 3.5]], 'storm');
     iron(a.es[1]);
-    const ev = a.loose(0.9, 0.6, UP6), call = evs(ev, 'spell')[0];
+    const ev = a.loose(1.3, 0.6, UP6), call = evs(ev, 'spell')[0];
     expect(call.x).toBeCloseTo(12, 5);
     expect(evs(ev, 'rodhit').length).toBe(1);
     expect(cracked(a.room, a.es[1])).toBe(true);
@@ -47,9 +47,9 @@ describe('rods: an ironhide draws the lightning, and its guard breaks', () => {
   });
 
   it('with no ironhide within ROD.reach it falls where it was aimed', () => {
-    const a = mageArena('wand', [[9, 3], [9 + ROD.reach + 1.5, 3]], 'storm');
+    const a = mageArena('staff', [[9, 3], [9 + ROD.reach + 1.5, 3]], 'storm');
     iron(a.es[1]);
-    const ev = a.loose(0.9, 0.6, UP6);
+    const ev = a.loose(1.3, 0.6, UP6);
     expect(evs(ev, 'spell')[0].x).toBeCloseTo(9, 5);
     expect(evs(ev, 'rodhit').length).toBe(0);
   });
@@ -78,8 +78,8 @@ describe('rods: an ironhide draws the lightning, and its guard breaks', () => {
 
 describe('lightning through a pool', () => {
   it('jolts the goblins in that same water only: near, far, never the pond apart or the bank', () => {
-    const a = mageArena('wand', [[9, 3], [14, 2], [2, 8], [12, 6.2]], 'storm', false, 'scrapper', POOLS);
-    const ev = a.loose(0.9, 0.6, UP6);
+    const a = mageArena('staff', [[9, 3], [14, 2], [2, 8], [12, 6.2]], 'storm', false, 'scrapper', POOLS);
+    const ev = a.loose(1.3, 0.6, UP6);
     const [hit, far, pond, bank] = a.es.map(lost);
     expect(hit).toBeGreaterThan(0);
     expect(far).toBeGreaterThan(0);
@@ -89,10 +89,10 @@ describe('lightning through a pool', () => {
   });
 
   it('friends wading the same water take nothing from a friend storm, and are drawn as passed by', () => {
-    const a = mageArena('wand', [[9, 3], [14, 2]], 'storm', false, 'scrapper', POOLS);
+    const a = mageArena('staff', [[9, 3], [14, 2]], 'storm', false, 'scrapper', POOLS);
     const pal = a.room.join('pal');
     Object.assign(pal, { x: 6, y: 2 });
-    const hp = pal.hp, ev = a.loose(0.9, 0.6, UP6), j = evs(ev, 'pooljolt')[0];
+    const hp = pal.hp, ev = a.loose(1.3, 0.6, UP6), j = evs(ev, 'pooljolt')[0];
     expect(pal.hp).toBe(hp);
     expect(j.spared.length).toBe(1);
     expect(j.to.length).toBe(1);
@@ -101,10 +101,10 @@ describe('lightning through a pool', () => {
   it('reaches POOL.cap bodies at most, nearest first, friends counted', () => {
     const spots: [number, number][] = [[9, 3]];
     for (const x of [3.5, 4.5, 5.5, 6.5, 7.4, 10.6, 11.5, 12.5, 13.5, 14.6]) spots.push([x, 1.6]);
-    const a = mageArena('wand', spots, 'storm', false, 'scrapper', POOLS);
+    const a = mageArena('staff', spots, 'storm', false, 'scrapper', POOLS);
     const pal = a.room.join('pal');
     Object.assign(pal, { x: 9, y: 4.6 });
-    const ev = a.loose(0.9, 0.6, UP6), j = evs(ev, 'pooljolt')[0];
+    const ev = a.loose(1.3, 0.6, UP6), j = evs(ev, 'pooljolt')[0];
     expect(j.to.length + j.spared.length).toBe(POOL.cap);
     expect(a.es.slice(1).filter((e) => lost(e) > 0).length).toBe(POOL.cap - 1);
     // The two furthest (3.5 and 14.6) are left.
@@ -113,9 +113,9 @@ describe('lightning through a pool', () => {
   });
 
   it('an ironhide jolted through the water has its guard broken', () => {
-    const a = mageArena('wand', [[9, 3], [14.2, 2.2]], 'storm', false, 'scrapper', POOLS);
+    const a = mageArena('staff', [[9, 3], [14.2, 2.2]], 'storm', false, 'scrapper', POOLS);
     iron(a.es[1]);
-    a.loose(0.9, 0.6, UP6);
+    a.loose(1.3, 0.6, UP6);
     expect(cracked(a.room, a.es[1])).toBe(true);
   });
 
@@ -323,10 +323,10 @@ describe('steam', () => {
 
 describe('the same every time, and a guest sees the same', () => {
   const scene = () => {
-    const a = mageArena('wand', [[9, 3], [14, 2], [12, 3.6], [6, 2]], 'storm', true, 'scrapper', POOLS);
+    const a = mageArena('staff', [[9, 3], [14, 2], [12, 3.6], [6, 2]], 'storm', true, 'scrapper', POOLS);
     iron(a.es[2]);
     a.room.setIntent('me', { ...NO_INTENT });
-    a.loose(0.9, 0.6, UP6);
+    a.loose(1.3, 0.6, UP6);
     iceAt(a.room, 6, 2, 1.5, a.room.time, a.room.events);
     a.room.zones.push({ kind: 'fire', x: 6, y: 2, r: 1, at: a.room.time, until: a.room.time + 0.3, next: a.room.time + 99, owner: 'me', el: 'fire' });
     a.run(1.5);

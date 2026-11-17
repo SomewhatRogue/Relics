@@ -172,3 +172,7 @@ Claude Opus 5.5
   speed"): shared/mods.ts rollMods: SPEED never on a piece with SKILL RECHARGE, STAMINA RECOVERY (a Mage's
   magic), SPELL power or CHEAPER SPELLS (NOT_WITH_SPEED), for every class; the draw order kept, so pieces the
   rule doesn't touch roll as before; a piece that lost a pick shares its whole worth among what it got.
+- Storm held swapped (Kyle: "staff charge to be lightning bolt and big damage, charged lightning wand can be
+  chain lightning but less damage but more range than its little shock"): the staff calls the strike down
+  (sim/skystrike.ts, its 24 to 56 hold), the wand throws CHAIN_BOLT: range 9 (the stream's 5), 3 jumps (5 on
+  the flash), 0.9 of the hold falling 0.85 a jump. Cards and the storm, worldfx and spellbook tests follow.

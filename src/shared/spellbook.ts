@@ -25,8 +25,9 @@ export const TAPS: Record<MageKit, Record<Element, { dmg: number }>> = {
   staff: { fire: { dmg: 0.65 }, frost: { dmg: 1.05 }, storm: { dmg: 1.05 } },
   spellblade: { fire: { dmg: 0.6 }, frost: { dmg: 1 }, storm: { dmg: 1 } },
 };
-/** The staff's storm hold: a chain bolt (sim/staffholds.ts). `dmg` of the hold on the first goblin, `fall` of that on each after. */
-export const CHAIN_BOLT = { range: 8, cone: 30, jumps: 4, bigJumps: 7, reach: 4, dmg: 1.6, fall: 0.85, stun: 0.5 };
+/** The wand's storm hold (Kyle, 2026-11-16; the staff's calls the strike down: SKY_STRIKE): chain lightning
+ *  (sim/staffholds.ts), further than the tap's stream, lighter: `dmg` of the hold on the first goblin, `fall` of that on each after. */
+export const CHAIN_BOLT = { range: 9, cone: 30, jumps: 3, bigJumps: 5, reach: 3.5, dmg: 0.9, fall: 0.85, stun: 0.4 };
 /** The staff's frost hold: an ice dome round you (sim/staffholds.ts); `dmg` of the hold on each goblin it freezes. */
 export const ICE_DOME = { r: 2.6, bigR: 3.2, time: 4, bigTime: 5.5, edge: 0.9, dmg: 0.4 };
 /** The wand's frost tap: `n` icicles fanned `spread` radians apart, flying `speed` times the spark's. */
