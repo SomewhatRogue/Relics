@@ -102,15 +102,17 @@ def _mesh(name, bm, col, smooth):
     return o
 
 
-def sheet(name, rows, col, n=7):
-    """A cloth: rows of (z, half width, y at the middle, y at the edges), joined into a sheet with soft folds."""
+def sheet(name, rows, col, n=7, rag=0.0):
+    """A cloth: rows of (z, half width, y at the middle, y at the edges), joined into a sheet with soft folds.
+    `rag` lifts every other point of its last row by that much: a torn hem."""
     bm = bmesh.new()
     grid = []
-    for z, hw, ym, ye in rows:
+    for k, (z, hw, ym, ye) in enumerate(rows):
         line = []
         for i in range(n):
             t = i / (n - 1) * 2 - 1
-            line.append(bm.verts.new((t * hw, ym + (ye - ym) * t * t + 0.02 * math.sin(i * 2.1), z)))
+            up = rag * (i % 2) if k == len(rows) - 1 else 0.0
+            line.append(bm.verts.new((t * hw, ym + (ye - ym) * t * t + 0.02 * math.sin(i * 2.1), z + up)))
         grid.append(line)
     for a, b in zip(grid, grid[1:]):
         for i in range(n - 1):

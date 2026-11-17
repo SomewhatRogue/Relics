@@ -3,9 +3,12 @@ numbers pose any figure built on the hero skeleton. The game drives them from it
 covered (p from 0 to 1 is two steps), `strike(t)` by the blow's own time (the wind-up ends at WINDUP)."""
 import math
 
+# On guard: one foot forward and the feet apart, the body turned a little behind the shield, the sword hand low.
+STANCE = {'thighL': (-12, 5, 0), 'shinL': (8, 0, 0), 'thighR': (9, -5, 0), 'shinR': (8, 0, 0), 'footR': (-6, 0, 0)}
 GUARD = {
+    **STANCE, 'spine': (3, 0, 9), 'head': (2, 0, -9),
     'uarmL': (-8, 7, 0), 'farmL': (-40, 0, 0), 'shield': (0, 0, 0),
-    'uarmR': (10, -9, 0), 'farmR': (-26, 0, 0),
+    'uarmR': (12, -12, 0), 'farmR': (-22, 0, 0),
     'cape1': (5, 0, 0), 'cape2': (4, 0, 0), 'cape3': (3, 0, 0),
 }
 WINDUP = 0.32
@@ -25,7 +28,7 @@ def ease(k):
 def idle(p):
     """Standing on guard: the cape stirs, the sword hand shifts a little."""
     s = math.sin(2 * math.pi * p)
-    return {**GUARD, 'cape2': (4 + 1.5 * s, 0, 0), 'cape3': (3 + 3 * math.sin(2 * math.pi * p - 0.9), 0, 0), 'farmR': (-26 + 2 * s, 0, 0), 'head': (0, 0, 3 * s)}
+    return {**GUARD, 'cape2': (4 + 1.5 * s, 0, 0), 'cape3': (3 + 3 * math.sin(2 * math.pi * p - 0.9), 0, 0), 'farmR': (-22 + 2 * s, 0, 0), 'head': (2, 0, -9 + 3 * s)}
 
 
 def walk(p):
@@ -33,13 +36,13 @@ def walk(p):
     f = 2 * math.pi * p
     out = dict(GUARD)
     for side, a in (('R', f), ('L', f + math.pi)):
-        out['thigh' + side] = (-27 * math.sin(a) + 3, 0, 0)
+        out['thigh' + side] = (-27 * math.sin(a) + 3, -4 if side == 'R' else 4, 0)
         out['shin' + side] = (46 * max(0.0, math.cos(a)) + 4, 0, 0)
         out['foot' + side] = (-10 * max(0.0, math.cos(a)), 0, 0)
     s = math.sin(f)
     out.update({
         'hips': (0, 0, -5 * s), 'spine': (4, 0, 9 * s), 'head': (-2, 0, -5 * s),
-        'uarmR': (10 + 13 * s, -9, 0), 'farmR': (-30 - 6 * s, 0, 0), 'shield': (0, 0, 2 * s),
+        'uarmR': (12 + 13 * s, -12, 0), 'farmR': (-26 - 6 * s, 0, 0), 'shield': (0, 0, 2 * s),
         'cape1': (10 + 2 * math.sin(2 * f), 0, 0), 'cape2': (4 + 3 * math.sin(2 * f - 0.8), 0, 0), 'cape3': (4 + 4 * math.sin(2 * f - 1.7), 0, 0),
     })
     return out

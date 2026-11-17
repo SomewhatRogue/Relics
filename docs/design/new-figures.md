@@ -11,6 +11,14 @@ especially with 32 colors... obviously we'd have to rebuild EVERYTHING to match 
 styled look of the classes you had there... Basically I want those figures... (though the legs of the knight look
 weird?) We can have you spin up sub agents to make things and we have Blender on my computer."
 
+## After the first bench (Kyle, 2026-11-17)
+
+The first knight was "too HD, not stylized"; the reference figures at the finer size are what he wants ("3d but
+looking like a dark-pixel might be the play... I like the higher definition but pixel look"). So: figures are models
+drawn as dark pixel art (near-black parts in many small pieces, gold as one-pixel lines, four shades a colour, dark
+lines between limbs, a big outline shape, a stance), in the 8 facings and frame steps only. The size is open between
+70 and 105 tall; 105 is the look in his screenshot and means the world at three times today's pixels, not two.
+
 ## The target
 
 - **In play: figures 70 pixels tall, 32 colours each.** A figure pixel is half a world pixel today (3 screen pixels on

@@ -3,16 +3,17 @@
                     the viewer's right), a column a frame, each cell CELL wide and tall, the feet at FEET;
   <name>.json       the model (rig.py) and every move's samples, for drawing it live, with the sheet's layout;
   <name>-look.png   a few poses big and smooth, to check the model by eye.
-blender --background --factory-startup --python scripts/figures/bake.py -- <outdir> [look]     (look: only the big picture)"""
+blender --background --factory-startup --python scripts/figures/bake.py -- <outdir> [look] [sheet]
+(look: only the big picture; sheet: the pixel frames too, plain cel: the game's own drawer has the final shading)"""
 import bpy, json, math, os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mathutils import Vector
 import kit, knight, moves
 
-# The camera looks down on the figure from this many degrees above level (a three-quarter view: the tops of the
-# helm and shoulders show); PPM pixels a metre makes a 1.9 m hero about 70 pixels tall.
-EL, PPM, CELL, FEET = 25.0, 40, (128, 152), (64, 132)
+# The camera looks down on the figure from this many degrees above level (a little: figures are drawn nearly from
+# the front even on a floor seen from above, as the game's own sprites are); PPM pixels a metre makes him 70 tall.
+EL, PPM, CELL, FEET = 12.0, 38, (128, 152), (64, 132)
 args = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 out = args[0] if args else 'out'
 os.makedirs(out, exist_ok=True)
@@ -88,7 +89,8 @@ big[..., 3] = 1
 save(big, os.path.join(out, 'knight-look.png'))
 print('BAKED look')
 
-if 'look' not in args:
+sheet = np.zeros((1, 1, 4), dtype=np.float32)
+if 'sheet' in args:
     frame(CELL[0], CELL[1], PPM, FEET, False)
     cols, layout, x = sum(n // 2 for _, _, n in moves.CLIPS), {}, 0
     sheet = np.zeros((CELL[1] * 8, CELL[0] * cols, 4), dtype=np.float32)
@@ -103,6 +105,10 @@ if 'look' not in args:
                 sheet[(7 - d) * CELL[1]:(8 - d) * CELL[1], (x + i) * CELL[0]:(x + i + 1) * CELL[0]] = px
         x += n // 2
     save(sheet, os.path.join(out, 'knight-sheet.png'))
+if 'look' not in args:
+    layout, x = {}, 0
+    for name, fn, n in moves.CLIPS:
+        layout[name], x = [x, n // 2], x + n // 2
     data = {
         'cell': CELL, 'feet': FEET, 'ppm': PPM, 'el': EL, 'light': [round(v, 4) for v in kit.LIGHT], 'bands': kit.BANDS, 'stride': moves.STRIDE, 'windup': moves.WINDUP,
         'sheet': layout, 'parent': rig.parent, 'parts': rig.model(),

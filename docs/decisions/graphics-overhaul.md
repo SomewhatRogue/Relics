@@ -179,3 +179,32 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Waiting on Kyle: whether the figure is right in motion, and baked or live in steps. Then the game: a figure layer
   at twice the art's pixels in the 2.5D view, the hook where the parked `three/chars3d.ts` hung.
   (Claude Fable 5.2)
+
+## 2026-11-17: the knight's second pass: a model drawn as dark pixels
+
+- Kyle on the first bench: "a little too HD or not stylized... I liked how it looked in that first-pass that you gave
+  me to look at sizes, it was just a much cooler looking knight and characters in general." Then, with a screenshot of
+  the scale test (the wizard, the knight and the hooded one at the finer size): "making it 3d but looking like a
+  dark-pixel might be the play. otherwise it's sort of runescape-esque which i'm not really going for. I like the
+  higher definition but pixel look in this screenshot a LOT. like i want these."
+- What made the first knight read clean and 3D: big flat mid-grey shapes, thick bright gold bands, a square stance,
+  shading that only multiplied one colour. What the reference figures do: nearly black with sparse highlights, gold as
+  one-pixel lines, many small layered pieces, a big outline shape (hat, cloak, weapon), a pose.
+- The second pass (`scripts/figures/knight.py`, `moves.py`): near-black blue steel in more pieces (two-lame pauldrons,
+  waist lames, tassets, cuisses over mail, a beaked bascinet drawn to a point), gold only as 2.6 cm lines, a horsehair
+  plume, a fur mantle, a cape to the ankle with a torn hem, a longer sword held forward, and a guard stance (a foot
+  forward, the body turned behind the shield). The camera on a figure down from 25 degrees to 12, nearer the front,
+  as the reference figures and the game's own sprites are drawn.
+- The pixel pass, in the drawer (on the bench now; the game's when he goes in): each part's colour becomes four
+  shades (two shadows turned toward blue, itself, a light turned warm), the light band kept small; a dark line where
+  one joint's parts cross another's (drawn from each pixel's joint number); a cold edge on dark pixels at the lit
+  side of the outline; a dark outline. Drawn in the 8 facings and frame steps only, never free.
+- Size is now a number: the same model at 70 tall (a figure pixel half a world pixel) or 105 (a third), which is the
+  finer look in Kyle's screenshot. The bench has both in the street and both rows in the comparison.
+- `bake.py` now puts out the model and the big check picture by default; the baked sheet is an option (plain cel,
+  since the final shading is the drawer's). Baked and live were measured the same, so live in steps is the way.
+- The bench (same link, https://claude.ai/artifact/GgoKXqc7Arzz1NbNbL3Ypy): the four reference heroes at 70 and 105
+  beside ours now, ours turned, and the first pass; then the street. Honest gap: theirs have hand-placed texture
+  inside the shapes; ours are cleaner inside, and his red and his edge light are still stronger than theirs.
+- Waiting on Kyle: is this the look; 70 or 105 (105 means the world at three times today's pixels to match, not two).
+  (Claude Fable 5.2)
