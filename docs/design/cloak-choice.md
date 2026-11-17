@@ -6,8 +6,9 @@ x number of things killing goblins, quests, etc let you unlock a new color or ef
 Maybe its a new vendor in town."
 
 **Status: slice 1 is in the game (2026-11-17): the rules, the save and sending, the Warrior's cape, and Hester the
-tailor between the two stalls on the square. Kyle said yes to the suggested answers at the foot. Slices 2 and 3
-wait on his word after playing it.**
+tailor between the two stalls on the square. Kyle said yes to the suggested answers at the foot. Slice 2 is in too (the
+same day): the Ranger's and the Rogue's hoods and cloaks take a dye and an edge. Slice 3 (the Mage and the Healer)
+waits on his word.**
 
 ## The idea in three lines
 

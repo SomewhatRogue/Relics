@@ -65,6 +65,8 @@ const ranger = (face: string[], pal: Record<string, string>, _life: LookDef['lif
   const p = { l: darker(pal.L), f: darker(pal.F), ...pal };
   return {
     side: { body: art([...R_SIDE_HEADS[look], ...R_SIDE_BODY], p), arm: art(R_SIDE_ARM, p), eyes: [5, 11, 11] },
+    // (The trapper's `c` is his hood's fur edge, not cloth: a dye leaves it.)
+    cloth: look === 1 ? [pal.C] : [pal.C, pal.c],
     down: art([...R_HOOD, ...face, ...R_BODY], p), up: art([...R_HOOD_BACK, ...R_BACK], p), h: 33, tall: 2, eyes: [5, 7, 10], life: {},
     // (The legs cut below the cloak's hem, so it stays whole as they walk.)
     cut: { headTo: 9, hip: 25, back: [0, 9, 6, 19], arm: [12, 9, 18, 19], skirt: 20 }, lift: 6,
@@ -101,7 +103,7 @@ const rogue = (sk: Parameters<typeof skin>[0], pal: Record<string, string>): Loo
   return {
     // (One cloak: its own lower half sways from the waist with the walk, `skirt`; the separate swaying mantle behind it
     // is gone, its outline read as the cloak cut in two. The legs cut below the hem; only the boots step under it.)
-    down: art([...G_HEAD, ...G_BODY], p), up: art(G_BACK, p), h: 33, tall: 0, eyes: [5, 7, 10], life: {},
+    down: art([...G_HEAD, ...G_BODY], p), up: art(G_BACK, p), h: 33, tall: 0, eyes: [5, 7, 10], life: {}, cloth: [p.C, p.c, p.H],
     side: { body: art([...G_SIDE_HEAD, ...G_SIDE_BODY], p), arm: art(G_SIDE_ARM, p), eyes: [5, 11, 11] },
     cut: { headTo: 9, hip: 27, back: [0, 9, 6, 17], arm: [12, 9, 18, 17], skirt: 19 }, lift: 7,
   };

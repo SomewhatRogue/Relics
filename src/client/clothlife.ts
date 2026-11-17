@@ -9,9 +9,9 @@ import type { Life } from './lookkit';
 
 /** The six dyes, by the tailor's order (entry 0 is the look's own): deep colours, none brighter than the knight's
  *  red, the white a bone white. */
-const DYE: ([string, string] | null)[] = [null, ['#641618', '#340a0c'], ['#1e3460', '#101c3a'], ['#22462a', '#122a16'], ['#24212a', '#141218'], ['#a8a49c', '#6e6a64'], ['#7a5e22', '#4a3812']];
+export const DYE: ([string, string] | null)[] = [null, ['#641618', '#340a0c'], ['#1e3460', '#101c3a'], ['#22462a', '#122a16'], ['#24212a', '#141218'], ['#a8a49c', '#6e6a64'], ['#7a5e22', '#4a3812']];
 /** The three edges: iron, silver, old gold. */
-const EDGE: (string | null)[] = [null, '#6e6a78', '#c8ced4', '#c8962e'];
+export const EDGE: (string | null)[] = [null, '#6e6a78', '#c8ced4', '#c8962e'];
 
 /** A colour at a share of its brightness. */
 const dim = (c: string, k: number): string => '#' + [1, 3, 5].map((i) => Math.round(parseInt(c.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');

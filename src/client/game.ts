@@ -89,7 +89,7 @@ import { relicBack } from '../sim/deepmarks';
 const houndOf = (p: Profile): HoundLook | undefined => (p.cls === 'RANGER' ? fitHound(p.hound, p.id) : undefined);
 /** A Warrior's shield as the profile has it. */
 const shieldOf = (p: Profile): ShieldLook | undefined => (p.cls === 'WARRIOR' ? fitShield(p.shield) : undefined);
-const clothOf = (p: Profile): ClothLook | undefined => (wearsCloth(p.cls) ? wearable(p, p.cloth) : undefined);
+const clothOf = (p: Profile): ClothLook | undefined => (wearsCloth(p.cls) ? wearable(p, p.cloth, p.cls) : undefined);
 
 /** Seconds the screen takes to go dark after a lost job, before town. */
 export const FADE_OUT = 2.4;
@@ -323,7 +323,7 @@ export class Game {
   chooseCloth(look: ClothLook): boolean {
     const p = this.profile;
     if (!wearsCloth(p.cls)) return false;
-    p.cloth = wearable(p, look);
+    p.cloth = wearable(p, look, p.cls);
     if (this.hero) this.hero.clothLook = { ...p.cloth };
     store(this.save);
     return true;

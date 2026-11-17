@@ -24,7 +24,8 @@ import { drawRaise } from './raisemark';
 import { drawHolyShield } from './holyshield';
 import { drawText, textWidth } from './pixfont';
 import { PARTY } from '../shared/tuning';
-import { SPRITES, heroLook, lookDef } from './sprites';
+import { SPRITES } from './sprites';
+import { heroLookIn, lookDefIn } from './clothsprites';
 import type { Cls, LookDef } from './lookkit';
 import { drawLife, idPhase } from './herolife';
 import { dialLook, drawDialAura, drawDialEyes } from './heroeyes';
@@ -70,7 +71,7 @@ export function drawHero(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'b
 }
 
 function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t: number): void {
-  const look = heroLook(WEAPONS[h.weapon].cls, h.look);
+  const look = heroLookIn(WEAPONS[h.weapon].cls, h.look, h.clothLook);
   if (h.act === 'down') {
     shadow(c, x, y, hs(6));
     spin(c, look.down, x, y - hs(4), Math.PI / 2, 0.85);
@@ -90,7 +91,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   const pz = heroPose(h, t, c.now);
   // Stood still a while out of a fight: an idle of their class, or petting a hound (idlepose.ts).
   const idl = idlePose(h, pz, c.now);
-  const cls = WEAPONS[h.weapon].cls as Cls, def = lookDef(cls, h.look);
+  const cls = WEAPONS[h.weapon].cls as Cls, def = lookDefIn(cls, h.look, h.clothLook);
   // Facing mostly east or west: in profile, for a look drawn that way (sideview.ts), unless an idle has its own view.
   const sv = !idl && sideOn(h, !!def.side);
   const up = !sv && (idl?.up ?? (h.fy < -0.55 && Math.abs(h.fy) > Math.abs(h.fx) * 0.8));
@@ -131,7 +132,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   // Knocked flat by the hound (the Ranger's rare idle): lying there laughing, the gear set down.
   if (idl?.lying) {
     spin(c, look.down, bx, by - hs(5) + (Math.floor(c.now * 7) % 2), (idl.lying * Math.PI) / 2);
-    return idleProps(c, { x, y, bx, by, px: bx, py: by, side: flip ? -1 : 1, ey: 0, exl: 0, exr: 0, def: lookDef(WEAPONS[h.weapon].cls as Cls, h.look), p: { a: 0, ext: 0, reach: 0, pull: 0 }, el: '', now: c.now, o: idl, w: h.weapon });
+    return idleProps(c, { x, y, bx, by, px: bx, py: by, side: flip ? -1 : 1, ey: 0, exl: 0, exr: 0, def: lookDefIn(WEAPONS[h.weapon].cls as Cls, h.look, h.clothLook), p: { a: 0, ext: 0, reach: 0, pull: 0 }, el: '', now: c.now, o: idl, w: h.weapon });
   }
   if (h.act === 'roll' || h.act === 'zip' || h.act === 'bash') {
     const dx = h.act === 'zip' ? h.fx : h.rollDx, dy = h.act === 'zip' ? h.fy : h.rollDy;

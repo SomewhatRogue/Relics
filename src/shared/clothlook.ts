@@ -22,8 +22,10 @@ export const ROW_ORDER: Row[] = ['dye', 'edge', 'cut'];
 export interface ClothLook { dye: number; edge: number; cut: number }
 export const defaultCloth = (): ClothLook => ({ dye: 0, edge: 0, cut: 0 });
 
-/** The classes the tailor has cloth for (slice 1: the Warrior's cape). */
-export const wearsCloth = (cls: string): boolean => cls === 'WARRIOR';
+/** The rows the tailor has for a class: the Warrior's cape takes all three; the Ranger's and the Rogue's cloaks a dye
+ *  and an edge (slice 2); nothing yet for the Mage and the Healer. */
+export const rowsFor = (cls: string): Row[] => (cls === 'WARRIOR' ? ROW_ORDER : cls === 'RANGER' || cls === 'ROGUE' ? ['dye', 'edge'] : []);
+export const wearsCloth = (cls: string): boolean => rowsFor(cls).length > 0;
 
 /** What a deed is counted in: one of the Roll's tallies, the Deep's deepest floor, or hero quests done. */
 export type Tally = keyof Stats | 'deep' | 'quests';
@@ -71,10 +73,11 @@ export function fitCloth(s: unknown): ClothLook {
   return { dye: of('dye'), edge: of('edge'), cut: of('cut') };
 }
 
-/** A cloth as this hero may wear it: any part not earned falls back to the look's own. */
-export function wearable(p: Doer, s: unknown): ClothLook {
-  const c = fitCloth(s);
-  for (const row of ROW_ORDER) if (!earned(p, row, c[row])) c[row] = 0;
+/** A cloth as this hero may wear it: any part not earned, or that the tailor has no row of for their class, falls
+ *  back to the look's own. */
+export function wearable(p: Doer, s: unknown, cls: string = 'WARRIOR'): ClothLook {
+  const c = fitCloth(s), has = rowsFor(cls);
+  for (const row of ROW_ORDER) if (!has.includes(row) || !earned(p, row, c[row])) c[row] = 0;
   return c;
 }
 

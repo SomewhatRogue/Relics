@@ -427,3 +427,22 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   build at night with no errors and no button. The full suite ran a few minutes before on the cloth change (two
   known timing failures on this PC, relaybudget and the heavy hound test, which passes alone).
   (Claude Fable 5.2)
+
+## 2026-11-17: the cloth choice, slice 2: the Ranger's and the Rogue's cloaks
+
+- Kyle: "Yes, next two."
+- Their cloth is part of the body, not a cape drawn behind it, so it is dyed in the pixels. A look now names the
+  colours its cloth is drawn in (lookkit.ts `cloth`; herolooks.ts sets it for the Ranger and the Rogue). New file
+  `src/client/clothsprites.ts`: `lookDefIn` and `heroLookIn` give a look in a chosen cloth, front, back and profile,
+  made once and kept. A dye swaps the cloth's colours before the sharp painting; an edge is a line of metal along the
+  hem (the lowest cloth in each column, within four rows of the cloak's foot). actors.ts asks for the hero's look
+  through them (three lines). The trapper's fur edge is left as it is: only his hood and cloak take the dye.
+- The rules: `rowsFor(cls)` in shared/clothlook.ts. The Warrior has dye, edge and cut; the Ranger and the Rogue dye
+  and edge; the Mage and the Healer nothing yet. `wearable` now also drops a row the tailor has not for the class.
+  Hester's page shows only the class's rows.
+- Checked: tsc clean; the cloth test (9 tests); the full suite (see the commit); a sheet of all three looks of both
+  classes in every dye with an edge, front, back and side, from the game's own drawing hook; the tailor's page as a
+  Ranger on the phone size (wearing blue with an iron edge), and as a Mage (her line, no rows).
+- Left: the small portraits (the unit frame, the pack, the Roll) still show the look undyed. Silver reads nearly white
+  under the sharp painting.
+  (Claude Fable 5.2)

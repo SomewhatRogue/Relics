@@ -40,6 +40,9 @@ export interface LookDef {
   /** In profile facing east (docs/design/side-view.md): the body with the near leg only, the near arm on its own,
    *  and where the one eye is (row, x, x). Mirrored for west. A look without it draws its front walking across. */
   side?: { body: Part[]; arm: Part[]; eyes: [number, number, number] };
+  /** The colours its cloth is drawn in, where the cloth is part of the body (a hood and cloak): the cloth, its shadow,
+   *  its glint. The tailor's dye swaps them (clothsprites.ts). */
+  cloth?: string[];
 }
 
 /** A pixel map to parts: '.' is empty, `M` (mail) checkers between `M` and `m`. Rows are HERO_W (18) wide. */

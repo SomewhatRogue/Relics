@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEEDS, ROWS, defaultCloth, earned, fitCloth, packCloth, tally, unpackCloth, wearable, wearsCloth } from '../src/shared/clothlook';
+import { DEEDS, ROWS, defaultCloth, earned, fitCloth, packCloth, rowsFor, tally, unpackCloth, wearable, wearsCloth } from '../src/shared/clothlook';
 import { QUESTS } from '../src/shared/heroquests';
 import { newProfile } from '../src/shared/progress';
 
@@ -59,8 +59,18 @@ describe('the cloth a hero wears', () => {
     expect(unpackCloth(['x', 9, 1])).toEqual({ dye: 0, edge: 0, cut: 1 });
   });
 
-  it('only the Warrior wears one, for now', () => {
-    expect(wearsCloth('WARRIOR')).toBe(true);
-    expect(['RANGER', 'ROGUE', 'MAGE', 'HEALER'].some(wearsCloth)).toBe(false);
+  it('the Warrior has all three rows, the Ranger and the Rogue a dye and an edge, the others nothing yet', () => {
+    expect(rowsFor('WARRIOR')).toEqual(['dye', 'edge', 'cut']);
+    expect(rowsFor('RANGER')).toEqual(['dye', 'edge']);
+    expect(rowsFor('ROGUE')).toEqual(['dye', 'edge']);
+    expect(['WARRIOR', 'RANGER', 'ROGUE'].every(wearsCloth)).toBe(true);
+    expect(['MAGE', 'HEALER'].some(wearsCloth)).toBe(false);
+  });
+
+  it('a row the tailor has not for a class is never worn by it', () => {
+    const p = newProfile('RANGER');
+    p.stats.kills = 100;
+    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'RANGER')).toEqual({ dye: 1, edge: 0, cut: 0 });
+    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'MAGE')).toEqual(defaultCloth());
   });
 });

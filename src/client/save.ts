@@ -65,7 +65,7 @@ const hero = (old: Partial<Profile>): Profile => {
   if (cls === 'WARRIOR') out.shield = fitShield(p.shield);
   else delete out.shield;
   // The cloth worn (shared/clothlook.ts): kept as far as it's earned, for a class the tailor has cloth for.
-  if (wearsCloth(cls) && p.cloth) out.cloth = wearable({ stats: out.stats, deepBest: p.deepBest, quests: p.quests, level: p.level ?? 1 }, p.cloth);
+  if (wearsCloth(cls) && p.cloth) out.cloth = wearable({ stats: out.stats, deepBest: p.deepBest, quests: p.quests, level: p.level ?? 1 }, p.cloth, cls);
   else delete out.cloth;
   // Relics before they had charge: each kind owned becomes a full plain relic (shared/relicitems.ts).
   Object.assign(out, fitRelics(p as never, out.xp * 31 + out.runs + 7));
