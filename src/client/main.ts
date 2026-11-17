@@ -150,10 +150,10 @@ import { echoes } from './runnerecho';
 import { LAYOUT, townSpots } from '../shared/town';
 import { STREET } from './three/streetkit';
 import { BIG } from '../shared/bighalls';
-// The new town (docs/design/town-layout.md) behind `?layout`, or with the parked street look: set before the town is
-// first built. `LAYOUT.on` is the street look itself, for the insides' tall walls.
+// The new town (docs/design/town-layout.md), the default since Kyle walked it (2026-11-16); `?layout=old` for today's.
+// Set before the town is first built. `LAYOUT.on` is the parked street look itself, for the insides' tall walls.
 LAYOUT.on = STREET;
-LAYOUT.town = STREET || new URLSearchParams(location.search).has('layout');
+LAYOUT.town = STREET || new URLSearchParams(location.search).get('layout') !== 'old';
 // The bigger rooms on their own switch, on unless `?rooms=small` (shared/bighalls.ts): set before anyone goes in.
 BIG.on = new URLSearchParams(location.search).get('rooms') !== 'small';
 import { GearHint } from './gearhint';

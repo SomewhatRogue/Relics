@@ -188,3 +188,18 @@ Claude Opus 5.5
 - Full suite 1968 passed. Next: Kyle walks it (`?layout`, and `?layout&look=3d`); on his yes it becomes the default.
 
 Claude Opus 5.5
+
+## 2026-11-16: the default (Kyle: "approved"), the sewer grate by the pond
+
+- **The new town is the default**, flat and plain 2.5D: main.ts `LAYOUT.town` unless `?layout=old` (today's town).
+  `?layout` alone still works (it's simply on). Everyone online gets the same town again.
+- **The sewer grate and Cobb** (Kyle: "didn't we lose Cobb at the sewer grate?"): they came along with the Rat's
+  district and sat on the south brink by the gorge rail (24, 56), out of sight. Their own district now
+  (layoutmove `sewer`, before the Rat's): the grate, its spot and Cobb to the right of the millpond, a way off from it,
+  grate at (37, 44.5), between the pond and Rescue Row. tests/layout.test.ts: all reachable.
+- **For others:** scripts that walk the old town by its coordinates (firstjob.cjs, errands-look.cjs, crowd-look.cjs
+  and the like) need `&layout=old` now, or the new town's points. Whisper's "where" line still says "down south by
+  the sewer grate": with the trainers' directions, below.
+- Now due (Kyle confirmed the town): trainers' directions, quest markers, first-time runners (the to-do above).
+
+Claude Opus 5.5
