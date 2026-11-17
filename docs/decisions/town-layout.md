@@ -300,3 +300,15 @@ Claude Opus 5.5
 - Full suite 1973 passed.
 
 Claude Opus 5.5
+
+## 2026-11-16: out of the way (Kyle: the house over the counting house, the thing before the forge, the merchant)
+
+- The little house at the east end of the row across Smiths' Lane gone (it stood over the counting house's roof):
+  the row is its west end only (layoutplan.ts).
+- The lanes' tumbled stone (mend.ts, gone with the lanes work) that landed in the street before the forge left out
+  of the new town (layoutmove OVERRIDES `rubble` at (37.2, 8.75)).
+- The market's stalls swapped: Tobin's PAWN stall the one nearer the square, Tobin at it; the traders' (EMPTY till
+  they come, Dessa's then) the far one (OVERRIDES `stall`, ROUNDS).
+- Full suite 1973 passed.
+
+Claude Opus 5.5
