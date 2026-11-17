@@ -155,3 +155,5 @@ on one uniform. Opus 5.5.
 - Glints are now single surface pixels brightening the water, not 3-pixel white squares.
 - Left out: goblin ears swinging. They're baked into the 1.5x body sprite; worth it only with a head redraw in parts.
   Opus 5.5.
+- Townsfolk greet you: coming within a few tiles of someone standing about, they nod, two quick one-pixel dips, once
+  each time you come up (alive.ts `idleStance` `dy`, npcs.ts). Opus 5.5.

@@ -83,10 +83,21 @@ export function phaseOf(s: string): number {
  *  player within `near` tiles, else glancing one way and the other on their own uneven rhythm; `shift`, a pixel of
  *  weight from foot to foot now and then. */
 export const IDLE = { near: [5, 3.5] };
-export function idleStance(name: string, x: number, y: number, now: number): { left: boolean; shift: number } {
+/** When each townsperson last saw you come near (seconds), for the nod; dropped when you've gone. */
+const greeted = new Map<string, number>();
+/** The greeting: two quick dips of a pixel, `beat` seconds each, after you come near. */
+const NOD = { beat: 0.14, dips: 2 };
+export function idleStance(name: string, x: number, y: number, now: number): { left: boolean; shift: number; dy: number } {
   const ph = phaseOf(name) * 6.283;
   const near = WATCHED.on && Math.abs(WATCHED.x - x) < IDLE.near[0] && Math.abs(WATCHED.y - y) < IDLE.near[1];
   const left = near ? WATCHED.x < x : Math.sin(now * 0.31 + ph) + Math.sin(now * 0.17 + ph * 2.1) * 0.8 > 0;
   const w = Math.sin(now * 0.43 + ph * 1.7);
-  return { left, shift: w > 0.45 ? 1 : w < -0.45 ? -1 : 0 };
+  let dy = 0;
+  if (near) {
+    let t0 = greeted.get(name);
+    if (t0 === undefined || t0 > now) greeted.set(name, (t0 = now));
+    const beat = Math.floor((now - t0) / NOD.beat);
+    dy = beat < NOD.dips * 2 && beat % 2 === 0 ? 1 : 0;
+  } else greeted.delete(name);
+  return { left, shift: w > 0.45 ? 1 : w < -0.45 ? -1 : 0, dy };
 }
