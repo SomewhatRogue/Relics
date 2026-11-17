@@ -45,8 +45,8 @@ export function gradeBuilt(group: THREE.Group, roof: THREE.Mesh | null, seed: nu
   });
 }
 
-/** Whether a face's colour is the green-grey the grade gave stone (not timber, not a lit pane). */
+/** Whether a face's colour is the slate the grade gave stone (../darkgold.ts; not timber, not a lit pane). */
 function stoneish(a: Float32Array, f: number): boolean {
   const r = a[f], g = a[f + 1], b = a[f + 2];
-  return g >= r && g >= b && g - Math.min(r, b) < 0.05 && g > 0.01 && g < 0.2;
+  return b >= g && g >= r && b - r < 0.07 && b > 0.01 && b < 0.24;
 }

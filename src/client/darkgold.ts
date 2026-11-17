@@ -1,6 +1,7 @@
 /**
  * Dark and gold (docs/design/dark-gold.md): the world's colours pulled to Kyle's reference pictures in one
- * place, rather than in every painter. Cool violet-grey stone becomes green-grey, timber goes darker and
+ * place, rather than in every painter. Cool violet-grey stone becomes one slate (green-grey until 2026-11-17:
+ * docs/design/graphics-overhaul.md), timber goes darker and
  * duller, red roof tiles turn to slate and red cloth to rust. Bright things (lit windows, gold lettering,
  * flames) are left as they are, so the accent still reads. Applied once to what's painted and cached (the
  * map's floor, each block's canvas) and to the 2.5D buildings' vertex colours (three/darkgold3d.ts).
@@ -29,6 +30,9 @@ function rgb(h: number, s: number, l: number): number {
   return (k(r) << 16) | (k(g) << 8) | k(b);
 }
 
+/** Stone's hue: slate. (Dark and gold had it at 90, a green-grey.) */
+const STONE_HUE = 214;
+
 /** The stone family: violet, blue and plain greys. */
 const greyish = (h: number, s: number, l: number) => l > 0.04 && l < 0.82 && (s < 0.06 || (s < 0.3 && h >= 190 && h <= 335));
 
@@ -38,9 +42,11 @@ export function gradeHex(c: number, mode: Grade): number {
   if (mode === 'foe') return foeHex(c, h, s, l);
   if (mode === 'folk') return folkHex(c, h, s, l);
   if (greyish(h, s, l)) {
-    // Roofs of grey stone or lead read as slate; everything else as the dungeon's green-grey.
-    if (mode === 'roof') return rgb(208, Math.min(0.16, 0.07 + s * 0.5), l * 0.9);
-    return rgb(90 + (h % 9), Math.min(0.15, 0.07 + s * 0.45), l * (0.96 - 0.15 * l));
+    // Stone is a cool slate (Kyle, 2026-11-17, graphics-overhaul.md slice 2: off dark and gold's green-grey, which
+    // left the whole town one olive by day; moss stays green, as the accent). Roofs of grey stone or lead a step
+    // darker and bluer, so a roof still parts from the wall under it.
+    if (mode === 'roof') return rgb(STONE_HUE + 8, Math.min(0.19, 0.09 + s * 0.5), l * 0.82);
+    return rgb(STONE_HUE - 4 + (h % 9), Math.min(0.14, 0.06 + s * 0.45), l * (0.96 - 0.15 * l));
   }
   if (mode === 'floor') return c;
   const red = (h < 14 || h > 335) && s > 0.2 && l < 0.62;

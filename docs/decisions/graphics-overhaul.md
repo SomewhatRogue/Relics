@@ -68,3 +68,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   is three texture reads a pixel.
 - For other chats: your look scripts now shoot the smooth light. Add `&light=bands` for the old.
   (Claude Fable 5.2)
+
+## 2026-11-17: slice 2, first part: stone to slate
+
+- Kyle: slate, 90 to 100 percent. The stone family's grade (`client/darkgold.ts`, one line and a named hue) goes from
+  the green-grey at hue 90 to a slate at 214, the mock's own colour at about 95 percent; roofs of grey stone a step
+  darker and bluer than before so a roof still parts from the wall under it. Moss, timber, rust, gold and the foe and
+  folk rules are untouched, so moss now reads as the accent it was meant to be.
+- Everything that goes through the grade follows: the floor and back walls, every block, the 2.5D buildings, rocks,
+  the Lantern's dais and the statue. `three/darkgold3d.ts` knew stone by its green (to lay moss on low walls): now by
+  its slate. The 2.5D retaining walls and steps (`three/layoutledges.ts`, the finished Town layout chat's) had their
+  own violet outside the grade, which is why they glowed purple at night beside olive cobbles: now through the grade.
+- Still to do in slice 2: the three brightness tiers (ground, walls and props, figures), faces less orange, the dusk
+  and day tints against goblin skin. Those need the yardstick sheets side by side and Kyle's eye.
+  (Claude Fable 5.2)

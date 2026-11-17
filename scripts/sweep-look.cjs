@@ -44,7 +44,7 @@ function stage(s) {
     g.room.enemies.filter((e) => e.act !== 'dead').slice(0, 6).forEach((e, i) => Object.assign(e, { x: h.x + 2.4 + (i % 3) * 1.1, y: h.y - 1.2 + Math.floor(i / 3) * 1.6, alert: true }));
     const key = (k) => (document.body.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true })), setTimeout(() => document.body.dispatchEvent(new KeyboardEvent('keyup', { key: k, bubbles: true })), 60));
     for (const [k, ms] of [['e', 450], ['j', 300], ['r', 450]]) (key(k), await wait(ms));
-    g.step = () => {};
+    g.step = () => [];
   })();
 }
 

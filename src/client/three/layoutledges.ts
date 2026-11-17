@@ -9,6 +9,11 @@ import { levelAt, type Area, type GameMap, type Ledge } from '../../shared/arena
 import { Boxes, Seed, jit } from './boxes';
 
 import { stacked } from '../levelpaint';
+import { graded } from '../darkgold';
+
+// The retaining walls' and steps' stone, through the world's grade (../darkgold.ts) so they are the town's slate, not
+// their own violet (docs/design/graphics-overhaul.md, slice 2).
+const STONE = graded(0x4a4652, 'wall'), COPING = graded(0x5c5866, 'wall'), TREAD = graded(0x6a6674, 'wall');
 /** Whether a map's ledges are stacked levels (drawn here) rather than a job's rock shelves (ground.ts). One source with
  *  the flat view's levelpaint.ts. */
 export { stacked };
@@ -34,13 +39,13 @@ function wall(B: Boxes, ax: 'x' | 'z', a0: number, a1: number, c: number, out: n
       const len = 0.5 + r.next() * 0.45, sa = Math.max(a, a0), sb = Math.min(a + len, a1), hh = Math.min(ch, h - y) - 0.03;
       a += len;
       if (sb - sa < 0.08) continue;
-      const col = jit(0x4a4652, 0.13, r);
+      const col = jit(STONE, 0.13, r);
       if (ax === 'x') B.b((sa + sb) / 2, y, c + out * 0.06, sb - sa - 0.04, hh, 0.12, col);
       else B.b(c + out * 0.06, y, (sa + sb) / 2, 0.12, hh, sb - sa - 0.04, col);
     }
   }
-  if (ax === 'x') B.b((a0 + a1) / 2, h - 0.02, c + out * 0.08, a1 - a0, 0.1, 0.2, 0x5c5866);
-  else B.b(c + out * 0.08, h - 0.02, (a0 + a1) / 2, 0.2, 0.1, a1 - a0, 0x5c5866);
+  if (ax === 'x') B.b((a0 + a1) / 2, h - 0.02, c + out * 0.08, a1 - a0, 0.1, 0.2, COPING);
+  else B.b(c + out * 0.08, h - 0.02, (a0 + a1) / 2, 0.2, 0.1, a1 - a0, COPING);
 }
 
 /** A ramp as a flight of steps, from the level on its low side up to the level on its high side. */
@@ -52,7 +57,7 @@ function steps(B: Boxes, q: Area, m: GameMap, H: number, r: Seed): void {
   for (let i = 0; i < k; i++) {
     // Step i from the low end: its height, and where it sits along the flight.
     const h = (lo + ((hi - lo) * (i + 1)) / (k + 1)) * H, f = (i + 0.5) / k, d = len / k;
-    const at = up > 0 ? f : 1 - f, col = jit(i % 2 ? 0x4a4652 : 0x6a6674, 0.05, r);
+    const at = up > 0 ? f : 1 - f, col = jit(i % 2 ? STONE : TREAD, 0.05, r);
     if (alongY) B.b(mx, 0, q.y + at * q.h, q.w, h, d + 0.01, col);
     else B.b(q.x + at * q.w, 0, my, d + 0.01, h, q.h, col);
   }
