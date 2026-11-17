@@ -1,0 +1,3 @@
+/* The CAMERA button in the options box (camwide.ts), with the VIEW button's eye. */
+#options #camerabtn::before { background-image: var(--ic-view); }
+#options #camerabtn.on { border-image-source: var(--f-iron); color: var(--bone); }

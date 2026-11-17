@@ -92,4 +92,12 @@ export class Buildings {
     });
     for (const [i, e] of this.built) if (i >= map.blocks.length) this.drop(e.b), this.built.delete(i);
   }
+
+  /** Where the lit windows and door lamps are this frame (tiles), for their haze (air3d.ts). Read only. */
+  panes(out: THREE.Vector3[]): void {
+    for (const { b } of this.built.values()) {
+      if (!b.group.visible) continue;
+      for (const m of b.lamps) if (m.visible && m.material === m.userData.lamp.on) out.push(m.getWorldPosition(new THREE.Vector3()));
+    }
+  }
 }

@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import { FOG_BANDS } from '../light';
 import { MIST_GLSL, MIST_KEEP, MIST_MAX } from '../fenmistdraw';
 import { HD, hdPostMaterial } from './hdlook';
+import { AIR_GLSL, airUniforms } from './air3d';
 
 export const BAYER = `
 float bay2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
@@ -64,12 +65,15 @@ export function postMaterial(near: number, far: number): THREE.ShaderMaterial {
       tCol: { value: null }, tDep: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uGamma: { value: 1 }, uFog: { value: new THREE.Vector4(0, 0, 0, 16) }, uFogC: { value: new THREE.Vector3() }, uFogY: { value: 1 },
       // Fenmere's mist (../fenmistdraw.ts).
       uMist: { value: Array.from({ length: MIST_MAX }, () => new THREE.Vector4()) }, uMN: { value: 0 }, uMY: { value: 1 }, uMH: { value: new THREE.Vector4(-1e5, -1e5, 0, 1) }, uMC: { value: new THREE.Vector3() },
+      // The vignette and the lamps' haze (air3d.ts).
+      ...airUniforms(),
     },
     vertexShader: QUAD_VS,
     fragmentShader: BAYER + `
 uniform sampler2D tCol; uniform sampler2D tDep; uniform vec2 uRes; uniform float uGamma;
 uniform vec4 uFog; uniform vec3 uFogC; uniform float uFogY;
 ${MIST_GLSL}
+${AIR_GLSL}
 float D(vec2 p){ return ${near.toFixed(1)} + texture2D(tDep, p).x * ${(far - near).toFixed(1)}; }
 vec3 glowAt(vec2 p){ vec4 s = texture2D(tCol, p); return s.rgb * (1.0 - s.a); }
 void main(){
@@ -102,6 +106,11 @@ void main(){
     for (int j = -${MIST_KEEP}; j <= ${MIST_KEEP}; j++) for (int i = -${MIST_KEEP}; i <= ${MIST_KEEP}; i++) near = min(near, texture2D(tCol, uv + vec2(float(i), float(j)) * t).a);
     if (near > 0.99) col = mix(col, uMC, mk);
   }
+  // Warm haze round lit lamps and windows, then the edges of the screen darkened (air3d.ts); glowing things keep
+  // most of their light at the edges, so a lamp out there still shows.
+  float bz = bay4(px) - 0.5;
+  if (uHN > 0) col += airHalo(px, D(uv), bz);
+  if (uVig > 0.0) col *= 1.0 - airVig(px, uRes, bz) * (0.35 + 0.65 * c.a);
   vec3 g = vec3(0.0);
   g += (glowAt(uv + vec2(t.x, 0.0)) + glowAt(uv - vec2(t.x, 0.0)) + glowAt(uv + vec2(0.0, t.y)) + glowAt(uv - vec2(0.0, t.y))) * 0.2;
   g += (glowAt(uv + t) + glowAt(uv - t) + glowAt(uv + vec2(t.x, -t.y)) + glowAt(uv + vec2(-t.x, t.y))) * 0.1;

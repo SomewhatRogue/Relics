@@ -106,6 +106,7 @@ import { LessonView } from './lesson';
 import { Scene } from './scene';
 import { Views } from './three/views';
 import { options } from './options';
+import { camButton } from './camwide';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { heroVoices, primeSpot, townVoice, voiceClock } from './voiceplay';
@@ -835,6 +836,8 @@ try {
 tipsOn(tipsWanted);
 $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.contains('tips')));
 options();
+// CAMERA: CLOSE or WIDE, the wider camera to try (camwide.ts).
+camButton();
 ironUi();
 if (input.touch) document.body.classList.add('touch');
 

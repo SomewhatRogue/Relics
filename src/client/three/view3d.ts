@@ -4,6 +4,7 @@
  * whole number with nearest-pixel sampling; the flat layer of words and marks goes over it at the same
  * size. Only draws; the room decides everything. Built the first time it's wanted (main.ts).
  */
+import { camScale } from '../camwide';
 import { drawCuts } from '../cutdraw';
 import { mistFrame } from '../fenmistdraw';
 import { feetBand, topPush } from '../phoneband';
@@ -44,6 +45,7 @@ import { skyFlash } from '../skystrikedraw';
 import { drawFound3 } from './found3d';
 import { Perf } from './perf3d';
 import { makeRT, postMaterial } from './post';
+import { placeAir } from './air3d';
 import { roomLights } from './roomlights';
 import type { Spot } from './rounds3d';
 import { WitchFires } from './witch3d';
@@ -155,7 +157,7 @@ export class View3D {
     // As much floor as the pixel scene shows (its tiles across times down, scene.ts), so a figure stands
     // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.
     // `__zoom3` (a share of that floor) is for screenshots.
-    const s2 = Math.max(1, Math.round(Math.sqrt((Dw * Dh) / 118000))), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
+    const s2 = camScale(Dw, Dh), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
     this.view.size(W, H, STREET ? STREET_PPU : Math.sqrt((W * H) / (Math.sin(PITCH) * floor)));
     this.gl.setSize(W, H, false);
     const css: [string, string] = [(W * S) / this.dpr + 'px', (H * S) / this.dpr + 'px'];
@@ -212,6 +214,8 @@ export class View3D {
     }
     const at = this.view.at, fires: Spot[] = [...this.ground!.fires], ls: L3[] = [...this.ground!.lights];
     lampsNow(map.theme, this.ground!.lamps, fires, ls);
+    // (The fixed lamps and fires lit this hour, before the frame's spells and flashes join them: their haze, air3d.ts.)
+    const steady = ls.length;
     // (Live foes near your hero, for the new look's fade: a building hiding one of them fades.)
     const ha = this.heroAt, near = STREET && ha ? room.enemies.filter((e) => e.act !== 'dead' && Math.hypot(e.x - ha[0], e.y - ha[1]) < 10).map((e) => [e.x, e.y] as [number, number]) : [];
     this.buildings.update(map, this.heroAt, fires, near);
@@ -292,6 +296,10 @@ export class View3D {
       (u.uMist.value as THREE.Vector4[]).forEach((v, i) => v.fromArray(mist.banks, i * 4));
       u.uMY.value = mist.yr, u.uMH.value.set(...mist.hero), u.uMC.value.set(...mist.c);
     }
+    // The vignette, and the haze round lit lamps and windows (air3d.ts).
+    const panes: THREE.Vector3[] = [];
+    this.buildings.panes(panes);
+    placeAir(u, cam, V.W, V.H, V.ppu, NEAR, FAR, ls.slice(0, steady), panes, !!map.theme.day, at);
     this.post.uniforms.tDep.value = this.rt!.depthTexture;
     this.gl.setRenderTarget(null);
     this.gl.render(this.postScene, this.quad);

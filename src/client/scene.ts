@@ -2,6 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { camScale } from './camwide';
 import { drawCuts } from './cutdraw';
 import { drawPairLift } from './pairdraw';
 import { drawBrakeLane, drawIncline } from './brakedraw';
@@ -188,7 +189,8 @@ export class Scene {
     const zoom = (globalThis as { __zoom?: number }).__zoom;
     // (A step further back since the heroic proportions, Kyle 2026-11-12: "scale it back down but keep the same
     // fidelity": the tall heroes about the old ones' size on screen, more of the town round them.)
-    this.scale = zoom ?? Math.max(1, Math.round(Math.sqrt((W * H) / 118000)));
+    // (CAMERA: WIDE, a step further out to try: camwide.ts.)
+    this.scale = zoom ?? camScale(W, H);
     this.vw = Math.ceil(W / this.scale);
     this.vh = Math.ceil(H / this.scale);
     for (const c of [this.out, this.base, this.glowC]) (c.width = this.vw), (c.height = this.vh);
