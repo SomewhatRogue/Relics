@@ -34,6 +34,9 @@ export class Boxes {
   private pos: number[] = [];
   private nor: number[] = [];
   private cols: number[] = [];
+  private sw: number[] = [];
+  /** How much what's added from now on moves in the wind (the living world, wind3d.ts): 1 a tree's leaves, 0 else. */
+  sway = 0;
 
   get count(): number {
     return this.pos.length / 108;
@@ -74,6 +77,7 @@ export class Boxes {
       v.set(UN[i], UN[i + 1], UN[i + 2]).applyMatrix3(nmat).normalize();
       this.nor.push(v.x, v.y, v.z);
       this.cols.push(col.r, col.g, col.b);
+      this.sw.push(this.sway);
     }
   }
 
@@ -87,6 +91,7 @@ export class Boxes {
     g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(this.nor, 3));
     g.setAttribute('color', new THREE.Float32BufferAttribute(this.cols, 3));
+    if (this.sw.some((x) => x)) g.setAttribute('aSway', new THREE.Float32BufferAttribute(this.sw, 1));
     g.computeBoundingSphere();
     return g;
   }

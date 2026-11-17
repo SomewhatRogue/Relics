@@ -27,16 +27,21 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
         for (let i = 0; i < 4; i++) B.c(x + (r.next() - 0.5) * 0.4, 1.2 + i * 0.2, z, 0.08, 0.7, 0.08, 0x4a3e34, r.next() * 3, 0, 0.6 * (i % 2 ? 1 : -1));
         break;
       }
-      // A round crown of a few lumps, the biggest low, a lighter one up on the sunny side.
+      // A round crown of a few lumps, the biggest low, a lighter one up on the sunny side. (Its leaves move in the
+      // living world's wind, wind3d.ts.)
+      B.sway = 1;
       B.lump(x, 1.85, z, R * 2.6, R * 2.1, R * 2.4, jit(LEAF[0], 0.08, r), r.next() * 3);
       B.lump(x + (r.next() - 0.5) * R, 1.75 + r.next() * 0.2, z + R * 0.5, R * 1.7, R * 1.4, R * 1.5, jit(LEAF[2], 0.08, r), r.next() * 3);
       B.lump(x - R * 0.35, 2.25, z + R * 0.2, R * 1.5, R * 1.2, R * 1.4, jit(LEAF[1], 0.08, r), r.next() * 3);
+      B.sway = 0;
       break;
     }
     case 'pine':
       B.b(x, 0, z, 0.24, 0.8, 0.24, bark);
       // Three tiers, each a cone overlapping the one under it (the flat sprite's stacked triangles).
+      B.sway = 1;
       for (let i = 0; i < 3; i++) B.cone(x, 1.25 + i * 0.62, z, R * (2.5 - i * 0.62), 1.1 - i * 0.12, jit(PINE[i], 0.06, r), r.next() * 2);
+      B.sway = 0;
       break;
     case 'well':
       for (let i = 0; i < 8; i++) {

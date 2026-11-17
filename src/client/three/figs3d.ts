@@ -14,6 +14,7 @@ import { PITCH } from './camera3d';
 import { SWING } from '../swing';
 import { POOL, cardMaterial, xrayMaterial } from './figmat';
 import type { Proj } from './overlay3d';
+import { castFigures } from './sun3d';
 
 /** A cell of the atlas (sprite pixels), and where the feet go in it. */
 export const CELL = { w: 96, h: 96, fx: 48, fy: 64 };
@@ -123,6 +124,8 @@ export class Figs {
     }
     this.free.sort((a, b) => b - a);
     if (this.drawn) this.litTex.needsUpdate = this.glowTex.needsUpdate = true;
+    // (The living world, sun3d.ts: each figure's shadow, thrown away from the sun.)
+    castFigures(this.byIndex, this.litTex);
     this.ms = this.ms * 0.9 + (performance.now() - this.t0) * 0.1;
   }
 

@@ -2,7 +2,7 @@
  * The living world's landscape in 2.5D (../alive.ts, LIVING WORLD in the options box; docs/decisions/
  * new-look-characters.md). With it on, outdoors (a room with trees, bushes or water):
  * - the wind runs through the trees in gusts: leaf-green parts of the map's merged mesh (`VCOL`) above the trunk bend
- *   along the wind, the treetops most, bushes a little, with a quick flutter on top. The gust is ../alive.ts `gust`,
+ *   along the wind, the treetops most, with a quick flutter on top (only leaves rounds3d.ts marks: no hedge, roof or moss). The gust is ../alive.ts `gust`,
  *   the same sum, so a cape's hem stirs as the trees do;
  * - cloud shadows drift over the floor and everything on it, along the wind, their edges dithered (the pixel look);
  * - the water (water3d.ts) laps: foam along the bank coming and going, a thinner line rolling in, and light glinting
@@ -69,7 +69,7 @@ export function useReflections(m: GameMap): () => void {
 }
 
 /** How much each thing moves and darkens. */
-const K = { treeBend: 0.16, bushBend: 0.06, flutter: 0.012, cloudScale: 9, cloudDrift: 0.7, cloudDark: 0.2 };
+const K = { treeBend: 0.09, flutter: 0.01, cloudScale: 9, cloudDrift: 0.7, cloudDark: 0.2 };
 
 export const LIFE_GLSL = /* glsl */ `
 uniform float uLifeT; uniform float uLife; uniform sampler2D uRefl;
@@ -113,19 +113,14 @@ const shadows = (sh: THREE.WebGLProgramParametersWithUniforms, after: string) =>
 export function windify(m: THREE.Material): void {
   chain(m, (sh) => {
     shadows(sh, '#include <color_fragment>');
-    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + 'void main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
-#ifdef USE_COLOR
-if (uLife > 0.5) {
-  vec3 cc = color.rgb;
+    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + 'attribute float aSway;\nvoid main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
+if (uLife > 0.5 && aSway > 0.5) {
+  // Only a tree's leaves (rounds3d.ts marks them, boxes.ts \`sway\`): the higher, the more they bend, and flutter.
   vec4 wp = modelMatrix * vec4(transformed, 1.0);
-  float hgt = max(0.0, wp.y - 0.25);
-  // Leaf green, above the trunk's foot: a treetop bends most, a bush a little, and flutters.
-  if (cc.g > cc.r * 1.08 && cc.g > cc.b * 1.05 && cc.g > 0.05 && hgt > 0.0) {
-    float g = lifeGust(wp.xz, uLifeT), k = hgt * (wp.y > 1.0 ? ${K.treeBend} : ${K.bushBend});
-    transformed.xz += vec2(${WIND.dir[0]}, ${WIND.dir[1]}) * (g * k + ${K.flutter} * hgt * sin(uLifeT * 5.3 + wp.x * 1.7 + wp.z * 2.3) * (0.4 + g));
-  }
-}
-#endif`);
+  float hgt = max(0.0, wp.y - 1.0);
+  float g = lifeGust(wp.xz, uLifeT);
+  transformed.xz += vec2(${WIND.dir[0]}, ${WIND.dir[1]}) * (g * hgt * ${K.treeBend} + ${K.flutter} * hgt * sin(uLifeT * 5.3 + wp.x * 1.7 + wp.z * 2.3) * (0.4 + g));
+}`);
   }, '|life');
 }
 

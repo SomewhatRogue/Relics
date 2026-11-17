@@ -33,6 +33,6 @@ describe('layout 3: seeds', () => {
     // The second wave (2026-11-06: the Kegman, Pouncer, Gorger; Oil-soaked, Hornblower, Smouldering) moved none of these rooms:
     // with AFFIX2_ON.on and MEATY2_ON.on false it is 2219083919, and on the same (scripts/encounters/pins.ts). Layout 4's
     // pin (tests/variety.test.ts) is unmoved too.
-    expect(all).toBe(2219083919 /* 2026-11-06 elites. Before: 2459865809 (a fallen-in house is never the kept door, shared/doors.ts), and before that 1139809545 */);
+    expect(all).toBe(1312947912 /* 2026-11-16: more jobs by day and evening, fewer at night (shared/timeofday.ts, jobs.ts); the hour shapes a room, so the sample moved (a saved job keeps its hour). Before: 2219083919, 2026-11-06 elites. Before: 2459865809 (a fallen-in house is never the kept door, shared/doors.ts), and before that 1139809545 */);
   }, 240000);
 });

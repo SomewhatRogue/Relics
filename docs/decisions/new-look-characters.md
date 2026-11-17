@@ -157,3 +157,20 @@ on one uniform. Opus 5.5.
   Opus 5.5.
 - Townsfolk greet you: coming within a few tiles of someone standing about, they nod, two quick one-pixel dips, once
   each time you come up (alive.ts `idleStance` `dy`, npcs.ts). Opus 5.5.
+
+## 2026-11-16: the town's wind fixed; the sun keeps the hour; figures cast shadows; more jobs by day and evening
+
+- Kyle: the wind in town "is blowing literally everything". It moved every green vertex (moss on roofs, hedges). Now
+  only what rounds3d.ts marks moves: a tree's crown and a pine's tiers (boxes.ts `sway`, an `aSway` attribute the
+  shader reads); bushes and hedges stay still; the bend is about half what it was. (The grass sheen is gone: Kyle had the town-layout chat nix it, heat haze.)
+- Kyle: more jobs by day and evening, to play with light and shadow. Of all jobs now about 40% day, 25% dusk, 20%
+  dawn, 15% night (was 35 / 17.5 / 17.5 / 30): jobs.ts night roll 0.3 to 0.15, timeofday.ts EDGES. Night pays and
+  threatens a little more, so the board's average does a little less. Four layout hash pins re-pinned (the hour shapes
+  a room; a saved job keeps its own). threat.test.ts: the wand bot now gets 190 s, not 180: the new sample holds a dusk
+  room whose ironhide it finishes just past three minutes (12 of 225 health left at 180). **For General to weigh.**
+- Behind LIVING WORLD (new sun3d.ts): the sun keeps the hour in 2.5D, high at midday, low (about 25 degrees) in the
+  east at dawn and the west at dusk, so shadows reach twice a thing's height; the low sun a little brighter. Night's
+  moon as it was. Figures cast shadows: each card gets a twin turned side-on to the sun that writes no colour and no
+  depth, only the shadow (three.js chooses shadow casters by the main camera's layers, so a layer of its own doesn't
+  work). Hooks: lights3d.ts `setSky` calls `sunAt`; figs3d.ts `end` calls `castFigures`.
+- Torches don't throw figure shadows yet (a point light's shadow is six renders; too dear on a phone). Opus 5.5.

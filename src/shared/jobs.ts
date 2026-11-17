@@ -129,7 +129,8 @@ function ordinary(day: number, sewers: boolean): Job[] {
   const sizes: Size[] = ['short', 'medium', 'medium', 'long'];
   return sizes.map((size, i) => {
     const place = places[i % places.length], objective = objectives[i], boss = rng.pick(BOSSES);
-    const twist: Twist = rng.next() < 0.3 ? 'night' : 'none', rooms = SIZES[size].rooms, seed = day * 101 + i * 7 + 1;
+    // (15% at night: Kyle 2026-11-16, more by day and evening; the rest's hours, timeofday.ts.)
+    const twist: Twist = rng.next() < 0.15 ? 'night' : 'none', rooms = SIZES[size].rooms, seed = day * 101 + i * 7 + 1;
     return {
       id: `d${day}-${i}`, place, objective, twist, time: rollTime(seed, twist === 'night'), rooms, size, layout: 4, boss: objective === 'hunt' ? boss : undefined,
       reward: payFor(rooms, place.ruin, twist === 'night', size), seed, ...describe(objective, place, boss),

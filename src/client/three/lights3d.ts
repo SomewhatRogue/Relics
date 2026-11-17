@@ -5,6 +5,7 @@
  */
 import * as THREE from 'three';
 import type { Theme } from '../../shared/arena';
+import { sunAt } from './sun3d';
 
 /** A light in tiles: x, height, z; reach; strength; colour 0..1; flicker rate (0: steady). */
 export interface L3 { x: number; y: number; z: number; r: number; i: number; c: [number, number, number]; f?: number }
@@ -58,6 +59,8 @@ export class Lights {
     this.sky.intensity = Math.PI;
     this.sky.position.set(cx - 8, 22, cz + 10);
     this.sky.target.position.set(cx, 0, cz);
+    // (The living world, sun3d.ts: the sun keeps the hour, low at dawn and dusk.)
+    sunAt(this.sky, t, cx, cz);
   }
 
   /** Give the pool to the lights that matter most around (cx, cz). */

@@ -31,7 +31,9 @@ export const TIMES: Record<Time, { ambient: [number, number, number]; moon: numb
 const OPEN: Record<PlaceKind, number> = { village: 0.97, farm: 1, field: 1, forest: 0.8, mine: 0, river: 0.97, marsh: 0.9, ruins: 0.94 };
 
 /** Out of daylight hours, how many jobs fall at dawn and dusk rather than broad day. */
-const EDGES = { dawn: 0.25, dusk: 0.25 };
+// Kyle 2026-11-16: more by day and evening, to play with light and shadow. Of all jobs: about 40% day, 25% dusk,
+// 20% dawn, 15% night (jobs.ts).
+const EDGES = { dawn: 0.235, dusk: 0.295 };
 
 /** The hour for a job that isn't at night (seeded from the job, on its own stream). */
 export function rollTime(seed: number, night: boolean): Time {

@@ -149,6 +149,8 @@ describe('layout 3: seeds', () => {
     // (Re-pinned 2026-11-04: nests send 2 spiders a wave, not 3; and again for weather as a rule, the theme
     // only: `sky` on it and the new odds, everything but the theme checked unchanged.)
     // Re-pinned 2026-11-05 for the doors rule (shared/doors.ts): with it switched off still 3813929807.
-    expect(all).toBe(356891114);
+    // Re-pinned 2026-11-16: more jobs by day and evening, fewer at night (shared/timeofday.ts, jobs.ts); the hour
+    // shapes a room, so the board's sample of rooms moved. A saved job keeps its own hour, and its rooms.
+    expect(all).toBe(3642826757);
   }, 120000);
 });
