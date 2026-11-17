@@ -320,3 +320,14 @@ Claude Opus 5.5
   sway, the capes and the cloud shadows are as they were. No tests cover it; tsc clean.
 
 Claude Opus 5.5
+
+## 2026-11-16 (late): the sewer grate and Cobb down the dead end (Kyle)
+
+- The `sewer` district now lands in the dead end left of the millpond, behind the Drowned Rat (fenced from Wall
+  Lane, the Rat's back below it, open only from the Lower Lane): the grate at (16, 43), Cobb at his ladder beside it
+  once the sewers are open, the `sewer` spot with them. Fits Whisper's directions and the works' own words ("the
+  grate behind the Drowned Rat"). A first try two tiles lower was half under the Rat's roof in the flat view.
+- tests/layout.test.ts: the richest world now has the sewers open (`dens: 99`), so Cobb at the ladder is held
+  reachable too.
+
+Claude Opus 5.5

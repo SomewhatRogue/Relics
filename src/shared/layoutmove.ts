@@ -29,9 +29,10 @@ export const DISTRICTS: District[] = [
   { name: 'pond', from: { x: 47, y: 28.5, w: 7, h: 9.5 }, d: [-23.6, 11.1] },
   { name: 'wash', from: { x: 33, y: 36, w: 10, h: 3.5 }, d: [8.5, 13.2] },
   { name: 'rescue', from: { x: 31, y: 27.5, w: 16, h: 12 }, d: [8.5, 12] },
-  // The sewer grate and Cobb at the Deep's ladder to the right of the millpond, a way off from it (Kyle, 2026-11-16:
-  // down on the brink by the Rat they were lost). Before the Rat's district, which holds them today.
-  { name: 'sewer', from: { x: 22, y: 34.6, w: 4.4, h: 2.4 }, d: [13.5, 8.5] },
+  // The sewer grate and Cobb at the Deep's ladder in the dead end left of the millpond, behind the Drowned Rat (Kyle,
+  // 2026-11-16, late: first lost on the brink by the Rat, then right of the pond, now down the dead end). Before the
+  // Rat's district, which holds them today.
+  { name: 'sewer', from: { x: 22, y: 34.6, w: 4.4, h: 2.4 }, d: [-7.5, 7] },
   { name: 'rat', from: { x: 10, y: 29.5, w: 17, h: 8 }, d: [0.75, 20.5] },
   { name: 'oldquarter', from: { x: 54.5, y: 0, w: 8, h: 40 }, d: [2, 6] },
 ];

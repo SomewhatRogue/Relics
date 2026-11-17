@@ -34,7 +34,7 @@ down by the millpond.
 - **The lower quarter (level 0), the bottom.** Down the Rat Steps or the East Stair from the square's south edge,
   which is a parapet looking over it. The Lower Lane runs along the foot of the wall, a yard below the Rat Steps.
   The millpond below the Rat Steps; the town works beside it, east of the Rat's front (Kyle, 2026-11-15: Judd's crew
-  and their board off the square); the sewer grate and Cobb to the right of the pond, a way off (Kyle, 2026-11-16).
+  and their board off the square); the sewer grate and Cobb down the dead end left of the pond, behind the Drowned Rat (Kyle, 2026-11-16).
   Whisper's back door is still the Rat's back. The whole end in dirt
   and mud. The Drowned Rat in the bottom-left corner, out of the square's view, its front
   toward the camera on Rat Lane along the town's south edge, which is no wall but a cliff: the town on a bluff over

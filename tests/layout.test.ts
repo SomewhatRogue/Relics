@@ -62,7 +62,7 @@ import { QUIET } from '../src/shared/layoutmove';
 import { WORKS } from '../src/shared/works';
 
 const ready = () => Object.assign(newWorld(), { rescued: 6, storyDone: [CHAPTER_1.goals.story] });
-const WORLDS = () => [newWorld(), { ...ready(), works: { watch: 400, oldquarter: 600 }, flags: { 'north-fields': 'refugees' } }, { ...ready(), rescued: 16, works: Object.fromEntries(Object.keys(WORKS).map((k) => [k, 9999])), flags: { 'north-fields': 'farm' } }];
+const WORLDS = () => [newWorld(), { ...ready(), works: { watch: 400, oldquarter: 600 }, flags: { 'north-fields': 'refugees' } }, { ...ready(), rescued: 16, works: Object.fromEntries(Object.keys(WORKS).map((k) => [k, 9999])), dens: 99, flags: { 'north-fields': 'farm' } }];
 
 /** Where a body can walk to from where you arrive, on a quarter-tile grid, minding levels, steps and drops. */
 function walkable(m: GameMap) {
