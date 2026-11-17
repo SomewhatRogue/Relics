@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { HERO, LEGS_THREAT, growAt, raise, CLASS_KITS, HELD_KITS, LEGS_MODS, LEGS_SHARE, MOD_COUNT, PER_MOD, budget, gearStats, MODS, MOD_TEXT, WEAPONS, guardOf, modFits, modPool, rollGear, weaponMods, type ArmorKind, type HeroClass, type ModId, type Tier } from '../src/shared/tuning';
 import { barWords } from '../src/shared/barword';
 import { Rng } from '../src/shared/rng';
+import { NOT_WITH_SPEED, rollMods } from '../src/shared/mods';
 
 const CLASSES = Object.keys(CLASS_KITS) as HeroClass[];
 const swung = (kit: keyof typeof WEAPONS) => WEAPONS[kit].combo.some((s) => !s.thrust && !s.shot && s.arc >= 100);
@@ -78,5 +79,21 @@ describe('gear modifiers', () => {
     }
     expect(MODS.draw.name).toBe('CHARGE SPEED');
     expect(MODS.spell.name).toBe('SPELL POWER');
+  });
+});
+
+describe('SPEED keeps its own company (Kyle, 2026-11-16)', () => {
+  it('never on one piece with a recharge, spell power, cheaper spells or stamina; the piece no weaker for it', () => {
+    const all = Object.keys(MODS) as (keyof typeof MODS)[];
+    for (let seed = 1; seed <= 400; seed++) {
+      const got = rollMods(new Rng(seed), all, 3, 12);
+      const ids = got.map((m) => m.id);
+      if (ids.includes('foot')) expect(ids.filter((id) => NOT_WITH_SPEED.includes(id)), `seed ${seed}`).toEqual([]);
+      expect(ids.length).toBeGreaterThan(0);
+    }
+    // With SPEED and nothing else it may share with, the one piece of SPEED gets the whole worth.
+    const lone = rollMods(new Rng(1), ['foot', ...NOT_WITH_SPEED], 3, 12);
+    expect(lone.length).toBeLessThanOrEqual(3);
+    if (lone[0].id === 'foot') expect(lone).toHaveLength(1);
   });
 });

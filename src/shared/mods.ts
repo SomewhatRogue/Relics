@@ -152,11 +152,21 @@ export const modPoints = (m: Mod) => (MODS[m.id] ? (MODS[m.id].unit === '' ? m.v
 export const band = (rng: Rng, lean = 0) => 0.8 + 0.4 * (lean + (1 - lean) * rng.next());
 
 /** `n` different modifiers from `pool`, sharing `total` points (fewer if the pool is short; the points still all go). */
+/** Never on one piece with SPEED (Kyle, 2026-11-16: things that help magic or skills come back are never also
+ *  on something that makes you faster): the recharges, the spells' power and cost, stamina (a Mage's magic). */
+export const NOT_WITH_SPEED: ModId[] = ['focus', 'breath', 'spell', 'thrift'];
+
 export function rollMods(rng: Rng, pool: ModId[], n: number, total: number, lean = 0): Mod[] {
-  const left = [...pool], k = Math.min(n, left.length), out: Mod[] = [];
-  for (let i = 0; i < k; i++) {
+  let left = [...pool];
+  const k = Math.min(n, left.length), got: { id: ModId; b: number }[] = [];
+  // (Drawn in the same order as ever, a pick then its share, so a piece the rule doesn't touch rolls as it did.)
+  for (let i = 0; i < k && left.length; i++) {
     const id = left.splice(Math.floor(rng.next() * left.length), 1)[0];
-    out.push({ id, v: modValue(id, (total / k) * band(rng, lean)) });
+    got.push({ id, b: band(rng, lean) });
+    // SPEED drawn: none of those after it; one of those drawn: no SPEED after it.
+    if (id === 'foot') left = left.filter((m) => !NOT_WITH_SPEED.includes(m));
+    else if (NOT_WITH_SPEED.includes(id)) left = left.filter((m) => m !== 'foot');
   }
-  return out;
+  // The piece's worth shared among what it got: one that lost a pick to the rule isn't weaker for it.
+  return got.map(({ id, b }) => ({ id, v: modValue(id, (total / got.length) * b) }));
 }

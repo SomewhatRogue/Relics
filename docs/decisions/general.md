@@ -168,3 +168,7 @@ Claude Opus 5.5
 - Correction (Kyle: "Rogues and rangers and clerics etc can get speed perks just not mages"): QUICK FEET back
   for the Warrior, Ranger and Rogue, SPEED gear back to 25%. A Mage alone is held: gear, the trainer's SPEED
   rank and the streak together at most 10% faster (MAGE_PACE in shared/mage.ts, sim/gearstats.ts statsOf).
+- Gear (Kyle: "never have things that help magic recharge or ability also be on something that increases
+  speed"): shared/mods.ts rollMods: SPEED never on a piece with SKILL RECHARGE, STAMINA RECOVERY (a Mage's
+  magic), SPELL power or CHEAPER SPELLS (NOT_WITH_SPEED), for every class; the draw order kept, so pieces the
+  rule doesn't touch roll as before; a piece that lost a pick shares its whole worth among what it got.
