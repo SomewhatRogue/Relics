@@ -37,6 +37,8 @@ export const ICICLES = { n: 3, spread: 0.12, speed: 1.2 };
  *  all of it alight (fire then spreads by touch); let go on the white flash, `big` across, and it breaks blows off. */
 export const FIREBOLT = { burst: 0.8, big: 1.2, speed: 1.4 };
 export const FIREBALL = { burst: 2.4, big: 3.2, speed: 0.6 };
+/** How big a held spell's ball is drawn, by its burst: the staff's fireball 1, the wand's firebolt about 0.4. */
+export const ballSize = (burst: number) => Math.max(0.4, Math.min(1.4, burst / FIREBALL.burst));
 
 /** Wand, frost: a cold blast in a cone from your hand, `range` tiles and `arc` degrees, for `dmg` of the
  *  hold's damage and a shove; everything in it freezes solid. On the flash: `bigRange`, `bigArc`, and it

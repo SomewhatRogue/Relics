@@ -150,3 +150,6 @@ Claude Opus 5.5
   0.6). Card: the wand's hold is "Heavy firebolt, small burst". Wand tests read its draw, not fixed times.
 
 Claude Opus 5.5
+- Follow-up (Kyle: "a lot smaller than the staff's"): a held spell's ball is drawn sized by its burst
+  (`ballSize`, shared/spellbook.ts) in both views (spelldraw.ts, three/shots3d.ts): the staff's fireball full,
+  the wand's firebolt 0.4 of it (0.5 on the flash).

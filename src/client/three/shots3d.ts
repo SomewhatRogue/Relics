@@ -4,6 +4,7 @@
  * a lobbed flask; the relic javelin; blessed ground (snares, smoke and poison: hazards3d.ts); and
  * the way out (stakes while it's shut, gold chevrons once it's open).
  */
+import { ballSize } from '../../shared/spellbook';
 import * as THREE from 'three';
 import { EL_COL } from '../palette';
 import { POTIONS } from '../../shared/potions';
@@ -14,7 +15,7 @@ import { part, pivot } from './rig';
 const steel = M(0xd8dce4), shaft = M(0x6b4a2b);
 
 /** A bolt's look, as a key (rebuilt when it changes: an orb landing as a well). */
-export const boltLook = (b: Bolt) => b.kind + ':' + b.el + ':' + (b.kind === 'lodestone' ? b.state : '') + (b.potion ?? '') + (b.burst ? ':big' : '');
+export const boltLook = (b: Bolt) => b.kind + ':' + b.el + ':' + (b.kind === 'lodestone' ? b.state : '') + (b.potion ?? '') + (b.burst ? ':big' + ballSize(b.burst).toFixed(2) : '');
 
 export function makeBolt(b: Bolt): THREE.Group {
   const root = new THREE.Group(), g = pivot(root, 0, 0, 0), el = G(hex(EL_COL[b.el]), 0);
@@ -38,6 +39,8 @@ export function makeBolt(b: Bolt): THREE.Group {
         // A held spell: a big ball of the element with smaller ones trailing (placeBolt breathes the stretch).
         part(g, 0.46, 0.46, 0.5, el, 0, 0, 0), part(g, 0.36, 0.36, 0.36, el, 0, 0, -0.34), part(g, 0.24, 0.24, 0.26, el, 0, 0, -0.6);
         part(g, 0.24, 0.24, 0.24, white, 0, 0, 0.1);
+        // (Sized by its burst: the staff's fireball full, the wand's firebolt small.)
+        root.scale.setScalar(ballSize(b.burst));
       } else {
         // A quick cast: a bolt, narrow and long, a white spine and a bright point at the front.
         part(g, 0.07, 0.07, 0.8, el, 0, 0, -0.1), part(g, 0.035, 0.035, 0.66, white, 0, 0, -0.04), part(g, 0.06, 0.06, 0.08, white, 0, 0, 0.3);
