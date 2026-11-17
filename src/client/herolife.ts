@@ -17,6 +17,7 @@ import { HERO_W, HS } from './heroscale';
 import { SHARP, shadeHex } from './charpaint';
 import { ALIVE, gust } from './alive';
 import { flare, linedFront, linedSide } from './capelined';
+import { lifeIn } from './clothlife';
 
 /** A stable number in [0, 1) from a hero's id (their sway's phase, their step's timing). */
 export function idPhase(id: string): number {
@@ -110,7 +111,7 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
   // (The look's height, hat and eyes in the old body's rows, which this file's numbers are written in.)
   // (A tall body keeps the old rows here; rect() maps them onto it.)
   ymap = stretch(d);
-  const L = d.life, t = d.tall / HS, bottom = (d.cut ? 24 + d.tall : d.h) / HS - 2, rag = !!L.ragged || dark > 0.5;
+  const L = lifeIn(d.life, h.clothLook), t = d.tall / HS, bottom = (d.cut ? 24 + d.tall : d.h) / HS - 2, rag = !!L.ragged || dark > 0.5;
   const shade = (col: string) => (dark > 0.5 ? mix(col, '#140a0a', (dark - 0.5) * 1.2) : col);
   // A cape (or the cloak's skirts): behind the body facing you, flying out behind when walking.
   const cloth = L.cape ?? L.cloak;
@@ -125,11 +126,17 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
         // In profile: hanging down the back from the shoulders, a little off it at the hem, streaming behind walking.
         const x0 = (low ? 1.3 : 2) - ext * 1.2 + Math.min(0, sw), x1 = 3.7;
         if (inn) linedSide(rect, x0 - fl + hem, x1, r, r === bottom, col, lin, trim);
-        else rect('back', x0 + hem, r, x1 - x0 - hem, 1, col), rect('back', x0 + hem, r, 0.7, 1, lin);
+        else {
+          rect('back', x0 + hem, r, x1 - x0 - hem, 1, col), rect('back', x0 + hem, r, 0.7, 1, lin);
+          if (trim && r === bottom) rect('back', x0 + hem, r + 0.6, x1 - x0 - hem, 0.4, trim);
+        }
       } else if (!up) {
         const x0 = (low ? 0 : 1) - ext + Math.min(0, sw), x1 = (low ? 11 : 10) + Math.max(0, sw);
         if (inn) linedFront(rect, x0 - fl, x1 + 1 + fl - hem, r, i, n, r === bottom, ext, col, inn, trim);
-        else rect('back', x0, r, x1 - x0 + 1 - hem, 1, lin), ext > 0 && rect('back', x0, r, ext, 1, col);
+        else {
+          rect('back', x0, r, x1 - x0 + 1 - hem, 1, lin), ext > 0 && rect('back', x0, r, ext, 1, col);
+          if (trim && r === bottom) rect('back', x0, r + 0.6, x1 - x0 + 1 - hem, 0.4, trim);
+        }
       } else if (L.cape || r > 11 + t) {
         const x0 = (low ? 1 : 2) - ext + sw - fl, x1 = (low ? 10 : 9) + sw + fl;
         rect('front', x0 + hem, r, x1 - x0 + 1 - hem * 2, 1, col);

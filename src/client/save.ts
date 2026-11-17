@@ -16,6 +16,7 @@ import { renameKits } from '../shared/oldkits';
 import { fitOldSkills } from '../shared/oldskills';
 import { fitHound } from '../shared/houndlook';
 import { fitShield } from '../shared/shieldlook';
+import { wearable, wearsCloth } from '../shared/clothlook';
 import { fitNoParry } from '../shared/oldparry';
 import { fitFishRecord } from '../shared/fishing';
 import { fitRangeRecord } from '../shared/range';
@@ -63,6 +64,9 @@ const hero = (old: Partial<Profile>): Profile => {
   // A Warrior's shield (shared/shieldlook.ts): heroes from before the choice carry the red heater.
   if (cls === 'WARRIOR') out.shield = fitShield(p.shield);
   else delete out.shield;
+  // The cloth worn (shared/clothlook.ts): kept as far as it's earned, for a class the tailor has cloth for.
+  if (wearsCloth(cls) && p.cloth) out.cloth = wearable({ stats: out.stats, deepBest: p.deepBest, quests: p.quests, level: p.level ?? 1 }, p.cloth);
+  else delete out.cloth;
   // Relics before they had charge: each kind owned becomes a full plain relic (shared/relicitems.ts).
   Object.assign(out, fitRelics(p as never, out.xp * 31 + out.runs + 7));
   // Relics are earned now (docs/design/relics.md): an older hero keeps the javelin only, once (shared/relicreset.ts).

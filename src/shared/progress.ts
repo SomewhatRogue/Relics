@@ -133,6 +133,8 @@ export interface Profile {
   hound?: HoundLook;
   /** A Warrior's shield: shape, field, device and trim, chosen with Master Cole at the barracks (shared/shieldlook.ts). Cosmetic. */
   shield?: import('./shieldlook.js').ShieldLook;
+  /** The cloth worn, as earned and put on with the tailor (shared/clothlook.ts). Only what is worn: what is earned is read from the tallies. */
+  cloth?: import('./clothlook.js').ClothLook;
   /** Elements the relic-wright has fitted to this hero's skill and relics. */
   augments: Partial<Record<RelicId, Augment>>;
   runs: number;

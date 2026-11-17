@@ -53,6 +53,7 @@ import { players } from '../sim/party';
 import { load, store, type Save } from './save';
 import { fitHound, nameTrouble, type HoundLook } from '../shared/houndlook';
 import { fitShield, type ShieldLook } from '../shared/shieldlook';
+import { wearable, wearsCloth, type ClothLook } from '../shared/clothlook';
 import { treasure } from '../shared/treasure';
 import { makeRelic, relicMax, type RelicItem } from '../shared/relicitems';
 import { GEAR } from '../sim/pack';
@@ -88,6 +89,7 @@ import { relicBack } from '../sim/deepmarks';
 const houndOf = (p: Profile): HoundLook | undefined => (p.cls === 'RANGER' ? fitHound(p.hound, p.id) : undefined);
 /** A Warrior's shield as the profile has it. */
 const shieldOf = (p: Profile): ShieldLook | undefined => (p.cls === 'WARRIOR' ? fitShield(p.shield) : undefined);
+const clothOf = (p: Profile): ClothLook | undefined => (wearsCloth(p.cls) ? wearable(p, p.cloth) : undefined);
 
 /** Seconds the screen takes to go dark after a lost job, before town. */
 export const FADE_OUT = 2.4;
@@ -316,6 +318,16 @@ export class Game {
     const el = [...(elementTaught(this.wood) ? ['element'] : []), ...(signTaught(this.wood) ? ['sign'] : []), ...(this.wood.bitter ? ['potion'] : [])];
     return this.wood.stage >= 5 ? ['attack', 'roll', 'block', 'relic', 'potion', 'grab', ...el] : [...lessonOf(this.wood).moves.filter((m) => m !== 'grab' || this.wood!.stage > 0 || this.wood!.more), ...el];
   }
+  /** Your cloth as put on with the tailor (clothui.ts): only what is earned is kept, shown at once, friends hearing
+   *  it with your look (townpresence.ts). False if the tailor has nothing for this hero's class. */
+  chooseCloth(look: ClothLook): boolean {
+    const p = this.profile;
+    if (!wearsCloth(p.cls)) return false;
+    p.cloth = wearable(p, look);
+    if (this.hero) this.hero.clothLook = { ...p.cloth };
+    store(this.save);
+    return true;
+  }
   /** Your shield as chosen with Master Cole (shieldui.ts): kept on the hero and shown at once, friends
    *  hearing it with your look (townpresence.ts). False if this hero isn't a Warrior. */
   chooseShield(look: ShieldLook): boolean {
@@ -397,6 +409,7 @@ export class Game {
     h.look = p.look ?? 0;
     h.houndLook = houndOf(p);
     h.shieldLook = shieldOf(p);
+    h.clothLook = clothOf(p);
     // Your skill in hand, or (not yet taught it) the relic you carry.
     h.relic = knows(h, 'skill') ? h.relics[0] : (h.relics[1] ?? h.relics[0]);
     for (const r of h.relics) h.augments[r] = p.augments[r] ?? '';

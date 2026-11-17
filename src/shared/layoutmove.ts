@@ -92,6 +92,7 @@ export const ROUNDS: Record<string, { path: [number, number][]; stops?: number[]
   'RECRUIT WAT': { path: [[24.4, 33.1]] },
   'DESSA THE TRADER': { path: [[43.5, 21.7]] },
   'TOBIN THE PAWNBROKER': { path: [[39.8, 21.7]] },
+  'HESTER THE TAILOR': { path: [[41.65, 21.7]] },
 };
 /** The ducks' file out of the millpond and back. */
 export const DUCKS: [number, number][] = [[32.2, 46.7], [33.8, 48.1], [34.4, 50.1], [31.8, 50.7], [29.6, 49.1], [31.4, 47.7]];

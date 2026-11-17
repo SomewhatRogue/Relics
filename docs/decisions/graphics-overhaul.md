@@ -381,3 +381,34 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - One rule written down: an effect is never red eyes, embers or ash, which are the mark of the eye dial.
 - It waits on seven calls from Kyle. Nothing is built.
   (Claude Fable 5.2)
+
+## 2026-11-17: the cloth choice, slice 1: deeds earn it, Hester the tailor makes it, the Warrior wears it
+
+- Kyle: "Yes, build it" (the suggested answers in docs/design/cloak-choice.md: earned and free, deeds already done
+  count, one tailor by Tobin, every Warrior keeps the lined cut, the Healer's robe stays pale, this chat builds
+  slice 1).
+- **The rules** (`src/shared/clothlook.ts`, pure): three rows (dye, edge, cut), entry 0 of each the look's own.
+  `DEEDS` says what earns each entry, read from the tallies the game already keeps (`Profile.stats`, `deepBest`, the
+  hero quests), so nothing new is counted. `earned`, `wearable` (drops what is not earned), `fitCloth`, a pack of
+  three numbers. `tests/clothlook.test.ts`, 7 tests.
+- **Kept and sent as the shield is**: `Profile.cloth` holds only what is worn (save.ts fits it against the tallies);
+  `Hero.clothLook`; `Game.chooseCloth`; town presence carries `cl` and says it again when it changes.
+- **Drawn** on the Warrior's cape only (`src/client/clothlife.ts`): the dye is the cape's two colours, the edge its
+  trim (a hem line on a plain cape; the sides too on a lined one), the cut makes it lined or ragged. One line in
+  herolife.ts asks for it. The six dyes are deep colours; WHITE is a bone white.
+- **Hester the tailor** stands between the pawn stall and the trader's on the square (the old town: below Tobin).
+  Her page (`src/client/clothui.ts`): the hero facing you and walking away in whatever is picked, the three rows,
+  entries not earned dimmed. A dimmed entry can be looked at and says what earns it ("Not earned yet: BROUGHT HOME
+  9 OF 25."); WEAR IT keeps only what is earned. Other classes get a line saying she has nothing cut for them yet.
+- **Words**: her name and three lines went through one lore-keeper call and one line-editor call (both run as
+  plain agents told to follow the repo's agent files, since this session has no such agent types). The lore keeper
+  asks that she be recorded in the story bible as working old stock, never new cloth from outside: not done here,
+  the lore files are not mine.
+- **Checked**: tsc clean; the cloth test and the town tests; the full suite (see the commit); played in the local
+  build at phone and laptop size: the page, a dimmed entry, wearing blue with an iron edge, and the cloak on the hero
+  in the square. Not checked: two players seeing each other's cloth (it rides the same word as the shield), a real
+  phone.
+- **Known and left**: she is drawn as the plain villager, the same as Tobin beside her, and has no stall or sign of
+  her own. Her first spot was in front of the hall's door, so she was moved between the stalls. The coin tally shows
+  as a bare number. The page waits for her line to type out before the rows show, as the shield's does.
+  (Claude Fable 5.2)

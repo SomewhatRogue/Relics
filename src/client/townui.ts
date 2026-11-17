@@ -1,4 +1,5 @@
 /** What each person in Wickhold says and offers, the spots in the open, and the end-of-run results. */
+import { openTailor } from './clothui';
 import { FAMILIES, PATIENTS } from '../shared/interiors';
 import { openTrainer } from './trainerui';
 import { CHAPTER_1, chapterGoals, councilOpen } from '../shared/story';
@@ -48,6 +49,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   const pr = g.profile, w = g.world, again = () => openSpot(id, g, panel, arg, key);
   if (openSquare(id, g, panel, arg, key)) return;
   if (openStore(id, g, panel) || openShop(id, g, panel)) return;
+  if (id === 'tailor') return openTailor(g, panel);
   // A class's vendor, at a counter in its place (vendorui.ts); `arg` is the class.
   // Come from Tobin with hungry gear: Nettle knows, and his table opens on SELL QUIETLY (shared/errands.ts).
   if (id === 'vendor' && CLASS_ORDER[arg] === 'ROGUE' && metNettle(g.profile)) return g.keep(), openVendor(g, panel, arg, 'fence', ERRANDW.nettleMet);

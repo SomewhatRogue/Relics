@@ -1,0 +1,6 @@
+/* The tailor (clothui.ts): the hero facing you and walking away, over the hound panel's rows (hound.css). */
+#panel .cl-stage { gap: 8px; }
+#panel .cl-prev { width: 132px; height: 144px; max-width: 46%; image-rendering: pixelated; object-fit: contain; background: radial-gradient(ellipse at 50% 80%, #2e2a26 0%, #16171b 72%); border: 1px solid #3a3e46; }
+/* Not yet earned: still there to look at, dimmed. */
+#panel .hd-o.no { color: #7c7f88; border-style: dashed; }
+#panel .hd-o.no.on { border-color: #8a7a52; background: #201d18; color: #b8a47c; }

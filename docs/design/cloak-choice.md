@@ -5,7 +5,9 @@ classes customize theirs)." Then: "Lets make it something you can unlock - also 
 x number of things killing goblins, quests, etc let you unlock a new color or effect to a new article of clothing.
 Maybe its a new vendor in town."
 
-**Status: a spec, not built. It waits on Kyle's calls at the foot.**
+**Status: slice 1 is in the game (2026-11-17): the rules, the save and sending, the Warrior's cape, and Hester the
+tailor between the two stalls on the square. Kyle said yes to the suggested answers at the foot. Slices 2 and 3
+wait on his word after playing it.**
 
 ## The idea in three lines
 
@@ -49,10 +51,11 @@ A first table. The pairings are meant to make sense; the numbers are first guess
 | 500 coin given away | `given` | OCHRE |
 | Floor 5 of the Deep | `deepBest` | SILVER edge |
 | Every hero quest done | `quests` | GOLD edge |
-| 5 dens burned | `dens` | RAGGED |
-| 25 jobs done | `jobs` | LINED |
+| 25 jobs done | `jobs` | RAGGED |
 
-The knight wears the lined red-and-gold cloak today, before any of this. See call 5.
+LINED is every Warrior's from the start (call 5). Dens burned earns nothing yet: it is free for the next entry.
+
+As built, the table is `DEEDS` in src/shared/clothlook.ts.
 
 ## The tailor
 

@@ -29,7 +29,7 @@ export const LAYOUT = { on: false, town: false };
 
 /** What talking to someone (or using a spot) opens. */
 export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
-  | 'yard' | 'gate' | 'hew' | 'orla' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked' | 'bank' | 'merchant' | 'advocate' | 'vendor'
+  | 'yard' | 'gate' | 'hew' | 'orla' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked' | 'bank' | 'merchant' | 'advocate' | 'vendor' | 'tailor'
   /** The practice board at the training yard's pen (client/practiceui.ts). */
   | 'practice'
   /** Brisk's stair up to the night shift on the wall (client/watchpost.ts). */
@@ -157,6 +157,8 @@ export function oldTown(w: WorldState): GameMap {
   if (marketIn(w)) npcs.push(n('DESSA THE TRADER', 38.5, 13.9, 'market', 'trader'));
   // Tobin buys anything at the far stall, and sells it back for a while (client/stores.ts).
   npcs.push(n('TOBIN THE PAWNBROKER', 38.5, 18.1, 'merchant', 'villager'));
+  // Hester makes the cloth a hero has earned, by Tobin's stall (shared/clothlook.ts, client/clothui.ts).
+  npcs.push(n('HESTER THE TAILOR', 38.5, 20.3, 'tailor', 'villager'));
   // The town's pastimes (shared/pastimes.ts): Old Pennock lends rods at the millpond, Abel keeps the butts.
   npcs.push(n('OLD PENNOCK', MILLPOND.npc[0], MILLPOND.npc[1], 'fish', 'elder'), n('ABEL', BUTTS.npc[0], BUTTS.npc[1], 'range', 'ranger'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));

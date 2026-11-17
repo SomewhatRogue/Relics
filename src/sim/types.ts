@@ -289,6 +289,8 @@ export interface Hero extends Body {
   houndLook?: import('../shared/houndlook').HoundLook;
   /** A Warrior's shield as chosen at the barracks (shared/shieldlook.ts). Drawing only. */
   shieldLook?: import('../shared/shieldlook').ShieldLook;
+  /** The cloth worn, as put on with the tailor (shared/clothlook.ts). Drawing only. */
+  clothLook?: import('../shared/clothlook').ClothLook;
   /** What a friend in town holds, as their word said (shared/gearlook.ts). Drawing only; your own hero's and a party's
    *  come from the weapon in hand (`arms`). */
   gearLook?: import('../shared/gearlook').GearLook;
