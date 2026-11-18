@@ -22,9 +22,10 @@ export const ROW_ORDER: Row[] = ['dye', 'edge', 'cut'];
 export interface ClothLook { dye: number; edge: number; cut: number }
 export const defaultCloth = (): ClothLook => ({ dye: 0, edge: 0, cut: 0 });
 
-/** The rows the tailor has for a class: the Warrior's cape takes all three; the Ranger's and the Rogue's cloaks a dye
- *  and an edge (slice 2); nothing yet for the Mage and the Healer. */
-export const rowsFor = (cls: string): Row[] => (cls === 'WARRIOR' ? ROW_ORDER : cls === 'RANGER' || cls === 'ROGUE' ? ['dye', 'edge'] : []);
+/** The rows the tailor has for a class: the Warrior's cape takes all three; the Ranger's and the Rogue's cloaks, the
+ *  Mage's robe and hat and the Healer's tabard a dye and an edge. */
+const DYED = ['RANGER', 'ROGUE', 'MAGE', 'HEALER'];
+export const rowsFor = (cls: string): Row[] => (cls === 'WARRIOR' ? ROW_ORDER : DYED.includes(cls) ? ['dye', 'edge'] : []);
 export const wearsCloth = (cls: string): boolean => rowsFor(cls).length > 0;
 
 /** What a deed is counted in: one of the Roll's tallies, the Deep's deepest floor, or hero quests done. */

@@ -7,8 +7,9 @@ Maybe its a new vendor in town."
 
 **Status: slice 1 is in the game (2026-11-17): the rules, the save and sending, the Warrior's cape, and Hester the
 tailor between the two stalls on the square. Kyle said yes to the suggested answers at the foot. Slice 2 is in too (the
-same day): the Ranger's and the Rogue's hoods and cloaks take a dye and an edge. Slice 3 (the Mage and the Healer)
-waits on his word.**
+same day): the Ranger's and the Rogue's hoods and cloaks take a dye and an edge. Slice 3 is in as well: the Mage's
+robe and hat, the Healer's tabard (its edge is its metal: edges, hem and Lantern), the friar's habit. All five
+classes are done.**
 
 ## The idea in three lines
 

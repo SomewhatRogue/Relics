@@ -446,3 +446,26 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Left: the small portraits (the unit frame, the pack, the Roll) still show the look undyed. Silver reads nearly white
   under the sharp painting.
   (Claude Fable 5.2)
+
+## 2026-11-17: the tailor's page fixed (a tap closed it), locks that explain themselves, and slice 3: Mage and Healer
+
+- Kyle, playing it: "not clear that things arn't available or are locked or how you unlock them and also when I click
+  on one I just sort of...go back out of the shop? I don't get it."
+- **The bug**: the page's own choices carried `data-i`, which the panel reads as one of its own buttons (panels.ts), so
+  a tap on the second entry of any row pressed CLOSE and a tap on the first pressed WEAR IT. They carry `data-n` now.
+  My check had clicked them by script and never looked at whether the panel was still up; the script now says so.
+- **Locks**: an entry not earned shows a small padlock. Picking one says "WHITE is locked. You can look at it, but
+  not wear it yet." Under the rows a list, LOCKED: HOW TO EARN EACH, gives every locked entry with its deed and how
+  far along you are. WEAR IT and CLOSE stay pinned at the foot of the card while the list scrolls. These are plain
+  labels; her spoken lines are unchanged.
+- **Slice 3** (Kyle: "Yes, last two"): the Mage's robe, sleeves and hat take the dye, the edge is a line of metal at
+  the robe's foot. The Healer's tabard takes the dye and the edge is the tabard's own metal: its edges, its hem and
+  the Lantern. The friar has no tabard, so his habit and cowl take the dye and the edge runs along its foot (my call;
+  Kyle can say it should stay brown). A look can now name the metal on its cloth (lookkit.ts `edge`); what moves (a
+  hem, a hat's tip, a tabard's foot) is dyed with the body. All five classes have rows now.
+- Checked: tsc clean; the cloth test; the full suite (see the commit); sheets of all three looks of the Mage and the
+  Healer in every dye, front, back and side; the page on the phone size, tapped, still open, the list and the pinned
+  buttons looked at.
+- Kyle also asks to rethink how the pawn stall and the tailor look on the square ("kind of hard to tell and see
+  them"): not started; to be proposed and mocked first.
+  (Claude Fable 5.2)

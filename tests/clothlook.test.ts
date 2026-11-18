@@ -59,18 +59,21 @@ describe('the cloth a hero wears', () => {
     expect(unpackCloth(['x', 9, 1])).toEqual({ dye: 0, edge: 0, cut: 1 });
   });
 
-  it('the Warrior has all three rows, the Ranger and the Rogue a dye and an edge, the others nothing yet', () => {
+  it('the Warrior has all three rows, every other class a dye and an edge', () => {
     expect(rowsFor('WARRIOR')).toEqual(['dye', 'edge', 'cut']);
     expect(rowsFor('RANGER')).toEqual(['dye', 'edge']);
     expect(rowsFor('ROGUE')).toEqual(['dye', 'edge']);
-    expect(['WARRIOR', 'RANGER', 'ROGUE'].every(wearsCloth)).toBe(true);
-    expect(['MAGE', 'HEALER'].some(wearsCloth)).toBe(false);
+    expect(rowsFor('MAGE')).toEqual(['dye', 'edge']);
+    expect(rowsFor('HEALER')).toEqual(['dye', 'edge']);
+    expect(['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'].every(wearsCloth)).toBe(true);
+    expect(wearsCloth('NOBODY')).toBe(false);
   });
 
   it('a row the tailor has not for a class is never worn by it', () => {
     const p = newProfile('RANGER');
     p.stats.kills = 100;
     expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'RANGER')).toEqual({ dye: 1, edge: 0, cut: 0 });
-    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'MAGE')).toEqual(defaultCloth());
+    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'MAGE')).toEqual({ dye: 1, edge: 0, cut: 0 });
+    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'NOBODY')).toEqual(defaultCloth());
   });
 });

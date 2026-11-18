@@ -29,6 +29,8 @@ const mage = (face: string[], back: string[], side: string[], pal: Record<string
   side: { body: art([...M_SIDE_HAT, ...side, ...M_SIDE_BODY], pal), arm: art(M_SIDE_ARM, pal), eyes: [12, 11, 11] },
   down: art([...HAT, ...face, ...M_BODY], pal), up: art([...HAT, ...back, ...M_BACK], pal), h: 40, tall: 8, robe: true, eyes: [12, 7, 10],
   life: { hem: [pal.B, pal.b], tip: pal.X, hair }, cut: { headTo: 16, hip: 39, back: [0, 16, 5, 25], arm: [13, 16, 18, 25] }, lift: 6,
+  // (The tailor's dye, clothsprites.ts: the robe, its folds, the sleeves, the hat and its shadow.)
+  cloth: [pal.B, pal.b, pal.O, pal.X, pal.x],
 });
 
 export const MAGE: LookDef[] = [
@@ -61,6 +63,8 @@ const cleric = (head: string[], back: string[], neck: string, pal: Record<string
   down: art([...head, neck, ...C_BODY], pal), up: art([...back, neck.replace(/S/g, 'M'), ...C_BACK], pal), h: 31, tall: 0, eyes: [3, 7, 10],
   // (The legs cut below the tabard's gold hem, so it stays whole as they walk.)
   life: { tabard: pal.W }, cut: { headTo: 7, hip: 22, back: [0, 7, 6, 17], arm: [12, 7, 18, 17] }, lift: 6,
+  // (The tailor's dye is the tabard; her edge is its metal: its edges, its hem and the Lantern.)
+  cloth: [pal.W], edge: [pal.w, pal.G, pal.g],
 });
 
 const FRIAR = { ...skin('brown'), H: '#2a2020', C: '#2e221a', B: '#3a2a20', b: '#261c16', O: '#2e221a', K: '#a89868', k: '#7a6c4a', F: '#18120e', W: '#c8962e' };
@@ -89,6 +93,8 @@ export const CLERIC: LookDef[] = [
     h: 31, tall: 0, robe: true, eyes: [3, 7, 10], life: { hem: ['#3a2a20', '#261c16'] },
     side: { body: art([...F_SIDE_HEAD, ...F_SIDE_BODY], FRIAR), arm: art(F_SIDE_ARM, FRIAR), eyes: [3, 11, 11] },
     cut: { headTo: 7, hip: 29, back: [0, 7, 5, 17], arm: [13, 7, 18, 17] }, lift: 6,
+    // (He has no tabard: the tailor's dye is his habit and its cowl.)
+    cloth: [FRIAR.B, FRIAR.b, '', FRIAR.O],
   },
   // A red cap over cropped brown hair, a red tabard over the mail.
   cleric(['......RRRRRR......', '.....RRRRRRRR.....', '.....HSsSSsSH.....', '.....HSESSESH.....', '.....HSSsSSSH.....', '.....HSSssSSH.....', '......sSSSSs......'],

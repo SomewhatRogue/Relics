@@ -1,6 +1,15 @@
 /* The tailor (clothui.ts): the hero facing you and walking away, over the hound panel's rows (hound.css). */
 #panel .cl-stage { gap: 8px; }
 #panel .cl-prev { width: 132px; height: 144px; max-width: 46%; image-rendering: pixelated; object-fit: contain; background: radial-gradient(ellipse at 50% 80%, #2e2a26 0%, #16171b 72%); border: 1px solid #3a3e46; }
-/* Not yet earned: still there to look at, dimmed. */
+/* Not yet earned: still there to look at, dimmed, with a lock. */
 #panel .hd-o.no { color: #7c7f88; border-style: dashed; }
 #panel .hd-o.no.on { border-color: #8a7a52; background: #201d18; color: #b8a47c; }
+#panel .cl-lock { display: inline-block; position: relative; width: 9px; height: 7px; margin: 0 7px 0 0; background: currentColor; }
+#panel .cl-lock::before { content: ''; position: absolute; left: 1.5px; top: -5px; width: 6px; height: 6px; box-sizing: border-box; border: 2px solid currentColor; border-bottom: 0; border-radius: 3px 3px 0 0; }
+#panel .cl-note { margin: 0 0 10px; color: #ddd5c4; }
+/* What each lock wants, and how far along you are. */
+#panel .cl-ahead { list-style: none; margin: 0; padding: 0; font-size: var(--fs-text); color: #9a9da6; }
+#panel .cl-ahead li { display: flex; flex-wrap: wrap; gap: 0 10px; padding: 3px 0; border-top: 1px solid #23262c; }
+#panel .cl-ahead b { min-width: 5.5em; color: #b8a47c; font-weight: 500; }
+/* The list can run long: WEAR IT and CLOSE stay at the foot of the card while it scrolls under them. */
+#panel .card:has(.cl-stage) .buttons { position: sticky; bottom: -10px; margin: 10px -10px -10px; padding: 10px 10px 10px; background: var(--i-well, #14151a); box-shadow: 0 -10px 10px -8px #000c; }

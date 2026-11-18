@@ -1,37 +1,56 @@
 /**
- * A look whose cloth is part of its body (the Ranger's hood and cloak, the Rogue's hood and long cloak) in the
- * cloth a hero has chosen (shared/clothlook.ts, docs/design/cloak-choice.md slice 2). The look names the colours
- * its cloth is drawn in (lookkit.ts `cloth`): a dye swaps them through every pixel map, front, back and profile,
- * before the painting, so shading and outline come out as they do now; an edge is a line of metal along the hem,
- * the lowest cloth in each column near the cloak's foot. Each dyed look is made once and kept, and is its own
- * object, so the cut body pieces made from it (joints.ts, sidejoints.ts) are its own too. Drawing only.
+ * A look whose cloth is part of its body (the Ranger's and the Rogue's hoods and cloaks, the Mage's robe and hat, the
+ * Healer's tabard, the friar's habit) in the cloth a hero has chosen (shared/clothlook.ts, docs/design/cloak-choice.md
+ * slices 2 and 3). The look names the colours its cloth is drawn in (lookkit.ts `cloth`): a dye swaps them through
+ * every pixel map, front, back and profile, and through what moves (herolife.ts), before the painting, so shading and
+ * outline come out as they do now. An edge is the look's own metal where it names it (`edge`: the Healer's tabard
+ * edges, hem and Lantern), else a line of metal along the hem: the lowest cloth in each column near the foot. Each
+ * dyed look is made once and kept, and is its own object, so the cut body pieces made from it (joints.ts,
+ * sidejoints.ts) are its own too. Drawing only.
  */
 import type { ClothLook } from '../shared/clothlook';
 import { DYE, EDGE } from './clothlife';
 import { HERO_W } from './heroscale';
-import type { Cls, LookDef } from './lookkit';
+import type { Cls, Life, LookDef } from './lookkit';
 import { heroLook, lookDef, makeSprite, type HeroSprites, type Part } from './sprites';
 
-/** How many rows up from the cloak's lowest row a hem may sit (its foot rises toward the sides). */
+/** How many rows up from the cloth's lowest row a hem may sit (its foot rises toward the sides). */
 const HEM_ROWS = 4;
 
-/** A colour a step lighter: the glint on a dyed hood. */
-const lift = (c: string): string => '#' + [1, 3, 5].map((i) => Math.min(255, Math.round(parseInt(c.slice(i, i + 2), 16) * 1.35 + 14)).toString(16).padStart(2, '0')).join('');
+/** A colour at `k` of its brightness, a little lifted when lighter (a glint on a hood, a sleeve's lit cloth). */
+const tone = (c: string, k: number): string => '#' + [1, 3, 5].map((i) => Math.max(0, Math.min(255, Math.round(parseInt(c.slice(i, i + 2), 16) * k + (k > 1 ? 14 : 0)))).toString(16).padStart(2, '0')).join('');
 
-/** `parts` (single pixels, as lookkit.ts `art` makes them) with the cloth's colours swapped and its hem edged. */
-function dyed(parts: Part[], from: string[], to: (string | undefined)[], trim: string | null): Part[] {
-  const at = new Map<string, number>();
+/** What each of a look's cloth colours becomes in a dye, by its place in `cloth`: the cloth, its shadow, its lit
+ *  side, then a darker cloth and its shadow (a hat, a cowl). */
+const dyeTo = (dye: [string, string]): string[] => [dye[0], dye[1], tone(dye[0], 1.35), tone(dye[0], 0.8), tone(dye[1], 0.8)];
+/** What each of a look's `edge` colours becomes in a metal: the metal, the metal, its glint. */
+const edgeTo = (m: string): string[] => [m, m, tone(m, 1.25)];
+
+/** A table of colour for colour (an empty place in a look's list is skipped). */
+function table(from: string[], to: string[], into = new Map<string, string>()): Map<string, string> {
+  from.forEach((c, i) => c && to[i] && into.set(c, to[i]));
+  return into;
+}
+
+/** `parts` (single pixels, as lookkit.ts `art` makes them) with colours swapped; `hem`: the lowest pixels of these
+ *  colours, near the cloth's foot, laid in that metal instead. */
+function dyed(parts: Part[], swap: Map<string, string>, hem: { of: string[]; trim: string } | null): Part[] {
+  const at = new Set<string>();
   let low = -1;
-  parts.forEach((p, i) => {
-    if (p[0] !== 'p' || !from.includes(p[3])) return;
-    at.set(p[1] + ',' + p[2], i);
-    low = Math.max(low, p[2]);
+  if (hem) for (const p of parts) if (p[0] === 'p' && hem.of.includes(p[3])) (at.add(p[1] + ',' + p[2]), (low = Math.max(low, p[2])));
+  return parts.map((p): Part => {
+    if (p[0] !== 'p') return p;
+    if (hem && at.has(p[1] + ',' + p[2]) && p[2] >= low - HEM_ROWS && !at.has(p[1] + ',' + (p[2] + 1))) return ['p', p[1], p[2], hem.trim];
+    const to = swap.get(p[3]);
+    return to ? ['p', p[1], p[2], to] : p;
   });
-  return parts.map((p, i): Part => {
-    if (p[0] !== 'p' || at.get(p[1] + ',' + p[2]) !== i) return p;
-    if (trim && p[2] >= low - HEM_ROWS && !at.has(p[1] + ',' + (p[2] + 1))) return ['p', p[1], p[2], trim];
-    return ['p', p[1], p[2], to[from.indexOf(p[3])] ?? p[3]];
-  });
+}
+
+/** What moves, in the same swap (a robe's hem, a hat's tip, a tabard's foot). */
+function lifeDyed(life: Life, swap: Map<string, string>): Life {
+  const out: Record<string, unknown> = { ...life };
+  for (const [k, v] of Object.entries(life)) out[k] = typeof v === 'string' ? swap.get(v) ?? v : Array.isArray(v) ? v.map((c) => swap.get(c) ?? c) : v;
+  return out as Life;
 }
 
 const defs = new Map<string, LookDef>(), sprites = new Map<string, HeroSprites>();
@@ -46,9 +65,11 @@ export function lookDefIn(cls: Cls, i = 0, c?: ClothLook): LookDef {
   const key = `${cls}${i}:${c.dye}:${c.edge}`;
   let out = defs.get(key);
   if (!out) {
-    const dye = DYE[c.dye], to = dye ? [dye[0], dye[1], lift(dye[0])] : [], trim = EDGE[c.edge], from = d.cloth!;
-    out = { ...d, down: dyed(d.down, from, to, trim), up: dyed(d.up, from, to, trim) };
-    if (d.side) out.side = { ...d.side, body: dyed(d.side.body, from, to, trim), arm: dyed(d.side.arm, from, to, null) };
+    const dye = DYE[c.dye], trim = EDGE[c.edge], swap = dye ? table(d.cloth!, dyeTo(dye)) : new Map<string, string>();
+    if (trim && d.edge) table(d.edge, edgeTo(trim), swap);
+    const hem = trim && !d.edge ? { of: d.cloth!.filter(Boolean), trim } : null;
+    out = { ...d, down: dyed(d.down, swap, hem), up: dyed(d.up, swap, hem), life: lifeDyed(d.life, swap) };
+    if (d.side) out.side = { ...d.side, body: dyed(d.side.body, swap, hem), arm: dyed(d.side.arm, swap, null) };
     defs.set(key, out);
   }
   return out;
