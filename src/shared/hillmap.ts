@@ -18,7 +18,8 @@ import { block, claim, mark, newKit, patch, path, prop, round, scatter, spotIn, 
 import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
 import { THEMES, type Foe } from './terrain.js';
-import { gateIn, layRoad, ledge, road, thickHedge, wall } from './terrkit.js';
+import { gateIn, giverNpc, layRoad, ledge, road, thickHedge, wall } from './terrkit.js';
+import type { Mini } from './miniquest.js';
 import type { TerrPlan, TerrZone } from './territory.js';
 import { lightFor } from './timeofday.js';
 
@@ -165,6 +166,19 @@ function foldYard(k: Kit, land: LowLand): void {
   [{ x: 10.4, y: 11.5 }, { x: 19.8, y: 15.2 }, { x: 16, y: 16.6 }].forEach((p, i) => put(land, k.foes, p.x, p.y, 103, i === bow ? { bow: true } : {}));
 }
 
+/**
+ * The hill's one mini quest, for the tests (tests/minis.test.ts): someone by the headland's cart who won't speak till
+ * the two at the dinner are dead, and sends you to the pond, where two goblins are made only then.
+ */
+export function hillMinis(land: LowLand): Mini[] {
+  const foes: Foe[] = [];
+  put(land, foes, 12, 66.5, 201), put(land, foes, 13.6, 67.4, 201);
+  return [{
+    id: 'hill-pond', kind: 'find', giver: { x: 17.4, y: 84.2, look: 'villager', low: true }, after: [101], foes,
+    at: { x: 12.5, y: 66.5, r: 5 }, frees: [{ x: 10.8, y: 65.6 }], giverLeaves: 'done', chest: { x: 12.6, y: 68.6 },
+  }];
+}
+
 export function hillPlan(job: Job): TerrPlan {
   const k = newKit(new Rng(job.seed * 7927 + 83));
   Object.assign(k, { mw: LOW.w, mh: LOW.h });
@@ -172,12 +186,15 @@ export function hillPlan(job: Job): TerrPlan {
   for (const c of LOW_CAGES) prop(k, 'cage', c.x, c.y);
   headland(k, land), strips(k, land), stooks(k, land), barnRoad(k, land), foldYard(k, land);
   layRoad(k, land.road, 0.9);
+  const minis = hillMinis(land);
+  for (const m of minis) claim(k, m.giver.x, m.giver.y, 0.6);
   const map: GameMap = {
     name: 'THE PROVING HILL', w: LOW.w, h: LOW.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: [], torches: [],
     hero: { x: 22, y: 92.5 }, exit: { x: 20.5, y: 0, w: 3, h: 0.9 }, theme: lightFor(THEMES.field, 'field', 'day'),
     water: k.water, soil: k.soil, marks: k.marks, ledges: land.ledges, stretches: land.stretches,
     // Most of the land is raised: anything set down on it (a cage, someone freed, a hero up at a gate) stands on it.
     settle: true,
+    minis, npcs: minis.map(giverNpc),
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: LOW_ZONES.map((z) => ({ ...z })) };
 }

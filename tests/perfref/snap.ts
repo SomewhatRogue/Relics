@@ -1,5 +1,5 @@
-// REFERENCE COPY, do not edit: src/client/snap.ts as it stood on commit 1dbfcd3 (roomsend.ts: as first cut out of coop.ts,
-// the same lines). tests/perfparity.wire.test.ts holds the live file to this one's bytes. See docs/design/perf-sweep.md.
+// REFERENCE COPY, do not edit: src/client/snap.ts as it stands on main without the performance sweep (first taken at 1dbfcd3,
+// brought up to main's when main changes it). tests/perfparity.wire.test.ts holds the live file to this one's bytes. See docs/design/perf-sweep.md.
 /**
  * The leader's fight, sent to the party: everything in the room that moves or changes, as patches
  * that carry only what changed since the last one (a full one now and then, and to anyone new).
@@ -10,7 +10,7 @@
  */
 import type { ArenaRoom } from '../../src/sim/room';
 
-export const COLLS = ['heroes', 'enemies', 'javelins', 'snares', 'hooks', 'bolts', 'drops', 'coals', 'zones', 'pickups', 'smokes', 'chests', 'props', 'rolls', 'survivors', 'puddles', 'slicks', 'crows', 'strikes', 'ices', 'nooses', 'blocks'] as const;
+export const COLLS = ['heroes', 'enemies', 'javelins', 'snares', 'hooks', 'bolts', 'drops', 'coals', 'zones', 'pickups', 'smokes', 'chests', 'props', 'rolls', 'survivors', 'puddles', 'slicks', 'crows', 'strikes', 'ices', 'nooses', 'minis', 'blocks'] as const;
 type Coll = (typeof COLLS)[number];
 type Ent = Record<string, unknown>;
 /** Per collection: the order of keys (only when it changed), and each changed entity's changed fields. */

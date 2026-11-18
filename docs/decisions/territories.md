@@ -139,3 +139,104 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   `?hero=WARRIOR&land=lowfurrow`: ten of twelve goblins dozing at the way in, both gates opening for the party
   with the checkpoint moving, the goal turning to the cages past the second gate, no page errors on a laptop.
   Pictures: `node scripts/land-look.cjs`.
+
+## 2026-11-17, night: bigger, stitched, and mini quests (Claude Fable 5.2)
+
+- **Kyle, after playing the first build:** "I like it but I think that it could actually be even bigger in each
+  area. We proved out in the RAID mode that we can have pretty damn big maps ... we could stitch those sorts of
+  things together. Even have mini quests within a quest: like talk to a person who tells you to hunt something that
+  doesn't spawn until you talk to it." Then: "anyone you rescue has to run SUPER far out ... should just be able to
+  run to next gate"; "this doesn't feel hand crafted and beautiful telling a narrative, it's just sort of ...
+  there"; and, of an ordinary Hunt SKARN job played the same sitting, "it felt really cool ... felt like a tailored
+  story and arena with obstacles etc. really liked it and the shadows looked GREAT"; "(Shadows are from living
+  world: we should make that absolutely a feature not a toggle)".
+- **The spec re-laid** (territories.md: "Bigger, stitched", "Mini quests", Lowfurrow as two maps of 96 wide). The
+  bar for a territory is now the game's own good rooms: their kits, their scenes, their packs, bigger and by hand.
+- **The freed make for the nearest gate** (`sim/haven.ts`, new; three lines in `sim/survivors.ts`): on a map in
+  stretches, the nearest of the way in, the way out and every gate, open or shut. **For the Instances chat:** this
+  is the Open Cut's too (your freed ran to the map's start).
+- **The living world is the game** (`client/alive.ts`; its button, its setting and `alive.css` gone; `?alive=0` kept
+  for look scripts). **For the Graphics sweep and New look: characters chats:** done at Kyle's word here; your board
+  rows say it "stays an option".
+- **A territory is several maps stitched** (`shared/territory.ts`: `territoryPlan(job, index)`, `mapsOf`, a room a
+  map; `sim/landroom.ts`, `sim/goal.ts`, one line in `client/game.ts` so the next map starts at its own first gate).
+  `?land=lowfurrow&map=1` starts on the second map.
+- **The first build kept as the proving hill** (`shared/hillmap.ts`, `?land=hill`): the frame's, the pathing's and
+  the rules' tests stand on it, so Lowfurrow can be re-laid freely.
+- **Mini quests** (`shared/miniquest.ts`, `shared/miniwords.ts`, `sim/minis.ts`, `client/fxmini.ts`, new;
+  `tests/minis.test.ts`). `map.minis` is plain data; the room keeps each one's record (offered, taken, done) and it
+  is sent to friends (`client/snap.ts`: one more collection). TALK is at the head of the GRAB chain, after helping
+  a friend up; E and USE press it too (`client/main.ts`), and the button reads TALK (`client/cluster.ts`). The
+  goblins are made when it's taken (`ArenaRoom.wake`, the room's own foe-making moved into `fromFoe` so both use
+  it), as tough as the room's others for the party. It never keeps a gate. Done, whoever was hidden steps out and
+  the words are said over them; a giver goes home at once, or waits till a hero is back in sight of them. The goal
+  carries a second line ("Also: ..."); gold marks over a giver who is free to speak and a hero is near, then over
+  the ground it sends you to (`sim/targets.ts`). Played through on the proving hill in the browser.
+- **Lines:** one lore-keeper call, one line-editor call, for Lowfurrow's two mini quests and the territory's own
+  gate line ("Kill the goblins here", `shared/landwords.ts`). The lore keeper turned down the rope with nine knots
+  (a second way of counting, the Tally Man's ground, and it hands a first-job player the number): the trace is a cut
+  coil with unused loops. Recorded in the bible.
+
+## 2026-11-17, late: Lowfurrow laid by hand as two maps, its two mini quests, and two things Kyle saw
+
+- **Lowfurrow is two hand-laid maps** (`?hero=WARRIOR&land=lowfurrow`, `&map=1` for the second), each built by one
+  builder to the spec and reviewed here in pictures and in a played run.
+  - **THE FIELDS** (96 by 112; `shared/lowfurrowfields*.ts`): the gleaners' camp on the headland (handcarts, a
+    cookfire, the dinner trodden in), eight long strips of standing rye, oat and fallow with mown rides, a pond in
+    willows in a hollow of the lynchet, the stooks and a half-built rick, the drain and the far bank. 19 goblins in
+    six packs, each doing something (a patrol on the road, two at the scarecrow, sheaves being carried to a cart).
+  - **THE RISE** (96 by 104; `shared/lowfurrowrise*.ts`): the sunken barn road between banks with sheep tracks up
+    them, the orchard, the barn and its yard behind a tumbled drystone wall, the fold on the brow with the cage,
+    the hut and its fire, the stile north. 15 goblins in five packs.
+  - Both builders' notes on what drew wrong are worth keeping for the next territory: water on raised ground draws
+    as a pit (so the dewpond is paint), `flowers` paints a garden bed, `stone` a headstone, `trample` a dark box,
+    `stump` and the `log` block read as boxes. **Art wanted, most wanted first:** water drawn at its level, gold
+    rye taller than a head, a handcart on its side, a fallen trunk that reads as one, a pear tree, a proper
+    sheepfold, wildflowers on grass.
+- **Lowfurrow's two mini quests are in** (`shared/lowfurrowminis.ts`, new; `tests/lowfurrowminis.test.ts`).
+  The sister: the woman under the near cart, once the two at the dinner are dead; three goblins made in the rye by
+  the pond; her sister out of the willows. The rope: a man up the one full-grown tree in the orchard, once the
+  archers who shot at him are dead; a plated brute and two made outside the barn; he comes down when a hero is back
+  in sight of him, and a chest stands by the carts. A giver can be drawn off the ground (`Mini.giver.up`, pixels,
+  paint only: he sits in the boughs in both views). Played through in the browser: both taken with G, both done,
+  the first map's screen leads into the second.
+- **A line said by someone well off the side of the screen is not drawn** (`client/saylines.ts`, three lines): it
+  was pinned to the screen's edge as if said there (the woman's "I heard it go quiet" with her half a field away).
+- **"wtf is this. bread?"** (Kyle, with a picture of a `hay` round). It was a rounded yellow bale with a band, in
+  both views. Now a stook: sheaves leant together, tied at the waist, a tuft of ears, a dark gap at its foot
+  (`client/sprites.ts`, the one `hay` line; `client/three/nature3d.ts`; `tests/parity3d.test.ts`, its corner
+  count). **For the Art chat:** your file, changed at Kyle's word here; redraw it freely.
+- **"guards who are walking to the right seem to be looking left"** (Kyle). The side-on townsfolk carry their
+  front-view hair round to the side by moving it a pixel toward the back. A guard's helm and its dark band, a
+  soldier's steel cap and any hood were moved the same way, so the helm overhung the back of the head and the band
+  sat where a face would be on the wrong side. Deep headwear now sits square and its rim comes forward over the
+  brow (`client/npcside.ts`, `sideHair`). **For the Art and New look: characters chats:** your file, changed at
+  Kyle's word here.
+- **Still thin, known:** the fold yard between the fold and the gate, and the brow, are plain grass; the pond is
+  square-edged; the stubble is one flat yellow; the rick is a pale slab. Next pass with the props above.
+- Signed: Claude Fable 5.2.
+
+## 2026-11-17, night: elevation narrowed to raised areas
+
+- **Kyle:** "the elevation doesn't read as elevation at all. It also doesn't really add anything to the game that
+  much. We need to do research into how other games like this do elevation and it might just be some raised areas
+  or something." Then, to the change proposed: "aligned with what you'd change. go ahead."
+- **Research, in short:** slopes are close to invisible from above; this view shows height as a wall face toward
+  the camera; most ground is flat; ledges drop south and are often one-way; Hades uses room shape and hazards, not
+  height; CrossCode's layered height is hard to read by its makers' own account; clicking to climb annoys.
+  Sources: CrossCode's "Why do we use auto jump" post (moddb.com), Kotaku on Hades' level design thread
+  (2020), "How do 2D top-down games convey depth?" (jayorten.github.io), "Pixel-Art Ledges, Stairs and Bridges in
+  a Tile World" (blakecrosley.com), the Zelda Wiki's Autojump page, Dexerto on Diablo 4's traversal.
+- **The rules are in `docs/design/elevation.md`, "Raised areas"**, which now leads that spec: flat land, a raised
+  area as a set piece two levels high with its face toward the camera, its back closed, one or two narrow ways up
+  drawn as log steps, off it anywhere, a job in the fight, two or three a map.
+- **Built: the knoll** (`shared/knollmap.ts`, new; `?hero=WARRIOR&land=knoll`; `tests/knoll.test.ts`, 8 tests): a
+  third land in `shared/territory.ts`, a test map like the proving hill.
+- **A narrow ramp is drawn as steps in 2.5D** (`client/three/landledges.ts`: trodden earth, a log riser a step, a
+  post either side of its foot; any ramp 3.2 tiles wide or less, so the proving hill's sheep tracks too).
+- **Not changed yet, waiting on Kyle's look at the knoll:** Lowfurrow's two maps still have their slopes and banks.
+  The flat view still draws a land's raised area as grey town masonry.
+- **Seen, not chased:** the look script's phone run logs one 404 for a resource on every land; the laptop run
+  logs none.
+- Signed: Claude Fable 5.2.
+

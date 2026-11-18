@@ -1,5 +1,5 @@
-// REFERENCE COPY, do not edit: src/client/interest.ts as it stood on commit 1dbfcd3 (roomsend.ts: as first cut out of coop.ts,
-// the same lines). tests/perfparity.wire.test.ts holds the live file to this one's bytes. See docs/design/perf-sweep.md.
+// REFERENCE COPY, do not edit: src/client/interest.ts as it stands on main without the performance sweep (first taken at 1dbfcd3,
+// brought up to main's when main changes it). tests/perfparity.wire.test.ts holds the live file to this one's bytes. See docs/design/perf-sweep.md.
 /**
  * What one friend's screen needs of a big room (an expedition, the load test): every hero always (names
  * over heads, the party's health, the map screen's friends), and everything else only within `radius`

@@ -2,6 +2,7 @@
  * One frame: camera, the flat (lit) layer in depth order, the glowing layer, then the lighting pass.
  * The scene is painted at a low resolution and scaled up by a whole number so pixels stay crisp.
  */
+import { giverGone } from './fxmini';
 import { camScale } from './camwide';
 import { drawCuts } from './cutdraw';
 import { drawPairLift } from './pairdraw';
@@ -486,6 +487,8 @@ export class Scene {
     }
     watched(me);
     for (const n of map.npcs ?? []) {
+      // (A mini quest's giver who has gone home: fxmini.ts.)
+      if (giverGone(room, n)) continue;
       const at = npcAt(n, room.time), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
       items.push({ y: OY + at.y * PX, draw: () => drawNpc(c, n, OX + at.x * PX - cx, OY + at.y * PX - cy - lv(at.x, at.y), near && !n.mute, at.fx, !!n.path && !at.still, at.x, at.fy) });
     }

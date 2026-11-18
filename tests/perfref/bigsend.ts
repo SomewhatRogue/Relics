@@ -1,5 +1,5 @@
-// REFERENCE COPY, do not edit: src/client/bigsend.ts as it stood on commit 1dbfcd3 (roomsend.ts: as first cut out of coop.ts,
-// the same lines). tests/perfparity.wire.test.ts holds the live file to this one's bytes. See docs/design/perf-sweep.md.
+// REFERENCE COPY, do not edit: src/client/bigsend.ts as it stands on main without the performance sweep (first taken at 1dbfcd3,
+// brought up to main's when main changes it). tests/perfparity.wire.test.ts holds the live file to this one's bytes. See docs/design/perf-sweep.md.
 /**
  * The leader's sending for a big room (an expedition): each friend their own patch of only what's near
  * them (interest.ts), on their own Encoder, with quiet clocks; the map never sent (the friend builds it

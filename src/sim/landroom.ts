@@ -23,10 +23,12 @@ export function landRoom(run: Run): ArenaRoom {
   room.sleepAt = { wake: TERR.wake, doze: TERR.doze };
   room.pace = { index: 2 };
   const past = n - 1;
-  if (past > 0) for (const e of room.allEnemies) {
+  // (Kept on the room: goblins a mini quest wakes later are as tough: sim/minis.ts.)
+  if (past > 0) room.tough = { hp: 1 + TERR.more.hp * past, harm: 1 + TERR.more.harm * past };
+  if (room.tough) for (const e of room.allEnemies) {
     if (e.name || e.boss) continue;
-    e.hp = e.maxHp = Math.round(e.maxHp * (1 + TERR.more.hp * past));
-    e.harm = +((e.harm ?? 1) * (1 + TERR.more.harm * past)).toFixed(3);
+    e.hp = e.maxHp = Math.round(e.maxHp * room.tough.hp);
+    e.harm = +((e.harm ?? 1) * room.tough.harm).toFixed(3);
   }
   scaleBosses(room.enemies, n);
   room.board = {};

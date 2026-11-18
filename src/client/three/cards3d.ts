@@ -5,6 +5,7 @@
  * nests, someone caged waving through the bars and calling out, the freed, the map's people (Wickhold's folk, Hew, the dead), and the scenes past the wood's trees. Positions eased between
  * the room's ticks as everywhere else. Only draws.
  */
+import { giverGone } from '../fxmini';
 import { lurking } from '../../sim/lurk';
 import { lurkFrame } from '../fenlurk';
 import { pulledAt } from '../wave2ground';
@@ -137,6 +138,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   if (map.life) for (const b of lifeFigs(map, f.now, others.length ? [...room.heroes, ...others] : room.heroes)) f.put('lf' + b.key, b.x, b.up, b.y, b.draw, { pool: 0 });
   watched(me);
   (map.npcs ?? []).forEach((n, i) => {
+    // (A mini quest's giver who has gone home: ../fxmini.ts.)
+    if (giverGone(room, n)) return;
     const at = npcAt(n, t), near = !!me && Math.hypot(me.x - at.x, me.y - at.y) <= SPOT_REACH;
     f.put('n' + i + n.name, at.x, stacked(map) ? lift(levelAt(map, at.x, at.y)) : 0, at.y, (c, px, py) => drawNpc(c, n, px, py, near && !n.mute, at.fx, !!n.path && !at.still, at.x, at.fy), { pool: n.pose ? 0 : 0.3, bias: n.pose ? -0.3 : 0 });
   });

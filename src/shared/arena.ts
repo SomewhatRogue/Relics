@@ -344,6 +344,8 @@ export interface GameMap {
   npcs?: Npc[];
   /** Raised ground. */
   ledges?: Ledge[];
+  /** People on the land with a job of their own (shared/miniquest.ts; sim/minis.ts). */
+  minis?: import('./miniquest.js').Mini[];
   /** Anyone set down well inside a raised level stands on it (the new town, where most of it is raised); without it
    *  they're pushed out to its edge, as on a job's map. */
   settle?: boolean;

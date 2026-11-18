@@ -18,6 +18,7 @@ import type { Run } from './run';
 import type { Enemy } from './types';
 import { waiting } from './survivors';
 import { expedTargets } from './expedgoal';
+import { miniTargets } from './minis';
 
 /** `folk`: someone in town with an errand or a quest for you, `hall` the door of the hall they're in (client/errandmarks.ts). */
 export type TargetKind = 'cage' | 'door' | 'out' | 'nest' | 'larder' | 'den' | 'boss' | 'job' | 'folk' | 'hall';
@@ -40,7 +41,8 @@ export function targets(run: Run | null, room: ArenaRoom, houses: HouseAt[] = []
   if (!run) return [];
   // An expedition: each job not yet done (the way out once they are), and the cages of its prisoners.
   if (room.exped && !room.indoors) return expedTargets(room);
-  const out: Target[] = [];
+  // (People on the land with a job of their own, and a taken one's ground: sim/minis.ts.)
+  const out: Target[] = room.minis.length ? miniTargets(room) : [];
   for (const p of room.props) if (p.kind === 'cage' && !p.broken) out.push({ kind: 'cage', x: p.x, y: p.y });
   const freed = room.survivors.some(waiting);
   if (room.indoors) {

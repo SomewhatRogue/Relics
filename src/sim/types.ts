@@ -936,6 +936,8 @@ export type FightEvent =
   | { k: 'opened'; x: number; y: number }
   /** An instance's gate between stretches opened for the party (sim/stretches.ts). */
   | { k: 'gateopen'; x: number; y: number }
+  /** A mini quest (sim/minis.ts): its giver talked to (`taken`, at the giver), done (where whoever was hidden steps out), or its giver going home (`home`). */
+  | { k: 'mini'; x: number; y: number; id: string; what: 'taken' | 'done' | 'home' }
   /** An instance's fork decided by the party's vote (sim/fork.ts). */
   | { k: 'wayopen'; x: number; y: number; way: number }
   | { k: 'pairup'; x: number; y: number }

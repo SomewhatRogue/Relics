@@ -34,6 +34,7 @@ import { mend, shieldNear } from './holy';
 import { impacts } from './impacts';
 import { stepSleds } from './iceslide';
 import { release, stepCarry, tryGrab } from './grab';
+import { newMinis, stepMinis, talkMini, type MiniState } from './minis';
 import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
 import { startRaise, stepParty, sweepAllies } from './party';
@@ -223,6 +224,10 @@ export class ArenaRoom {
   sleepFar = false;
   /** How near a hero wakes them and how far lets them doze again, if not a big map's (an instance's area: shared/instancetune.ts). */
   sleepAt?: { wake: number; doze: number };
+  /** Mini quests (sim/minis.ts): each of the map's, offered, taken or done. */
+  minis: MiniState[] = [];
+  /** How much tougher and harder hitting this room's goblins are for the party (a territory: sim/landroom.ts); goblins made later take it too. */
+  tough?: { hp: number; harm: number };
   /** Every goblin, dozers too, while a big map's tick runs on the awake ones (null between ticks). */
   private whole: Enemy[] | null = null;
   /** An expedition's rules and how it stands (sim/exped.ts): the jobs, the way out, the pressure. */
@@ -258,6 +263,7 @@ export class ArenaRoom {
     this.rushRng = new Rng(seed * 4241 + 59);
     this.map = opts.map ?? ARENA;
     this.crows = newFlocks(this.map.flocks);
+    this.minis = newMinis(this.map.minis);
     useMap(this.map);
     // Layout 4's scenes: prisoners on their rope, a wrecked cart's oil (sim/scenes.ts).
     if (this.map.led || this.map.oil) this.slicks = initScenes(this.map, this.survivors, this.time);
@@ -267,32 +273,7 @@ export class ArenaRoom {
     if (this.map.hang) this.nooses = this.map.hang.snares.map((q, i) => ({ id: i + 1, x: q.x, y: q.y, at: -SNARER.arm, by: 0, keep: true }));
     this.squire = !!opts.squire;
     if (opts.foes) {
-      opts.foes.forEach((f, i) => {
-        const e = newEnemy(i + 1, f.kind, f.x, f.y);
-        if (f.variant) (e.variant = f.variant), (e.hp = e.maxHp = VARIANTS[f.variant].hp);
-        if (f.hp) e.hp = e.maxHp = f.hp;
-        packOnto(e, f);
-        shapeFoe(e);
-        levelOn(e, this.level);
-        Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
-        if (f.noose) e.noose = true;
-        if (f.zoned) e.zoned = true;
-        if (f.drives) e.drives = true;
-        if (f.brakes) e.brakes = { next: BRAKE.warn, off: 0 };
-        if (f.lamps) e.lamps = { lit: (opts.map?.lamps ?? []).map(() => true), next: 0 };
-        if (f.pair) e.pair = f.pair;
-        if (f.boss) e.boss = newBoss(f.boss, 1);
-        if (f.task) e.task = structuredClone(f.task);
-        if (f.haul) e.haul = { ...f.haul };
-        if (f.wave) e.wave = f.wave;
-        // At the dead: facing the body it's eating.
-        const body = f.feeding ? (this.map.npcs ?? []).filter((n) => n.pose === 'corpse').sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0] : undefined;
-        if (body) {
-          const l = Math.hypot(body.x - e.x, body.y - e.y) || 1;
-          (e.fx = (body.x - e.x) / l), (e.fy = (body.y - e.y) / l);
-        }
-        this.enemies.push(e);
-      });
+      opts.foes.forEach((f, i) => this.enemies.push(this.fromFoe(f, i + 1)));
       this.props = (opts.furniture ?? []).map((p) => Object.assign(newProp(p.kind, p.x, p.y, false), p.lean ? { lean: p.lean } : {}));
       return;
     }
@@ -406,7 +387,7 @@ export class ArenaRoom {
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
       sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events), sweepSurvivors(h, s, w)),
-      grab: (h) => startRaise(h, this.heroes, this.events) || startRise(h, this.heroes, this.zones, this.time, this.events) || startTorch(h, this.enemies, this.events) || startKindle(h, this.map, this.events) || this.staitheGrab(h, w) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
+      grab: (h) => startRaise(h, this.heroes, this.events) || startRise(h, this.heroes, this.zones, this.time, this.events) || talkMini(this, h, this.events) || startTorch(h, this.enemies, this.events) || startKindle(h, this.map, this.events) || this.staitheGrab(h, w) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
       bash: (h) => (h.rush ? stepRush(h, w, TICK) : stepBash(h, this.enemies, w, TICK)),
@@ -538,6 +519,7 @@ export class ArenaRoom {
     // lightning it calls falls when it's due (sim/skystrike.ts).
     stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w), stepDomes(this.heroes, this.enemies, this.time), stepTraps(this.zones, w);
     this.landings();
+    if (this.minis.length) stepMinis(this, this.events);
     // Steam scalds; fire turns bodies to ash and ice to steam (sim/steam.ts, worldfire.ts).
     stepSteam(w);
     stepWorldFire(w, this);
@@ -562,6 +544,48 @@ export class ArenaRoom {
     // A storm's lightning: the circle a second ahead, then everyone under it hurt (sim/storm.ts).
     stepStorm(this, this.skyRng);
     if (this.exped) stepExped(this, this.events, TICK);
+  }
+
+  /** A planned goblin made a body in this room, with this id (the room's own at its start; a mini quest's when it's taken). */
+  private fromFoe(f: Foe, id: number): Enemy {
+    const e = newEnemy(id, f.kind, f.x, f.y);
+    if (f.variant) (e.variant = f.variant), (e.hp = e.maxHp = VARIANTS[f.variant].hp);
+    if (f.hp) e.hp = e.maxHp = f.hp;
+    packOnto(e, f);
+    shapeFoe(e);
+    levelOn(e, this.level);
+    Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
+    if (f.noose) e.noose = true;
+    if (f.zoned) e.zoned = true;
+    if (f.drives) e.drives = true;
+    if (f.brakes) e.brakes = { next: BRAKE.warn, off: 0 };
+    if (f.lamps) e.lamps = { lit: (this.map.lamps ?? []).map(() => true), next: 0 };
+    if (f.pair) e.pair = f.pair;
+    if (f.boss) e.boss = newBoss(f.boss, 1);
+    if (f.task) e.task = structuredClone(f.task);
+    if (f.haul) e.haul = { ...f.haul };
+    if (f.wave) e.wave = f.wave;
+    // At the dead: facing the body it's eating.
+    const body = f.feeding ? (this.map.npcs ?? []).filter((n) => n.pose === 'corpse').sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0] : undefined;
+    if (body) {
+      const l = Math.hypot(body.x - e.x, body.y - e.y) || 1;
+      (e.fx = (body.x - e.x) / l), (e.fy = (body.y - e.y) / l);
+    }
+    return e;
+  }
+
+  /**
+   * Goblins that weren't here till now (a mini quest taken: sim/minis.ts): made from their plan, as tough as the
+   * room's others for the party (`tough`), in the room for good. Their ids.
+   */
+  wake(foes: Foe[]): number[] {
+    let id = Math.max(0, ...(this.whole ?? this.enemies).map((o) => o.id), ...this.enemies.map((o) => o.id));
+    return foes.map((f) => {
+      const e = this.fromFoe(f, ++id);
+      if (this.tough && !e.name && !e.boss) (e.hp = e.maxHp = Math.round(e.maxHp * this.tough.hp)), (e.harm = +((e.harm ?? 1) * this.tough.harm).toFixed(3));
+      this.enemies.push(e);
+      return e.id;
+    });
   }
 
   /** Something new in the room (a den's goblin, a nest's spider), awake and for good. */

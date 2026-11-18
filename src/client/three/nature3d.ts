@@ -44,14 +44,31 @@ export function addNature(B: Boxes, o: Round, r: Seed): boolean {
       B.lump(x + R * 0.4, 0.42, z + R * 0.15, R * 1.0, 0.4, R * 0.85, jit(0x2a4024, 0.08, r), r.next() * 3);
       for (const [dx, dy] of [[-0.45, 0.32], [0.45, 0.38]]) B.c(x + dx * R, dy, z + R * 0.62, 0.06, 0.06, 0.06, 0x7a2a3a);
       return true;
-    case 'hay':
-      // A bale (the sprite's 16 by 11 pixels): its sides, a rounded top no wider than them, lighter
-      // where the light falls, and the band round its foot.
-      B.b(x, 0, z, R * 1.8, 0.4, R * 1.3, jit(0xa08c44, 0.04, r));
-      B.lump(x, 0.4, z, R * 1.8, 0.4, R * 1.3, jit(0xa89448, 0.04, r), 0);
-      B.lump(x - R * 0.25, 0.52, z - R * 0.15, R * 0.9, 0.22, R * 0.65, 0xb8a050, 0);
-      B.b(x, 0.12, z, R * 1.84, 0.05, R * 1.34, 0x8a7a3a);
+    case 'hay': {
+      // A stook: sheaves stood on end and leant together, tied at the waist, their ears in a tuft on top. Upright
+      // stalks in three straws, a dark twine band, darker ears, a gap of shadow at its foot. (It was a rounded bale
+      // with a band round it, and read as a loaf of bread: Kyle, 2026-11-17, "wtf is this. bread?")
+      const STRAW = [0xa08c44, 0x857434, 0xb8a050], EARS = [0x6e5622, 0x8a6e2c, 0x5e4a1e], n = 9;
+      // The butts splayed out at its foot, the stalks drawn in above them: wide below, narrow at the tie.
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + 0.3, cx = Math.cos(a), cz = Math.sin(a);
+        B.b(x + cx * R * 0.95, 0, z + cz * R * 0.72, R * 0.5, 0.2, R * 0.42, jit(STRAW[i % 3], 0.05, r));
+        B.b(x + cx * R * 0.42, 0.18, z + cz * R * 0.32, R * 0.4, 0.38, R * 0.34, jit(STRAW[(i + 1) % 3], 0.05, r));
+      }
+      B.b(x, 0, z, R * 1.5, 0.22, R * 1.1, jit(STRAW[1], 0.04, r));
+      B.b(x, 0.2, z, R * 0.7, 0.4, R * 0.56, jit(STRAW[1], 0.04, r));
+      // The gap between two sheaves at its foot, toward the camera.
+      B.b(x + R * 0.1, 0, z + R * 0.96, R * 0.34, 0.24, 0.05, 0x241c12);
+      // The twine, pinching it in.
+      B.b(x, 0.54, z, R * 1.04, 0.07, R * 0.84, 0x3a2c18);
+      // The ears: a ragged tuft, wider than the tie, tallest in the middle.
+      for (let i = 0; i < 7; i++) {
+        const a = (i / 7) * Math.PI * 2 + 0.9, k = 0.34 + r.next() * 0.2;
+        B.b(x + Math.cos(a) * R * k, 0.62, z + Math.sin(a) * R * k * 0.8, R * 0.34, 0.14 + r.next() * 0.12, R * 0.3, jit(EARS[i % 3], 0.06, r));
+      }
+      B.b(x, 0.62, z, R * 0.44, 0.34, R * 0.38, jit(EARS[1], 0.05, r));
       return true;
+    }
     case 'clamp':
       // A charcoal clamp: earth heaped low and wide, turf over its crown, vents dark in its side.
       B.lump(x, 0.18, z, R * 3.0, 0.5, R * 1.6, jit(0x2a2420, 0.06, r), 0);

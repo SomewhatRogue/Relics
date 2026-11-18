@@ -24,6 +24,8 @@ import { BRAKE_WORDS, DROVER_WORDS, FORK_WORDS, GATE_WORDS, LAMP_WORDS, PAIR_WOR
 import { forkOf } from './fork';
 import { keepers, lastStretch, stretchOf } from './stretches';
 import { staitheGoal } from './staithegoal';
+import { miniLine } from './minis';
+import { LAND_WORDS } from '../shared/landwords';
 
 export interface Captives { caged: number; waiting: number }
 
@@ -79,7 +81,13 @@ export const sum = (list: Captives[]): Captives => list.reduce((a, c) => ({ cage
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/** The room's goal, and under it any mini quest in hand (sim/minis.ts): never part of what opens the way. */
 export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, waiting: 0 }): { text: string; done: boolean } {
+  const g = mainGoal(run, room, houses), also = room.minis.length ? miniLine(room) : '';
+  return also ? { ...g, text: `${g.text}. ${also}` } : g;
+}
+
+function mainGoal(run: Run, room: ArenaRoom, houses: Captives): { text: string; done: boolean } {
   if (room.exped) return expedGoal(run, room);
   const goblins = room.enemies.filter((e) => !isDead(e)).length, o = run.job.objective, here = inRoom(room);
   // What has to be done (the cages out here, and everyone freed brought out), and who else is caged indoors.
@@ -94,7 +102,7 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   const st = run.job.instance || (run.job.land && !(isFinal(run) && lastStretch(run, room.map))) ? stretchOf(run, room.map) : undefined;
   if (st) {
     const keep = keepers(st, room), last = lastStretch(run, room.map);
-    if (keep.length) return { text: also(keep.some((e) => e.name) ? killWords(keep.filter((e) => e.name), room) : GATE_WORDS.guards), done: false };
+    if (keep.length) return { text: also(keep.some((e) => e.name) ? killWords(keep.filter((e) => e.name), room) : run.job.land ? LAND_WORDS.guards : GATE_WORDS.guards), done: false };
     // A puzzle keeping it (sim/tubs.ts).
     if (unsolved(room.map, room.props, st.puzzle)) return { text: also(PUZZLE_WORDS.goal), done: false };
     // A fork yard: the party votes by standing on a way (sim/fork.ts).

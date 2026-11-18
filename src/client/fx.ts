@@ -16,6 +16,7 @@ import { toPx } from './world';
 import { CRY } from './captives';
 import { spiderFx } from './fxspiders';
 import { weakFx } from './fxweak';
+import { miniFx } from './fxmini';
 import { rushFx } from './fxrush';
 import { bossFx } from './fxboss';
 import { listenFx } from './fxlisten';
@@ -124,7 +125,7 @@ export class Fx {
     const [x, y] = toPx(ev.x, ev.y);
     mageTapFx(this, ev, x, y, this.heroes);
     if (chalkFx(this, ev, x, y)) return;
-    if (listenFx(this, ev, x, y) || leechFx(this, ev, x, y) || foeFx(this, ev, x, y) || bossFx(this, ev, x, y) || staitheFx(this, ev, x, y) || woodFx(this, ev, x, y) || rushFx(this, ev, x, y) || spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || rangerFx(this, ev, x, y) || mageFx(this, ev, x, y) || clericFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y) || cageFx(this, ev, x, y) || techFx(this, ev, x, y) || stormFx(this, ev, x, y) || ladderFx(this, ev, x, y) || iceFx(this, ev, x, y) || worldFx(this, ev, x, y) || signFx(this, ev, x, y) || cutFx(this, ev, x, y)) return;
+    if (miniFx(this, ev, x, y) || listenFx(this, ev, x, y) || leechFx(this, ev, x, y) || foeFx(this, ev, x, y) || bossFx(this, ev, x, y) || staitheFx(this, ev, x, y) || woodFx(this, ev, x, y) || rushFx(this, ev, x, y) || spiderFx(this, ev, x, y) || weakFx(this, ev, x, y) || venomFx(this, ev, x, y) || warriorFx(this, ev, x, y) || rangerFx(this, ev, x, y) || mageFx(this, ev, x, y) || clericFx(this, ev, x, y) || levelFx(this, ev, x, y) || skillFx(this, ev, x, y) || relicFx(this, ev, x, y) || cageFx(this, ev, x, y) || techFx(this, ev, x, y) || stormFx(this, ev, x, y) || ladderFx(this, ev, x, y) || iceFx(this, ev, x, y) || worldFx(this, ev, x, y) || signFx(this, ev, x, y) || cutFx(this, ev, x, y)) return;
     switch (ev.k) {
       case 'impact':
         if (ev.kind === 'slam') {

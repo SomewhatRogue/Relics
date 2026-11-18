@@ -4,7 +4,8 @@
  * gate in a gap with its stretch (sim/stretches.ts), a ledge whose named edges are slopes (a slope is a ramp
  * as long as the edge, so you walk up it anywhere), and a road the seed bends. Pure.
  */
-import type { Area, Ledge, Stretch } from './arena.js';
+import type { Area, Ledge, Npc, Stretch } from './arena.js';
+import type { Mini } from './miniquest.js';
 import { claim, path, type Kit, type Line, type P } from './expedkit.js';
 
 /**
@@ -61,3 +62,9 @@ export function road(k: Kit, pts: P[], bends: number[]): Line {
 
 /** Lay a road's soil (after the ground under it, so it's drawn on top). */
 export const layRoad = (k: Kit, l: Line, half: number) => path(k, 'earth', l, half);
+
+/**
+ * A mini quest's giver as someone standing on the map (shared/miniquest.ts): drawn as any person out there is,
+ * `talk` naming their quest so a screen can tell when they've gone home (sim/minis.ts giverThere).
+ */
+export const giverNpc = (m: Mini): Npc => ({ x: m.giver.x, y: m.giver.y, name: '', talk: `mini:${m.id}`, look: m.giver.look, mute: true, ...(m.giver.low ? { sneak: true } : {}), ...(m.giver.up ? { lift: m.giver.up } : {}) });
