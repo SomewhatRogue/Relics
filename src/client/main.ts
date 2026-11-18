@@ -14,6 +14,7 @@ import { SIGNS, SIGN_KEY } from '../shared/signs';
 import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
 import { expedition, fenmere, goalWords, hangmansWood } from '../shared/expedjob';
+import { board } from '../shared/jobs';
 import { openCut, stressJob } from '../shared/instances';
 import { LANDS, landJob, type LandId } from '../shared/territory';
 import { stretchOf } from '../sim/stretches';
@@ -283,6 +284,9 @@ else title.show();
 // (?exped=4: the expedition posted on day 4, for a given map.)
 const xday = Number(new URLSearchParams(location.search).get('exped') ?? 0);
 if (quick && xday) game.startJob(expedition(xday > 1 ? xday : game.world.day));
+// ?hero=WARRIOR&job=2:3: straight into a day's board job (here day 2's fourth), alone; &area=3 starts at its fourth room.
+const bj = (new URLSearchParams(location.search).get('job') ?? '').split(':').map(Number), bjob = bj.length === 2 ? board(bj[0])[bj[1]] : undefined;
+if (quick && bjob) game.startJob(bjob, 1, Number(new URLSearchParams(location.search).get('area') ?? 0));
 // ?hero=WARRIOR&wood=1: straight into today's Hangman's Wood (?wood=4: the one posted on day 4).
 const wday = Number(new URLSearchParams(location.search).get('wood') ?? 0);
 if (quick && wday) game.startJob(hangmansWood(wday > 1 ? wday : game.world.day));

@@ -184,19 +184,19 @@ is small: sickles in the stubble, a handcart on its side.
 
 **Two maps, stitched at the drain** (re-laid bigger, Kyle 2026-11-17 evening; each 96 wide).
 
-**Map 1, THE FIELDS** (96 by 112, level ground rising one lynchet):
+**Map 1, THE FIELDS** (96 by 112, flat: elevation.md "Raised areas"):
 
 | | Ground | What you walk in on | The job |
 | --- | --- | --- | --- |
 | In | The stile off the Wickhold road, a green lane between hedges | | |
 | Zone | **The headland** (about 72 by 24). The gleaners' camp at the field's foot: three handcarts, the dinner, sickles dropped in the stubble, a hawthorn | Two scrappers fighting over the dinner basket; three more turning out the far cart | Kill both packs. **Someone is under the near cart** (mini quest 1) |
 | Gate | The field gate in the headland hedge (teaches gates: stand in it, all of you) | | |
-| Scape | **The long strips** (about 80 by 38). Ridge and furrow, rye standing in long strips with mown rides between them, the first lynchet climbing across the whole field, a pond in willows off to the west, a scarecrow, a fallen hovel to the east | The barn's roof on the rise, far off; a patrol on the road; two at the scarecrow | Nothing you must do. The pond has a chest. The rye by the pond is where mini quest 1 sends you |
+| Scape | **The long strips** (about 80 by 38). Ridge and furrow, rye standing in long strips with mown rides between them, a pond in willows off to the west, a scarecrow, a fallen hovel to the east | The barn's roof on the rise, far off; a patrol on the road; two at the scarecrow | Nothing you must do. The pond has a chest. The rye by the pond is where mini quest 1 sends you |
 | Zone | **The stooks** (about 72 by 28). A cut strip, sheaves stood in rows, two hay carts, a half-built rick | A pack loading sheaves with an archer up on a cart; three at the rick with one of the gleaners caged by it | Kill both packs; break the cage |
 | Gate | The drain: the hungry pulled the planks off the bridge. Lay them back (a hold, quicker with two) | | |
-| Screen | Over the bridge and up the far bank | | |
+| Screen | Over the bridge to the far bank | | |
 
-**Map 2, THE RISE** (96 by 104, a hill of two more levels):
+**Map 2, THE RISE** (96 by 104; the sunken lane's banks and the top one level up, nothing else raised):
 
 | | Ground | What you walk in on | The job |
 | --- | --- | --- | --- |
@@ -430,7 +430,8 @@ look). Nothing of the Instances chat's sim changes: a territory is data for it.
 5. **"I'm blasting through most of these missions."** So a zone's packs are fights, not sweeps: fewer
    goblins, each a job, an elite leading, tuned against a hero who knows the game. Numbers at his playtest.
 6. **"I want worlds to be beautiful and interesting."** The rules below.
-7. **Elevation rethought:** docs/design/elevation.md. Every territory is laid on real height.
+7. **Elevation rethought:** docs/design/elevation.md. First every territory on real height; then, played, narrowed
+   to **raised areas** (its first section): flat land, a few raised set pieces that do a job.
 
 ## Beautiful and interesting
 
@@ -441,7 +442,8 @@ Each territory is laid out to these before a goblin is placed:
 - **Three props no other place has** (Lowfurrow: stooks, the scarecrow, the hay cart).
 - **A silhouette you'd know it by** from the far end of the map (the barn on the hill; the wheel; three
   smokes).
-- **Height** (elevation.md): no territory is flat by default.
+- **Height** (elevation.md, "Raised areas"): flat by default; one to three raised areas a map, each with a job
+  in the fight, its face toward the camera. Each territory's are listed there.
 - **Something moving that isn't a goblin:** rye in the wind, the wheel, larks, a dog, water over the weir.
 - **A view that pays off:** the thing seen from a scape is somewhere you then stand, and from the end you
   look back over where you walked.

@@ -446,7 +446,7 @@ something, and what happens when they see you. "Behaviour" says whether the gobl
 | **The patrol** | A few walking a loop of the room | Built (layout 4): three on a round of four points | any, more in camps |
 | **Asleep** | Goblins curled in the hay or by a cold fire | Exists (`sleepers`) | stackyard, farmyard, orechamber, glade |
 | **Looting a cart** | A wrecked cart, crates broken open, goblins at it | Exists (resting at a spot) + `cart`, `debris` | track, crossroads, bridge, ford |
-| **Archers on the heights** | Bows up on raised ground | Exists (ledges) | hollow way, woodedge slope, stepped gallery, wallwalk |
+| **Archers on the heights** | Bows up on raised ground | Exists (ledges). Since 2026-11-18, outdoors, a raised area of earth under docs/design/elevation.md's rules (range from the lip, a Rogue climbs); in rock, the old shelf | hollow way, woodedge slope, stepped gallery, wallwalk |
 | **Building an engine** | A half-built ram or throwing engine; goblins at it | New block (engine) and a "working" pose; the **wreck** side task | warcamp, crossroads, minehead |
 | **Wayside shrine** | A small shrine, fouled by the hungry, a candle stub | Piece exists (`shrine`) | track, crossroads, lane, churchyard |
 | **Wrecked cart** | Overturned, burned or not, barrels of oil (a fire trap) | Built; layout 4 spills its oil (a slick from the start) | track, crossroads, bridge, ford, minehead |

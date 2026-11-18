@@ -99,6 +99,40 @@ next thing to lay there). THE RISE keeps its sunken lane, the banks and the top 
 **Next:** a raised area on THE FIELDS where it does a job; the proving hill (`?land=hill`) still has the old slopes, kept
 only because the frame's tests stand on it.
 
+## The sweep: every other map and spec (2026-11-18)
+
+Kyle: "Can we sweep any other maps and designs and move to this new elevation system where / if it makes sense."
+Every map that lays raised ground, and what was done:
+
+| Map | What it had | Now |
+| --- | --- | --- |
+| **The board's job rooms, outdoors** (`shared/terrain.ts`, `shared/roomledge.ts`: fields, villages, woods, the high road, hedged tracks) | A wooden deck or a grey rock slab one level up with a ramp, archers on it, under the old shelf rules | **Moved.** A raised area of earth, its level ground (`kind: 'earth', lv: 1`): a bank with a turf lip and log steps in both views, and every rule above (nobody lands in the bank, the leap, a Rogue climbs, height is range, archers hold the lip, you hit what you click). The same box and ramp in the same place. Look: `?hero=WARRIOR&job=2:3&area=3` |
+| **The board's job rooms, in rock and underground** (mines, the under) | A rock shelf with a ramp | **Left**, on purpose: a turf bank is wrong in a mine. It wants a stone-faced raised area (the same rules, a rock face, the room's own floor on top). Next slice |
+| **The Open Cut's winding gantry** (`shared/cutwinding.ts`, the Instances chat's) | A wooden gantry | **Left.** It is a built thing and reads as one. It could take the rules (range, the leap) without the look; the Instances chat's call |
+| **The town** (`shared/layouttown.ts`) | Three stone levels with steps | **Left.** Already levels-as-ground, built stone, no fights. It gets the leap and the truer aim with everyone else |
+| **Lowfurrow** | Slopes | Done earlier today: THE FIELDS flat, THE RISE its sunken lane |
+| **The proving hill** (`?land=hill`) | The old slopes | **Left** as a fixture: the frame's and the pathing's tests walk its slopes. Not on any board |
+| **Expeditions, the Deep, the raid, the instance arenas** | No raised ground at all | Nothing to move. Whether any of them wants a raised area is each owner's call, by rule 6: only where it does a job |
+
+**What moving the job rooms changed, measured:** four pinned room hashes (the ledge's kind and level are in the
+plan; nothing else in any room moved), and one balance bench: in the one sampled room with a bank, the bot that
+stands still with a wand takes 231 s where it took 202 and is hit about a tenth more, because the two archers on
+the bank reach further and hold their lip. Daggers 120 s, staff 83 s. That is the rule working as asked.
+
+**A back that is not closed.** A routed room's bank can stand out in the open, so its north side is a drop that
+faces away. It is three or four tiles deep and one level high, and it was already so. Left; rule 3 is for what is
+laid by hand.
+
+## The quest territories' raised areas (replaces "The quest territories' height", below)
+
+| Territory | Flat, but for |
+| --- | --- |
+| Lowfurrow Fields | THE RISE's sunken lane (built). THE FIELDS: one low mound by the rick for the stooks' archer, who was to stand on a cart (to lay) |
+| Tollan's Farm | **The yard**, a levelled terrace behind its wall, face to the orchard below: the bank barn's upper door opens onto it. A flight where the cart road comes up, steps at the far corner. MAWL fights on it; whoever holds the wall's lip covers the orchard |
+| Sallow Carr | Its height is water, which the game already has. One raised area: **the main bank at the sluice house**, stone-faced, the biggest den on it, over the causeway you come by |
+| Fennick Ford | **The mill dam**, the race along its top, over the ford: bows on the dam cover the crossing. The town up the far bank is drawn, not walked |
+| The Copperdeep Shafts | Down, by ladders, as screens. In a level: **the stope's benches**, which are the stone-faced raised area the mines want |
+
 ## What Kyle said (2026-11-17)
 
 "Rethink elevation: it's hard to see, and archers are on these pre-fab things. I'd like actual elevation to
@@ -167,7 +201,7 @@ a blade can't get to within a few seconds.
 5. The camera never loses your hero behind a rise.
 6. A friend's name and the way-on arrow sit at the right height.
 
-## The quest territories' height
+## The quest territories' height (history: see "The quest territories' raised areas")
 
 | Territory | Its height |
 | --- | --- |

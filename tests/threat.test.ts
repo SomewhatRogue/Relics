@@ -337,7 +337,11 @@ describe('a single-target kit clears a room comfortably', () => {
     // (210 s since 2026-11-17: goblins path over heights now (sim/pathlevels.ts), and in that same room, which has a
     // rock shelf, the wand bot takes 202 s where it took 184, the daggers 110 where they took 132. The sample's mean
     // moves under two seconds.)
-    const r = clearTimes(sampleRooms(2, 3), ['daggers', 'wand', 'staff'], 210);
+    // (240 s since 2026-11-18: that room's shelf is a raised area under the land's rules now (docs/design/elevation.md):
+    // its two archers reach 1.5 tiles further from the lip and hold it. The wand bot, which stands where it is, is
+    // hit more (5,368 taken where it was under 4,900) and takes 231 s; the daggers take 120, the staff 83. Meant: high
+    // ground is worth having. For the General chat to weigh with the rest of that room.)
+    const r = clearTimes(sampleRooms(2, 3), ['daggers', 'wand', 'staff'], 240);
     expect(r.daggers.unclear + r.wand.unclear + r.staff.unclear).toBe(0);
     expect(r.daggers.mean / r.wand.mean).toBeLessThan(1.15);
     // (Goblins swing sooner since 2026-11-11, which tells more on a knife fighter up close.)

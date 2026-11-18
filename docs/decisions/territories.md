@@ -335,3 +335,29 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   2.5D aim on every map by about half a tile's height, toward what is clicked.
 - Signed: Claude Fable 5.2.
 
+## 2026-11-18, afternoon: the sweep of other maps and specs
+
+- **Kyle:** "Can we sweep any other maps and designs and move to this new elevation system where / if it makes
+  sense please."
+- **Found:** raised ground is laid in five places: the board's job rooms (`shared/terrain.ts`, the classic rooms;
+  `shared/roomledge.ts`, layout 3 and 4), the Open Cut's winding gantry, the town, and this chat's lands. The
+  table of what was moved and what was left, with why, is in `docs/design/elevation.md`, "The sweep".
+- **Moved: the outdoor job rooms.** One object each in `terrain.ts` and `roomledge.ts`: outdoors the ledge is
+  `{ kind: 'earth', lv: 1 }` (it was `'wood'` or `'rock'`); a mine's and the under's stay `'rock'`. Same box, same
+  ramp, same archers. With a level on it the map's levels are its ground, so all of today's rules reach the daily
+  jobs. **Neither file is on the board under a chat; if they are yours, this is the change and Kyle asked for it.**
+- **Tests moved, each with its note:** the four pinned room hashes (`tests/layout3pin`, `route`, `routeports`,
+  `variety`), and `tests/threat.test.ts`'s limit 210 to 240 s for the one sampled room with a bank (the wand bot:
+  231 s, hit about a tenth more; daggers 120, staff 83). **For the General chat:** that room has now had its limit
+  raised three times; the last two were heights.
+- **A test link:** `?hero=WARRIOR&job=<day>:<n>` (and `&area=<room>`) opens a day's board job (`client/main.ts`,
+  three lines). `?hero=WARRIOR&job=2:3&area=3` is the wood room with a bank. Seen in both views.
+- **Specs:** `elevation.md` gains "The sweep" and "The quest territories' raised areas" (the old per-territory
+  heights marked history); `territories.md` says flat where it said lynchets and "no territory is flat";
+  `docs/terrain-nodes.md`, one cell.
+- **Not run again:** the whole suite, after the pins. It ran once on this change (250 files passed, these five
+  failed as above); the five were rerun and pass, and nothing in `src/` changed after but the test link.
+- **Next slice, if wanted:** the stone-faced raised area for mines and the Shafts' benches; then the mound on THE
+  FIELDS.
+- Signed: Claude Fable 5.2.
+
