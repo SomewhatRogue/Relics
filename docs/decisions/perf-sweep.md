@@ -110,3 +110,19 @@ The spec is docs/design/perf-sweep.md. Branch `perf-sweep`. One entry a change, 
 - `scripts/party-online.cjs` (two browsers, a local relay with Redis, both pages on the new build): 25 of 30
   steps pass, the same five failing as on `main` in this container.
 - `scripts/smoke.cjs` fails on `main` itself; noted on the board for its owner.
+
+## 2026-11-18: slice F, two more of the tick's hot spots (built by an Opus 5.5 agent, reviewed by Claude Fable 5.2)
+
+- `sim/enemies.ts` `notice`: the look at each hero stops once the goblin has seen one (nothing in the loop
+  writes anything); a hero with no marks counts as 1 without a list being made; whether a fight is near enough to
+  hear is tried on each axis first against the farthest hearing there is (`heardNear`), the old sum after it.
+- `sim/pathgrid.ts`: the text that says a map's grids are out of date is made again only when one of the numbers it
+  is made of has changed (kept per map); every other call reads the numbers and makes no text.
+- `sim/pairgrid.ts`: each cell's bodies in one flat typed list where it was an array a cell; the same pairs in
+  the same order.
+- Proof: `tests/perfparity.sim.test.ts` hash for hash; the nearby files green; `npm run check` clean.
+- Measured by CPU profile on the 300-goblin map: the whole run 5,644 ms to 4,705 (17% less), `notice` 807 ms to
+  381, `nearPairs` 271 to 183. The box was too busy that hour for tick timings to show it on their own (they
+  ran 10% either way), so the profile is the number to trust. CI's run of the whole suite stands for the full
+  local run on this push.
+- Next in the profile: `field` in `sim/pathing.ts` (the search itself), `stepAll` in `sim/room.ts`.

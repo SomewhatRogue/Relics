@@ -79,9 +79,37 @@ function build(m: GameMap, size: number, sig: string): Grid {
   return g;
 }
 
+/** What the room's signature text is made of, and that text, as last worked out for each map. */
+const sigs = new WeakMap<GameMap, { vals: unknown[]; sig: string }>();
+const vals: unknown[] = [];
+
+/**
+ * The text that says when a map's grids are out of date: a block ruined or decked, things added, water
+ * moved, the ledges. Worked out again only when one of the values it is made of has changed (equal values
+ * make equal text), so most calls read a few dozen numbers and make no text.
+ */
+function signature(m: GameMap): string {
+  let n = 0, decks = 0, wet = 0;
+  for (const b of m.blocks) if (b.ruined || b.deck) decks++;
+  for (const w of m.water ?? []) wet = wet + w.x + w.y + w.w + w.h;
+  vals[n++] = decks, vals[n++] = m.blocks.length, vals[n++] = m.rounds.length, vals[n++] = m.water?.length ?? 0, vals[n++] = wet, vals[n++] = m.npcs?.length ?? 0;
+  for (const l of m.ledges ?? []) {
+    vals[n++] = l.ramps.length, vals[n++] = l.x, vals[n++] = l.y, vals[n++] = l.w, vals[n++] = l.h, vals[n++] = l.lv ?? 1;
+    for (const q of l.ramps) vals[n++] = q.x, vals[n++] = q.y, vals[n++] = q.w, vals[n++] = q.h;
+  }
+  vals.length = n;
+  const had = sigs.get(m);
+  let same = !!had && had.vals.length === n;
+  for (let i = 0; same && i < n; i++) same = had!.vals[i] === vals[i];
+  if (same) return had!.sig;
+  const sig = `${m.blocks.filter((b) => b.ruined || b.deck).length}.${m.blocks.length}.${m.rounds.length}.${m.water?.length ?? 0}.${m.water?.reduce((s, w) => s + w.x + w.y + w.w + w.h, 0) ?? 0}.${m.npcs?.length ?? 0}.${m.ledges?.map((l) => `${l.x},${l.y},${l.w},${l.h},${l.lv ?? 1},${l.ramps.map((q) => `${q.x},${q.y},${q.w},${q.h}`)}`).join(';') ?? ''}`;
+  sigs.set(m, { vals: vals.slice(), sig });
+  return sig;
+}
+
 /** The grid for a body of radius r on this map (collide() works on the current map, which this is). */
 export function gridOf(m: GameMap, r: number): Grid {
-  const sig = `${m.blocks.filter((b) => b.ruined || b.deck).length}.${m.blocks.length}.${m.rounds.length}.${m.water?.length ?? 0}.${m.water?.reduce((s, w) => s + w.x + w.y + w.w + w.h, 0) ?? 0}.${m.npcs?.length ?? 0}.${m.ledges?.map((l) => `${l.x},${l.y},${l.w},${l.h},${l.lv ?? 1},${l.ramps.map((q) => `${q.x},${q.y},${q.w},${q.h}`)}`).join(';') ?? ''}`;
+  const sig = signature(m);
   const size = sizeOf(r);
   let mine = grids.get(m);
   if (!mine) grids.set(m, (mine = new Map()));

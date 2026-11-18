@@ -397,6 +397,8 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
   let seen = false;
   const m = currentMap(), theme = m.theme;
   for (const h of heroes) {
+    // (Nothing in this loop writes anything, so once seen the rest can't change the answer.)
+    if (seen) break;
     if (h.act === 'down' || h.id === 'squire') continue;
     const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy);
     if (!visible(h, d, now) || vanished(h, now) || smokeBlind(e, d, now)) continue;
@@ -409,9 +411,12 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     // Fenmere's mist hides you too, the thicker it lies where you stand (shared/fenmist.ts).
     const mist = m.fen ? mistSight(m, h.x, h.y, now) : 1;
     // (Cursed in the Deep to be seen sooner: shared/deepmarks.ts.)
-    if (d < sight * noticeFor(theme) * mist * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) * (1 + markSum(h.marks, 'seen')) + seenFrom(h) * glowIn(theme)) seen = true;
+    // (No marks sum to 0, so 1 + it is 1: skipped without making an empty list each time.)
+    if (d < sight * noticeFor(theme) * mist * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) * (h.marks?.length ? 1 + markSum(h.marks, 'seen') : 1) + seenFrom(h) * glowIn(theme)) seen = true;
   }
-  for (const o of noisy(others, now)) if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(o.x - e.x, o.y - e.y) < hearFrom(e, o)) seen = true;
+  // (Always asked: its list is made by the tick's first asking, so skipping it could make it later.)
+  const loud = noisy(others, now);
+  if (!seen) seen = heardNear(e, loud, now);
   if (!seen) return false;
   // The shout wakes its own pack (sim/packs.ts): the next fight waits its turn.
   for (const o of others) if (o.alert === false && samePack(o, e) && Math.hypot(o.x - e.x, o.y - e.y) < ALERT.shout) o.alert = true;
@@ -419,6 +424,19 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
   e.cooldown = Math.max(e.cooldown, 0.6);
   ev.push({ k: 'spotted', x: e.x, y: e.y });
   return true;
+}
+
+/** Is a fight near enough to hear? Each axis is tested first against the farthest hearing: Math.hypot is never less than either. */
+const PACK_A = { pack: 0 }, PACK_B = { pack: 1 };
+function heardNear(e: Enemy, list: Enemy[], now: number): boolean {
+  const ex = e.x, ey = e.y, far = Math.max(hearFrom(PACK_A, PACK_A), hearFrom(PACK_A, PACK_B));
+  for (const o of list) {
+    const dx = o.x - ex, dy = o.y - ey;
+    if (dx >= far || -dx >= far || dy >= far || -dy >= far) continue;
+    const r = hearFrom(e, o);
+    if (o !== e && o.alert && (isDead(o) || o.hitAt > now - 0.2) && Math.hypot(dx, dy) < r) return true;
+  }
+  return false;
 }
 
 /**

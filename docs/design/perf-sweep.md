@@ -317,6 +317,7 @@ Scripts used: `scripts/bigmap/swarm.ts` (existing), and three new ones kept in `
 | C, drawing | the wolf sprite leak gone (in a browser profile `drawWolf` 2.45 ms a frame to 0.63, no canvas made); doorsteps 0.60 ms a frame to 0.26 in town; the HUD's own writes only on change; one matrix walk for four passes | recorded draw calls equal; no page errors |
 | D, the second wire format | bytes on the wire: an ordinary room 15.2 KB/s to 11.7 (23% less), a deep dive 21.6 to 15.7 (27%), a swarm to three friends 189 to 158 (17%); only between pages that both say `v: 2` | two real guests, one fed each format, the same room after every patch; mixed parties; the first format unchanged to the byte |
 | E, caching | `/assets/*` immutable | to read on the preview deployment |
+| F, the fight again (2026-11-18) | by CPU profile on the 300-goblin map: 17% less for the whole run, `notice` 807 ms to 381, `nearPairs` 271 to 183 | the same 13 fights hash for hash |
 
 Whole suite on the merged branch: 250 files, 2,106 tests, green. `npm run check` clean.
 
@@ -335,6 +336,6 @@ downloaded the script again; it only asks again.
 **Next, in order of worth.**
 1. The whole job every 2 s (N5): still the largest stream to the friend first in line.
 2. The hound and other nested objects in patches: fields one by one.
-3. `notice` in `sim/enemies.ts`: 13.6% of the big map's tick.
+3. `field` in `sim/pathing.ts` and `stepAll` in `sim/room.ts`, now the top of the big map's profile (`notice` was done in slice F).
 4. The figure atlas upload and the shadow map, measured on a real phone (`?perf=1`).
 5. The hub files, in a quiet hour.
