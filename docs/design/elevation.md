@@ -46,9 +46,24 @@ all built the same morning:
    comes off the lip is set down clear of it, from the one number the face is drawn with (`FACE_FOOT`,
    `shared/arena.ts`).
 8. **Coming off is seen.** The body is drawn hopping (a small rise, the fall), and dust is kicked up where its feet
-   land (`client/three/hop.ts`, the `land` event's `how`). 2.5D only so far.
+   land (`client/three/hop.ts`, the `land` event's `how`), in both views.
 9. **A Rogue climbs.** A Rogue who keeps walking into an earth face for `HEIGHT.climb` seconds (0.4) goes up it and
    stands on the lip. No button. Everyone else goes round by the steps (`sim/climb.ts`).
+
+10. **Height is range** (Kyle, 2026-11-18: "if you're up, you get a range bonus... so that there's benefits to
+    taking higher zones"; `sim/highrange.ts`, numbers in `HEIGHT`).
+    - **Down:** a shot loosed from a height reaches 1.5 tiles further for each level it looks down, but only from
+      near the lip: lower ground within 2.5 tiles ahead of the one shooting. Stood back from the edge, nothing.
+    - **Up:** each level the mark stands above the one shooting counts as 1.5 tiles more to cover. From too far
+      the shot passes under them and OUT OF REACH shows.
+    - The same for a hero's shots and a goblin archer's. A goblin archer on a height comes to the lip and holds
+      it; it never steps off after you. A goblin archer's reach is never cut below 3 tiles.
+    - On the knoll (two levels): a goblin archer on the lip reaches 10.5 tiles instead of 7.5; from below it must
+      come within 4.5. On the lane's banks (one level): 9 and 6.
+    - Not yet touched by it: the javelin, the hook, a Mage's held spells, a mace's smite, thrown flasks.
+11. **The flat view shows all of it** ("that's almost accessibility"): a land's raised area is an earth bank with a
+    turf lip and leaning sides, its ways up are log steps between posts, and bodies hop there too
+    (`client/levelpaint.ts`, `client/scene.ts`).
 
 **The sunken lane is the one other shape.** Kyle, of THE RISE's lane: it "reads really well with the edge and the
 steps on the sides." Two banks one level up either side of a road, faces to the lane and at their south ends, log
@@ -68,8 +83,7 @@ south face and up the east end, three goblins and cover from the bows in the fie
 **Lowfurrow, as built 2026-11-18:** THE FIELDS is flat (no raised area yet: one for the stooks' archer is the
 next thing to lay there). THE RISE keeps its sunken lane, the banks and the top one level up, and nothing else.
 
-**Next:** a raised area on THE FIELDS where it does a job; the flat view draws a land's raised area as town masonry
-today and wants the same earth face and the hop; the proving hill (`?land=hill`) still has the old slopes, kept
+**Next:** a raised area on THE FIELDS where it does a job; the proving hill (`?land=hill`) still has the old slopes, kept
 only because the frame's tests stand on it.
 
 ## What Kyle said (2026-11-17)

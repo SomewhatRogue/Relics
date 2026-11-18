@@ -233,6 +233,10 @@ export class Fx {
       case 'yank':
         this.say(x, y - 24, 'YANK', '#9fe8ff');
         break;
+      case 'short':
+        // A shot loosed up at someone on a height from too far (sim/highrange.ts).
+        this.say(x, y - 24, 'OUT OF REACH', '#b8b2c4');
+        break;
       case 'land':
         // Off a height, or a Rogue up a face: the body is drawn hopping (three/hop.ts), so the dust waits for its feet.
         if (ev.how) {

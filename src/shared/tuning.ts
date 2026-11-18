@@ -309,8 +309,10 @@ export const VARIANTS = {
  */
 export const WOOD_EASE = { windup: 1.5, dmg: 0.7, stoker: 1.25, heal: true, mends: 0.25 };
 
-// (`climb`: seconds a Rogue walks into an earth face before going up it: sim/climb.ts.)
-export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8, climb: 0.4 };
+// (`climb`: seconds a Rogue walks into an earth face before going up it: sim/climb.ts. `reach`: tiles a shot gains
+// for each level it looks down from a lip, and loses for each level it is loosed up; `edge`: how near the lip the
+// one shooting must stand for the gain; `least`: a goblin archer's reach is never cut below this: sim/highrange.ts.)
+export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8, climb: 0.4, reach: 1.5, edge: 2.5, least: 3 };
 
 export const SWING_DUMMY = {
   every: 2.6,

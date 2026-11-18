@@ -973,6 +973,8 @@ export type FightEvent =
   | { k: 'grasp'; x: number; y: number; dx: number; dy: number; r: number; arc: number; n: number }
   | { k: 'grasped'; x: number; y: number; x2: number; y2: number }
   | { k: 'weapon'; x: number; y: number; name: string }
+  // A shot loosed up at someone on a height from too far: it fell short of them (sim/highrange.ts).
+  | { k: 'short'; x: number; y: number }
   // (`how` on a 'land': off a height onto the ground below, or a Rogue up a face: sim/room.ts `landings`, sim/climb.ts.)
   | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number; how?: 'fall' | 'climb' }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }

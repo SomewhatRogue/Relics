@@ -35,6 +35,7 @@ import { impacts } from './impacts';
 import { stepSleds } from './iceslide';
 import { release, stepCarry, tryGrab } from './grab';
 import { stepClimb } from './climb';
+import { looksDown } from './highrange';
 import { newMinis, stepMinis, talkMini, type MiniState } from './minis';
 import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
@@ -706,7 +707,8 @@ export class ArenaRoom {
       else this.bolts.push(shoot(aimed(h, s.shot, this.intents.get(h.id), w.now, w.ev), s, el, mult, traitsOf(h)));
       if (!fed) w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el, ...(primed ? { primed } : {}) });
     }
-    if (s.shot && land) for (const b of this.bolts.slice(bolts)) b.hz = h.z ?? 0;
+    // (And from near a lip it flies further for each level it looks down: sim/highrange.ts.)
+    if (s.shot && land) for (const b of this.bolts.slice(bolts)) (b.hz = h.z ?? 0), (b.range += HEIGHT.reach * looksDown(this.map, h, b.dx, b.dy));
     // The Jealous Rod: a charged spell jumps to every goblin near what it hits.
     if (full && wears(h, 'jealous')) for (const b of this.bolts.slice(bolts)) b.chain = true;
     // WIDE BURST: a Mage's bursts reach further.

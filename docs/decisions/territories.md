@@ -268,3 +268,28 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   the old slopes.
 - Signed: Claude Fable 5.2.
 
+## 2026-11-18, later: height is range; the flat view catches up
+
+- **Kyle:** "I'd like us to fix the flat view sort of stuff because that's almost accessibility. I also want that if
+  there's ranged units above a hill firing down onto it, they almost get like a range increase or range bonus, but
+  have to be kind of closer to the edge. Whereas if you're firing up, you almost get a range decrease. Like it
+  takes that as extra space... so that there's benefits to taking higher zones."
+- **Height is range** (`sim/highrange.ts`, new; `HEIGHT.reach` 1.5, `edge` 2.5, `least` 3 in `shared/tuning.ts`).
+  My reading of "closer to the edge": the gain is only for a shot loosed with lower ground within 2.5 tiles ahead.
+  Tiles a level, not a share of the range, so a short bow and a long one gain and lose the same.
+  - A hero's shot (`sim/room.ts` where it stamps the shot's level; `sim/bolts.ts` where it meets a goblin): further
+    from a lip; loosed up from too far it passes under them, once, with a `short` event (`sim/types.ts`).
+  - A goblin archer (`sim/enemies.ts`, its three lines): the same shift on its reach and its telegraph's length,
+    and on a height it walks to the lip and stops. Off a land nothing changes: the shift is 0 and the old lines run.
+  - **For the classes and balance chats:** this is a fight rule for every ranged kit on a land. The javelin, the
+    hook, a Mage's holds, the smite and thrown flasks do not feel it yet.
+- **OUT OF REACH** over a goblin a shot fell short of (`client/fx.ts`). Not sent to the lore keeper or the line
+  editor: two words already on screen ("OUT", "NOTHING IN REACH").
+- **The flat view** (`client/levelpaint.ts`, `client/scene.ts`: **the Graphics sweep chat's files**, changed at
+  Kyle's word here). A land's raised area was painted as the town's grey masonry with stone steps. Now an earth
+  bank with a turf lip and a shadow at its foot, its sides leaning out by the rules' own `FACE_FOOT`, log steps
+  with a post either side of their foot. Heroes, goblins and the freed hop there as in 2.5D. Two things it also
+  put right on a land: a goblin on level 2 was drawn as if on a roof, and the freed were not lifted to their level.
+- Tests: `tests/highrange.test.ts` (6, on the knoll). Pictures taken of the flat knoll and the flat Rise.
+- Signed: Claude Fable 5.2.
+
