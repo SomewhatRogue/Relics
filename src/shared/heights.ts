@@ -65,3 +65,17 @@ export function shotLv(m: GameMap, b: { x: number; y: number; hz?: number; trave
   return Math.max(groundLv(m, b.x, b.y), (b.hz ?? 0) * left);
 }
 
+/**
+ * The mouse's aim put on the ground. The views read the pointer as if it were on the hero's own level (so a goblin
+ * beside you on a height is hit where you click it). A spot on another level is drawn higher or lower on the screen
+ * than its place on the map, by `perLevel` tiles north for each level up, so the aim (tiles from the hero) is moved
+ * back onto the ground the pointer is really over. Maps whose levels are the ground only.
+ */
+export function aimOnGround(m: GameMap, h: { x: number; y: number; z?: number }, ax: number, ay: number, perLevel: number): [number, number] {
+  if (!m.ledges?.some((l) => l.lv !== undefined) || (!ax && !ay)) return [ax, ay];
+  const z = bodyLv(m, h.x, h.y, h.z);
+  let y = ay;
+  for (let i = 0; i < 3; i++) y = ay + (groundLv(m, h.x + ax, h.y + y) - z) * perLevel;
+  return [ax, y];
+}
+

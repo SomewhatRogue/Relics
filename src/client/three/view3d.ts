@@ -23,7 +23,8 @@ import { Buildings } from './buildings3d';
 import { Cam, FAR, NEAR, PITCH } from './camera3d';
 import { Fires } from './fire3d';
 import { burningAt } from '../../shared/blaze';
-import { buildGround, type Ground } from './ground';
+import { buildGround, LEDGE_H, type Ground } from './ground';
+import { bodyLv } from '../../shared/heights';
 import { disposeInside, insideKit } from './insidekit';
 import { townInside } from './insidedress';
 import { lampsNow } from './lamps3d';
@@ -62,6 +63,9 @@ import { drawChalkMarks } from '../chalkdraw';
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
 const ZOOM = { tall: 0.8, wide: 1 };
 
+/** How far above its feet the middle of a body is (world units): the mouse's aim is measured from there. */
+const AIM_UP = 0.5;
+
 export class View3D {
   readonly canvas: HTMLCanvasElement;
   private gl: THREE.WebGLRenderer;
@@ -97,6 +101,8 @@ export class View3D {
   /** In town (the new look zooms closer there: streetkit.ts `streetScale`). */
   private town = false;
   private heroAt: [number, number] | null = null;
+  /** How high my hero stands (world units): the level under them, on a map with raised ground. */
+  private heroUp = 0;
   private calls = 0;
   private tris = 0;
 
@@ -174,10 +180,18 @@ export class View3D {
     sc.updateProjectionMatrix();
   }
 
+  // (AIM_UP, below: how far above their feet a body's middle is, for the mouse's aim.)
+  /** Tiles further up the screen a spot is drawn for each level it stands above another (views.ts levelShift). */
+  readonly levelShift = LEDGE_H / Math.tan(PITCH);
+
   /** My hero on screen (CSS pixels), and CSS pixels per tile across and down the floor (for aiming with the mouse). */
   heroScreen(): [number, number, number, number] | null {
     if (!this.heroAt) return null;
-    const [x, y] = this.view.px(this.heroAt[0], 0, this.heroAt[1]), k = this.S / this.dpr, ppu = this.view.ppu;
+    // (At the height they stand at: on a raised level the hero is drawn that much higher, and so is whoever is up
+    // there with them, so a click on a goblin beside you aims at it. Taken at level 0 it aimed north of it.)
+    // And at the middle of their body, not their feet, as the flat view does (scene.ts, 8 pixels up): you click on a
+    // goblin's body, and measured from the hero's feet that aimed north of it too.
+    const [x, y] = this.view.px(this.heroAt[0], this.heroUp + AIM_UP, this.heroAt[1]), k = this.S / this.dpr, ppu = this.view.ppu;
     return [x * k, y * k, ppu * k, ppu * Math.sin(PITCH) * k];
   }
 
@@ -201,6 +215,7 @@ export class View3D {
     if (me) {
       const [hx, hy] = lerp('h:' + me.id, me.x, me.y), portrait = this.view.H > this.view.W * 1.2;
       this.heroAt = [hx, hy];
+      this.heroUp = bodyLv(room.map, hx, hy, me.z) * LEDGE_H;
       // The new look's test street: the see-through hole round your hero in a building that hides them (streetkit.ts).
       if (STREET) {
         const [sx, sy] = this.view.px(hx, 0.9, hy);
