@@ -9,12 +9,13 @@
 import { PLACES, payFor, type Job } from './jobs.js';
 import type { RoomPlan } from './terrain.js';
 import { hillPlan } from './hillmap.js';
+import { knollPlan } from './knollmap.js';
 import { fieldsPlan } from './lowfurrowfields.js';
 import { risePlan } from './lowfurrowrise.js';
 
-/** `hill`: the proving hill, a small test map (shared/hillmap.ts). */
-export type LandId = 'lowfurrow' | 'hill';
-export const LANDS: LandId[] = ['lowfurrow', 'hill'];
+/** `hill`: the proving hill, a small test map (shared/hillmap.ts). `knoll`: the raised-area test map (shared/knollmap.ts). */
+export type LandId = 'lowfurrow' | 'hill' | 'knoll';
+export const LANDS: LandId[] = ['lowfurrow', 'hill', 'knoll'];
 /** Tuning for every territory. */
 export const TERR = { wake: 15, doze: 19, more: { hp: 0.3, harm: 0.15 }, gate: 3.2 };
 /** A zone or a scape: its box on the map and the stretch it belongs to. */
@@ -22,8 +23,8 @@ export interface TerrZone { name: string; kind: 'zone' | 'scape'; x: number; y: 
 export interface TerrPlan extends RoomPlan { zones: TerrZone[] }
 
 /** Each territory's maps, in the order they're walked. */
-const PLANS: Record<LandId, ((job: Job) => TerrPlan)[]> = { lowfurrow: [fieldsPlan, risePlan], hill: [hillPlan] };
-const NAMES: Record<LandId, string> = { lowfurrow: 'Lowfurrow Fields', hill: 'Lowfurrow Fields' };
+const PLANS: Record<LandId, ((job: Job) => TerrPlan)[]> = { lowfurrow: [fieldsPlan, risePlan], hill: [hillPlan], knoll: [knollPlan] };
+const NAMES: Record<LandId, string> = { lowfurrow: 'Lowfurrow Fields', hill: 'Lowfurrow Fields', knoll: 'Lowfurrow Fields' };
 
 /** How many maps a territory is. */
 export const mapsOf = (land: LandId) => PLANS[land].length;

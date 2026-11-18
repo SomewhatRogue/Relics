@@ -1,7 +1,56 @@
 # Elevation: the land has height, and you can read it
 
-Spec, 2026-11-17 (Kyle and Claude Fable 5.2). **Steps 1 and 2 built the same day** (the log). Built first inside the territories
+Spec, 2026-11-17 (Kyle and Claude Fable 5.2). **Steps 1 and 2 built the same day** (the log). **Then narrowed to raised areas the same night: read that section first.** Built first inside the territories
 (docs/design/territories.md), then carried back to the board's rooms. Log: `docs/decisions/territories.md`.
+
+## Raised areas: what replaced the rethink (2026-11-17, late)
+
+**This section is the rule now. Where the sections below disagree with it, they are history.**
+
+Kyle, having played Lowfurrow's slopes: "the elevation doesn't read as elevation at all. It also doesn't really add
+anything to the game that much. We need to do research into how other games like this do elevation and it might
+just be some raised areas or something." He agreed the change below the same evening.
+
+**What the research said** (the sources are in the log):
+
+- A slope seen from above is close to invisible. The rethink's wide grass slopes, walked up anywhere, were the one
+  kind of height this camera cannot show.
+- Games in this view show height as a stacked layer with a wall face toward the camera (A Link to the Past, Stardew
+  Valley). An edge that faces away from the camera is hard to judge, so they avoid it.
+- Most ground is flat and height is rare. Ledges drop down the screen or sideways, mostly south. The way up is a
+  small stair.
+- A ledge is often a one-way shortcut: off it anywhere, back up only by the stair.
+- Hades gets its variety from room shape and hazards and does not use height as a mechanic. CrossCode went all in
+  on layered height, and its makers and players both say it is hard to read.
+- Having to stop and click to climb annoys people (Diablo 4's ladders and ropes).
+
+**The rules:**
+
+1. **Land is flat by default.** No lynchets, no land-wide levels, no slope along a whole edge. A bank or a terrace
+   that is only there for the look is paint: a band of colour, a line of turf.
+2. **A raised area is a set piece.** One box, flat on top, **two levels high** (a face a tile and a half tall), drawn
+   with a tall earth or stone face, a lit lip, a dark foot and a shadow on the ground below it.
+3. **Higher ground is always up the screen.** Its face is to the south, and to the east or west where a side is
+   open. Its back runs to the map's edge or is grown over (a hedge across the top, a copse behind), so nobody ever
+   stands on a drop that faces away from the camera.
+4. **One or two narrow ways up**, three tiles wide at most, drawn as log steps between two posts so they are seen
+   from across the field. Walking only: no button, no climb.
+5. **Off it anywhere.** You can step off the lip and land below. It is a way down, never a way up.
+6. **Each one has a job in the fight**, or it is not built: an archer's perch you must go round to reach, a
+   chokepoint, a shortcut down, a lookout with a chest or a cage. **Two or three a map at most.**
+
+**What stays from the rethink:** levels in the rules (`Ledge.lv`), `map.settle`, level-aware pathing (round a face
+from below, off it from above), the fight's level tests (`sim/afoot.ts`), the shot from above, the 2.5D drawing of
+a face (`client/three/landledges.ts`). What goes: slopes as the main way of showing height, heights carried
+through a whole territory, the "8 tiles to a way up" rule (a raised area is small enough not to need it).
+
+**Proved on the knoll** (`shared/knollmap.ts`, `?hero=WARRIOR&land=knoll`, `tests/knoll.test.ts`): a flat field, one
+raised area across its north with two archers on its lip, a brute, the cage and a chest on top, log steps up the
+south face and up the east end, three goblins and cover from the bows in the field below.
+
+**Next:** Kyle looks at the knoll. Then Lowfurrow's two maps lose their slopes and banks (the lane becomes a lane
+between hedges and walls) and get one or two raised areas each, where they do a job. The flat view draws a land's
+raised area as town masonry today; it wants the same earth face.
 
 ## What Kyle said (2026-11-17)
 

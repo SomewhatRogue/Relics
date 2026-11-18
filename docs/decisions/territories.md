@@ -216,3 +216,27 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   square-edged; the stubble is one flat yellow; the rick is a pale slab. Next pass with the props above.
 - Signed: Claude Fable 5.2.
 
+## 2026-11-17, night: elevation narrowed to raised areas
+
+- **Kyle:** "the elevation doesn't read as elevation at all. It also doesn't really add anything to the game that
+  much. We need to do research into how other games like this do elevation and it might just be some raised areas
+  or something." Then, to the change proposed: "aligned with what you'd change. go ahead."
+- **Research, in short:** slopes are close to invisible from above; this view shows height as a wall face toward
+  the camera; most ground is flat; ledges drop south and are often one-way; Hades uses room shape and hazards, not
+  height; CrossCode's layered height is hard to read by its makers' own account; clicking to climb annoys.
+  Sources: CrossCode's "Why do we use auto jump" post (moddb.com), Kotaku on Hades' level design thread
+  (2020), "How do 2D top-down games convey depth?" (jayorten.github.io), "Pixel-Art Ledges, Stairs and Bridges in
+  a Tile World" (blakecrosley.com), the Zelda Wiki's Autojump page, Dexerto on Diablo 4's traversal.
+- **The rules are in `docs/design/elevation.md`, "Raised areas"**, which now leads that spec: flat land, a raised
+  area as a set piece two levels high with its face toward the camera, its back closed, one or two narrow ways up
+  drawn as log steps, off it anywhere, a job in the fight, two or three a map.
+- **Built: the knoll** (`shared/knollmap.ts`, new; `?hero=WARRIOR&land=knoll`; `tests/knoll.test.ts`, 8 tests): a
+  third land in `shared/territory.ts`, a test map like the proving hill.
+- **A narrow ramp is drawn as steps in 2.5D** (`client/three/landledges.ts`: trodden earth, a log riser a step, a
+  post either side of its foot; any ramp 3.2 tiles wide or less, so the proving hill's sheep tracks too).
+- **Not changed yet, waiting on Kyle's look at the knoll:** Lowfurrow's two maps still have their slopes and banks.
+  The flat view still draws a land's raised area as grey town masonry.
+- **Seen, not chased:** the look script's phone run logs one 404 for a resource on every land; the laptop run
+  logs none.
+- Signed: Claude Fable 5.2.
+

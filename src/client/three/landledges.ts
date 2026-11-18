@@ -21,6 +21,8 @@ const ONE: C = [1, 1, 1];
 // The bank's earth, stones and turf, through the world's grade (../darkgold.ts).
 const EARTH = graded(0x6e5a44, 'floor'), FOOT = graded(0x2a2119, 'floor'), STONE = graded(0x5e5a56, 'wall'), CORE = 0x1c1915;
 const TURF = graded(0x34421f, 'floor'), LIT = graded(0x56683a, 'floor'), STRAW = graded(0x7a6c40, 'floor');
+// Steps: the trodden tread, the log risers, the pale cut top of a post. A ramp this narrow or narrower is steps.
+const TROD = graded(0x5a4a36, 'floor'), LOG = graded(0x4a3824, 'wall'), LOG2 = graded(0x3a2c1c, 'wall'), POST_CAP = graded(0xa89468, 'wall'), STEPS_MAX = 3.2;
 /** How far a face's foot leans out from its top (tiles), so a bank seen side-on still shows; its shadow's reach. */
 const BAT = 0.55, SHADOW = 1.8;
 
@@ -109,6 +111,9 @@ export function landLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THRE
     };
     const corners = (lift: number) => [at(0, 0, lift), at(1, 0, lift), at(1, 1, lift), at(0, 1, lift)];
     ground.quad(corners(0), null, UP);
+    // A narrow way up a raised area (elevation.md, "Raised areas") is steps, not a grass slope: trodden earth, a
+    // log riser to each step, a post either side of its foot. It has to be seen from across the field.
+    if ((run.alongY ? q.w : q.h) <= STEPS_MAX) return void steps(q, run, at, corners);
     // Darker than the flat above and below it, darkest at its foot.
     const foot = mul(tint(run.lo), 0.62), brow = mul(tint(run.hi), 0.84);
     shade.quad(corners(0.002), [foot, foot, brow, brow], UP);
@@ -136,6 +141,28 @@ export function landLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THRE
     for (let i = Math.round(len * 1.2); i > 0; i--) {
       const p = at(r.next(), 0.88 + r.next() * 0.1);
       B.b(p[0], p[1] - 0.02, p[2], 0.07, 0.1 + r.next() * 0.08, 0.07, jit(LIT, 0.15, r), r.next() * 3);
+    }
+  }
+
+  /** Steps up a narrow ramp: the tread trodden to bare earth, logs across it, its sides closed, posts at its foot. */
+  function steps(q: Area, run: ReturnType<typeof runOf>, at: (s: number, t: number, lift?: number) => V, corners: (lift: number) => V[]): void {
+    const tread = rgb(TROD), low = mul(rgb(TROD), 0.7), wide = run.alongY ? q.w : q.h, deep = run.alongY ? q.h : q.w;
+    earth.quad(corners(0.01), [low, low, tread, tread], UP);
+    for (const s of [0, 1]) {
+      const a = at(s, 0), b = at(s, 1), lo = (p: V): V => [p[0], 0, p[2]], f: V = run.alongY ? [s ? 1 : -1, 0, 0] : [0, 0, s ? 1 : -1];
+      earth.quad([lo(a), a, b, lo(b)], [rgb(FOOT), rgb(EARTH), rgb(EARTH), rgb(FOOT)], f);
+      const past = (p: V): V => { const x = p[0] + f[0] * 0.03, z = p[2] + f[2] * 0.03; return [p[0], Math.max(p[1], groundLv(m, x, z) * H), p[2]]; };
+      const pa = past(a), pb = past(b);
+      if (pa[1] - a[1] > 0.02 || pb[1] - b[1] > 0.02) earth.quad([a, pa, pb, b], [rgb(FOOT), rgb(EARTH), rgb(EARTH), rgb(FOOT)], [-f[0], 0, -f[2]]);
+    }
+    const n = Math.max(3, Math.round(deep / 0.42));
+    for (let i = 0; i < n; i++) {
+      const p = at(0.5, (i + 0.5) / n), c = jit(i % 2 ? LOG : LOG2, 0.06, r);
+      B.b(p[0], p[1] - 0.05, p[2], run.alongY ? wide * 0.98 : 0.17, 0.15, run.alongY ? 0.17 : wide * 0.98, c);
+    }
+    for (const s of [-0.06, 1.06]) {
+      const p = at(s, 0);
+      B.b(p[0], p[1], p[2], 0.2, 1.05, 0.2, jit(LOG2, 0.08, r)), B.b(p[0], p[1] + 1.05, p[2], 0.26, 0.08, 0.26, POST_CAP);
     }
   }
 
