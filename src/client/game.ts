@@ -1375,10 +1375,17 @@ export class Game {
     const pets = petSpots(this.mode === 'town' ? this.outside?.door.door : null, h, ownPetOk(h, this.room, this.mode));
     for (const s of pets) if (!s.last) all.push({ x: s.x, y: s.y, label: s.label, pet: s.pet, reach: s.reach });
     for (const c of this.room.chests) if (c.state === 'shut') all.push({ x: c.x, y: c.y, label: c.chained ? 'A CHAINED CHEST' : 'OPEN THE CHEST', chest: c.id });
+    // Another player is offered for a trade only when there's nothing else here to use: someone standing at a stall
+    // never takes the vendor's place (Kyle, 2026-11-17: "trading is annoying a bit if another player is in front of a
+    // merchant"). So the people, doors and spots first, then the players.
     let best: Near | null = null, bd = SPOT_REACH;
-    for (const n of all) {
-      const d = Math.hypot(n.x - h.x, n.y - h.y) * (n.door ? 1.4 : 1) - (n.reach ?? 0);
-      if (d <= bd) (bd = d), (best = n);
+    for (const players of [false, true]) {
+      if (best) break;
+      for (const n of all) {
+        if (!!n.trade !== players) continue;
+        const d = Math.hypot(n.x - h.x, n.y - h.y) * (n.door ? 1.4 : 1) - (n.reach ?? 0);
+        if (d <= bd) (bd = d), (best = n);
+      }
     }
     // Your own hound, at heel: only when there's nothing else here to use.
     for (const s of pets) if (!best && s.last && Math.hypot(s.x - h.x, s.y - h.y) - s.reach <= SPOT_REACH) best = { label: s.label, pet: s.pet };

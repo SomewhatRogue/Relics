@@ -494,3 +494,16 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   phone. In the flat view a vendor still stands over the middle of their stall's name, as Tobin always has.
 - Not done: a shop building for either. Say if the stalls are not enough.
   (Claude Fable 5.2)
+
+## 2026-11-17: a player standing at a stall no longer takes the vendor's place
+
+- Kyle: "trading is annoying a bit if another player is in front of a merchant." The game talked to whatever was
+  nearest, and another player counted the same as a vendor, so someone standing at a stall took the tap ("TRADE:
+  their name"). Offered three ways; Kyle picked the first: people, doors and spots always win, and a player is
+  offered for a trade only when nothing else is in reach (as a Ranger's own hound already is).
+- One change, `Game.near` in game.ts (a shared file): two passes over the same list, players second.
+- Checked in the local build with a stand-in player: between you and Tobin, and on top of you at his stall, Tobin
+  answers; alone on the square, "TRADE: FRIEND"; nobody about, nothing. tsc clean; the five test files that use
+  `near` pass. Not checked with two real players.
+- Cost of the rule: to trade with a friend who stands at a stall, both step a couple of paces away.
+  (Claude Fable 5.2)
