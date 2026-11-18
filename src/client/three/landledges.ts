@@ -24,6 +24,12 @@ const TURF = graded(0x34421f, 'floor'), LIT = graded(0x56683a, 'floor'), STRAW =
 // Steps: the trodden tread, the log risers, the pale cut top of a post. A ramp this narrow or narrower is steps
 // (a way up a raised area, a flight across a lane); a wider one is a grass slope.
 const TROD = graded(0x5a4a36, 'floor'), LOG = graded(0x4a3824, 'wall'), LOG2 = graded(0x3a2c1c, 'wall'), POST_CAP = graded(0xa89468, 'wall'), STEPS_MAX = 6;
+/** What a raised area is made of: a bank of earth under turf, or (a mine's, the under's: `kind: 'crag'`) hewn rock. */
+interface Pal { earth: number; foot: number; lip: number; lip2: number; stone: number; trod: number; riser: number; riser2: number; wood: boolean }
+const SOIL: Pal = { earth: EARTH, foot: FOOT, lip: LIT, lip2: TURF, stone: STONE, trod: TROD, riser: LOG, riser2: LOG2, wood: true };
+const ROCK: Pal = { earth: graded(0x58545e, 'wall'), foot: graded(0x1c1a22, 'wall'), lip: graded(0x8e8a98, 'wall'), lip2: graded(0x6a6674, 'wall'), stone: graded(0x74707c, 'wall'), trod: graded(0x4c4854, 'floor'), riser: graded(0x66626e, 'wall'), riser2: graded(0x3c3844, 'wall'), wood: false };
+const palOf = (l: Ledge) => (l.kind === 'crag' ? ROCK : SOIL);
+
 /** How far a face's foot leans out from its top (the rules' own number: a body stops there), so a bank seen side-on still shows; its shadow's reach. */
 const BAT = FACE_FOOT, SHADOW = 1.8;
 
@@ -95,7 +101,7 @@ export function landLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THRE
       ground.flat(c.x, c.y, c.w, c.h, h, null);
       shade.flat(c.x, c.y, c.w, c.h, h + 0.002, tint(lv));
     }
-    for (const q of l.ramps) slope(q, runOf(m, l, q));
+    for (const q of l.ramps) slope(q, runOf(m, l, q), palOf(l));
     for (const [ax, c, out, a0, a1] of [['x', l.y + l.h, 1, l.x, l.x + l.w], ['x', l.y, -1, l.x, l.x + l.w], ['z', l.x, -1, l.y, l.y + l.h], ['z', l.x + l.w, 1, l.y, l.y + l.h]] as const) face(l, ax, c, out, a0, a1);
   }
   for (const [t, mat, order] of [[ground, floor, 0], [earth, VCOL, 0], [shade, SHADE, -10]] as const) {
@@ -104,7 +110,7 @@ export function landLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THRE
   }
 
   /** A ramp as a real slope of the floor's own ground, shaded, combed downhill, closed at its ends. */
-  function slope(q: Area, run: ReturnType<typeof runOf>): void {
+  function slope(q: Area, run: ReturnType<typeof runOf>, pal: Pal): void {
     // A point on it from `s` (0..1 along its edge) and `t` (0 at its foot, 1 at its brow), and its height there.
     const at = (s: number, t: number, lift = 0): V => {
       const f = run.hiFirst ? 1 - t : t, y = (run.lo + (run.hi - run.lo) * t) * H + lift;
@@ -114,7 +120,7 @@ export function landLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THRE
     ground.quad(corners(0), null, UP);
     // A narrow way up a raised area (elevation.md, "Raised areas") is steps, not a grass slope: trodden earth, a
     // log riser to each step, a post either side of its foot. It has to be seen from across the field.
-    if ((run.alongY ? q.w : q.h) <= STEPS_MAX) return void steps(q, run, at, corners);
+    if ((run.alongY ? q.w : q.h) <= STEPS_MAX) return void steps(q, run, at, corners, pal);
     // Darker than the flat above and below it, darkest at its foot.
     const foot = mul(tint(run.lo), 0.62), brow = mul(tint(run.hi), 0.84);
     shade.quad(corners(0.002), [foot, foot, brow, brow], UP);
@@ -146,22 +152,23 @@ export function landLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THRE
   }
 
   /** Steps up a narrow ramp: the tread trodden to bare earth, logs across it, its sides closed, posts at its foot. */
-  function steps(q: Area, run: ReturnType<typeof runOf>, at: (s: number, t: number, lift?: number) => V, corners: (lift: number) => V[]): void {
-    const tread = rgb(TROD), low = mul(rgb(TROD), 0.7), wide = run.alongY ? q.w : q.h, deep = run.alongY ? q.h : q.w;
+  function steps(q: Area, run: ReturnType<typeof runOf>, at: (s: number, t: number, lift?: number) => V, corners: (lift: number) => V[], pal: Pal): void {
+    const tread = rgb(pal.trod), low = mul(rgb(pal.trod), 0.7), wide = run.alongY ? q.w : q.h, deep = run.alongY ? q.h : q.w;
     earth.quad(corners(0.01), [low, low, tread, tread], UP);
     for (const s of [0, 1]) {
       const a = at(s, 0), b = at(s, 1), lo = (p: V): V => [p[0], 0, p[2]], f: V = run.alongY ? [s ? 1 : -1, 0, 0] : [0, 0, s ? 1 : -1];
-      earth.quad([lo(a), a, b, lo(b)], [rgb(FOOT), rgb(EARTH), rgb(EARTH), rgb(FOOT)], f);
+      earth.quad([lo(a), a, b, lo(b)], [rgb(pal.foot), rgb(pal.earth), rgb(pal.earth), rgb(pal.foot)], f);
       const past = (p: V): V => { const x = p[0] + f[0] * 0.03, z = p[2] + f[2] * 0.03; return [p[0], Math.max(p[1], groundLv(m, x, z) * H), p[2]]; };
       const pa = past(a), pb = past(b);
-      if (pa[1] - a[1] > 0.02 || pb[1] - b[1] > 0.02) earth.quad([a, pa, pb, b], [rgb(FOOT), rgb(EARTH), rgb(EARTH), rgb(FOOT)], [-f[0], 0, -f[2]]);
+      if (pa[1] - a[1] > 0.02 || pb[1] - b[1] > 0.02) earth.quad([a, pa, pb, b], [rgb(pal.foot), rgb(pal.earth), rgb(pal.earth), rgb(pal.foot)], [-f[0], 0, -f[2]]);
     }
     const n = Math.max(3, Math.round(deep / 0.42));
     for (let i = 0; i < n; i++) {
-      const p = at(0.5, (i + 0.5) / n), c = jit(i % 2 ? LOG : LOG2, 0.06, r);
+      const p = at(0.5, (i + 0.5) / n), c = jit(i % 2 ? pal.riser : pal.riser2, 0.06, r);
       B.b(p[0], p[1] - 0.05, p[2], run.alongY ? wide * 0.98 : 0.17, 0.15, run.alongY ? 0.17 : wide * 0.98, c);
     }
-    for (const s of [-0.06, 1.06]) {
+    // (Posts at its foot where it is timber; a step cut in rock has none.)
+    if (pal.wood) for (const s of [-0.06, 1.06]) {
       const p = at(s, 0);
       B.b(p[0], p[1], p[2], 0.2, 1.05, 0.2, jit(LOG2, 0.08, r)), B.b(p[0], p[1] + 1.05, p[2], 0.26, 0.08, 0.26, POST_CAP);
     }
@@ -175,28 +182,28 @@ export function landLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THRE
     const own = (s: number) => { const [x, z] = pt(s, -out * 0.03); return (x > l.x && x < l.x + l.w && z > l.y && z < l.y + l.h) || l.ramps.some((q) => inArea(q, x, z)); };
     const inMap = (s: number) => { const [x, z] = pt(s, out * 0.03); return x > 0 && z > 0 && x < m.w && z < m.h; };
     const hi = (s: number) => groundLv(m, ...pt(s, -out * 0.03)), lo = (s: number) => groundLv(m, ...pt(s, out * 0.03));
-    const facing: V = ax === 'x' ? [0, 0, out] : [out, 0, 0];
+    const facing: V = ax === 'x' ? [0, 0, out] : [out, 0, 0], pal = palOf(l);
     for (let a = a0 - 1.25; a < a1 + 1.25 - 1e-6; a += S) {
       const b = a + S, mid = a + S / 2;
       if (!own(mid) || !inMap(mid) || hi(mid) - lo(mid) < 0.08) continue;
       const ta = Math.max(hi(a), lo(a)) * H, tb = Math.max(hi(b), lo(b)) * H, fa = lo(a) * H, fb = lo(b) * H, tall = hi(mid) - lo(mid);
       // The bank itself, lit earth at the top going dark at the foot.
-      earth.quad([P(a, ta, 0), P(b, tb, 0), P(b, fb, out * BAT), P(a, fa, out * BAT)], [rgb(jit(EARTH, 0.06, r)), rgb(jit(EARTH, 0.06, r)), rgb(FOOT), rgb(FOOT)], facing);
+      earth.quad([P(a, ta, 0), P(b, tb, 0), P(b, fb, out * BAT), P(a, fa, out * BAT)], [rgb(jit(pal.earth, 0.06, r)), rgb(jit(pal.earth, 0.06, r)), rgb(pal.foot), rgb(pal.foot)], facing);
       // The dark foot on the ground, and the shadow it casts there (pure darkening: the level's light is already on it).
-      earth.quad([P(a, fa + 0.006, out * BAT), P(b, fb + 0.006, out * BAT), P(b, fb + 0.006, out * (BAT + 0.12)), P(a, fa + 0.006, out * (BAT + 0.12))], Array(4).fill(mul(rgb(FOOT), 0.85)), UP);
+      earth.quad([P(a, fa + 0.006, out * BAT), P(b, fb + 0.006, out * BAT), P(b, fb + 0.006, out * (BAT + 0.12)), P(a, fa + 0.006, out * (BAT + 0.12))], Array(4).fill(mul(rgb(pal.foot), 0.85)), UP);
       const dark: C = mul(ONE, 1 - 0.55 * Math.min(1, tall));
       shade.quad([P(a, fa + 0.004, out * BAT), P(b, fb + 0.004, out * BAT), P(b, fb + 0.004, out * (BAT + SHADOW)), P(a, fa + 0.004, out * (BAT + SHADOW))], [dark, dark, ONE, ONE], UP);
       // Stones in the earth, and the turf lip along the top catching the light, a tuft hanging over.
       const sh = (ta + tb) / 2, sf = (fa + fb) / 2;
-      if (r.next() < 0.35 && tall > 0.3) {
+      if (r.next() < (pal.wood ? 0.35 : 0.6) && tall > 0.3) {
         const k = 0.2 + r.next() * 0.65, [x, z] = pt(mid + (r.next() - 0.5) * 0.15, out * (BAT * k + 0.03));
-        B.c(x, sh - k * (sh - sf), z, 0.1 + r.next() * 0.12, 0.07 + r.next() * 0.06, 0.1 + r.next() * 0.08, jit(STONE, 0.14, r), r.next() * 3);
+        B.c(x, sh - k * (sh - sf), z, 0.1 + r.next() * 0.12, 0.07 + r.next() * 0.06, 0.1 + r.next() * 0.08, jit(pal.stone, 0.14, r), r.next() * 3);
       }
       if (tall > 0.2) {
         const [x, z] = pt(mid, out * 0.05);
         const lw = 0.16 + r.next() * 0.14, lh = 0.08 + r.next() * 0.06;
-        B.b(x, sh - lh + 0.03, z, ax === 'x' ? S + 0.02 : lw, lh, ax === 'x' ? lw : S + 0.02, jit(r.next() < 0.7 ? LIT : TURF, 0.12, r));
-        if (r.next() < 0.35) { const [hx, hz] = pt(mid, out * 0.16); B.b(hx, sh - 0.2, hz, 0.06, 0.15, 0.06, jit(TURF, 0.15, r)); }
+        B.b(x, sh - lh + 0.03, z, ax === 'x' ? S + 0.02 : lw, lh, ax === 'x' ? lw : S + 0.02, jit(r.next() < 0.7 ? pal.lip : pal.lip2, 0.12, r));
+        if (pal.wood && r.next() < 0.35) { const [hx, hz] = pt(mid, out * 0.16); B.b(hx, sh - 0.2, hz, 0.06, 0.15, 0.06, jit(TURF, 0.15, r)); }
       }
     }
   }

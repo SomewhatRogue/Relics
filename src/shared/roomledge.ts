@@ -60,8 +60,8 @@ export function raise3(o: Raise): void {
     if (ramp.y + ramp.h > H - 0.6 || bad({ ...ramp, y: a.y + a.h, h: 1.5 }, 0.3)) continue;
     took.push(f);
     // (Under the sky a raised area of earth under the land's rules, docs/design/elevation.md "Raised areas"; in the
-    // rock and underground it stays a rock shelf.)
-    o.ledges.push(skin === 'rock' || skin === 'under' ? { ...a, ramps: [ramp], kind: 'rock' } : { ...a, ramps: [ramp], kind: 'earth', lv: 1 });
+    // rock and underground the same, faced in rock: `crag`.)
+    o.ledges.push({ ...a, ramps: [ramp], kind: skin === 'rock' || skin === 'under' ? 'crag' : 'earth', lv: 1 });
     for (let x = a.x + 1; x < a.x + a.w; x += 1.5) {
       const s = { x, y: a.y + a.h / 2, r: a.h / 2 + 0.3 };
       o.spots.push(s), o.onLedge.add(s);

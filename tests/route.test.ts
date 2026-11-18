@@ -116,7 +116,7 @@ describe('seeds', () => {
     // Re-pinned 2026-11-05 for the doors rule (shared/doors.ts): with it switched off still 1134690767.
     // Re-pinned 2026-11-16: more jobs by day and evening, fewer at night (shared/timeofday.ts, jobs.ts); the hour
     // shapes a room, so the board's sample of rooms moved. A saved job keeps its own hour, and its rooms.
-    expect(all).toBe(11013677 /* re-pinned 2026-11-18: an outdoor room's raised ground is `kind: 'earth', lv: 1` (a raised area under the land's rules, docs/design/elevation.md), where it was a wood deck or a rock shelf: the same box and ramp, nothing else in any room moved (shared/terrain.ts, roomledge.ts: the one object pushed). Before: 3721327977. */);
+    expect(all).toBe(345261938 /* re-pinned 2026-11-18, twice: an outdoor room's raised ground is `kind: 'earth', lv: 1` (a raised area under the land's rules, docs/design/elevation.md), where it was a wood deck or a rock shelf: the same box and ramp, nothing else in any room moved (shared/terrain.ts, roomledge.ts: the one object pushed); then a mine's and the under's `kind: 'crag', lv: 1`, the same in rock (that pin: 11013677). Before both: 3721327977. */);
   });
 
   it('weather: one pattern a job; fog only ever creeps in, never more than a step a room; none underground', () => {

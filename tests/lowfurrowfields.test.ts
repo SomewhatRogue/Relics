@@ -4,6 +4,7 @@
  * the heights all slopes, walked by the game's own collide rules (the walk is tests/territory.test.ts's), the
  * density floors, and the map in a real room.
  */
+import { MOUND } from '../src/shared/lowfurrowfieldsland';
 import { describe, expect, it } from 'vitest';
 import { collide, inArea, levelAt, solid, useMap, type GameMap } from '../src/shared/arena';
 import { FIELDS_SPOTS, fieldsPlan, type FieldsPlan } from '../src/shared/lowfurrowfields';
@@ -110,12 +111,25 @@ describe('THE FIELDS, the plan', () => {
     expect(walk(open(plan(), 0).map, plan().map.hero).minY).toBeGreaterThan(9.3);
   });
 
-  it('is flat: no raised ground anywhere (elevation.md, "Raised areas")', () => {
-    const m = plan().map, at = (x: number, y: number) => levelAt(m, x, y);
-    expect(m.ledges ?? []).toEqual([]);
+  it('is flat but for one raised area: the bank behind the near hay cart, the archer on its lip', () => {
+    const p = plan(), m = p.map, at = (x: number, y: number) => levelAt(m, x, y);
+    expect(m.ledges!.length).toBe(1);
+    const l = m.ledges![0];
+    expect([l.kind, l.lv]).toEqual(['earth', 1]);
+    // Ways up are steps (narrow), never a slope along an edge; lower ground is south and east of it.
+    for (const q of l.ramps) expect(Math.min(q.w, q.h)).toBeLessThanOrEqual(3);
     expect([at(48, 109), at(30, 90), at(20, 70), at(40, 30), at(66, 24), at(48, 6), at(48, 2)]).toEqual([0, 0, 0, 0, 0, 0, 0]);
-    for (const f of plan().foes) expect(f.z ?? 0).toBe(0);
+    expect(at(MOUND.x + MOUND.w / 2, MOUND.y + MOUND.h / 2)).toBe(1);
+    expect(at(MOUND.x + MOUND.w / 2, MOUND.y + MOUND.h + 1)).toBe(0);
+    // Everyone stands on the ground but the one archer of the pack at the cart, who is up on the lip over it.
+    const up = p.foes.filter((f) => (f.z ?? 0) > 0);
+    expect(up.length).toBe(1);
+    expect(up[0].pack).toBe(103), expect(up[0].bow).toBe(true);
+    expect(up[0].y).toBeGreaterThan(MOUND.y + MOUND.h - 2);
+    // Its back is hedged: bushes along the north edge on top.
+    expect(m.rounds.filter((o) => o.x > MOUND.x && o.x < MOUND.x + MOUND.w && Math.abs(o.y - (MOUND.y + 0.5)) < 0.3).length).toBeGreaterThan(8);
   });
+
 
 
   it('keeps the road, the gates and the checkpoints clear', () => {

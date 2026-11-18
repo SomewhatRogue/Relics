@@ -4,10 +4,11 @@
  * already painted under it, moved up, so cobbles, soil and marks run on up as the 2.5D floor's UVs do), a coursed
  * stone face below its front wherever the ground there is lower, and its ramps as flights of steps. A land's raised
  * area (`kind: 'earth'`, docs/design/elevation.md "Raised areas") is an earth bank with a turf lip, leaning out at
- * its sides, and log steps between two posts, as three/landledges.ts draws it. Drawing only;
+ * its sides, and log steps between two posts, as three/landledges.ts draws it; in a mine (`'crag'`) the same bank in
+ * hewn rock with stone steps. Drawing only;
  * shared/arena.ts decides who stands where. `upAt` is how far up anything standing at a point is drawn.
  */
-import { FACE_FOOT, levelAt, type Area, type GameMap, type Ledge } from '../shared/arena';
+import { FACE_FOOT, levelAt, raised, type Area, type GameMap, type Ledge } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import { LIFT, OX, OY, PX } from './world';
 
@@ -40,24 +41,26 @@ function face(rect: Rect, rng: Rng, x0: number, x1: number, top: number, h: numb
 
 // A land's bank: lit earth at the lip going dark at the foot, the turf along its top, the stones in it.
 const EARTH = [0x7a, 0x64, 0x4a], FOOT = [0x2e, 0x24, 0x1a], TURF = '#6c8a3a', TURF2 = '#3a4a22', PEBBLE = ['#8a8478', '#6e685e'];
-const mix = (k: number) => `rgb(${EARTH.map((v, i) => Math.round(v + (FOOT[i] - v) * k)).join(',')})`;
+// The same bank faced in rock (a mine's, the under's: `kind: 'crag'`): hewn stone, a pale worn lip, no turf.
+const ROCK = [0x62, 0x5e, 0x6a], ROCKFOOT = [0x1e, 0x1c, 0x24], LIP = '#9a96a4', LIP2 = '#6a6674', CHIP = ['#7a7684', '#46424e'];
+const mix = (k: number, rock = false) => `rgb(${(rock ? ROCK : EARTH).map((v, i) => Math.round(v + ((rock ? ROCKFOOT : FOOT)[i] - v) * k)).join(',')})`;
 
 /** An earth bank's front, `x0`..`x1` wide, from `top` down `h` pixels: the same reading as the stone face, in earth. */
-function bank(rect: Rect, rng: Rng, x0: number, x1: number, top: number, h: number): void {
-  for (let y = 0; y < h; y++) rect(x0, top + y, x1 - x0, 1, mix(Math.min(1, (y / Math.max(1, h - 1)) * 0.95)));
+function bank(rect: Rect, rng: Rng, x0: number, x1: number, top: number, h: number, rock = false): void {
+  for (let y = 0; y < h; y++) rect(x0, top + y, x1 - x0, 1, mix(Math.min(1, (y / Math.max(1, h - 1)) * 0.95), rock));
   for (let x = x0; x < x1; x++) {
-    if (rng.next() < 0.06 && h > 6) rect(x, top + 3 + rng.int(Math.max(1, h - 5)), 2, 1, PEBBLE[rng.int(2)]);
-    // The turf lip, a tuft hanging over it here and there.
-    rect(x, top, 1, 2, rng.next() < 0.75 ? TURF : TURF2);
-    if (rng.next() < 0.22) rect(x, top + 2, 1, 1 + rng.int(2), TURF2);
+    if (rng.next() < (rock ? 0.14 : 0.06) && h > 6) rect(x, top + 3 + rng.int(Math.max(1, h - 5)), 2, 1, (rock ? CHIP : PEBBLE)[rng.int(2)]);
+    // The turf lip, a tuft hanging over it here and there (in rock: the worn edge, a crack down from it).
+    rect(x, top, 1, 2, rng.next() < 0.75 ? (rock ? LIP : TURF) : rock ? LIP2 : TURF2);
+    if (rng.next() < (rock ? 0.08 : 0.22)) rect(x, top + 2, 1, 1 + rng.int(2), rock ? '#2a2733' : TURF2);
   }
   rect(x0, top + h, x1 - x0, 5, 'rgba(0,0,0,0.38)');
 }
 
 /** An earth bank's side over one run of y: it leans out FACE_FOOT at its foot, so it shows as a strip going down and dark. */
-function bankSide(rect: Rect, x: number, out: 1 | -1, y0: number, h: number, lo: number, up: number): void {
+function bankSide(rect: Rect, x: number, out: 1 | -1, y0: number, h: number, lo: number, up: number, rock = false): void {
   const n = Math.round(FACE_FOOT * PX);
-  for (let i = 0; i < n; i++) rect(out > 0 ? x + i : x - 1 - i, y0 - Math.round(lo + (up - lo) * (1 - (i + 0.5) / n)), 1, h, i ? mix(0.15 + (0.8 * i) / n) : TURF);
+  for (let i = 0; i < n; i++) rect(out > 0 ? x + i : x - 1 - i, y0 - Math.round(lo + (up - lo) * (1 - (i + 0.5) / n)), 1, h, i ? mix(0.15 + (0.8 * i) / n, rock) : rock ? LIP : TURF);
   rect(out > 0 ? x + n : x - n - 3, y0 - lo, 3, h, 'rgba(0,0,0,0.3)');
 }
 
@@ -69,7 +72,8 @@ function level(m: GameMap, l: Ledge, g: CanvasRenderingContext2D, snap: HTMLCanv
   const fy = l.y + l.h;
   for (let a = l.x; a < l.x + l.w - 1e-6; a += 0.5) {
     const b = Math.min(a + 0.5, l.x + l.w), lo = fy < m.h ? levelAt(m, (a + b) / 2, fy + 0.2) : 0;
-    if (lo < lv) (l.kind === 'earth' ? bank : face)(rect, rng, OX + a * PX, OX + b * PX, OY + fy * PX - up, (lv - lo) * LIFT);
+    if (lo < lv && raised(l)) bank(rect, rng, OX + a * PX, OX + b * PX, OY + fy * PX - up, (lv - lo) * LIFT, l.kind === 'crag');
+    else if (lo < lv) face(rect, rng, OX + a * PX, OX + b * PX, OY + fy * PX - up, (lv - lo) * LIFT);
   }
   // Its sides: a dark seam where the ground beside is lower (a three-quarter view doesn't show the side face).
   for (const [sx, dx] of [[l.x, -0.2], [l.x + l.w, 0.2]] as const) {
@@ -78,7 +82,7 @@ function level(m: GameMap, l: Ledge, g: CanvasRenderingContext2D, snap: HTMLCanv
       const b = Math.min(a + 0.5, l.y + l.h);
       const lo = levelAt(m, sx + dx, (a + b) / 2);
       if (lo >= lv) continue;
-      if (l.kind === 'earth') bankSide(rect, OX + sx * PX, dx < 0 ? -1 : 1, OY + a * PX, Math.ceil((b - a) * PX), lo * LIFT, up);
+      if (raised(l)) bankSide(rect, OX + sx * PX, dx < 0 ? -1 : 1, OY + a * PX, Math.ceil((b - a) * PX), lo * LIFT, up, l.kind === 'crag');
       else rect(OX + sx * PX - (dx < 0 ? 0 : 1), OY + a * PX - up, 1, (b - a) * PX, '#1d1b24');
     }
   }

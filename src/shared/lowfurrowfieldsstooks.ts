@@ -2,13 +2,15 @@
  * THE STOOKS and THE FAR BANK (shared/lowfurrowfields.ts).
  *
  *   The gleaners had cut this strip and stood the sheaves in rows; the hungry are loading them onto the hay
- *   carts, and the empty places in the rows lead to the near cart. At the half-built rick a netter keeps the
+ *   carts, and the empty places in the rows lead to the near cart, an archer on the bank over it. At the half-built rick a netter keeps the
  *   one they caught here, caged. Then the drain, its bridge planks pulled off and thrown on the bank, and the
  *   trodden way going on up the far bank without you.
  */
 import { block, claim, mark, patch, prop, round, type Kit, type P } from './expedkit.js';
 import { cast } from './encounter.js';
 import { grove, marks, maybe, put, rye, xAt, type FieldsLand } from './lowfurrowfieldskit.js';
+import { MOUND, MOUND_STEPS } from './lowfurrowfieldsland.js';
+import { wall } from './terrkit.js';
 
 /** The two hay carts and the rick (fixed), the cage by the rick. */
 export const HAY = { cart: { x: 37.4, y: 25.2 }, cart2: { x: 55.8, y: 18.4 }, rick: { x: 61.6, y: 19.2, w: 3.4, h: 2.6 } };
@@ -21,6 +23,8 @@ function stookRows(k: Kit, land: FieldsLand, keep: P[]): void {
     for (let x = 18.6 + k.rng.range(0, 1.6); x < 78; x += k.rng.range(2.5, 3.7)) {
       const sx = x, sy = y0 + (x - 48) * tilt + k.rng.range(-0.3, 0.3);
       if (Math.abs(sx - xAt(land.road, sy)) < 2.6 || keep.some((p) => Math.hypot(p.x - sx, p.y - sy) < 3)) continue;
+      // None on the bank, at its foot or where its steps come down.
+      if (sx > MOUND.x - 1.6 && sx < MOUND.x + MOUND.w + 3.4 && sy > MOUND.y - 0.8 && sy < MOUND.y + MOUND.h + 2.4) continue;
       // Near the loading cart, most have gone already: the straw where each stood.
       const gone = Math.hypot(sx - HAY.cart.x, sy - HAY.cart.y) < 9 ? 0.6 : 0.12;
       if (k.rng.next() < gone) {
@@ -40,10 +44,15 @@ export function stooks(k: Kit, land: FieldsLand): void {
   block(k, 'haystack', rick.x, rick.y, rick.w, rick.h);
   const keep: P[] = [{ x: cart.x + 1.3, y: cart.y + 0.6 }, { x: cart2.x + 1.3, y: cart2.y + 0.6 }, { x: rick.x + 1.7, y: rick.y + 1.3 }, CAGE, { x: 40, y: 27.4 }, { x: 63.6, y: 25.4 }];
   claim(k, CAGE.x, CAGE.y, 1.2);
-  // Pack 103 loading the near cart: an archer up behind it, two carrying sheaves to it, two at it.
+  // The bank behind the near cart (MOUND): its back hedged, its ways up kept clear.
+  wall(k, { x: MOUND.x + 0.4, y: MOUND.y + 0.5 }, { x: MOUND.x + MOUND.w - 0.5, y: MOUND.y + 0.5 }, 0.42);
+  for (const q of MOUND_STEPS) claim(k, q.x + q.w / 2, q.y + q.h / 2, 1.6);
+  // Pack 103 loading the near cart: an archer up on the bank's lip over it, two carrying sheaves to it, three at it.
+  // (The seed still picks which of the two spots behind the cart the bow would have had; the other works the cart.)
   const bow = k.rng.int(2), at = { x: cart.x + 1.3, y: cart.y + 0.65 };
   const back = [{ x: cart.x + 0.6, y: cart.y - 1.2 }, { x: cart.x + 2.4, y: cart.y - 1.3 }];
-  back.forEach((p, i) => (i === bow ? cast(put(k, land, p.x, p.y, 103), 'archer') : put(k, land, p.x, p.y, 103, { task: { k: 'busy', x: at.x, y: at.y, what: 'winch' } })));
+  cast(put(k, land, back[bow].x + 0.4, MOUND.y + MOUND.h - 1.1, 103), 'archer');
+  put(k, land, back[1 - bow].x, back[1 - bow].y, 103, { task: { k: 'busy', x: at.x, y: at.y, what: 'winch' } });
   put(k, land, cart.x + 3.8, cart.y + 0.9, 103, { task: { k: 'busy', x: at.x, y: at.y, what: 'winch' } });
   put(k, land, 32.2, 28.6, 103, { task: { k: 'haul', to: [cart.x - 0.6, cart.y + 2] }, haul: { x: 31.4, y: 28.9, sack: true } });
   put(k, land, 43.8, 29.8, 103, { task: { k: 'haul', to: [cart.x + 3.4, cart.y + 2.2] }, haul: { x: 44.6, y: 30.1, sack: true } });

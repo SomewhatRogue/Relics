@@ -2,10 +2,10 @@
  * THE FIELDS' ground (shared/lowfurrowfields.ts): the side hedges the whole length, wandering a tile or two,
  * with field trees behind them and a fallen elm across one gap; the green lane in from the Wickhold road and
  * its stile; the headland hedge with the field gate; the drain with its bridge; the far bank; the road and the
- * mown rides; the soil. The ground is flat. All fixed but the road's small
+ * mown rides; the soil. The ground is flat but for one raised area, the bank behind the near hay cart (MOUND). All fixed but the road's small
  * bends, the trees behind the hedges and the jitter of the soil. Pure.
  */
-import { levelAt, type GameMap, type Ledge, type Stretch } from './arena.js';
+import { levelAt, type Area, type GameMap, type Ledge, type Stretch } from './arena.js';
 import { block, claim, mark, patch, path, round, unclaimed, type Kit, type Line, type P } from './expedkit.js';
 import { gateIn, layRoad, road, thickHedge } from './terrkit.js';
 import { hedgeLine, xAt, type FieldsLand } from './lowfurrowfieldskit.js';
@@ -45,12 +45,16 @@ export const STRIPS: { x0: number; x1: number; is: 'rye' | 'oat' | 'fallow' | 'r
 export const POND = [{ x: 14.4, y: 50.6, w: 9.4, h: 5.6 }, { x: 15.6, y: 49.8, w: 6.2, h: 1 }, { x: 16.2, y: 56, w: 6, h: 1 }];
 
 /**
- * The heights: none. The fields are flat (docs/design/elevation.md, "Raised areas": land is flat by default, and a
- * slope seen from above does not read). The lynchet and the far bank that were here are gone; the pond lies in its
- * willows on the level.
+ * The one raised area (docs/design/elevation.md, "Raised areas"; the land is flat but for it): the old headland bank
+ * behind the near hay cart, a level up, its face to the cart and the road. The stooks' archer stands on its lip over
+ * the loading. Log steps up its face at the west end and up its east end; a hedge along its back, so nothing drops
+ * away to the north.
  */
+export const MOUND = { x: 34, y: 18.2, w: 10, h: 4.6, lv: 1 };
+export const MOUND_STEPS: Area[] = [{ x: MOUND.x + 0.5, y: MOUND.y + MOUND.h - 1.3, w: 1.8, h: 2.8 }, { x: MOUND.x + MOUND.w - 1.3, y: MOUND.y + 1.6, w: 2.8, h: 1.8 }];
+
 export function heights(): Ledge[] {
-  return [];
+  return [{ x: MOUND.x, y: MOUND.y, w: MOUND.w, h: MOUND.h, lv: MOUND.lv, ramps: MOUND_STEPS.map((q) => ({ ...q })), kind: 'earth' }];
 }
 
 /** The side hedges, the field trees behind them, the fallen elm across its gap, brambles in front. */

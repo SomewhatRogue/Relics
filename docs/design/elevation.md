@@ -28,6 +28,8 @@ just be some raised areas or something." He agreed the change below the same eve
 
 1. **Land is flat by default.** No lynchets, no land-wide levels, no slope along a whole edge. A bank or a terrace
    that is only there for the look is paint: a band of colour, a line of turf.
+   (Two makes: earth under turf, `kind: 'earth'`; and the same faced in rock for a mine and under the ground,
+   `kind: 'crag'`. `raised(l)` in `shared/arena.ts` is the one test for both.)
 2. **A raised area is a set piece.** One box, flat on top, **two levels high** (a face a tile and a half tall), drawn
    with a tall earth or stone face, a lit lip, a dark foot and a shadow on the ground below it.
 3. **Higher ground is always up the screen.** Its face is to the south, and to the east or west where a side is
@@ -93,10 +95,9 @@ through a whole territory, the "8 tiles to a way up" rule (a raised area is smal
 raised area across its north with two archers on its lip, a brute, the cage and a chest on top, log steps up the
 south face and up the east end, three goblins and cover from the bows in the field below.
 
-**Lowfurrow, as built 2026-11-18:** THE FIELDS is flat (no raised area yet: one for the stooks' archer is the
-next thing to lay there). THE RISE keeps its sunken lane, the banks and the top one level up, and nothing else.
+**Lowfurrow, as built 2026-11-18:** THE FIELDS is flat but for the bank behind the near hay cart. THE RISE keeps its sunken lane, the banks and the top one level up, and nothing else.
 
-**Next:** a raised area on THE FIELDS where it does a job; the proving hill (`?land=hill`) still has the old slopes, kept
+**Next:** the proving hill (`?land=hill`) still has the old slopes, kept
 only because the frame's tests stand on it.
 
 ## The sweep: every other map and spec (2026-11-18)
@@ -107,7 +108,7 @@ Every map that lays raised ground, and what was done:
 | Map | What it had | Now |
 | --- | --- | --- |
 | **The board's job rooms, outdoors** (`shared/terrain.ts`, `shared/roomledge.ts`: fields, villages, woods, the high road, hedged tracks) | A wooden deck or a grey rock slab one level up with a ramp, archers on it, under the old shelf rules | **Moved.** A raised area of earth, its level ground (`kind: 'earth', lv: 1`): a bank with a turf lip and log steps in both views, and every rule above (nobody lands in the bank, the leap, a Rogue climbs, height is range, archers hold the lip, you hit what you click). The same box and ramp in the same place. Look: `?hero=WARRIOR&job=2:3&area=3` |
-| **The board's job rooms, in rock and underground** (mines, the under) | A rock shelf with a ramp | **Left**, on purpose: a turf bank is wrong in a mine. It wants a stone-faced raised area (the same rules, a rock face, the room's own floor on top). Next slice |
+| **The board's job rooms, in rock and underground** (mines, the under) | A rock shelf with a ramp | **Moved, the same afternoon.** A raised area faced in rock (`kind: 'crag', lv: 1`): the same bank in hewn stone with a pale worn lip, stone steps and no posts, the room's own floor on top, and every rule the earth one has. Look: `?hero=WARRIOR&job=1:1&area=1` |
 | **The Open Cut's winding gantry** (`shared/cutwinding.ts`, the Instances chat's) | A wooden gantry | **Left.** It is a built thing and reads as one. It could take the rules (range, the leap) without the look; the Instances chat's call |
 | **The town** (`shared/layouttown.ts`) | Three stone levels with steps | **Left.** Already levels-as-ground, built stone, no fights. It gets the leap and the truer aim with everyone else |
 | **Lowfurrow** | Slopes | Done earlier today: THE FIELDS flat, THE RISE its sunken lane |
@@ -127,11 +128,11 @@ laid by hand.
 
 | Territory | Flat, but for |
 | --- | --- |
-| Lowfurrow Fields | THE RISE's sunken lane (built). THE FIELDS: one low mound by the rick for the stooks' archer, who was to stand on a cart (to lay) |
+| Lowfurrow Fields | THE RISE's sunken lane (built). THE FIELDS: the old headland bank behind the near hay cart, a level up, the stooks' archer on its lip over the loading, steps at each end, its back hedged (built 2026-11-18) |
 | Tollan's Farm | **The yard**, a levelled terrace behind its wall, face to the orchard below: the bank barn's upper door opens onto it. A flight where the cart road comes up, steps at the far corner. MAWL fights on it; whoever holds the wall's lip covers the orchard |
 | Sallow Carr | Its height is water, which the game already has. One raised area: **the main bank at the sluice house**, stone-faced, the biggest den on it, over the causeway you come by |
 | Fennick Ford | **The mill dam**, the race along its top, over the ford: bows on the dam cover the crossing. The town up the far bank is drawn, not walked |
-| The Copperdeep Shafts | Down, by ladders, as screens. In a level: **the stope's benches**, which are the stone-faced raised area the mines want |
+| The Copperdeep Shafts | Down, by ladders, as screens. In a level: **the stope's benches**, the rock-faced raised area (`'crag'`), which the mines' job rooms now have |
 
 ## What Kyle said (2026-11-17)
 

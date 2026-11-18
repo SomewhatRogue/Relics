@@ -129,10 +129,15 @@ describe('the high ground is relative where the levels are the ground', () => {
 
 const job = (kind: Job['place']['kind']): Job => ({ ...board(1)[0], layout: undefined, place: PLACES.find((p) => p.kind === kind)!, objective: 'hunt', boss: 'SKARN', seed: 31, rooms: 3 });
 describe('off a landed map nothing changed', () => {
-  it("on the high road's rock shelf an archer is not afoot, and a shot from it is a quarter harder as it leaves", () => {
+  it('a built shelf (a deck, a gantry: a ledge with no level) is as it was: an archer on it is not afoot, and a shot from it is a quarter harder as it leaves', () => {
+    // (A job room's own raised ground is a raised area under the land's rules since 2026-11-18: earth outdoors, rock in
+    // a mine, its level ground. The old shelf is still what a built thing is, the Open Cut's gantry for one, so the
+    // same room is taken here with its ledge made a wooden deck again.)
+    expect(planRoom(job('mine'), 2, 'high').map.ledges![0]).toMatchObject({ kind: 'crag', lv: 1 });
+    expect(landed(planRoom(job('mine'), 2, 'high').map)).toBe(true);
     const high = (): { room: ArenaRoom; map: GameMap } => {
-      const plan = planRoom(job('mine'), 2, 'high');
-      return { room: new ArenaRoom(3, { map: plan.map, foes: [], furniture: [] }), map: plan.map };
+      const plan = planRoom(job('mine'), 2, 'high'), map: GameMap = { ...plan.map, ledges: plan.map.ledges!.map(({ lv: _lv, ...l }) => ({ ...l, kind: 'wood' as const })) };
+      return { room: new ArenaRoom(3, { map, foes: [], furniture: [] }), map };
     };
     let { room, map } = high();
     const l = map.ledges![0], x = l.x + l.w / 2, y = l.y + l.h / 2;

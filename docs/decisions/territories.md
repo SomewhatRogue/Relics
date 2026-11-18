@@ -361,3 +361,23 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   FIELDS.
 - Signed: Claude Fable 5.2.
 
+## 2026-11-18, later afternoon: the rock-faced raised area, and the bank on THE FIELDS
+
+- **Kyle:** "continue" (to the next slice named: mines, then the Fields' archer).
+- **`kind: 'crag'`** (`shared/arena.ts`: the kind, and `raised(l)`, the one test for "a raised area under the
+  land's rules", earth or rock; `shared/heights.ts` `isLand`, `sim/climb.ts` and the foot rule ask it). The same
+  bank drawn in hewn rock: `client/three/landledges.ts` takes its colours from a palette a ledge (stone steps, no
+  posts, no turf); `client/levelpaint.ts` the same in the flat view.
+- **The mines' and the under's job rooms** (`shared/terrain.ts`, `shared/roomledge.ts`) lay it, a level up, in
+  place of the old rock shelf. So every board room's raised ground is now under the one set of rules. The old
+  shelf rule is left for built things (the Open Cut's gantry) and is still tested, on a deck
+  (`tests/afoot.test.ts`, its last test rewritten to say so).
+- **THE FIELDS' one raised area** (`lowfurrowfieldsland.ts` `MOUND`, `lowfurrowfieldsstooks.ts`): the old headland
+  bank behind the near hay cart, 10 by 4.6, a level up, log steps up its face at the west end and up its east
+  end, a hedge along its back. Pack 103's archer stands on its lip over the loading; no stooks on it or at its
+  foot.
+- Tests: the four room pins moved again for the mines' kind (noted in each); the balance bench did not move.
+  Whole suite: 251 files passed, those four failed as expected, rerun and passing. Seen in both views: a
+  Copperdeep room (`?hero=WARRIOR&job=1:1&area=1`) and THE FIELDS.
+- Signed: Claude Fable 5.2.
+

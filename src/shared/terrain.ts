@@ -161,8 +161,8 @@ export function planRoom(job: Job, index: number, road?: RoadId, taken?: Record<
     if (lw) {
       const lx = left ? 0 : W - lw, ramp = { x: left ? lx + lw - 1.8 : lx, y: lh - 1.3, w: 1.8, h: 2.8 };
       // (Outdoors a raised area of earth under the land's rules, docs/design/elevation.md "Raised areas": its level is
-      // ground, a bank with a turf lip and log steps. It was a wooden deck in a field. A mine keeps its rock shelf.)
-      ledges.push(kind === 'mine' ? { x: lx, y: 0, w: lw, h: lh, ramps: [ramp], kind: 'rock' } : { x: lx, y: 0, w: lw, h: lh, ramps: [ramp], kind: 'earth', lv: 1 });
+      // ground, a bank with a turf lip and log steps. It was a wooden deck in a field. In a mine the same, faced in rock.)
+      ledges.push({ x: lx, y: 0, w: lw, h: lh, ramps: [ramp], kind: kind === 'mine' ? 'crag' : 'earth', lv: 1 });
       for (let x = lx + 1; x < lx + lw; x += 1.5) spots.push({ x, y: lh / 2, r: lh / 2 + 0.3 });
       spots.push({ x: ramp.x + 0.9, y: ramp.y + ramp.h / 2, r: 1.5 });
       // A routed room's ledge clears what's on it by its own ground (below); its spots only keep goblins and cages off it.

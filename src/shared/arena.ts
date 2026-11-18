@@ -186,7 +186,7 @@ export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: numb
  * edge: inside a ramp you go freely between the levels.
  */
 export interface Ledge {
-  x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood' | 'earth';
+  x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood' | 'earth' | 'crag';
   /** The level its top stands at (default 1). Ledges stack: you stand on the highest one under you, and a ramp joins
    *  the levels either side of its edge (the new town's three levels: docs/design/town-layout.md). */
   lv?: number;
@@ -551,7 +551,12 @@ function levels(m: GameMap, p: { x: number; y: number; z?: number; dropped?: num
  * leans this far (client/three/landledges.ts) and a body below stops this far out, so nobody stands in the bank.
  */
 export const FACE_FOOT = 0.55;
-const footOf = (l: Ledge) => (l.kind === 'earth' ? FACE_FOOT : 0);
+/**
+ * A raised area under the land's rules (docs/design/elevation.md, "Raised areas"): a bank of earth, or (`crag`, in a
+ * mine and under the ground) the same thing faced in rock. Not a built shelf, deck or the town's masonry.
+ */
+export const raised = (l: Ledge) => l.kind === 'earth' || l.kind === 'crag';
+const footOf = (l: Ledge) => (raised(l) ? FACE_FOOT : 0);
 
 /** Push a circle out of a box. */
 function box(p: { x: number; y: number }, r: number, b: { x: number; y: number; w: number; h: number }): void {

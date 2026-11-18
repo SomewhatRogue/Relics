@@ -4,10 +4,10 @@
  * an earth ledge's ramp it runs evenly from the level just outside the ramp's low edge up to the ledge's level.
  * Pure. Nothing in the fight reads it.
  */
-import { inArea, levelAt, type Area, type GameMap, type Ledge } from './arena.js';
+import { raised, inArea, levelAt, type Area, type GameMap, type Ledge } from './arena.js';
 
 /** Whether a map is land (its heights are earth, laid with shared/terrkit.ts), not the town's stone levels. */
-export const isLand = (m: GameMap) => !!m.ledges?.some((l) => l.kind === 'earth');
+export const isLand = (m: GameMap) => !!m.ledges?.some(raised);
 
 /** A ramp's run: the level at its low edge, at its high edge, its axis, and whether its high edge is at its start (north or west). */
 export interface Run { lo: number; hi: number; alongY: boolean; hiFirst: boolean }

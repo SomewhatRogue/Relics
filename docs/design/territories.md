@@ -192,7 +192,7 @@ is small: sickles in the stubble, a handcart on its side.
 | Zone | **The headland** (about 72 by 24). The gleaners' camp at the field's foot: three handcarts, the dinner, sickles dropped in the stubble, a hawthorn | Two scrappers fighting over the dinner basket; three more turning out the far cart | Kill both packs. **Someone is under the near cart** (mini quest 1) |
 | Gate | The field gate in the headland hedge (teaches gates: stand in it, all of you) | | |
 | Scape | **The long strips** (about 80 by 38). Ridge and furrow, rye standing in long strips with mown rides between them, a pond in willows off to the west, a scarecrow, a fallen hovel to the east | The barn's roof on the rise, far off; a patrol on the road; two at the scarecrow | Nothing you must do. The pond has a chest. The rye by the pond is where mini quest 1 sends you |
-| Zone | **The stooks** (about 72 by 28). A cut strip, sheaves stood in rows, two hay carts, a half-built rick | A pack loading sheaves with an archer up on a cart; three at the rick with one of the gleaners caged by it | Kill both packs; break the cage |
+| Zone | **The stooks** (about 72 by 28). A cut strip, sheaves stood in rows, two hay carts, a half-built rick | A pack loading sheaves with an archer up on the bank behind the cart (the map's one raised area); three at the rick with one of the gleaners caged by it | Kill both packs; break the cage |
 | Gate | The drain: the hungry pulled the planks off the bridge. Lay them back (a hold, quicker with two) | | |
 | Screen | Over the bridge to the far bank | | |
 
