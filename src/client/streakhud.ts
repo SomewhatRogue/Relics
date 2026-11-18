@@ -4,8 +4,9 @@
  */
 import './streak.css';
 import type { Hero } from '../sim/types';
+import { one, setData, setHidden, setText, toggle } from './domset';
 
-const el = () => document.querySelector('#hud .streak') as HTMLElement | null;
+const el = () => one('#hud .streak') as HTMLElement | null;
 let last = 0, step = 0, brokeAt = -9;
 
 export function showStreak(me: Hero): void {
@@ -16,10 +17,9 @@ export function showStreak(me: Hero): void {
   const broken = now - brokeAt < 1.2;
   if (s > step) box.classList.remove('flare'), void box.offsetWidth, box.classList.add('flare');
   [last, step] = [n, s];
-  box.hidden = n < 3 && !broken;
-  box.classList.toggle('broken', broken && n < 3);
-  box.dataset.step = String(s);
+  setHidden(box, n < 3 && !broken);
+  toggle(box, 'broken', broken && n < 3);
+  setData(box, 'step', s);
   const text = broken && n < 3 ? `STREAK ${box.dataset.lost}` : `STREAK ${n}`;
-  const b = box.firstElementChild as HTMLElement;
-  if (b.textContent !== text) b.textContent = text;
+  setText(box.firstElementChild as HTMLElement, text);
 }

@@ -15,6 +15,27 @@ const LEVEL = 0.75;
 /** Tiles from a door within which its mark brightens, and its faint and full strength. */
 const NEAR = 5, FAINT = 0.55, FULL = 1;
 const WARM = ['#ffcf7a', '#fff2c8'];
+/** Tiles round a door's spot that hold all of its marks (the patch and chevrons reach under 0.75), and screen pixels of slack. */
+const REACH = 1, SLACK = 2;
+
+/**
+ * Whether none of a door's marks can land on the canvas: its box (a tile either way, the mark's heights)
+ * projected corner by corner falls wholly to one side. Only trusted when the door's spot projects inside
+ * that box, which holds for any flat or perspective view with the box all on one side of the eye.
+ */
+function offCanvas(g: CanvasRenderingContext2D, P: Proj, x: number, up: number, y: number): boolean {
+  const W = g.canvas?.width, H = g.canvas?.height;
+  if (!W || !H) return false;
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const ex of [-REACH, REACH]) for (const ey of [-REACH, REACH]) for (const ez of [-0.01, 0.05]) {
+    const [sx, sy] = P(x + ex, up + ez, y + ey);
+    if (!Number.isFinite(sx) || !Number.isFinite(sy)) return false;
+    (x0 = Math.min(x0, sx)), (x1 = Math.max(x1, sx)), (y0 = Math.min(y0, sy)), (y1 = Math.max(y1, sy));
+  }
+  const [cx, cy] = P(x, up + 0.01, y);
+  if (!(cx >= x0 && cx <= x1 && cy >= y0 && cy <= y1)) return false;
+  return x1 < -SLACK || y1 < -SLACK || x0 > W + SLACK || y0 > H + SLACK;
+}
 
 const px = (g: CanvasRenderingContext2D, x: number, y: number, col: string, a: number) => {
   g.globalAlpha = a;
@@ -26,9 +47,13 @@ export function drawDoorsteps(g: CanvasRenderingContext2D, room: ArenaRoom, meId
   const map: GameMap = room.map;
   if (room.indoors || !map.blocks?.length) return;
   const me = room.heroes.find((h) => h.id === meId), t = room.time;
+  let any = false;
   for (const b of map.blocks) {
     if (!b.door || b.locked || b.ruined || (b.burning ?? -1) >= 0) continue;
     const d = doorAt(b), [dx, dy] = pushDir(b), up = levelAt(map, d.x, d.y) * LEVEL;
+    // Off the canvas, skipped (the pen still ends warm, as if it had been drawn).
+    any = true;
+    if (offCanvas(g, P, d.x, up, d.y)) continue;
     const far = me ? Math.hypot(me.x - d.x, me.y - d.y) : NEAR * 2, k = Math.max(0, Math.min(1, 1 - (far - 1) / NEAR));
     const a = FAINT + (FULL - FAINT) * k;
     // The patch: a small dithered oval of warm light on the step.
@@ -52,5 +77,6 @@ export function drawDoorsteps(g: CanvasRenderingContext2D, room: ArenaRoom, meId
       }
     }
   }
+  if (any) g.fillStyle = WARM[1];
   g.globalAlpha = 1;
 }

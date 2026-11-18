@@ -38,6 +38,8 @@ function spriteOf(look: HoundLook, p: Pose): { s: Sprite; m: HoundMap } {
   let got = sprites.get(key);
   if (!got) {
     const m = houndMap(look, p);
+    // Capped, oldest out (the look sheets show a few dozen at once, well under it).
+    if (sprites.size >= 512) sprites.delete(sprites.keys().next().value!);
     sprites.set(key, (got = { s: makeSprite(BOX.w, BOX.h, m.parts), m }));
   }
   return got;

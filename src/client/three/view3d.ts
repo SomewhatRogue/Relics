@@ -258,24 +258,31 @@ export class View3D {
     cam.layers.set(0);
     gl.render(this.scene, cam);
     let calls = gl.info.render.calls, tris = gl.info.render.triangles;
-    cam.layers.set(XRAY_LAYER);
-    gl.autoClear = false;
-    gl.shadowMap.autoUpdate = false;
-    // Box figures take the silhouette as an override; cards swap to theirs (cut to the figure's shape).
-    if (BOXFIGS) this.scene.overrideMaterial = XRAY;
-    else this.figs.xray(true);
-    gl.render(this.scene, cam);
-    this.scene.overrideMaterial = null;
-    this.figs.xray(false);
-    gl.render(this.scene, cam);
-    calls += gl.info.render.calls * 2;
-    tris += gl.info.render.triangles * 2;
-    // Last, smoke and steam, then the telegraphs over them (hazards3d.ts): depth-tested against everything,
-    // writing none for the smoke, so a cloud never hides a telegraph and bodies in front of it stay in front.
-    cam.layers.set(FX_LAYER);
-    gl.render(this.scene, cam);
-    calls += gl.info.render.calls;
-    tris += gl.info.render.triangles;
+    // Nothing moves between the passes: the first updated every matrix, so the rest skip the walk.
+    const auto = this.scene.matrixWorldAutoUpdate;
+    this.scene.matrixWorldAutoUpdate = false;
+    try {
+      cam.layers.set(XRAY_LAYER);
+      gl.autoClear = false;
+      gl.shadowMap.autoUpdate = false;
+      // Box figures take the silhouette as an override; cards swap to theirs (cut to the figure's shape).
+      if (BOXFIGS) this.scene.overrideMaterial = XRAY;
+      else this.figs.xray(true);
+      gl.render(this.scene, cam);
+      this.scene.overrideMaterial = null;
+      this.figs.xray(false);
+      gl.render(this.scene, cam);
+      calls += gl.info.render.calls * 2;
+      tris += gl.info.render.triangles * 2;
+      // Last, smoke and steam, then the telegraphs over them (hazards3d.ts): depth-tested against everything,
+      // writing none for the smoke, so a cloud never hides a telegraph and bodies in front of it stay in front.
+      cam.layers.set(FX_LAYER);
+      gl.render(this.scene, cam);
+      calls += gl.info.render.calls;
+      tris += gl.info.render.triangles;
+    } finally {
+      this.scene.matrixWorldAutoUpdate = auto;
+    }
     this.calls = calls;
     this.tris = tris;
     gl.shadowMap.autoUpdate = true;

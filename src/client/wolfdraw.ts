@@ -18,13 +18,25 @@ const EYE = '#ffd040', FUR2 = '#7a7880';
 /** A colour a step darker (the wolf's coat over the hound's). */
 const dark = (c: string) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(c.slice(i, i + 2), 16) * 0.72).toString(16).padStart(2, '0')).join('');
 
-const made = new Map<string, { s: Sprite; m: HoundMap }>();
-function sprite(p: Pose): { s: Sprite; m: HoundMap } {
+/**
+ * Sprites by the picture they draw: the body's parts and where its head is, so poses that come out the same
+ * (a standing wolf's tail swings through a new number every frame) share one, and poses seen lately by
+ * their own text so most frames build nothing. Both lists are capped, oldest out.
+ */
+type Made = { s: Sprite; m: HoundMap };
+const CAP = 96, byPose = new Map<string, Made>(), byPicture = new Map<string, Made>();
+const keep = (into: Map<string, Made>, key: string, v: Made) => {
+  if (into.size >= CAP) into.delete(into.keys().next().value!);
+  into.set(key, v);
+};
+function sprite(p: Pose): Made {
   const key = JSON.stringify(p);
-  let got = made.get(key);
+  let got = byPose.get(key);
   if (!got) {
-    const m = houndMap(LOOK, p);
-    made.set(key, (got = { s: makeSprite(BOX.w, BOX.h, m.parts.map((q) => [...q.slice(0, -1), dark(q[q.length - 1] as string)] as Part)), m }));
+    const m = houndMap(LOOK, p), pic = JSON.stringify(m);
+    got = byPicture.get(pic);
+    if (!got) keep(byPicture, pic, (got = { s: makeSprite(BOX.w, BOX.h, m.parts.map((q) => [...q.slice(0, -1), dark(q[q.length - 1] as string)] as Part)), m }));
+    keep(byPose, key, got);
   }
   return got;
 }

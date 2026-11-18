@@ -90,3 +90,22 @@ What the Florida night taught (docs/DECISIONS.md 2026-11-05, "the join storm"):
 - A hidden desktop host runs its room from a worker's timer at full pace, and hands on after 15 s (phones at once).
 - Patches go 20 a second steadily and carry the leader's send clock (`w`) for the playout.
 - The relay's `join` line has the page's last timed trip (`rtt`, ms).
+
+## The second wire format (2026-11-17)
+
+- **A friend's hello says what it speaks** (`v: 2`); the leader keeps it per friend from each hello, so a page
+  reloaded onto an older build falls back. A message goes in the second format only if every friend it goes to
+  speaks it: an ordinary room's one message by its whole group, a big room's per friend. Everyone else gets the
+  first, byte for byte as before (`tests/perfparity.wire.test.ts`). A friend reads both, from any leader.
+- **The body as an object** (`{ b }`), not JSON text inside JSON (`{ s }`), whose escaped quotes were a fifth of
+  every byte. The ids are swapped by walking it (`client/wire2.ts`), keys and strings at once.
+- **Heroes' act clocks as `a0`**, when the act began, to the millisecond; the friend works `actT` out as each
+  patch is applied, so heroes step at the patch rate as before. An encoder never changes format without a whole
+  room between.
+- **The map only when it is news**: a whole room carries it for someone new or just come in, or when its text
+  changed. A friend with no room ignores a whole room without one and says hello, which brings it.
+- **The relay** makes each message's text once and sends that string to every socket it goes to.
+- Measured (`npx tsx scripts/perf/sendbench.ts`, the relay's whole envelope): village 15.2 to 11.7 KB/s (23%
+  less), the Deep 21.6 to 15.7 (27%), a swarm of 60 189 to 158 per three friends (17%). The largest part of an
+  ordinary patch is now a Ranger's hound: a nested object, sent whole in every patch it moves in (about 18% of
+  a patch's bytes). Sending its fields one by one would be the next saving.

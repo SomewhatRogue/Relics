@@ -24,6 +24,10 @@ export class Lights {
   private pool: THREE.PointLight[] = [];
   readonly amb = new THREE.AmbientLight(0xffffff, 1);
   readonly sky = new THREE.DirectionalLight(0xffffff, 0);
+  /** Scratch for place: each light's score and the lit ones' places in the list, kept between frames. */
+  private sc: number[] = [];
+  private at: number[] = [];
+  private bySc = (a: number, b: number) => this.sc[a] - this.sc[b];
 
   constructor(n: number, shadow: number) {
     for (let i = 0; i < n; i++) {
@@ -65,10 +69,16 @@ export class Lights {
 
   /** Give the pool to the lights that matter most around (cx, cz). */
   place(list: L3[], cx: number, cz: number, now: number): void {
-    const score = (l: L3) => (Math.hypot(l.x - cx, l.z - cz) - l.r) / (0.5 + l.i);
-    const best = list.filter((l) => l.i > 0.01).sort((a, b) => score(a) - score(b));
+    // Each light's score once (near and bright first), the lit ones' places in list order, then a stable
+    // sort of those places by score: the same order as sorting the lights themselves, with no new arrays.
+    const sc = this.sc, at = this.at;
+    at.length = 0;
+    list.forEach((l, k) => {
+      if (l.i > 0.01) (sc[k] = (Math.hypot(l.x - cx, l.z - cz) - l.r) / (0.5 + l.i)), at.push(k);
+    });
+    at.sort(this.bySc);
     this.pool.forEach((p, k) => {
-      const l = best[k];
+      const l = k < at.length ? list[at[k]] : undefined;
       if (!l) return void (p.intensity = 0);
       const fl = l.f ? 1 + Math.sin(now * l.f + l.x * 3.1) * 0.06 + Math.sin(now * l.f * 0.57 + l.z) * 0.05 : 1;
       p.position.set(l.x, l.y, l.z);

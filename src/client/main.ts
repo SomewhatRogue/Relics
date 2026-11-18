@@ -168,6 +168,7 @@ import { legend } from './legend';
 import { weaponsAbout } from './weaponsabout';
 import { mageTrails } from './fxmagetap';
 import { iceTrails } from './fxice';
+import { one, setData, setHidden, setHtml, setStyle, setText, setTitle, toggle } from './domset';
 
 // The UI's frames and icons, drawn once before anything shows.
 paintFrames();
@@ -405,38 +406,38 @@ let tipAt = -99, tipI = 0;
 
 function hud(now: number): void {
   const me = game.hero, room = game.room, pr = game.profile;
-  document.body.dataset.mode = game.mode;
+  setData(document.body, 'mode', game.mode);
   // (Raised this job: the bar's far end is cut off, darkened, and the health fills what's left: unitframe.ts.)
-  $('.hp i').style.width = (100 * me.hp * (1 - (me.hpCut ?? 0))) / me.maxHp + '%';
-  $('.hp').classList.toggle('poisoned', !!me.poison);
-  $('.st i').style.width = me.stamina + '%';
+  setStyle(one('.hp i'), 'width', (100 * me.hp * (1 - (me.hpCut ?? 0))) / me.maxHp + '%');
+  toggle(one('.hp'), 'poisoned', !!me.poison);
+  setStyle(one('.st i'), 'width', me.stamina + '%');
   // A Mage's bar is MAGIC: the word on its tooltip and a soft violet (shared/barword.ts).
   const bw = barWord(WEAPONS[me.weapon].cls);
-  if ($('.st').title !== bw) ($('.st').title = bw), $('.st').classList.toggle('magic', bw === 'MAGIC'), $('.st').classList.toggle('faith', bw === 'FAITH');
-  $('.st').classList.toggle('low', me.stamina < 25);
+  if (one('.st').title !== bw) (one('.st').title = bw), one('.st').classList.toggle('magic', bw === 'MAGIC'), one('.st').classList.toggle('faith', bw === 'FAITH');
+  toggle(one('.st'), 'low', me.stamina < 25);
   // Winded: the bar flashes, fast while nothing's coming back, slower as it refills.
-  $('.st').classList.toggle('winded', !!me.winded);
-  $('.st').classList.toggle('empty', !!me.winded && room.time - me.staminaAt < HERO.windedDelay);
+  toggle(one('.st'), 'winded', !!me.winded);
+  toggle(one('.st'), 'empty', !!me.winded && room.time - me.staminaAt < HERO.windedDelay);
   showStreak(me);
-  $('.who').textContent = pr.name;
-  $('.who').title = `${CLASS_NAME[pr.cls]}, level ${pr.level}`;
+  setText($('.who'), pr.name);
+  setTitle($('.who'), `${CLASS_NAME[pr.cls]}, level ${pr.level}`);
   const item = me.arms[me.weapon];
-  $('.wpn').textContent = item ? itemName(item) : WEAPONS[me.weapon].name;
+  setText(one('.wpn'), item ? itemName(item) : WEAPONS[me.weapon].name);
   // (The block button is the touch cluster's: cluster.ts.)
   // A Mage's big spell: a mark on the bar at what it costs, red while you're short of it (sim/spells.ts).
   const cost = spellCost(me);
-  $('.st').classList.toggle('spell', cost > 0);
-  $('.st').classList.toggle('short', cost > 0 && (me.stamina < cost || !!me.winded));
-  $('.st').style.setProperty('--cost', Math.min(100, cost) + '%');
+  toggle(one('.st'), 'spell', cost > 0);
+  toggle(one('.st'), 'short', cost > 0 && (me.stamina < cost || !!me.winded));
+  setStyle(one('.st'), '--cost', Math.min(100, cost) + '%');
   // A Mage's element now (X switches it), TAP, HOLD and PERFECT in it (kitlines.ts), the crossbow's reload key.
   const mageEl = WEAPONS[me.weapon].cls === 'MAGE' ? castElement(me) : '';
   const kit = (mageEl ? (input.touch ? '' : 'X ') + mageEl.toUpperCase() + '  ' : '') + kitLine(me.weapon, mageEl) + (WEAPONS[me.weapon].reloads ? (input.touch ? '  HOLD RELOAD TO WIND' : '  HOLD C TO RELOAD') : '');
-  $('.kit').textContent = item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit;
+  setText(one('.kit'), item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit);
   card.update(room, me, !input.touch);
   pack.update(me);
   lesson.update();
-  $('#packbtn').classList.toggle('on', pack.open);
-  knackCues(game, panel.open, $('#packbtn'), (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] + 14, s, '#ffd27a', 3.2));
+  toggle(one('#packbtn'), 'on', pack.open);
+  knackCues(game, panel.open, one('#packbtn'), (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] + 14, s, '#ffd27a', 3.2));
   // A hero quest done (shared/heroquests.ts): said once, back in town, with what it opened.
   if (game.questPop && game.mode === 'town' && !game.result && !panel.open) {
     const q = game.questPop;
@@ -457,38 +458,38 @@ function hud(now: number): void {
   // A Rogue's, Ranger's or Healer's own button (V) and its wait, first (shared/signs.ts).
   const sg = signFor(me), sgl = sg ? signLeft(me, room.time) : 0;
   const own = sg && game.taught().includes('sign') ? (input.touch ? '' : SIGN_KEY + ' ') + SIGNS[sg].name + (sgl > 0 ? ' ' + sgl.toFixed(1) : '') + '   ' : '';
-  $('.rlc').textContent = own + (known ? (input.touch ? '' : 'E ') + tag(skill) : '');
-  $('.rlc').dataset.el = me.augments[skill];
+  setText(one('.rlc'), own + (known ? (input.touch ? '' : 'E ') + tag(skill) : ''));
+  setData(one('.rlc'), 'el', me.augments[skill]);
   // The relic carried: its uses as pips (gold, amber, the last one red-brown, or DARK and greyed).
   const it = relic ? carriedItem(me) : undefined;
-  $('.rcd').innerHTML = relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? chargePips(it) : '') : '';
-  $('.rcd').classList.toggle('wait', !!relic && (left(relic) > 0 || (!!it && isDark(it))));
-  $('.litbadge').hidden = !me.lit;
+  setHtml(one('.rcd'), relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? chargePips(it) : '') : '');
+  toggle(one('.rcd'), 'wait', !!relic && (left(relic) > 0 || (!!it && isDark(it))));
+  setHidden(one('.litbadge'), !me.lit);
   game.settleCouncil();
   setVotes(game.world);
   // The belt: the potion that's next (Q, POTION) and how many more.
   const next = me.belt[0];
-  $('.belt').textContent = next ? (input.touch ? '' : 'Q ') + POTIONS[next].short + (me.belt.length > 1 ? `  +${me.belt.length - 1}` : '') : '';
+  setText(one('.belt'), next ? (input.touch ? '' : 'Q ') + POTIONS[next].short + (me.belt.length > 1 ? `  +${me.belt.length - 1}` : '') : '');
   // The banner: where you are and what you're doing.
   const run = game.run;
   // The wood: the lesson and its control, how far along; Hew's words; the bars in the cutscene.
-  document.body.dataset.taught = game.taught().join(' ');
+  setData(document.body, 'taught', game.taught().join(' '));
   const wood = game.wood;
-  document.body.classList.toggle('cutscene', (!!wood && wood.cut >= 0) || runner.scene());
+  toggle(document.body, 'cutscene', (!!wood && wood.cut >= 0) || runner.scene());
   // Praise shows as a caption while the fight stops for it.
   const praise = wood?.hold?.kind === 'praise' ? { who: wood.hold.who, text: wood.hold.text } : null;
   // (In town, a new hero's runner says their piece on the same strip: runner.ts.)
   const cap = praise ?? (wood?.caption && wood.caption.until > room.time ? wood.caption : null) ?? (game.mode === 'town' ? runner.caption(now) : null);
-  $('#caption').classList.toggle('praise', !!praise);
+  toggle(one('#caption'), 'praise', !!praise);
   // (A lesson card or a freeze-frame says it all; the caption waits.)
-  $('#caption').hidden = !cap || (!!wood?.hold && wood.hold.kind !== 'praise');
+  setHidden(one('#caption'), !cap || (!!wood?.hold && wood.hold.kind !== 'praise'));
   const capKey = cap ? cap.who + cap.text : '';
   // (A lesson's prompt is up all at once: it has less than a second. The rest are typed.)
   if (cap && capKey !== shownCap) $('#caption').innerHTML = (cap.who ? `<b>${cap.who}</b>` : '') + '<span></span>', cap.text.startsWith('NOW:') ? ($('#caption').querySelector('span')!.textContent = cap.text) : speak($('#caption').querySelector('span')!, cap.text, cap.who);
   shownCap = capKey;
-  $('#skipcut').hidden = !wood || wood.cut < 0 || !pr.cutSeen;
+  setHidden(one('#skipcut'), !wood || wood.cut < 0 || !pr.cutSeen);
   // On a job, near the top of a room (where the way on is), the banner fades so it doesn't hide the exit.
-  $('#banner').classList.toggle('faint', game.mode === 'run' && game.hero.y < 7);
+  toggle(one('#banner'), 'faint', game.mode === 'run' && game.hero.y < 7);
   if (game.mode === 'wood' && wood) {
     const g = woodGoal(wood, input.touch);
     // (A lesson's count done flashes too, before its goblins are down: sim/woodsteps.ts.)
@@ -496,10 +497,10 @@ function hud(now: number): void {
     // (The wood's lessons never fold: the control to learn is on it.)
     fold.render(objFlash.show(`<b>${g.title}</b> <div class="obj">${goalHtml(g.text)}</div><span>GREYHOLLOW, THE DAY AFTER</span>`, now), null, g.title + g.text, now);
     // Big, with its count as pips, and called out when it changes (goalpulse.ts, goal.css).
-    goalPulse.frame($('#banner'), g.title + '|' + g.text, now, objFlash.holding(now));
+    goalPulse.frame(one('#banner'), g.title + '|' + g.text, now, objFlash.holding(now));
     showPlate($('#boss'), wood.cut >= 0 ? null : plateOf(room.enemies, room.time));
   } else if (game.mode === 'run' && run) {
-    goalPulse.clear($('#banner'));
+    goalPulse.clear(one('#banner'));
     const g = { text: me.out ? outText(me, room.heroes) : game.goalText() };
     // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
     // Folded: the objective and the room diamonds; an expedition's, how many jobs are left. Open: the lot,
@@ -515,11 +516,11 @@ function hud(now: number): void {
     fold.render(full, small, run.job.place.name + run.index + ':' + (x && !me.out && x.phase === 'shut' ? 'jobs' + left : calm(g.text)), now, objFlash.holding(now), !!plate);
     showPlate($('#boss'), plate);
     // (A boss's plate up and no expedition's jobs to count: the plate is the goal, the tracker steps aside.)
-    document.body.classList.toggle('bossfight', !!plate && !x);
+    toggle(document.body, 'bossfight', !!plate && !x);
   } else {
     showPlate($('#boss'), null);
     document.body.classList.remove('bossfight');
-    goalPulse.clear($('#banner'));
+    goalPulse.clear(one('#banner'));
     objFlash.watchWood(-1, now);
     // A new hero's errands, and the trainer's word on a new skill, are the town's goal (errandline.ts).
     // (Not while the runner's still saying it: the strip first, then the rows.)
@@ -539,21 +540,21 @@ function hud(now: number): void {
   if (spot?.talk) primeSpot(spot.talk, spot.arg ?? 0, CLASS_ORDER[spot.arg ?? 0]);
   // (While you're petting the hound, its prompt steps aside so you can see it. Your own hound, always at
   // heel, never puts up a prompt: it covered the view (Kyle's friend, 2026-11-12); USE still pets it.)
-  $('#prompt').hidden = !spot || busy || (!!spot.pet && (spot.pet === 'own' || !!petFrame(game.hero, now)));
-  if (spot) $('#prompt').textContent = (input.touch ? '' : spot?.chest || (spot?.pet && game.mode === 'run') ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || NOT_PEOPLE.has(spot.talk) ? spot.label : 'TALK: ' + spot.label);
+  setHidden(one('#prompt'), !spot || busy || (!!spot.pet && (spot.pet === 'own' || !!petFrame(game.hero, now))));
+  if (spot) setText(one('#prompt'), (input.touch ? '' : spot?.chest || (spot?.pet && game.mode === 'run') ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || NOT_PEOPLE.has(spot.talk) ? spot.label : 'TALK: ' + spot.label));
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
-  else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) ($('#prompt').hidden = false), ($('#prompt').textContent = 'F  LOOK');
+  else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) setHidden(one('#prompt'), false), setText(one('#prompt'), 'F  LOOK');
   // A friend down at your feet: the key that gets them up.
   const stg = game.mode === 'run' ? staitheGrabbable(game.hero, game.room.survivors, game.room.map) : null;
-  if (!spot && !busy && !input.touch && game.mode === 'run' && (cuttable(game.hero, game.room.heroes, game.room.time) || stg === 'cut')) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  CUT FREE');
-  else if (!spot && !busy && !input.touch && stg === 'shove') ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  ' + STAITHE_WORDS.shove);
-  else if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  HELP UP');
+  if (!spot && !busy && !input.touch && game.mode === 'run' && (cuttable(game.hero, game.room.heroes, game.room.time) || stg === 'cut')) setHidden(one('#prompt'), false), setText(one('#prompt'), 'G  CUT FREE');
+  else if (!spot && !busy && !input.touch && stg === 'shove') setHidden(one('#prompt'), false), setText(one('#prompt'), 'G  ' + STAITHE_WORDS.shove);
+  else if (!spot && !busy && !input.touch && game.mode === 'run' && game.hero.act === 'idle' && raisable(game.hero, game.room.heroes)) setHidden(one('#prompt'), false), setText(one('#prompt'), 'G  HELP UP');
   // A Cleric by a friend who is out (sim/raise.ts): the key, or the seconds till it's ready.
   else if (!spot && !busy && !input.touch && game.mode === 'run' && risable(game.hero, game.room.heroes, game.room.time)) {
     const wait = riseWait(game.hero, game.room.time);
-    ($('#prompt').hidden = false), ($('#prompt').textContent = wait > 0 ? `${RAISEW.button}  ${Math.ceil(wait)}` : `G  ${RAISEW.button}`);
+    setHidden(one('#prompt'), false), setText(one('#prompt'), wait > 0 ? `${RAISEW.button}  ${Math.ceil(wait)}` : `G  ${RAISEW.button}`);
   }
-  else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) ($('#prompt').hidden = false), ($('#prompt').textContent = 'G  BURN');
+  else if (!spot && !busy && !input.touch && game.mode === 'run' && (torchable(game.hero, game.room.enemies) || kindleable(game.hero, game.room.map))) setHidden(one('#prompt'), false), setText(one('#prompt'), 'G  BURN');
   // The touch buttons round ATTACK, and the unit frame (cluster.ts, unitframe.ts).
   cluster.update(game, spot, busy, now, game.mode === 'run' && card.near >= 0 ? (card.current >= 0 ? 'open' : 'shut') : '');
   unit.update(game, now);
@@ -564,13 +565,13 @@ function hud(now: number): void {
   gearHint.update(game.mode === 'wood' && !!game.wood && !game.wood.hold && game.wood.cut < 0 && game.taught().length >= 2, now);
   purse.update(game);
   // A laptop's empty crossbow: the key to wind it, on the prompt line.
-  if (!input.touch && $('#prompt').hidden && !busy && game.mode !== 'town' && WEAPONS[me.weapon].reloads && me.xbowEmpty) ($('#prompt').hidden = false), ($('#prompt').textContent = 'RELOAD: C');
+  if (!input.touch && one('#prompt').hidden && !busy && game.mode !== 'town' && WEAPONS[me.weapon].reloads && me.xbowEmpty) setHidden(one('#prompt'), false), setText(one('#prompt'), 'RELOAD: C');
   const list = game.mode === 'town' ? townTips : tips;
   if (now - tipAt > 6) {
     tipAt = now;
     $('#tip').textContent = list[tipI++ % list.length];
   }
-  $('#tip').classList.toggle('gone', game.mode === 'run' || (game.mode === 'yard' && guards >= 3));
+  toggle(one('#tip'), 'gone', game.mode === 'run' || (game.mode === 'yard' && guards >= 3));
 }
 
 /** The LEAVE button's question, alone and in a party. */

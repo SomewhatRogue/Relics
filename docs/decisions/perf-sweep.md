@@ -62,3 +62,38 @@ The spec is docs/design/perf-sweep.md. Branch `perf-sweep`. One entry a change, 
   server for every file on every visit. Music and sounds are not hashed and are left alone (Kyle to say).
 - Corrected in the spec: I first wrote that every visit downloads the script again. It asks again and is
   told "not modified"; the cost is the round trips.
+
+## 2026-11-17: slice C, draw waste (built by an Opus 5.5 agent, reviewed by Claude Fable 5.2)
+
+- `wolfdraw.ts`: a standing wolf's pose carries a number that is new every frame, and the sprite cache was
+  keyed on the pose: a new canvas a frame per wolf, never let go. Sprites are now kept by the picture
+  (`houndMap`'s own text), so 4,000 swings of the tail are 14 sprites; both lists capped at 96.
+  `hound.ts`: a cap of 512 only (its keys were already few). Only the cache; nothing of the look.
+- `doorsteps.ts`: a door whose marks cannot touch the canvas is skipped. Against the old body on the real town
+  map, flat and tilted views: the same rectangles on screen, the same pen left behind; 1,413 calls to 0 with
+  no door in view.
+- `domset.ts` (new) and `hud()`: the HUD's words, bars and marks are written only when the page would change,
+  each compared with what the page holds now. The edit in `main.ts` is inside `hud()` and one import.
+- `three/view3d.ts`: the scene's matrices are worked out by the first of the four passes and not again by
+  the other three. `three/lights3d.ts`: each light's score once, the same order.
+- Proof: `tests/doorsteps.test.ts`, `tests/lightsplace.test.ts`, `tests/wolfcache.test.ts`; `look.cjs` with no
+  page errors and the HUD read off the screenshots.
+
+## 2026-11-17: slice D, the second wire format (built by an Opus 5.5 agent, reviewed by Claude Fable 5.2)
+
+- A friend's hello says `v: 2`. The leader sends a message in the second format only when everyone it goes to
+  has said so; anyone else gets the first, byte for byte (the parity tests still hold it).
+- The second format (`client/wire2.ts`): the patch as an object, not text inside text; a hero's act clock as
+  `a0`, when the act began, worked back out by the friend as each patch is applied; a whole room's map only
+  when someone needs it or it changed. A change of format sends the room whole.
+- A friend with no room ignores a whole room that has no map and says hello (it would have thrown).
+- `api/_relay.ts` `deliver`: the text of a message is made once, not once per socket. The same bytes.
+- Proof: `tests/wire2.test.ts`, `tests/wire2host.test.ts` (two real guests, one fed each format, the same
+  room after every patch with heroes' clocks within a hundredth, the same own-hero state; mixed parties both
+  ways; an old leader with a new friend; the relay's texts), the five relay files, the co-op files.
+- Measured, the relay's whole envelope, KB/s: an ordinary room 15.2 to 11.7 (23% less), a deep dive 21.6 to
+  15.7 (27%), a swarm of 60 to three friends 189 to 158 (17%). **Less than the 35 to 40% I wrote in the spec**:
+  whole rooms still carry every hero's kit, and a Ranger's hound is a nested object sent whole whenever it
+  moves (about 18% of a second-format patch). Sending the hound's fields one by one is the next saving.
+- Left as found: the first format's text swap would rewrite a chat line ending in `"me`; a friend following a
+  new leader keeps its old room until its own hello brings the new one.

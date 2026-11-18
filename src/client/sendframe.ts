@@ -10,26 +10,30 @@ import type { ArenaRoom } from '../sim/room';
 import { expedView } from '../sim/exped';
 import { INTEREST, quietInto, ringFor } from './interest';
 import { rnd, snapOf, stateOf, type Snap, type Source } from './snap';
+import { heroInto } from './wire2';
 
 type State = ReturnType<typeof stateOf>;
 type Ent = Record<string, unknown>;
 /** Reads goblin `e`'s fields as they're to be sent into `keys` and `vals`, returning their count (interest.ts quietInto). */
 type Reader = (e: Ent, keys: string[], vals: unknown[]) => number;
+/** Reads hero `e` as it's to be sent (the second wire format's clock: wire2.ts heroInto). */
+type HeroReader = (e: Ent, skip: Set<string> | null, into: Snap) => Snap;
 
 /**
  * Entities as they are now, each read once. `keep`: kept for the send, for every friend's encoder to
  * share (nothing of what anyone was sent: it must not outlive the moment it was made for); else each
  * entity is read into the same two lists, good until the next, and only goblins at all (an encoder reads
- * the rest itself). `foes`: how to read a goblin from the live one (quiet clocks).
+ * the rest itself). `foes`: how to read a goblin from the live one (quiet clocks); `heroes`, if given,
+ * a hero (the second wire format's clock), else an encoder reads heroes itself.
  */
 export class Snaps implements Source {
   private by = new Map<string, Map<Ent, Snap>>();
   private scratch: Snap = { keys: [], vals: [] };
 
-  constructor(private readonly keep: boolean, private readonly foes?: Reader) {}
+  constructor(private readonly keep: boolean, private readonly foes?: Reader, private readonly heroes?: HeroReader) {}
 
   of(e: Ent, c: string, skip: Set<string> | null): Snap | null {
-    if (!this.keep) return c === 'enemies' && this.foes ? this.read(e, c, skip, this.scratch) : null;
+    if (!this.keep) return (c === 'enemies' && this.foes) || (c === 'heroes' && this.heroes) ? this.read(e, c, skip, this.scratch) : null;
     let m = this.by.get(c), s = m?.get(e);
     if (!m) this.by.set(c, (m = new Map()));
     if (!s) m.set(e, (s = this.read(e, c, skip, { keys: [], vals: [] })));
@@ -37,6 +41,7 @@ export class Snaps implements Source {
   }
 
   private read(e: Ent, c: string, skip: Set<string> | null, into: Snap): Snap {
+    if (c === 'heroes' && this.heroes) return this.heroes(e, skip, into);
     if (c !== 'enemies' || !this.foes) return snapOf(e, skip, into);
     const n = this.foes(e, into.keys, into.vals);
     for (let i = 0; i < n; i++) if (typeof into.vals[i] === 'number') into.vals[i] = rnd(into.vals[i] as number);
@@ -54,6 +59,7 @@ export class SendFrame {
   private view: { s: string; o: unknown } | null = null;
   /** The entities as they are now (goblins as quiet sends them), read once for every friend's Encoder. */
   readonly snaps: Snaps;
+  private snaps2: Snaps | null = null;
 
   constructor(readonly room: ArenaRoom, readonly now: number) {
     const s = stateOf(room), t = room.time;
@@ -64,6 +70,13 @@ export class SendFrame {
     // and their ids, so the friends' rings and keys are the same.)
     this.all = s;
     this.snaps = new Snaps(true, (e, keys, vals) => quietInto(e, t, keys, vals));
+  }
+
+  /** The snaps for wire format `v` (2: heroes' clocks as `a0` too, wire2.ts), each made once a send. */
+  snapsFor(v: number): Snaps {
+    if (v < 2) return this.snaps;
+    const t = this.time;
+    return (this.snaps2 ??= new Snaps(true, (e, keys, vals) => quietInto(e, t, keys, vals), (e, skip, into) => heroInto(e, t, skip, into)));
   }
 
   /** Whether this frame is still `room` as it is at `now`. */

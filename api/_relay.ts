@@ -366,18 +366,26 @@ export class Relay {
   }
 
   private deliver(room: string, env: Envelope): void {
+    // (The text is made once, the first time a socket needs it, and that same string goes to each: the
+    // envelope is the same object for everyone, so the text was the same each time it was made.)
+    let text: string | undefined, step: string | undefined;
     for (const c of this.rooms.get(room) ?? []) {
       if (env.k === 'msg') {
-        if (c.id !== env.from && (env.to === '*' || env.to === c.id)) this.tell(c, { t: 'msg', from: env.from, d: env.d, cn: env.cn });
+        if (c.id !== env.from && (env.to === '*' || env.to === c.id)) this.tellText(c, (text ??= JSON.stringify({ t: 'msg', from: env.from, d: env.d, cn: env.cn })));
       } else if ((env.k === 'hosted' || env.k === 'left') && c.id !== env.id) {
-        this.tell(c, { t: env.k, id: env.id, cn: env.cn, ...(env.k === 'hosted' && env.o !== this.origin ? { far: 1 } : {}) });
+        this.tellText(c, (text ??= JSON.stringify({ t: env.k, id: env.id, cn: env.cn, ...(env.k === 'hosted' && env.o !== this.origin ? { far: 1 } : {}) })));
         // Someone else hosts now: a host here that was replaced (it was away too long) steps down.
         if (env.k === 'hosted' && c.host) {
           c.host = false;
-          this.tell(c, { t: 'role', role: 'guest', host: env.id });
+          this.tellText(c, (step ??= JSON.stringify({ t: 'role', role: 'guest', host: env.id })));
         }
       }
     }
+  }
+
+  /** `text` (a message already made JSON) to `c`, if it's open. */
+  private tellText(c: Conn, text: string): void {
+    if (c.sock.readyState === 1) c.sock.send(text);
   }
 
   private async gone(c: Conn): Promise<void> {

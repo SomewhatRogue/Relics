@@ -51,6 +51,7 @@ import { asGuest } from './asguest';
 import { rejoinAfter } from './backoff';
 import { Playout } from './playout';
 import { OwnHero } from './ownhero';
+import { heroClocks, readBody, withClock, WIRE } from './wire2';
 
 /** Everyone gets the whole job this often; the friend first in line every SAVE_EVERY. */
 const SAVE_ALL = 8;
@@ -71,6 +72,8 @@ const r2 = (v: number) => Math.round(v * 100) / 100;
 const clock = () => performance.now() / 1000;
 /** The run as a patch carries it: without the heroes' board, which rides whole in the end and the saves (sim/score.ts). */
 const lean = (r: Run | null): Run | null => (r?.board ? { ...r, board: undefined } : r);
+/** The wire format to send a friend in: the highest both pages speak (wire2.ts). */
+const wire = (f: Friend) => Math.min(WIRE, f.v ?? 1);
 /** A hero's fields that are their kit (client/keepkit.ts). */
 const KIT = ['weapon', 'arms', 'bag', 'armor', 'legs', 'rings', 'belt', 'glow', 'relics', 'augments', 'found', 'relicItem'];
 /** A friend in the leader's room. */
@@ -82,6 +85,8 @@ export interface Friend {
   lag?: number;
   /** A press of theirs came at this tick of their room: once a tick has used it, their patch goes at once. */
   pressTick?: number;
+  /** The wire format their page speaks, from their latest hello (none: the first; wire2.ts). */
+  v?: number;
 }
 /** What the leader's game tells the host to send, and is told by it. */
 export interface HostGame {
@@ -145,14 +150,15 @@ export class CoopHost {
   private heard(m: RelayMsg): void {
     if (m.t === 'role' && m.role === 'guest' && m.host && m.host !== this.myId) return this.onRefused(m.host);
     if (m.t !== 'msg') return;
-    const f = this.friends.get(m.from), d = m.d as { t?: string; profile?: Profile; i?: Intent } | null;
+    const f = this.friends.get(m.from), d = m.d as { t?: string; profile?: Profile; i?: Intent; v?: unknown } | null;
     if (!f || !d) return;
     f.heard = this.now;
     // A friend headed home: out of the fight now, not in a minute.
     if (d.t === 'bye') return void (f.gone || ((f.gone = true), this.game.dropFriend(m.from)));
     if (d.t === 'hello' && d.profile && typeof d.profile === 'object') {
       const first = !f.profile || f.gone;
-      Object.assign(f, { profile: d.profile, fresh: true, gone: false });
+      // (Their wire format from each hello: a page reloaded onto an older build says none, and gets the first.)
+      Object.assign(f, { profile: d.profile, fresh: true, gone: false, v: typeof d.v === 'number' ? d.v : undefined });
       if (first) this.game.addFriend(m.from, f);
     } else if (d.t === 'in' && d.i && typeof d.i === 'object') {
       const i: Intent = { ...NO_INTENT, ...d.i }, r = this.game.roomOf(m.from) ?? this.game.room;
@@ -222,8 +228,8 @@ export class CoopHost {
         const k = g.keyOf(room), out = !room.indoors;
         const common = { k, t: room.time, w: sentClock(now), x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, acks };
         for (const id of ids) {
-          const f = this.friends.get(id)!, m = this.big.body(room, id, now, f.fresh || this.sentKey.get(id) !== k, common, this.evs.get(room) ?? []);
-          this.sock.send(id, { s: m.s });
+          const f = this.friends.get(id)!, m = this.big.msg(room, id, now, f.fresh || this.sentKey.get(id) !== k, common, this.evs.get(room) ?? [], wire(f));
+          this.sock.send(id, m.d);
           if (m.full) this.sentKey.set(id, k), (f.fresh = false);
         }
         continue;
@@ -232,10 +238,12 @@ export class CoopHost {
       // The run, the banner, names and the houses only when they change (or with a whole room), as a
       // big room sends them (bigsend.ts): a friend keeps what it last heard (roomsend.ts).
       const whole = ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
-      const { s, full } = this.sending.body(room, now, whole, { k, w: sentClock(now), slow: { hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names }, ev: this.evs.get(room) ?? [], acks });
+      // (One message for the room: the second wire format only if everyone it goes to speaks it, wire2.ts.)
+      const v = Math.min(...ids.map((id) => wire(this.friends.get(id)!)));
+      const { d, full } = this.sending.msg(room, now, whole, { k, w: sentClock(now), slow: { hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names }, ev: this.evs.get(room) ?? [], acks }, v);
       // Everyone in the one room: one message for them all; else each their own.
-      if (groups.size === 1) this.sock.send('*', { s });
-      else for (const id of ids) this.sock.send(id, { s });
+      if (groups.size === 1) this.sock.send('*', d);
+      else for (const id of ids) this.sock.send(id, d);
       if (full) ids.forEach((id) => (this.sentKey.set(id, k), (this.friends.get(id)!.fresh = false)));
     }
     // A room nobody's in any more starts afresh if anyone goes back.
@@ -361,7 +369,7 @@ export class CoopGuest {
 
   private hello(): void {
     this.helloAt = this.now;
-    this.sock.send(this.lead, { t: 'hello', profile: this.profile() });
+    this.sock.send(this.lead, { t: 'hello', profile: this.profile(), v: WIRE });
   }
 
   private heard(m: RelayMsg): void {
@@ -385,7 +393,8 @@ export class CoopGuest {
     this.heardLead = now;
     // (Heard: the next time the leader goes quiet, a rejoin starts from the first wait again.)
     if (this.rejoins) (this.rejoins = 0), (this.rejoinWait = -1);
-    const d = m.d as { s?: string; end?: { won: boolean; run: Run }; save?: string; bye?: number; stay?: number; to?: unknown };
+    const d = m.d as { s?: string; b?: unknown; end?: { won: boolean; run: Run }; save?: string; bye?: number; stay?: number; to?: unknown };
+    if (!d || typeof d !== 'object') return;
     // The leader's headed home and left the job to us: as good as gone, so whoever's first takes it
     // on in a moment (once their goodbye has freed the room).
     // (`stay`: their page only went out of sight. They hand it to the friend they name, keep their hero
@@ -396,14 +405,10 @@ export class CoopGuest {
     // (The end's run swaps ids like a patch does, so my own tallies are under `me`.)
     if (d.end) return void ((this.ended = asGuest(d.end, this.myId)), this.onEnd(this.ended!));
     if (typeof d.save === 'string') return void (this.save = d.save);
-    if (typeof d.s !== 'string') return;
-    // The leader's own hero is `me` in their room; in mine, I am. (Ids are quoted whole, so only ids change.)
-    let body: Body;
-    try {
-      body = JSON.parse(d.s.split('"me"').join('"@lead"').split(`"${this.myId}"`).join('"me"'));
-    } catch {
-      return;
-    }
+    // The leader's own hero is `me` in their room; in mine, I am. Either wire format (`{ s }` text, `{ b }`
+    // an object: wire2.ts); anything else isn't a patch.
+    const body = readBody(d, this.myId) as Body | null;
+    if (!body) return;
     // Played at the pace the leader made it, not the pace it came (playout.ts): applied in frame().
     // (`?playout=0`: applied as it comes, as before: the lag harness compares the two.)
     if (NO_PLAYOUT) return this.apply(body);
@@ -421,6 +426,9 @@ export class CoopGuest {
   private apply(body: Body): void {
     // (Only a whole room to start from: a new leader's changes mean nothing without it.)
     if (!body.f && (!this.room || this.key < 0 || body.k !== this.key)) return;
+    // (A whole room without its map, for a room I haven't got (the second wire format sends the map only when
+    // it's news): nothing to build it on. A hello has the leader send it whole with the map.)
+    if (body.f && (body.k !== this.key || !this.room) && !(body.map || (body.ms && body.run))) return void (this.now - this.helloAt > 2 && this.hello());
     if (body.f && (body.k !== this.key || !this.room) && (body.map || (body.ms && body.run))) {
       // A big room's map is built here from the run, never sent (shared/guestmap.ts: an Instance's area or an
       // expedition's); its buildings come near only.
@@ -449,9 +457,11 @@ export class CoopGuest {
     // My kit touched (a whole room, or a patch with my pack, hands or belt in it): my save looks again.
     if (body.f || (mine && KIT.some((f) => f in mine))) this.kitSeq++;
     const s = this.dec.apply(body.p, !!body.f) as unknown as Record<string, unknown[]>;
+    // (Heroes' act clocks from when their acts began, at this patch's time: the second wire format, wire2.ts.)
+    heroClocks(s.heroes as Record<string, unknown>[] | undefined, body.t);
     const meNow = (s.heroes as Hero[] | undefined)?.find((h) => h.id === 'me');
     // The leader's word on my hero (and the trip, from the newest input of mine it has used): ownhero.ts.
-    this.own.patch(mine as Record<string, unknown> | undefined, meNow, !!body.f, body.t, body.acks?.me, this.now);
+    this.own.patch(withClock(mine as Record<string, unknown> | undefined, meNow as unknown as Record<string, unknown> | undefined), meNow, !!body.f, body.t, body.acks?.me, this.now);
     const r = room as unknown as Record<string, unknown>;
     for (const [c, list] of Object.entries(s)) if (c === 'blocks') room.map.blocks = this.base ? mergeBlocks(this.base, list as Record<string, unknown>[], this.known) : (list as typeof room.map.blocks);
     else r[c] = list;
