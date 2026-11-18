@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const [,, file, framesStr] = process.argv; const frames = Number(framesStr);
+const p = JSON.parse(fs.readFileSync(file, 'utf8')), byId = new Map(p.nodes.map((n) => [n.id, n]));
+const parent = new Map(); for (const n of p.nodes) for (const c of n.children ?? []) parent.set(c, n.id);
+const self = new Map(), incl = new Map(); let js = 0, total = 0;
+p.samples.forEach((id, i) => { const n = byId.get(id), d = p.timeDeltas[i], f = n.callFrame.functionName; total += d; if (f === '(program)' || f === '(idle)') return; js += d;
+  const k = (f || '(anon)') + (n.callFrame.url ? '' : ' [native]'); self.set(k, (self.get(k) ?? 0) + d);
+  const seen = new Set(); for (let x = id; x !== undefined; x = parent.get(x)) { const m = byId.get(x), kk = m.callFrame.functionName || '(anon)'; if (!seen.has(kk)) seen.add(kk), incl.set(kk, (incl.get(kk) ?? 0) + d); } });
+console.log(`${file.split('/').pop()}: JS+GL-call time ${(js / 1000).toFixed(0)} ms over ${frames} frames = ${(js / 1000 / frames).toFixed(2)} ms/frame (wall ${(total/1000).toFixed(0)} ms)`);
+console.log(' self:'); for (const [k, v] of [...self].sort((a, b) => b[1] - a[1]).slice(0, 26)) console.log(`  ${(v / 1000 / frames).toFixed(3)} ms/f ${(100 * v / js).toFixed(1)}%  ${k}`);
+console.log(' inclusive:'); for (const [k, v] of [...incl].sort((a, b) => b[1] - a[1]).slice(0, 44)) console.log(`  ${(v / 1000 / frames).toFixed(3)} ms/f ${(100 * v / js).toFixed(1)}%  ${k}`);

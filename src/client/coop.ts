@@ -37,12 +37,13 @@ import { ArenaRoom } from '../sim/room';
 import type { Run } from '../sim/run';
 import { NO_INTENT, type FightEvent, type Intent } from '../sim/types';
 import { RelaySocket, type RelayMsg } from './relay';
-import { Decoder, Encoder, stateOf, type Patch } from './snap';
+import { Decoder, type Patch } from './snap';
+import { RoomSend } from './roomsend';
 import { keepJob } from './session';
 import { OwedBook } from './owed';
 import type { DoorMark } from './jobrooms';
 import { BigSend } from './bigsend';
-import { isBig, loud, mergeBlocks, quiet } from './interest';
+import { isBig, loud, mergeBlocks } from './interest';
 import { guestMap } from '../shared/guestmap';
 import { themeUnder } from '../shared/expedsky';
 import type { ExpedState } from '../sim/exped';
@@ -59,7 +60,7 @@ const SEND_SLACK = 0.004;
 const sentClock = (now: number) => Math.round(now * 1000) / 1000;
 /** A save due waits at most this long (s) for a frame without a patch. */
 const SAVE_WAIT = 0.2;
-const AWAY = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, FULL_EVERY = 4, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
+const AWAY = 5, BYE_WAIT = 2.5, SEND_EVERY = 0.05, GRACE = 60, LOST = 20, KEEP = 2, SAVE_EVERY = 2, TAKE = 9, TAKE_NEXT = 5;
 const NO_PLAYOUT = typeof location !== 'undefined' && new URLSearchParams(location.search).get('playout') === '0';
 /** A friend's stick and aim go to the leader at most this often (seconds); a button at once. */
 const STICK_EVERY = 0.1;
@@ -109,8 +110,8 @@ export interface HostGame {
 export class CoopHost {
   readonly friends = new Map<string, Friend>();
   private sock: RelaySocket;
-  /** Each room being sent: its own encoder (patches are against what was last sent of it) and last full. */
-  private sending = new Map<ArenaRoom, { enc: Encoder; fullAt: number; said: Record<string, string> }>();
+  /** Each ordinary room being sent: its own encoder (patches are against what was last sent of it) and last full (roomsend.ts). */
+  private sending = new RoomSend();
   /** Events since the last send, by room. */
   private evs = new Map<ArenaRoom, FightEvent[]>();
   /** The room each friend was last sent whole (a different one now: they get the whole of it). */
@@ -165,7 +166,7 @@ export class CoopHost {
 
   /** Send this room whole next time (its map changed under it: a house set alight with someone inside). */
   fresh(room: ArenaRoom): void {
-    this.sending.delete(room);
+    this.sending.reset(room);
     this.big.reset(room);
   }
 
@@ -227,27 +228,18 @@ export class CoopHost {
         }
         continue;
       }
-      const k = g.keyOf(room), st = this.sending.get(room) ?? { enc: new Encoder(), fullAt: -99, said: {} };
-      this.sending.set(room, st);
-      const full = now - st.fullAt > FULL_EVERY || ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
-      // (Quiet clocks, as a big room's: a goblin's act and its blow go as when they began, interest.ts.)
-      const p = st.enc.encode(quiet(stateOf(room), room.time), full), out = !room.indoors;
+      const k = g.keyOf(room), out = !room.indoors;
       // The run, the banner, names and the houses only when they change (or with a whole room), as a
-      // big room sends them (bigsend.ts): a friend keeps what it last heard.
-      const slow: Record<string, unknown> = {};
-      for (const [key, v] of Object.entries({ hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names })) {
-        const j = JSON.stringify(v);
-        if (full || st.said[key] !== j) (slow[key] = v), (st.said[key] = j);
-      }
-      const body = { p, f: full ? 1 : 0, k, map: full ? { ...room.map, blocks: [] } : undefined, t: room.time, w: sentClock(now), x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, ...slow, ev: this.evs.get(room) ?? [], acks };
-      const s = JSON.stringify(body);
+      // big room sends them (bigsend.ts): a friend keeps what it last heard (roomsend.ts).
+      const whole = ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
+      const { s, full } = this.sending.body(room, now, whole, { k, w: sentClock(now), slow: { hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names }, ev: this.evs.get(room) ?? [], acks });
       // Everyone in the one room: one message for them all; else each their own.
       if (groups.size === 1) this.sock.send('*', { s });
       else for (const id of ids) this.sock.send(id, { s });
-      if (full) (st.fullAt = now), ids.forEach((id) => (this.sentKey.set(id, k), (this.friends.get(id)!.fresh = false)));
+      if (full) ids.forEach((id) => (this.sentKey.set(id, k), (this.friends.get(id)!.fresh = false)));
     }
     // A room nobody's in any more starts afresh if anyone goes back.
-    for (const r of [...this.sending.keys()]) if (!groups.has(r)) this.sending.delete(r);
+    this.sending.keep((r) => groups.has(r));
     this.evs.clear();
     this.sentAt = now;
   }
