@@ -34,6 +34,7 @@ import { mend, shieldNear } from './holy';
 import { impacts } from './impacts';
 import { stepSleds } from './iceslide';
 import { release, stepCarry, tryGrab } from './grab';
+import { stepClimb } from './climb';
 import { newMinis, stepMinis, talkMini, type MiniState } from './minis';
 import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
@@ -503,6 +504,8 @@ export class ArenaRoom {
     // in it (sim/staffrings.ts); a wand's storm stream ticks on the goblin it holds (sim/stream.ts), and the
     // lightning it calls falls when it's due (sim/skystrike.ts).
     stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w), stepDomes(this.heroes, this.enemies, this.time), stepTraps(this.zones, w);
+    // A Rogue who keeps walking into an earth face goes up it (sim/climb.ts).
+    if (this.map.ledges) for (const h of this.heroes) stepClimb(this.map, h, this.intents.get(h.id), TICK, this.events);
     this.landings();
     if (this.minis.length) stepMinis(this, this.events);
     // Steam scalds; fire turns bodies to ash and ice to steam (sim/steam.ts, worldfire.ts).
@@ -593,7 +596,7 @@ export class ArenaRoom {
       if (b.dropped === undefined) continue;
       const v = b.dropped;
       b.dropped = undefined;
-      this.events.push({ k: 'land', x: b.x, y: b.y, dx: 0, dy: 1 });
+      this.events.push({ k: 'land', x: b.x, y: b.y, dx: 0, dy: 1, how: 'fall' });
       if (!('kind' in b) || v < HEIGHT.fallSpeed || isDead(b)) continue;
       if (!damage(b, HEIGHT.fallDmg, this.time, this.events, { how: 'fall', dx: b.kvx, dy: b.kvy }) && b.act !== 'carried')
         stun(b, b.lastBy, this.time, HEIGHT.fallStun, this.events);

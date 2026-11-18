@@ -110,21 +110,13 @@ describe('THE FIELDS, the plan', () => {
     expect(walk(open(plan(), 0).map, plan().map.hero).minY).toBeGreaterThan(9.3);
   });
 
-  it('stands level 0 in the headland and 1 in the stooks, every ledge edge a slope', () => {
+  it('is flat: no raised ground anywhere (elevation.md, "Raised areas")', () => {
     const m = plan().map, at = (x: number, y: number) => levelAt(m, x, y);
-    expect([at(48, 109), at(30, 90), at(70, 100), at(20, 70), at(40, 30), at(66, 24), at(20, 15), at(48, 6), at(48, 2)]).toEqual([0, 0, 0, 0, 1, 1, 1, 1, 2]);
-    const inRamp = (x: number, y: number) => m.ledges!.some((l) => l.ramps.some((r) => inArea(r, x, y)));
-    for (const l of m.ledges!) {
-      const lv = l.lv ?? 1, edges: [number, number, number, number][] = [];
-      for (let t = 0.25; t < l.w; t += 0.5) edges.push([l.x + t, l.y, 0, -1], [l.x + t, l.y + l.h, 0, 1]);
-      for (let t = 0.25; t < l.h; t += 0.5) edges.push([l.x, l.y + t, -1, 0], [l.x + l.w, l.y + t, 1, 0]);
-      for (const [x, y, dx, dy] of edges) {
-        const ox = x + dx * 0.3, oy = y + dy * 0.3;
-        if (ox < 0 || oy < 0 || ox > m.w || oy > m.h || at(ox, oy) >= lv) continue;
-        expect(inRamp(x, y), `face at ${x},${y}`).toBe(true);
-      }
-    }
+    expect(m.ledges ?? []).toEqual([]);
+    expect([at(48, 109), at(30, 90), at(20, 70), at(40, 30), at(66, 24), at(48, 6), at(48, 2)]).toEqual([0, 0, 0, 0, 0, 0, 0]);
+    for (const f of plan().foes) expect(f.z ?? 0).toBe(0);
   });
+
 
   it('keeps the road, the gates and the checkpoints clear', () => {
     for (const day of [3, 41, 77]) {

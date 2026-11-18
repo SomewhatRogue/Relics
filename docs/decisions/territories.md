@@ -240,3 +240,31 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   logs none.
 - Signed: Claude Fable 5.2.
 
+## 2026-11-18: the knoll played; landing, the hop, the Rogue's climb; Lowfurrow's slopes out
+
+- **Kyle on the knoll:** "MUCH better - notes though. 1) when things roll off the cliff or jump sometimes they're
+  not back on the 'flat' area. 2) should make it clear when they (or you) jump off and a little animation or puff
+  when you hit the ground. 3) maybe rogue can climb up those areas because... rogue. 4) actually really love this."
+  Of THE RISE: the lane with steps up its banks "reads really well"; the foot slope "reads really weirdly and it's
+  not clear what's up with it."
+- **1, landing.** The face is drawn leaning 0.55 of a tile out at its foot, but a body was stopped at the lip's line
+  and set down there, so it stood in the bank. `shared/arena.ts` `levels`: an earth ledge's wall, for a body below,
+  is out at its foot, and a body that comes off the lip is pushed clear of it in the same tick. One number,
+  `FACE_FOOT`, for the rule and the drawing (`client/three/landledges.ts` reads it). Town and board-room ledges are
+  untouched, to the tick: pushing a lander clear of those too flipped the daggers' balance bench
+  (`tests/threat.test.ts`), so only earth faces do it.
+- **2, the hop.** `client/three/hop.ts` (new): a body whose drawn height changes by 0.4 or more hops there over
+  0.3 s. Used for heroes, goblins and the freed in the 2.5D cards. The `land` event carries `how: 'fall' | 'climb'`
+  (`sim/types.ts`, one line); `client/fx.ts` holds the dust until the feet are down.
+- **3, the climb.** `sim/climb.ts` (new), `HEIGHT.climb` in `shared/tuning.ts` (one line), a line in
+  `sim/room.ts`. A class rule, at Kyle's word: **for the classes chat to know.**
+- **Lowfurrow.** THE FIELDS is flat (`lowfurrowfieldsland.ts` `heights` returns none). THE RISE: the foot slope,
+  the banks' south slopes and the brow are gone; the lane and the south are ground, the banks and the top one
+  level up, a five-wide flight of log steps at the lane's head (`lowfurrowriseland.ts`). A ramp up to six tiles
+  wide now draws as log steps.
+- Tests: `tests/knoll.test.ts` (10), `tests/hop.test.ts` (3), both Lowfurrow map tests brought to the new levels.
+  Played in the browser as a Rogue on the knoll: up the face, off the lip, landed clear of the bank.
+- **Not done:** the hop and the earth face in the flat view; a raised area on THE FIELDS; the proving hill still has
+  the old slopes.
+- Signed: Claude Fable 5.2.
+

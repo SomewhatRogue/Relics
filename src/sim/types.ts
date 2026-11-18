@@ -973,7 +973,8 @@ export type FightEvent =
   | { k: 'grasp'; x: number; y: number; dx: number; dy: number; r: number; arc: number; n: number }
   | { k: 'grasped'; x: number; y: number; x2: number; y2: number }
   | { k: 'weapon'; x: number; y: number; name: string }
-  | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number }
+  // (`how` on a 'land': off a height onto the ground below, or a Rogue up a face: sim/room.ts `landings`, sim/climb.ts.)
+  | { k: 'throw' | 'pinned' | 'javwall' | 'javstick' | 'hookfire' | 'latch' | 'yank' | 'land'; x: number; y: number; dx: number; dy: number; how?: 'fall' | 'climb' }
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }
   | { k: 'coal'; x: number; y: number; n: number }
   | { k: 'gold'; id: string; x: number; y: number; n: number }

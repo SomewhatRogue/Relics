@@ -309,7 +309,8 @@ export const VARIANTS = {
  */
 export const WOOD_EASE = { windup: 1.5, dmg: 0.7, stoker: 1.25, heal: true, mends: 0.25 };
 
-export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8 };
+// (`climb`: seconds a Rogue walks into an earth face before going up it: sim/climb.ts.)
+export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8, climb: 0.4 };
 
 export const SWING_DUMMY = {
   every: 2.6,
