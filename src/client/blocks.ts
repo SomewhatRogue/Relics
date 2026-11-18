@@ -4,6 +4,7 @@
  * block is its footprint with a front wall rising from its bottom edge and a roof over it. Wooden ones
  * on a job char as they're hurt, burn with flames and smoke, and fall in to rubble.
  */
+import { dressStall } from './stalldress';
 import { roofNamed } from './hallnames';
 import { doorSlot, drawSideDoor } from './doorside';
 import { drawGate } from './gatedraw';
@@ -77,6 +78,8 @@ function paint(b: Block, st: number): HTMLCanvasElement {
     rect(Math.round(w / 2 - 2), 1, 4, 4, '#14121a');
   }
   if (b.kind === 'stall') for (let x = 0; x < w; x += 6) rect(x, 0, 3, roofH, l.ridge);
+  // (A named market stall's own awning and wares: stalldress.ts.)
+  if (b.kind === 'stall') dressStall(rect, b, w, roofH, wallY);
   // (A building's name goes up on its roof over everything instead: hallnames.ts.)
   if (b.label && !roofNamed(b)) {
     const tw = textWidth(b.label), ty = b.kind === 'stall' ? wallY + 3 : wallY + 2;

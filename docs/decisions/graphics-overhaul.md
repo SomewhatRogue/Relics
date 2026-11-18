@@ -469,3 +469,28 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Kyle also asks to rethink how the pawn stall and the tailor look on the square ("kind of hard to tell and see
   them"): not started; to be proposed and mocked first.
   (Claude Fable 5.2)
+
+## 2026-11-17: the tailor gets her own stall, and the market's stalls are told apart
+
+- Kyle: "I also want us to look and rethink how the Pawnshop and Tailor look. Maybe we put them in a house and give
+  them more space or something right or decorate their stalls, kind of hard to tell and see them." Offered: dress the
+  stalls first, a shop building as the other way. Kyle: "Do it."
+- **Found on the way**: Hester stood half a tile from MARKET ROW's spot at the seam of the two stalls, so a hero
+  walking up from the square reached the market, not her. She was also drawn as the plain villager, the same as
+  Tobin beside her.
+- **Her own stall**, labelled TAILOR, the other side of the town hall's door from Tobin's (new town: 32.5 to 36.1
+  by 18.5 to 21.1; she stands before it at 34.3, 21.7). The row now reads TAILOR, the hall's door, PAWN, the
+  trader's. Standing before her, or to her side, reaches her; before Tobin, him; at the seam, MARKET ROW as before.
+  The first spot tried put a lamp post inside the stall and tests/layout.test.ts caught it, so it sits 0.5 west.
+- **Awnings**: the tailor's blue and cream, the pawnbroker's black and old gold; the trader's keeps the market's red
+  and cream. **Wares** hang from the awning's front lip, where they show under it from the square: four cloaks with
+  their hems on hers; a lantern, a pot, a shield and a sword on his. Nothing hung is walked into.
+  `src/client/three/stalldress3d.ts` for 2.5D, `src/client/stalldress.ts` for the flat view (the awning, and one ware
+  either side of the name). One line each in walls3d.ts and blocks.ts asks them.
+- **Hester's look** (`tailor` in npcs.ts LOOKS): a madder dress edged in gold, a pale apron, grey hair past her ears
+  and a bun.
+- Checked: tsc clean; the town tests; the full suite (see the commit); both views on the laptop size by day, and who
+  is reached from four standing places. Not looked at: the phone shot and the night shot (taken, no errors), a real
+  phone. In the flat view a vendor still stands over the middle of their stall's name, as Tobin always has.
+- Not done: a shop building for either. Say if the stalls are not enough.
+  (Claude Fable 5.2)

@@ -20,6 +20,7 @@ import { fence3d } from './fence3d';
 import { post3d } from './posts3d';
 import { isPost } from '../postkind';
 import { gate3d } from './gate3d';
+import { stallDress3d, stallStripes3d } from './stalldress3d';
 
 export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, number, number][]): THREE.Group {
   const r = new Seed(Math.round(b.x * 29 + b.y * 13 + 3)), L = LOOK[b.kind], B = new Boxes();
@@ -55,7 +56,10 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
     post3d(B, b);
   } else if (b.kind === 'stall') {
     for (const [px, pz] of [[x0 + 0.1, z0 + 0.1], [x1 - 0.1, z0 + 0.1], [x0 + 0.1, z1 - 0.1], [x1 - 0.1, z1 - 0.1]]) B.b(px, 0, pz, 0.09, 1.25, 0.09, 0x4a3420);
-    for (let x = x0, i = 0; x < x1 - 0.01; x += 0.4, i++) B.c(x + 0.2, 1.3, cz + 0.1, 0.4, 0.06, b.h + 0.4, i % 2 ? dk(hex(L.ridge)) : dk(roof), 0, 0.18);
+    // (A named market stall's own awning and wares: stalldress3d.ts.)
+    const stripes = stallStripes3d(b);
+    for (let x = x0, i = 0; x < x1 - 0.01; x += 0.4, i++) B.c(x + 0.2, 1.3, cz + 0.1, 0.4, 0.06, b.h + 0.4, i % 2 ? dk(stripes?.[1] ?? hex(L.ridge)) : dk(stripes?.[0] ?? roof), 0, 0.18);
+    stallDress3d(B, b, dk);
     B.b(cx, 0, z1 - 0.25, b.w - 0.2, 0.6, 0.35, dk(wall));
   } else if (b.kind === 'tent') {
     tent(B, x0, x1, z0, z1, dk(roof), dk(hex(L.ridge)), r);

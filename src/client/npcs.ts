@@ -32,6 +32,8 @@ export const LOOKS: Record<string, Look> = {
   trader: { body: '#8a5a2a', trim: '#d8c48a', skin: DARK, hair: [['r', 3, 1, 6, 2, '#7a2a6a'], ['p', 9, 3, '#7a2a6a']] },
   farmer: { body: '#6a5a3a', trim: '#3a2a1a', skin: SKIN, hair: [['r', 2, 1, 8, 1, '#c8b060'], ['r', 4, 0, 4, 1, '#c8b060']] },
   villager: { body: '#5a5a48', trim: '#3a3a2a', skin: SKIN, apron: '#8a8070', hair: [['r', 4, 1, 4, 1, '#5a3d22']] },
+  // Hester the tailor: a madder dress edged in gold, a pale apron, grey hair down past her ears, a bun.
+  tailor: { body: '#6a2434', trim: '#c8962e', skin: SKIN, apron: '#d8d0bc', hair: [['r', 3, 1, 6, 2, '#9a94a0'], ['r', 3, 2, 1, 4, '#9a94a0'], ['r', 8, 2, 1, 4, '#9a94a0'], ['r', 5, 0, 2, 1, '#9a94a0']] },
   // Hew: soot to the elbows, a white beard, a leather apron.
   burner: { body: '#2a2622', trim: '#4a3a2a', skin: DARK, apron: '#5a3d22', hair: [['r', 4, 1, 4, 1, '#e8e4ee'], ['r', 4, 5, 4, 2, '#e8e4ee'], ['r', 3, 0, 6, 1, '#3a3020']] },
   elder: { body: '#4a4652', trim: '#6a6470', skin: SKIN, hair: [['r', 4, 1, 4, 1, '#d8d4de'], ['r', 4, 5, 4, 2, '#d8d4de']] },

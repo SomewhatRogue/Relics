@@ -109,6 +109,8 @@ export function oldTown(w: WorldState): GameMap {
     { x: 45, y: 13, w: 6, h: 3.5, kind: 'house', label: "HUNTERS' LODGE", door: 'lodge' },
     { x: 37, y: 11.5, w: 3, h: 2, kind: 'stall', label: marketIn(w) ? 'TRADER' : 'EMPTY' },
     { x: 37, y: 15.5, w: 3, h: 2, kind: 'stall', label: 'PAWN' },
+    // Hester the tailor's (shared/clothlook.ts): her own stall, the other side of the hall's door in the new town.
+    { x: 37.4, y: 19.6, w: 3, h: 2, kind: 'stall', label: 'TAILOR' },
     // The counting house: the roof came in during the siege and was never put back; the vault under it held (Keeper Edda).
     { x: 2.4, y: 22.4, w: 6, h: 3.2, kind: 'hall', label: 'COUNTING HOUSE', door: 'bank', worn: true },
     { x: 22.9, y: 12.6, w: 2.4, h: 0.6, kind: 'stall', label: 'JOBS' },
@@ -157,8 +159,8 @@ export function oldTown(w: WorldState): GameMap {
   if (marketIn(w)) npcs.push(n('DESSA THE TRADER', 38.5, 13.9, 'market', 'trader'));
   // Tobin buys anything at the far stall, and sells it back for a while (client/stores.ts).
   npcs.push(n('TOBIN THE PAWNBROKER', 38.5, 18.1, 'merchant', 'villager'));
-  // Hester makes the cloth a hero has earned, by Tobin's stall (shared/clothlook.ts, client/clothui.ts).
-  npcs.push(n('HESTER THE TAILOR', 38.5, 20.3, 'tailor', 'villager'));
+  // Hester makes the cloth a hero has earned, at her own stall (shared/clothlook.ts, client/clothui.ts).
+  npcs.push(n('HESTER THE TAILOR', 38.9, 22.2, 'tailor', 'tailor'));
   // The town's pastimes (shared/pastimes.ts): Old Pennock lends rods at the millpond, Abel keeps the butts.
   npcs.push(n('OLD PENNOCK', MILLPOND.npc[0], MILLPOND.npc[1], 'fish', 'elder'), n('ABEL', BUTTS.npc[0], BUTTS.npc[1], 'range', 'ranger'));
   if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));

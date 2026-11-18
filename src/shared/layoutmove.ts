@@ -72,6 +72,8 @@ export const OVERRIDES: { kind: string; at: [number, number]; to: [number, numbe
   { kind: 'tree', at: [22.6, 25.3], to: null }, { kind: 'tree', at: [33.6, 25.3], to: null }, { kind: 'post', at: [36.3, 12.2], to: null },
   // (Tobin's pawn stall the one nearer the square, the traders' the far one: Kyle, 2026-11-16.)
   { kind: 'stall', at: [38.5, 12.5], to: [43.5, 19.8] }, { kind: 'stall', at: [38.5, 16.5], to: [39.8, 19.8] },
+  // (The tailor's, the other side of the town hall's door from Tobin's: clear of the door and of MARKET ROW's spot.)
+  { kind: 'stall', at: [38.9, 20.6], to: [34.3, 19.8] },
   { kind: 'spot', at: [38.5, 14.2], to: [41.65, 22.2] }, { kind: 'crates', at: [42.25, 14.45], to: [46.1, 20.7] },
   { kind: 'crate', at: [40.5, 12.7], to: [46.2, 19.2] }, { kind: 'crate', at: [40.5, 16.6], to: [45.9, 22.4] },
   { kind: 'gallows', at: [37.3, 24.85], to: [51, 17.05] }, { kind: 'rubble', at: [26.2, 31.5], to: [37, 38.3] },
@@ -92,7 +94,7 @@ export const ROUNDS: Record<string, { path: [number, number][]; stops?: number[]
   'RECRUIT WAT': { path: [[24.4, 33.1]] },
   'DESSA THE TRADER': { path: [[43.5, 21.7]] },
   'TOBIN THE PAWNBROKER': { path: [[39.8, 21.7]] },
-  'HESTER THE TAILOR': { path: [[41.65, 21.7]] },
+  'HESTER THE TAILOR': { path: [[34.3, 21.7]] },
 };
 /** The ducks' file out of the millpond and back. */
 export const DUCKS: [number, number][] = [[32.2, 46.7], [33.8, 48.1], [34.4, 50.1], [31.8, 50.7], [29.6, 49.1], [31.4, 47.7]];
