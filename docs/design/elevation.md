@@ -45,8 +45,15 @@ all built the same morning:
 7. **Nobody lands in the bank.** An earth face leans out at its foot. A body below stops at that foot, and whoever
    comes off the lip is set down clear of it, from the one number the face is drawn with (`FACE_FOOT`,
    `shared/arena.ts`).
-8. **Coming off is seen.** The body is drawn hopping (a small rise, the fall), and dust is kicked up where its feet
-   land (`client/three/hop.ts`, the `land` event's `how`), in both views.
+8. **Coming off is a jump.** The body is drawn leaping: up and out from where it stood on the lip, carried across
+   to where the rules set it down, its shadow already on the ground there, dust and a shake when its feet land
+   (`client/three/hop.ts`, the `land` event's `how`), in both views. (First built as a short drop; Kyle: "it still
+   feels like I'm falling off the edge, not jumping and landing.")
+12. **Everything is drawn at the height it happens at.** Shots, thrown things and every effect made by the fight
+    (sparks, numbers, words, rings) are drawn at the level of the ground they happen on; a shot flies from the
+    level it was loosed at and sinks to the ground by the end of its reach (`shared/heights.ts` `shotLv`,
+    `client/fx.ts` `atLevel`). They were all drawn at level 0, so from a height a cast seemed to come from under
+    the caster (Kyle: "like it thinks I'm under myself").
 9. **A Rogue climbs.** A Rogue who keeps walking into an earth face for `HEIGHT.climb` seconds (0.4) goes up it and
    stands on the lip. No button. Everyone else goes round by the steps (`sim/climb.ts`).
 

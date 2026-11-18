@@ -25,8 +25,8 @@ const BACK = new THREE.Vector3(0, SIN, COS);
 const DISC = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 
 export type Draw = (c: Ctx, x: number, y: number) => void;
-/** `xray`: shown as a silhouette behind walls (a hero, or 'foe' in a foe's colour); `pool`: the shadow's radius (tiles); `bias`: nearer the camera (tiles), to sit over another at the same spot. */
-export interface Opts { xray?: boolean | 'foe'; pool?: number; bias?: number }
+/** `xray`: shown as a silhouette behind walls (a hero, or 'foe' in a foe's colour); `pool`: the shadow's radius (tiles); `bias`: nearer the camera (tiles), to sit over another at the same spot; `ground`: where the shadow lies (x, height, z) when the figure is in the air over it (a leap off a height: hop.ts). */
+export interface Opts { xray?: boolean | 'foe'; pool?: number; bias?: number; ground?: [number, number, number] }
 
 interface Slot { i: number; card: THREE.Mesh; pool: THREE.Mesh; seen: number; hero: boolean | 'foe' }
 
@@ -112,7 +112,8 @@ export class Figs {
     card.visible = true;
     card.layers.set(o.xray ? XRAY_LAYER : 0);
     s.pool.visible = !!o.pool;
-    if (o.pool) s.pool.position.set(x, h + 0.01, z), s.pool.scale.set(o.pool * 2.4, 1, o.pool * 1.6);
+    const [gx, gh, gz] = o.ground ?? [x, h, z];
+    if (o.pool) s.pool.position.set(gx, gh + 0.01, gz), s.pool.scale.set(o.pool * 2.4, 1, o.pool * 1.6);
   }
 
   /** Hide whoever wasn't drawn this frame and send the atlas up if anything was. */

@@ -293,3 +293,25 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
 - Tests: `tests/highrange.test.ts` (6, on the knoll). Pictures taken of the flat knoll and the flat Rise.
 - Signed: Claude Fable 5.2.
 
+## 2026-11-18, midday: the leap, and effects at their own height
+
+- **Kyle:** "better but it still feels like I'm falling off the edge not jumping and landing." And: "when I'm up
+  the hill I feel like... it's casting or attacking from BELOW where my character / weapon is? like it thinks I'm
+  UNDER myself."
+- **The leap** (`client/three/hop.ts`). It was the height alone easing down over 0.3 s after the rules had already
+  moved the body out from the lip in one tick, so it read as a slide and a drop. Now `hopAt` carries the body from
+  where it was last drawn on the lip to where it was set down, along an arc that rises 0.7 of a tile first, in
+  0.42 s. In 2.5D its shadow lies on the ground where it will land (`figs3d.ts`, a `ground` option on a card).
+  More dust and a firmer shake on landing, none before it.
+- **Under myself.** In both views every shot and every effect of the fight was placed at level 0. Fixed at the two
+  places they are made: `client/fx.ts` stamps whatever a fight event adds with the level of the ground the event
+  happened on (`atLevel`), and both views draw it that high; shots, javelins, coals and ground rings take the
+  ground's height where they are, a shot from the level it left (`shared/heights.ts` `shotLv`). A goblin's own
+  telegraph was already at its level.
+- Drawing only: nothing in `src/sim` changed. Seen in the browser as a Mage on the knoll in both views: BURNING,
+  the numbers and the hit all on the goblin on the top. The leap is in a unit test of its arc and carry; I could
+  not catch it mid-air in a still.
+- **The Graphics sweep chat's files touched again** (`client/scene.ts`, `client/fx.ts`, `three/actors3d.ts`,
+  `three/overlay3d.ts`, `three/figs3d.ts`), a line or a few each, at Kyle's word here.
+- Signed: Claude Fable 5.2.
+
