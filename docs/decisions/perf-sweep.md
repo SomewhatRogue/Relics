@@ -97,3 +97,16 @@ The spec is docs/design/perf-sweep.md. Branch `perf-sweep`. One entry a change, 
   moves (about 18% of a second-format patch). Sending the hound's fields one by one is the next saving.
 - Left as found: the first format's text swap would rewrite a chat line ending in `"me`; a friend following a
   new leader keeps its old room until its own hello brings the new one.
+
+## 2026-11-17: main merged in, and the last checks (Claude Fable 5.2)
+
+- `main` had moved (the mini quests: a new collection in `snap.ts`, a new field on the room). Merged; only the
+  board conflicted. The reference copies in `tests/perfref/` were taken again from `main`'s files, and the sim
+  parity record was taken again from `main` untouched (a separate worktree with only the two test files
+  added), then the merged branch held to it: the same, hash for hash.
+- The whole suite on the merged branch: 250 files, 2,106 tests, green. `npm run check` clean.
+- In a browser: `look.cjs` with no page errors; the same profile script on `main` and the branch
+  (`scripts/perf/browser.cjs`), numbers in the spec, section 9.
+- `scripts/party-online.cjs` (two browsers, a local relay with Redis, both pages on the new build): 25 of 30
+  steps pass, the same five failing as on `main` in this container.
+- `scripts/smoke.cjs` fails on `main` itself; noted on the board for its owner.

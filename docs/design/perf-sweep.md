@@ -307,3 +307,34 @@ against this page before the next pair starts.
 
 Scripts used: `scripts/bigmap/swarm.ts` (existing), and three new ones kept in `scripts/perf/`
 (`wire.ts`, `simprof.ts`, `browser.cjs`).
+
+## 9. What landed (2026-11-17, branch `perf-sweep`)
+
+| Slice | Result | Proof |
+| --- | --- | --- |
+| A, the leader's sending | CPU a send for three friends: swarm of 60, 5.7 ms to 1.7; 300 goblins, 3.1 to 1.0; an ordinary room, 0.68 to 0.40 | every message the same text as main's code over 13 seeded fights, and a fuzz of odd rooms |
+| B, the fight | CPU a tick: swarm 1.64 ms to 1.33 (19% less); 300 goblins 1.70 to 1.54 (9%); an ordinary room 0.26 to 0.23 (12%) | 13 seeded fights hash for hash with main |
+| C, drawing | the wolf sprite leak gone (in a browser profile `drawWolf` 2.45 ms a frame to 0.63, no canvas made); doorsteps 0.60 ms a frame to 0.26 in town; the HUD's own writes only on change; one matrix walk for four passes | recorded draw calls equal; no page errors |
+| D, the second wire format | bytes on the wire: an ordinary room 15.2 KB/s to 11.7 (23% less), a deep dive 21.6 to 15.7 (27%), a swarm to three friends 189 to 158 (17%); only between pages that both say `v: 2` | two real guests, one fed each format, the same room after every patch; mixed parties; the first format unchanged to the byte |
+| E, caching | `/assets/*` immutable | to read on the preview deployment |
+
+Whole suite on the merged branch: 250 files, 2,106 tests, green. `npm run check` clean.
+
+**Where I was wrong.** Section 7 expected 35 to 40% fewer bytes from the second format; it is 23 to 27% in
+ordinary rooms. Whole rooms still carry every hero's kit every 4 s, and a Ranger's hound is a nested object
+sent whole whenever it moves (about 18% of a second-format patch). And section 1 first said every visit
+downloaded the script again; it only asks again.
+
+**Found on the way, not mine to fix here.**
+- `scripts/smoke.cjs` (the CI walk-through) fails on `main` as it stands, the same way as on this branch:
+  "hero not made", "no prologue". The start screen changed (the hero ring) and the script did not. CI is red.
+- `scripts/party-online.cjs`: 25 of 30 steps pass on `main` and on this branch, the same five failing on both
+  in this container (three are timing checks at four frames a second under software GL; "room 2: Kyle moves
+  on" and "Sam is in it with him" fail on both and want a look on a real machine).
+
+**Next, in order of worth.**
+1. The whole job every 2 s (N5): still the largest stream to the friend first in line.
+2. The hound and other nested objects in patches: fields one by one.
+3. `notice` in `sim/enemies.ts`: 13.6% of the big map's tick.
+4. The figure atlas upload and the shadow map, measured on a real phone (`?perf=1`).
+5. The hub files, in a quiet hour.
