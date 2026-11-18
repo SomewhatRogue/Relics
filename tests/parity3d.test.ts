@@ -86,10 +86,11 @@ describe('2.5D parity, second pass', () => {
     expect(top(B).max.y).toBeGreaterThan(2.4);
   });
 
-  it('rounds the boulders, bushes, bales and clamps, and stands the stones upright', () => {
+  it('rounds the boulders, bushes and clamps, stands the stones upright and the hay in a stook', () => {
     // Boxes are 36 corners, a rounded lump (an icosahedron) 60: rocks were three boxes, bushes three,
-    // bales and clamps two, a standing stone one.
-    const want: [Round['kind'], number][] = [['rock', 3 * 60], ['bush', 3 * 60 + 2 * 36], ['hay', 2 * 36 + 2 * 60], ['clamp', 3 * 60 + 2 * 36], ['stone', 3 * 36 + 60]];
+    // clamps two, a standing stone one. Hay is a stook of 30 boxes (nine sheaves in two tiers, its core in two,
+    // the gap at its foot, the twine, eight tufts of ears): no rounded lump, which read as a loaf.
+    const want: [Round['kind'], number][] = [['rock', 3 * 60], ['bush', 3 * 60 + 2 * 36], ['hay', 30 * 36], ['clamp', 3 * 60 + 2 * 36], ['stone', 3 * 36 + 60]];
     for (const [kind, n] of want) {
       const B = new Boxes();
       addRound(B, { kind, x: 4, y: 4, r: 0.45 }, [], new Seed(1));

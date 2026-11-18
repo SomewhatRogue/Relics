@@ -6,6 +6,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { levelAt, solid } from '../src/shared/arena';
+import { LAND_WORDS } from '../src/shared/landwords';
 import { GATE_WORDS } from '../src/shared/opencutwords';
 import { landJob, TERR, territoryPlan } from '../src/shared/territory';
 import { HERO, INSTANCE, TICK } from '../src/shared/tuning';
@@ -47,7 +48,7 @@ describe('a territory in the fight', () => {
     expect(run.stretch ?? 0).toBe(0);
     expect(solid(room.map.blocks[st().gate!])).toBe(true);
     expect(gateReady(run, room)).toBe(false);
-    expect(goal(run, room).text).toContain(GATE_WORDS.guards);
+    expect(goal(run, room).text).toContain(LAND_WORDS.guards);
     expect(goal(run, room).done).toBe(false);
   });
 
@@ -111,7 +112,7 @@ describe('a territory in the fight', () => {
     expect(lastStretch(run, room.map)).toBe(true);
     const g = goal(run, room);
     expect(g.done).toBe(false);
-    expect(g.text).not.toContain(GATE_WORDS.guards);
+    expect(g.text).not.toContain(LAND_WORDS.guards);
     expect(g.text).toContain('to free');
   });
 

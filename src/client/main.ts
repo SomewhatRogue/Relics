@@ -1,4 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { canTalk } from '../sim/minis';
 import { deepTestHero } from './deeptest';
 import { store } from './save';
 import { normName } from '../shared/names';
@@ -312,6 +313,9 @@ if (new URLSearchParams(location.search).has('gearlook')) void import('./gearloo
 void recovery.start((s) => title.open && (game.adopt(s), title.show(), true));
 /** Talk to whoever you stand by, use the spot, or go in at the door (E or F on a laptop, USE on a phone). */
 const use = () => {
+  // Beside someone on the land with something to say (a mini quest's giver: sim/minis.ts): the room decides it, by
+  // the same press as GRAB, which reads TALK there.
+  if (game.mode === 'run' && !panel.open && !title.open && game.room.minis?.length && canTalk(game.room, game.hero)) return void input.intent.grabSeq++;
   const n = game.near();
   // A drop of yours at your feet (and nothing else here): LOOK opens its card (lootcard.ts).
   if (!n?.chest && !n?.door && game.mode === 'run' && card.near >= 0 && !panel.open && !title.open) return card.current >= 0 ? card.shut() : card.open(card.near);

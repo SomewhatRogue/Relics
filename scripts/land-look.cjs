@@ -12,8 +12,8 @@ const SIZES = { phone: { viewport: { width: 390, height: 844 }, deviceScaleFacto
 // Where to stand, by territory: [name, x, y].
 const SPOTS = {
   // Lowfurrow Fields, map 0 (THE FIELDS) and map 1 (THE RISE): shared/lowfurrowfields.ts, lowfurrowrise.ts.
-  lowfurrow: [],
-  'lowfurrow:1': [],
+  lowfurrow: [['in', 48, 107], ['camp', 45, 97], ['farcart', 66, 92], ['gate1', 48, 82], ['road', 48, 70], ['scarecrow', 66, 69], ['pond', 22, 53], ['rye', 31, 55], ['lynchet', 40, 63], ['hovel', 72, 53], ['loading', 40, 31], ['rick', 61, 28], ['drain', 48, 12], ['farbank', 48, 5]],
+  'lowfurrow:1': [['in', 48, 99], ['foot', 40, 89], ['lanefoot', 41, 84], ['lane', 39, 76], ['lanebend', 43, 68], ['archers', 31, 78], ['orchard', 22, 74.5], ['barnyard', 66, 77], ['lanehead', 48, 60], ['gate', 50, 57.6], ['fold', 46, 43], ['hut', 63, 31], ['pond', 27, 33], ['brow', 50, 11]],
   hill: [['in', 22, 92], ['headland', 20, 83], ['gate1', 22, 79], ['lynchet1', 20, 72.5], ['strips', 16, 65], ['stooks', 22, 51], ['drain', 22, 45], ['lane', 22, 33], ['bank', 12, 34], ['barn', 33, 35], ['foldyard', 20, 14], ['out', 22, 4], ['slope1', 20, 70], ['bankslope', 10, 40], ['lanefoot', 19, 30], ['banklip', 27, 30], ['cages2', 15, 15.5], ['cages1', 15, 53]],
 };
 

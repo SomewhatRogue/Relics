@@ -26,11 +26,17 @@ export function tallPerson(parts: Part[]): Sprite {
 
 const LEG = '#3a3036', FAR = '#26202a', BOOT = '#2a2024', SOLE = '#1a1410';
 
-/** The hair round to the side (see the top of the file). */
-function sideHair(q: Part): Part | null {
+/**
+ * The hair round to the side (see the top of the file). `hat`: deep headwear (a helm, a steel cap, a hood: three rows
+ * or more from the crown) sits square on the head and its rim comes forward over the brow. Shifted back like hair it
+ * overhung the back of the head and read as a peaked cap worn the wrong way round, so a guard walking east looked
+ * as if he faced west (Kyle, 2026-11-17: "guards who are walking to the right seem to be looking left").
+ */
+function sideHair(q: Part, hat = false): Part | null {
   if (q[0] !== 'r') return q;
   const [, x, y, w, h, col] = q as unknown as [string, number, number, number, number, string];
   if (w >= 7) return q;
+  if (hat) return y < 2 ? q : ['r', x + 1, y, w, h, col];
   if (y >= 5) return ['r', x + 1, y, w, h, col];
   if (y >= 2 && x >= 7) return null;
   return ['r', x - 1, y, w, h, col];
@@ -48,8 +54,9 @@ function profile(l: Look, apart: boolean): Sprite {
   parts.push(...((apart ? [['r', 4, 7, 2, 3, l.body], ['r', 3, 10, 2, 1, l.trim], ['p', 3, 11, l.skin]] : [['r', 5, 7, 2, 3, l.body], ['r', 5, 10, 2, 1, l.trim], ['p', 6, 11, l.skin]]) as Part[]));
   // The head facing east: one eye, the nose, the mouth.
   parts.push(['e', 6, 3.5, 3, 3.4, l.skin], ['p', 9, 4, l.skin], ['p', 8, 4, '#141218'], ['p', 8, 5, '#6a3a2a']);
+  const hat = l.hair.some((q) => q[0] === 'r' && (q[2] as number) <= 0 && (q[3] as number) >= 6 && (q[4] as number) >= 3);
   for (const q of l.hair) {
-    const s = sideHair(q);
+    const s = sideHair(q, hat);
     if (s) parts.push(s);
   }
   return tallPerson(parts);

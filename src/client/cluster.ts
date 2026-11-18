@@ -10,6 +10,8 @@
  * Warrior's always shows GRAB (dimmed till there's something to take hold of). (The Warrior's roar, TAUNT,
  * sat in the dodge's place till it became TAUNT GUARD, held on the block: 2026-11-06.)
  */
+import { canTalk } from '../sim/minis';
+import { MINI_WORDS } from '../shared/miniwords';
 import { resting } from '../sim/brake';
 import { ropedNear } from '../sim/drover';
 import { staitheGrabbable } from '../sim/staithebits';
@@ -180,12 +182,14 @@ export class Cluster {
     const burn = !raise && (!!torchable(me, room.enemies) || (mode === 'run' && (!!kindleable(me, room.map) || (!!room.map.lamps && darkLampBy(me, room.enemies) >= 0))));
     // By an instance puzzle's lever, unsolved: PULL puts the tubs back (sim/tubs.ts).
     const pull = mode === 'run' && !raise && !cut && !burn && !carrying && (room.map.puzzles ?? []).some((p) => unsolvedAt(room.map, room.props, p) && Math.hypot(p.lever.x - me.x, p.lever.y - me.y) <= PUZZLE.lever);
-    const lifter = kit.cls === 'WARRIOR', active = can || raise || rise === 'ready' || burn || cut || shove || pull;
+    // Beside someone on the land with something to say (a mini quest's giver: sim/minis.ts): TALK.
+    const talk = mode === 'run' && !raise && !rise && !carrying && !!room.minis?.length && !!canTalk(room, me);
+    const lifter = kit.cls === 'WARRIOR', active = can || raise || rise === 'ready' || burn || cut || shove || pull || talk;
     // A drop at your feet with nothing else here: LOOK opens its card.
     const looking = !!look && !busy && !spot?.chest && !spot?.door;
     const use = (!!spot && !busy && (mode !== 'run' || !!spot.chest || !!spot.pet)) || looking;
-    const what: IconId = raise || cut || rise ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
-    const word = cut ? 'CUT FREE' : shove ? STAITHE_WORDS.shove : raise ? 'HELP UP' : rise ? RAISEW.button : burn ? 'BURN' : carrying ? 'THROW' : pull ? PUZZLE_WORDS.lever : 'GRAB';
+    const what: IconId = raise || cut || rise || talk ? 'help' : burn ? 'burn' : carrying ? 'throw' : 'grab';
+    const word = cut ? 'CUT FREE' : shove ? STAITHE_WORDS.shove : raise ? 'HELP UP' : rise ? RAISEW.button : talk ? MINI_WORDS.talk : burn ? 'BURN' : carrying ? 'THROW' : pull ? PUZZLE_WORDS.lever : 'GRAB';
     // (With no dodge the slot has its own place, so a USE or OPEN can show beside it.)
     const showGrab = (active || lifter || !!rise) && (!dodges || !(use && !active && mode !== 'town'));
     const wait = rise === 'wait' ? riseWait(me, room.time) : 0;

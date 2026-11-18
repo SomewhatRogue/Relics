@@ -205,17 +205,22 @@ is small: sickles in the stubble, a handcart on its side.
 | Zone | **The fold yard** (about 72 by 38). A big sheepfold of hurdles used as a pen, the dipping pens, a dewpond, a shepherd's hut with its door hanging | A pack with a drummer round the pen; three at the hut | Kill the pack at the pen; break the pen's cage |
 | Out | The stile on the brow | You look back down over both maps; the trampled lane goes on north without you | |
 
-**Mini quests** (lines are drafts for the lore keeper and the line editor):
+**Mini quests** (lines through the lore keeper and the line editor, 2026-11-17: `shared/miniwords.ts`):
 
-1. **Her sister, in the rye** (find). *The giver:* a woman under the near handcart on the headland, who won't come
-   out till the two at the dinner are dead. *She says* her sister ran for the pond when the hungry came. *It wakes:*
-   three beaters working through the rye east of the pond toward the willows. *Done:* the beaters dead, the sister
-   comes out of the willows, and both walk home. Two of the five.
-2. **The one that tied the rope** (hunt). *The giver:* a man up a pear tree in the orchard, who watched the nine
-   roped. *He says* the big one that tied them didn't go on with the rest: it's asleep by the barn's carts. *It
-   wakes:* that one (an elite, never a named butcher) and two with it, on the barn's shoulder. *Done:* he climbs
-   down and walks home, and the rope's end it kept is on the ground by the carts: nine knots **[NEW; the lore
-   keeper to say whether a counted rope says too much]**, with a chest. One of the five.
+1. **Her sister, by the pond** (find). *The giver:* a woman under the near handcart on the headland, who won't come
+   out till the goblins at the dinner are dead. *She says:* "My sister ran into the rye when they came, toward the
+   pond. She's not one to stay quiet this long." *It wakes:* three beaters working through the rye east of the pond
+   toward the willows, the way hunters beat cover. *Done:* the beaters dead, the sister steps out of the willows
+   (seen before she speaks: a voice from cover is the mimic's ground), and both walk home. Two of the five; they are
+   sisters, and never named.
+2. **The one that tied the rope** (hunt). *The giver:* a man up a pear tree in the orchard, who saw the others
+   roped. *He says:* "I'm not coming down. The big one that tied the rope is still here, asleep outside the barn."
+   *It wakes:* that one (an elite, never a butcher, nothing to do with the Doorkeepers) and two with it, outside the
+   barn. *Done:* when a hero is back in sight of the tree he comes down ("I saw it fall. I'll come down now, if
+   you'll look the other way.") and walks home; by the carts is a chest and what's left of the coil, one end cut,
+   two or three neck loops tied ready and never used. One of the five. **No counted rope** (the lore keeper: nine
+   knots would be a second way of counting, the Tally Man's ground, and would hand a first-job player the number).
+   He says no number, no name, and not which way they went.
 
 - **The five:** two in cages on the road (the stooks, the pen), three by the mini quests. A hero who walks past
   both brings home two, and the recap says how many of the five came home.

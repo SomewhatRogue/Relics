@@ -53,8 +53,14 @@ export function clearTop(block: SayBlock, up: readonly SayBlock[]): number {
   return b.y;
 }
 
+/** How far off the side of the screen (pixels) a speaker can be and still have their words drawn, kept on at its edge. */
+const OFF = 48;
+
 /** Draw a block centred on `x` with its top at `y`, kept inside the `w` pixels across the view. */
 export function drawBlock(g: CanvasRenderingContext2D, lines: readonly string[], x: number, y: number, col: string, w: number): void {
+  // Said by someone well off the side of the screen: not drawn, rather than pinned to its edge as if said there
+  // (a mini quest's giver, half a field away when their goblins fall: fxmini.ts).
+  if (x < -OFF || x > w + OFF) return;
   lines.forEach((s, i) => {
     const tw = textWidth(s), left = Math.min(Math.max(2, Math.round(x - tw / 2)), Math.max(2, w - tw - 2));
     drawText(g, s, left, Math.round(y) + i * lineH(), col);
