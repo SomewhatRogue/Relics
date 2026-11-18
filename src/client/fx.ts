@@ -2,6 +2,7 @@
  * Effects that only decorate: sparks, blood (that stays on the floor), floating calls ("BLOCK"),
  * rings, screen shake and short flashes of light. Cosmetic, so Math.random is fine here.
  */
+import { HOP } from './three/hop';
 import { cutFx } from './fxcut';
 import { RAISEW } from './raisewords';
 import { foeFx } from './fxfoes';
@@ -49,6 +50,9 @@ interface Ring { x: number; y: number; life: number; max: number; col: string; s
 interface Arc { x: number; y: number; x2: number; y2: number; life: number; col?: string; /** A straight line (a glinted bolt's path), not lightning. */ straight?: boolean }
 interface Flash extends Light { life: number; max: number }
 
+/** Kicked-up earth: where a body lands off a height. */
+const DUST = ['#8a7a5a', '#6a5c44', '#a89a78', '#57503e'];
+
 export class Fx {
   /** Deaths a moment apart (a bunch splattered by one swing). */
   private bunch = 0;
@@ -65,6 +69,8 @@ export class Fx {
   wet = new Wet();
   /** Coins flying into whoever picked up a pile (coinfly.ts). */
   coins = new CoinFly();
+  /** Effects due in a moment (the dust when a hop lands). */
+  private soon: { in: number; fn: () => void }[] = [];
   /** The room's heroes (set each frame), so an effect can tell whose cast it was. */
   heroes: readonly Hero[] = [];
 
@@ -227,7 +233,18 @@ export class Fx {
       case 'yank':
         this.say(x, y - 24, 'YANK', '#9fe8ff');
         break;
+      case 'short':
+        // A shot loosed up at someone on a height from too far (sim/highrange.ts).
+        this.say(x, y - 24, 'OUT OF REACH', '#b8b2c4');
+        break;
       case 'land':
+        // Off a height, or a Rogue up a face: the body is drawn hopping (three/hop.ts), so the dust waits for its feet.
+        if (ev.how) {
+          const up = ev.how === 'climb';
+          this.burst(x, y, up ? 5 : 4, DUST, 28, false);
+          this.soon.push({ in: HOP.time * (up ? 0.2 : 0.95), fn: () => (this.burst(x + (up ? ev.dx * 22 : 0), y + (up ? ev.dy * 22 : 0), up ? 6 : 16, DUST, up ? 30 : 60, false, 90), up || (this.shake = Math.max(this.shake, 1.8))) });
+          break;
+        }
         this.burst(x, y, 8, ['#6a647a', '#57525e'], 35, false);
         this.shake = Math.max(this.shake, 1.5);
         break;
@@ -340,6 +357,8 @@ export class Fx {
 
   update(dt: number): void {
     this.coins.update(dt, this.heroes);
+    for (const q of this.soon) if ((q.in -= dt) <= 0) q.fn();
+    if (this.soon.length) this.soon = this.soon.filter((q) => q.in > 0);
     for (const p of this.parts) {
       p.life -= dt;
       p.vy += p.grav * dt;

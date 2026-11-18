@@ -11,7 +11,7 @@ import { addPoise } from './poise';
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
 import { highShot } from './afoot';
-import { CRIT, FLINCH, HERO, LODESTONE, NET, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
+import { CRIT, FLINCH, HEIGHT, HERO, LODESTONE, NET, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
 import { bendShot } from './mark';
 import { damage, frozen, isDead, isDummy } from './damage';
@@ -218,6 +218,11 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
     for (const e of w.enemies) {
       if (isDead(e) || e.act === 'carried' || b.hit.includes(e.id)) continue;
       if (Math.hypot(e.x - b.x, e.y - b.y) > e.radius + (b.kind === 'orb' || b.kind === 'net' ? 0.3 : 0.14)) continue;
+      // Loosed up at someone on a height: each level is more to cover, and from too far it falls short (sim/highrange.ts).
+      if (b.hz !== undefined && (e.z ?? 0) > b.hz && b.travelled + HEIGHT.reach * ((e.z ?? 0) - b.hz) > b.range) {
+        b.hit.push(e.id), w.ev.push({ k: 'short', x: e.x, y: e.y });
+        continue;
+      }
       if (b.kind === 'net') return openNet(w, b), false;
       if (b.burst) return blast(w, b, b.x, b.y), false;
       b.hit.push(e.id);

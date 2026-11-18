@@ -6,7 +6,7 @@
  * Drawing only: shared/arena.ts decides who stands where; shared/heights.ts gives the eye its smooth height.
  */
 import * as THREE from 'three';
-import { inArea, type Area, type GameMap, type Ledge } from '../../shared/arena';
+import { FACE_FOOT, inArea, type Area, type GameMap, type Ledge } from '../../shared/arena';
 import { groundLv, runOf, upRamp } from '../../shared/heights';
 import { Boxes, Seed, jit } from './boxes';
 import { VCOL } from './mats';
@@ -21,10 +21,11 @@ const ONE: C = [1, 1, 1];
 // The bank's earth, stones and turf, through the world's grade (../darkgold.ts).
 const EARTH = graded(0x6e5a44, 'floor'), FOOT = graded(0x2a2119, 'floor'), STONE = graded(0x5e5a56, 'wall'), CORE = 0x1c1915;
 const TURF = graded(0x34421f, 'floor'), LIT = graded(0x56683a, 'floor'), STRAW = graded(0x7a6c40, 'floor');
-// Steps: the trodden tread, the log risers, the pale cut top of a post. A ramp this narrow or narrower is steps.
-const TROD = graded(0x5a4a36, 'floor'), LOG = graded(0x4a3824, 'wall'), LOG2 = graded(0x3a2c1c, 'wall'), POST_CAP = graded(0xa89468, 'wall'), STEPS_MAX = 3.2;
-/** How far a face's foot leans out from its top (tiles), so a bank seen side-on still shows; its shadow's reach. */
-const BAT = 0.55, SHADOW = 1.8;
+// Steps: the trodden tread, the log risers, the pale cut top of a post. A ramp this narrow or narrower is steps
+// (a way up a raised area, a flight across a lane); a wider one is a grass slope.
+const TROD = graded(0x5a4a36, 'floor'), LOG = graded(0x4a3824, 'wall'), LOG2 = graded(0x3a2c1c, 'wall'), POST_CAP = graded(0xa89468, 'wall'), STEPS_MAX = 6;
+/** How far a face's foot leans out from its top (the rules' own number: a body stops there), so a bank seen side-on still shows; its shadow's reach. */
+const BAT = FACE_FOOT, SHADOW = 1.8;
 
 /** Triangles with colours (VCOL, the shade) or the floor's UVs (the ground). */
 class Tris {

@@ -1,13 +1,13 @@
 /**
  * THE RISE's ground (shared/lowfurrowrise.ts; docs/design/territories.md, "Map 2, THE RISE"; heights by
- * docs/design/elevation.md): the hedges down both sides, the hill's four levels, the road, the fold gate's line,
+ * docs/design/elevation.md): the hedges down both sides, the sunken lane's banks, the road, the fold gate's line,
  * the drain at the foot and the soil. All fixed by hand: the seed only bends the road a little between its fixed
  * points and shuffles the hedge's elms and brambles. Pure.
  *
- *   level 0: the far bank of the drain (y 93 to 104). Level 1: the foot of the hill and the hollow lane, a slope
- *   whose line wanders at about y 92. Level 2: both banks either side of the lane (their lane sides earth faces,
- *   with a slope at each south end and sheep tracks up them) and the whole top north of y 59. Level 3: the brow,
- *   north of y 15.5, up a slope the whole width.
+ *   The land is flat but for the lane (docs/design/elevation.md, "Raised areas"). Level 0: the foot of the hill and
+ *   the hollow lane. Level 1: both banks either side of the lane (earth faces to the lane and at their south ends,
+ *   log steps worn up them from the lane) and the whole top north of y 59, which the lane climbs onto by a flight
+ *   of steps at its head. Nothing ever drops away to the north.
  */
 import { levelAt, type Area, type GameMap, type Ledge, type Stretch } from './arena.js';
 import { block, claim, patch, type Kit, type Line, type P } from './expedkit.js';
@@ -31,34 +31,21 @@ export const TRACKS: ['W' | 'E', number][] = [['W', 81], ['W', 74.5], ['W', 66.5
 /** The fold gate in its line across the top. */
 export const GATE: Area = { x: 48.4, y: 54.3, w: 3.2, h: 1.4 };
 
-/** A slope along a ledge's south edge, run a tile and a half past its ends so a step between two never leaves a scrap of face. */
-function southSlope(l: Ledge): Ledge {
-  l.ramps.push({ x: l.x - 1.5, y: l.y + l.h - 1, w: l.w + 3, h: 2 });
-  return l;
-}
+/** The steps at the lane's head, up onto the top: a flight across the road, the bank's face either side of it. */
+export const HEAD: Area = { x: 46.7, y: 58, w: 5, h: 2 };
 
-/** The heights (fixed). */
+/** The heights (fixed): the two banks and the top, one level up; everything else is ground. */
 export function heights(): Ledge[] {
-  // Level 1: the foot steps up at about y 92, its line wandering in three boxes.
-  const foot = [southSlope(ledge(0, 0, 36, 92.8, 1)), southSlope(ledge(35, 0, 27, 91.6, 1)), southSlope(ledge(61, 0, 35, 92.2, 1))];
-  // Level 2: the banks, band by band (the first with a slope at its south end), and the top.
   const banks: Ledge[] = [];
-  LANE.forEach(([y0, y1, wx, ex], i) => {
-    const w = ledge(0, y0, wx, y1 - y0, 2), e = ledge(ex, y0, RISE.w - ex, y1 - y0, 2);
-    if (i === 0) southSlope(w), southSlope(e);
-    banks.push(w, e);
-  });
+  for (const [y0, y1, wx, ex] of LANE) banks.push(ledge(0, y0, wx, y1 - y0, 1), ledge(ex, y0, RISE.w - ex, y1 - y0, 1));
   for (const [side, y] of TRACKS) {
     const b = banks.find((l, i) => (i % 2 === 0) === (side === 'W') && y > l.y + 0.5 && y < l.y + l.h - 0.5)!;
     const fx = side === 'W' ? b.x + b.w : b.x;
     b.ramps.push({ x: fx - 1, y: y - 1.5, w: 2, h: 3 });
   }
-  const top = ledge(0, 0, RISE.w, 59, 2);
-  // The lane climbs onto the top by a slope across its width.
-  top.ramps.push({ x: 42.5, y: 58, w: 10.5, h: 2 });
-  // Level 3: the brow, up a slope the whole width.
-  const brow = ledge(0, 0, RISE.w, 15.5, 3, ['S']);
-  return [...foot, ...banks, top, brow];
+  const top = ledge(0, 0, RISE.w, 59, 1);
+  top.ramps.push({ ...HEAD });
+  return [...banks, top];
 }
 
 /** A hedge's line down one side: [y, x] points (fixed: it wanders a tile or two). */

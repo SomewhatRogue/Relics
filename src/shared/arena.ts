@@ -529,10 +529,12 @@ function levels(m: GameMap, p: { x: number; y: number; z?: number; dropped?: num
     p.z = at;
     return;
   }
-  // Walked off an edge: down to whatever is below.
+  // Walked off an edge: down to whatever is below, and clear of the foot of what you came off (an earth face leans
+  // out at its foot: nobody lands in the bank).
   if (z > at) {
     p.z = at;
     p.dropped = Math.hypot(p.kvx ?? 0, p.kvy ?? 0);
+    for (const l of m.ledges!) if (footOf(l) && (l.lv ?? 1) > at) box(p, r + footOf(l), l);
     return;
   }
   // Set down well inside a raised level (arriving, coming out of a door), on a map that allows it: stand on it.
@@ -540,9 +542,16 @@ function levels(m: GameMap, p: { x: number; y: number; z?: number; dropped?: num
     p.z = at;
     return;
   }
-  // Anything higher than where you stand is a wall.
-  for (const l of m.ledges!) if ((l.lv ?? 1) > z) box(p, r, l);
+  // Anything higher than where you stand is a wall, out to the foot of its face.
+  for (const l of m.ledges!) if ((l.lv ?? 1) > z) box(p, r + footOf(l), l);
 }
+
+/**
+ * How far an earth face's foot leans out from its top (tiles). Drawn and decided from the one number: the 2.5D bank
+ * leans this far (client/three/landledges.ts) and a body below stops this far out, so nobody stands in the bank.
+ */
+export const FACE_FOOT = 0.55;
+const footOf = (l: Ledge) => (l.kind === 'earth' ? FACE_FOOT : 0);
 
 /** Push a circle out of a box. */
 function box(p: { x: number; y: number }, r: number, b: { x: number; y: number; w: number; h: number }): void {

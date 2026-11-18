@@ -1,14 +1,13 @@
 /**
  * THE FIELDS' ground (shared/lowfurrowfields.ts): the side hedges the whole length, wandering a tile or two,
  * with field trees behind them and a fallen elm across one gap; the green lane in from the Wickhold road and
- * its stile; the headland hedge with the field gate; the first lynchet across the strips (three ledges whose
- * south edges sit at different heights, every edge a slope, so it reads as a contour); the drain with its
- * bridge; the far bank climbing out; the road and the mown rides; the soil. All fixed but the road's small
+ * its stile; the headland hedge with the field gate; the drain with its bridge; the far bank; the road and the
+ * mown rides; the soil. The ground is flat. All fixed but the road's small
  * bends, the trees behind the hedges and the jitter of the soil. Pure.
  */
 import { levelAt, type GameMap, type Ledge, type Stretch } from './arena.js';
 import { block, claim, mark, patch, path, round, unclaimed, type Kit, type Line, type P } from './expedkit.js';
-import { gateIn, layRoad, ledge, road, thickHedge } from './terrkit.js';
+import { gateIn, layRoad, road, thickHedge } from './terrkit.js';
 import { hedgeLine, xAt, type FieldsLand } from './lowfurrowfieldskit.js';
 
 export const FIELDS = { w: 96, h: 112 };
@@ -46,15 +45,12 @@ export const STRIPS: { x0: number; x1: number; is: 'rye' | 'oat' | 'fallow' | 'r
 export const POND = [{ x: 14.4, y: 50.6, w: 9.4, h: 5.6 }, { x: 15.6, y: 49.8, w: 6.2, h: 1 }, { x: 16.2, y: 56, w: 6, h: 1 }];
 
 /**
- * The heights. The first lynchet: level 1 north of a line that wanders (y 61.5 in the west, a bay up to 48.6
- * where the pond lies in its hollow, 59 in the middle, 60.5 in the east), each ledge's south edge sloped and
- * slopes down every short edge where two meet. The far bank climbs to level 2 out of the drain, by a slope
- * across the whole width.
+ * The heights: none. The fields are flat (docs/design/elevation.md, "Raised areas": land is flat by default, and a
+ * slope seen from above does not read). The lynchet and the far bank that were here are gone; the pond lies in its
+ * willows on the level.
  */
 export function heights(): Ledge[] {
-  const a = ledge(0, 0, 10.4, 61.5, 1, ['S']), bay = ledge(9.4, 0, 19.6, 48.6, 1, ['S']), b = ledge(28, 0, 38, 59, 1, ['S']), c = ledge(64, 0, 32, 60.5, 1, ['S']);
-  a.ramps.push({ x: 9.4, y: 47.6, w: 2, h: 14.9 }), b.ramps.push({ x: 27, y: 47.6, w: 2, h: 12.4 }), c.ramps.push({ x: 63, y: 58, w: 2, h: 3.6 });
-  return [a, bay, b, c, ledge(0, 0, FIELDS.w, 4.4, 2, ['S'])];
+  return [];
 }
 
 /** The side hedges, the field trees behind them, the fallen elm across its gap, brambles in front. */

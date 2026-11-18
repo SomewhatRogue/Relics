@@ -240,3 +240,56 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   logs none.
 - Signed: Claude Fable 5.2.
 
+## 2026-11-18: the knoll played; landing, the hop, the Rogue's climb; Lowfurrow's slopes out
+
+- **Kyle on the knoll:** "MUCH better - notes though. 1) when things roll off the cliff or jump sometimes they're
+  not back on the 'flat' area. 2) should make it clear when they (or you) jump off and a little animation or puff
+  when you hit the ground. 3) maybe rogue can climb up those areas because... rogue. 4) actually really love this."
+  Of THE RISE: the lane with steps up its banks "reads really well"; the foot slope "reads really weirdly and it's
+  not clear what's up with it."
+- **1, landing.** The face is drawn leaning 0.55 of a tile out at its foot, but a body was stopped at the lip's line
+  and set down there, so it stood in the bank. `shared/arena.ts` `levels`: an earth ledge's wall, for a body below,
+  is out at its foot, and a body that comes off the lip is pushed clear of it in the same tick. One number,
+  `FACE_FOOT`, for the rule and the drawing (`client/three/landledges.ts` reads it). Town and board-room ledges are
+  untouched, to the tick: pushing a lander clear of those too flipped the daggers' balance bench
+  (`tests/threat.test.ts`), so only earth faces do it.
+- **2, the hop.** `client/three/hop.ts` (new): a body whose drawn height changes by 0.4 or more hops there over
+  0.3 s. Used for heroes, goblins and the freed in the 2.5D cards. The `land` event carries `how: 'fall' | 'climb'`
+  (`sim/types.ts`, one line); `client/fx.ts` holds the dust until the feet are down.
+- **3, the climb.** `sim/climb.ts` (new), `HEIGHT.climb` in `shared/tuning.ts` (one line), a line in
+  `sim/room.ts`. A class rule, at Kyle's word: **for the classes chat to know.**
+- **Lowfurrow.** THE FIELDS is flat (`lowfurrowfieldsland.ts` `heights` returns none). THE RISE: the foot slope,
+  the banks' south slopes and the brow are gone; the lane and the south are ground, the banks and the top one
+  level up, a five-wide flight of log steps at the lane's head (`lowfurrowriseland.ts`). A ramp up to six tiles
+  wide now draws as log steps.
+- Tests: `tests/knoll.test.ts` (10), `tests/hop.test.ts` (3), both Lowfurrow map tests brought to the new levels.
+  Played in the browser as a Rogue on the knoll: up the face, off the lip, landed clear of the bank.
+- **Not done:** the hop and the earth face in the flat view; a raised area on THE FIELDS; the proving hill still has
+  the old slopes.
+- Signed: Claude Fable 5.2.
+
+## 2026-11-18, later: height is range; the flat view catches up
+
+- **Kyle:** "I'd like us to fix the flat view sort of stuff because that's almost accessibility. I also want that if
+  there's ranged units above a hill firing down onto it, they almost get like a range increase or range bonus, but
+  have to be kind of closer to the edge. Whereas if you're firing up, you almost get a range decrease. Like it
+  takes that as extra space... so that there's benefits to taking higher zones."
+- **Height is range** (`sim/highrange.ts`, new; `HEIGHT.reach` 1.5, `edge` 2.5, `least` 3 in `shared/tuning.ts`).
+  My reading of "closer to the edge": the gain is only for a shot loosed with lower ground within 2.5 tiles ahead.
+  Tiles a level, not a share of the range, so a short bow and a long one gain and lose the same.
+  - A hero's shot (`sim/room.ts` where it stamps the shot's level; `sim/bolts.ts` where it meets a goblin): further
+    from a lip; loosed up from too far it passes under them, once, with a `short` event (`sim/types.ts`).
+  - A goblin archer (`sim/enemies.ts`, its three lines): the same shift on its reach and its telegraph's length,
+    and on a height it walks to the lip and stops. Off a land nothing changes: the shift is 0 and the old lines run.
+  - **For the classes and balance chats:** this is a fight rule for every ranged kit on a land. The javelin, the
+    hook, a Mage's holds, the smite and thrown flasks do not feel it yet.
+- **OUT OF REACH** over a goblin a shot fell short of (`client/fx.ts`). Not sent to the lore keeper or the line
+  editor: two words already on screen ("OUT", "NOTHING IN REACH").
+- **The flat view** (`client/levelpaint.ts`, `client/scene.ts`: **the Graphics sweep chat's files**, changed at
+  Kyle's word here). A land's raised area was painted as the town's grey masonry with stone steps. Now an earth
+  bank with a turf lip and a shadow at its foot, its sides leaning out by the rules' own `FACE_FOOT`, log steps
+  with a post either side of their foot. Heroes, goblins and the freed hop there as in 2.5D. Two things it also
+  put right on a land: a goblin on level 2 was drawn as if on a roof, and the freed were not lifted to their level.
+- Tests: `tests/highrange.test.ts` (6, on the knoll). Pictures taken of the flat knoll and the flat Rise.
+- Signed: Claude Fable 5.2.
+
