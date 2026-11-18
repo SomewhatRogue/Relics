@@ -289,7 +289,8 @@ describe('a friend sees it', () => {
     for (const s of socks) s.onMessage({ t: 'role', role: 'peer' });
     for (let k = 0; k < 20; k++) frame(0.1);
     expect(tb.here(b.room.map.name).length).toBe(1);
-    const sends = () => socks.reduce((n, s) => n + s.sent.length, 0);
+    // (Not counting where they stand, which is said again now and then to those in the same place: townfolk.ts NEAR.)
+    const sends = () => socks.reduce((n, s) => n + (s.sent as Record<string, unknown>[]).filter((d) => d?.k !== 'me').length, 0);
     // Half a minute stood still, then pet: one word more than standing still, and nothing per frame after.
     for (let k = 0; k < 300; k++) frame(0.1);
     const before = sends();

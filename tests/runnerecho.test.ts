@@ -80,14 +80,21 @@ describe("others' runners", () => {
     pass(sb, sa, 'bbb'), pass(sa, sb, 'aaa');
     expect(b.runners('WICKHOLD')).toEqual([]);
     // A's runner out: one word, then nothing more while it runs (the age isn't news).
-    let sent = 0;
+    let sent = 0, was = 'undefined';
     for (let t = 1; t < 4; t += 0.05) {
       a.step(me(10, [0, 10.5, 4, 0, Math.round((t - 1) * 100) / 100]), t, 0.05);
-      sent += sa.sent.length;
+      // (Counted by what they say of the runner: where A stands is said again a moment on, to those in the
+      // same place, in case the word was lost: townfolk.ts SETTLE.)
+      for (const m of sa.sent) {
+        const k = JSON.stringify((m.d as { r?: number[] }).r?.slice(0, 4));
+        if (k !== was) sent++, (was = k);
+      }
       pass(sa, sb, 'aaa');
     }
     expect(sent).toBe(1);
-    expect(b.runners('WICKHOLD')).toMatchObject([{ id: 'aaa', w: [0, 10.5, 4, 0, 0] }]);
+    // (The word said again carries the phase's age as it then is, so the age B works out is the same.)
+    const [heardA] = b.runners('WICKHOLD');
+    expect([heardA.id, ...heardA.w.slice(0, 4)]).toEqual(['aaa', 0, 10.5, 4, 0]);
     // The line: a second word.
     a.step(me(10, [0, 10.5, 4, 1, 0]), 5, 0.05);
     expect(sa.sent.length).toBe(1);
