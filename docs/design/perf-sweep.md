@@ -25,8 +25,11 @@ marked "read, not measured".
    21 KB, as many bytes as all the patches put together).
 5. **A wolf standing still builds a new sprite canvas every frame and never frees it.** A cache keyed
    on a number that changes every frame: a leak and a per-frame cost.
-6. **Nothing is cached by the browser.** Every asset is served `no-cache`, so every visit re-asks for
-   all 2.8 MB of script, though the file names are already content-hashed.
+6. **The browser is told never to trust its cache.** `vercel.json` sets no cache headers, so Vercel's
+   default applies (`max-age=0, must-revalidate`): every visit asks the server again about each of the 25
+   files of the page, and about every sound the first time it plays, though the script and style file
+   names are already content-hashed. The files come back "not modified", so it costs round trips, not
+   the 2.8 MB again.
 7. **Four files carry the game and every chat has to edit them.** `game.ts` (1,883 lines),
    `main.ts` (897 lines, 158 imports, one frame function several hundred lines long), `scene.ts`
    (747 lines, 112 imports) and `room.ts` (one tick calling about 80 systems in a fixed order).
@@ -42,7 +45,7 @@ found nothing obscene in the request pattern: no polling loops, no per-tick HTTP
 
 | What | When | Size | Verdict |
 | --- | --- | --- | --- |
-| Page load | once | 25 requests, 2.8 MB script (1.9 MB in one chunk), 152 KB CSS | all `no-cache`: see N7 |
+| Page load | once | 25 requests, 2.8 MB script (1.9 MB in one chunk), 152 KB CSS | revalidated every visit: see N7 |
 | `/api/world` GET | on load, then at most once a minute in town | about 5 KB | fine |
 | `/api/room` WebSocket | one per room; ping every 4 s; swapped every 4 min | 10 bytes a ping | fine |
 | `/api/room?meter=1` | settings panel only | tiny | fine |
@@ -111,7 +114,12 @@ wrong takeover is worse than the bytes. Recommendation in section 7.
 and `tell` runs `JSON.stringify` on the same envelope each time. With 4 players that is 3 identical
 stringifies of every patch on the function's CPU (Hobby gives 4 CPU-hours).
 
-**N7. No cache headers.** `vercel.json` sets none, so hashed assets revalidate on every visit.
+**N7. No cache headers.** `vercel.json` sets none, so Vercel sends its default,
+`public, max-age=0, must-revalidate`: the browser keeps the files but must ask about each one on every
+visit (a conditional request each, answered 304). Vercel's own guidance for content-hashed files is
+`max-age=31536000, immutable`. Everything under `/assets/` is hashed by the build, so that is safe there.
+(Not measured on the live site: the container cannot reach it. The local preview server I measured sends
+`no-cache`, which is the same behaviour.)
 
 **N8. The protocol has no version.** Fields are added by convention. A friend on yesterday's page
 and a leader on today's works only if every change happens to be backward compatible. Any wire change
@@ -255,7 +263,7 @@ slice has a proof, written before the change and run on the old code first.
 | B | Sim hot paths: `settled` copies only what `collide` reads; flow fields search a window and reuse arrays; `stepAll` stops allocating per body | `shared/sweep.ts`, `sim/pathing.ts`, `sim/room.ts` (small) | sim parity, hash for hash | 15 to 25% off a swarm tick |
 | C | Client draw waste: wolf and hound sprite caches keyed on parts and bounded; doorsteps culled to the screen; HUD writes only on change; one matrix update for the four passes; `Lights.place` scores once | `client/wolfdraw.ts`, `hound.ts`, `doorsteps.ts`, `hud*.ts`, `three/view3d.ts` (small), `three/lights3d.ts` | draw parity, suite, a look in the browser | the leak gone; about 2 to 3 ms a frame off town and fights on a phone |
 | D | Wire format 2, only between pages that both say they speak it: hero act clocks as `a0`; the patch as an object, not a string in a string; the map left out of a whole room when it has not changed; the relay stringifies once per message | `client/coop.ts`, `bigsend.ts`, `interest.ts`, `api/_relay.ts` | new tests for old-with-new both ways; `test:online` | about 35 to 40% fewer bytes in an ordinary room, about 20% under a swarm |
-| E | Cache headers for hashed assets | `vercel.json` | read the header | repeat visits load from cache |
+| E | Cache headers for hashed assets | `vercel.json` | read the header on the preview deployment | repeat visits skip 20-odd round trips |
 
 A and B run together (no shared files), then C and D together. Each agent is Opus 5.5 as Kyle asked,
 one narrow slice, the files named, told to stop at its proof. The main chat reviews every diff
@@ -295,7 +303,7 @@ against this page before the next pair starts.
 | Wire, ordinary room | 14.7 KB/s to the room, 23.2% of it escaping |
 | Wire, swarm 40 / 60 | 55.4 / 67.9 KB/s a friend |
 | Whole room / whole job message | 18.0 KB / 16.5 to 20.9 KB |
-| Page load | 25 requests, 2.8 MB script, none cacheable |
+| Page load | 25 requests, 2.8 MB script, every file revalidated on each visit |
 
 Scripts used: `scripts/bigmap/swarm.ts` (existing), and three new ones kept in `scripts/perf/`
 (`wire.ts`, `simprof.ts`, `browser.cjs`).

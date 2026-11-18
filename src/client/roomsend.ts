@@ -8,7 +8,8 @@
  */
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
-import { quiet } from './interest';
+import { quietInto } from './interest';
+import { Snaps } from './sendframe';
 import { Encoder, stateOf } from './snap';
 
 export const FULL_EVERY = 4;
@@ -24,8 +25,9 @@ export class RoomSend {
     const st = this.per.get(room) ?? { enc: new Encoder(), fullAt: -99, said: {} };
     this.per.set(room, st);
     const full = now - st.fullAt > FULL_EVERY || whole;
-    // (Quiet clocks, as a big room's: a goblin's act and its blow go as when they began, interest.ts.)
-    const p = st.enc.encode(quiet(stateOf(room), room.time), full);
+    // (Quiet clocks, as a big room's: a goblin's act and its blow go as when they began, interest.ts.
+    // Each goblin is read that way straight into the encoder rather than copied first.)
+    const t = room.time, p = st.enc.encode(stateOf(room), full, new Snaps(false, (e, keys, vals) => quietInto(e, t, keys, vals)));
     const slow: Record<string, unknown> = {};
     for (const [key, v] of Object.entries(rest.slow)) {
       const j = JSON.stringify(v);

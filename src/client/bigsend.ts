@@ -3,11 +3,13 @@
  * them (interest.ts), on their own Encoder, with quiet clocks; the map never sent (the friend builds it
  * from the job's seed: `ms` on a whole one); the expedition's view (sim/exped.ts expedView) only when it
  * changes. CoopHost.frame asks here for each friend in a big room; everything else it sends as before.
+ * What every friend's message is made from (the quiet goblins, the slow parts' text) is worked out once a
+ * send and shared (sendframe.ts); what each was last sent stays their own.
  */
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
-import { expedView } from '../sim/exped';
-import { eventsFor, quiet, stateFor } from './interest';
+import { eventsFor } from './interest';
+import { SendFrame } from './sendframe';
 import { Encoder } from './snap';
 
 const FULL_EVERY = 4;
@@ -24,6 +26,7 @@ interface Per { enc: Encoder; fullAt: number; room: ArenaRoom | null; xs: string
 export class BigSend {
   private per = new Map<string, Per>();
   private fullAt = -99;
+  private frame: SendFrame | null = null;
 
   /**
    * Friend `id`'s message for `room` (a JSON string, as CoopHost sends it) and whether it's whole.
@@ -34,8 +37,9 @@ export class BigSend {
     if (!st || st.room !== room) this.per.set(id, (st = { enc: new Encoder(), fullAt: -99, room, xs: '', said: {} }));
     const full = whole || (now - st.fullAt > FULL_EVERY && now - this.fullAt >= FULL_GAP);
     if (full && !whole) this.fullAt = now;
-    const p = st.enc.encode(quiet(stateFor(room, id), room.time), full);
-    const view = room.exped ? JSON.stringify(expedView(room.exped)) : '';
+    if (!this.frame?.fits(room, now)) this.frame = new SendFrame(room, now);
+    const fr = this.frame, p = st.enc.encode(fr.stateFor(id), full, fr.snaps);
+    const { s: view, o: seen } = fr.exped();
     const xs = full || view !== st.xs ? view : '';
     st.xs = view;
     if (full) st.fullAt = now;
@@ -43,15 +47,20 @@ export class BigSend {
     // third of every message): a friend keeps what it last heard.
     const rest: Record<string, unknown> = {};
     for (const [key, v] of Object.entries(common)) {
-      const j = JSON.stringify(v);
-      if (!SLOW.has(key) || full || st.said[key] !== j) (rest[key] = v), (st.said[key] = j);
+      if (!SLOW.has(key)) {
+        rest[key] = v;
+        continue;
+      }
+      const j = fr.text(key, v);
+      if (full || st.said[key] !== j) (rest[key] = v), (st.said[key] = j);
     }
-    const body = { ...rest, p, f: full ? 1 : 0, ms: full ? 1 : undefined, blaze: full ? room.map.blaze : undefined, ev: eventsFor(room, id, ev), xs: xs ? JSON.parse(xs) : undefined };
+    const body = { ...rest, p, f: full ? 1 : 0, ms: full ? 1 : undefined, blaze: full ? room.map.blaze : undefined, ev: eventsFor(room, id, ev), xs: xs ? seen : undefined };
     return { s: JSON.stringify(body), full };
   }
 
   /** Start this room afresh for everyone (its map changed under it). */
   reset(room: ArenaRoom): void {
+    if (this.frame?.room === room) this.frame = null;
     for (const [id, st] of this.per) if (st.room === room) this.per.delete(id);
   }
 

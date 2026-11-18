@@ -118,6 +118,20 @@ import { stepBosses } from './bossrooms';
 import { syncMarks } from './deepmarks';
 import { landed } from './afoot';
 
+// Where each body stood last tick, `prev`'s keys made once per id rather than every tick, the tuple
+// written in place (nothing keeps one past the frame it was read in).
+const HKEY = new Map<string | number, string>(), EKEY = new Map<string | number, string>(), SKEY = new Map<string | number, string>();
+function notePrev(prev: Map<string, [number, number]>, keys: Map<string | number, string>, tag: string, id: string | number, x: number, y: number): void {
+  let k = keys.get(id);
+  if (k === undefined) {
+    if (keys.size > 4096) keys.clear();
+    keys.set(id, (k = tag + id));
+  }
+  const p = prev.get(k);
+  if (p) (p[0] = x), (p[1] = y);
+  else prev.set(k, [x, y]);
+}
+
 export class ArenaRoom {
   time = 0;
   tick = 0;
@@ -378,9 +392,9 @@ export class ArenaRoom {
 
   private stepAll(): void {
     useMap(this.map);
-    for (const h of this.heroes) this.prev.set('h:' + h.id, [h.x, h.y]);
-    for (const e of this.enemies) this.prev.set('e:' + e.id, [e.x, e.y]);
-    for (const s of this.survivors) this.prev.set('s:' + s.id, [s.x, s.y]);
+    for (const h of this.heroes) notePrev(this.prev, HKEY, 'h:', h.id, h.x, h.y);
+    for (const e of this.enemies) notePrev(this.prev, EKEY, 'e:', e.id, e.x, e.y);
+    for (const s of this.survivors) notePrev(this.prev, SKEY, 's:', s.id, s.x, s.y);
     this.events = [];
     this.time += TICK;
     this.tick++;
@@ -400,7 +414,8 @@ export class ArenaRoom {
     };
     // Houses alight: their goblins driven out into the street before anyone moves (and their loot falls here).
     stepHouseFires(this, this.fireRng);
-    const alive = new Set(this.enemies.filter((e) => !isDead(e)).map((e) => e.id));
+    const alive = new Set<Enemy['id']>();
+    for (const e of this.enemies) if (!isDead(e)) alive.add(e.id);
     syncMarks(this.heroes, this.intents);
     for (const h of this.heroes) takeLoot(h, this.intents.get(h.id) ?? NO_INTENT, this.drops, this.events);
     for (const h of this.heroes) grow(h, this.intents.get(h.id) ?? NO_INTENT, this.events);
@@ -528,11 +543,11 @@ export class ArenaRoom {
     stepWorldFire(w, this);
     // Out of bounds: the dread, and what comes for anyone who stays out (sim/dread.ts).
     stepDread(this.dread, this.map, this.heroes, this.enemies, TICK, this.events);
-    for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events, this.level, this.floor);
-    if (this.floor > 0) uniqueDrops(this, this.enemies.filter((e) => alive.has(e.id) && isDead(e) && !e.escaped), this.lootRng);
+    for (const e of this.enemies) if (isDead(e) && alive.has(e.id) && !e.escaped) dropFrom(e, this.heroes, this.drops, this.lootRng, this.events, this.level, this.floor);
+    if (this.floor > 0) uniqueDrops(this, this.enemies.filter((e) => isDead(e) && alive.has(e.id) && !e.escaped), this.lootRng);
     // A great boss beaten: its relic, to each hero without one (sim/relicboss.ts; its own stream).
-    bossRelics(this.enemies.filter((e) => alive.has(e.id) && isDead(e) && e.boss), this.enemies, this.heroes, this.floor, this.homeRng, this.events);
-    for (const e of this.enemies) if (alive.has(e.id) && isDead(e) && !e.escaped) {
+    bossRelics(this.enemies.filter((e) => isDead(e) && alive.has(e.id) && e.boss), this.enemies, this.heroes, this.floor, this.homeRng, this.events);
+    for (const e of this.enemies) if (isDead(e) && alive.has(e.id) && !e.escaped) {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);
       const by = this.heroes.find((x) => x.id === e.lastBy);

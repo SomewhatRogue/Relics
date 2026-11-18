@@ -37,14 +37,28 @@ export const isBig = (room: ArenaRoom) => room.sleepFar;
 
 /** The room as friend `id` needs it: the party, and what's near them. */
 export function stateFor(room: ArenaRoom, id: string, radius = INTEREST.radius): State {
-  const all = stateOf(room), h = room.heroes.find((x) => x.id === id);
+  return ringFor(room, stateOf(room), id, radius, (b, i) => ({ ...b, id: 'b' + i }));
+}
+
+/**
+ * stateFor over `all` (the room's collections, its goblins perhaps already quiet: quiet keeps where they
+ * stand), each nearby building as `block` makes it (so one send can make each once for every friend).
+ */
+export function ringFor(room: ArenaRoom, all: State, id: string, radius: number, block: (b: Ent, i: number) => Ent): State {
+  const h = room.heroes.find((x) => x.id === id);
   if (!h) return all;
   const r2 = radius * radius, b2 = INTEREST.blocks * INTEREST.blocks, out = {} as Record<string, Ent[]>;
   for (const [c, list] of Object.entries(all)) {
     // (The party, and every boss-loot roll wherever it is: everyone in the group is asked: sim/lootroll.ts.)
     if (c === 'heroes' || c === 'rolls') out[c] = list;
-    else if (c === 'blocks') out[c] = list.flatMap((b, i) => (near({ x: (b.x as number) + (b.w as number) / 2, y: (b.y as number) + (b.h as number) / 2 }, h.x, h.y, b2) ? [{ ...b, id: 'b' + i }] : []));
-    else out[c] = (list ?? []).filter((e) => near(e, h.x, h.y, r2));
+    else if (c === 'blocks') {
+      const got: Ent[] = [];
+      list.forEach((b, i) => {
+        const x = (b.x as number) + (b.w as number) / 2 - h.x, y = (b.y as number) + (b.h as number) / 2 - h.y;
+        if (x * x + y * y <= b2) got.push(block(b, i));
+      });
+      out[c] = got;
+    } else out[c] = (list ?? []).filter((e) => near(e, h.x, h.y, r2));
   }
   return out as State;
 }
@@ -54,25 +68,78 @@ const tenth = (v: unknown) => (typeof v === 'number' ? Math.round(v * 10) / 10 :
 const shove = (v: unknown) => (typeof v === 'number' && Math.abs(v) < 1 ? 0 : tenth(v));
 const when = (t: number, ago: number) => Math.round((t - ago) * 30) / 30;
 
+/** What of a goblin stays with the leader, and what of its blow (see quietOne). */
+const KEEP = new Set(['cooldown', 'home', 'smokedUntil', 'actT', 'attack']);
+const BLOW = new Set(['t', 'dmg', 'knock', 'recover', 'aimed', 'missed', 'hit', 'done']);
+/** `e` without the fields in `drop`, in its own order. */
+function without(e: Ent, drop: Set<string>): Ent {
+  const out: Ent = {};
+  for (const k of Object.keys(e)) if (!drop.has(k)) out[k] = e[k];
+  return out;
+}
+
 /** Goblins' clocks as `a0` and their blows' as `t0`, facing and knockback to a tenth (see above). */
 export function quiet(s: State, t: number): State {
-  const enemies = (s.enemies ?? []).map((e) => {
-    // (Where it was put, `home`, is the room's alone: a patrol moves it as it walks.)
-    // (`smokedUntil` is refreshed every tick a goblin stands in smoke, and only the leader's room reads it.)
-    const { cooldown: _c, home: _h, smokedUntil: _s, actT, attack, ...rest } = e as Ent & { actT: number; cooldown: number; attack?: (Ent & { t: number }) | null };
-    const out: Ent = { ...rest, a0: when(t, actT), fx: tenth(e.fx), fy: tenth(e.fy), kvx: shove(e.kvx), kvy: shove(e.kvy) };
-    if (attack !== undefined) {
-      if (!attack) out.attack = attack;
-      else {
-        // (What the blow does when it lands, and to whom, is the leader's alone: never drawn. `done` flips
-        // as it lands, which sent the whole blow again: a friend reads t against windup instead.)
-        const { t: at, dmg: _d, knock: _k, recover: _r, aimed: _a, missed: _m, hit: _h, done: _n, ...blow } = attack;
-        out.attack = { ...blow, t0: when(t, at) };
-      }
+  return { ...s, enemies: (s.enemies ?? []).map((e) => quietOne(e, t)) };
+}
+
+/** Field `k` as `v`: over its own place `at` if it had one, else on the end; the new count. */
+function put(keys: string[], vals: unknown[], n: number, at: number, k: string, v: unknown): number {
+  if (at >= 0) return (vals[at] = v), n;
+  keys[n] = k;
+  vals[n] = v;
+  return n + 1;
+}
+
+/** One goblin as quiet sends it: a new object, the live one untouched. */
+export function quietOne(e: Ent, t: number): Ent {
+  const keys: string[] = [], vals: unknown[] = [], out: Ent = {};
+  const n = quietInto(e, t, keys, vals);
+  for (let i = 0; i < n; i++) out[keys[i]] = vals[i];
+  return out;
+}
+
+/**
+ * The fields of quietOne(e, t), in its order, into `keys` and `vals` (their count returned), without
+ * making the goblin's copy: the leader's sending reads them straight into its encoder (snap.ts Snaps).
+ */
+export function quietInto(e: Ent, t: number, keys: string[], vals: unknown[]): number {
+  // (Where it was put, `home`, is the room's alone: a patrol moves it as it walks.)
+  // (`smokedUntil` is refreshed every tick a goblin stands in smoke, and only the leader's room reads it.)
+  let n = 0, a0 = -1, fx = -1, fy = -1, kvx = -1, kvy = -1;
+  // (for-in, the fastest way through, for a plain object, as goblins are; anything else by its own keys.)
+  const src: Ent = Object.getPrototypeOf(e) === Object.prototype ? e : { ...e };
+  for (const k in src) {
+    if (KEEP.has(k)) continue;
+    if (k === 'a0') a0 = n;
+    else if (k === 'fx') fx = n;
+    else if (k === 'fy') fy = n;
+    else if (k === 'kvx') kvx = n;
+    else if (k === 'kvy') kvy = n;
+    keys[n] = k;
+    vals[n++] = src[k];
+  }
+  // (As an object written {...rest, a0, fx, ...} would have them: one already there keeps its place and
+  // takes the new value, a new one goes on the end.)
+  n = put(keys, vals, n, a0, 'a0', when(t, e.actT as number));
+  n = put(keys, vals, n, fx, 'fx', tenth(e.fx));
+  n = put(keys, vals, n, fy, 'fy', tenth(e.fy));
+  n = put(keys, vals, n, kvx, 'kvx', shove(e.kvx));
+  n = put(keys, vals, n, kvy, 'kvy', shove(e.kvy));
+  const attack = e.attack as (Ent & { t: number }) | null | undefined;
+  if (attack !== undefined) {
+    keys[n] = 'attack';
+    if (!attack) vals[n++] = attack;
+    else {
+      // (What the blow does when it lands, and to whom, is the leader's alone: never drawn. `done` flips
+      // as it lands, which sent the whole blow again: a friend reads t against windup instead.)
+      const blow = without(attack, BLOW);
+      blow.t0 = when(t, attack.t);
+      vals[n++] = blow;
     }
-    return out;
-  });
-  return { ...s, enemies };
+  }
+  keys.length = vals.length = n;
+  return n;
 }
 
 /** A friend's end: each goblin's actT back from its a0, and its blow's clock from its t0. */

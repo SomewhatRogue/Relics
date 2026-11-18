@@ -19,7 +19,7 @@ import { PATH } from '../shared/tuning';
 import { canStep, layLevels } from './pathlevels';
 
 export interface Grid {
-  cols: number; rows: number; cost: Uint8Array; sig: string; fields: Map<number, Float32Array>; part?: Int32Array; nearest: Map<string, number>;
+  cols: number; rows: number; cost: Uint8Array; sig: string; fields: Map<number, { d: Float32Array; i0: number; j0: number; w: number; h: number }>; part?: Int32Array; nearest: Map<string, number>;
   /** No ledges: every step open. Else each cell's level, whether its middle is in a ramp, whether it's a drop (sim/pathlevels.ts). */
   flat: boolean; lv?: Uint8Array; ramp?: Uint8Array; drop?: Uint8Array;
 }
