@@ -138,3 +138,13 @@ The spec is docs/design/perf-sweep.md. Branch `perf-sweep`. One entry a change, 
   untouched in its own worktree (it came out the same record). The merged branch: the fight hash for hash, the
   wire byte for byte, the fuzz, the second format's tests, the three fixes' tests, all green; `npm run check` clean.
 - Still waiting on Kyle playing a job with a friend on this branch's preview before it goes to main.
+
+## 2026-11-18: merged to main at Kyle's word (Claude Fable 5.2)
+
+- Kyle: "I'd merge for now I can't get a friend and I'll have them try it later." Main's newest commit (the
+  mouse's aim on raised ground) merged in first with no conflict; the sim parity record taken again from main
+  untouched (the same record), the reference copies the same as main's; the parity, wire, fuzz and fix tests
+  green, `npm run check` clean, and the built page loads on phone and laptop sizes with no page errors.
+- Known and accepted: the second wire format has run in node and in two browsers on a local relay, not on real
+  phones. If co-op misbehaves, setting `WIRE` to 1 in `client/wire2.ts` has every page send and ask for the
+  first format, which is unchanged to the byte.

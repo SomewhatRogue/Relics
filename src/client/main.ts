@@ -1,4 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { aimOnGround } from '../shared/heights';
 import { canTalk } from '../sim/minis';
 import { deepTestHero } from './deeptest';
 import { store } from './save';
@@ -218,7 +219,8 @@ const panel = new Panel();
 const trades = new Trades(game, panel);
 // The townsfolk's goodbye as their panel closes (townvoice.ts).
 panel.onHide = () => void townVoice.close(voiceClock());
-const input = new Input(() => views.heroScreen());
+// (The mouse's aim is read on the hero's own level, then put on the ground the pointer is over: shared/heights.ts.)
+const input = new Input(() => views.heroScreen(), (ax, ay) => (game.hero && game.room ? aimOnGround(game.room.map, game.hero, ax, ay, views.levelShift) : [ax, ay]));
 const lobby = new Lobby(game, panel, input.touch, () => pack.toggle(false));
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));

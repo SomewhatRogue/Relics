@@ -30,7 +30,8 @@ export class Input {
   private tapAt = { t: 0, x: 0, y: 0 };
   private potion = new PotionPress(() => this.intent.potionSeq++, () => (this.intent.beltSeq = (this.intent.beltSeq ?? 0) + 1));
 
-  constructor(private heroScreen: () => [number, number, number, number?] | null) {
+  /** `onGround`: the aim (tiles from the hero) put on the ground the pointer is really over, where the map has raised ground. */
+  constructor(private heroScreen: () => [number, number, number, number?] | null, private onGround?: (ax: number, ay: number) => [number, number]) {
     const unlock = () => unlockAudio();
     for (const t of ['touchend', 'pointerup', 'click', 'keydown']) addEventListener(t, unlock, { passive: true });
     addEventListener('keydown', (e) => {
@@ -227,6 +228,7 @@ export class Input {
     // Aim in tiles: the direction to the mouse, and how far (a lobbed flask lands there). The 3D view's
     // floor is foreshortened, so it gives its own pixels per tile down the screen.
     if (!this.touch && this.mouse && hs) (i.ax = (this.mouse[0] - hs[0]) / hs[2]), (i.ay = (this.mouse[1] - hs[1]) / (hs[3] ?? hs[2]));
+    if (this.onGround && (i.ax || i.ay)) [i.ax, i.ay] = this.onGround(i.ax, i.ay);
     return { ...i };
   }
 }

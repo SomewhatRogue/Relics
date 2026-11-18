@@ -15,6 +15,7 @@ import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
 import type { Fx } from '../fx';
 import type { Scene } from '../scene';
+import { LIFT, PX } from '../world';
 import { ViewSwitch } from './switch';
 import type { View3D } from './view3d';
 
@@ -102,6 +103,11 @@ export class Views {
 
   heroScreen(): [number, number, number, number?] | null {
     return this.on3d ? this.v3!.heroScreen() : this.scene.heroScreen();
+  }
+
+  /** How many tiles further up the screen a spot is drawn for each level it stands above another (for the mouse's aim: shared/heights.ts aimOnGround). */
+  get levelShift(): number {
+    return this.on3d ? this.v3!.levelShift : LIFT / PX;
   }
 
   tileScreen(x: number, y: number, up = 0): [number, number] {

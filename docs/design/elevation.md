@@ -72,6 +72,12 @@ all built the same morning:
     turf lip and leaning sides, its ways up are log steps between posts, and bodies hop there too
     (`client/levelpaint.ts`, `client/scene.ts`).
 
+13. **You hit what you click, at any height** (Kyle: "I want to be able to click on a goblin and have it hit them
+    easily if they're on the same height as me"). The mouse's aim is measured from the middle of the hero's body
+    at the height they stand at, so a goblin beside you on a raised area is hit where you click it. A goblin on
+    another level is drawn higher or lower on the screen than its place on the map; the aim is put back on the
+    ground the pointer is over (`shared/heights.ts` `aimOnGround`). Both views.
+
 **The sunken lane is the one other shape.** Kyle, of THE RISE's lane: it "reads really well with the edge and the
 steps on the sides." Two banks one level up either side of a road, faces to the lane and at their south ends, log
 steps up them, and a flight of steps across the lane's head (up to six tiles wide) onto the ground beyond, which

@@ -315,3 +315,23 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   `three/overlay3d.ts`, `three/figs3d.ts`), a line or a few each, at Kyle's word here.
 - Signed: Claude Fable 5.2.
 
+## 2026-11-18, noon: the mouse's aim on raised ground
+
+- **Kyle:** "now the aiming is too high. I want to be able to click on a goblin and have it hit them easily if
+  they're on the same height as me :)"
+- **Two causes, both in the 2.5D view** (`client/three/view3d.ts` `heroScreen`). The aim is the pointer minus the
+  hero's place on the screen. That place was taken at level 0, while the hero and whoever stood beside them on a
+  raised area were drawn a level or two up the screen: every aim up there pointed north of what was clicked. And
+  it was taken at the hero's feet, while you click a goblin's body: a smaller pull north, on any ground. Now it is
+  the middle of the hero's body at the height they stand at (the flat view already did both).
+- **Other levels** (`shared/heights.ts` `aimOnGround`, wired through `client/input.ts` and one line of
+  `client/main.ts`): the aim is moved back onto the ground the pointer is over, by each view's own shift a level
+  (`views.levelShift`). Without it a goblin on the field clicked from the top, off to one side, was missed by a
+  dozen degrees.
+- Measured in the browser, as a Ranger on the knoll, pointer on the middle of a pinned goblin, both views: top to
+  top, top to field, field to top, field to field all within about a degree (they were up to 15 off), and the
+  arrow lands in each where nothing stands in the way.
+- `tests/aimground.test.ts` (4). **For whoever owns input and the 2.5D camera:** the feet-to-body change moves the
+  2.5D aim on every map by about half a tile's height, toward what is clicked.
+- Signed: Claude Fable 5.2.
+
