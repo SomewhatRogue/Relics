@@ -1,11 +1,13 @@
 /**
- * Lowfurrow Fields, the first territory (docs/design/territories.md, "1. Lowfurrow Fields"; heights by
- * docs/design/elevation.md, "The rethink"). A grey box: the right ground, shape and heights in the blocks and
- * rounds we have. One map of 44 by 96, in from the bottom and out at the top, always by day:
+ * The proving hill (docs/design/territories.md, "The proving hill"; heights by docs/design/elevation.md): the first
+ * build's small Lowfurrow, kept as a test map (`?land=hill`). The frame's, the pathing's and the rules' tests stand
+ * on it (tests/territory.test.ts, landroom, pathlevels, afoot), so the real territories can be re-laid without
+ * breaking them. Plain blocks: the right shape and heights, no art. One map of 44 by 96, in from the bottom and
+ * out at the top, always by day:
  *
  *   the stile, the headland (zone), the field gate, the long strips (scape) up the first lynchet, the stooks
- *   (zone), the drain and its bridge, the barn road (scape, a hollow lane between banks), the second
- *   lynchet, the fold yard (zone), the stile on the rise.
+ *   (zone), the drain and its bridge, the barn road (scape, a hollow lane between banks with a sheep track up
+ *   each), the second lynchet, the fold yard (zone), the stile on the rise.
  *
  * The seed bends the road and shuffles the trees, the loose hay, which goblin holds the bow and where the
  * pond's chest is. It never moves the hero, the exit, the gates, the zones, the ledges, the water, the
@@ -163,7 +165,7 @@ function foldYard(k: Kit, land: LowLand): void {
   [{ x: 10.4, y: 11.5 }, { x: 19.8, y: 15.2 }, { x: 16, y: 16.6 }].forEach((p, i) => put(land, k.foes, p.x, p.y, 103, i === bow ? { bow: true } : {}));
 }
 
-export function lowfurrowPlan(job: Job): TerrPlan {
+export function hillPlan(job: Job): TerrPlan {
   const k = newKit(new Rng(job.seed * 7927 + 83));
   Object.assign(k, { mw: LOW.w, mh: LOW.h });
   const land = layLand(k);
@@ -171,7 +173,7 @@ export function lowfurrowPlan(job: Job): TerrPlan {
   headland(k, land), strips(k, land), stooks(k, land), barnRoad(k, land), foldYard(k, land);
   layRoad(k, land.road, 0.9);
   const map: GameMap = {
-    name: 'LOWFURROW FIELDS', w: LOW.w, h: LOW.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: [], torches: [],
+    name: 'THE PROVING HILL', w: LOW.w, h: LOW.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: [], torches: [],
     hero: { x: 22, y: 92.5 }, exit: { x: 20.5, y: 0, w: 3, h: 0.9 }, theme: lightFor(THEMES.field, 'field', 'day'),
     water: k.water, soil: k.soil, marks: k.marks, ledges: land.ledges, stretches: land.stretches,
     // Most of the land is raised: anything set down on it (a cage, someone freed, a hero up at a gate) stands on it.

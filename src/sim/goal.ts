@@ -90,8 +90,8 @@ export function goal(run: Run, room: ArenaRoom, houses: Captives = { caged: 0, w
   // (A Deep floor's way out is the ladder on down to its checkpoint: shared/deep.ts.)
   const way = (home: boolean) => `${home ? (run.job.floor ? 'Way down' : 'Way home') : 'Way on'}: ${wayDir(room.map)}`;
   // An instance on one map, in stretches: this stretch's named ones, then its gate (sim/stretches.ts).
-  // (A territory's the same till its last stretch, whose goal is the job's own: docs/design/territories.md.)
-  const st = run.job.instance || (run.job.land && !lastStretch(run, room.map)) ? stretchOf(run, room.map) : undefined;
+  // (A territory's the same, but for the last stretch of its last map, whose goal is the job's own: docs/design/territories.md.)
+  const st = run.job.instance || (run.job.land && !(isFinal(run) && lastStretch(run, room.map))) ? stretchOf(run, room.map) : undefined;
   if (st) {
     const keep = keepers(st, room), last = lastStretch(run, room.map);
     if (keep.length) return { text: also(keep.some((e) => e.name) ? killWords(keep.filter((e) => e.name), room) : GATE_WORDS.guards), done: false };

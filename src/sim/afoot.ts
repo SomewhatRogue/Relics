@@ -1,6 +1,6 @@
 /**
  * Standing on the ground (docs/design/elevation.md, "What height does in a fight"). On most maps the ground is
- * level 0 and anything higher is a shelf or a roof. On a map whose ledges carry `lv` (Lowfurrow's hill, the town's
+ * level 0 and anything higher is a shelf or a roof. On a map whose ledges carry `lv` (a territory's hill, the town's
  * three levels) the levels ARE the ground: a body stands on it when it is at the level under its feet, or on a
  * slope between two. Off such a map every answer here is exactly what the rules always asked (`z === 0`).
  */

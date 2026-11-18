@@ -1,3 +1,0 @@
-/* The LIVING WORLD button in the options box (alive.ts), with the VIEW button's eye, as CAMERA. */
-#options #alivebtn::before { background-image: var(--ic-view); }
-#options #alivebtn.on { border-image-source: var(--f-iron); color: var(--bone); }

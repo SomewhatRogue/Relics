@@ -1,6 +1,6 @@
 /**
- * Territories (docs/design/territories.md, "The format" and "1. Lowfurrow Fields"; docs/design/elevation.md,
- * "The rethink"): the plan side of Lowfurrow Fields. Fixed where the spec fixes it, the packs where they
+ * Territories (docs/design/territories.md, "The format" and "The proving hill"; docs/design/elevation.md,
+ * "The rethink"): the plan side of the proving hill (shared/hillmap.ts). Fixed where the spec fixes it, the packs where they
  * belong, the heights, and a walk through it by the game's own rules (collide() in shared/arena.ts, levels
  * and all): a body of a hero's size reaches the exit only through open gates, and never up a face.
  */
@@ -9,7 +9,7 @@ import { collide, inArea, levelAt, solid, useMap, type GameMap } from '../src/sh
 import { landJob, territoryPlan, type TerrPlan } from '../src/shared/territory';
 
 const R = 0.3, C = 0.5;
-const plan = (day = 3) => territoryPlan(landJob('lowfurrow', day));
+const plan = (day = 3) => territoryPlan(landJob('hill', day));
 const zone = (p: TerrPlan, name: string) => p.zones.find((z) => z.name === name)!;
 const inBox = (b: { x: number; y: number; w: number; h: number }, x: number, y: number) => x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h;
 const fixed = (p: TerrPlan) => ({
@@ -48,7 +48,7 @@ const open = (p: TerrPlan, ...which: number[]) => {
   return p;
 };
 
-describe('Lowfurrow Fields, the plan', () => {
+describe('the proving hill, the plan', () => {
   it('is the same from the same seed, and the seed moves nothing fixed', () => {
     expect(plan(3)).toEqual(plan(3));
     const a = plan(3), b = plan(41);

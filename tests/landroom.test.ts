@@ -1,6 +1,6 @@
 /**
- * A territory in the fight (sim/landroom.ts; docs/design/territories.md and elevation.md), on Lowfurrow Fields
- * (shared/lowfurrow.ts): its gates keep till the zone's pack is dead and the whole party stands at them, each
+ * A territory in the fight (sim/landroom.ts; docs/design/territories.md and elevation.md), on the proving hill
+ * (shared/hillmap.ts): its gates keep till the zone's pack is dead and the whole party stands at them, each
  * gate is the checkpoint, the last stretch's goal is the job's own, a party makes the goblins tougher and never
  * more, and its hill is walked: up a slope anywhere along it, never up a face.
  */
@@ -17,7 +17,7 @@ import { gateReady, lastStretch, stretchOf } from '../src/sim/stretches';
 import { NO_INTENT } from '../src/sim/types';
 
 function land(ids = ['me']) {
-  const run = newRun(landJob('lowfurrow', 3));
+  const run = newRun(landJob('hill', 3));
   run.party = ids.length;
   const room = runRoom(run), hs = ids.map((id) => room.join(id));
   for (const h of hs) room.setIntent(h.id, NO_INTENT), Object.assign(h, { hp: 1e6, maxHp: 1e6 });
@@ -42,7 +42,7 @@ function land(ids = ['me']) {
 describe('a territory in the fight', () => {
   it('starts at the way in, in the first stretch, its gate shut and kept by the zone`s pack', () => {
     const { run, room, hs, st } = land();
-    expect(room.map.name).toBe('LOWFURROW FIELDS');
+    expect(room.map.name).toBe('THE PROVING HILL');
     expect(Math.hypot(hs[0].x - room.map.hero.x, hs[0].y - room.map.hero.y)).toBeLessThan(1.5);
     expect(run.stretch ?? 0).toBe(0);
     expect(solid(room.map.blocks[st().gate!])).toBe(true);
@@ -133,7 +133,7 @@ describe('a territory in the fight', () => {
   });
 });
 
-describe('the hill at Lowfurrow (docs/design/elevation.md)', () => {
+describe('the proving hill (docs/design/elevation.md)', () => {
   /** Walk a hero from (x, y) by (mx, my) for `secs`. */
   function walk(x: number, y: number, mx: number, my: number, secs: number, z = 0) {
     const { room, hs } = land();
@@ -179,7 +179,7 @@ describe('the hill at Lowfurrow (docs/design/elevation.md)', () => {
   });
 
   it('what is set down on raised ground stands on it: the cages stay where they were put', () => {
-    const { room, tick } = land(), plan = territoryPlan(landJob('lowfurrow', 3));
+    const { room, tick } = land(), plan = territoryPlan(landJob('hill', 3));
     for (let n = 0; n < 30; n++) tick();
     const cages = room.props.filter((p) => p.kind === 'cage'), put = plan.props.filter((p) => p.kind === 'cage');
     expect(cages.length).toBe(5);
@@ -206,10 +206,24 @@ describe('the hill at Lowfurrow (docs/design/elevation.md)', () => {
     expect(hs[0].z).toBe(levelAt(room.map, check.x, check.y));
   });
 
+  it('the freed make for the nearest gate or way out, not the whole map back to the way in (Kyle, 2026-11-17)', () => {
+    const { room, kill } = land();
+    for (const e of room.allEnemies) Object.assign(e, { hp: 0, act: 'dead' });
+    void kill;
+    const inStooks = freeSurvivor(room.survivors, 15, 50, room.time), inYard = freeSurvivor(room.survivors, 20, 16, room.time);
+    for (let n = 0; n < Math.round(12 / TICK) && !(inStooks.home >= 0 && inYard.home >= 0); n++) room.step();
+    // The drain's bridge is 9 tiles from the stooks' cage; the way in is 43.
+    expect(inStooks.home).toBeGreaterThanOrEqual(0);
+    expect(Math.hypot(inStooks.x - 22, inStooks.y - 45)).toBeLessThan(3);
+    // From the fold yard, the stile on the rise.
+    expect(inYard.home).toBeGreaterThanOrEqual(0);
+    expect(inYard.y).toBeLessThan(4);
+  });
+
   it('a run never changes the kept plan: the same job again starts with its gates shut', () => {
     const first = land();
     first.pass(), first.pass();
-    const again = land(), plan = territoryPlan(landJob('lowfurrow', 3));
+    const again = land(), plan = territoryPlan(landJob('hill', 3));
     for (const s of plan.map.stretches!) if (s.gate !== undefined) expect(plan.map.blocks[s.gate].ruined ?? false).toBe(false);
     expect(solid(again.room.map.blocks[again.st().gate!])).toBe(true);
     expect(again.run.stretch ?? 0).toBe(0);

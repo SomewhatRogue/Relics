@@ -946,7 +946,8 @@ export class Game {
             if (road) this.run.roads[this.run.index] = road.road;
             // An instance's gate is a checkpoint: the wipes count from here (sim/checkpoint.ts).
             // (The way voted for stays: the next map is that way's, sim/instanceroom.ts.)
-            if (this.run.job.instance) Object.assign(this.run, { downs: 0, wipeAt: undefined, stretch: 0, check: undefined });
+            // (A territory's next map the same: docs/design/territories.md, "Bigger, stitched".)
+            if (this.run.job.instance || this.run.job.land) Object.assign(this.run, { downs: 0, wipeAt: undefined, stretch: 0, check: undefined });
             // The goblins ahead are counted for whoever's still with you.
             this.run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
             this.place(runRoom(this.run), undefined, h);

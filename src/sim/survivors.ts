@@ -18,6 +18,7 @@ import { survivorHazards } from './survivorhits';
 import { stepLed } from './scenes';
 import type { Enemy, FightEvent, Hero, Survivor } from './types';
 import { isDead } from './damage';
+import { haven } from './haven';
 
 /** Freed and still to be brought home (never a false prisoner: sim/falsecage.ts). What the goal counts. */
 export const waiting = (s: Survivor) => !s.dead && s.home < 0 && s.tearAt === undefined && !s.taken;
@@ -76,8 +77,10 @@ export function stepSurvivors(w: World, dt: number, entrance: { x: number; y: nu
     s.dropped = undefined;
     // A false prisoner stands where the cage was, lurching, till it tears open (sim/falsecage.ts).
     if (s.dead || s.tearAt !== undefined) continue;
+    // Where they make for: the way in, or on a map in stretches the nearest gate (sim/haven.ts).
+    const safe = haven(currentMap(), s, entrance);
     if (s.home >= 0) {
-      leaving(s, entrance, w.now, dt);
+      leaving(s, safe, w.now, dt);
       continue;
     }
     // Roped and led off (layout 4, sim/scenes.ts) while a guard still drives them.
@@ -89,13 +92,13 @@ export function stepSurvivors(w: World, dt: number, entrance: { x: number; y: nu
     }
     // The Staithe's: standing on the jetty for the punt, or netted on the bank till someone cuts them free (sim/staithe.ts).
     if (s.stay || s.netted) continue;
-    if (s.out || (entrance && Math.hypot(s.x - entrance.x, s.y - entrance.y) <= SURVIVOR.homeReach)) {
+    if (s.out || (safe && Math.hypot(s.x - safe.x, s.y - safe.y) <= SURVIVOR.homeReach)) {
       if (s.out) out ??= { x: s.x, y: s.y };
       Object.assign(s, { home: w.now, out: false, burnUntil: 0 });
       w.ev.push({ k: 'survivorhome', x: s.x, y: s.y, id: s.id });
       continue;
     }
-    run(s, entrance ?? door, w.heroes, list, w.now, dt, w.enemies);
+    run(s, safe ?? door, w.heroes, list, w.now, dt, w.enemies);
   }
   return out;
 }

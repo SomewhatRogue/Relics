@@ -1,56 +1,17 @@
 /**
- * LIVING WORLD, a player's choice to compare (docs/decisions/new-look-characters.md, Kyle 2026-11-16: "I wish
- * characters and NPCs looked more dynamic", "beautiful landscapes make a huge difference... things that look deep or
- * nuanced, like water"; "put it behind an option I can toggle in the UI to compare"). On: capes trail and swing,
- * goblins are knocked back the way a blow lands, townsfolk shift their weight and turn to look at you; in the 2.5D view
- * the wind runs through the trees in gusts, cloud shadows drift over the ground, and the water has foam at its edges and
- * light glinting on it. Off: as it was. A button in the options box flips it live; remembered on this device;
- * `?alive=1` or `?alive=0` in the address wins. Off until Kyle says.
+ * The living world (docs/decisions/new-look-characters.md, Kyle 2026-11-16: "I wish characters and NPCs looked more
+ * dynamic", "beautiful landscapes make a huge difference... things that look deep or nuanced, like water"): capes
+ * trail and swing, goblins are knocked back the way a blow lands, townsfolk shift their weight and turn to look at
+ * you; in the 2.5D view the wind runs through the trees in gusts, cloud shadows drift over the ground, the sun keeps
+ * the hour and figures cast shadows, and the water has foam at its edges and light glinting on it.
+ *
+ * It was an option to compare. **It is the game now** (Kyle, 2026-11-17: "we should make that absolutely a feature
+ * not a toggle"): the button and its setting are gone. `?alive=0` in the address still turns it off, for the look
+ * scripts that compare with and without.
  */
-import './alive.css';
 
-const KEY = 'relic.alive';
-
-function start(): boolean {
-  if (typeof location === 'undefined') return false;
-  const u = new URLSearchParams(location.search).get('alive');
-  if (u === '1' || u === '0') return u === '1';
-  try {
-    return localStorage.getItem(KEY) === 'on';
-  } catch {
-    return false;
-  }
-}
-
-/** Whether the living world is on (read each frame, so the button changes it live). */
-export const ALIVE = { on: start() };
-
-export function setAlive(on: boolean): void {
-  ALIVE.on = on;
-  try {
-    localStorage.setItem(KEY, on ? 'on' : 'off');
-  } catch {
-    /* this session only */
-  }
-}
-
-/** The LIVING WORLD button, under CAMERA. */
-export function aliveButton(): void {
-  const box = document.getElementById('options');
-  if (!box) return;
-  const b = document.createElement('button');
-  b.id = 'alivebtn';
-  b.setAttribute('aria-label', 'Living world: characters and landscapes that move more');
-  const label = () => {
-    b.textContent = ALIVE.on ? 'LIVING WORLD: ON' : 'LIVING WORLD: OFF';
-    b.classList.toggle('on', ALIVE.on);
-  };
-  b.addEventListener('click', () => (setAlive(!ALIVE.on), label()));
-  label();
-  const after = document.getElementById('camerabtn') ?? document.getElementById('brightrow') ?? document.getElementById('viewbtn');
-  if (after) after.after(b);
-  else box.prepend(b);
-}
+/** Whether the living world is on: always, but for `?alive=0` in the address. */
+export const ALIVE = { on: typeof location === 'undefined' || new URLSearchParams(location.search).get('alive') !== '0' };
 
 /**
  * The wind (one for everything: a cape's hem, the trees in 2.5D, three/wind3d.ts's shader writes the same sum):

@@ -1,6 +1,6 @@
 /**
  * Goblins path on levels (sim/pathlevels.ts, docs/design/elevation.md): up a slope anywhere along it, along raised
- * ground round what stands on it, off a face onto lower ground, never up a face; on Lowfurrow Fields' hill, on a
+ * ground round what stands on it, off a face onto lower ground, never up a face; on the proving hill, on a
  * bank with no slope, and on a flat map just as before.
  */
 import { describe, expect, it } from 'vitest';
@@ -18,9 +18,9 @@ type Box = { x: number; y: number; w: number; h: number };
 const inBox = (b: Box, x: number, y: number) => x > b.x && x < b.x + b.w && y > b.y && y < b.y + b.h;
 const gap = (b: Box, x: number, y: number) => Math.hypot(x - Math.max(b.x, Math.min(b.x + b.w, x)), y - Math.max(b.y, Math.min(b.y + b.h, y)));
 
-/** Lowfurrow's map, both gates open when asked. */
+/** The proving hill's map, both gates open when asked. */
 function low(open = false): GameMap {
-  const map = territoryPlan(landJob('lowfurrow', 3)).map;
+  const map = territoryPlan(landJob('hill', 3)).map;
   if (open) for (const b of map.blocks) if (b.kind === 'gate') b.ruined = true;
   useMap(map);
   return map;
@@ -44,7 +44,7 @@ function drive(at: { x: number; y: number; z: number }, goal: { x: number; y: nu
   return { b, walked, off: Math.hypot(goal.x - b.x, goal.y - b.y) };
 }
 
-describe('goblins path on Lowfurrow`s hill', () => {
+describe('goblins path on the proving hill', () => {
   it('up a slope anywhere along it, round the scarecrow', () => {
     const map = low(), crow = map.rounds.find((r) => r.kind === 'scarecrow')!;
     for (const x of [10, 30, 36]) {
@@ -94,7 +94,7 @@ describe('goblins path on Lowfurrow`s hill', () => {
   });
 });
 
-describe('levels off Lowfurrow', () => {
+describe('levels off the proving hill', () => {
   const base = (): GameMap => ({ name: 'T', w: 30, h: 20, rounds: [], blocks: [], braziers: [], torches: [], hero: { x: 5, y: 15 }, exit: { x: 14, y: 0, w: 2, h: 1 } } as unknown as GameMap);
 
   it('a bank with no slope: as near as its own ground goes, never into it', () => {
@@ -122,7 +122,7 @@ describe('levels off Lowfurrow', () => {
 
 describe('in a real room', () => {
   it('a woken scrapper in the lane comes up onto the bank to the hero', () => {
-    const run = newRun(landJob('lowfurrow', 3));
+    const run = newRun(landJob('hill', 3));
     const room = runRoom(run), h = room.join('me');
     room.setIntent(h.id, NO_INTENT);
     const e = room.allEnemies.find((f) => f.pack === 102 && !f.bow && f.kind === 'scrapper')!;

@@ -13,7 +13,7 @@ import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
 import { expedition, fenmere, goalWords, hangmansWood } from '../shared/expedjob';
 import { openCut, stressJob } from '../shared/instances';
-import { landJob } from '../shared/territory';
+import { LANDS, landJob, type LandId } from '../shared/territory';
 import { stretchOf } from '../sim/stretches';
 import { barnHunt } from '../shared/bossjobs';
 import { plateOf } from '../sim/bossplate';
@@ -108,7 +108,6 @@ import { Scene } from './scene';
 import { Views } from './three/views';
 import { options } from './options';
 import { camButton } from './camwide';
-import { aliveButton } from './alive';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { heroVoices, primeSpot, townVoice, voiceClock } from './voiceplay';
@@ -295,9 +294,10 @@ if (quick && cday) {
   const q = new URLSearchParams(location.search), way = q.get('way');
   game.startJob(openCut(cday > 1 ? cday : game.world.day), 1, Number(q.get('area') ?? 0), way === null ? undefined : Number(way));
 }
-// ?hero=WARRIOR&land=lowfurrow: straight onto a territory (docs/design/territories.md), a party of `party` (default 1).
+// ?hero=WARRIOR&land=lowfurrow: straight onto a territory (docs/design/territories.md), a party of `party` (default 1),
+// at its map `map` (from 0). ?land=hill: the proving hill, a small test map.
 const land = new URLSearchParams(location.search).get('land');
-if (quick && land === 'lowfurrow') game.startJob(landJob(land, game.world.day), Number(new URLSearchParams(location.search).get('party') ?? 1));
+if (quick && land && (LANDS as string[]).includes(land)) game.startJob(landJob(land as LandId, game.world.day), Number(new URLSearchParams(location.search).get('party') ?? 1), Number(new URLSearchParams(location.search).get('map') ?? 0));
 // ?hero=WARRIOR&barn=1: straight onto today's Doorkeepers hunt; ?barn=arena: straight into the great barn.
 const barn = new URLSearchParams(location.search).get('barn');
 if (quick && barn) game.startJob(barnHunt(game.world.day, barn === 'arena'));
@@ -844,8 +844,6 @@ $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.conta
 options();
 // CAMERA: CLOSE or WIDE, the wider camera to try (camwide.ts).
 camButton();
-// LIVING WORLD: characters and landscapes that move more, to compare (alive.ts).
-aliveButton();
 ironUi();
 if (input.touch) document.body.classList.add('touch');
 

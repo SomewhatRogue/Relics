@@ -1,6 +1,6 @@
 /**
  * Standing on the ground (sim/afoot.ts; docs/design/elevation.md, "The rethink"): where the levels are the ground
- * (Lowfurrow's hill, the town), a body at level 1 or 2 is on the ground, and fire, storm, bursts, snares and the
+ * (the proving hill, the town), a body at level 1 or 2 is on the ground, and fire, storm, bursts, snares and the
  * shoving apart of bodies treat it so; the high ground is relative. Elsewhere nothing changed.
  */
 import { describe, expect, it } from 'vitest';
@@ -24,9 +24,9 @@ import { newRun, runRoom } from '../src/sim/run';
 import { stepStorm } from '../src/sim/storm';
 import { NO_INTENT, type Bolt, type Enemy, type FightEvent, type Hero, type Snare } from '../src/sim/types';
 
-/** Lowfurrow's room, its goblins cleared away. */
+/** The proving hill's room, its goblins cleared away. */
 function land() {
-  const room = runRoom(newRun(landJob('lowfurrow', 3)));
+  const room = runRoom(newRun(landJob('hill', 3)));
   for (const e of room.allEnemies) Object.assign(e, { hp: 0, act: 'dead', respawns: false });
   return room;
 }

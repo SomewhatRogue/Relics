@@ -14,6 +14,13 @@ written: player-facing words go through the lore keeper and the line editor when
 - "Make it possible for multiplayer so some gates or screens you can pass through but generally bigger
   territories and scapes between each zone and a more linear feel (sort of like an instance)."
 
+**Kyle, after playing the first build (2026-11-17, evening):** "I like it but I think that it could actually be
+even bigger in each area. We proved out in the RAID mode that we can have pretty damn big maps ... we could stitch
+those sorts of things together. Even have mini quests within a quest: like talk to a person who tells you to hunt
+something that doesn't spawn until you talk to it." So: every zone the size of a raid's ground, a territory several
+big maps stitched together, and people on the land with jobs of their own (below: "Bigger, stitched" and "Mini
+quests").
+
 ## Where the quest maps stand today
 
 The five quest postings (`shared/heroquests.ts`) run the ordinary board generator at their place: two to
@@ -60,18 +67,32 @@ the same place every time and the job is what changes.
 **Seeds.** The spine, every zone's place, the gates and the set pieces never change. The seed shuffles
 cover, which goblins are in a pack, chests, the captive, the hour and the weather (the atlas rule).
 
-### Sizes
+### Bigger, stitched (Kyle, 2026-11-17, evening)
 
-| Kind | Map | Zones | Time | For |
+A territory is **two to four big maps stitched end to end**, each about the size of a raid's ground (the
+Barrowfields is 96 by 72; the Open Cut's stress map, 150 by 150 with 150 goblins, ran cheaper than Fenmere).
+
+- **A map** is about 96 wide and 100 to 120 long, with two zones, a wide scape and a gate or two inside it.
+- **A zone** is about 70 by 25 to 40: several things in it, two or three packs, room to come at it from a side.
+  Not one scene in a box.
+- **A scape** is about 80 by 40: wide country with the road through it, rides and paths off it, one or two
+  pockets and whatever a mini quest sends you back into it for. Still quiet: a patrol, a knot.
+- **Between maps is a screen:** the party gathers at the way on (a bridge, a stile, a ladder), the next map loads,
+  the last one is done with. Only one map runs at a time, so a territory of four maps costs what one does.
+- **The linear feel stays:** one road, one way on. What grows is the country either side of it.
+
+| Kind | Maps | Zones | Time on the road | For |
 | --- | --- | --- | --- | --- |
-| Short | about 44 by 90 | 3 | about 8 min | Lowfurrow, Tollan's Farm |
-| Medium | about 56 by 125 | 3 or 4 | 10 to 12 min | Sallow Carr, Fennick Ford |
-| Long | 4 screens of about 40 by 60 | 4 or 5 | 15 to 18 min | the Copperdeep Shafts |
+| Short | 2 of about 96 by 110 | 3 | about 10 min, mini quests on top | Lowfurrow, Tollan's Farm |
+| Medium | 3 | 4 or 5 | 15 to 18 min | Sallow Carr, Fennick Ford |
+| Long | 4 (the Shafts: its four levels) | 5 | 20 to 25 min | the Copperdeep Shafts |
 
-Today's rooms come to 1,300 to 3,400 tiles a job. A short territory is about 4,000 and a medium one
-7,000, most of it scape. The Open Cut's stress map (150 by 150, 150 goblins) measured cheaper than
-Fenmere runs today (docs/decisions/instances.md), so these are well inside the budget: a map built in
-2 s on a phone, a room step under 4 ms with the CPU slowed 4x.
+The first job was "perfect" at eight minutes on the small build. Twice the ground with the same fights comes to
+about ten on the road; the mini quests are what a player who wants more does with the rest.
+
+**The proving hill.** The first build's small Lowfurrow (44 by 96) is kept as a test map (`?land=hill`,
+`shared/hillmap.ts`): the frame's, the pathing's and the rules' tests stand on it, so the real territories can be
+re-laid without breaking them.
 
 ### Multiplayer
 
@@ -85,6 +106,32 @@ Fenmere runs today (docs/decisions/instances.md), so these are well inside the b
 - **A run joined counts toward your own quest** (Kyle, 2026-11-13: already the rule).
 - **The room decides everything**, built from the job's seed on every screen; the map is never sent.
 
+## Mini quests: people on the land with a job of their own (Kyle, 2026-11-17, evening)
+
+A territory has **one to three people** on it who aren't in a cage: someone hiding, a holdout, one of the freed
+who won't leave yet. Each has a small job, in the board's own kinds (Kyle, 2026-11-13: "less is more: fetch quests
+or kill quests or burn X").
+
+- **You find them.** A gold mark over their head when you're near, the same mark the town's people carry when they
+  have something for you. They're never on the road: a ride into the rye, a tree, under a cart.
+- **You talk to them.** Stand by them and GRAB reads TALK. One line, said over their head, in their own voice.
+  Nothing stops for it: no card, no pause, because the room never pauses for a party.
+- **What they send you after isn't there until they've said it.** The talk puts it on the map: a pack that comes
+  out of the rye, a big one asleep by the barn. So nobody stumbles on a mini quest's goblins early, and nobody
+  kills them by accident before being asked.
+- **It's said on the goal line** as a second, smaller line ("Also: ..."), with a gold mark where it is.
+- **It pays in the place's own coin:** someone comes out and goes home, a chest that was hidden is shown, a way is
+  opened. Never a gate: the road never waits on a mini quest, and a party can walk past every one.
+- **The kinds, to start:** *hunt* (kill what comes), *find* (someone is hidden; kill what's hunting them and they
+  come out). *Fetch* and *burn* when a territory wants one.
+- **In a party:** anyone can take one, it's everyone's once taken, and what it wakes is as tough as everything
+  else for the party's size. Leave the map with one unfinished and it's lost.
+- **Each is seeded like everything else:** the person and the place are fixed by hand; who's in the pack is the
+  seed's.
+
+In the rules: `map.minis` (plain data: the giver, the kind, the goblins it wakes, where, what it pays), the room's
+record of each (offered, taken, done), TALK at the head of the GRAB chain, the goblins made when it's taken.
+
 ## The thread: the Lowfurrow line [NEW, Kyle's call]
 
 The five quest territories lie along one road, and a hero climbing the ladder is walking it a step behind
@@ -96,7 +143,8 @@ one roped line of people.
   anyone who cuts out there, since nobody sowed it. The hungry took them at their work.
 - Like the prologue, the line is each hero's own and undated. No shared line in town ever speaks of "the
   fourteen".
-- At Lowfurrow (the first job) you bring out the five who were hidden, caught or penned. **Nine were roped
+- At Lowfurrow (the first job) you bring out the five who were hidden, caught or penned (two are in cages on the
+  road; three are people you find and talk to, or are sent after: the mini quests). **Nine were roped
   and walked on** before you came. Nothing says so. You see a trampled lane through the rye going on
   past the rise, and things dropped along it.
 - Each later territory is a place that way passes through, and shows one thing the hungry do with people:
@@ -128,30 +176,54 @@ child among them. A caged one cries pain and the cage, never "help me", which is
 
 ### 1. Lowfurrow Fields: the gleaning (first job; level 1; rescue; short; always by day)
 
-**What happened.** The gleaners were taken at their work an hour or two ago. The dinner is still in the
-basket.
+**What happened.** The gleaners were taken at their work an hour or two ago. The dinner is still in the basket.
 
-**The feel.** Open, bright, readable, safe-looking: strips gone to rye, wild oat and thistle, the rye over
-head height, a blue day, larks. The
-least ruined place in the valley, which is why new heroes start here. What's wrong is small: sickles in
-the stubble, a handcart on its side.
+**The feel.** Open, bright, readable, safe-looking: strips gone to rye, wild oat and thistle, the rye over head
+height, a blue day, larks. The least ruined place in the valley, which is why new heroes start here. What's wrong
+is small: sickles in the stubble, a handcart on its side.
+
+**Two maps, stitched at the drain** (re-laid bigger, Kyle 2026-11-17 evening; each 96 wide).
+
+**Map 1, THE FIELDS** (96 by 112, level ground rising one lynchet):
 
 | | Ground | What you walk in on | The job |
 | --- | --- | --- | --- |
-| In | The stile off the Wickhold road | | |
-| Zone 1 | **The headland.** The gleaners' handcart, dropped sickles, sheaves half bound | Two scrappers fighting over the dinner basket | Kill them; a gleaner comes out from under the cart (the first rescue) |
-| Gate | The field gate in the hedge (teaches gates: stand in it, all of you) | | |
-| Scape | **The long strips.** Ridge and furrow, rye standing either side of a trampled lane | The barn's roof on the rise; a scarecrow in a gleaner's bonnet; a pond down a side path (a chest) | |
-| Zone 2 | **The stooks.** A cut strip, sheaves stood in rows (cover that burns), a hay cart | Two gleaners made to carry sheaves to the cart, an archer up on it | Cut them free |
+| In | The stile off the Wickhold road, a green lane between hedges | | |
+| Zone | **The headland** (about 72 by 24). The gleaners' camp at the field's foot: three handcarts, the dinner, sickles dropped in the stubble, a hawthorn | Two scrappers fighting over the dinner basket; three more turning out the far cart | Kill both packs. **Someone is under the near cart** (mini quest 1) |
+| Gate | The field gate in the headland hedge (teaches gates: stand in it, all of you) | | |
+| Scape | **The long strips** (about 80 by 38). Ridge and furrow, rye standing in long strips with mown rides between them, the first lynchet climbing across the whole field, a pond in willows off to the west, a scarecrow, a fallen hovel to the east | The barn's roof on the rise, far off; a patrol on the road; two at the scarecrow | Nothing you must do. The pond has a chest. The rye by the pond is where mini quest 1 sends you |
+| Zone | **The stooks** (about 72 by 28). A cut strip, sheaves stood in rows, two hay carts, a half-built rick | A pack loading sheaves with an archer up on a cart; three at the rick with one of the gleaners caged by it | Kill both packs; break the cage |
 | Gate | The drain: the hungry pulled the planks off the bridge. Lay them back (a hold, quicker with two) | | |
-| Scape | **The barn road.** A hollow lane under elms, climbing | The great barn: no doors on it, carts dragged across the doorway, something big shifting inside. No fight: the Doorkeepers' hunt is posted later | |
-| Zone 3 | **The fold yard.** A sheepfold of hurdles used as a pen | A pack with a drummer round the pen | Break the pen; the last two come out |
-| Out | The stile on the rise | The trampled lane goes on north without you | |
+| Screen | Over the bridge and up the far bank | | |
 
+**Map 2, THE RISE** (96 by 104, a hill of two more levels):
+
+| | Ground | What you walk in on | The job |
+| --- | --- | --- | --- |
+| Scape | **The barn road** (about 80 by 44). A hollow lane climbing in a long bend between banks under elms; sheep tracks up the banks; an old orchard gone wild on the west shoulder; on the east shoulder the great barn in its yard | The great barn: no doors on it, carts dragged across the doorway, something big shifting inside. No fight: the Doorkeepers' hunt is posted later. Archers on the west bank; a patrol in the lane. **Someone is up a pear tree in the orchard** (mini quest 2) | Nothing you must do |
+| Gate | The fold gate, hurdles across the lane's head | | |
+| Zone | **The fold yard** (about 72 by 38). A big sheepfold of hurdles used as a pen, the dipping pens, a dewpond, a shepherd's hut with its door hanging | A pack with a drummer round the pen; three at the hut | Kill the pack at the pen; break the pen's cage |
+| Out | The stile on the brow | You look back down over both maps; the trampled lane goes on north without you | |
+
+**Mini quests** (lines are drafts for the lore keeper and the line editor):
+
+1. **Her sister, in the rye** (find). *The giver:* a woman under the near handcart on the headland, who won't come
+   out till the two at the dinner are dead. *She says* her sister ran for the pond when the hungry came. *It wakes:*
+   three beaters working through the rye east of the pond toward the willows. *Done:* the beaters dead, the sister
+   comes out of the willows, and both walk home. Two of the five.
+2. **The one that tied the rope** (hunt). *The giver:* a man up a pear tree in the orchard, who watched the nine
+   roped. *He says* the big one that tied them didn't go on with the rest: it's asleep by the barn's carts. *It
+   wakes:* that one (an elite, never a named butcher) and two with it, on the barn's shoulder. *Done:* he climbs
+   down and walks home, and the rope's end it kept is on the ground by the carts: nine knots **[NEW; the lore
+   keeper to say whether a counted rope says too much]**, with a chest. One of the five.
+
+- **The five:** two in cages on the road (the stooks, the pen), three by the mini quests. A hero who walks past
+  both brings home two, and the recap says how many of the five came home.
 - **Only here:** standing rye. You can't see into it, and neither can they. It burns.
-- **What it costs:** nothing yet. It's the first job. The cost is what you notice on the rise.
+- **What it costs:** nothing yet. It's the first job. The cost is what you notice on the brow.
 - **Solo and party:** soloable by a hero who has only just left the wood.
-- **Needs:** rye as cover and fuel (new), the field gate and the plank bridge as gate looks.
+- **Needs:** rye as cover and fuel (new), the field gate, the plank bridge and the fold gate as gate looks, the
+  screen between maps, mini quests.
 
 ### 2. Tollan's Farm: MAWL has the barn (level 3; hunt MAWL; short)
 

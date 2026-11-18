@@ -1,6 +1,6 @@
 /**
- * A territory's room (shared/territory.ts; docs/design/territories.md): one hand-laid map of zones, scapes and
- * gates, built from the job's seed alone. Its goblins doze till a hero comes near (TERR.wake: sim/sleep.ts),
+ * A territory's room (shared/territory.ts; docs/design/territories.md): one of its hand-laid maps of zones, scapes
+ * and gates (the run's index: a territory is its maps stitched end to end), built from the job's seed alone. Its goblins doze till a hero comes near (TERR.wake: sim/sleep.ts),
  * so only the ground the party is on runs and is sent, and the pacing rules hold what fights at once to the
  * party's caps (sim/pacing.ts). Its gates and checkpoints are the Open Cut's (sim/stretches.ts,
  * sim/checkpoint.ts): the run steps them for a territory as for an instance (sim/run.ts).
@@ -15,8 +15,8 @@ import { ArenaRoom } from './room';
 import type { Run } from './run';
 
 export function landRoom(run: Run): ArenaRoom {
-  const job = run.job, plan = territoryPlan(job), n = Math.max(1, run.party ?? 1);
-  const room = new ArenaRoom(job.seed, {
+  const job = run.job, plan = territoryPlan(job, run.index), n = Math.max(1, run.party ?? 1);
+  const room = new ArenaRoom(job.seed + run.index, {
     map: plan.map, foes: plan.foes, furniture: plan.props, chests: plan.chests,
     danger: job.place.ruin >= 3 ? 1 : 0, level: run.level ?? 1, sleep: true,
   });
