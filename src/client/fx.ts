@@ -2,6 +2,7 @@
  * Effects that only decorate: sparks, blood (that stays on the floor), floating calls ("BLOCK"),
  * rings, screen shake and short flashes of light. Cosmetic, so Math.random is fine here.
  */
+import { HOP } from './three/hop';
 import { cutFx } from './fxcut';
 import { RAISEW } from './raisewords';
 import { foeFx } from './fxfoes';
@@ -12,7 +13,9 @@ import { magicFx } from './fxmagic';
 import { Gore } from './gore';
 import type { Light } from './light';
 import { clearTop, drawBlock, READ_LIFE, READ_RISE, wrapLine } from './saylines';
-import { toPx } from './world';
+import { LIFT, toPx } from './world';
+import { currentMap } from '../shared/arena';
+import { groundLv } from '../shared/heights';
 import { CRY } from './captives';
 import { spiderFx } from './fxspiders';
 import { weakFx } from './fxweak';
@@ -42,12 +45,16 @@ import { worldFx } from './fxworld';
 import { chalkFx } from './chalkfx';
 import { shown } from '../shared/shown';
 
-interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean }
-interface Text { x: number; y: number; s: string; col: string; life: number; rise?: number; /** `s` as drawn, broken to fit a phone (saylines.ts). */ lines: string[]; /** Up this long at the start (seconds). */ max: number }
-interface Ring { x: number; y: number; life: number; max: number; col: string; size?: number }
+/** `up` (on a particle, a ring, an arc, a line of text): the level of the ground it was made on, on a land (it is drawn that high). */
+interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; col: string; glow: boolean; grav: number; stick: boolean; up?: number }
+interface Text { up?: number; x: number; y: number; s: string; col: string; life: number; rise?: number; /** `s` as drawn, broken to fit a phone (saylines.ts). */ lines: string[]; /** Up this long at the start (seconds). */ max: number }
+interface Ring { x: number; y: number; life: number; max: number; col: string; size?: number; up?: number }
 /** A lightning arc between two points, in world pixels. */
-interface Arc { x: number; y: number; x2: number; y2: number; life: number; col?: string; /** A straight line (a glinted bolt's path), not lightning. */ straight?: boolean }
+interface Arc { up?: number; x: number; y: number; x2: number; y2: number; life: number; col?: string; /** A straight line (a glinted bolt's path), not lightning. */ straight?: boolean }
 interface Flash extends Light { life: number; max: number }
+
+/** Kicked-up earth: where a body lands off a height. */
+const DUST = ['#8a7a5a', '#6a5c44', '#a89a78', '#57503e'];
 
 export class Fx {
   /** Deaths a moment apart (a bunch splattered by one swing). */
@@ -65,6 +72,8 @@ export class Fx {
   wet = new Wet();
   /** Coins flying into whoever picked up a pile (coinfly.ts). */
   coins = new CoinFly();
+  /** Effects due in a moment (the dust when a hop lands). */
+  private soon: { in: number; up: number; fn: () => void }[] = [];
   /** The room's heroes (set each frame), so an effect can tell whose cast it was. */
   heroes: readonly Hero[] = [];
 
@@ -121,7 +130,20 @@ export class Fx {
     this.burst(x, y, n, ['#6a647a', '#4f4a5c', '#8a8494'], 70, false, 220, true);
   }
 
+  /** A fight event's effects, each stamped with the level of the ground it happened on (a land's raised area). */
   on(ev: FightEvent): void {
+    this.atLevel(groundLv(currentMap(), ev.x, ev.y), () => this.handle(ev));
+  }
+
+  /** Run `make`; whatever effects it adds are drawn `up` levels high. */
+  private atLevel(up: number, make: () => void): void {
+    const n = [this.parts.length, this.texts.length, this.rings.length, this.arcs.length];
+    make();
+    if (!up) return;
+    for (const [list, from] of [[this.parts, n[0]], [this.texts, n[1]], [this.rings, n[2]], [this.arcs, n[3]]] as const) for (let i = from; i < list.length; i++) list[i].up = up;
+  }
+
+  private handle(ev: FightEvent): void {
     const [x, y] = toPx(ev.x, ev.y);
     mageTapFx(this, ev, x, y, this.heroes);
     if (chalkFx(this, ev, x, y)) return;
@@ -227,7 +249,20 @@ export class Fx {
       case 'yank':
         this.say(x, y - 24, 'YANK', '#9fe8ff');
         break;
+      case 'short':
+        // A shot loosed up at someone on a height from too far (sim/highrange.ts).
+        this.say(x, y - 24, 'OUT OF REACH', '#b8b2c4');
+        break;
       case 'land':
+        // Off a height, or a Rogue up a face: the body is drawn leaping (three/hop.ts), so the dust waits for its feet.
+        if (ev.how) {
+          const up = ev.how === 'climb';
+          if (up) this.burst(x, y, 5, DUST, 28, false);
+          // (The dust is on the ground where the feet come down: for a climb, the top it went up to.)
+          const m = currentMap(), lx = ev.x + (up ? ev.dx * 1.4 : 0), ly = ev.y + (up ? ev.dy * 1.4 : 0);
+          this.soon.push({ in: HOP.time * (up ? 0.2 : 1), up: groundLv(m, lx, ly), fn: () => (this.burst(x + (up ? ev.dx * 22 : 0), y + (up ? ev.dy * 22 : 0), up ? 6 : 22, DUST, up ? 30 : 70, false, 90), up || (this.shake = Math.max(this.shake, 2.4))) });
+          break;
+        }
         this.burst(x, y, 8, ['#6a647a', '#57525e'], 35, false);
         this.shake = Math.max(this.shake, 1.5);
         break;
@@ -340,6 +375,8 @@ export class Fx {
 
   update(dt: number): void {
     this.coins.update(dt, this.heroes);
+    for (const q of this.soon) if ((q.in -= dt) <= 0) this.atLevel(q.up, q.fn);
+    if (this.soon.length) this.soon = this.soon.filter((q) => q.in > 0);
     for (const p of this.parts) {
       p.life -= dt;
       p.vy += p.grav * dt;
@@ -379,7 +416,7 @@ export class Fx {
       const ctx = p.glow ? g : lit;
       ctx.globalAlpha = p.glow ? Math.min(1, (p.life / p.max) * 1.5) : 1;
       ctx.fillStyle = p.col;
-      ctx.fillRect(Math.round(p.x - cx), Math.round(p.y - cy), 1, 1);
+      ctx.fillRect(Math.round(p.x - cx), Math.round(p.y - cy - (p.up ?? 0) * LIFT), 1, 1);
     }
     g.globalAlpha = 1;
     lit.globalAlpha = 1;
@@ -389,7 +426,7 @@ export class Fx {
       g.fillStyle = r.col;
       for (let a = 0; a < 48; a++) {
         const t = (a / 48) * Math.PI * 2;
-        g.fillRect(Math.round(r.x - cx + Math.cos(t) * rad), Math.round(r.y - cy + Math.sin(t) * rad * 0.7), 1, 1);
+        g.fillRect(Math.round(r.x - cx + Math.cos(t) * rad), Math.round(r.y - cy - (r.up ?? 0) * LIFT + Math.sin(t) * rad * 0.7), 1, 1);
       }
     }
     g.globalAlpha = 1;
@@ -399,12 +436,12 @@ export class Fx {
       const n = Math.max(2, Math.round(Math.hypot(a.x2 - a.x, a.y2 - a.y) / 3));
       for (let i = 0; i <= n; i++) {
         const k = i / n, j = i && i < n && !a.straight ? (Math.random() - 0.5) * 5 : 0;
-        g.fillRect(Math.round(a.x + (a.x2 - a.x) * k - cx + j), Math.round(a.y + (a.y2 - a.y) * k - cy - 10 + j), 1, 1);
+        g.fillRect(Math.round(a.x + (a.x2 - a.x) * k - cx + j), Math.round(a.y + (a.y2 - a.y) * k - cy - 10 - (a.up ?? 0) * LIFT + j), 1, 1);
       }
     }
     for (const t of this.texts) {
       g.globalAlpha = Math.min(1, t.life * 3);
-      drawBlock(g, t.lines, t.x - cx, t.y - cy, t.col, g.canvas.width);
+      drawBlock(g, t.lines, t.x - cx, t.y - cy - Math.round((t.up ?? 0) * LIFT), t.col, g.canvas.width);
     }
     g.globalAlpha = 1;
   }

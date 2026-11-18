@@ -56,10 +56,10 @@ describe('hound looks', () => {
       const m = houndMap(l, poseOf(n, f, wag, tuck));
       expect(m.clipped, `${l.breed} ${l.coat} ${l.mark} ${n} ${f}`).toBe(0);
       expect(m.parts.length).toBeGreaterThan(40);
-      for (const p of m.parts) {
-        expect(p[1]).toBeGreaterThanOrEqual(0), expect(p[1]).toBeLessThan(HOUND_BOX.w), expect(p[2]).toBeLessThan(HOUND_BOX.h);
-        expect(GLOW).not.toContain(p[p.length - 1]);
-      }
+      // (One check a pose, on the first part that's out of the box or glows: an `expect` for each of four tests on
+      // each part of each pose was millions of them, 40 to 75 seconds, and timed the suite out on a slow machine.)
+      const bad = m.parts.find((p) => !(p[1] >= 0 && p[1] < HOUND_BOX.w && p[2] < HOUND_BOX.h) || (GLOW as unknown[]).includes(p[p.length - 1]));
+      expect(bad, `${l.breed} ${l.coat} ${l.mark} ${n} ${f} ${wag} ${tuck}`).toBeUndefined();
       // Standing on its feet (not flying in or leaping): on the ground row, like every other breed.
       if (!['lunge', 'leap', 'run'].includes(n) && !(n === 'trot' && f % 2)) expect(m.parts.some((p) => p[2] === HOUND_BOX.ground)).toBe(true);
     }

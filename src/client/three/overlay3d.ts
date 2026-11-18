@@ -68,20 +68,20 @@ export class Overlay {
       g.fillRect(Math.round(x - w / 2), Math.round(y - w / 2), w, w);
     });
     for (const p of fx.parts) {
-      const [x, y] = at(p.x, p.y);
+      const [x, y] = at(p.x, p.y, (p.up ?? 0) * 0.75);
       g.globalAlpha = p.glow ? Math.min(1, (p.life / p.max) * 1.5) : 1;
       g.fillStyle = p.col;
       g.fillRect(Math.round(x), Math.round(y), 1, 1);
     }
     for (const r of fx.rings) {
-      const q = 1 - r.life / r.max, rad = (4 + q * (r.size ?? 22)) * k, [x, y] = at(r.x, r.y);
+      const q = 1 - r.life / r.max, rad = (4 + q * (r.size ?? 22)) * k, [x, y] = at(r.x, r.y, (r.up ?? 0) * 0.75);
       g.globalAlpha = 1 - q;
       g.fillStyle = r.col;
       for (let a = 0; a < 48; a++) g.fillRect(Math.round(x + Math.cos((a / 48) * 6.283) * rad), Math.round(y + Math.sin((a / 48) * 6.283) * rad * 0.6), 1, 1);
     }
     g.globalAlpha = 1;
     for (const a of fx.arcs) {
-      const [x0, y0] = at(a.x, a.y, 0.6), [x1, y1] = at(a.x2, a.y2, 0.6), n = Math.max(2, Math.round(Math.hypot(x1 - x0, y1 - y0) / 3));
+      const ah = 0.6 + (a.up ?? 0) * 0.75, [x0, y0] = at(a.x, a.y, ah), [x1, y1] = at(a.x2, a.y2, ah), n = Math.max(2, Math.round(Math.hypot(x1 - x0, y1 - y0) / 3));
       g.fillStyle = Math.random() < 0.5 ? '#ffffff' : a.col ?? '#fff27a';
       for (let i = 0; i <= n; i++) {
         const q = i / n, j = i && i < n ? (Math.random() - 0.5) * 5 : 0;
@@ -143,7 +143,7 @@ export class Overlay {
     friendMarks(g, room, meId, (x, y) => P(x, 1, y), this.W, this.H, 16, 16);
     this.marks(room, meId, m, P, lerp, now);
     for (const t of fx.texts) {
-      const [x, y] = at(t.x, t.y);
+      const [x, y] = at(t.x, t.y, (t.up ?? 0) * 0.75);
       g.globalAlpha = Math.min(1, t.life * 3);
       drawBlock(g, t.lines, x, y, t.col, this.W);
     }

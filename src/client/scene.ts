@@ -65,6 +65,8 @@ import { RACK } from '../shared/practice';
 import { waiting } from '../sim/practice';
 import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
 import { lifter, upAt } from './levelpaint';
+import { hopAt } from './three/hop';
+import { isLand, shotLv } from '../shared/heights';
 import { drawText, textWidth } from './pixfont';
 import { LOOK, blockAt, blockFoot, drawBlock, drawRound } from './blocks';
 import { drawHallNames } from './hallnames';
@@ -255,6 +257,13 @@ export class Scene {
     const map = room.map;
     // How far up anything standing at a point is drawn: on the new town's raised levels (levelpaint.ts), else 0.
     const lv = lifter(map);
+    // A land's raised areas (elevation.md): its levels are its ground (no roofs), and a body that leaves one hops (three/hop.ts).
+    const land = isLand(map);
+    /** Where to draw a body (pixels: its place, and how far up), leaping if it has just left a height. `b`: where the rules have it. */
+    const hopPx = (key: string, x: number, y: number, up: number, b: { x: number; y: number }): [number, number, number] => {
+      const [jx, jy, jh] = hopAt('f' + key, x / PX, y / PX, up / PX, (OX + b.x * PX) / PX, (OY + b.y * PX) / PX);
+      return [Math.round(jx * PX), Math.round(jy * PX), Math.round(jh * PX)];
+    };
     if (this.painted !== map) (this.bg = paintMap(map)), (this.painted = map), (this.cam.ready = false);
     const clamp = (v: number, size: number, world: number) => (size >= world ? (world - size) / 2 : Math.max(0, Math.min(world - size, v)));
     this.cam.x = clamp(this.cam.x, this.vw, worldW(map));
@@ -351,7 +360,7 @@ export class Scene {
       items.push({ y: OY + a.y * PX, draw: () => drawHound(c, LODGE_HOUND, OX + a.x * PX - cx, OY + a.y * PX - cy, { mood: a.mood, fx: a.fx, down: a.down, look: MAEVE_HOUND }) });
     }
     for (const h of room.heroes) {
-      const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * LIFT;
+      const [x0, y0] = lerp('h:' + h.id, h.x, h.y), [x, y, up] = hopPx('h' + h.id, x0, y0, (h.z ?? 0) * LIFT, h);
       // (Heroes are drawn at 1.5x already, heroscale.ts: never stretched.)
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
       // Leeches latched on them (THE LEECHMAN's: leechhero.ts).
@@ -389,7 +398,7 @@ export class Scene {
       }
       // Up on a roof: stood on its ridge, drawn after the house it's on.
       // (A body a Gorger is pulling in: dragged along to it: wave2ground.ts.)
-      const pz = pulledAt(room, e), roof = (e.z ?? 0) >= 2, [x, y] = pz ? [OX + pz[0] * PX, OY + pz[1] * PX] : lerp('e:' + e.id, e.x, e.y), up = roof ? ROOF_UP : Math.max(0, e.z ?? 0) * LIFT;
+      const pz = pulledAt(room, e), roof = (e.z ?? 0) >= 2 && !land, [x0, y0] = pz ? [OX + pz[0] * PX, OY + pz[1] * PX] : lerp('e:' + e.id, e.x, e.y), [x, y, up] = roof || pz ? [x0, y0, roof ? ROOF_UP : Math.max(0, e.z ?? 0) * LIFT] : hopPx('e' + e.id, x0, y0, Math.max(0, e.z ?? 0) * LIFT, e);
       // A big map: only what's on screen is drawn (DECISIONS 2026-11-03).
       if (big && off(x - cx, y - cy)) continue;
       items.push({ y: roof ? y + 3 * PX : y, draw: () => (drawFoe(c, e, x - cx, y - up - cy, asleep(map, e), map === ARENA), drawStatus(c, e, x - cx, y - up - cy, room.time)) });
@@ -414,8 +423,8 @@ export class Scene {
     // The freed, where the room has them (the dead lie under everyone; the gone are gone).
     for (const s of room.survivors ?? []) {
       if (s.gone) continue;
-      const [x, y] = lerp('s:' + s.id, s.x, s.y);
-      items.push({ y: s.dead ? y - 20 : y, draw: () => drawSurvivor(c, s, x - cx, y - cy, room.time) });
+      const [x0, y0] = lerp('s:' + s.id, s.x, s.y), [x, y, up] = land ? hopPx('s' + s.id, x0, y0, (s.z ?? 0) * LIFT, s) : [x0, y0, 0];
+      items.push({ y: s.dead ? y - 20 : y, draw: () => drawSurvivor(c, s, x - cx, y - up - cy, room.time) });
     }
     for (const ch of room.chests) {
       const x = OX + ch.x * PX - cx, y = OY + ch.y * PX - cy;
@@ -441,13 +450,14 @@ export class Scene {
     for (const b of room.bolts) {
       // (A gall bomb is drawn with the found relics, foundsdraw.ts.)
       if (b.kind === 'bomb') continue;
-      const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy;
+      // (On a land a shot flies from the level it was loosed at: shared/heights.ts shotLv.)
+      const x = OX + b.x * PX - cx, y = OY + b.y * PX - cy - Math.round(shotLv(map, b) * LIFT);
       // Things on the floor draw under the bodies; things in the air over them.
       const floor = b.kind === 'smite' || b.state === 'well';
       items.push({ y: OY + b.y * PX + (floor ? -40 : b.kind === 'lodestone' ? 30 : 0), draw: () => (b.kind === 'flask' ? drawFlask(c, b, x, y) : drawBolt(c, b, x, y)) });
     }
     for (const j of room.javelins) {
-      const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy;
+      const x = OX + j.x * PX - cx, y = OY + j.y * PX - cy - (land ? lv(j.x, j.y) : 0);
       items.push({ y: OY + j.y * PX + (j.state === 'wall' && j.dy < 0 ? -40 : 0), draw: () => drawJavelin(c, j, x, y) });
     }
     for (const k of room.hooks) {

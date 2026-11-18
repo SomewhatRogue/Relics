@@ -39,6 +39,45 @@ just be some raised areas or something." He agreed the change below the same eve
 6. **Each one has a job in the fight**, or it is not built: an archer's perch you must go round to reach, a
    chokepoint, a shortcut down, a lookout with a chest or a cage. **Two or three a map at most.**
 
+**Kyle on the knoll (2026-11-18):** "MUCH better... actually really love this I'm going to be honest." His notes,
+all built the same morning:
+
+7. **Nobody lands in the bank.** An earth face leans out at its foot. A body below stops at that foot, and whoever
+   comes off the lip is set down clear of it, from the one number the face is drawn with (`FACE_FOOT`,
+   `shared/arena.ts`).
+8. **Coming off is a jump.** The body is drawn leaping: up and out from where it stood on the lip, carried across
+   to where the rules set it down, its shadow already on the ground there, dust and a shake when its feet land
+   (`client/three/hop.ts`, the `land` event's `how`), in both views. (First built as a short drop; Kyle: "it still
+   feels like I'm falling off the edge, not jumping and landing.")
+12. **Everything is drawn at the height it happens at.** Shots, thrown things and every effect made by the fight
+    (sparks, numbers, words, rings) are drawn at the level of the ground they happen on; a shot flies from the
+    level it was loosed at and sinks to the ground by the end of its reach (`shared/heights.ts` `shotLv`,
+    `client/fx.ts` `atLevel`). They were all drawn at level 0, so from a height a cast seemed to come from under
+    the caster (Kyle: "like it thinks I'm under myself").
+9. **A Rogue climbs.** A Rogue who keeps walking into an earth face for `HEIGHT.climb` seconds (0.4) goes up it and
+   stands on the lip. No button. Everyone else goes round by the steps (`sim/climb.ts`).
+
+10. **Height is range** (Kyle, 2026-11-18: "if you're up, you get a range bonus... so that there's benefits to
+    taking higher zones"; `sim/highrange.ts`, numbers in `HEIGHT`).
+    - **Down:** a shot loosed from a height reaches 1.5 tiles further for each level it looks down, but only from
+      near the lip: lower ground within 2.5 tiles ahead of the one shooting. Stood back from the edge, nothing.
+    - **Up:** each level the mark stands above the one shooting counts as 1.5 tiles more to cover. From too far
+      the shot passes under them and OUT OF REACH shows.
+    - The same for a hero's shots and a goblin archer's. A goblin archer on a height comes to the lip and holds
+      it; it never steps off after you. A goblin archer's reach is never cut below 3 tiles.
+    - On the knoll (two levels): a goblin archer on the lip reaches 10.5 tiles instead of 7.5; from below it must
+      come within 4.5. On the lane's banks (one level): 9 and 6.
+    - Not yet touched by it: the javelin, the hook, a Mage's held spells, a mace's smite, thrown flasks.
+11. **The flat view shows all of it** ("that's almost accessibility"): a land's raised area is an earth bank with a
+    turf lip and leaning sides, its ways up are log steps between posts, and bodies hop there too
+    (`client/levelpaint.ts`, `client/scene.ts`).
+
+**The sunken lane is the one other shape.** Kyle, of THE RISE's lane: it "reads really well with the edge and the
+steps on the sides." Two banks one level up either side of a road, faces to the lane and at their south ends, log
+steps up them, and a flight of steps across the lane's head (up to six tiles wide) onto the ground beyond, which
+stays at the banks' level so nothing drops away to the north. Of the old foot slope on the same map: "reads really
+weirdly and it's not clear what's up with it." Every slope along a whole edge is gone from Lowfurrow.
+
 **What stays from the rethink:** levels in the rules (`Ledge.lv`), `map.settle`, level-aware pathing (round a face
 from below, off it from above), the fight's level tests (`sim/afoot.ts`), the shot from above, the 2.5D drawing of
 a face (`client/three/landledges.ts`). What goes: slopes as the main way of showing height, heights carried
@@ -48,9 +87,11 @@ through a whole territory, the "8 tiles to a way up" rule (a raised area is smal
 raised area across its north with two archers on its lip, a brute, the cage and a chest on top, log steps up the
 south face and up the east end, three goblins and cover from the bows in the field below.
 
-**Next:** Kyle looks at the knoll. Then Lowfurrow's two maps lose their slopes and banks (the lane becomes a lane
-between hedges and walls) and get one or two raised areas each, where they do a job. The flat view draws a land's
-raised area as town masonry today; it wants the same earth face.
+**Lowfurrow, as built 2026-11-18:** THE FIELDS is flat (no raised area yet: one for the stooks' archer is the
+next thing to lay there). THE RISE keeps its sunken lane, the banks and the top one level up, and nothing else.
+
+**Next:** a raised area on THE FIELDS where it does a job; the proving hill (`?land=hill`) still has the old slopes, kept
+only because the frame's tests stand on it.
 
 ## What Kyle said (2026-11-17)
 

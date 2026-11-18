@@ -10,7 +10,7 @@ import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
 import { asleep } from '../foes';
 import { LEDGE_H } from './ground';
-import { bodyLv, groundLv, groundTop, isLand } from '../../shared/heights';
+import { bodyLv, groundLv, groundTop, isLand, shotLv } from '../../shared/heights';
 import { clsOf, heroKey, makeHero, type HeroFig } from './heroes3d';
 import { poseHero } from './heropose3d';
 import { foeLook, makeGoblin, type FoeFig } from './goblins3d';
@@ -153,11 +153,14 @@ export class Actors {
       o.userData.tick?.(now);
     }
     for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: p.gold ? makeCoins(p.gold) : p.potion ? makeBottle(p.potion) : makePickup(false, undefined, p.relic && relicCol(p.relic)) })).root.position.set(p.x, bodyLv(room.map, p.x, p.y) * LEDGE_H, p.y);
-    for (const c of room.coals) this.things.get('o' + c.id, '', () => ({ root: makeCoal() })).root.position.set(c.x, Math.sin(now * 6 + c.id) * 0.02, c.y);
-    for (const b of room.bolts) placeBolt(this.things.get('b' + b.id, boltLook(b), () => ({ root: makeBolt(b) })).root, b, 0);
-    for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, 0);
+    // (On a land everything in the air or on the floor is at the ground's height there; a shot flies from the level it
+    // was loosed at: shared/heights.ts shotLv. It was all drawn at level 0, under a hero stood on a height.)
+    const gl = (x: number, y: number) => groundLv(room.map, x, y) * LEDGE_H;
+    for (const c of room.coals) this.things.get('o' + c.id, '', () => ({ root: makeCoal() })).root.position.set(c.x, gl(c.x, c.y) + Math.sin(now * 6 + c.id) * 0.02, c.y);
+    for (const b of room.bolts) placeBolt(this.things.get('b' + b.id, boltLook(b), () => ({ root: makeBolt(b) })).root, b, shotLv(room.map, b) * LEDGE_H);
+    for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, gl(j.x, j.y));
     // (A wind-up bow's reach is dotted on the overlay, as in the flat view: found3d.ts.)
-    room.zones.forEach((z, i) => z.kind !== 'sentry' && z.kind !== 'firewall' && z.kind !== 'stormring' && z.kind !== 'caltrops' && z.kind !== 'blinkburst' && z.kind !== 'taunt' && z.kind !== 'skystrike' && z.kind !== 'trap' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, 0.04, z.y));
+    room.zones.forEach((z, i) => z.kind !== 'sentry' && z.kind !== 'firewall' && z.kind !== 'stormring' && z.kind !== 'caltrops' && z.kind !== 'blinkburst' && z.kind !== 'taunt' && z.kind !== 'skystrike' && z.kind !== 'trap' && this.things.get('z' + i, String(z.r), () => ({ root: makeRing(z.r, 0xffd27a, true, 0.12) })).root.position.set(z.x, gl(z.x, z.y) + 0.04, z.y));
     // (Snares, smoke and steam, poison and oil: hazards3d.ts.)
     const ex = room.map.exit;
     if (ex && ex.y < 1) this.things.get('exit', String(room.exitOpen), () => ({ root: makeExit(ex.w, room.exitOpen) })).root.position.set(ex.x, 0, ex.y - 0.4);

@@ -129,3 +129,12 @@ The spec is docs/design/perf-sweep.md. Branch `perf-sweep`. One entry a change, 
   runs before, and 48 s here both before and after this slice, which does not touch it). It makes millions of
   `expect` calls and sits too near its limit. The Art chat's file; noted, not changed.
 - Next in the profile: `field` in `sim/pathing.ts` (the search itself), `stepAll` in `sim/room.ts`.
+
+## 2026-11-18: main merged in again (Claude Fable 5.2)
+
+- Main had the territory map fix, the hound's door fix, the town saying again where you stand, the hound test's
+  repair and three of the Territories chat's commits. Merged; only the board conflicted.
+- The reference copies were taken again from main (unchanged) and the sim parity record again from main
+  untouched in its own worktree (it came out the same record). The merged branch: the fight hash for hash, the
+  wire byte for byte, the fuzz, the second format's tests, the three fixes' tests, all green; `npm run check` clean.
+- Still waiting on Kyle playing a job with a friend on this branch's preview before it goes to main.

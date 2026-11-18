@@ -54,3 +54,14 @@ export const bodyLv = (m: GameMap, x: number, y: number, z?: number) =>
  *  buried in a slope. */
 export const groundTop = (m: GameMap, x: number, y: number, r: number) =>
   Math.max(...[[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]].map(([dx, dy]) => groundLv(m, x + dx, y + dy)));
+
+/**
+ * The level a shot is drawn flying at: from the level it left (`hz`), sinking to the ground by the end of its
+ * reach, and never under the ground it is over (loosed up at a height, it rises with the bank).
+ */
+export function shotLv(m: GameMap, b: { x: number; y: number; hz?: number; travelled?: number; range?: number }): number {
+  if (!isLand(m)) return 0;
+  const left = b.range ? Math.max(0, 1 - (b.travelled ?? 0) / b.range) : 1;
+  return Math.max(groundLv(m, b.x, b.y), (b.hz ?? 0) * left);
+}
+

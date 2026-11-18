@@ -90,8 +90,8 @@ describe('THE RISE, the plan', () => {
       expect(pack(122).every((f) => inBox(fy, f.x, f.y))).toBe(true);
       expect(pack(122).some((f) => f.variant === 'drummer')).toBe(true);
       expect(pack(120).length).toBe(2);
-      expect(pack(120).every((f) => f.bow && f.z === 2 && f.x < LANE[0][2] - 2 && f.y > 74 && f.y < 82)).toBe(true);
-      expect(pack(121).every((f) => inBox(br, f.x, f.y) && f.z === 1 && f.task?.k === 'patrol')).toBe(true);
+      expect(pack(120).every((f) => f.bow && f.z === 1 && f.x < LANE[0][2] - 2 && f.y > 74 && f.y < 82)).toBe(true);
+      expect(pack(121).every((f) => inBox(br, f.x, f.y) && !f.z && f.task?.k === 'patrol')).toBe(true);
       expect(pack(123).length).toBe(3);
       expect(pack(123).every((f) => Math.hypot(f.x - 66, f.y - 26) < 6)).toBe(true);
       expect(p.foes.length).toBeGreaterThanOrEqual(14);
@@ -104,9 +104,12 @@ describe('THE RISE, the plan', () => {
     }
   });
 
-  it('stands at the right heights', () => {
+  it('stands at the right heights: the lane and the foot are ground, the banks and the top one level up, no more', () => {
     const m = plan().map, at = (x: number, y: number) => levelAt(m, x, y), barn = m.blocks.find((b) => b.kind === 'barn')!;
-    expect([at(m.hero.x, m.hero.y), at(roadX(72), 72), at(20, 72), at(70, 80), at(barn.x + 5, barn.y + 3), at(66, 76), at(40, 34), at(26, 28), at(50, 8)]).toEqual([0, 1, 2, 2, 2, 2, 2, 2, 3]);
+    expect([at(m.hero.x, m.hero.y), at(roadX(72), 72), at(20, 72), at(70, 80), at(barn.x + 5, barn.y + 3), at(66, 76), at(40, 34), at(26, 28), at(50, 8)]).toEqual([0, 0, 1, 1, 1, 1, 1, 1, 1]);
+    expect(Math.max(...m.ledges!.map((l) => l.lv ?? 1))).toBe(1);
+    // No slope along a whole edge: every way up is a flight of steps six tiles wide at most.
+    for (const l of m.ledges!) for (const q of l.ramps) expect(Math.min(q.w, q.h)).toBeLessThanOrEqual(3), expect(Math.max(q.w, q.h)).toBeLessThanOrEqual(6);
     expect(barn.door).toBeUndefined();
     for (const l of m.ledges!) expect(l.kind).toBe('earth');
   });
@@ -126,24 +129,23 @@ describe('THE RISE, walked', () => {
       for (const f of p.foes) expect(w.near(f.x, f.y), `foe ${f.pack} at ${f.x.toFixed(1)},${f.y.toFixed(1)}`).toBe(true);
       for (const c of [...p.chests, RISE_SPOTS.cage, RISE_SPOTS.giver, RISE_SPOTS.barnGround]) expect(w.near(c.x, c.y), `${c.x},${c.y}`).toBe(true);
       // The man stands on his spot now (lowfurrowminis.ts): you walk up beside him, on his level, inside talking reach.
-      expect(w.toNear(RISE_SPOTS.giver.x, RISE_SPOTS.giver.y, 2, 1.2)).toBeDefined();
-      expect(w.to(RISE_SPOTS.barnGround.x, RISE_SPOTS.barnGround.y, 2)).toBeDefined();
+      expect(w.toNear(RISE_SPOTS.giver.x, RISE_SPOTS.giver.y, 1, 1.2)).toBeDefined();
+      expect(w.to(RISE_SPOTS.barnGround.x, RISE_SPOTS.barnGround.y, 1)).toBeDefined();
     }
   });
 
-  it('keeps the banks faces from the lane: up only by a slope or a track, and never far', () => {
+  it('keeps the banks faces from the lane: up only by the steps, and never far', () => {
     const p = open(plan()), m = p.map;
     // With every slope and track onto the banks gone, the lane never reaches them.
     const flat: GameMap = JSON.parse(JSON.stringify(m));
-    for (const l of flat.ledges!) if ((l.lv ?? 1) === 2 && l.y > 50) l.ramps = [];
-    for (const l of flat.ledges!) if ((l.lv ?? 1) === 2 && l.y === 0) l.ramps = [];
+    for (const l of flat.ledges!) l.ramps = [];
     const archer = p.foes.find((f) => f.pack === 120)!;
-    expect(walk(flat, { x: roadX(72), y: 72 }, { y0: 50, y1: 92 }).to(archer.x, archer.y, 2)).toBeUndefined();
+    expect(walk(flat, { x: roadX(72), y: 72 }, { y0: 50, y1: 92 }).to(archer.x, archer.y, 1)).toBeUndefined();
     // With them, from every point of the lane the walk onto either bank beside it is never 8 tiles over the straight one.
     for (let y = 60; y <= 85; y += 2) {
       const x0 = roadX(y), from = walk(m, { x: x0, y }, { y0: 50, y1: 93 }), band = LANE.find(([a, b]) => y >= a && y < b)!;
       for (const x of [band[2] - 3, band[3] + 3]) {
-        const d = from.toNear(x, y, 2, 2.2);
+        const d = from.toNear(x, y, 1, 2.2);
         expect(d, `(${x0.toFixed(1)},${y}) to (${x},${y})`).toBeDefined();
         expect(d! * C, `(${x0.toFixed(1)},${y}) to (${x},${y})`).toBeLessThanOrEqual(Math.abs(x - x0) + 8 + 1);
       }
@@ -192,6 +194,6 @@ describe('THE RISE, as a room', () => {
     const cage = room.props.find((f) => f.kind === 'cage');
     expect(cage).toBeDefined();
     expect(Math.hypot(cage!.x - RISE_SPOTS.cage.x, cage!.y - RISE_SPOTS.cage.y)).toBeLessThan(0.05);
-    expect(levelAt(room.map, cage!.x, cage!.y)).toBe(2);
+    expect(levelAt(room.map, cage!.x, cage!.y)).toBe(1);
   });
 });

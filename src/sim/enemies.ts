@@ -6,7 +6,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, HEIGHT, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
@@ -39,6 +39,7 @@ import { count, dealt } from './score';
 import { chalkTarget } from './chalker';
 import { chaseOn, flankTo, fleeing, rangedPull, sprintPace } from './chase';
 import { stomp } from './bigone';
+import { atLip, reachShift } from './highrange';
 import { standHeld } from './pacing';
 import { stepLurk } from './lurk';
 import { mistReach, mistSight } from '../shared/fenmist';
@@ -339,15 +340,18 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (e.bow) {
     // In fog it shoots, keeps off and comes in at a shorter reach, its telegraph as short (shared/sky.ts).
     // And in Fenmere's mist, the thicker it lies where you stand (shared/fenmist.ts).
-    const cm = currentMap(), fr = reachFor(cm.theme) * (cm.fen ? mistReach(cm, t.x, t.y, now) : 1), reach = ARCHER.reach * fr;
-    if (d <= reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', fr < 1 ? { ...ARCHER.shot, range: (ARCHER.shot.range ?? ARCHER.reach) * fr } : ARCHER.shot, t, ev);
+    // From a lip above you it reaches further; from below, each level you stand above it is more to cover (sim/highrange.ts).
+    const cm = currentMap(), fr = reachFor(cm.theme) * (cm.fen ? mistReach(cm, t.x, t.y, now) : 1), tz = t.z ?? 0;
+    const lift = reachShift(cm, e, ux, uy, tz), reach = Math.max(Math.min(HEIGHT.least, ARCHER.reach * fr), ARCHER.reach * fr + lift);
+    if (d <= reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', fr < 1 || lift ? { ...ARCHER.shot, range: Math.max(reach, (ARCHER.shot.range ?? ARCHER.reach) * fr + lift) } : ARCHER.shot, t, ev);
     // Runs from you when you get close on its level (along its perch, up high); comes in if you're far on the ground.
     const back = level && d < ARCHER.keep * fr, on = afoot(e) && d > reach;
     if (back) {
       // Away, and a little to the side, so it doesn't back itself into a corner.
       const side = Math.sin(now * 0.7 + e.id) > 0 ? 1 : -1;
       walk(e, -ux - uy * side * 0.6, -uy + ux * side * 0.6, spec.speed * slow * ARCHER.flee, dt);
-    } else if (on) walk(e, ux, uy, spec.speed * slow * Math.max(0.2, facing), dt);
+    // (Up on a height with you below: it comes to the lip and holds it, never steps off after you.)
+    } else if (on && !((e.z ?? 0) > tz && atLip(cm, e, ux, uy))) walk(e, ux, uy, spec.speed * slow * Math.max(0.2, facing), dt);
     return;
   }
   // Spiders (sim/spiders.ts): skitter, circle and pounce; the brood mother bites and spits.
