@@ -14,7 +14,7 @@ import { stepCut } from './woodcut';
 import { outOfWood, stepGuard, type Guard } from './woodguard';
 import { startElement, stepElementLesson, wantsElement, type ElementStep } from './woodelement';
 import { signGoal, startSign, stepSignLesson, wantsSign, type SignStep } from './woodsign';
-import { afterGoal, countNow, needNow, stepAfter, type After } from './woodsteps';
+import { afterGoal, countNow, stepAfter, type After } from './woodsteps';
 import { walkHew } from './hewwalk';
 import { stepBitter } from './woodbitter';
 export { CUT, skipCut } from './woodcut';
@@ -41,6 +41,8 @@ export interface WoodState {
   relic: boolean;
   /** The Bitter (sim/woodbitter.ts): handed over at your first hit, then two more once you've drunk it. */
   bitter?: 'drink' | 'done';
+  /** Hurt for the first time in the middle of a lesson's fight: Hew's Bitter is owed once it's over (woodbitter.ts). */
+  bitterDue?: boolean;
   done: boolean;
   /** Seconds into waking up (-1: up and about): you lie still while he comes over. */
   wake: number;
@@ -79,7 +81,8 @@ export const WAKE = { fade: 2.5, arrive: 5.2, standing: 0.8 };
 /** Hew's way in at the waking: out of the trees west of you, round under the cart, slow and low. */
 const SNEAK = { round: [4.2, 36.4] as [number, number], speed: 1.45 };
 /** Tutorial pacing: drilled goblins wind up this much slower; one at a time comes at you. */
-export const DRILL = { windup: WOOD_EASE.windup, wheels: 1, praise: 1, praiseFor: 1.1 };
+/** (`wheels`: how many of a lesson's first blows are prompted. `next`: the longest the one coming at you waits.) */
+export const DRILL = { windup: WOOD_EASE.windup, wheels: 2, praise: 1, praiseFor: 1.1, next: 0.7 };
 
 export function newWood(room: ArenaRoom, cls: HeroClass = 'WARRIOR'): WoodState {
   const w: WoodState = { stage: 0, entered: false, count: 0, ids: [], more: false, cut: -1, caption: null, stoker: 0, helped: 0, hewAlive: true, relic: false, done: false, wake: 0, hold: null, drilled: 0, praised: 0, drillAt: -1, from: null, said: 0, upAt: -1, cls };
@@ -145,11 +148,15 @@ function oneAtATime(w: WoodState, room: ArenaRoom, hx: number, hy: number): Enem
   if (!up.length) return null;
   const near = up.reduce((a, b) => (Math.hypot(a.x - hx, a.y - hy) <= Math.hypot(b.x - hx, b.y - hy) ? a : b));
   for (const e of up) if (e !== near && e.act !== 'attack') e.cooldown = Math.max(e.cooldown, 0.8);
-  if (near.act !== 'attack' && near.cooldown > 1.2) near.cooldown = 1.2;
+  // (The quicker turn is for the lessons: the Stoker's fight keeps its own pace.)
+  const wait = w.stage < 4 ? DRILL.next : 1.2;
+  if (near.act !== 'attack' && near.cooldown > wait) near.cooldown = wait;
   return near;
 }
 
-/** The first blow of a lesson: just before it lands, what to press, said in passing. */
+/** A lesson's first blows: what to press, up as the blow is drawn back and down as it lands, said in passing.
+ *  (Kyle, 2026-11-17: "things just sort of flash on the screen". It came up a tenth of a second before the blow and
+ *  stayed on after it had landed. Only the last-second dodge waits for the end, since waiting is its lesson.) */
 function drill(w: WoodState, room: ArenaRoom, e: Enemy | null, h: Hero): void {
   const a = e?.attack, kind = countNow(w, lessonOf(w));
   if (!a || a.t >= a.windup || w.drilled >= DRILL.wheels || w.drillAt === e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10)) return;
@@ -157,13 +164,14 @@ function drill(w: WoodState, room: ArenaRoom, e: Enemy | null, h: Hero): void {
   if (h.act === 'roll' || !attackCovers(a, h)) return;
   const left = a.windup - a.t;
   const walk = lessonOf(w).card === 'step';
-  const ready = kind === 'dodge' ? a.unblockable && left <= (walk ? 0.45 : 0.16) : kind === 'block' ? left <= 0.4 : kind === 'slip' ? a.kind !== 'shot' && left <= 0.08 : false;
+  const ready = kind === 'dodge' ? a.unblockable : kind === 'block' ? true : kind === 'slip' ? a.kind !== 'shot' && left <= 0.25 : false;
   if (!ready) return;
   w.drilled++;
   w.drillAt = e!.id * 1000 + Math.round(a.windup * 100) + Math.round(a.ox * 10);
   const move: Move = kind === 'dodge' ? (walk ? 'step' : 'roll') : kind === 'block' ? 'block' : 'slip';
   // Said as it comes, never a freeze (Kyle, 2026-11-12: lines that stop you get in the way).
-  say(w, room, '', LINES.now[move as 'step' | 'roll' | 'block' | 'slip'], 1.2);
+  // (Set here, not by `say`: that keeps a line up long enough to read, and this one goes when the blow lands.)
+  w.caption = { who: '', text: LINES.now[move as 'step' | 'roll' | 'block' | 'slip'], until: room.time + left + 0.15 };
 }
 
 function openGate(room: ArenaRoom, i: number): void {
@@ -287,13 +295,9 @@ export function stepWood(w: WoodState, room: ArenaRoom, ev: FightEvent[], dt: nu
   }
   // A count done: flash it, then the goblins left.
   if (stepAfter(w, room, ev, lesson)) return;
-  // Cleared them before the lesson took: they come again.
-  if (!left.length && w.count < needNow(w, lesson)) {
-    w.ids = lesson.foes.map((f) => spawn(room, { ...f, awake: true }).id);
-    if (!w.moreSaid) (w.moreSaid = true), say(w, room, 'HEW', LINES.more, 3);
-    return;
-  }
-  if (!left.length && w.count >= needNow(w, lesson)) {
+  // Cleared them, the lesson's count done or not: the way on opens. (They used to come again until the count was
+  // done, so a hero who simply killed them was sent more and more with no word why: Kyle, 2026-11-17, "kind of dumb".)
+  if (!left.length) {
     w.after = undefined;
     // A Mage's full charge goes on to switching element, in the same clearing.
     if (wantsElement(w)) return startElement(w, room);

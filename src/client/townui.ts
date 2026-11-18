@@ -89,12 +89,12 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     if (talkedTo(pr, 'trainer', arg)) g.keep();
     // The first meeting, and the word after your first job, are a talk, not the training screen (Kyle's
     // playtest, 2026-11-13): there's nothing to buy at level 1, so what they say is the point.
-    const head = `${t.name}, ${CLASS_NAME[cls]} TRAINER`, talk = (s: string, pre = '') => panel.show(head, pre + say(name, s), [{ label: 'TRAINING', act: () => openTrainer(g, panel, head, name, '') }]);
+    const head = `${t.name}, ${CLASS_NAME[cls]} TRAINER`, talk = (s: string, pre = '', post = '') => panel.show(head, pre + say(name, s) + post, [{ label: 'TRAINING', act: () => openTrainer(g, panel, head, name, '') }]);
     // A Cleric's cold censer: Isolde lights it at the Lantern first (on the first meeting, then her word too).
     const relit = pr.cls === 'HEALER' && pr.cold;
     if (relit) (pr.cold = false), g.keep(), (g.hero.cold = false);
     const lit = relit ? p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') : '';
-    if (first) return talk(ERRANDW.firstVisit[pr.cls], lit);
+    if (first) return talk(ERRANDW.firstVisit[pr.cls], lit, `<p class="dim">${ERRANDW.firstNote}</p>`);
     if (relit) return panel.show(head, lit + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }], true);
     if (back && pr.level < 3) return talk(ERRANDW.back[pr.cls]);
     // A hero quest handed over just now (shared/heroquests.ts): the trainer's one line for it.

@@ -133,7 +133,7 @@ export class Title {
     if (!this.detail) return void (box.innerHTML = '');
     const c = this.pick, own = this.mine();
     if (own) return void (box.innerHTML = ownCard(own.h, own.i));
-    box.innerHTML = ringCard({ cls: c, look: this.look, name: this.free[0] ?? '', tryIt: !!this.onTry, skipWood: this.g.save.heroes.some((h) => h.prologue) });
+    box.innerHTML = ringCard({ cls: c, look: this.look, name: this.free[0] ?? '', tryIt: !!this.onTry, skipWood: true });
     this.fillNames();
   }
 

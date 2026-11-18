@@ -5,6 +5,7 @@
  * hands you two more in passing, the belt full.
  */
 import { LINES } from '../shared/wood';
+import { isDead } from './damage';
 import type { ArenaRoom } from './room';
 import type { Hero } from './types';
 import type { WoodState } from './wood';
@@ -13,7 +14,11 @@ import { say } from './woodkit';
 /** True when it stopped the world this frame. */
 export function stepBitter(w: WoodState, room: ArenaRoom, h: Hero): boolean {
   if (w.stage >= 4 || h.hp <= 0 || h.act === 'down') return false;
-  if (!w.bitter && h.hp < h.maxHp - 0.5) {
+  // (Never in the middle of a lesson's fight, on top of its own prompt: it's owed from the first hurt, and comes once
+  // that lesson's goblins are down, whatever your health is by then. Kyle, 2026-11-17.)
+  const fighting = w.entered && room.enemies.some((e) => w.ids.includes(e.id) && !isDead(e));
+  if (!w.bitter && h.hp < h.maxHp - 0.5) w.bitterDue = true;
+  if (!w.bitter && w.bitterDue && !fighting) {
     w.bitter = 'drink';
     h.belt = ['bitter'];
     w.hold = { kind: 'card', who: 'HEW', text: LINES.bitter, how: LINES.how.potion, need: 'potion', t: 0, until: 0 };

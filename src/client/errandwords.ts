@@ -32,15 +32,18 @@ export const ERRANDW = {
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
   freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",
-  /** Each trainer's first meeting (a talk, not the training screen): they send you to the board in the square
-   *  (Kyle's playtest, 2026-11-13; lore keeper and line editor). */
+  /** Each trainer's first meeting (a talk, not the training screen): there's plenty they'll teach you, and you start
+   *  at the board in the square (Kyle's playtest, 2026-11-13, and again 2026-11-17; lore keeper and line editor). */
   firstVisit: {
-    WARRIOR: "So you're the new one. Nothing to teach you till you've some fight in you. Board's in the square, and you can earn your keep there.",
-    RANGER: "Found my note, then. I don't teach anyone I haven't seen work, so there's a board in the square, and mind the dog bowls on your way out.",
-    ROGUE: "There you are. Sit, sit. I don't sell lessons to strangers, so get yourself some work off the board in the square, and then we'll talk.",
-    MAGE: "Ah. Yes. You. Mind the circle, it's chalk. I can't teach you anything yet, not really, so there's the board in the square, and come back after, and I'll have something worked out.",
-    HEALER: "Stand there where I can see you. Hm. You'll do, you great calf. Go and do an honest job off the board in the square, and come back to me after.",
+    WARRIOR: "So you're the new one. I'll teach you plenty, once you've some fight in you. Board's in the square, take a job or two.",
+    RANGER: "Found my note, then. I've plenty to show you, in time, only I don't teach anyone I haven't seen work, so take a job or two off the board in the square first. And mind the dog bowls on your way out.",
+    ROGUE: "There you are. Sit, sit. I've things to sell you that'll keep you alive, but not to a stranger, so get yourself some work off the board in the square first, and then we'll talk.",
+    MAGE: "Ah. Yes. You. Mind the circle, it's chalk. There's a great deal I can teach you, only not yet, not really, so start with the board in the square, take a job or two, and come back after, and I'll have something worked out.",
+    HEALER: "Stand there where I can see you. Hm. You'll do, you great calf. There's plenty I can teach you, in time. First get an honest job or two off the board in the square, then come back to me.",
   } as Record<HeroClass, string>,
+  /** Under that first talk, the game's own plain word (Kyle, 2026-11-17: make it clear there are things to learn,
+   *  and to start at the board). */
+  firstNote: 'Your trainer teaches a new skill as you level up, the first at level 3. Start with a job from the board in the square.',
   /** Tobin, frightened of your hungry gear, the first time (said under his panic while the errand's open), and
    *  Nettle when you come from him (Kyle, 2026-11-14; lore keeper and line editor). */
   tobinSends: "If you want rid of it there's a man at the back of the Rat, Nettle he's called, and he'll take it off you, only I never said so, mind, and if anyone asks it's the church you want.",

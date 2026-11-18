@@ -8,15 +8,22 @@ const store = new Map<string, string>();
 beforeEach(() => store.clear());
 
 describe('the Bitter in the wood', () => {
-  it('your first hit: Hew stops the world with a Bitter; POTION drinks it; then two more', () => {
+  it('your first hit: once that fight is over, Hew stops the world with a Bitter; POTION drinks it; then two more', () => {
     const g = new Game();
     g.create('WARRIOR', 'stray');
     Object.assign(g.wood!, { wake: -1, hold: null, from: null });
     Object.assign(g.hero, { act: 'idle', actT: 0, lying: false });
     g.step(0.05, NO_INTENT);
-    Object.assign(g.wood!, { hold: null });
+    Object.assign(g.wood!, { hold: null, entered: true });
     expect(g.taught()).not.toContain('potion');
     g.hero.hp -= 20;
+    g.step(0.05, NO_INTENT);
+    // Hurt in the middle of the lesson's fight: his card waits (it used to land on top of the lesson's own prompt).
+    expect(g.wood!.entered).toBe(true);
+    expect(g.wood!.hold).toBeNull();
+    // (No second pair on the field, so nothing follows but the way on.)
+    g.wood!.more = true;
+    for (const e of g.room.enemies) if (g.wood!.ids.includes(e.id)) Object.assign(e, { hp: 0, act: 'dead', actT: 0, actDur: 1e9 });
     g.step(0.05, NO_INTENT);
     expect(g.wood!.hold?.need).toBe('potion');
     expect(g.hero.belt).toEqual(['bitter']);

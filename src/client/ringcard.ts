@@ -24,7 +24,7 @@ export function ringCard(o: CardOpts): string {
       `<button data-begin class="primary wide">CHOOSE</button>`;
   return `<div class="rhead"><h2 class="cname">${CLASS_NAME[c]}</h2><p class="ctag">${CLASS_TAG[c]}</p></div>${looks}${bars}${choose}` +
     (o.tryIt ? `<button data-try class="ghost wide">TRY THE ${CLASS_NAME[c]}</button>` : '') +
-    (o.skipWood ? '<button data-skipwood class="ghost wide">SKIP THE WOOD</button>' : '');
+    (o.skipWood ? '<button data-skipwood class="ghost wide">SKIP THE TUTORIAL</button>' : '');
 }
 
 /** Your hero of the picked class: who they are, the class's ratings, PLAY (their slot `i`). */

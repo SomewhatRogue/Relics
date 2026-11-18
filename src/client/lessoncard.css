@@ -1,0 +1,7 @@
+/* A lesson's card (lesson.ts): what to do comes first and large, the move and its button, then the plain line on it;
+   Hew's word follows, smaller (Kyle, 2026-11-17: "a bit much on mobile": his speech led and the instruction sat small
+   under it). */
+#lesson .card.teach .move { margin-top: 0; }
+#lesson .card.teach .how { font-size: var(--fs); line-height: 1.4; color: #f0e6cc; }
+#lesson .card.teach .who { margin-top: 6px; font-size: 12px; }
+#lesson .card.teach .line { font-size: var(--fs-text); line-height: 1.45; color: #b8b2c4; }

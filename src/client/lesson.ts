@@ -7,6 +7,7 @@ import type { Game } from './game';
 import type { Move } from '../sim/wood';
 import { dodgeName } from '../shared/weapons';
 import { finish, speak, typing } from './speech';
+import './lessoncard.css';
 
 const NAME: Record<Move, string> = { move: 'MOVE', step: 'WALK OUT', attack: 'ATTACK', roll: 'DODGE', block: 'BLOCK', skill: 'SKILL', relic: 'RELIC', grab: 'GRAB AND THROW', backstab: 'BACKSTAB', heavy: 'FULL SHOT', slip: 'LAST SECOND', element: 'ELEMENT', shadow: 'SHADOW STEP', mark: 'MARK', heal: 'MEND' };
 const KEY: Record<Move, [string, string]> = {
@@ -91,8 +92,9 @@ export class LessonView {
     }
     this.el.innerHTML = h.kind === 'act'
       ? `<div class="now">${h.text}</div><kbd>${k}</kbd>`
-      : `<div class="card">${h.who ? `<b class="who">${h.who}</b>` : ''}<p class="line"></p>` +
-        `<div class="move"><span>${NAME[h.move ?? 'attack']}</span><kbd>${k}</kbd></div>${h.how ? `<p class="how">${h.how}</p>` : ''}` +
+      // (What to do first, large; Hew's word on it after: lessoncard.css.)
+      : `<div class="card teach"><div class="move"><span>${NAME[h.move ?? 'attack']}</span><kbd>${k}</kbd></div>${h.how ? `<p class="how">${h.how}</p>` : ''}` +
+        `${h.who ? `<b class="who">${h.who}</b>` : ''}<p class="line"></p>` +
         hint + '</div>';
     const ln = this.el.querySelector<HTMLElement>('.line');
     if (ln) speak(ln, h.text, h.who);

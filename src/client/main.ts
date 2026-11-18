@@ -479,7 +479,8 @@ function hud(now: number): void {
   // (A lesson card or a freeze-frame says it all; the caption waits.)
   $('#caption').hidden = !cap || (!!wood?.hold && wood.hold.kind !== 'praise');
   const capKey = cap ? cap.who + cap.text : '';
-  if (cap && capKey !== shownCap) $('#caption').innerHTML = (cap.who ? `<b>${cap.who}</b>` : '') + '<span></span>', speak($('#caption').querySelector('span')!, cap.text, cap.who);
+  // (A lesson's prompt is up all at once: it has less than a second. The rest are typed.)
+  if (cap && capKey !== shownCap) $('#caption').innerHTML = (cap.who ? `<b>${cap.who}</b>` : '') + '<span></span>', cap.text.startsWith('NOW:') ? ($('#caption').querySelector('span')!.textContent = cap.text) : speak($('#caption').querySelector('span')!, cap.text, cap.who);
   shownCap = capKey;
   $('#skipcut').hidden = !wood || wood.cut < 0 || !pr.cutSeen;
   // On a job, near the top of a room (where the way on is), the banner fades so it doesn't hide the exit.
