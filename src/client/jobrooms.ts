@@ -146,5 +146,8 @@ function carry(h: Hero, from: ArenaRoom, to: ArenaRoom, x: number, y: number, fy
   Object.assign(h, { x, y, fx: 0, fy, kvx: 0, kvy: 0, act: h.act === 'down' ? 'down' : 'idle', actT: h.act === 'down' ? h.actT : 0, moving: false });
   if (h.hound) Object.assign(h.hound, { x: x + 0.6, y: y + 0.3, state: 'heel', target: 0, moving: false });
   to.prev.set('h:' + h.id, [x, y]);
-  if (h.hound) to.prev.set('d:' + h.id, [h.hound.x, h.hound.y]);
+  // (No last place kept for the hound: the tick keeps one for heroes, goblins and survivors only (sim/room.ts),
+  // so one written here stayed for good, and the hound was drawn sweeping from this door to where it was, every
+  // tick, on the screen that runs the fight. Kyle, 2026-11-18: "VERY far away and then very close".)
+  to.prev.delete('d:' + h.id);
 }
