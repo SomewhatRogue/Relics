@@ -4,6 +4,7 @@
  * LEGS: dash through a goblin and the next hit soon after counts as from behind. SHAKE IT OFF: a dash
  * clears poison, and fire underfoot can't burn you a moment after.
  */
+import { afoot } from './afoot';
 import { SKEWER, WEAPONS } from '../shared/tuning';
 import { CALTROPS, LEGS, SHAKE_OFF, knowsRung } from '../shared/ladder';
 import { isDead, isDummy } from './damage';
@@ -13,7 +14,7 @@ import type { World } from './elements';
 import type { Enemy, FightEvent, Hero, Zone } from './types';
 
 const isRogue = (h: Hero) => WEAPONS[h.weapon]?.cls === 'ROGUE';
-const onFoot = (e: Enemy) => !isDead(e) && !isDummy(e) && e.kind !== 'nest' && (e.z ?? 0) === 0;
+const onFoot = (e: Enemy) => !isDead(e) && !isDummy(e) && e.kind !== 'nest' && afoot(e);
 
 /** A dash begins: caltrops where it began (when they're ready), and poison shaken off. */
 export function dashStart(h: Hero, zones: Zone[], w: World): void {

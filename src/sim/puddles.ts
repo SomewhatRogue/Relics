@@ -3,6 +3,7 @@
  * telegraph showed), a green pool lies PUDDLE.life seconds. Every PUDDLE.every seconds of the room's
  * clock, each hero standing in one (on the ground, not mid-dodge) takes a stack of poison.
  */
+import { afoot } from './afoot';
 import { HERO, PUDDLE } from '../shared/tuning';
 import { poison } from './poison';
 import type { FightEvent, Hero, Puddle } from './types';
@@ -18,7 +19,7 @@ export function stepPuddles(puddles: Puddle[], heroes: Hero[], now: number, dt: 
   const live = puddles.filter((p) => p.until > now);
   if (!live.length || Math.floor(now / PUDDLE.every) === Math.floor((now - dt) / PUDDLE.every)) return live;
   for (const h of heroes) {
-    if (h.act === 'roll' || (h.z ?? 0) > 0) continue;
+    if (h.act === 'roll' || !afoot(h)) continue;
     if (live.some((p) => Math.hypot(h.x - p.x, h.y - p.y) <= p.r + HERO.radius * 0.5)) poison(h, now, ev);
   }
   return live;

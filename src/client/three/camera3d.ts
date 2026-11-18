@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { LEDGE_H, WALL_H } from './ground';
-import { levelAt } from '../../shared/arena';
+import { groundLv } from '../../shared/heights';
 import { upright } from '../phoneband';
 import { STREET } from './streetkit';
 import { SWING } from '../swing';
@@ -110,7 +110,7 @@ export class Cam {
     this.at.z += (z - this.at.z) * k;
     this.ready = true;
     // Up on a raised level (the new town's Kirkhill), the camera rises with you, easing so a step doesn't jolt it.
-    this.lift += ((map.ledges ? levelAt(map, x, z) * LEDGE_H : 0) - this.lift) * k;
+    this.lift += ((map.ledges ? groundLv(map, x, z) * LEDGE_H : 0) - this.lift) * k;
     // (The new look's insides look down a little steeper, at the room and its back wall: shared/bighalls.ts.)
     const p = map.wallH ? IN_PITCH : PITCH, y = SWING.yaw, cp = Math.cos(p), ly = 0.8 + this.lift;
     this.cam.position.set(this.at.x - Math.sin(y) * cp * this.dist, ly - 0.8 + Math.sin(p) * this.dist, this.at.z + Math.cos(y) * cp * this.dist);

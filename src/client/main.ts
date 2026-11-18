@@ -13,6 +13,7 @@ import { signFor, signLeft } from '../sim/signature';
 import { ExpedUi } from './expedui';
 import { expedition, fenmere, goalWords, hangmansWood } from '../shared/expedjob';
 import { openCut, stressJob } from '../shared/instances';
+import { landJob } from '../shared/territory';
 import { stretchOf } from '../sim/stretches';
 import { barnHunt } from '../shared/bossjobs';
 import { plateOf } from '../sim/bossplate';
@@ -294,6 +295,9 @@ if (quick && cday) {
   const q = new URLSearchParams(location.search), way = q.get('way');
   game.startJob(openCut(cday > 1 ? cday : game.world.day), 1, Number(q.get('area') ?? 0), way === null ? undefined : Number(way));
 }
+// ?hero=WARRIOR&land=lowfurrow: straight onto a territory (docs/design/territories.md), a party of `party` (default 1).
+const land = new URLSearchParams(location.search).get('land');
+if (quick && land === 'lowfurrow') game.startJob(landJob(land, game.world.day), Number(new URLSearchParams(location.search).get('party') ?? 1));
 // ?hero=WARRIOR&barn=1: straight onto today's Doorkeepers hunt; ?barn=arena: straight into the great barn.
 const barn = new URLSearchParams(location.search).get('barn');
 if (quick && barn) game.startJob(barnHunt(game.world.day, barn === 'arena'));

@@ -23,6 +23,7 @@ import { ROWS, boardRows } from '../voteboards';
 import { LEDGE_H, WALL_H } from './ground';
 import { stacked } from './layoutledges';
 import { levelAt } from '../../shared/arena';
+import { bodyLv, groundLv, isLand } from '../../shared/heights';
 import { cueAt, drawCue, drawWayWord } from '../waycues';
 
 export type Proj = (x: number, y: number, z: number) => [number, number];
@@ -45,7 +46,7 @@ export class Overlay {
   }
 
   draw(room: ArenaRoom, meId: string, fx: Fx, m: Marks, P: Proj, lerp: Lerp, now: number, ppu: number): void {
-    const g = this.g, k = ppu / PX, up = (z?: number) => (z ?? 0) * 0.75;
+    const g = this.g, k = ppu / PX, up = (z?: number, x?: number, y?: number) => (x === undefined ? z ?? 0 : bodyLv(room.map, x, y ?? 0, z)) * 0.75;
     g.clearRect(0, 0, this.W, this.H);
     // The town hall's vote boards' words, each row placed on the wall's face (../voteboards.ts).
     // (Rows under a board's name go a fixed step below it: the wall is foreshortened, and lines would touch.)
@@ -97,7 +98,7 @@ export class Overlay {
       g.fillStyle = '#b080ff';
       g.globalAlpha = behind ? 0.95 : 0.35;
       for (let q = -1.1; q <= 1.1; q += 0.12) {
-        const [x, y] = P(ex + Math.cos(back + q) * r, 0.05 + up(e.z), ey + Math.sin(back + q) * r);
+        const [x, y] = P(ex + Math.cos(back + q) * r, 0.05 + up(e.z, ex, ey), ey + Math.sin(back + q) * r);
         g.fillRect(Math.round(x), Math.round(y), 1, 1);
       }
       g.globalAlpha = 1;
@@ -106,7 +107,7 @@ export class Overlay {
     // figures (figs3d.ts) bring their own, as the flat view draws them: a ring at the feet, names, counts.
     if (BOXFIGS) for (const e of room.enemies) {
       if (e.act === 'dead' || e.kind === 'dummy' || e.kind === 'swingDummy') continue;
-      const big = e.kind === 'butcher' || e.kind === 'brood' || e.variant === 'heavy', [ex, ey] = lerp('e:' + e.id, e.x, e.y), [x, y] = P(ex, (big ? 2.6 : 1.3) + up(e.z), ey);
+      const big = e.kind === 'butcher' || e.kind === 'brood' || e.variant === 'heavy', [ex, ey] = lerp('e:' + e.id, e.x, e.y), [x, y] = P(ex, (big ? 2.6 : 1.3) + up(e.z, ex, ey), ey);
       if (e.hp < e.maxHp && (room.time - e.hitAt < 3 || e.hp < e.maxHp * 0.5)) {
         const w = big ? 20 : 10, f = Math.max(0, Math.round((w * e.hp) / e.maxHp));
         g.fillStyle = '#0e0a10';
@@ -118,7 +119,7 @@ export class Overlay {
     }
     // Friends' names over their heads; a downed hero's count (a flat figure's card carries that).
     for (const h of room.heroes) {
-      const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [x, y] = P(hx, (BOXFIGS ? 1.75 : 1.5) + up(h.z), hy);
+      const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [x, y] = P(hx, (BOXFIGS ? 1.75 : 1.5) + up(h.z, hx, hy), hy);
       if (h.act === 'down' && (h.out || h.lying || !BOXFIGS)) continue;
       if (h.act === 'down') {
         const left = h.bleeding ? PARTY.bleed - h.actT : h.actDur - h.actT, s = String(Math.max(0, Math.ceil(left)));
@@ -156,7 +157,7 @@ export class Overlay {
     for (const t of m.marks) {
       const [tx, ty] = t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : [t.x, t.y];
       // (On the new town's raised levels, the level's height under it too: layoutledges.ts.)
-      const up = t.id === undefined && stacked(room.map) ? levelAt(room.map, tx, ty) * LEDGE_H : 0;
+      const up = isLand(room.map) ? groundLv(room.map, tx, ty) * LEDGE_H : t.id === undefined && stacked(room.map) ? levelAt(room.map, tx, ty) * LEDGE_H : 0;
       let [x, y] = P(tx, up + (t.kind === 'door' ? 2.6 : t.kind === 'boss' ? 3.4 : t.kind === 'folk' ? 2.75 : t.kind === 'hall' ? 1.6 : 2.0), ty);
       const off = x < pad || y < top || x > this.W - pad || y > this.H - pad;
       x = Math.min(this.W - pad, Math.max(pad, x));
@@ -180,7 +181,7 @@ export class Overlay {
     const me = room.heroes.find((h) => h.id === meId), p = m.pointTo;
     if (me) this.chasing(room, me, P, lerp);
     if (!me || !p) return;
-    const [hx, hy] = lerp('h:' + me.id, me.x, me.y), [ax, ay] = P(hx, 0, hy), [bx, by] = P(p.x, 0, p.y), l = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / l, uy = (by - ay) / l;
+    const [hx, hy] = lerp('h:' + me.id, me.x, me.y), land = isLand(room.map), [ax, ay] = P(hx, land ? bodyLv(room.map, hx, hy, me.z) * LEDGE_H : 0, hy), [bx, by] = P(p.x, land ? groundLv(room.map, p.x, p.y) * LEDGE_H : 0, p.y), l = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / l, uy = (by - ay) / l;
     const d = 13 + Math.sin(now * 5) * 3, cx = ax + ux * d, cy = ay + uy * d;
     g.fillStyle = '#ffd27a';
     for (let q = 0; q < 6; q++) for (let s = -q; s <= q; s++) g.fillRect(Math.round(cx + ux * (6 - q) - uy * s * 0.9), Math.round(cy + uy * (6 - q) + ux * s * 0.9), 1, 1);

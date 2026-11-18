@@ -186,7 +186,7 @@ export interface Mark { kind: MarkKind; x: number; y: number; w: number; h: numb
  * edge: inside a ramp you go freely between the levels.
  */
 export interface Ledge {
-  x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood';
+  x: number; y: number; w: number; h: number; ramps: Area[]; kind?: 'rock' | 'wood' | 'earth';
   /** The level its top stands at (default 1). Ledges stack: you stand on the highest one under you, and a ramp joins
    *  the levels either side of its edge (the new town's three levels: docs/design/town-layout.md). */
   lv?: number;

@@ -46,7 +46,8 @@ describe('heights', () => {
   it("a blade doesn't reach between levels; an archer's arrow does", () => {
     const { room, map } = high(), l = map.ledges![0], h = room.join('me');
     const e = newEnemy(1, 'scrapper', l.x + l.w / 2, l.y + l.h - 0.4);
-    Object.assign(e, { z: 1, respawns: false });
+    // (Held where it stands: left to itself it would walk off the edge at you, as a goblin on a height now does: sim/pathlevels.ts.)
+    Object.assign(e, { z: 1, respawns: false, held: true });
     room.enemies.push(e);
     Object.assign(h, { x: e.x, y: l.y + l.h + 0.4, fx: 0, fy: -1 });
     for (let i = 0; i < 30; i++) room.setIntent('me', { ...NO_INTENT, attackSeq: 1 + Math.floor(i / 10) }), room.step();

@@ -21,7 +21,7 @@ export class CheckNotes {
 
   /** This frame's line, if any. `together`: the whole party already stands in the gate (it's opening). */
   note(run: Run | null, room: ArenaRoom, me: string, together: boolean): string | null {
-    if (!run?.job.instance) return void Object.assign(this, { index: -1, downs: 0, there: false }), null;
+    if (!run?.job.instance && !run?.job.land) return void Object.assign(this, { index: -1, downs: 0, there: false }), null;
     let say: string | null = null;
     // A gate passed: the next room, or (one map in stretches) the next stretch.
     const at = run.index * 100 + (run.stretch ?? 0);

@@ -6,6 +6,7 @@
  * heavy hit takes it off the body (sim/damage.ts), as a stun, a freeze, a net or a grab does here; fire
  * on the body turns it to ash first (sim/worldfire.ts), and ash, a burned body or a burst one feeds nothing.
  */
+import { afoot } from './afoot';
 import { ELITE, MEAL } from '../shared/tuning';
 import { gorges } from './elite';
 import { held, isDead } from './damage';
@@ -79,7 +80,7 @@ export function stepMeal(e: Enemy, heroes: Hero[], others: Enemy[], freed: Survi
     ev.push({ k: 'fed', x: e.x, y: e.y, n });
     return true;
   }
-  if ((e.mealCool ?? -9) > now || e.fed || e.attack || e.rushTo || (e.z ?? 0) !== 0) return false;
+  if ((e.mealCool ?? -9) > now || e.fed || e.attack || e.rushTo || !afoot(e)) return false;
   // A hero right on it gets the blow instead.
   if (heroes.some((h) => h.act !== 'down' && !h.out && Math.hypot(h.x - e.x, h.y - e.y) < MEAL.guard + e.radius)) return false;
   let best: Body | undefined, bd = Infinity;

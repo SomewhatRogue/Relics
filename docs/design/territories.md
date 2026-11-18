@@ -371,6 +371,28 @@ Each territory is laid out to these before a goblin is placed:
 - **Sound before sight** at every zone.
 - **Nothing for its own sake:** no house, wall or tree that isn't part of what happened there.
 
+## Telling things apart (Kyle, 2026-11-17, later)
+
+"Sometimes it's hard to see things apart, or see items on the ground, or what a chest is versus a box. High
+contrast might be helpful." A rule for every territory, and a slice of its own for the whole game:
+
+- **Three reads, never mixed.** *Scenery* (crates, carts, stooks, fences) sits back: lower contrast, no
+  bright edge, no gold. *Things you can use* (a chest, a cage, a winch, a lever, a gate you can open, loot on
+  the ground) stand forward: a light rim, a dark plate under them so busy ground can't swallow them, and a
+  slow glint. *Bodies* (heroes, goblins, the freed) are the brightest edges on screen.
+- **A chest is never a box.** Its own silhouette (a curved lid, iron bands, a lock that catches the light) and
+  its own colour; a crate is square, dull and banded in wood. Seen at a phone's size, side by side.
+- **Loot on the ground** keeps its tier's colour as a rim and a small beam or glint, on a dark plate, so it
+  reads on rye, mud or stone alike.
+- **The ground is never the busiest thing** (the Graphics sweep's slice 5 says the same): scatter in a
+  territory is laid in clumps away from where things are dropped and fought over.
+- **An option, HIGH CONTRAST** (beside LIGHT and CAMERA): a dark outline on every body and every thing you
+  can use, and the ground a step darker. Off by default until Kyle has seen it.
+
+How it gets built: a sheet first (today's chest, crate, loot and cage beside the proposed, at phone size on
+three grounds), Kyle picks, then the look goes in. It crosses the Art chat's and the Graphics sweep chat's
+files, so it is asked on the board first.
+
 ## Still open for Kyle
 
 1. **Fennick Ford is the near bank only** until chapter 4?

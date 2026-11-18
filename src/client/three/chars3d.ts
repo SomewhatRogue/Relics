@@ -33,6 +33,7 @@ import { cardMaterial } from './figmat';
 import type { Figs } from './figs3d';
 import { levelAt } from '../../shared/arena';
 import { LEDGE_H } from './ground';
+import { bodyLv } from '../../shared/heights';
 import { STREET } from './streetkit';
 import { drawParts, type Kit } from './charparts';
 import META from './charkit/chars.json';
@@ -131,7 +132,7 @@ export class Chars {
     const hero = (h: Hero, key: string, x: number, y: number) => {
       const w = WEAPONS[h.weapon];
       if (w.cls !== 'WARRIOR' || h.act === 'down' || h.act === 'carry' || h.act === 'slam') return;
-      const up = (h.z ?? 0) * LEDGE_H, g = this.fig(key, this.kits.knight);
+      const up = bodyLv(room.map, x, y, h.z) * LEDGE_H, g = this.fig(key, this.kits.knight);
       if (!g) return;
       const p = heroPose(h, t, now), walk = this.walked(g, x, y, h.moving, STRIDE.knight);
       knightShows({ act: h.act, heavy: h.heavy, combo: h.combo, blocking: h.blocking, phase: p.phase, k: p.k, moving: h.moving, walk }, SH, blowFrames(this.kits.knight.meta));
@@ -147,7 +148,7 @@ export class Chars {
     // (Another player's Warrior at the level they stand on.)
     for (const h of others) hero({ ...h, z: levelAt(room.map, h.x, h.y) }, 'o' + h.id, h.x, h.y);
     for (const e of room.enemies) if (this.goblin(e, room)) {
-      const [x, y] = lerp('e:' + e.id, e.x, e.y), up = Math.max(0, e.z ?? 0) * LEDGE_H, key = 'e' + e.id, g = this.fig(key, this.kits.goblin);
+      const [x, y] = lerp('e:' + e.id, e.x, e.y), up = bodyLv(room.map, x, y, Math.max(0, e.z ?? 0)) * LEDGE_H, key = 'e' + e.id, g = this.fig(key, this.kits.goblin);
       if (!g) continue;
       const dead = e.act === 'dead' ? e.actT : -1, p = scrapperPose(e, t, now), walk = this.walked(g, x, y, e.moving && dead < 0, STRIDE.goblin);
       goblinShows({ attack: e.attack?.kind ?? '', phase: p.phase, k: p.k, moving: e.moving, walk, dead }, SH);

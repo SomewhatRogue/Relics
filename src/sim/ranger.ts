@@ -8,6 +8,7 @@
  * the nearest small goblin), runs it down and worries it (a shield-bearer from behind), then comes back. It can't be killed; a
  * butcher winding up near it scares it off for a while, and it comes back when it's ready.
  */
+import { afoot } from './afoot';
 import { HOUND, SNARE, WEAPONS } from '../shared/tuning';
 import { catches } from './techranger';
 import { snareSpots } from './ladderranger';
@@ -36,7 +37,7 @@ export function laySnare(h: Hero, snares: Snare[], now: number, ev: FightEvent[]
  *  it stays set for a second goblin (not the one it already holds), and shows it's set again. */
 export function stepSnare(s: Snare, enemies: Enemy[], now: number, ev: FightEvent[]): boolean {
   if (now > s.until) return false;
-  const e = enemies.find((o) => !isDead(o) && o.kind !== 'dummy' && o.kind !== 'swingDummy' && (o.z ?? 0) === 0 && !s.got?.includes(o.id) && Math.hypot(o.x - s.x, o.y - s.y) < SNARE.radius + o.radius);
+  const e = enemies.find((o) => !isDead(o) && o.kind !== 'dummy' && o.kind !== 'swingDummy' && afoot(o) && !s.got?.includes(o.id) && Math.hypot(o.x - s.x, o.y - s.y) < SNARE.radius + o.radius);
   if (!e) return true;
   const hold = s.hold ?? SNARE.hold, more = (s.left ?? 1) > 1;
   (s.got ??= []).push(e.id);

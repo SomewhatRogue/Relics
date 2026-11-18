@@ -9,11 +9,20 @@
  * Barrowfields' river stepping bank to bank. It walked into the gap and stood there for good (Kyle: "some
  * shallow water seems to really hurt pathing"). Now there is a grid for each size of body, built the
  * first time one of that size needs it and again when the room changes (a house knocked down).
+ *
+ * It knows levels (sim/pathlevels.ts): a ledge's box is not blocked, each cell has the level a body must be
+ * at to stand there, and `canStep` says which steps between cells a body can take (up a slope, off a face,
+ * never up a face). A map with no ledges is `flat` and every step is open, as it always was.
  */
 import { inArea, solid, type GameMap } from '../shared/arena';
 import { PATH } from '../shared/tuning';
+import { canStep, layLevels } from './pathlevels';
 
-export interface Grid { cols: number; rows: number; cost: Uint8Array; sig: string; fields: Map<number, Float32Array>; part?: Int32Array; nearest: Map<string, number> }
+export interface Grid {
+  cols: number; rows: number; cost: Uint8Array; sig: string; fields: Map<number, Float32Array>; part?: Int32Array; nearest: Map<string, number>;
+  /** No ledges: every step open. Else each cell's level, whether its middle is in a ramp, whether it's a drop (sim/pathlevels.ts). */
+  flat: boolean; lv?: Uint8Array; ramp?: Uint8Array; drop?: Uint8Array;
+}
 export const C = PATH.cell;
 const overlaps = (a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 const grids = new WeakMap<GameMap, Map<number, Grid>>();
@@ -23,8 +32,7 @@ export const sizeOf = (r: number) => Math.ceil(r * 100 - 1e-6) / 100;
 
 /**
  * What a cell costs to cross: 0 blocked, 1 dry, 2 wading. Blocked where collide() would push a body of
- * that size set down at the cell's middle: within its radius of a block, deep water or a ledge's face (but
- * for the ramps), of a round thing, a brazier or someone standing, or of the map's edge. Laid shape by
+ * that size set down at the cell's middle: within its radius of a block, deep water, a round thing, a brazier or someone standing, or of the map's edge. Laid shape by
  * shape rather than asked cell by cell, so a grid costs a few milliseconds even on the Barrowfields.
  */
 function build(m: GameMap, size: number, sig: string): Grid {
@@ -56,14 +64,6 @@ function build(m: GameMap, size: number, sig: string): Grid {
   for (const b of m.braziers) disc(b.x, b.y, b.r);
   // (Not Hew: he walks about the wood, so where he stood when the grid was built would block his own way.)
   for (const n of m.npcs ?? []) if (!n.path && !n.pose && n.talk !== 'hew') disc(n.x, n.y, 0.32);
-  // A ledge's face stops anyone on the ground; its ramp is the way up.
-  for (const l of m.ledges ?? []) {
-    box(l);
-    for (const q of l.ramps) {
-      const [i0, i1] = span(q.x, q.x + q.w, cols), [j0, j1] = span(q.y, q.y + q.h, rows);
-      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) if (inArea(q, (i + 0.5) * C, (j + 0.5) * C)) cost[j * cols + i] = 1;
-    }
-  }
   // The map's edge (collide keeps a body r in from the sides and the foot, 0.6 r from the top).
   for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
     const x = (i + 0.5) * C, y = (j + 0.5) * C;
@@ -74,12 +74,14 @@ function build(m: GameMap, size: number, sig: string): Grid {
     const [i0, i1] = span(w.x, w.x + w.w, cols), [j0, j1] = span(w.y, w.y + w.h, rows);
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) if (cost[j * cols + i] && inArea(w, (i + 0.5) * C, (j + 0.5) * C)) cost[j * cols + i] = 2;
   }
-  return { cols, rows, cost, sig, fields: new Map(), nearest: new Map() };
+  const g: Grid = { cols, rows, cost, sig, fields: new Map(), nearest: new Map(), flat: true };
+  layLevels(m, g, C, r);
+  return g;
 }
 
 /** The grid for a body of radius r on this map (collide() works on the current map, which this is). */
 export function gridOf(m: GameMap, r: number): Grid {
-  const sig = `${m.blocks.filter((b) => b.ruined || b.deck).length}.${m.blocks.length}.${m.rounds.length}.${m.water?.length ?? 0}.${m.water?.reduce((s, w) => s + w.x + w.y + w.w + w.h, 0) ?? 0}.${m.npcs?.length ?? 0}`;
+  const sig = `${m.blocks.filter((b) => b.ruined || b.deck).length}.${m.blocks.length}.${m.rounds.length}.${m.water?.length ?? 0}.${m.water?.reduce((s, w) => s + w.x + w.y + w.w + w.h, 0) ?? 0}.${m.npcs?.length ?? 0}.${m.ledges?.map((l) => `${l.x},${l.y},${l.w},${l.h},${l.lv ?? 1},${l.ramps.map((q) => `${q.x},${q.y},${q.w},${q.h}`)}`).join(';') ?? ''}`;
   const size = sizeOf(r);
   let mine = grids.get(m);
   if (!mine) grids.set(m, (mine = new Map()));
@@ -105,7 +107,8 @@ export function openNear(g: Grid, c: number, ring: number): number[] {
   return [];
 }
 
-/** Which walled-off part of the ground each open cell is in (-1 blocked), worked out once a grid. */
+/** Which walled-off part of the ground each open cell is in (-1 blocked), worked out once a grid. Two cells
+ *  are joined only where a body can step both ways between them (a bank with no slope is a part of its own). */
 function parts(g: Grid): Int32Array {
   if (g.part) return g.part;
   const part = new Int32Array(g.cols * g.rows).fill(-1), stack: number[] = [];
@@ -118,7 +121,7 @@ function parts(g: Grid): Int32Array {
       const k = stack.pop()!, i = k % g.cols, j = Math.floor(k / g.cols);
       for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const ni = i + di, nj = j + dj, q = ni + nj * g.cols;
-        if (ni >= 0 && nj >= 0 && ni < g.cols && nj < g.rows && g.cost[q] && part[q] < 0) (part[q] = n), stack.push(q);
+        if (ni >= 0 && nj >= 0 && ni < g.cols && nj < g.rows && g.cost[q] && part[q] < 0 && canStep(g, k, q) && canStep(g, q, k)) (part[q] = n), stack.push(q);
       }
     }
     n++;

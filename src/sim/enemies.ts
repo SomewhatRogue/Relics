@@ -1,10 +1,11 @@
 /** Enemies' turns: the goblin butcher, goblin scrappers, and the two training dummies. */
+import { afoot } from './afoot';
 import { stepTask } from './tasks';
 import { blinded, stumble } from './rangershots';
 import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
-import { collide, currentMap, inArea, wadeAt } from '../shared/arena';
+import { collide, currentMap, wadeAt } from '../shared/arena';
 import { FRIENDLY, DECOY, ALERT, ARCHER, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
@@ -315,10 +316,10 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   if (!spec) return;
-  // On another level: a goblin with a blade goes round by the nearest ramp; an archer just shoots.
-  const level = (t.z ?? 0) === (e.z ?? 0), via = level || e.bow ? null : rampFor(e);
-  // On the ground, round water and anything long in the way: by the ford, the bridge, the gap (sim/pathing.ts).
-  const go = !e.bow && !e.z ? wayTo(e, via ? via.x : t.x, via ? via.y : t.y) : via ?? t;
+  // On any level, round water and anything long in the way, up a slope or off a face to another level: by the
+  // ford, the bridge, the gap (sim/pathing.ts). An archer just faces you and shoots.
+  const level = (t.z ?? 0) === (e.z ?? 0), via = !level && !e.bow;
+  const go = !e.bow ? wayTo(e, t.x, t.y, t.z ?? 0) : t;
   const gx = go.x, gy = go.y, gd = Math.hypot(gx - e.x, gy - e.y) || 1;
   // Turn toward where it's going at this enemy's own pace; it only attacks once it faces you.
   const ux = (gx - e.x) / gd, uy = (gy - e.y) / gd;
@@ -341,7 +342,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     const cm = currentMap(), fr = reachFor(cm.theme) * (cm.fen ? mistReach(cm, t.x, t.y, now) : 1), reach = ARCHER.reach * fr;
     if (d <= reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', fr < 1 ? { ...ARCHER.shot, range: (ARCHER.shot.range ?? ARCHER.reach) * fr } : ARCHER.shot, t, ev);
     // Runs from you when you get close on its level (along its perch, up high); comes in if you're far on the ground.
-    const back = level && d < ARCHER.keep * fr, on = !e.z && d > reach;
+    const back = level && d < ARCHER.keep * fr, on = afoot(e) && d > reach;
     if (back) {
       // Away, and a little to the side, so it doesn't back itself into a corner.
       const side = Math.sin(now * 0.7 + e.id) > 0 ? 1 : -1;
@@ -451,16 +452,5 @@ export function walk(e: Enemy, mx: number, my: number, k: number, dt: number): v
   e.y += (my / ml) * k * wade * dt;
   e.moving = true;
   collide(e, e.radius);
-}
-
-/** Where to head to change level: the middle of the nearest ramp (or straight on, once on it). */
-function rampFor(e: Enemy): { x: number; y: number } | null {
-  let best: { x: number; y: number } | null = null, bd = Infinity;
-  for (const l of currentMap().ledges ?? []) for (const r of l.ramps) {
-    if (inArea(r, e.x, e.y)) return null;
-    const c = { x: r.x + r.w / 2, y: r.y + r.h / 2 }, d = Math.hypot(c.x - e.x, c.y - e.y);
-    if (d < bd) (bd = d), (best = c);
-  }
-  return best;
 }
 

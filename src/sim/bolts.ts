@@ -10,6 +10,7 @@ import { shotAtDoor } from './doorwall';
 import { addPoise } from './poise';
 import { HUNGRY_FX } from './hungry';
 import { collide } from '../shared/arena';
+import { highShot } from './afoot';
 import { CRIT, FLINCH, HERO, LODESTONE, NET, WEAPONS, type Augment, type Swing, type TraitId } from '../shared/tuning';
 import { shove } from './bodies';
 import { bendShot } from './mark';
@@ -98,7 +99,7 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     }
     const wasFrozen = frozen(e, w.now), winding = !!b.interrupts && windingUp(e);
     e.lastBy = b.owner;
-    if (damage(e, b.dmg, w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;
+    if (damage(e, b.hz === undefined ? b.dmg : Math.round(b.dmg * highShot(b, e)), w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el })) continue;
     // A smite on a frozen small one sends it skidding off from where it fell (sim/iceslide.ts).
     if (wasFrozen && b.kind === 'smite' && fling(e, b.owner, d > 0.05 ? e.x - x : b.dx, d > 0.05 ? e.y - y : b.dy, true, w.now, w.ev)) continue;
     // A relic's blast throws a butcher as far as a scrapper (one that can't be moved stays put).
@@ -148,7 +149,7 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
   const rear = back && by ? backstabOf(by) : 1;
   // A boss of the kit: a shot into a shut door cuts its straps; a perfect, a full draw or one in its back fills its POISE (sim/doorwall.ts, poise.ts).
   if (e.boss) bossShot(e, b, back, w);
-  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back });
+  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board) * highShot(b, e)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back });
   // (A board tuned to let a little of a plain shot by still stops it there.)
   if (board === 'blocked') w.ev.push({ k: 'deflect', x: e.x, y: e.y });
   // A Rogue's techniques on a backstab (sim/techrogue.ts).

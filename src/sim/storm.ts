@@ -7,6 +7,7 @@
  * turn as one stunner under the 6 s cap), a siege engine is cracked, all are thrown out. The strike is
  * kept a moment after for the flash and the bolt. One shape drawn and judged: sim/stormshape.ts.
  */
+import { afoot } from './afoot';
 import type { GameMap } from '../shared/arena';
 import type { Rng } from '../shared/rng';
 import { ENGINE } from '../shared/expedcamps';
@@ -70,7 +71,7 @@ function land(r: StormRoom, s: Strike): void {
   if (rod) rodHit(rod, s.ox ?? s.x, s.oy ?? s.y, t, ev);
   const struck: Enemy[] = [];
   for (const e of r.enemies) {
-    if (isDead(e) || e.under || (e.z ?? 0) !== 0 || (e !== rod && !inStrike(s, e, e.radius))) continue;
+    if (isDead(e) || e.under || !afoot(e) || (e !== rod && !inStrike(s, e, e.radius))) continue;
     struck.push(e);
     const [dx, dy] = away(s, e);
     if (damage(e, LIGHTNING.dmg, t, ev, { heavy: true, how: 'burst', dx, dy, el: 'storm' })) continue;
@@ -79,7 +80,7 @@ function land(r: StormRoom, s: Strike): void {
   }
   for (const h of r.heroes) {
     // A roll gets out from under it, as from any blow; the grace on coming in holds.
-    if (h.act === 'down' || h.act === 'roll' || h.out || h.safeT || (h.z ?? 0) !== 0 || !inStrike(s, h)) continue;
+    if (h.act === 'down' || h.act === 'roll' || h.out || h.safeT || !afoot(h) || !inStrike(s, h)) continue;
     const [dx, dy] = away(s, h);
     h.hp -= LIGHTNING.heroDmg;
     count(h.id, 'taken', LIGHTNING.heroDmg);

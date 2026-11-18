@@ -7,6 +7,7 @@
  * (a striped circle on their spot), and ropes that are due land, judged as any boss blow (sim/combat.ts
  * hitHero: the lag compensation and the grace with it). And how the wood's room takes Hempen on (`hempenOnto`).
  */
+import { afoot } from './afoot';
 import { BOSS, HEMPEN_BOSS as H } from '../shared/tuning';
 import { SPINE } from '../shared/hangwood';
 import { Rng } from '../shared/rng';
@@ -89,7 +90,7 @@ function land(e: Enemy, b: BossOn, w: World): void {
   for (const r of due) {
     w.ev.push({ k: 'impact', x: r.x, y: r.y, kind: 'slam' });
     const a = ropeBlow(e, r);
-    for (const h of w.heroes) if ((h.z ?? 0) === 0) hitHero(e, a, h, now, w.ev, w.heroes);
+    for (const h of w.heroes) if (afoot(h)) hitHero(e, a, h, now, w.ev, w.heroes);
   }
 }
 

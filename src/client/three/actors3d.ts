@@ -10,6 +10,7 @@ import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
 import { asleep } from '../foes';
 import { LEDGE_H } from './ground';
+import { bodyLv, groundLv, groundTop, isLand } from '../../shared/heights';
 import { clsOf, heroKey, makeHero, type HeroFig } from './heroes3d';
 import { poseHero } from './heropose3d';
 import { foeLook, makeGoblin, type FoeFig } from './goblins3d';
@@ -82,13 +83,13 @@ export class Actors {
     const t = room.time, lift = (z?: number) => (z ?? 0) * LEDGE_H;
     for (const p of [this.heroes, this.foes, this.folk, this.hounds, this.teles, this.things, this.chests]) p.begin();
     // The figures are flat cards (cards3d.ts) unless ?figs=3d: then these, built from boxes.
-    if (BOXFIGS) for (const h of room.heroes) this.hero(h, lerp, now, lift(h.z));
+    if (BOXFIGS) for (const h of room.heroes) this.hero(h, lerp, now, bodyLv(room.map, h.x, h.y, h.z) * LEDGE_H);
     for (const e of room.enemies) {
       if (BOXFIGS) this.foe(room, e, now, lerp);
       if (e.attack && (e.act === 'attack' || (e.boss?.who === 'listener' && e.boss.lmove === 'rise'))) {
         // A round one on water lies on its surface, with the oil it's about (hazards3d.ts).
         const m = this.teles.get('t' + e.id, '', () => ({ root: makeTele() })).root, a = e.attack;
-        m.visible = shapeTele(m, a, now, e.z ? lift(e.z) : isRound(a.kind) ? surfAt(room.map, a.cx, a.cy) : 0);
+        m.visible = shapeTele(m, a, now, isLand(room.map) ? (isRound(a.kind) ? groundTop(room.map, a.cx, a.cy, a.radius) : bodyLv(room.map, e.x, e.y, e.z)) * LEDGE_H : e.z ? lift(e.z) : isRound(a.kind) ? surfAt(room.map, a.cx, a.cy) : 0);
       }
     }
     // A storm's lightning coming: its circle, the striped edge (sim/stormshape.ts, the shape the room judges).
@@ -120,7 +121,7 @@ export class Actors {
       if (s.gone) continue;
       const [x, y] = lerp('s:' + s.id, s.x, s.y), f = this.folk.get('s' + s.id, '', () => makeFolk(s.id));
       poseFolk(f, s, t, this.stride('s' + s.id, x, y));
-      f.root.position.set(x, f.root.position.y + lift(s.z), y);
+      f.root.position.set(x, f.root.position.y + bodyLv(room.map, x, y, s.z) * LEDGE_H, y);
     }
     // THE LEECHMAN's old windlass on the west bank: a drum on two timbers, a crank, a chain (as client/windlassdraw.ts).
     if (room.map.windlass) {
@@ -134,24 +135,24 @@ export class Actors {
       if (p.kind === 'log') continue;
       const carrier = p.lifted ? room.heroes.find((h) => h.lifting === p.id) : undefined, o = this.things.get('p' + p.id, p.kind, () => ({ root: makeProp(p.kind) })).root;
       const [x, y] = carrier ? lerp('h:' + carrier.id, carrier.x, carrier.y) : [p.x, p.y];
-      o.position.set(x, carrier ? 1.3 : (p.air ?? 0) > 0 ? 0.3 : lift(p.z), y);
+      o.position.set(x, carrier ? 1.3 : (p.air ?? 0) > 0 ? 0.3 : isLand(room.map) ? groundLv(room.map, x, y) * LEDGE_H : lift(p.z), y);
       o.rotation.set(0, p.spin, (p.air ?? 0) > 0 ? p.spin * 2 : 0);
       if (!carrier) shakeProp(o, p, t);
     }
     (room.map.holes ?? []).forEach((h, i) => this.things.get('hole' + i, '', () => ({ root: makeHole() })).root.position.set(h.x, 0, h.y));
     for (const c of room.chests) {
       const f = this.chests.get('c' + c.id, '', makeChest);
-      f.root.position.set(c.x, 0, c.y);
+      f.root.position.set(c.x, bodyLv(room.map, c.x, c.y) * LEDGE_H, c.y);
       poseChest(f, c);
     }
     for (const d of room.drops) {
       if (d.owner && d.owner !== meId) continue;
       // Lying on the floor as itself, a glint down its blade now and then (loot3d.ts).
       const o = this.things.get('d' + d.id, d.item.quality, () => ({ root: makeLoot(d.item, itemCol(d.item), d.id) })).root;
-      o.position.set(d.x, 0, d.y);
+      o.position.set(d.x, bodyLv(room.map, d.x, d.y) * LEDGE_H, d.y);
       o.userData.tick?.(now);
     }
-    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: p.gold ? makeCoins(p.gold) : p.potion ? makeBottle(p.potion) : makePickup(false, undefined, p.relic && relicCol(p.relic)) })).root.position.set(p.x, 0, p.y);
+    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: p.gold ? makeCoins(p.gold) : p.potion ? makeBottle(p.potion) : makePickup(false, undefined, p.relic && relicCol(p.relic)) })).root.position.set(p.x, bodyLv(room.map, p.x, p.y) * LEDGE_H, p.y);
     for (const c of room.coals) this.things.get('o' + c.id, '', () => ({ root: makeCoal() })).root.position.set(c.x, Math.sin(now * 6 + c.id) * 0.02, c.y);
     for (const b of room.bolts) placeBolt(this.things.get('b' + b.id, boltLook(b), () => ({ root: makeBolt(b) })).root, b, 0);
     for (const j of room.javelins) placeJavelin(this.things.get('j' + j.id, '', () => ({ root: makeJavelin() })).root, j, 0);
@@ -179,7 +180,7 @@ export class Actors {
     if (!poseFoe(f, e, room.time, now, this.stride('e' + e.id, x, y))) f.root.visible = false;
     f.root.position.x = x;
     f.root.position.z = y;
-    f.root.position.y += carrier ? 1.25 + lift(carrier.z) : lift(e.z);
+    f.root.position.y += carrier ? 1.25 + lift(carrier.z) : bodyLv(room.map, x, y, e.z) * LEDGE_H;
     if (carrier) (f.mid.rotation.z = Math.PI / 2), (f.legs[0].rotation.x = Math.sin(now * 14) * 0.6);
     if (asleep(room.map, e)) (f.mid.rotation.z = Math.PI / 2), (f.mid.position.y = 0.15);
   }

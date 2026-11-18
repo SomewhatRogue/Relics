@@ -5,6 +5,7 @@
  * now and then, rarely); with nothing like that about, bare open ground near someone. Weighted by
  * LIGHTNING.weights, chosen on the room's own sky stream, so every screen sees the same.
  */
+import { afoot } from './afoot';
 import type { Block, GameMap, Round } from '../shared/arena';
 import { ENGINE } from '../shared/expedcamps';
 import type { Rng } from '../shared/rng';
@@ -57,13 +58,13 @@ function pickSpot(map: GameMap, heroes: Hero[], enemies: Enemy[], rng: Rng): Pic
     if (b.kind === 'cart' && b.look === ENGINE.look && !b.ruined && near(x, y)) all.push({ x, y, on: 'engine', w: W.engine });
   }
   for (const e of enemies) {
-    if (isDead(e) || e.under || (e.z ?? 0) !== 0 || e.dozing || !near(e.x, e.y)) continue;
+    if (isDead(e) || e.under || !afoot(e) || e.dozing || !near(e.x, e.y)) continue;
     if (e.variant === 'banner') all.push({ x: e.x, y: e.y, on: 'banner', w: W.banner });
     // An ironhide's iron draws it as a banner pole does (sim/rods.ts).
     else if (isRod(e)) all.push({ x: e.x, y: e.y, on: 'rod', rod: e.id, w: ROD.weight });
     else if (inOpen(map, e.x, e.y)) all.push({ x: e.x, y: e.y, on: 'goblin', w: W.goblin });
   }
-  for (const h of party) if ((h.z ?? 0) === 0 && inOpen(map, h.x, h.y)) all.push({ x: h.x, y: h.y, on: 'hero', w: W.hero });
+  for (const h of party) if (afoot(h) && inOpen(map, h.x, h.y)) all.push({ x: h.x, y: h.y, on: 'hero', w: W.hero });
   const total = all.reduce((n, p) => n + p.w, 0);
   if (total > 0) {
     let r = rng.next() * total;

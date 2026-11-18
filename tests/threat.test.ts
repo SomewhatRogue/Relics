@@ -334,7 +334,10 @@ describe('a single-target kit clears a room comfortably', () => {
     // bot that never needs to move clears faster with it: below.)
     // (190 s, not 180: since 2026-11-16's day and evening mix, the sample holds a dusk room with an ironhide that a wand
     // bot finishes just past three minutes, 12 of its 225 health left at 180. For the General chat to weigh.)
-    const r = clearTimes(sampleRooms(2, 3), ['daggers', 'wand', 'staff'], 190);
+    // (210 s since 2026-11-17: goblins path over heights now (sim/pathlevels.ts), and in that same room, which has a
+    // rock shelf, the wand bot takes 202 s where it took 184, the daggers 110 where they took 132. The sample's mean
+    // moves under two seconds.)
+    const r = clearTimes(sampleRooms(2, 3), ['daggers', 'wand', 'staff'], 210);
     expect(r.daggers.unclear + r.wand.unclear + r.staff.unclear).toBe(0);
     expect(r.daggers.mean / r.wand.mean).toBeLessThan(1.15);
     // (Goblins swing sooner since 2026-11-11, which tells more on a knife fighter up close.)

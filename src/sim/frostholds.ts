@@ -4,6 +4,7 @@
  * blow that smashes the frozen and the chilled near you). Each is one shape, judged here and drawn from
  * the same numbers (client/fxspells.ts).
  */
+import { afoot } from './afoot';
 import { COLD_BLAST, NOVA, SHATTER_BLOW, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { inArc } from './combat';
@@ -38,7 +39,7 @@ export function coldBlast(h: Hero, s: Swing, mult: number, w: World, wide: numbe
   const n = Math.max(1, Math.round(s.dmg * COLD_BLAST.dmg * mult));
   w.ev.push({ k: 'spell', x: h.x, y: h.y, dx: h.fx, dy: h.fy, el: 'frost', what: 'coldblast', r: range, big });
   // Shallows in the cone ice over (sim/ice.ts): two patches along it, near and far.
-  if ((h.z ?? 0) === 0) for (const [d, r] of [[0.35, 0.3], [0.72, 0.38]]) iceAt(w.fx, h.x + h.fx * range * d, h.y + h.fy * range * d, range * r, w.now, w.ev);
+  if (afoot(h)) for (const [d, r] of [[0.35, 0.3], [0.72, 0.38]]) iceAt(w.fx, h.x + h.fx * range * d, h.y + h.fy * range * d, range * r, w.now, w.ev);
   for (const e of w.enemies) if (open(h, e) && inArc(h.x, h.y, h.fx, h.fy, e.x, e.y, range, arc, e.radius)) freezeHit(w, h, e, n, COLD_BLAST.knock, h.x, h.y, big);
 }
 
@@ -47,7 +48,7 @@ export function nova(h: Hero, s: Swing, mult: number, w: World, r: number): void
   const n = Math.max(1, Math.round(s.dmg * NOVA.dmg * mult));
   w.ev.push({ k: 'spell', x: h.x, y: h.y, dx: h.fx, dy: h.fy, el: 'frost', what: 'nova', r, big: h.perfect });
   // The hard frost ices the shallows all round (sim/ice.ts).
-  if ((h.z ?? 0) === 0) iceAt(w.fx, h.x, h.y, r, w.now, w.ev);
+  if (afoot(h)) iceAt(w.fx, h.x, h.y, r, w.now, w.ev);
   for (const e of w.enemies) if (open(h, e) && Math.hypot(e.x - h.x, e.y - h.y) <= r + e.radius) freezeHit(w, h, e, n, NOVA.knock, h.x, h.y, false);
 }
 

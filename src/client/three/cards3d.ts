@@ -40,6 +40,7 @@ import { drawBlastBits } from '../blastdraw';
 import type { Lerp } from './actors3d';
 import type { Figs } from './figs3d';
 import { LEDGE_H } from './ground';
+import { bodyLv, isLand } from '../../shared/heights';
 import { drawTally } from '../chalkdraw';
 import { woodFigs } from '../wooddraw';
 import { noteKneels } from '../kneel';
@@ -51,10 +52,10 @@ import { watched } from '../alive';
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 
 /** A hero's hound, where it plays if it's playing (idlehound.ts). */
-function hound(f: Figs, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number, me?: Hero): void {
+function hound(f: Figs, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number, me?: Hero, map?: ArenaRoom['map']): void {
   const a = houndAt(h, ax, ay, hx, hy, f.now), x = a ? a.x : ax, y = a ? a.y : ay;
   const o = { ...(a ? { mood: a.mood, fx: a.fx, down: a.down } : {}), look: h.houndLook, name: houndTag(h, d, x, y, me, !!a), seed: seedOf(h.id) };
-  f.put('d' + h.id, x, 0, y, (c, px, py) => drawHound(c, d, px, py, o), { pool: d.state === 'fled' && d.t > 2 ? 0 : 0.28 });
+  f.put('d' + h.id, x, map ? bodyLv(map, x, y) * LEDGE_H : 0, y, (c, px, py) => drawHound(c, d, px, py, o), { pool: d.state === 'fled' && d.t > 2 ? 0 : 0.28 });
 }
 
 /** Every figure this frame, onto its card. */
@@ -65,10 +66,10 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   noteKneels(room.heroes, t);
   for (const h of room.heroes) {
     const [x, y] = lerp('h:' + h.id, h.x, h.y);
-    f.put('h' + h.id, x, lift(h.z), y, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
+    f.put('h' + h.id, x, bodyLv(map, x, y, h.z) * LEDGE_H, y, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3 });
     if (h.hound) {
       const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);
-      hound(f, h, d, dx, dy, x, y, me);
+      hound(f, h, d, dx, dy, x, y, me, map);
     }
     // A Mage's blink image, flickering where they stood until it goes.
     if (h.decoyUntil > t) f.put('v' + h.id, h.decoyX, 0, h.decoyY, (c, px, py) => {
@@ -79,7 +80,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   }
   for (const h of others) {
     // (At the level they stand on: lifted, as your own hero is.)
-    f.put('o' + h.id, h.x, lift(levelAt(room.map, h.x, h.y)), h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
+    f.put('o' + h.id, h.x, bodyLv(map, h.x, h.y, levelAt(map, h.x, h.y)) * LEDGE_H, h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
     // Another player's Ranger: their hound at heel, as this screen walks it (idlehound.ts).
     const d = companion(h, f.now);
     if (d) hound(f, h, d, d.x, d.y, h.x, h.y, me);
@@ -100,7 +101,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       continue;
     }
     const pz = pulledAt(room, e), [x, y] = pz ?? lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
-    f.put('e' + e.id, x, (e.z ?? 0) >= 2 ? ROOF_UP3 : lift(Math.max(0, e.z ?? 0)), y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0, xray: STREET && !dead && !lurking(e) ? 'foe' : undefined });
+    f.put('e' + e.id, x, (e.z ?? 0) >= 2 && !isLand(map) ? ROOF_UP3 : bodyLv(map, x, y, Math.max(0, e.z ?? 0)) * LEDGE_H, y, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0, xray: STREET && !dead && !lurking(e) ? 'foe' : undefined });
   }
   // A keg about to go, its fuse spitting; a Smouldering one's embers coming up through it (../blastdraw.ts).
   for (const e of room.enemies) {
@@ -114,13 +115,13 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   // Someone caged: an arm waving out through the bars, and their call when you're close (scene.ts).
   for (const p of room.props) if (p.kind === 'cage' && !p.broken && !p.lifted) {
     const near = !!me && Math.hypot(me.x - p.x, me.y - p.y) < 7;
-    f.put('c' + p.id, p.x + propShake(p, t)[0], 0, p.y + 0.05, (c, px, py) => drawCaged(c, px, py, t, near, p.id), { pool: 0 });
+    f.put('c' + p.id, p.x + propShake(p, t)[0], bodyLv(map, p.x, p.y) * LEDGE_H, p.y + 0.05, (c, px, py) => drawCaged(c, px, py, t, near, p.id), { pool: 0 });
   }
   // The freed (the dead lie under everyone; the gone are gone).
   for (const s of room.survivors ?? []) {
     if (s.gone) continue;
     const [x, y] = lerp('s:' + s.id, s.x, s.y);
-    f.put('s' + s.id, x, lift(s.z), y, (c, px, py) => drawSurvivor(c, s, px, py, t), { pool: s.dead ? 0 : 0.2, bias: s.dead ? -0.3 : 0 });
+    f.put('s' + s.id, x, bodyLv(map, x, y, s.z) * LEDGE_H, y, (c, px, py) => drawSurvivor(c, s, px, py, t), { pool: s.dead ? 0 : 0.2, bias: s.dead ? -0.3 : 0 });
   }
   // Hangman's Wood: the cage on its chain, Hew's marks, the fire (../wooddraw.ts).
   for (const g of woodFigs(room, t)) f.put('hw' + g.key, g.x, 0, g.y, g.draw, { pool: 0 });

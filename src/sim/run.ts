@@ -20,6 +20,7 @@ import { blankScore, foldBoard, type Board, type Score } from './score';
 import type { RelicWon } from '../shared/relicaward';
 import { arenaRoom } from './arenaroom';
 import { instanceParty, instanceRoom } from './instanceroom';
+import { landRoom } from './landroom';
 import { stepCheckpoint } from './checkpoint';
 import { stepStretches } from './stretches';
 import { stepFork } from './fork';
@@ -86,6 +87,8 @@ export const newRun = (job: Job): Run => ({ job, index: 0, gold: 0, xp: 0, rescu
 export function runRoom(run: Run): ArenaRoom {
   // An expedition: one big map, not rooms (sim/expedroom.ts).
   if (run.job.exped) return expedRoom(run.job, run.party ?? 1, run.level ?? 1);
+  // A territory: one hand-laid map of zones, scapes and gates (sim/landroom.ts).
+  if (run.job.land) return landRoom(run);
   // A boss's arena as the last room (sim/arenaroom.ts).
   if (run.job.arena && isFinal(run)) return arenaRoom(run.job.instance ? { ...run, party: instanceParty(run) } : run);
   // An instance's area, by hand (sim/instanceroom.ts).
@@ -179,7 +182,7 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
     if (ev.k === 'down' && ev.id) bump(run.falls ??= {}, ev.id), ev.id !== 'squire' && line(run, ev.id).downs++;
     if (ev.k === 'pickedup' && ev.by) line(run, ev.by).raised++;
     if (ev.k === 'down' && ev.by) bump(run.teamkills ??= {}, ev.by);
-    if (ev.k === 'down' && players(room.heroes).length < 2 && !run.job.instance) {
+    if (ev.k === 'down' && players(room.heroes).length < 2 && !run.job.instance && !run.job.land) {
       // Alone, three downs and it's lost; in a party, it's lost when everyone is out.
       const h = room.heroes.find((x) => x.id === me);
       if (h && Math.abs(h.x - ev.x) < 0.01 && Math.abs(h.y - ev.y) < 0.01) run.downs++;
@@ -187,6 +190,8 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
   }
   // An instance: a wipe is back to the area's gate, the third since the last gate loses it (sim/checkpoint.ts).
   if (run.job.instance) stepStretches(run, room, events), stepFork(run, room, events), stepCheckpoint(run, room, events);
+  // A territory's gates and checkpoints are the same (docs/design/territories.md): no fork.
+  else if (run.job.land) stepStretches(run, room, events), stepCheckpoint(run, room, events);
   else if (run.downs >= MAX_DOWNS || allOut(room.heroes)) run.failed = true;
   board(run, room);
 }

@@ -30,8 +30,9 @@ import { DEEP, levelAt, waterField } from '../waterfield';
 import { addBrazier } from './brazier3d';
 import { palisadeRun } from './palisade3d';
 import { addMounds } from './mounds3d';
-import { levelAt as standAt } from '../../shared/arena';
 import { gorge, stackLedges, stacked } from './layoutledges';
+import { landLedges } from './landledges';
+import { groundLv, isLand } from '../../shared/heights';
 import { soilOver } from './layoutsoil';
 
 /** How high the back wall stands, and a ledge (tiles). */
@@ -52,6 +53,8 @@ function texture(c: HTMLCanvasElement): THREE.CanvasTexture {
 export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   const group = new THREE.Group(), B = new Boxes(), r = new Seed(m.w * 7 + m.h), fires: Spot[] = [], lights: L3[] = [], lamps: Lamp3[] = [];
   const tk = torchIn(m.theme), body = BODY[m.theme.back];
+  // The town's stone levels over its gorge; land's earth levels (landledges.ts) get the normal ground and edge.
+  const town = stacked(m) && !isLand(m);
   // The floor: the 2D painting's floor, a copy we can bleed on.
   const fc = document.createElement('canvas');
   fc.width = m.w * PX;
@@ -72,16 +75,16 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // The Haulier's tunnel mouths at its tracks' ends (three/tracks3d.ts).
   if (m.tracks) group.add(trackMouths3d(m));
   // (The new town's stops at its south edge, where the gorge drops away: layoutledges.ts.)
-  const deep = stacked(m) ? 30 : 60;
+  const deep = town ? 30 : 60;
   const under = new THREE.Mesh(new THREE.PlaneGeometry(m.w + 60, m.h + deep), VCOL);
   under.geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Array(12).fill(0.05), 3));
   under.rotation.x = -Math.PI / 2;
-  under.position.set(m.w / 2, -0.02, stacked(m) ? (m.h - 30) / 2 : m.h / 2);
+  under.position.set(m.w / 2, -0.02, town ? (m.h - 30) / 2 : m.h / 2);
   group.add(under);
   // The water, below the bank (water3d.ts): the floor is cut where it lies, so what's under goes lower.
   const water = buildWater(m, floorMat, floorTex);
   // The new town's dirt and mud over the street's cobbles (layoutsoil.ts).
-  if (STREET && stacked(m)) soilOver(floorMat, m);
+  if (STREET && town) soilOver(floorMat, m);
   if (water) group.add(...water.meshes), (under.position.y = -0.6);
   // The back wall: its painted face (from the 2D painting) on a wall with thickness, cut for the way out.
   const wc = document.createElement('canvas');
@@ -132,12 +135,13 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   }
   const kerb = cuts.filter((g) => g.side === 'S').map((g): [number, number] => [g.a.x, g.a.x + g.a.w]);
   // (The new town's front is a cliff over a gorge, not a kerb: layoutledges.ts.)
-  const cliff = stacked(m) ? gorge(m, LEDGE_H, VCOL) : null;
+  const cliff = town ? gorge(m, LEDGE_H, VCOL) : null;
   if (cliff) group.add(cliff);
-  if (!stacked(m)) for (const [x0, x1] of runs(-0.9, m.w + 0.9, kerb)) B.b((x0 + x1) / 2, 0, m.h + 0.3, x1 - x0, 0.25, 0.6, body);
-  if (!stacked(m)) for (const [x0, x1] of kerb) for (const x of [x0, x1]) B.b(x, 0, m.h + 0.3, 0.3, 0.9, 0.3, 0x3a3640);
+  if (!town) for (const [x0, x1] of runs(-0.9, m.w + 0.9, kerb)) B.b((x0 + x1) / 2, 0, m.h + 0.3, x1 - x0, 0.25, 0.6, body);
+  if (!town) for (const [x0, x1] of kerb) for (const x of [x0, x1]) B.b(x, 0, m.h + 0.3, 0.3, 0.9, 0.3, 0x3a3640);
   // The new town's stacked levels: tops in the floor's material, stone faces, steps (layoutledges.ts).
-  if (stacked(m)) stackLedges(B, group, m, floorMat, LEDGE_H);
+  if (isLand(m)) landLedges(B, group, m, floorMat, LEDGE_H);
+  else if (stacked(m)) stackLedges(B, group, m, floorMat, LEDGE_H);
   else for (const l of m.ledges ?? []) {
     B.b(l.x + l.w / 2, 0, l.y + l.h / 2, l.w, LEDGE_H, l.h, l.kind === 'wood' ? 0x5a3d22 : 0x3a3640);
     for (const rp of l.ramps) B.b(rp.x + rp.w / 2, 0, rp.y + rp.h / 2, rp.w, LEDGE_H * 0.45, rp.h, 0x46424e);
@@ -151,7 +155,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     // A reed or a stump standing in deep water: its foot goes down to the water.
     if (levelAt(wf, o.x, o.y) === DEEP) B.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
     // (On a stacked level, lifted to stand on it, its flames with it: layoutledges.ts.)
-    const k = B.mark(), up = stacked(m) ? standAt(m, o.x, o.y) * LEDGE_H : 0;
+    const k = B.mark(), up = stacked(m) ? groundLv(m, o.x, o.y) * LEDGE_H : 0;
     // The new look (`?hd&street`): in town, the kit's trees, well, lamp posts and street clutter (streetprops.ts).
     if (STREET && m.name === 'WICKHOLD' && kitRound(group, o, up)) {
       if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: [], light: { x: o.x, y: 3 + up, z: o.y + 0.3, r: 6, i: 0.9, c: [1, 0.74, 0.44], f: 5 } });
@@ -176,7 +180,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   }
   // Braziers: a bowl on legs, its coals, its flames and light (brazier3d.ts).
   for (const b of m.braziers) {
-    const k = B.mark(), n = lamps.length, up = stacked(m) ? standAt(m, b.x, b.y) * LEDGE_H : 0;
+    const k = B.mark(), n = lamps.length, up = stacked(m) ? groundLv(m, b.x, b.y) * LEDGE_H : 0;
     addBrazier(B, b, lamps);
     if (up) B.raise(k, up), lamps.slice(n).forEach((l) => (l.fires.forEach((f) => (f[1] += up)), l.light && (l.light.y += up)));
   }
@@ -185,7 +189,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   for (const o of m.rounds) {
     const n = lights.length, k = lamps.length;
     lightsOf(o);
-    const up = stacked(m) ? standAt(m, o.x, o.y) * LEDGE_H : 0;
+    const up = stacked(m) ? groundLv(m, o.x, o.y) * LEDGE_H : 0;
     if (up) lights.slice(n).forEach((l) => (l.y += up)), lamps.slice(k).forEach((l) => l.light && (l.light.y += up));
   }
   function lightsOf(o: GameMap['rounds'][number]): void {

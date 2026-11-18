@@ -9,6 +9,7 @@
  * (sim/rushguard.ts), a dodge through it slips it all. Never from behind, never off screen, one rush on a
  * hero at a time (a party spreads them). Held by the room; its goblins carry what both views draw.
  */
+import { afoot } from './afoot';
 import { RUSH } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { begin } from './enemies';
@@ -29,8 +30,8 @@ export const melee = (e: Enemy) => e.kind === 'scrapper' && !e.bow && (!e.varian
 const spent = (e: Enemy) => e.act === 'attack' && !!e.attack && !e.attack.rush && e.attack.kind !== 'charge' && e.attack.t >= e.attack.windup + e.attack.active;
 /** Free to join: awake, on its feet and chasing or past its blow (not stunned, frozen, carried, winding up, routed or blinded). */
 const free = (e: Enemy, now: number) => melee(e) && !isDead(e) && ((e.act === 'chase' && !e.attack) || spent(e)) && e.alert !== false && !e.dozing && !e.rushTo &&
-  !frozen(e, now) && !snared(e, now) && (e.routUntil ?? -9) <= now && (e.blindUntil ?? -9) <= now && (e.z ?? 0) === 0;
-const up = (h: Hero) => h.act !== 'down' && !h.safeT && !h.out && (h.z ?? 0) === 0;
+  !frozen(e, now) && !snared(e, now) && (e.routUntil ?? -9) <= now && (e.blindUntil ?? -9) <= now && afoot(e);
+const up = (h: Hero) => h.act !== 'down' && !h.safeT && !h.out && afoot(h);
 /** In front of the hero (or, `wide`, anywhere but behind them) and on the screen with them. */
 const before = (h: Hero, p: { x: number; y: number }, wide = false) => {
   const dx = p.x - h.x, dy = p.y - h.y, d = Math.hypot(dx, dy);
@@ -58,7 +59,7 @@ export function stepRushes(s: Rushes, enemies: Enemy[], heroes: Hero[], rng: Rng
 
 /** In the fight and on its feet: could answer a call once its blow is done. */
 const able = (e: Enemy, now: number) => melee(e) && !isDead(e) && (e.act === 'chase' || e.act === 'attack' || e.act === 'flinch') && e.alert !== false && !e.dozing &&
-  !e.rushTo && !e.attack?.rush && !frozen(e, now) && !snared(e, now) && (e.routUntil ?? -9) <= now && (e.blindUntil ?? -9) <= now && (e.z ?? 0) === 0;
+  !e.rushTo && !e.attack?.rush && !frozen(e, now) && !snared(e, now) && (e.routUntil ?? -9) <= now && (e.blindUntil ?? -9) <= now && afoot(e);
 
 /**
  * A goblin of pack `p` that's free calls a rush on a hero it's in front of, with two or more packmates in

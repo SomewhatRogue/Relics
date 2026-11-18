@@ -11,6 +11,7 @@
  * among them (the answer: burn it inside its own pack), props blasted, the freed hurt, slicks lit and the
  * dead burned to ash (the fire `burst` event: sim/oil.ts, sim/worldfire.ts). No dice.
  */
+import { sameGround } from './afoot';
 import { hitHero } from './combat';
 import { damage, isDead } from './damage';
 import { afflict, type World } from './elements';
@@ -59,10 +60,10 @@ function blow(e: Enemy, w: World): void {
   const b = e.blast!, s = blastSpec(b.k), a = blastAttack(b, w.now), { now, ev } = w;
   b.done = true;
   ev.push({ k: 'burst', x: b.x, y: b.y, r: b.r, el: 'fire' });
-  for (const h of w.heroes) if ((h.z ?? 0) === 0 && !h.out) hitHero(e, a, h, now, ev, w.heroes);
+  for (const h of w.heroes) if (sameGround(h, b) && !h.out) hitHero(e, a, h, now, ev, w.heroes);
   for (const o of w.enemies) {
     const d = Math.hypot(o.x - b.x, o.y - b.y);
-    if (isDead(o) || o.under || o.act === 'carried' || (o.z ?? 0) !== 0 || d > b.r + o.radius) continue;
+    if (isDead(o) || o.under || o.act === 'carried' || !sameGround(o, b) || d > b.r + o.radius) continue;
     const dx = d > 0.05 ? (o.x - b.x) / d : 0, dy = d > 0.05 ? (o.y - b.y) / d : 1;
     // Whoever lit it or killed it gets the kills it makes.
     if (e.lastBy) o.lastBy = e.lastBy;

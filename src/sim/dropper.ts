@@ -6,12 +6,13 @@
  * knocking whoever's still under it, and it's a goblin on the ground like the rest. The perch is plain data
  * on the goblin's task (`at`, `tx`, `ty`; `at` -1 once down), so a friend's screen draws the same circle.
  */
+import { afoot } from './afoot';
 import { DROPPER } from '../shared/tuning';
 import { downIfDead } from './combat';
 import { count } from './score';
 import type { Enemy, FightEvent, Hero } from './types';
 
-const up = (h: Hero) => h.id !== 'squire' && h.act !== 'down' && !h.out && (h.z ?? 0) === 0;
+const up = (h: Hero) => h.id !== 'squire' && h.act !== 'down' && !h.out && afoot(h);
 
 /** A blow from the world on a hero (no blocking it): a roll gets out from under, as from any blow. */
 export function strike(h: Hero, n: number, x: number, y: number, knock: number, ev: FightEvent[], src: string): void {

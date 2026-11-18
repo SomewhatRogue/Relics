@@ -116,6 +116,7 @@ import { stepDrift } from './drift';
 import { newBoss, useBook, type BossBook } from './bosskit';
 import { stepBosses } from './bossrooms';
 import { syncMarks } from './deepmarks';
+import { landed } from './afoot';
 
 export class ArenaRoom {
   time = 0;
@@ -646,8 +647,10 @@ export class ArenaRoom {
     // Blessed, a DEADEYE perfect release, a TEMPO hit after a dodge through a blow.
     let mult = (h.blessedUntil > w.now ? BLESSING.dmgMult : 1) * (h.heavy && h.perfect ? perfectMult(h) * (has(h, 'deadeye') ? TRAIT.deadeye : 1) * (h.weapon === 'shortbow' ? SHORTBOW.perfect : 1) : 1) * brandyDmg(h, w.now) * litMult(h);
     if (s.shot && h.tempoUntil > w.now) (mult *= TRAIT.tempo), (h.tempoUntil = -9);
-    // The high ground: shots from up on a ledge.
-    if (s.shot && (h.z ?? 0) > 0) mult *= HEIGHT.shot;
+    // The high ground: shots from up on a ledge. Where the levels are the ground it is relative: the shot carries
+    // the level it left and lands harder only on someone lower (sim/afoot.ts highShot).
+    const land = landed(this.map);
+    if (s.shot && !land && (h.z ?? 0) > 0) mult *= HEIGHT.shot;
     // The spear thrown on its chain (sim/spearchain.ts).
     if (s.chain) return void (this.hooks.push(throwSpear(h, s, mult)), (h.chainOut = true));
     // A forged weapon's element rides a full draw (and every crossbow bolt); spells otherwise take the relic's.
@@ -676,6 +679,7 @@ export class ArenaRoom {
       else this.bolts.push(shoot(aimed(h, s.shot, this.intents.get(h.id), w.now, w.ev), s, el, mult, traitsOf(h)));
       if (!fed) w.ev.push({ k: 'shoot', x: h.x, y: h.y, dx: h.fx, dy: h.fy, kind: s.shot, el, ...(primed ? { primed } : {}) });
     }
+    if (s.shot && land) for (const b of this.bolts.slice(bolts)) b.hz = h.z ?? 0;
     // The Jealous Rod: a charged spell jumps to every goblin near what it hits.
     if (full && wears(h, 'jealous')) for (const b of this.bolts.slice(bolts)) b.chain = true;
     // WIDE BURST: a Mage's bursts reach further.

@@ -1,5 +1,6 @@
 /** Bodies in the room: knockback slides, wall slams, and nobody standing inside anybody else. */
-import { collide } from '../shared/arena';
+import { collide, currentMap, levelAt } from '../shared/arena';
+import { landed } from './afoot';
 import { travel } from '../shared/sweep';
 import { HERO, KNOCK } from '../shared/tuning';
 import type { Body, Enemy, Hero, Prop } from './types';
@@ -42,9 +43,11 @@ export function slide(b: Body, r: number, dt: number): number {
 export function separate(heroes: Hero[], enemies: Enemy[], props: Prop[] = []): void {
   const list: { b: Body; r: number; inv: number }[] = [];
   for (const h of heroes) if (h.act !== 'roll' && h.act !== 'down') list.push({ b: h, r: HERO.radius, inv: 1 / HERO.weight });
+  // (Up on a roof it stands inside the house's footprint: left out, or it'd be pushed off. Where the levels are
+  // the ground, that's anything above its own level.)
+  const m = currentMap(), roof = landed(m) ? (e: Enemy) => (e.z ?? 0) > levelAt(m, e.x, e.y) : (e: Enemy) => (e.z ?? 0) >= 2;
   for (const e of enemies) {
-    // (Up on a roof it stands inside the house's footprint: left out, or it'd be pushed off.)
-    if (e.act === 'dead' || e.act === 'carried' || (e.z ?? 0) >= 2) continue;
+    if (e.act === 'dead' || e.act === 'carried' || roof(e)) continue;
     list.push({ b: e, r: e.radius, inv: isFinite(e.weight) && e.act !== 'pinned' ? 1 / e.weight : 0 });
   }
   // (Not a cart running its track, nor one the Haulier holds overhead: sim/haulcarts.ts moves those.)

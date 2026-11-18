@@ -6,13 +6,14 @@
  * (sim/pools.ts, sim/elements.ts), breaks its guard (sim/ironhide.ts crack). Both views draw the bolt bending
  * into it from the `rodhit` event, and crackling on it from `rodAt`.
  */
+import { afoot } from './afoot';
 import { ROD } from '../shared/tuning';
 import { isDead } from './damage';
 import { armoured, crack } from './ironhide';
 import type { Enemy, FightEvent } from './types';
 
 /** Iron that can draw lightning: an ironhide on its feet, on the ground, not carried or under. */
-export const isRod = (e: Enemy) => armoured(e) && !isDead(e) && !e.under && !e.dozing && (e.z ?? 0) === 0 && e.act !== 'carried';
+export const isRod = (e: Enemy) => armoured(e) && !isDead(e) && !e.under && !e.dozing && afoot(e) && e.act !== 'carried';
 
 /** The rod nearest (x, y) within `reach` (the edge of its body), if any. */
 export function rodNear(enemies: Enemy[], x: number, y: number, reach = ROD.reach, ok: (e: Enemy) => boolean = () => true): Enemy | undefined {

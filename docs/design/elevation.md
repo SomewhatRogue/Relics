@@ -1,6 +1,6 @@
 # Elevation: the land has height, and you can read it
 
-Spec, 2026-11-17 (Kyle and Claude Fable 5.2). **Not built.** Built first inside the territories
+Spec, 2026-11-17 (Kyle and Claude Fable 5.2). **Steps 1 and 2 built the same day** (the log). Built first inside the territories
 (docs/design/territories.md), then carried back to the board's rooms. Log: `docs/decisions/territories.md`.
 
 ## What Kyle said (2026-11-17)
@@ -82,6 +82,9 @@ a blade can't get to within a few seconds.
 | The Copperdeep Shafts | Down, by ladders. In a level: the stope's benches |
 
 ## Build order
+
+**Built 2026-11-17:** step 1 (slopes proved, and with it goblins pathing over heights: `sim/pathlevels.ts`; the
+fight's rules on every level: `sim/afoot.ts`) and step 2 (`client/three/landledges.ts`, `shared/heights.ts`).
 
 1. **Slopes proved:** a land-shaped rise with slopes for edges on the Lowfurrow grey box; the "no more than
    8 tiles" test; goblins and heroes over it.

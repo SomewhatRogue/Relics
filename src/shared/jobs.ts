@@ -88,6 +88,8 @@ export interface Job {
   hall?: { w: number; h: number };
   /** An instance (shared/instances.ts): its rooms are its areas, taken in turn, each gate a checkpoint. */
   instance?: import('./instances.js').InstanceId;
+  /** A territory (shared/territory.ts; docs/design/territories.md): one hand-laid map of zones, scapes and gates. */
+  land?: import('./territory.js').LandId;
   /** A hero's own posting for their quest in hand (shared/heroquests.ts): on their board only. */
   quest?: import('./heroquests.js').QuestId;
 }

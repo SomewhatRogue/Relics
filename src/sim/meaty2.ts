@@ -7,6 +7,7 @@
  *   a stun or the body burned breaks it off), growing each time, up to GORGER.most; else it bites.
  * The room's hooks: sim/ownfoes.ts (their turns and bodies), sim/enemies.ts (the leap's flight).
  */
+import { afoot } from './afoot';
 import { GORGER, KEGMAN, POUNCER, grownBy } from '../shared/tuning';
 import { begin, walk } from './enemies';
 import { edible, edibleFreed } from './meal';
@@ -101,7 +102,7 @@ export function stepGorger(e: Enemy, t: Hero, d: number, level: boolean, ux: num
     return grow(e, ev);
   }
   const guarded = heroes.some((h) => h.act !== 'down' && !h.out && Math.hypot(h.x - e.x, h.y - e.y) < GORGER.guard + e.radius);
-  if ((e.grown ?? 0) < GORGER.most && (e.mealCool ?? -9) <= now && !guarded && (e.z ?? 0) === 0) {
+  if ((e.grown ?? 0) < GORGER.most && (e.mealCool ?? -9) <= now && !guarded && afoot(e)) {
     const b = bodyNear(e, others, freed);
     if (b) {
       e.meal = { b: b.id, ...(b.s ? { s: true } : {}), x: b.x, y: b.y, at: +now.toFixed(3), until: +(now + GORGER.pull).toFixed(3) };

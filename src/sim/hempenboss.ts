@@ -11,6 +11,7 @@
  * friend standing in front (who takes it on a block, or dodges it). It fights on its own ground (or after
  * whoever hurt it lately), and goes back to it. The room's once-a-tick part is sim/hempenbook.ts.
  */
+import { afoot } from './afoot';
 import { BOSS, HEMPEN, HEMPEN_BOSS as H, HERO, type EnemyAttackSpec, type HempenMove } from '../shared/tuning';
 import { currentMap } from '../shared/arena';
 import { travelTo } from '../shared/sweep';
@@ -60,7 +61,7 @@ export function ropeReach(a: Pick<EnemyAttack, 'ox' | 'oy' | 'dx' | 'dy' | 'arc'
     if (along > 0 && along - o.r < r && Math.abs(px * a.dy - py * a.dx) < o.r) r = Math.max(0.3, along - o.r);
   }
   for (const h of heroes) {
-    if (h.id === a.aimed || !up(h) || (h.z ?? 0) !== 0) continue;
+    if (h.id === a.aimed || !up(h) || !afoot(h)) continue;
     const d = Math.hypot(h.x - a.ox, h.y - a.oy);
     if (d > 0.4 && d < r && inArc(a.ox, a.oy, a.dx, a.dy, h.x, h.y, r, a.arc, HERO.radius)) r = d;
   }

@@ -7,6 +7,7 @@
  * The snares are the room's (`nooses`): plain data a friend's screen gets in the usual patch, only when one
  * is laid or sprung.
  */
+import { afoot } from './afoot';
 import { HOIST, SNARER } from '../shared/tuning';
 import { walk } from './enemies';
 import type { Enemy, FightEvent, Hero } from './types';
@@ -35,7 +36,7 @@ export function stepNooses(list: Noose[], heroes: Hero[], now: number, ev: Fight
   return list.filter((n) => {
     if (!n.keep && now - n.at >= SNARER.life) return false;
     if (!live(n, now)) return true;
-    const h = heroes.find((o) => o.id !== 'squire' && o.act !== 'down' && o.act !== 'roll' && !o.out && (o.z ?? 0) === 0 && !o.hoisted && Math.hypot(o.x - n.x, o.y - n.y) <= SNARER.r + 0.15);
+    const h = heroes.find((o) => o.id !== 'squire' && o.act !== 'down' && o.act !== 'roll' && !o.out && afoot(o) && !o.hoisted && Math.hypot(o.x - n.x, o.y - n.y) <= SNARER.r + 0.15);
     if (!h) return true;
     hoist(h, now, ev);
     return false;

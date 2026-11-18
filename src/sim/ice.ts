@@ -7,6 +7,7 @@
  * it goes further. Friends walk it as plain shallows: the frost is theirs, as the skid spares them. Fire on
  * it melts it to steam (sim/worldfire.ts). Ice lives in the room's own list, so a guest has the same.
  */
+import { afoot } from './afoot';
 import { currentMap } from '../shared/arena';
 import { ICE } from '../shared/tuning';
 import { shallowAt } from '../shared/waterbody';
@@ -40,7 +41,7 @@ export function iceAt(fx: WorldFx | undefined, x: number, y: number, r: number, 
 }
 
 /** Frost on a goblin (a tap, a chill, a freeze) wading: a small patch round it. */
-export const iceOn = (fx: WorldFx | undefined, e: Enemy, now: number, ev: FightEvent[]) => (e.z ?? 0) === 0 && iceAt(fx, e.x, e.y, ICE.tapR + e.radius * 0.5, now, ev);
+export const iceOn = (fx: WorldFx | undefined, e: Enemy, now: number, ev: FightEvent[]) => afoot(e) && iceAt(fx, e.x, e.y, ICE.tapR + e.radius * 0.5, now, ev);
 
 /** Fire on (x, y): ice there melts (the steam is the caller's). True if any did. */
 export function meltAt(fx: WorldFx | undefined, x: number, y: number, pad: number, now: number, ev: FightEvent[]): boolean {
@@ -53,7 +54,7 @@ export function meltAt(fx: WorldFx | undefined, x: number, y: number, pad: numbe
 export function stepIce(fx: WorldFx, enemies: Enemy[], now: number): void {
   if (fx.ices.length) fx.ices = fx.ices.filter((i) => live(i, now));
   for (const e of enemies) {
-    const on = fx.ices.length > 0 && !isDead(e) && (e.z ?? 0) === 0 && !e.under && iceUnder(fx.ices, e.x, e.y, now);
+    const on = fx.ices.length > 0 && !isDead(e) && afoot(e) && !e.under && iceUnder(fx.ices, e.x, e.y, now);
     if (on || e.onIce) e.onIce = on;
   }
 }

@@ -8,6 +8,7 @@
  * on nobody's side: landing in water it jolts goblins POOL.wildFoe and friends POOL.wild. Both views draw
  * the crackle across the water from the `pooljolt` event.
  */
+import { afoot } from './afoot';
 import { currentMap } from '../shared/arena';
 import { POOL } from '../shared/tuning';
 import { bodyAt } from '../shared/waterbody';
@@ -18,7 +19,7 @@ import { hurtSurvivor } from './survivors';
 import type { Enemy, FightEvent, Hero, Strike, Survivor } from './types';
 
 type At = { x: number; y: number; z?: number };
-const level = (b: At) => (b.z ?? 0) === 0;
+const level = (b: At) => afoot(b);
 
 /** The body of water a body stands in (-1: dry, or up on a ledge). */
 export const waterOf = (b: At) => (level(b) ? bodyAt(currentMap(), b.x, b.y) : -1);

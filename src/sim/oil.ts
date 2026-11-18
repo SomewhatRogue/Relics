@@ -5,6 +5,7 @@
  * burning whoever's in it. Any fire of yours lights a slick too: a fire burst, a flask of Lamp Oil, a
  * burning goblin walking into it.
  */
+import { afoot } from './afoot';
 import { HERO, OIL, STAITHE, TICK, TORCH, type EnemyAttackSpec } from '../shared/tuning';
 import { currentMap } from '../shared/arena';
 import { slickFor } from '../shared/sky';
@@ -85,7 +86,7 @@ export function stepSlicks(slicks: Slick[], w: World, dt: number): Slick[] {
   for (const s of slicks) {
     if (!lit(s, now)) continue;
     for (const h of w.heroes) {
-      if (h.act === 'down' || h.act === 'roll' || (h.z ?? 0) !== 0 || !on(s, h, HERO.radius * 0.5)) continue;
+      if (h.act === 'down' || h.act === 'roll' || !afoot(h) || !on(s, h, HERO.radius * 0.5)) continue;
       if (Math.floor(now * 2) === Math.floor((now - dt) * 2)) continue;
       // SHAKE IT OFF: just after a dash, the fire can't take (sim/ladderrogue.ts).
       if (fireproof(h, now)) {
@@ -100,7 +101,7 @@ export function stepSlicks(slicks: Slick[], w: World, dt: number): Slick[] {
       ev.push({ k: 'hit', x: h.x, y: h.y, n, heavy: false, on: 'hero', src: 'fire' });
       downIfDead(h, ev);
     }
-    for (const e of w.enemies) if (!isDead(e) && (e.z ?? 0) === 0 && e.burnUntil <= now && on(s, e)) afflict(w, e, 'fire', TORCH.foeDps);
+    for (const e of w.enemies) if (!isDead(e) && afoot(e) && e.burnUntil <= now && on(s, e)) afflict(w, e, 'fire', TORCH.foeDps);
   }
   return slicks.filter((s) => s.until > now && !(s.lit >= 0 && now - s.lit >= slickBurn(s)));
 }

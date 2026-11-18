@@ -1110,6 +1110,8 @@ export interface Bolt {
   smokeTime?: number;
   /** The Jealous Rod: this shot jumps to every goblin near what it hits. */
   chain?: boolean;
+  /** Where the levels are the ground (sim/afoot.ts): the level it was loosed from; it lands harder on anyone lower. */
+  hz?: number;
   x: number;
   y: number;
   dx: number;

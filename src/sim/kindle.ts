@@ -5,6 +5,7 @@
  * again from nothing, like a nest: sim/torch.ts). Then the house is alight (`burning`), and the house
  * fire takes it from there (sim/houseburn.ts). The state is on the block, so a friend's screen has it.
  */
+import { afoot } from './afoot';
 import type { Block, Round } from '../shared/arena';
 import { burnable, fireTimes, kindling } from '../shared/kindling';
 import { HOUSEBURN } from '../shared/tuning';
@@ -15,7 +16,7 @@ interface Street { blocks: Block[]; rounds?: Round[]; w: number; h: number }
 const unlit = (b: Block) => burnable(b) && (b.burning ?? -1) < 0 && !b.ruined;
 const near = (h: Hero, b: Block, m: Street) => {
   const k = kindling(b, m);
-  return !!k && (h.z ?? 0) === 0 && Math.hypot(h.x - k.x, h.y - k.y) <= HOUSEBURN.reach;
+  return !!k && afoot(h) && Math.hypot(h.x - k.x, h.y - k.y) <= HOUSEBURN.reach;
 };
 
 /** The house `h` could set alight now (for the BURN button), if any. */

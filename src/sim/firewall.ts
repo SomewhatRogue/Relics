@@ -9,6 +9,7 @@
  * loses, so they step out. It lights oil and tries wood it touches. Rain shortens it (shared/sky.ts). It
  * lives in the room's zones, so a guest sees the same wall that is judged (client/firewalldraw.ts).
  */
+import { afoot } from './afoot';
 import { count } from './score';
 import { collide, currentMap } from '../shared/arena';
 import { burnFor } from '../shared/sky';
@@ -115,13 +116,13 @@ export function stepWalls(zones: Zone[], w: World, slicks: Slick[] = []): void {
     kindle(z, w, slicks);
     const n = z.n ?? FIRE_WALL.dmg, friend = allyBurn(z);
     for (const e of w.enemies) {
-      if (isDead(e) || e.act === 'carried' || e.under || (e.z ?? 0) !== 0 || !inWall(z, e, e.radius, behind) || !due(z, 'e' + e.id, w.now)) continue;
+      if (isDead(e) || e.act === 'carried' || e.under || !afoot(e) || !inWall(z, e, e.radius, behind) || !due(z, 'e' + e.id, w.now)) continue;
       e.lastBy = z.owner;
       if (damage(e, n, w.now, w.ev, { tick: true, el: 'fire', how: 'burn', src: 'firewall' })) continue;
       afflict(w, e, 'fire', n);
     }
     for (const h of w.heroes) {
-      if (h.act === 'down' || h.act === 'roll' || h.out || h.safeT || (h.z ?? 0) !== 0 || !inWall(z, h, 0.3, behind) || !due(z, 'h' + h.id, w.now)) continue;
+      if (h.act === 'down' || h.act === 'roll' || h.out || h.safeT || !afoot(h) || !inWall(z, h, 0.3, behind) || !due(z, 'h' + h.id, w.now)) continue;
       // SHAKE IT OFF: just after a dash, fire underfoot can't take (sim/ladderrogue.ts).
       if (fireproof(h, w.now)) {
         w.ev.push({ k: 'shakeoff', x: h.x, y: h.y });
