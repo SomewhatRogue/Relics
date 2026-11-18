@@ -39,6 +39,15 @@ import { parkOf, setPark } from './parked';
 export const TOWN_ROOM = 'WICKHOLD1';
 /** `PARKED`: someone fishing or at the butts says nothing till they're done, so they're kept this long (a goodbye still takes them at once). */
 const KEEP = 120, GONE = 300, PARKED = 3600;
+/**
+ * With someone in the place I'm in: where I stand is said again once, SETTLE seconds after my last word
+ * if I've stood still since, and then every NEAR. A word can be lost on the way (a relay's subscriber
+ * resetting, a socket between two connections), and the others carry my figure on along the last
+ * walk they heard (reckon.ts): one lost "stopped" left me walked on up to three seconds past where I stood,
+ * on their screens only, until the two-minute word (Kyle, 2026-11-17: "the other person is in a different
+ * spot on their screen"). Alone in my place, as before: nobody sees where I stand.
+ */
+const SETTLE = 1.5, NEAR = 20, HI_AGAIN = 3;
 const hook = (k: string, d: number) => Number(typeof location === 'undefined' ? NaN : new URLSearchParams(location.search).get(k)) || d;
 /**
  * Out of sight this long (seconds), and untouched this long, and the town's room is left. Parked at a
@@ -68,6 +77,10 @@ export class Townfolk {
   /** The same, as those in other places see it (no walking). */
   private saidPlace = '';
   private hadCompany = false;
+  /** My last word to everyone has been said again since (SETTLE), or was itself a saying-again. */
+  private resaid = true;
+  /** When `hi` was said on arriving, while nobody has answered it (-1: answered, or said twice). */
+  private hiAt = -1;
   private sent: Sent | null = null;
   /** Words sent to the relay (tests and the budget check: townpresence.ts). */
   sends = 0;
@@ -114,13 +127,22 @@ export class Townfolk {
     // still), or they'd have me half a tile off, at most every RECKON.gap s; and now and then.
     // Alone where I am: only a change of place or party goes out (nobody here sees me walk), and when
     // someone comes in, where I stand goes out at once (what they last heard may be long out of date).
+    // Nobody answered my `hi` in HI_AGAIN seconds: once more (an empty town costs one word, once).
+    if (this.hiAt >= 0 && (this.folk.size || now - this.hiAt >= HI_AGAIN)) {
+      if (!this.folk.size) this.tell('*', 'hi');
+      this.hiAt = -1;
+    }
     const company = this.company();
     if (company && !this.hadCompany) this.said = '';
     this.hadCompany = company;
     const at = this.sent && reckoned(this.sent, now), off = at ? Math.hypot(at[0] - x, at[1] - y) : Infinity;
     const due = company ? this.gist() !== this.said || off > RECKON.err : this.gist(true) !== this.saidPlace;
     // Parked at a pastime: the word that says so, and then nothing (not even the beat) till it's over.
-    if (this.folk.size && ((due && now - this.sentAt >= RECKON.gap) || (!me.g && now - this.sentAt >= KEEP))) this.tell('*', 'me');
+    // (With company and standing still: said once more a moment after the last word, then every NEAR, in
+    // case that word never got there. See SETTLE.)
+    const fresh = due && now - this.sentAt >= RECKON.gap, since = now - this.sentAt;
+    const again = !me.g && (since >= (company ? NEAR : KEEP) || (company && !moving && !this.resaid && since >= SETTLE));
+    if (this.folk.size && (fresh || again)) this.tell('*', 'me'), (this.resaid = !fresh);
     for (const [id, f] of this.folk) {
       if (now - f.heard > (parkOf(f.hero) ? PARKED : GONE)) {
         this.folk.delete(id);
@@ -217,7 +239,9 @@ export class Townfolk {
 
   private heard(m: RelayMsg): void {
     // Arrived: everyone answers with where they are. (A socket swapped in for an old one isn't new.)
-    if (m.t === 'role' && m.role === 'peer') return m.swap ? undefined : this.tell('*', 'hi');
+    // (Said once more a few seconds on if nobody has answered: a `hi` lost on the way left the newcomer
+    // and the town unseen by each other till someone's two-minute word. See step.)
+    if (m.t === 'role' && m.role === 'peer') return m.swap ? undefined : (this.tell('*', 'hi'), void (this.hiAt = this.now));
     if (m.t === 'left') return void (this.folk.get(m.id)?.pt && this.onOffers(), this.folk.delete(m.id));
     if (m.t !== 'msg') return;
     const d = m.d as Partial<Said> | null;
@@ -226,6 +250,7 @@ export class Townfolk {
     const weapon = (typeof d.w === 'string' && d.w in WEAPONS ? d.w : 'sword') as WeaponId;
     const [x, y, fx, fy, moving] = d.p;
     let f = this.folk.get(m.from);
+    const unknown = !f;
     if (!f) this.folk.set(m.from, (f = { hero: newHero('o:' + m.from, x, y), to: [x, y], v: [0, 0], at: '', heard: 0 }));
     const had = JSON.stringify(f.pt ?? null), has = JSON.stringify(d.pt ?? null);
     Object.assign(f, { to: [x, y], v: moving ? heardV(d.v) : [0, 0], at: String(d.at ?? '').slice(0, 40), heard: this.now, pt: d.pt });
@@ -236,8 +261,9 @@ export class Townfolk {
     // Parked at a pastime, drawn there at it (parked.ts); a word without it, back.
     setPark(f.hero, isPastime(d.g) ? d.g : null);
     Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER', houndLook: d.d === undefined ? f.hero.houndLook : unpackHound(d.d, m.from), shieldLook: d.sh === undefined ? f.hero.shieldLook : unpackShield(d.sh), clothLook: d.cl === undefined ? f.hero.clothLook : unpackCloth(d.cl), gearLook: d.gw === undefined ? f.hero.gearLook : { w: unpackLook(d.gw), a: unpackArmour(d.ga), l: unpackArmour(d.gl), r: unpackRing(d.gr) } });
-    // Someone new: tell them where you are, just them.
-    if (d.k === 'hi') this.tell(m.from, 'me');
+    // Someone new: tell them where you are, just them. (Someone I hadn't heard of, too: their `hi` never
+    // got here, so they haven't heard of me either.)
+    if (d.k === 'hi' || unknown) this.tell(m.from, 'me');
   }
 
   /** Out of town (or this hero put away): the socket closes and the others are forgotten. */
@@ -248,6 +274,8 @@ export class Townfolk {
     this.folk.clear();
     this.said = this.saidPlace = this.dogSaid = '';
     this.hadCompany = false;
+    this.resaid = true;
+    this.hiAt = -1;
     this.sent = null;
     this.sentAt = -99;
   }
