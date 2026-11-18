@@ -64,7 +64,7 @@ cover, which goblins are in a pack, chests, the captive, the hour and the weathe
 
 | Kind | Map | Zones | Time | For |
 | --- | --- | --- | --- | --- |
-| Short | about 44 by 90 | 3 | 6 to 8 min | Lowfurrow, Tollan's Farm |
+| Short | about 44 by 90 | 3 | about 8 min | Lowfurrow, Tollan's Farm |
 | Medium | about 56 by 125 | 3 or 4 | 10 to 12 min | Sallow Carr, Fennick Ford |
 | Long | 4 screens of about 40 by 60 | 4 or 5 | 15 to 18 min | the Copperdeep Shafts |
 
@@ -344,14 +344,36 @@ scene files, tests). Small edits asked on the board first: `shared/jobs.ts` (one
 `heroquests.ts` (each posting's territory, one at a time, last), the Instances chat's `gatedraw.ts` (a gate's
 look). Nothing of the Instances chat's sim changes: a territory is data for it.
 
-## Calls for Kyle
+## Kyle's calls (2026-11-17)
 
-1. **The Lowfurrow line:** yes, no, or lighter (traces only, no count)? A yes puts the gleaners, the count
-   (fourteen, five, nine) and the order of the five places into the bible.
-2. **Tuned for one**, harder with each hero, for quest territories?
-3. **A result that stays:** Tollan's barn burned or saved, kept on your hero and said in town?
-4. **Fennick Ford is the near bank only** until chapter 4?
-5. **The first job's length:** six to eight minutes for a brand new hero, up from about five?
-6. **The daily board on the same ground** once a place has its territory (slice 8)?
-7. **The tenter field's scale** at Fennick Ford: a few bundles and boots (as written), or nothing at all?
-8. **Read the Wall** (arcs doc) waits for chapter 4 if the wall is on the far bank. All right?
+1. **The Lowfurrow line: yes.** The gleaners, the count and the order of the five places go to the bible.
+2. **Tuned for one, harder with each hero: yes.**
+3. **A result that stays: yes**, and it's each hero's own (Tollan's barn stands or doesn't for you).
+4. **The first job at eight minutes: "perfect".**
+5. **"I'm blasting through most of these missions."** So a zone's packs are fights, not sweeps: fewer
+   goblins, each a job, an elite leading, tuned against a hero who knows the game. Numbers at his playtest.
+6. **"I want worlds to be beautiful and interesting."** The rules below.
+7. **Elevation rethought:** docs/design/elevation.md. Every territory is laid on real height.
+
+## Beautiful and interesting
+
+Each territory is laid out to these before a goblin is placed:
+
+- **A palette of its own** and an hour it's best at (Lowfurrow gold and blue at midday; the carr grey-green
+  in mist; the ford wet stone and rust at dusk), through the world's grade so it stays one game.
+- **Three props no other place has** (Lowfurrow: stooks, the scarecrow, the hay cart).
+- **A silhouette you'd know it by** from the far end of the map (the barn on the hill; the wheel; three
+  smokes).
+- **Height** (elevation.md): no territory is flat by default.
+- **Something moving that isn't a goblin:** rye in the wind, the wheel, larks, a dog, water over the weir.
+- **A view that pays off:** the thing seen from a scape is somewhere you then stand, and from the end you
+  look back over where you walked.
+- **Sound before sight** at every zone.
+- **Nothing for its own sake:** no house, wall or tree that isn't part of what happened there.
+
+## Still open for Kyle
+
+1. **Fennick Ford is the near bank only** until chapter 4?
+2. **The daily board on the same ground** once a place has its territory (slice 8)?
+3. **The tenter field's scale** at Fennick Ford: a few bundles and boots (as written), or nothing at all?
+4. **Read the Wall** (arcs doc) waits for chapter 4 if the wall is on the far bank. All right?
