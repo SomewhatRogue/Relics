@@ -123,6 +123,9 @@ The spec is docs/design/perf-sweep.md. Branch `perf-sweep`. One entry a change, 
 - Proof: `tests/perfparity.sim.test.ts` hash for hash; the nearby files green; `npm run check` clean.
 - Measured by CPU profile on the 300-goblin map: the whole run 5,644 ms to 4,705 (17% less), `notice` 807 ms to
   381, `nearPairs` 271 to 183. The box was too busy that hour for tick timings to show it on their own (they
-  ran 10% either way), so the profile is the number to trust. CI's run of the whole suite stands for the full
-  local run on this push.
+  ran 10% either way), so the profile is the number to trust.
+- The whole suite for this push was CI's: 249 of 250 files green, and `tests/hound.test.ts` ("every breed, coat
+  and white draws in every gait") timed out at 60 s, twice, on a slow runner (74 s; it took 38 s on CI's two
+  runs before, and 48 s here both before and after this slice, which does not touch it). It makes millions of
+  `expect` calls and sits too near its limit. The Art chat's file; noted, not changed.
 - Next in the profile: `field` in `sim/pathing.ts` (the search itself), `stepAll` in `sim/room.ts`.
