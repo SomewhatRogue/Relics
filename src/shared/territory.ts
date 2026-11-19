@@ -23,8 +23,7 @@ import { yardPlan } from './tollanyard.js';
  * small test map (shared/hillmap.ts). `knoll`: the raised-area test map (shared/knollmap.ts).
  */
 export type LandId = 'lowfurrow' | 'tollan' | 'sallow' | 'hill' | 'knoll';
-/** (`sallow`, Sallow Carr, joins `LANDS` when both its maps are laid: until then its plans throw.) */
-export const LANDS: LandId[] = ['lowfurrow', 'tollan', 'hill', 'knoll'];
+export const LANDS: LandId[] = ['lowfurrow', 'tollan', 'sallow', 'hill', 'knoll'];
 /** Tuning for every territory. */
 export const TERR = { wake: 15, doze: 19, more: { hp: 0.3, harm: 0.15 }, gate: 3.2 };
 /** A zone or a scape: its box on the map and the stretch it belongs to. */

@@ -489,3 +489,37 @@ Kyle: "Do it" (the dog and the two-leaf doors, then start Sallow Carr).
 - Tests: `tests/farmdog.test.ts` (7: the dog's rules, its posts on all three maps, the hauled doors). Whole
   suite: 259 files pass. Played in the browser end to end with the haul.
 - Signed: Claude Fable 5.2.
+
+## 2026-11-18, late: Sallow Carr, slice 1 (two maps, played end to end)
+
+Built from its spec (territories.md, "3. Sallow Carr") by two builders to a brief each; reviewed with pictures
+and a played run.
+
+- **The job** (`territory.ts`): `sallow`, two maps, objective `burn`, in `LANDS`.
+- **Map 1, THE OSIER BEDS** (`sallowbeds*.ts`, a builder's): its ground is a grid of dry, wading and deep laid in
+  layers of ovals and bands (`sallowbedsland.ts`). The drove's end; rows of stools between two ditches; a pen
+  half woven; den 1 and its oil on the bank; the first sluice across a deep cut; the drained bottom; the old
+  causeway half under with boards over its two breaks; Lowfurrow's tools under a dead willow; a wade to a
+  hummock with a chest; the holm with den 2, the pot, drying racks and the cage eight tiles from the den; the
+  second sluice; the last cut. Nineteen goblins in seven packs. What I changed: the beds' two ditches are deep
+  and black, crossed only at the drove's boards, with reed and sedge standing along their banks. At wading
+  depth they drew a clean bright turquoise and were nothing to fight.
+- **Map 2, THE WILLOW HOLT** (`sallowholt*.ts`, a builder's): one duckboard zig-zagging through dense pollards
+  and dead trees over black water, deep off the boards; a camp hummock; side boards to a web pocket with a
+  chest, a nest and a brood mother; a hurdle gate where the boards come ashore; then the main bank, the map's
+  one raised area (`'crag'`, a level up, a six-wide flight and narrow east steps, two archers on its lip): the
+  hut, the one den against its wall, seven kegs of oil, the great sluice's frame, a keg cart stuck on the bank
+  road. Thirteen goblins and the spiders. Taken as laid.
+- **A sluice** is a gate that is wound (`haul` 5) and kept shut by its den (`Stretch.dens`, added this evening).
+  The goal line while a den stands is the burn job's own ("Burn out the dens (1 hut left)"). On the last map
+  the goal is the job's: its goblins dead and its den burned.
+- **Cut from this slice, said in the spec too:** the water does not drop when a sluice is wound (the cut beyond
+  is laid already drained). That is the new system the spec asks for; water is built once on each screen and
+  not sent, so it wants its own short spec. No skimmer, no oil alight on water, no fire behind you on the way
+  out.
+- **For Art, from both builders:** a pollard willow (squat crown, grey-green), an osier stool, webs strung
+  between trees, a small stone hut, a sluice frame with its leaf and winding gear, a log across water that
+  reads as a log (`gangway` draws as a dark slab), dark peaty shallows, mist banks.
+- **Tests:** `tests/sallowbeds.test.ts` (9), `sallowholt.test.ts` (13), `sallowcarr.test.ts` (3: the job, a
+  sluice shut by its den and then wound, the last map's goal). Played in the browser end to end.
+- Signed: Claude Fable 5.2.

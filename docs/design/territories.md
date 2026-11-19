@@ -305,6 +305,15 @@ open fen: the carr is a wood, roofed over, and you fight its water.
 - **Leaving:** three smokes over the carr behind you.
 - **Needs:** water that changes level at a gate (new), the winch hold, oil alight on water (the skimmer has
   it at the staithe).
+- **As laid (slice 1, 2026-11-18; `?land=sallow`):** two maps. **THE OSIER BEDS** (`sallowbeds*.ts`): the
+  drove's end, the beds between two deep black ditches crossed at the drove's boards, the first den on the
+  bank, the first sluice, the drained bottom and the causeway half under with boards over its breaks, the holm
+  with the second den, the pot and the cage, the second sluice. **THE WILLOW HOLT** (`sallowholt*.ts`): a
+  duckboard through pollards standing in black water, a camp hummock, a web pocket with a chest, then the
+  main bank, stone-faced and a level up, with the hut, the biggest den against it and the oil hoard. A sluice
+  is a gate you wind (a haul: five seconds for one hero, quicker for two) and it will not open while its den
+  stands. **Cut from this slice:** the water does not drop when a sluice is wound (the cut beyond is laid
+  already drained), no skimmer, no oil alight on water, no fire at your heels on the way out.
 - **Lore keeper (allowed as written):** the sluice house is nobody's: no name, no church things, no lantern
   niche. The dens are built against it, not in it. The atlas's Sallow Priory is a proposal, not canon, and
   nothing here leans on it or rules it out.

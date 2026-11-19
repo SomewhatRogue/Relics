@@ -130,7 +130,7 @@ laid by hand.
 | --- | --- |
 | Lowfurrow Fields | THE RISE's sunken lane (built). THE FIELDS: the old headland bank behind the near hay cart, a level up, the stooks' archer on its lip over the loading, steps at each end, its back hedged (built 2026-11-18) |
 | Tollan's Farm | **The yard**, a levelled terrace behind its wall, face to the orchard below: the bank barn's upper door opens onto it. A flight where the cart road comes up, steps at the far corner. MAWL fights on it; whoever holds the wall's lip covers the orchard. **Laid 2026-11-18** as a `'crag'` terrace two levels up across the yard map (`tollanyardland.ts`), archers on the lip either side of the flight; MAWL is inside the barn, which is its own flat map |
-| Sallow Carr | Its height is water, which the game already has. One raised area: **the main bank at the sluice house**, stone-faced, the biggest den on it, over the causeway you come by |
+| Sallow Carr | Its height is water, which the game already has. One raised area: **the main bank at the sluice house**, stone-faced, the biggest den on it, over the causeway you come by. **Laid 2026-11-18** (`sallowholtland.ts`): a `'crag'` bank a level up across the top of the holt map, a wide flight where the boards land and narrow steps at the east end, two archers on its lip |
 | Fennick Ford | **The mill dam**, the race along its top, over the ford: bows on the dam cover the crossing. The town up the far bank is drawn, not walked |
 | The Copperdeep Shafts | Down, by ladders, as screens. In a level: **the stope's benches**, the rock-faced raised area (`'crag'`), which the mines' job rooms now have |
 
