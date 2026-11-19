@@ -49,6 +49,8 @@ export function holtPlan(job: Job): TerrPlan {
   const land = layLand(k);
   // The fixed set pieces first, then the goblins and spiders, then the wood round them.
   layBank(k), layHolt(k), layPacks(k, land), layWood(k);
+  // The carr's trees are pollard willows, every one (paint only: client/flora.ts).
+  for (const r of k.rounds) if (r.kind === 'tree') r.look = 1;
   const map: GameMap = {
     name: 'SALLOW CARR', w: HOLT.w, h: HOLT.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
     hero: { x: 48, y: 97 }, exit: { ...OUT }, theme: theme(),

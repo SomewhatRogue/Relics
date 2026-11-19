@@ -571,3 +571,24 @@ Kyle: "kk continue". Slice 2 of `docs/design/flora.md`.
   trees now, not 400 stamps. Not done: a real willow (slice 3), flat apple trees, rye.
 - Tests: `tests/flora.test.ts` (5). Whole suite: 263 files pass.
 - Signed: Claude Fable 5.2.
+
+## 2026-11-19: flora slice 3, first part (the pollard willow, rye, crisp apple trees)
+
+Carried straight on from slice 2 at Kyle's "continue".
+
+- **A pollard willow** (`Round.look` 1 on a tree, paint only; `client/flora.ts` kind `willow`;
+  `client/florasprites.ts` `WILLOW`; `three/willow3d.ts`, new): a short fat trunk, the knuckled head, a dark
+  mass of leaf and five narrow sprays standing out of it, pale at the top, shoot tips above. Grey-green, in its
+  own green or the deep shade (the blue tint turned it teal, so a willow never takes it), three outlines, three
+  sizes, mirrored. `sallowbeds.ts` and `sallowholt.ts` mark every tree a willow as the plan is finished, so the
+  carr is a willow wood in both views and does not read as Fenmere or as a park.
+- **Rye** (`client/fenpieces.ts`; `lowfurrowfieldskit.ts` lays its strips with `look` 1000 and up): straw stems
+  all of a height, each with a pale ear bent over. It was fen reeds with brown cattail heads.
+- **Flat-view lumps** (`client/piecedraw.ts` `paintBoxes`): whole pixels row by row, a dark rim, a shaded
+  underside, a lighter cap. They were two smooth canvas ellipses, blurred beside the sprites. This is every
+  lump the flat view paints (apple trees, the rick, hay heaps). An apple tree's apples are two pixels and sit on
+  the front of its crown in both views (`client/pieces.ts`).
+- Seen in both views on Sallow Carr's holt, Lowfurrow's fields and Tollan's orchard. Whole suite: 263 pass.
+- Not done from slice 3: an oak and an alder. A flat-view apple tree is still a plain disc with a cap; it
+  wants the same three-lump crown the 2.5D one has.
+- Signed: Claude Fable 5.2.

@@ -8,7 +8,7 @@
  * Pure: no canvas here. The flat view builds its sprites from this in florasprites.ts; the 2.5D view shapes its
  * lumps from it in three/rounds3d.ts and three/nature3d.ts.
  */
-export type FloraKind = 'tree' | 'pine' | 'bush';
+export type FloraKind = 'tree' | 'pine' | 'bush' | 'willow';
 export interface FloraLook {
   /** 0 as it always was; 1 taller and narrower; 2 broader and lower. */
   shape: 0 | 1 | 2;
@@ -34,7 +34,8 @@ export const placeHash = (x: number, y: number): number => Math.floor(Math.abs(M
 export function floraLook(kind: FloraKind, x: number, y: number, r: number): FloraLook {
   const h = placeHash(x, y), cut = kind === 'bush' ? [0.36, 0.55] : kind === 'pine' ? [0.42, 0.62] : [0.4, 0.65];
   // Half keep the old green, so a wood is still one wood; a pine is its own green or the blue one only.
-  const pick = h % 10, green = kind === 'pine' ? (pick < 6 ? 0 : 2) : pick < 4 ? 0 : pick < 6 ? 1 : pick < 8 ? 2 : 3;
+  // A willow (a tree round with `look: 1`) is grey-green: its own or the deep shade. (The blue one turned it teal.)
+  const pick = h % 10, green = kind === 'pine' ? (pick < 6 ? 0 : 2) : kind === 'willow' ? (pick < 6 ? 0 : 3) : pick < 4 ? 0 : pick < 6 ? 1 : pick < 8 ? 2 : 3;
   const fruit = kind !== 'bush' ? 0 : (h >> 5) % 9 < 3 ? 1 : (h >> 5) % 9 === 3 ? 2 : 0;
   return {
     shape: kind === 'pine' ? 0 : (((h >> 3) % 3) as 0 | 1 | 2), green, flip: ((h >> 7) & 1) === 1,

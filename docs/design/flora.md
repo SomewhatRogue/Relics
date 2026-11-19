@@ -96,4 +96,13 @@ or the blue one, three sizes. A bush has the three outlines and four greens; abo
 one in nine blossom, the rest neither. The flat view builds each look from the one drawing the first time it
 is wanted (`client/florasprites.ts`); the 2.5D view shapes and tints its lumps from the same choice, and tree
 and pine leaves are graded now as bushes always were (`three/rounds3d.ts`, `three/nature3d.ts`). Fixes 3 and 7
-of the table. Open: 4 (rye), 6 (flat apple trees), 8, and slices 3 and 4.
+of the table.
+
+**Slice 3, first part, is in (2026-11-19).** A **pollard willow**: a tree round with `look: 1` (`Round.look`,
+paint only) is drawn as a short fat trunk, a knuckled head and a spray of upright grey-green shoots, in both
+views (`client/florasprites.ts` `WILLOW`, `three/willow3d.ts`), in its own green or the deep shade, three
+outlines, three sizes. Every tree on Sallow Carr's two maps is one. **Rye is rye** (fix 4): straw stems of one
+height with a pale bent ear (`fenpieces.ts`, a `reeds` block with `look` 1000 and up). **Flat-view lumps are
+crisp** (fix 6): whole pixels with a dark rim, a shaded underside and a lighter cap (`piecedraw.ts`), and an
+apple tree's apples sit on its crown at two pixels. Open: an oak and an alder, fix 8, and slice 4 (woods as
+places: clumps and gaps, a big old tree a map, darker floors, a dark foot where reeds meet water, sway).

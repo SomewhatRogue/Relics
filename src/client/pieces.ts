@@ -128,7 +128,7 @@ function rawRoundBoxes(o: Pick<Round, 'kind' | 'r' | 'x' | 'y'>): Bx[] {
   // big again, a young one a little less. Every apple tree was one size, so an orchard read as a grid of saplings.)
   const g = Math.min(1.5, Math.max(0.85, o.r / 0.5));
   out.push([0, 0, 0, 0.18 * g, 0.75 * g, 0.18 * g, BARK], [0, 0.6 * g, 0, 1.2 * g, 0.85 * g, 1.05 * g, 0x3a5a2a, 'lump'], [0.15 * g, 0.9 * g, 0.1 * g, 0.8 * g, 0.6 * g, 0.7 * g, 0x456a32, 'lump']);
-  for (let i = 0; i < 4; i++) out.push([(r() - 0.5) * 0.9 * g, (0.75 + r() * 0.5) * g, (0.35 + r() * 0.15) * g, 0.08, 0.08, 0.08, 0x9a2a1a]);
+  for (let i = 0; i < 4; i++) out.push([(r() - 0.5) * 0.9 * g, (0.98 + r() * 0.4) * g, (0.53 + r() * 0.1) * g, 0.12, 0.12, 0.12, 0x9a2a1a]);
   return out;
 }
 

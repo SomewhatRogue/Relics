@@ -60,6 +60,8 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   | 'boards' | 'reeds';
 export interface Round extends Circle {
   kind: RoundKind;
+  /** Paint only: which drawing of its kind. A tree: 1 is a pollard willow (client/flora.ts). */
+  look?: number;
   /** Paint only: the plinth's statue (none yet: an empty plinth and a sign). */
   hero?: import('./statue.js').StatueHero;
 }

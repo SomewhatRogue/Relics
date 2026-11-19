@@ -19,11 +19,18 @@ export function paintBoxes(g: CanvasRenderingContext2D, bx: Bx[], ox: number, oy
   for (const [x, y, z, w, h, d, col, shape] of order) {
     const sx = Math.round(ox + (x - w / 2) * PX), sw = Math.max(1, Math.round(w * PX)), top = Math.round(oy + (z + d / 2) * PX - (y + h) * PX), fh = Math.max(1, Math.round(h * PX));
     if (shape === 'lump') {
-      const cx = ox + x * PX, cy = oy + z * PX - (y + h / 2) * PX;
-      g.fillStyle = css(col);
-      g.beginPath(), g.ellipse(Math.round(cx), Math.round(cy), (w * PX) / 2, (h * PX) / 2 + (d * PX) / 6, 0, 0, Math.PI * 2), g.fill();
-      g.fillStyle = css(col, 1.25);
-      g.beginPath(), g.ellipse(Math.round(cx - w * 2), Math.round(cy - h * 3), (w * PX) / 4, (h * PX) / 5, 0, 0, Math.PI * 2), g.fill();
+      // Whole pixels, row by row: a dark rim, a shaded underside, a lighter cap up and to the left. (It was two smooth
+      // canvas ellipses, soft and blurred beside the crisp sprites: docs/design/flora.md, 6.)
+      const cx = Math.round(ox + x * PX), cy = Math.round(oy + z * PX - (y + h / 2) * PX), rx = Math.max(1, Math.round((w * PX) / 2)), ry = Math.max(1, Math.round((h * PX) / 2 + (d * PX) / 6));
+      const row = (yy: number, ry1: number, rx1: number) => Math.round(rx1 * Math.sqrt(Math.max(0, 1 - (yy * yy) / (ry1 * ry1))));
+      for (let yy = -ry; yy <= ry; yy++) {
+        const half = Math.max(1, row(yy, ry + 0.5, rx)), edge = Math.abs(yy) === ry;
+        (g.fillStyle = css(col, edge ? 0.62 : yy > ry * 0.4 ? 0.8 : 1)), g.fillRect(cx - half, cy + yy, half * 2, 1);
+        if (!edge) (g.fillStyle = css(col, 0.62)), g.fillRect(cx - half, cy + yy, 1, 1), g.fillRect(cx + half - 1, cy + yy, 1, 1);
+      }
+      const hx = Math.max(1, Math.round(rx * 0.42)), hy = Math.max(1, Math.round(ry * 0.3));
+      g.fillStyle = css(col, 1.22);
+      for (let yy = -hy; yy <= hy; yy++) { const half = row(yy, hy + 0.5, hx); if (half) g.fillRect(cx - Math.round(rx * 0.3) - half, cy - Math.round(ry * 0.38) + yy, half * 2, 1); }
       continue;
     }
     if (shape === 'cone') {

@@ -287,8 +287,9 @@ export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (drawSite(c, r, x, y)) return;
   if (r.kind === 'tree' || r.kind === 'pine' || r.kind === 'bush') {
     // One of its looks, by where it stands (flora.ts): outline, green, size, mirrored or not.
-    const l = floraLook(r.kind, r.x, r.y, r.r);
-    return void blit(c, gradeSprite(floraSprite(r.kind, l)), x, y + Math.round(r.r * 6), l.flip);
+    // (A tree with `look: 1` is a pollard willow.)
+    const kind = r.kind === 'tree' && r.look === 1 ? 'willow' : r.kind, l = floraLook(kind, r.x, r.y, r.r);
+    return void blit(c, gradeSprite(floraSprite(kind, l)), x, y + Math.round(r.r * 6), l.flip);
   }
   if (r.kind === 'reed') {
     // One of three clumps, flipped or not, by where it stands (docs/design/flora.md).

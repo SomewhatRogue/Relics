@@ -9,6 +9,7 @@ import { roundBoxes } from '../pieces';
 import { LANTERN_Y } from '../daispieces';
 import { putBoxes } from './pieces3d';
 import { addNature } from './nature3d';
+import { addWillow } from './willow3d';
 import { graded as gr } from '../darkgold';
 import { CROWN, floraLook, tintHex } from '../flora';
 
@@ -24,6 +25,8 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
   switch (o.kind) {
     case 'tree':
     case 'deadtree': {
+      // (A tree with `look: 1` is a pollard willow: willow3d.ts.)
+      if (o.kind === 'tree' && o.look === 1) return void addWillow(B, o, r);
       // (A living tree's trunk follows its size as its crown does: a small one on the full trunk was a post with a
       // fist of leaves on it. docs/design/flora.md, slice 1.)
       const th = o.kind === 'deadtree' ? 1.5 : Math.min(1.5, 0.6 + R * 1.2), tw = o.kind === 'deadtree' ? 0.3 : Math.min(0.3, 0.14 + R * 0.22), up = th - 1.5;

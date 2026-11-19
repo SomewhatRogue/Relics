@@ -69,6 +69,8 @@ export function bedsPlan(job: Job): TerrPlan {
   layBeds(k), layDrove(k), layHolm(k), layPacks(k), layBedRows(k), carr(k);
   const dens = k.blocks.flatMap((b, i) => (b.kind === 'den' ? [i] : []));
   s0.dens = [dens[0]], s1.dens = [dens[1]];
+  // The carr's trees are pollard willows, every one (paint only: client/flora.ts).
+  for (const r of k.rounds) if (r.kind === 'tree') r.look = 1;
   const map: GameMap = {
     name: 'SALLOW CARR', w: CARR.w, h: CARR.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
     hero: { x: 48, y: 109 }, exit: { x: 46.5, y: 0, w: 3, h: 0.9 }, theme: { ...lightFor(THEMES.marsh, 'marsh', 'day'), floor: 'grass', back: 'trees' },

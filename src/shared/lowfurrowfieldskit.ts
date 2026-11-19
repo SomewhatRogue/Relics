@@ -44,7 +44,7 @@ export function rye(k: Kit, land: FieldsLand, x0: number, y0: number, x1: number
     if (k.rng.next() < thin) continue;
     if (offLine(land.road, cx, cy) < 1.9 || land.rides.some((l) => offLine(l, cx, cy) < 1.25)) continue;
     if (!unclaimed(k, cx, cy, 0.5)) continue;
-    k.blocks.push({ kind: 'reeds', soft: true, x: cx - w / 2, y: cy - h / 2, w, h, look: k.rng.int(1000) } as Block);
+    k.blocks.push({ kind: 'reeds', soft: true, x: cx - w / 2, y: cy - h / 2, w, h, look: 1000 + k.rng.int(1000) } as Block);
   }
 }
 
