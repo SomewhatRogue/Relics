@@ -283,6 +283,11 @@ export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
   if (r.kind === 'candles' || r.kind === 'witchfire') return void drawHallRound(c, r, x, y);
   if (drawSite(c, r, x, y)) return;
+  if (r.kind === 'reed') {
+    // One of three clumps, flipped or not, by where it stands (docs/design/flora.md).
+    const k = Math.abs(Math.floor(r.x * 7.3 + r.y * 13.7)) % 6;
+    return void blit(c, gradeSprite([SPRITES.reed, SPRITES.reed2, SPRITES.reed3][k % 3]), x, y + Math.round(r.r * 6), k > 2);
+  }
   blit(c, gradeSprite(SPRITES[r.kind as keyof typeof SPRITES]), x, y + Math.round(r.r * 6));
   if (r.kind === 'lantern') {
     // The Last Lantern: a flame that never goes out.

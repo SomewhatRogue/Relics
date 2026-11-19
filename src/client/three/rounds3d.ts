@@ -9,6 +9,7 @@ import { roundBoxes } from '../pieces';
 import { LANTERN_Y } from '../daispieces';
 import { putBoxes } from './pieces3d';
 import { addNature } from './nature3d';
+import { graded as gr } from '../darkgold';
 
 export type Spot = [number, number, number, number];
 
@@ -22,7 +23,10 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
   switch (o.kind) {
     case 'tree':
     case 'deadtree': {
-      B.b(x, 0, z, 0.3, 1.5, 0.3, jit(bark, 0.1, r));
+      // (A living tree's trunk follows its size as its crown does: a small one on the full trunk was a post with a
+      // fist of leaves on it. docs/design/flora.md, slice 1.)
+      const th = o.kind === 'deadtree' ? 1.5 : Math.min(1.5, 0.6 + R * 1.2), tw = o.kind === 'deadtree' ? 0.3 : Math.min(0.3, 0.14 + R * 0.22), up = th - 1.5;
+      B.b(x, 0, z, tw, th, tw, jit(bark, 0.1, r));
       if (o.kind === 'deadtree') {
         for (let i = 0; i < 4; i++) B.c(x + (r.next() - 0.5) * 0.4, 1.2 + i * 0.2, z, 0.08, 0.7, 0.08, 0x4a3e34, r.next() * 3, 0, 0.6 * (i % 2 ? 1 : -1));
         break;
@@ -30,9 +34,9 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       // A round crown of a few lumps, the biggest low, a lighter one up on the sunny side. (Its leaves move in the
       // living world's wind, wind3d.ts.)
       B.sway = 1;
-      B.lump(x, 1.85, z, R * 2.6, R * 2.1, R * 2.4, jit(LEAF[0], 0.08, r), r.next() * 3);
-      B.lump(x + (r.next() - 0.5) * R, 1.75 + r.next() * 0.2, z + R * 0.5, R * 1.7, R * 1.4, R * 1.5, jit(LEAF[2], 0.08, r), r.next() * 3);
-      B.lump(x - R * 0.35, 2.25, z + R * 0.2, R * 1.5, R * 1.2, R * 1.4, jit(LEAF[1], 0.08, r), r.next() * 3);
+      B.lump(x, 1.85 + up, z, R * 2.6, R * 2.1, R * 2.4, jit(LEAF[0], 0.08, r), r.next() * 3);
+      B.lump(x + (r.next() - 0.5) * R, 1.75 + up + r.next() * 0.2, z + R * 0.5, R * 1.7, R * 1.4, R * 1.5, jit(LEAF[2], 0.08, r), r.next() * 3);
+      B.lump(x - R * 0.35, 2.25 + up, z + R * 0.2, R * 1.5, R * 1.2, R * 1.4, jit(LEAF[1], 0.08, r), r.next() * 3);
       B.sway = 0;
       break;
     }
@@ -89,7 +93,14 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       fires.push([x, 0.05, z, 0.8]);
       break;
     case 'reed':
-      for (let i = 0; i < 7; i++) B.b(x + (r.next() - 0.5) * R * 1.6, 0, z + (r.next() - 0.5) * R, 0.04, 0.5 + r.next() * 0.5, 0.04, jit(0x5a6a3a, 0.15, r));
+      // A clump at mixed heights, each stem dark at the foot and pale at the tip, graded like every other plant, a
+      // brown head on a few tall ones, one in seven dead and straw-coloured (docs/design/flora.md, slice 1).
+      for (let i = 0; i < 8; i++) {
+        const sx = x + (r.next() - 0.5) * R * 1.8, sz = z + (r.next() - 0.5) * R * 1.1, h = 0.3 + r.next() * r.next() * 0.9, dead = r.next() < 0.14, foot = h * 0.4;
+        B.b(sx, 0, sz, 0.045, foot, 0.045, gr(dead ? 0x5a5234 : 0x2c3d2c, 'wall'));
+        B.b(sx + (r.next() - 0.5) * 0.03, foot, sz, 0.035, h - foot, 0.035, gr(jit(dead ? 0x8e8250 : 0x66763a, 0.1, r), 'wall'));
+        if (!dead && h > 0.75 && r.next() < 0.5) B.b(sx, h - 0.16, sz, 0.06, 0.16, 0.06, gr(0x5e4226, 'wall'));
+      }
       break;
     case 'washline':
       for (const s of [-1, 1]) B.b(x + s * R, 0, z, 0.08, 1.3, 0.08, wood);

@@ -58,7 +58,8 @@ function ditches(k: Kit): void {
   for (const d of DITCHES) for (const [y, n] of [[d.y0 - 0.5, 0], [d.y1 + 0.5, 1]] as const) {
     for (let x = 13 + n * 1.3; x < 83; x += k.rng.range(2, 3.2)) {
       if (x > CROSS.x0 - 1.6 && x < CROSS.x1 + 1.6) continue;
-      put(k, k.rng.next() < 0.12 ? 'tree' : 'reed', x, y + k.rng.range(-0.15, 0.15), k.rng.range(0.22, 0.3), 0, 1.6);
+      const willow = k.rng.next() < 0.12;
+      put(k, willow ? 'tree' : 'reed', x, y + k.rng.range(-0.15, 0.15), willow ? k.rng.range(0.42, 0.6) : k.rng.range(0.22, 0.3), 0, 1.6);
     }
   }
 }

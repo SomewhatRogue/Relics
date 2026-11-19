@@ -532,3 +532,21 @@ how every plant is drawn today in both views (pictures in `scratch/flora/`), and
 ground cover and trees. Written up as `docs/design/flora.md`: nine defects worst first with their causes, what
 good looks like, and four slices. Nothing built. Most of what it would touch is the Art chat's, so who builds
 it is Kyle's call. Signed: Claude Fable 5.2.
+
+## 2026-11-18, late: flora slice 1 (the weird reeds, lollipop trees, glaring straw)
+
+Kyle, on the flora research: "do it". Slice 1 of `docs/design/flora.md`, as small edits in the Art chat's files:
+
+- **Flat-view reeds** (`client/sprites.ts` `reedClump`; `makeSprite` takes `outline`, default as before;
+  `client/blocks.ts` `drawRound`): three clumps, 15 by 20, one-pixel stems at mixed heights, dark blue-green at
+  the foot, green, a pale yellow-green tip, some bent, a brown head on a few tall ones, about one stem in seven
+  dead and straw-coloured, no outline and no edge shading. Picked and flipped by where the clump stands. They
+  were five fat outlined stems of one height and read as a black comb that buried bodies.
+- **2.5D reeds** (`three/rounds3d.ts`): eight stems at mixed heights, each a dark foot and a paler top, heads on
+  a few, graded as every other plant is (they skipped the grade and were the brightest thing on the map).
+- **A living tree's trunk follows its size in 2.5D** (`three/rounds3d.ts`): height `0.6 + 1.2 r`, width
+  `0.14 + 0.22 r`, both capped at the old 1.5 by 0.3, the crown lowered with it. A dead tree is as it was. The
+  ditch-bank willows I laid on Sallow Carr this evening are a proper size now (0.42 to 0.6), not 0.22.
+- **Crop and straw** (`client/soil.ts`): 20% and 17% flecks, not 35% and 30%, and the near-white gold is gone.
+- Seen in both views on Sallow Carr and Lowfurrow. Whole suite: 262 files pass.
+- Signed: Claude Fable 5.2.

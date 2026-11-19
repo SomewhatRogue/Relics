@@ -24,7 +24,7 @@ export const OUTLINE = '#0d0b10';
 const GLOW = new Set(['#ff4a3a', '#7dff8a', '#ffd27a', '#c9a8ff', '#ffe9a8', '#bfe0ff', '#ff8a3a']);
 const hex = (h: string) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 
-export function makeSprite(w: number, h: number, parts: Part[]): Sprite {
+export function makeSprite(w: number, h: number, parts: Part[], outline = true): Sprite {
   const g: (string | null)[][] = Array.from({ length: h }, () => Array(w).fill(null));
   for (const q of parts) {
     // Rects, pixels and wedges sit on whole pixels (a half pixel would name no row): ellipses may sit between.
@@ -51,7 +51,7 @@ export function makeSprite(w: number, h: number, parts: Part[]): Sprite {
     }
   }
   // (The new look's sharper painting, behind ?sharp: charpaint.ts.)
-  if (SHARP) return paintSharp(g, w, h, OUTLINE, GLOW);
+  if (SHARP && outline) return paintSharp(g, w, h, OUTLINE, GLOW);
   const W = w + 2, H = h + 2;
   const c = document.createElement('canvas'), white = document.createElement('canvas');
   c.width = white.width = W;
@@ -71,7 +71,9 @@ export function makeSprite(w: number, h: number, parts: Part[]): Sprite {
     const v = g[y][x];
     if (!v) continue;
     let f = 1;
-    if (!filled(x + 1, y) || !filled(x, y + 1)) f = 0.72;
+    // (Thin grass-like things, `outline` false: their own colours as given, no edge shading, no dark line round them.)
+    if (!outline) f = 1;
+    else if (!filled(x + 1, y) || !filled(x, y + 1)) f = 0.72;
     else if (!filled(x - 1, y) || !filled(x, y - 1)) f = 1.2;
     const [r, gg, b] = hex(v);
     set(img, x + 1, y + 1, Math.min(255, r * f), Math.min(255, gg * f), Math.min(255, b * f));
@@ -79,7 +81,7 @@ export function makeSprite(w: number, h: number, parts: Part[]): Sprite {
     if (GLOW.has(v)) glow.push([x + 1, y + 1, v]);
   }
   const [or, og, ob] = hex(OUTLINE);
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+  for (let y = 0; y < H && outline; y++) for (let x = 0; x < W; x++) {
     if (filled(x - 1, y - 1)) continue;
     if (filled(x, y - 1) || filled(x - 2, y - 1) || filled(x - 1, y) || filled(x - 1, y - 2)) {
       set(img, x, y, or, og, ob);
@@ -109,6 +111,23 @@ export function grow(parts: Part[], kx = 1.5, ky = kx): Part[] {
     return ['e', a * kx, b * ky, c * kx, d * ky, col];
   });
 }
+/** A clump of reeds, 15 wide and up to 20 tall: `n` picks which of three (their stems' places, heights and heads). */
+function reedClump(n: number): Sprite {
+  const W = 15, H = 20, parts: Part[] = [];
+  let seed = n * 7919;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff), seed / 0x7fffffff);
+  for (let x = 1 + (n % 2); x < W - 1; x += 1 + Math.floor(rnd() * 2.4)) {
+    const tall = Math.round(6 + rnd() * rnd() * 13 + (rnd() < 0.25 ? 3 : 0)), top = H - Math.min(H - 1, tall), dead = rnd() < 0.14;
+    const foot = Math.max(2, Math.round(tall * 0.35)), tip = Math.max(1, Math.round(tall * 0.3));
+    parts.push(['r', x, H - foot, 1, foot, dead ? '#5a5234' : '#2c3d2c'], ['r', x, top + tip, 1, tall - foot - tip, dead ? '#7a6e42' : rnd() < 0.5 ? '#44562c' : '#4e6030']);
+    // The tip, pale and a little yellow; bent over on some; a brown head on about one in four of the tall ones.
+    const bend = rnd() < 0.3 ? (rnd() < 0.5 ? -1 : 1) : 0;
+    parts.push(['r', x, top + 1, 1, tip - 1, dead ? '#8e8250' : '#6c7a3a'], ['p', Math.max(0, Math.min(W - 1, x + bend)), top, dead ? '#9a8c58' : '#7e8a44']);
+    if (!dead && tall > 11 && rnd() < 0.45) parts.push(['r', x, top + 1, 1, 3, '#5e4226']);
+  }
+  return makeSprite(W, H, parts, false);
+}
+
 /** `makeSprite` for a prop drawn again at 1.5x (or taller only: `kx` 1). */
 const grown = (w: number, h: number, parts: Part[], kx = 1.5, ky = 1.5) => makeSprite(Math.round(w * kx), Math.round(h * ky), grow(parts, kx, ky));
 
@@ -279,8 +298,11 @@ export const SPRITES = {
   // (Big enough to find, in a stone kerb: the way down to the Deep. Kyle, 2026-11-16.)
   grate: makeSprite(24, 14, [['r', 0, 0, 24, 14, '#6a6674'], ['r', 0, 0, 24, 1, '#8a8694'], ['r', 0, 13, 24, 1, '#3e3a46'], ['r', 2, 2, 20, 10, '#0d0b10'], ['r', 5, 2, 2, 10, '#4a4652'], ['r', 9, 2, 2, 10, '#4a4652'], ['r', 13, 2, 2, 10, '#4a4652'], ['r', 17, 2, 2, 10, '#4a4652'], ['r', 2, 6, 20, 2, '#4a4652'], ['r', 5, 2, 1, 10, '#6a6674'], ['r', 9, 2, 1, 10, '#6a6674'], ['r', 13, 2, 1, 10, '#6a6674'], ['r', 17, 2, 1, 10, '#6a6674']]),
   statue: grown(14, 30, [['r', 2, 24, 10, 6, '#5a5664'], ['r', 3, 23, 8, 1, '#6a6470'], ['r', 4, 10, 6, 13, '#6a6470'], ['e', 7, 7, 2.6, 2.6, '#6a6470'], ['r', 10, 6, 1, 12, '#57525e'], ['r', 9, 5, 3, 1, '#57525e'], ['r', 5, 12, 1, 8, '#57525e']], 1, 1.5),
-  // Reeds at a bank or in a bog: thin stalks, brown heads.
-  reed: grown(11, 15, [['r', 1, 5, 1, 10, '#4a5a2a'], ['r', 3, 2, 1, 13, '#56682e'], ['r', 5, 4, 1, 11, '#4a5a2a'], ['r', 7, 1, 1, 14, '#5e7034'], ['r', 9, 5, 1, 10, '#4a5a2a'], ['r', 3, 1, 1, 3, '#6b4a2b'], ['r', 7, 0, 1, 3, '#6b4a2b'], ['r', 9, 4, 1, 2, '#6b4a2b']]),
+  // Reeds at a bank or in a bog (docs/design/flora.md, slice 1): a clump of one-pixel stems at mixed heights, dark
+  // at the foot and pale at the tip, a seed head on a few, one dead and straw-coloured, no outline. Three clumps,
+  // picked and flipped by where they stand (blocks.ts). They were five fat outlined stems of one height and read
+  // as a black comb.
+  reed: reedClump(1), reed2: reedClump(2), reed3: reedClump(3),
   // A drowned tree in the marsh: grey, bare, a broken limb.
   deadtree: grown(19, 27, [['r', 8, 9, 3, 18, '#4a4650'], ['r', 9, 9, 1, 18, '#5a5660'], ['r', 4, 6, 1, 5, '#4a4650'], ['r', 4, 10, 5, 1, '#4a4650'], ['r', 13, 3, 1, 7, '#4a4650'], ['r', 10, 12, 4, 1, '#4a4650'], ['r', 7, 2, 1, 8, '#4a4650'], ['r', 15, 2, 1, 3, '#3e3a44'], ['r', 2, 4, 3, 1, '#3e3a44'], ['r', 7, 25, 6, 2, '#2e2c34']], 2, 2),
   bush: grown(14, 10, [['e', 7, 6, 6.5, 4, '#26361f'], ['e', 4, 5.5, 3.5, 2.8, '#2f4a28'], ['e', 10, 5, 3.2, 2.8, '#2a4024'], ['e', 7, 3.5, 3, 2, '#355430'], ['e', 7, 8, 5, 1.5, '#1f2e19'], ['p', 6, 2, '#45683a'], ['p', 11, 4, '#3e6034'], ['p', 4, 7, '#7a2a3a'], ['p', 10, 6, '#7a2a3a'], ['p', 8, 7, '#8a3a4a']]),

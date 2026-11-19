@@ -85,8 +85,10 @@ function colourAt(mat: Exclude<Soil['mat'], 'cobble' | 'shade'>, x: number, y: n
   // Grass in tufts; a field ploughed in rows (dark in the furrow, lighter on the ridge); grain in ears.
   if (mat === 'grass') return r < 0.12 ? ['#3a4c2c', '#46582f', '#1d2818'][Math.floor(r * 30) % 3] : col;
   if (mat === 'furrow') return px % 8 < 4 ? fam[0] : r < 0.06 ? '#4e4232' : fam[2 + (py % 4 < 2 ? 1 : 0)];
-  if (mat === 'crop') return r < 0.35 ? ['#8a7a3a', '#a08c44', '#6b5a2e', '#b8a050'][Math.floor(r * 40) % 4] : col;
-  if (mat === 'straw') return r < 0.3 ? ['#8a7a3a', '#a08c44', '#6b5a2e'][Math.floor(r * 10) % 3] : col;
+  // (Fewer and calmer flecks than before, 35% and 30% with a near-white gold among them: a crop or a straw patch
+  // glared against the grass round it. docs/design/flora.md, slice 1.)
+  if (mat === 'crop') return r < 0.2 ? ['#8a7a3a', '#96843e', '#6b5a2e', '#7c6c34'][Math.floor(r * 40) % 4] : col;
+  if (mat === 'straw') return r < 0.17 ? ['#8a7a3a', '#96843e', '#6b5a2e'][Math.floor(r * 20) % 3] : col;
   return r < 0.04 ? '#6a5a4a' : col;
 }
 

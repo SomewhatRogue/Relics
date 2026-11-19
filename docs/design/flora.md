@@ -81,5 +81,10 @@ Each slice is seen in both views on Lowfurrow, Tollan's Farm and Sallow Carr bef
    floor and dapples under crowns, dead trees and fallen trunks, a dark foot and a ring where a reed meets
    water. Reeds and rye swaying in 2.5D.
 
-Open for Kyle: whether this chat builds slice 1 now (small edits in the Art chat's files, logged) or the Art chat
-takes the whole doc.
+**Slice 1 is in (2026-11-18, the Territories chat, at Kyle's "do it").** Reeds in the flat view are three
+clumps of one-pixel stems at mixed heights, dark foot and pale tip, a few heads, one dead, no outline, picked and
+flipped by place (`sprites.ts` `reedClump`, `makeSprite`'s new `outline` switch, `blocks.ts`). Reeds in 2.5D are
+graded, two-tone by height, mixed heights, heads on a few (`three/rounds3d.ts`). A living tree's trunk follows
+its size in 2.5D. Crop and straw flecks are fewer and calmer (`soil.ts`). Still open from the table: 3, 4, 6, 7,
+8 (the proper cure) and tree leaves' grade in 2.5D. Slices 2 to 4 are not started; whose they are is Kyle's
+call.
