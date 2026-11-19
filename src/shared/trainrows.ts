@@ -111,7 +111,8 @@ export function trainerRows(p: Profile): TrainRow[] {
   const leave = hasLesson(p, 'leave') ? [lessonRow(p, 'leave')] : [];
   // The technique: three rows of moves; then the ladder's three rungs.
   const techs = stepRows(p, 'technique', TECHS[p.cls], TECH_WORDS, 'craft', 'tech'), rungs = stepRows(p, 'ladder', RUNGS[p.cls], RUNG_WORDS, 'ladder', 'rung');
-  const drills = DRILL_ORDER.flatMap((id) => (id === 'technique' ? [...techs, ...rungs] : [drillRow(p, id)]));
+  // (No SPEED for a Mage: they stay slow, Kyle 2026-11-19; sim/gearstats.ts ignores any bought before.)
+  const drills = DRILL_ORDER.filter((id) => !(id === 'speed' && p.cls === 'MAGE')).flatMap((id) => (id === 'technique' ? [...techs, ...rungs] : [drillRow(p, id)]));
   // (The Deep skill, once the hero has been deep enough: shared/deeprow.ts.)
   return [...skills, ...deepRows(p), ...leave, ...drills].map((r) => magicRow(r, p.cls));
 }

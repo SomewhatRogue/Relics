@@ -126,6 +126,20 @@ describe('storm jumps only between wet goblins', () => {
 });
 
 describe("the wand's storm stream", () => {
+  it('drains a little magic while it\'s up, and none comes back till it\'s down (Kyle, 2026-11-19)', () => {
+    const a = mageArena('wand', [[9, 6]], 'storm');
+    a.tap(0.3);
+    const at = a.h.stamina;
+    a.run(0.6);
+    expect(a.h.stream).toBeDefined();
+    expect(a.h.stamina).toBeLessThan(at);
+    expect(at - a.h.stamina).toBeLessThan(STREAM.drain * 0.6 + 0.5);
+    // Down, magic comes back after its usual wait.
+    a.run(STREAM.keep + 3);
+    expect(a.h.stream).toBeUndefined();
+    expect(a.h.stamina).toBeGreaterThan(at);
+  });
+
   it('fully built it slows your walk (Kyle, 2026-11-16: "a little too strong")', () => {
     const pace = (step: number) => {
       const h = mageArena('wand', [[2, 2]], 'storm').h;

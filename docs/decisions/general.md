@@ -176,3 +176,12 @@ Claude Opus 5.5
   chain lightning but less damage but more range than its little shock"): the staff calls the strike down
   (sim/skystrike.ts, its 24 to 56 hold), the wand throws CHAIN_BOLT: range 9 (the stream's 5), 3 jumps (5 on
   the flash), 0.9 of the hold falling 0.85 a jump. Cards and the storm, worldfx and spellbook tests follow.
+
+## 2026-11-19: the wand's stream costs; no SPEED at the Mage's trainer (Kyle)
+
+- The storm stream drains STREAM.drain (4) magic a second while it's up and holds magic regen (staminaAt kept
+  at now, so the usual wait starts when it's down); run dry, it stops (sim/stream.ts stepStreams).
+- The trainer offers a Mage no SPEED rank (shared/trainrows.ts), and a rank a Mage bought before does nothing
+  (sim/gearstats.ts); the price isn't refunded.
+
+Claude Opus 5.5

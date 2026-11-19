@@ -9,7 +9,7 @@
  * same goblin at the same build.
  */
 import { wetMult } from './techmage';
-import { ROD, STORM, STREAM } from '../shared/tuning';
+import { ROD, STORM, STREAM, TICK } from '../shared/tuning';
 import { isRod, jolt, rodHit, rodNear } from './rods';
 import { castElement } from './channel';
 import { damage, isDead, isDummy } from './damage';
@@ -79,10 +79,12 @@ export function stepStreams(w: World): void {
   for (const h of w.heroes) {
     const st = h.stream;
     if (!st) continue;
-    if (w.now >= st.until || h.act === 'down' || !streams(h)) {
+    if (w.now >= st.until || h.act === 'down' || !streams(h) || h.stamina <= 0) {
       h.stream = undefined;
       continue;
     }
+    // A little magic a tick while it's up, and none comes back till it's down (sim/hero.ts waits on staminaAt).
+    Object.assign(h, { stamina: Math.max(0, h.stamina - STREAM.drain * TICK), staminaAt: w.now });
     const e = target(h, w.enemies);
     // Its goblin dead or away (or a first one): it takes the next, keeping its build. Drawn into iron, the guard breaks.
     if ((e?.id ?? 0) !== st.id) {

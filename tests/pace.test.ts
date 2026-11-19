@@ -6,6 +6,8 @@ import { CAPS } from '../src/shared/mods';
 import { PERKS } from '../src/shared/perks';
 import { MAGE_PACE, WEAPONS, type HeroClass } from '../src/shared/tuning';
 import { statsOf } from '../src/sim/gearstats';
+import { trainerRows } from '../src/shared/trainrows';
+import { newProfile } from '../src/shared/progress';
 import { newHero } from '../src/sim/hero';
 import type { Hero } from '../src/sim/types';
 
@@ -16,6 +18,12 @@ describe('walking pace', () => {
     const slow = [...pace('WARRIOR'), ...pace('MAGE'), ...pace('HEALER')];
     expect(Math.max(...slow) - Math.min(...slow)).toBeLessThanOrEqual(0.01);
     for (const q of [...pace('ROGUE'), ...pace('RANGER')]) expect(q).toBeGreaterThan(Math.max(...slow) * 1.4);
+  });
+
+  it("a Mage's trainer sells no SPEED; everyone else's does (Kyle, 2026-11-19)", () => {
+    const rows = (cls: HeroClass) => trainerRows(newProfile(cls, 'X')).map((r) => r.id);
+    expect(rows('MAGE').some((id) => String(id).includes('speed'))).toBe(false);
+    expect(rows('ROGUE').some((id) => String(id).includes('speed'))).toBe(true);
   });
 
   it('a Mage stays slow: no knack of theirs makes them faster, and everything together at most MAGE_PACE.most (the rest may)', () => {
