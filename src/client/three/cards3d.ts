@@ -57,7 +57,9 @@ const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 function hound(f: Figs, h: Hero, d: Hound, ax: number, ay: number, hx: number, hy: number, me?: Hero, map?: ArenaRoom['map']): void {
   const a = houndAt(h, ax, ay, hx, hy, f.now), x = a ? a.x : ax, y = a ? a.y : ay;
   const o = { ...(a ? { mood: a.mood, fx: a.fx, down: a.down } : {}), look: h.houndLook, name: houndTag(h, d, x, y, me, !!a), seed: seedOf(h.id) };
-  f.put('d' + h.id, x, map ? bodyLv(map, x, y) * LEDGE_H : 0, y, (c, px, py) => drawHound(c, d, px, py, o), { pool: d.state === 'fled' && d.t > 2 ? 0 : 0.28 });
+  // (At the level it stands on: the town's stone levels as the land's slopes. Kyle, 2026-11-18: "my dog is
+  // clipping through the ground in town". Without a level, bodyLv keeps it on the floor off the land.)
+  f.put('d' + h.id, x, map ? bodyLv(map, x, y, levelAt(map, x, y)) * LEDGE_H : 0, y, (c, px, py) => drawHound(c, d, px, py, o), { pool: d.state === 'fled' && d.t > 2 ? 0 : 0.28 });
 }
 
 /** Every figure this frame, onto its card. */
@@ -87,10 +89,10 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     f.put('o' + h.id, h.x, bodyLv(map, h.x, h.y, levelAt(map, h.x, h.y)) * LEDGE_H, h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
     // Another player's Ranger: their hound at heel, as this screen walks it (idlehound.ts).
     const d = companion(h, f.now);
-    if (d) hound(f, h, d, d.x, d.y, h.x, h.y, me);
+    if (d) hound(f, h, d, d.x, d.y, h.x, h.y, me, map);
   }
   // Maeve's hound running in with her note for a new Ranger, this player's or another's (../runnerecho.ts, the town quests chat).
-  runnerHounds().forEach((rh, i) => f.put('runhound' + i, rh.x, 0, rh.y, (c, px, py) => drawHound(c, rh.d, px, py, { mood: rh.moving ? { moving: true, gait: 'run' } : { sit: true, wag: true }, look: MAEVE_HOUND }), { pool: 0.28 }));
+  runnerHounds().forEach((rh, i) => f.put('runhound' + i, rh.x, bodyLv(map, rh.x, rh.y, levelAt(map, rh.x, rh.y)) * LEDGE_H, rh.y, (c, px, py) => drawHound(c, rh.d, px, py, { mood: rh.moving ? { moving: true, gait: 'run' } : { sit: true, wag: true }, look: MAEVE_HOUND }), { pool: 0.28 }));
   // Maeve's hound by the lodge's fire.
   if (isLodgeMap(map)) {
     const a = lodgeHoundAt(others.length ? [...room.heroes, ...others] : room.heroes, f.now);
@@ -120,7 +122,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   // Someone caged: an arm waving out through the bars, and their call when you're close (scene.ts).
   for (const p of room.props) if (p.kind === 'cage' && !p.broken && !p.lifted) {
     const near = !!me && Math.hypot(me.x - p.x, me.y - p.y) < 7;
-    f.put('c' + p.id, p.x + propShake(p, t)[0], bodyLv(map, p.x, p.y) * LEDGE_H, p.y + 0.05, (c, px, py) => drawCaged(c, px, py, t, near, p.id), { pool: 0 });
+    f.put('c' + p.id, p.x + propShake(p, t)[0], bodyLv(map, p.x, p.y, levelAt(map, p.x, p.y)) * LEDGE_H, p.y + 0.05, (c, px, py) => drawCaged(c, px, py, t, near, p.id), { pool: 0 });
   }
   // The freed (the dead lie under everyone; the gone are gone).
   for (const s of room.survivors ?? []) {

@@ -331,3 +331,14 @@ Claude Opus 5.5
   reachable too.
 
 Claude Opus 5.5
+
+## 2026-11-18: hounds through the ground in town (Kyle: "my dog is clipping through the ground in town")
+
+- The elevation work moved figures to shared/heights.ts `bodyLv`, which follows the land's slopes but, given no
+  level, keeps a thing on the floor off the land: the town's stone levels aren't land, so a hound up on the square
+  (level 1) was drawn a level down, in the ground. 2.5D (cards3d.ts): your hound and another player's (that call
+  also lacked the map) at `bodyLv(map, x, y, levelAt(...))`; Maeve's runner hound, which was at 0 in both views,
+  now at its level too (scene.ts lifts it in the flat view). The same fix for chests, drops, pickups and caged
+  prisoners (actors3d.ts, cards3d.ts), which had the same gap on the town's levels. Related tests (22 files) passed.
+
+Claude Opus 5.5

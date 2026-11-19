@@ -11,6 +11,7 @@ import type { Hero } from '../../sim/types';
 import { asleep } from '../foes';
 import { LEDGE_H } from './ground';
 import { bodyLv, groundLv, groundTop, isLand, shotLv } from '../../shared/heights';
+import { levelAt } from '../../shared/arena';
 import { clsOf, heroKey, makeHero, type HeroFig } from './heroes3d';
 import { poseHero } from './heropose3d';
 import { foeLook, makeGoblin, type FoeFig } from './goblins3d';
@@ -142,17 +143,17 @@ export class Actors {
     (room.map.holes ?? []).forEach((h, i) => this.things.get('hole' + i, '', () => ({ root: makeHole() })).root.position.set(h.x, 0, h.y));
     for (const c of room.chests) {
       const f = this.chests.get('c' + c.id, '', makeChest);
-      f.root.position.set(c.x, bodyLv(room.map, c.x, c.y) * LEDGE_H, c.y);
+      f.root.position.set(c.x, bodyLv(room.map, c.x, c.y, levelAt(room.map, c.x, c.y)) * LEDGE_H, c.y);
       poseChest(f, c);
     }
     for (const d of room.drops) {
       if (d.owner && d.owner !== meId) continue;
       // Lying on the floor as itself, a glint down its blade now and then (loot3d.ts).
       const o = this.things.get('d' + d.id, d.item.quality, () => ({ root: makeLoot(d.item, itemCol(d.item), d.id) })).root;
-      o.position.set(d.x, bodyLv(room.map, d.x, d.y) * LEDGE_H, d.y);
+      o.position.set(d.x, bodyLv(room.map, d.x, d.y, levelAt(room.map, d.x, d.y)) * LEDGE_H, d.y);
       o.userData.tick?.(now);
     }
-    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: p.gold ? makeCoins(p.gold) : p.potion ? makeBottle(p.potion) : makePickup(false, undefined, p.relic && relicCol(p.relic)) })).root.position.set(p.x, bodyLv(room.map, p.x, p.y) * LEDGE_H, p.y);
+    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: p.gold ? makeCoins(p.gold) : p.potion ? makeBottle(p.potion) : makePickup(false, undefined, p.relic && relicCol(p.relic)) })).root.position.set(p.x, bodyLv(room.map, p.x, p.y, levelAt(room.map, p.x, p.y)) * LEDGE_H, p.y);
     // (On a land everything in the air or on the floor is at the ground's height there; a shot flies from the level it
     // was loosed at: shared/heights.ts shotLv. It was all drawn at level 0, under a hero stood on a height.)
     const gl = (x: number, y: number) => groundLv(room.map, x, y) * LEDGE_H;

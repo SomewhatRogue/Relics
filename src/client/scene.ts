@@ -353,7 +353,8 @@ export class Scene {
       if (d) this.hound(items, c, h, d, d.x, d.y, h.x, h.y, cx, cy, now, me);
     }
     // Maeve's hound running in with her note for a new Ranger (runner.ts).
-    for (const rh of runnerHounds()) items.push({ y: OY + rh.y * PX, draw: () => drawHound(c, rh.d, OX + rh.x * PX - cx, OY + rh.y * PX - cy, { mood: rh.moving ? { moving: true, gait: 'run' } : { sit: true, wag: true }, look: MAEVE_HOUND }) });
+    // (At the level it's on, on the new town's raised levels.)
+    for (const rh of runnerHounds()) items.push({ y: OY + rh.y * PX, draw: () => drawHound(c, rh.d, OX + rh.x * PX - cx, OY + rh.y * PX - cy - lv(rh.x, rh.y), { mood: rh.moving ? { moving: true, gait: 'run' } : { sit: true, wag: true }, look: MAEVE_HOUND }) });
     // Maeve's hound by the lodge's fire.
     if (isLodgeMap(map)) {
       const a = lodgeHoundAt(others.length ? [...room.heroes, ...others] : room.heroes, now);
