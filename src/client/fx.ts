@@ -249,6 +249,10 @@ export class Fx {
       case 'yank':
         this.say(x, y - 24, 'YANK', '#9fe8ff');
         break;
+      case 'mow':
+        // Rye or reeds cut down by a swing (sim/buildings.ts): the cut ends fly.
+        this.burst(x, y - 6, 9, ['#a08c44', '#8a7a3a', '#6a7a42'], 55, false, 160, true);
+        break;
       case 'short':
         // A shot loosed up at someone on a height from too far (sim/highrange.ts).
         this.say(x, y - 24, 'OUT OF REACH', '#b8b2c4');

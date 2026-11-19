@@ -26,9 +26,16 @@ export function hurtBlock(b: Block, n: number, ev: FightEvent[]): void {
   ev.push({ k: 'collapse', x: b.x, y: b.y, w: b.w, h: b.h });
 }
 
-/** A melee swing that reaches a wooden wall chips it (once a swing). */
+/** A melee swing that reaches a wooden wall chips it (once a swing), and mows whatever stands in it. */
 export function sweepBlocks(h: Hero, s: Swing, ev: FightEvent[]): void {
   currentMap().blocks.forEach((b, i) => {
+    // Standing rye and reeds in the swing are cut down for good (Kyle, 2026-11-19: "sword cuts cut down grain or
+    // high fields"). They were only ever soft cover, so nothing else changes: you can see what was in them.
+    if (b.kind === 'reeds' && !b.ruined) {
+      const [rx, ry] = nearest(b, h.x, h.y);
+      if (inArc(h.x, h.y, h.fx, h.fy, rx, ry, s.range, s.arc, 0.05)) (b.ruined = true), ev.push({ k: 'mow', x: b.x + b.w / 2, y: b.y + b.h / 2 });
+      return;
+    }
     if (!wood(b) || h.hitIds.includes(-10000 - i)) return;
     const [nx, ny] = nearest(b, h.x, h.y);
     if (!inArc(h.x, h.y, h.fx, h.fy, nx, ny, s.range, s.arc, 0.05)) return;

@@ -29,9 +29,10 @@ export function pose(h: Hero, now: number): Pose {
   // charges and blocks still point where they're aimed.
   const fw = side > 0 ? 0 : Math.PI;
   const rest: Partial<Record<Hero['weapon'], number>> = {
-    sword: fw + side * 1.1, greatsword: -Math.PI / 2 - side * 0.7, spear: -Math.PI / 2 + side * 0.3, daggers: fw + side * 1.4,
+    // (A sword, a spellblade and a mace are carried up, against the shoulder, not down at the side: Kyle, 2026-11-19.)
+    sword: -Math.PI / 2 - side * 0.42, greatsword: -Math.PI / 2 - side * 0.7, spear: -Math.PI / 2 + side * 0.3, daggers: fw + side * 1.4,
     longbow: fw + side * 1.2, shortbow: fw + side * 1.1, crossbow: fw + side * 0.9, wand: fw + side * 1.1, staff: -Math.PI / 2 + side * 0.25,
-    spellblade: fw + side * 1.1, mace: fw + side * 1.2,
+    spellblade: -Math.PI / 2 - side * 0.42, mace: -Math.PI / 2 - side * 0.5,
   };
   // The long cut: the blade low behind in the stance, drawn through on the slash, going away at the hip (cutdraw.ts).
   if (h.act === 'cut') return cutPose(h.actT, fa, side);

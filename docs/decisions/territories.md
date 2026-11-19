@@ -592,3 +592,28 @@ Carried straight on from slice 2 at Kyle's "continue".
 - Not done from slice 3: an oak and an alder. A flat-view apple tree is still a plain disc with a cap; it
   wants the same three-lump crown the 2.5D one has.
 - Signed: Claude Fable 5.2.
+
+## 2026-11-19: weapons carried up, and a swing mows rye and reeds
+
+Kyle: "I wonder if we could do things like sword cuts cut down grain or high fields and trees can be knocked
+down by bigger units like warrior and cleric. Also I'd prefer swords and mace to be held UP against the
+shoulder not down to the side."
+
+- **The carry** (`client/held.ts` `pose`, the Art chat's file, three numbers): a sword, a spellblade and a mace
+  rest up and a little back over the shoulder (`-PI/2 - 0.42 side`, the mace `0.5`), as the greatsword always
+  did. They were carried forward and down at the side. Blocking with a sword uses the same rest. Both views,
+  since both draw heroes with this painter.
+- **Mowing** (`sim/buildings.ts` `sweepBlocks`): any melee swing cuts down the standing rye and reeds in its arc
+  (`reeds` blocks: Lowfurrow's rye strips, Fenmere's reed beds) for good, with a `mow` event. They were only
+  ever soft cover, so nothing else in the fight changes: you can see what was hiding in them. A block's
+  `ruined` is already sent to friends, and the 2.5D view keeps one mesh a block, so a cut redraws that block
+  alone. Drawn as stubble with the cut stems lying on it (`client/fenpieces.ts`), cut ends flying
+  (`client/fx.ts`). A cut block is kept out of the burnt-ruin drawing (`three/walls3d.ts`) and out of the
+  ember light every ruined block gets (`client/scene.ts`, `three/roomlights.ts`). Not cut: the reed clumps
+  that are rounds (Sallow Carr's, pond edges), which are not sent to friends, and nothing a shot or a spell
+  does.
+- **Trees knocked down: not built.** A tree is a round, and rounds are not sent to friends, so a tree that
+  falls is a new thing to sync and a real rule (what fells it, where it falls, what it does lying there). Put
+  to Kyle as a short proposal in the reply.
+- Tests: `tests/mow.test.ts` (1). Whole suite: 264 files pass. Seen in both views.
+- Signed: Claude Fable 5.2.

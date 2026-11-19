@@ -32,7 +32,8 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
   for (const b of map.blocks) {
     const mx = b.x + b.w / 2, mz = b.y + b.h / 2;
     if (((b.burning ?? -1) >= 0 || b.smoulder || b.fate === 'burning') && !b.ruined) add(mx, 2.4, mz + 0.6, R(70 + b.w * 10), 1.2, [1, 0.55, 0.25], 13);
-    if (b.ruined) add(mx, 0.8, mz, R(22 + b.w * 3), 0.35, [1, 0.35, 0.15], 7);
+    // (Not cut rye or reeds: they are mown, not burnt.)
+    if (b.ruined && b.kind !== 'reeds') add(mx, 0.8, mz, R(22 + b.w * 3), 0.35, [1, 0.35, 0.15], 7);
   }
   // A house on fire inside: each patch alight (shared/blaze.ts).
   if (map.blaze) for (const a of burningAt(map.blaze, room.time)) add(a.x + a.w / 2, 0.9, a.y + a.h / 2, R(50), 0.9, [1, 0.55, 0.25], 11);

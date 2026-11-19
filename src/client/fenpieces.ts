@@ -11,8 +11,18 @@ import type { Bx } from './pieces';
 export const FEN_KINDS = new Set<Block['kind']>(['boards', 'reeds']);
 const PLANK = 0x6a5034, PLANK2 = 0x584228, PILE = 0x2e2016, STEMS = [0x6a7a42, 0x7a8448, 0x5a6a3a, 0x8a8a52], HEAD = 0x5a4026, RYE = [0x8a7a3a, 0x96843e, 0x7c6c34], EAR = 0xb09c56;
 
-export function fenBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look'>, r: () => number): Bx[] {
+export function fenBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined'>, r: () => number): Bx[] {
   const w = b.w, d = b.h, out: Bx[] = [];
+  // Cut down (sim/buildings.ts `sweepBlocks`): a stubble of short stems where it stood, and what was cut lying on it.
+  if (b.kind === 'reeds' && b.ruined) {
+    const rye = (b.look ?? 0) >= 1000, stems = rye ? RYE : STEMS;
+    for (let i = 0, n = Math.max(5, Math.round(w * d * 6)); i < n; i++) out.push([0.1 + r() * (w - 0.2), -0.05, 0.1 + r() * (d - 0.2), 0.04, 0.12 + r() * 0.08, 0.04, stems[Math.floor(r() * stems.length)]]);
+    for (let i = 0, n = Math.max(2, Math.round(w * d * 2.5)); i < n; i++) {
+      const along = r() < 0.5, len = 0.35 + r() * 0.3;
+      out.push([0.2 + r() * (w - 0.4), 0, 0.2 + r() * (d - 0.4), along ? len : 0.05, 0.04, along ? 0.05 : len, rye ? EAR : stems[0]]);
+    }
+    return out;
+  }
   if (b.kind === 'boards') {
     const along = w >= d, len = along ? w : d, span = along ? d : w, at = (u: number, v: number): [number, number] => (along ? [u, v] : [v, u]);
     // Piles down into the water at each end and every couple of tiles along both edges.

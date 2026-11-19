@@ -30,7 +30,7 @@ export function flatBlock(b: Block, group: THREE.Group, fires: [number, number, 
   if (b.kind === 'gate') {
     // An instance's gate, shut or hauled up (open is `ruined`, so it comes before the ruin).
     gate3d(B, b);
-  } else if (b.ruined && b.kind !== 'jetty') {
+  } else if (b.ruined && b.kind !== 'jetty' && b.kind !== 'reeds') {
     for (let i = 0; i < Math.max(3, b.w * b.h); i++) B.c(x0 + r.next() * b.w, 0.05, z0 + r.next() * b.h, 0.3, 0.1, 0.12, 0x141012, r.next() * 3);
     for (let i = 0; i < 3; i++) fires.push([x0 + r.next() * b.w, 0.06, z0 + r.next() * b.h, 0.25]);
   } else if (b.kind === 'fence') {

@@ -671,7 +671,7 @@ export class Scene {
       const [bx, by0] = blockAt(b), by = by0 - lv(b.x + b.w / 2, b.y + b.h / 2), mx = bx + (b.w * PX) / 2 - cx;
       // A building on fire lights the whole street; its ashes smoulder.
       if (((b.burning ?? -1) >= 0 || b.smoulder) && !b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy - 10, r: 70 + b.w * 10 + Math.sin(now * 13 + bx) * 6, i: 1.2, c: [1, 0.55, 0.25] });
-      if (b.ruined) lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy, r: 22 + b.w * 3, i: 0.35, c: [1, 0.35, 0.15] });
+      if (b.ruined && b.kind !== 'reeds') lights.push({ x: mx, y: by + (b.h * PX) / 2 - cy, r: 22 + b.w * 3, i: 0.35, c: [1, 0.35, 0.15] });
       // Someone lighting its kindling: a small warm glow growing at the pile.
       const kk = b.lighter && b.lightT ? kindling(b, map) : null;
       if (kk) lights.push({ x: OX + kk.x * PX - cx, y: OY + kk.y * PX - cy - 4, r: 30 + (b.lightT ?? 0) * 14, i: 0.5 + (b.lightT ?? 0) * 0.25, c: [1, 0.6, 0.3] });
