@@ -5,10 +5,11 @@
  * torches and braziers (their flames and light by the hour: lamps3d.ts). Static boxes are merged into one mesh.
  */
 import { scatterOf } from '../../shared/scatter';
+import { felledCount, syncFelled } from '../felled';
 import { LANTERN_Y } from '../daispieces';
 import * as THREE from 'three';
 import { trackMouths3d } from './tracks3d';
-import type { GameMap } from '../../shared/arena';
+import type { GameMap, Round } from '../../shared/arena';
 import { torchIn } from '../daytime';
 import type { Fx } from '../fx';
 import { OX, OY, PX } from '../world';
@@ -39,7 +40,7 @@ import { soilOver } from './layoutsoil';
 export const WALL_H = 2.4;
 export const LEDGE_H = 0.75;
 
-export interface Ground { group: THREE.Group; fires: Spot[]; lights: L3[]; lamps: Lamp3[]; decals(fx: Fx): void; wet(w: Wet, now: number): void; dispose(): void }
+export interface Ground { group: THREE.Group; fires: Spot[]; lights: L3[]; lamps: Lamp3[]; decals(fx: Fx): void; wet(w: Wet, now: number): void; /** Rebuild the trees if one has been felled since (sim/felling.ts). */ trees(): void; dispose(): void }
 
 const BODY: Record<GameMap['theme']['back'], number> = { stone: 0x2a2733, palisade: 0x2e2016, trees: 0x10160e, rockface: 0x26242c, plaster: 0x2a2018 };
 
@@ -49,6 +50,9 @@ function texture(c: HTMLCanvasElement): THREE.CanvasTexture {
   t.generateMipmaps = false;
   return t;
 }
+
+/** A tree or what is left of one: these can change in a fight (felling), so they are built apart. */
+const woody = (o: Round) => o.kind === 'tree' || o.kind === 'deadtree' || o.kind === 'apple' || o.kind === 'stump';
 
 export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   const group = new THREE.Group(), B = new Boxes(), r = new Seed(m.w * 7 + m.h), fires: Spot[] = [], lights: L3[] = [], lamps: Lamp3[] = [];
@@ -150,7 +154,25 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // The tended lamps (torches, braziers, lamp posts) give flames and light only while lit (lamps3d.ts).
   const wf = waterField(m);
   // (With a job's standing scatter: stumps, snags, reed beds, paint only: shared/scatter.ts.)
+  // The map's own trees and stumps stand in a mesh of their own, so that when one is felled (sim/felling.ts) they
+  // alone are rebuilt, not the whole ground. (Not the new look's town, whose trees are the kit's.)
+  const own = new Set(STREET && m.name === 'WICKHOLD' ? [] : m.rounds.filter(woody));
+  let wood: THREE.Mesh | null = null, felled = -1;
+  const trees = () => {
+    syncFelled(m);
+    if (felled === (felled = felledCount(m))) return;
+    if (wood) group.remove(wood), wood.geometry.dispose();
+    const T = new Boxes(), none: Spot[] = [];
+    for (const o of own) {
+      if (levelAt(wf, o.x, o.y) === DEEP) T.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
+      const k = T.mark(), up = stacked(m) ? groundLv(m, o.x, o.y) * LEDGE_H : 0;
+      addRound(T, o, none, new Seed(Math.round(o.x * 31 + o.y * 17)));
+      if (up) T.raise(k, up);
+    }
+    if ((wood = T.mesh(VCOL))) group.add(wood);
+  };
   for (const o of [...m.rounds, ...scatterOf(m).stand]) {
+    if (own.has(o)) continue;
     const n = fires.length;
     // A reed or a stump standing in deep water: its foot goes down to the water.
     if (levelAt(wf, o.x, o.y) === DEEP) B.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
@@ -201,6 +223,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   }
   const statics = B.mesh(VCOL);
   if (statics) group.add(statics);
+  trees();
   // Blood spilled since the last frame goes into the floor's painting.
   const done = new WeakSet<object>();
   let dirty = 0;
@@ -221,5 +244,5 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   });
   // (Each frame: the living world's clock and whether it's on here, wind3d.ts.)
   const wet = (w: Wet, now: number) => (lifeFrame(m, now, !!water), water?.update(w, now));
-  return { group, fires, lights, lamps, decals, wet, dispose: () => (dispose(), water?.dispose(), statics?.geometry.dispose(), floorTex.dispose(), floorMat.dispose(), wallMat.map?.dispose(), wallMat.dispose()) };
+  return { group, fires, lights, lamps, decals, wet, trees, dispose: () => (dispose(), water?.dispose(), statics?.geometry.dispose(), floorTex.dispose(), floorMat.dispose(), wallMat.map?.dispose(), wallMat.dispose()) };
 }

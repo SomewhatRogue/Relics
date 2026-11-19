@@ -207,6 +207,8 @@ export class View3D {
   render(room: ArenaRoom, meId: string, fx: Fx, now: number, dt: number, marks: Marks, others: Hero[] = [], _job = true): void {
     const t0 = performance.now(), map = room.map, a = room.alpha;
     if (this.map !== map) this.setMap(map);
+    // (A tree felled since last frame: its mesh alone is rebuilt. ground.ts.)
+    this.ground?.trees();
     const lerp: Lerp = (key, x, y) => {
       const p = room.prev.get(key);
       return p ? [p[0] + (x - p[0]) * a, p[1] + (y - p[1]) * a] : [x, y];

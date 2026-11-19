@@ -49,6 +49,8 @@ export class Buildings {
     if (STREET) streetAround(map.blocks, map.w, map.h);
     map.blocks.forEach((blk, i) => {
       if (blk.kind === 'sideway') return;
+      // (A felled trunk still in the air has no body yet: extras3d.ts draws its fall. sim/felling.ts.)
+      if (blk.lands !== undefined) return;
       const key = `${blk.kind}:${blk.x}:${blk.y}:${blk.w}:${blk.h}:${blk.door ?? ''}:${blk.locked ? 1 : 0}:${blockState(blk)}:${blk.deck ? 1 : 0}:${blk.shut ?? ''}`;
       let e = this.built.get(i);
       if (!e || e.key !== key) {

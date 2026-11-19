@@ -991,6 +991,7 @@ export type FightEvent =
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam' | 'boltline'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }
+  | { k: 'timber'; x: number; y: number; way: number; wood: number; r: number }
   | { k: 'mow' | 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'
       /** Techniques firing (shared/techniques.ts): SLAM's bursts, SHOULDER CHARGE ready and landing, IRON FEET,
        *  KNIFEWORK's bleed, SLIP AWAY, CUTPURSE, QUICK NOCK, STEADY, MENDING HANDS, SANCTUARY STEP, JUDGEMENT. */

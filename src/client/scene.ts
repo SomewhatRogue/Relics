@@ -24,6 +24,7 @@ import { tapEl, tapGlow } from './magetap';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
 import { dogDraw, farmDog } from './farmdog';
+import { drawFalling, syncFelled } from './felled';
 import { drawHound, drawSnare } from './hound';
 import { companion, houndAt, lodgeHoundAt } from './idlehound';
 import { LODGE_HOUND, MAEVE_HOUND, isLodgeMap } from './petting';
@@ -256,6 +257,8 @@ export class Scene {
       this.cam.ready = true;
     }
     const map = room.map;
+    // (A friend's map learns of a felled tree from its trunk: felled.ts.)
+    syncFelled(map);
     // How far up anything standing at a point is drawn: on the new town's raised levels (levelpaint.ts), else 0.
     const lv = lifter(map);
     // A land's raised areas (elevation.md): its levels are its ground (no roofs), and a body that leaves one hops (three/hop.ts).
@@ -597,6 +600,11 @@ export class Scene {
     if (punt) items.push({ y: OY + punt.y * PX - 4, draw: () => drawPunt(c.lit, OX + punt.x * PX - cx, OY + punt.y * PX - cy, PX, punt.full, now) });
     items.sort((p, q) => p.y - q.y);
     for (const it of items) it.draw();
+    // A felled tree going over, from its stump (felled.ts; sim/felling.ts): on top of what stands round it.
+    for (const b of map.blocks) {
+      const t = b.lands === undefined ? undefined : map.rounds[b.stump ?? -1];
+      if (t) drawFalling(c, b, map, OX + t.x * PX - cx, OY + t.y * PX - cy - lv(t.x, t.y));
+    }
     // What you can tell of each way at a fork (waycues.ts), over everything near its gap.
     for (const r of map.roads ?? []) if (r.way) {
       const q = cueAt(r, map);

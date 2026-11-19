@@ -134,6 +134,9 @@ export interface Block {
   pulled?: number;
   /** A hauled gate (`Stretch.haul`): how far open it has come, 0 to 1. */
   open?: number;
+  /** A felled tree's trunk (sim/felling.ts): the room time it lands (in the air till then), and the round that was the tree. */
+  lands?: number;
+  stump?: number;
   pullT?: number;
   /**
    * Boards you stand on over water (the Staithe's jetty, a log laid across a gap): never collided with,

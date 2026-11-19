@@ -617,3 +617,30 @@ shoulder not down to the side."
   to Kyle as a short proposal in the reply.
 - Tests: `tests/mow.test.ts` (1). Whole suite: 264 files pass. Seen in both views.
 - Signed: Claude Fable 5.2.
+
+## 2026-11-19: trees knocked down
+
+Kyle agreed the rule: "heavy is the right trigger. Falling tree should hurt everything. Felled trunks SHOULD
+burn! nice." Written up as `docs/design/felling.md`.
+
+- **The rule** (`sim/felling.ts`, new; `FELL` in `tuning.ts`; called from `room.ts` beside the building sweep and
+  step): a Warrior's or Cleric's charged heavy swing fells a tree, dead tree or apple tree of radius 0.72 or
+  less, away from the blow along the nearer of four ways. 0.65 seconds in the air, then it lands on everything
+  under it (goblins 40, heroes 22, thrown out sideways; a roll gets clear), and lies there as a `log` block:
+  solid, wooden, 90 health, burns. The round becomes a stump.
+- **Sent to friends as a block** (`Block.lands`, `Block.stump`; `falls` was taken by the hanging-fire rule).
+  `client/felled.ts` makes a friend's tree a stump when its trunk arrives, and draws the red mark and the tree
+  going over from the block alone, by the room's clock, so every screen shows the same fall.
+- **Drawn** (`client/pieces.ts`, the `log` piece with `look` 10 and up): the trunk, its pale cut end toward the
+  stump, broken limbs, the crown crushed at the far end in the tree's green (a willow's grey, none on a dead
+  tree, fruit on an apple). Flat: `blocks.ts`, `scene.ts`. 2.5D: `three/extras3d.ts` for the fall, and
+  `three/ground.ts` now builds the map's trees and stumps in a mesh of their own (`Ground.trees()`, called each
+  frame from `view3d.ts`) so one tree going over rebuilds the trees and not the ground. `buildings3d.ts` gives a
+  trunk no body while it is in the air.
+- Seen in both views in Tollan's orchard: the mark, the tree going over (the room frozen two thirds through to
+  photograph it, since a headless browser steps too coarsely to catch it), the trunk and stump after.
+- Not built, and in the doc: a trunk as a bridge over deep water, brutes felling, sound, goblins minding it.
+- Tests: `tests/felling.test.ts` (4: which trees, which way and the trunk in the air, the landing on a goblin and
+  a hero and the trunk as burning cover after, a Warrior's heavy against a quick cut and a bow). Whole suite: 265
+  files pass.
+- Signed: Claude Fable 5.2.

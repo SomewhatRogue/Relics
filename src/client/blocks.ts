@@ -17,6 +17,7 @@ import { furnish, mouth, type Look } from './furnish';
 import { LOOK } from './blocklook';
 import { drawText, textWidth } from './pixfont';
 import { SPRITES } from './sprites';
+import { drawFallMark } from './felled';
 import { floraLook } from './flora';
 import { floraSprite } from './florasprites';
 import { drawLife } from './streetlife';
@@ -141,6 +142,9 @@ function door(b: Block, rect: Rect, w: number, wallY: number, l: Look): void {
 
 /** (x, y) is the block's top-left on screen (the footprint's corner). */
 export function drawBlock(c: Ctx, b: Block, x: number, y: number, lit: boolean): void {
+  // A felled tree's trunk still in the air (sim/felling.ts): only the mark where it will lie (the tree going over is
+  // drawn by scene.ts, on top).
+  if (b.lands !== undefined) return void drawFallMark(c.glow, [[x, y], [x + b.w * PX, y], [x + b.w * PX, y + b.h * PX], [x, y + b.h * PX]]);
   // An instance's gate, shut or hauled up (gatedraw.ts).
   if (b.kind === 'gate') return drawGate(c, b, x, y);
   // The square's job board and Public Works sign (postdraw.ts).

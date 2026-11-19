@@ -17,6 +17,7 @@ import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
 import { skewer, stepVenom } from './venom';
 import { stepBuildings, sweepBlocks } from './buildings';
+import { stepFelling, sweepTrees } from './felling';
 import { rouse } from './backline';
 import { newEnemy, stepEnemy } from './enemies';
 import { stepBlasts } from './blast';
@@ -388,7 +389,7 @@ export class ArenaRoom {
       fire: (h) => this.fire(h, w),
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),
-      sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepAllies(h, s, this.heroes, this.events), sweepSurvivors(h, s, w)),
+      sweep: (h, s) => (sweepProps(h, s, w), sweepBlocks(h, s, this.events), sweepTrees(h, s, this.time, this.events), sweepAllies(h, s, this.heroes, this.events), sweepSurvivors(h, s, w)),
       grab: (h) => startRaise(h, this.heroes, this.events) || startRise(h, this.heroes, this.zones, this.time, this.events) || talkMini(this, h, this.events) || startTorch(h, this.enemies, this.events) || startKindle(h, this.map, this.events) || this.staitheGrab(h, w) || tryGrab(h, this.enemies, this.time, this.events) || tryLift(h, this.props, this.events),
       carry: (h, inp, walk) => (h.lifting ? stepLift(h, inp, w, TICK, walk) : stepCarry(h, inp, this.enemies, this.time, TICK, this.events, walk)),
       drop: (h) => (release(h, this.enemies, this.events), dropProp(h, this.props)),
@@ -476,6 +477,7 @@ export class ArenaRoom {
     propImpacts(w);
     this.props = w.props = stepProps(w, TICK);
     stepBuildings(w, TICK, (x, y) => void this.spawn('scrapper', x, y), (x, y) => this.nearHero(x, y));
+    stepFelling(this.map, this.time, this.enemies, this.heroes, this.events);
     // Nests hatch their waves; the brood mother's globs leave puddles; poison ticks (sim/spiders.ts, puddles.ts, poison.ts).
     // A nest set alight up close burns out (sim/torch.ts), and hatches nothing while it burns.
     stepTorch(this.enemies, this.heroes, this.time, TICK, this.events);

@@ -66,6 +66,23 @@ function rawBlockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | '
     out.push([cx, 3.05, cz, 0.08, 0.42, 0.08, IRON], [cx + 0.42, 0.15, cz, 0.04, 3.25, 0.04, ROPE], [cx, 0, cz, w * 0.6, 0.05, d * 0.6, 0x14100c]);
     return out;
   }
+  if (b.kind === 'log' && (b.look ?? 0) >= 10) {
+    // A tree just felled (sim/felling.ts; `look` packed as felled.ts `trunkLook` reads it): the trunk on its side, its
+    // cut end pale toward the stump, a few limbs broken off along it, and its crown crushed on the ground at the
+    // far end, in the tree's own green (a willow's grey, a dead tree's none, an apple's with its fruit).
+    const v = b.look! - 10, far = (v & 1) === 1, kind = (v >> 1) & 3, along = w >= d, len = along ? w : d;
+    const at = (u: number): [number, number] => { const q = far ? len - u : u; return along ? [q, cz] : [cx, q]; };
+    for (let u = 0.25; u < len - 0.9; u += 0.5) { const [x, z] = at(u); out.push([x, 0, z, along ? 0.52 : 0.4, 0.42, along ? 0.4 : 0.52, r() < 0.5 ? BARK : 0x3e3022]); }
+    const [ex, ez] = at(0.06);
+    out.push([ex, 0.04, ez, along ? 0.08 : 0.34, 0.34, along ? 0.34 : 0.08, 0x8a6a40]);
+    for (let i = 0; i < 3; i++) { const [x, z] = at(len * (0.3 + i * 0.16)); out.push([x + (along ? 0 : (i % 2 ? 0.3 : -0.3)), 0.2, z + (along ? (i % 2 ? 0.3 : -0.3) : 0), 0.1, 0.34, 0.1, BARK]); }
+    if (kind !== 2) {
+      const leaf = kind === 1 ? [0x34493a, 0x4a6450, 0x567260] : [0x26391f, 0x2f4a28, 0x3a5a30];
+      for (let i = 0; i < 4; i++) { const [x, z] = at(len - 0.5 - i * 0.42); out.push([x + (along ? 0 : (r() - 0.5) * 0.5), 0, z + (along ? (r() - 0.5) * 0.5 : 0), 0.95 - i * 0.12, 0.55 - i * 0.06, 0.9 - i * 0.1, leaf[i % 3], 'lump']); }
+      if (kind === 3) for (let i = 0; i < 4; i++) { const [x, z] = at(len - 0.3 - r() * 1.2); out.push([x + (r() - 0.5) * 0.7, 0.05, z + (r() - 0.5) * 0.7 + 0.4, 0.12, 0.12, 0.12, 0x9a2a1a]); }
+    }
+    return out;
+  }
   if (b.kind === 'log') {
     // A trunk on its side, its cut end pale, a few broken branches, the root plate torn up at the other end.
     const along = w >= d, len = along ? w : d, k = (u: number): [number, number] => (along ? [u, cz] : [cx, u]);

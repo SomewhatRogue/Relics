@@ -312,6 +312,13 @@ export const WOOD_EASE = { windup: 1.5, dmg: 0.7, stoker: 1.25, heal: true, mend
 // (`climb`: seconds a Rogue walks into an earth face before going up it: sim/climb.ts. `reach`: tiles a shot gains
 // for each level it looks down from a lip, and loses for each level it is loosed up; `edge`: how near the lip the
 // one shooting must stand for the gain; `least`: a goblin archer's reach is never cut below this: sim/highrange.ts.)
+/**
+ * Felling a tree (sim/felling.ts): the biggest radius that goes over; seconds from the blow to the ground; a
+ * trunk's length (`long` and `grow` times its radius) and width; what it does to a goblin and to a hero under
+ * it and how hard it throws them; the trunk's health as a wooden block.
+ */
+export const FELL = { r: 0.72, fall: 0.65, long: 2.4, grow: 2.2, wide: 0.6, dmg: 40, hero: 22, knock: 5, hp: 90 };
+
 export const HEIGHT = { shot: 1.25, fallSpeed: 3, fallDmg: 12, fallStun: 0.8, climb: 0.4, reach: 1.5, edge: 2.5, least: 3 };
 
 export const SWING_DUMMY = {
