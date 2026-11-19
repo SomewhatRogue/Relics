@@ -38,7 +38,9 @@ export class CheckNotes {
     const there = !!h && !!e && open && h.act !== 'down' && inArea(e, h.x, h.y) && !together;
     if (there && !this.there && e) {
       const up = players(room.heroes).filter((x) => x.act !== 'down');
-      say = CHECK_WORDS.waiting(up.filter((x) => inArea(e, x.x, x.y)).length, up.length);
+      // (Not when everyone is already there: a hauled gate takes a moment to come open, and nobody is waited for.)
+      const here = up.filter((x) => inArea(e, x.x, x.y)).length;
+      if (here < up.length) say = CHECK_WORDS.waiting(here, up.length);
     }
     this.there = there;
     // At a fork, stepping onto a way: who's on it (sim/fork.ts).

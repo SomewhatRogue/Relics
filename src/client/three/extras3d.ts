@@ -5,6 +5,7 @@
  * drummer's reach and its beat, marks at the edge toward the freed who've fallen behind, the relic
  * held up in the wood, and dawn's mist.
  */
+import { drawHaulBar } from '../gatedraw';
 import type { Theme } from '../../shared/arena';
 import { DRUMMER } from '../../shared/backline';
 import type { ArenaRoom } from '../../sim/room';
@@ -55,6 +56,8 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   // A house's kindling: the glint while you're near, the ring while someone lights it (kindledraw.ts).
   const meH = room.heroes.find((h) => h.id === x.meId);
   for (const b of room.map.blocks) {
+    // A two-leaf door being hauled (sim/stretches.ts): how far it has come, over its lintel.
+    if (b.kind === 'gate' && b.open && !b.ruined) { const [gx, gy] = P(b.x + b.w / 2, 1.7, b.y + b.h / 2); drawHaulBar(c, b, gx, gy); }
     if (houseAlight(b)) {
       const [hx, hy] = P(b.x + b.w / 2, 2.3, b.y + b.h / 2);
       drawHouseSmoke(c, hx, hy, 1 - (b.hp ?? 0) / (b.maxHp || 1), b.x);

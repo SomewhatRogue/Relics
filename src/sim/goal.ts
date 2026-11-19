@@ -22,7 +22,7 @@ import { HELD_HINT, pickWay, type WayKind } from '../shared/ways';
 import { STAITHE_WORDS } from '../shared/staithewords';
 import { BRAKE_WORDS, DROVER_WORDS, FORK_WORDS, GATE_WORDS, LAMP_WORDS, PAIR_WORDS, PUZZLE_WORDS } from '../shared/opencutwords';
 import { forkOf } from './fork';
-import { keepers, lastStretch, stretchOf } from './stretches';
+import { densOf, keepers, lastStretch, stretchOf } from './stretches';
 import { staitheGoal } from './staithegoal';
 import { miniLine } from './minis';
 import { LAND_WORDS } from '../shared/landwords';
@@ -103,6 +103,9 @@ function mainGoal(run: Run, room: ArenaRoom, houses: Captives): { text: string; 
   if (st) {
     const keep = keepers(st, room), last = lastStretch(run, room.map);
     if (keep.length) return { text: also(keep.some((e) => e.name) ? killWords(keep.filter((e) => e.name), room) : run.job.land ? LAND_WORDS.guards : GATE_WORDS.guards), done: false };
+    // Its dens to burn first (a territory's: `Stretch.dens`), in the burn job's own words.
+    const dens = densOf(st, room.map).length;
+    if (dens) return { text: also(`Burn out the dens (${dens} ${dens === 1 ? 'hut' : 'huts'} left)`), done: false };
     // A puzzle keeping it (sim/tubs.ts).
     if (unsolved(room.map, room.props, st.puzzle)) return { text: also(PUZZLE_WORDS.goal), done: false };
     // A fork yard: the party votes by standing on a way (sim/fork.ts).

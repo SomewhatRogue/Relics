@@ -51,6 +51,9 @@ export function yardPlan(job: Job): TerrPlan {
     water: k.water, soil: k.soil, marks: k.marks, ledges: land.ledges, stretches: land.stretches,
     // The yard is raised: whatever is set down there stands on the terrace.
     settle: true,
+    // The dog, ahead on the quiet way up: by the paddock gate, the foot of the corner steps, its place by the yard
+    // wall, and home at the farmhouse door.
+    dog: { posts: [[44.4, 91.6], [87, 63.6], [DOG_YARD.x, DOG_YARD.y], [KITCHEN.x - 1.8, KITCHEN.y + 1.2]] },
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: YARD_ZONES.map((z) => ({ ...z })) };
 }

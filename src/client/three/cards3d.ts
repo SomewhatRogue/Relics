@@ -24,6 +24,7 @@ import { HUNG3 } from './rack3d';
 import { ARENA } from '../../shared/arena';
 import { RACK } from '../../shared/practice';
 import { waiting } from '../../sim/practice';
+import { dogDraw, farmDog } from '../farmdog';
 import { drawHound } from '../hound';
 import { companion, houndAt, lodgeHoundAt } from '../idlehound';
 import { LODGE_HOUND, MAEVE_HOUND, isLodgeMap } from '../petting';
@@ -93,6 +94,9 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   }
   // Maeve's hound running in with her note for a new Ranger, this player's or another's (../runnerecho.ts, the town quests chat).
   runnerHounds().forEach((rh, i) => f.put('runhound' + i, rh.x, bodyLv(map, rh.x, rh.y, levelAt(map, rh.x, rh.y)) * LEDGE_H, rh.y, (c, px, py) => drawHound(c, rh.d, px, py, { mood: rh.moving ? { moving: true, gait: 'run' } : { sit: true, wag: true }, look: MAEVE_HOUND }), { pool: 0.28 }));
+  // Tollan's farm dog (../farmdog.ts): paint only, on its map's posts.
+  const fd = farmDog(map, room.heroes, room.enemies.some((e) => !!e.name && e.act !== 'dead'), f.now);
+  if (fd) f.put('farmdog', fd.x, bodyLv(map, fd.x, fd.y, levelAt(map, fd.x, fd.y)) * LEDGE_H + fd.up, fd.y, (c, px, py) => drawHound(c, fd.d, px, py, dogDraw(fd)), { pool: 0.28 });
   // Maeve's hound by the lodge's fire.
   if (isLodgeMap(map)) {
     const a = lodgeHoundAt(others.length ? [...room.heroes, ...others] : room.heroes, f.now);

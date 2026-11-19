@@ -23,6 +23,7 @@ import { lightsHolder } from './heldkits';
 import { tapEl, tapGlow } from './magetap';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
+import { dogDraw, farmDog } from './farmdog';
 import { drawHound, drawSnare } from './hound';
 import { companion, houndAt, lodgeHoundAt } from './idlehound';
 import { LODGE_HOUND, MAEVE_HOUND, isLodgeMap } from './petting';
@@ -355,6 +356,9 @@ export class Scene {
     // Maeve's hound running in with her note for a new Ranger (runner.ts).
     // (At the level it's on, on the new town's raised levels.)
     for (const rh of runnerHounds()) items.push({ y: OY + rh.y * PX, draw: () => drawHound(c, rh.d, OX + rh.x * PX - cx, OY + rh.y * PX - cy - lv(rh.x, rh.y), { mood: rh.moving ? { moving: true, gait: 'run' } : { sit: true, wag: true }, look: MAEVE_HOUND }) });
+    // Tollan's farm dog (farmdog.ts): paint only, on its map's posts.
+    const fd = farmDog(map, room.heroes, room.enemies.some((e) => !!e.name && e.act !== 'dead'), c.now);
+    if (fd) items.push({ y: OY + fd.y * PX, draw: () => drawHound(c, fd.d, OX + fd.x * PX - cx, OY + fd.y * PX - cy - lv(fd.x, fd.y) - Math.round(fd.up * PX), dogDraw(fd)) });
     // Maeve's hound by the lodge's fire.
     if (isLodgeMap(map)) {
       const a = lodgeHoundAt(others.length ? [...room.heroes, ...others] : room.heroes, now);

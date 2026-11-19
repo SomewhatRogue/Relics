@@ -18,6 +18,7 @@ export function drawGate(c: Ctx, b: Block, x: number, y: number): void {
   // Posts and lintel.
   rect(0, 0, 4, H, '#3a2a1a'), rect(w - 4, 0, 4, H, '#3a2a1a'), rect(0, 0, w, 4, '#4a3420'), rect(0, 4, w, 1, '#1e1610');
   rect(1, 1, 1, H - 2, '#5a4430'), rect(w - 3, 1, 1, H - 2, '#5a4430');
+  if (b.look === 2) return void leaves(b, rect, w, H);
   if (b.ruined) {
     // Hauled up: the bottom of it under the lintel.
     for (let rx = 5; rx < w - 5; rx += 4) rect(rx, 5, 3, 3, '#4a3a28');
@@ -31,4 +32,32 @@ export function drawGate(c: Ctx, b: Block, x: number, y: number): void {
     for (let rx = 6; rx < w - 6; rx += 6) rect(rx, ry, 1, 1, '#8a8a94');
   }
   rect(0, H - 1, w, 1, '#120e0a');
+}
+
+type Rect = (rx: number, ry: number, rw: number, rh: number, col: string) => void;
+
+/**
+ * A two-leaf door (`look: 2`: Tollan's barn, the Territories chat): shut, two leaves meeting at a seam; hauled
+ * (`open`, 0 to 1: sim/stretches.ts), they part from the middle with the dark inside showing; open, each stands
+ * back against its post. A bar over the lintel shows how far the haul has come.
+ */
+function leaves(b: Block, rect: Rect, w: number, H: number): void {
+  const k = b.ruined ? 1 : Math.min(1, b.open ?? 0), half = (w - 8) / 2, leaf = Math.max(2, Math.round(half * (1 - k * 0.86)));
+  rect(4, 5, w - 8, H - 6, '#0e0a08');
+  for (const side of [0, 1]) {
+    const x0 = side ? w - 4 - leaf : 4;
+    for (let rx = 0; rx < leaf; rx += 4) rect(x0 + rx, 5, Math.min(3, leaf - rx), H - 6, (rx >> 2) % 2 ? '#4a3a28' : '#56442e');
+    for (const ry of [Math.round(H * 0.32), Math.round(H * 0.72)]) rect(x0, ry, leaf, 2, '#3a3a40');
+    rect(side ? x0 : x0 + leaf - 1, 5, 1, H - 6, '#1e1610');
+  }
+  rect(0, H - 1, w, 1, '#120e0a');
+  if (k > 0 && k < 1) rect(2, -4, w - 4, 3, '#1e1610'), rect(3, -3, Math.round((w - 6) * k), 1, '#e8c070');
+}
+
+/** The haul's bar alone, over a gate at (x, y) on screen (the 2.5D view, whose gate is built once: three/extras3d.ts). */
+export function drawHaulBar(c: Ctx, b: Block, x: number, y: number): void {
+  const k = b.open ?? 0, w = Math.round(b.w * PX), g = c.lit, X = Math.round(x - w / 2), Y = Math.round(y);
+  if (b.ruined || k <= 0 || k >= 1) return;
+  (g.fillStyle = '#1e1610'), g.fillRect(X + 2, Y, w - 4, 3);
+  (g.fillStyle = '#e8c070'), g.fillRect(X + 3, Y + 1, Math.round((w - 6) * k), 1);
 }

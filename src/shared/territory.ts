@@ -13,6 +13,8 @@ import { knollPlan } from './knollmap.js';
 import { fieldsPlan } from './lowfurrowfields.js';
 import { risePlan } from './lowfurrowrise.js';
 import { barnPlan } from './tollanbarn.js';
+import { bedsPlan } from './sallowbeds.js';
+import { holtPlan } from './sallowholt.js';
 import { orchardPlan } from './tollanorchard.js';
 import { yardPlan } from './tollanyard.js';
 
@@ -20,7 +22,8 @@ import { yardPlan } from './tollanyard.js';
  * `lowfurrow`, `tollan`: the quest territories laid so far (docs/design/territories.md). `hill`: the proving hill, a
  * small test map (shared/hillmap.ts). `knoll`: the raised-area test map (shared/knollmap.ts).
  */
-export type LandId = 'lowfurrow' | 'tollan' | 'hill' | 'knoll';
+export type LandId = 'lowfurrow' | 'tollan' | 'sallow' | 'hill' | 'knoll';
+/** (`sallow`, Sallow Carr, joins `LANDS` when both its maps are laid: until then its plans throw.) */
 export const LANDS: LandId[] = ['lowfurrow', 'tollan', 'hill', 'knoll'];
 /** Tuning for every territory. */
 export const TERR = { wake: 15, doze: 19, more: { hp: 0.3, harm: 0.15 }, gate: 3.2 };
@@ -29,10 +32,10 @@ export interface TerrZone { name: string; kind: 'zone' | 'scape'; x: number; y: 
 export interface TerrPlan extends RoomPlan { zones: TerrZone[] }
 
 /** Each territory's maps, in the order they're walked. */
-const PLANS: Record<LandId, ((job: Job) => TerrPlan)[]> = { lowfurrow: [fieldsPlan, risePlan], tollan: [orchardPlan, yardPlan, barnPlan], hill: [hillPlan], knoll: [knollPlan] };
-const NAMES: Record<LandId, string> = { lowfurrow: 'Lowfurrow Fields', tollan: "Tollan's Farm", hill: 'Lowfurrow Fields', knoll: 'Lowfurrow Fields' };
+const PLANS: Record<LandId, ((job: Job) => TerrPlan)[]> = { lowfurrow: [fieldsPlan, risePlan], tollan: [orchardPlan, yardPlan, barnPlan], sallow: [bedsPlan, holtPlan], hill: [hillPlan], knoll: [knollPlan] };
+const NAMES: Record<LandId, string> = { lowfurrow: 'Lowfurrow Fields', tollan: "Tollan's Farm", sallow: 'Sallow Carr', hill: 'Lowfurrow Fields', knoll: 'Lowfurrow Fields' };
 /** What each territory's job is, where it is not bringing people out: Tollan's Farm is the hunt for MAWL, which is in its last map's plan. */
-const WORK: Partial<Record<LandId, Partial<Job>>> = { tollan: { objective: 'hunt', boss: 'MAWL' } };
+const WORK: Partial<Record<LandId, Partial<Job>>> = { tollan: { objective: 'hunt', boss: 'MAWL' }, sallow: { objective: 'burn' } };
 
 /** Whether `s` names a territory with maps (laid or still being laid: the test link opens either). */
 export const knownLand = (s: string): s is LandId => s in PLANS;

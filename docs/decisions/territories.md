@@ -456,3 +456,36 @@ brief, I reviewed with pictures and a played run and changed what did not hold.
   the browser by the room's own rules: orchard gate, paddocks, out; the yard, the doors, the porch; the barn,
   MAWL dead, home.
 - Signed: Claude Fable 5.2.
+
+## 2026-11-18, night: Tollan's dog and the two-leaf doors; Sallow Carr begun
+
+Kyle: "Do it" (the dog and the two-leaf doors, then start Sallow Carr).
+
+- **The dog** (`client/farmdog.ts`; territories.md, "Only here: the dog"). Paint only, as the spec's dog is: it
+  can't be hurt and never fights, so the room never knows it is there and each screen works it out from the
+  heroes every screen has. A map says where it waits (`GameMap.dog.posts`, in order, each with how high it
+  stands: on a wall). It sits watching whoever is nearest and runs on to the next post when they come within
+  6.5 tiles; at its last it stays. Drawn by the hound painter as a collie (`FARM_DOG`), one line in each view
+  (`client/scene.ts`, `three/cards3d.ts`, beside Maeve's runner). On the home ground: on the orchard wall as you
+  come up the lane, on the far wall by the door, ahead in the hurdle lane, at the lane's head. On the yard map:
+  by the paddock gate, the foot of the corner steps (the quiet way up), its place by the yard wall, home at the
+  farmhouse door. In the barn it is not there while MAWL stands (`late`), and is at the doors after.
+  Not done: it is not yet with Tollan in town afterwards, nor gone from the ground for a hero who has done the
+  job (that needs Tollan in town, new cast, and a line in the hero's save: the Town quests chat's ground).
+- **The barn's great doors are hauled** (`Stretch.haul`, `Block.open`; `sim/stretches.ts`, the Instances chat's
+  file, a small edit). With the yard's dead and the party at them, they come open over 4 seconds for one hero
+  and 2.5 times as fast for two or more; step away and they swing back. The gate rule runs once a frame, so the
+  haul goes by the room's clock. `look: 2` on a gate draws two leaves parting from the middle and a bar over
+  the lintel for how far the haul has come (`client/gatedraw.ts`, `three/gate3d.ts`, `three/extras3d.ts`: the
+  Instances chat's small files, edited). `client/checknotes.ts` no longer says "waiting for the rest" when
+  everyone is already there (one line). No new words.
+- **A stretch's dens** (`Stretch.dens`, `stretches.ts` `densOf`, `goal.ts`): a gate does not open while its
+  stretch's dens stand, and the goal says so in the burn job's own line. For Sallow Carr; nothing uses it yet.
+- **Sallow Carr, slice 1, begun.** The frame is in (`territory.ts`: `sallow`, two maps, a burn job; not in
+  `LANDS` yet) and two builders are laying THE OSIER BEDS and THE WILLOW HOLT. Slice 1's cuts from the spec,
+  mine to own: a sluice is a hauled gate with the cut beyond it laid already drained (water that drops when
+  you wind it is the new system the spec asks for, and touches how water is drawn and sent; its own slice);
+  no skimmer and no oil alight on water yet.
+- Tests: `tests/farmdog.test.ts` (7: the dog's rules, its posts on all three maps, the hauled doors). Whole
+  suite: 259 files pass. Played in the browser end to end with the haul.
+- Signed: Claude Fable 5.2.

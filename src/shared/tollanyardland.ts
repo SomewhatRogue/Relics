@@ -21,6 +21,8 @@ export const FLIGHT: Area = { x: 45, y: 58.5, w: 6, h: 3 };
 export const STEPS: Area = { x: 86, y: 58.5, w: 2, h: 3 };
 /** The barn's great doors, shut in the mouth of its wagon porch (the bays either side: tollanyardbarn.ts). */
 export const DOORS: Area = { x: 34, y: 22.2, w: 4, h: 1.4 };
+/** Seconds for one hero to haul the great doors open. */
+export const DOOR_HAUL = 4;
 /** What the places need from the ground. */
 export interface YardLand { ledges: Ledge[]; lv: (x: number, y: number) => number; road: Line; track: Line; stretches: Stretch[] }
 
@@ -85,6 +87,8 @@ export function layLand(k: Kit): YardLand {
   // The doors are the yard's gate; you gather on the cobbles before them and get up again there (behind them is
   // the porch, the way out, and nothing else). The last stretch is the porch itself: nobody in it.
   const s0 = gateIn(k, DOORS, 'THE YARD', [320, 323, 324, 325, 326], undefined, { x: DOORS.x + DOORS.w / 2, y: DOORS.y + DOORS.h + 2 });
+  // (Two leaves, hauled: four seconds for one, quicker for two. `look: 2` draws the leaves: client/gatedraw.ts.)
+  s0.haul = DOOR_HAUL, (k.blocks[s0.gate!].look = 2);
   const s1: Stretch = { name: 'THE BARN', keep: [], packs: [] };
   return { ledges, lv, road: line, track, stretches: [s0, s1] };
 }

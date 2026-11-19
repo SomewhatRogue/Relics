@@ -80,6 +80,8 @@ export function barnPlan(job: Job): TerrPlan {
     torches: [{ x: 5.4, y: 0.2 }, { x: 17.4, y: 0.2 }], braziers: [{ x: 10.4, y: 16.4, r: 0.3 }, { x: 15.6, y: 16.4, r: 0.3 }],
     hero: { x: w / 2, y: h - 1.6 }, exit: { x: w / 2 - 1.5, y: h - 0.7, w: 3, h: 0.7 },
     stretches: [{ name: 'THE BARN', keep: [], packs: [328, 329] }],
+    // The dog never comes in while MAWL stands. After, it is at the doors, to follow you home.
+    dog: { posts: [[w / 2 - 1.4, h - 1.2]], late: true },
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: BARN_ZONES.map((z) => ({ ...z })) };
 }

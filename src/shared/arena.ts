@@ -76,6 +76,10 @@ export interface Stretch {
   /** A puzzle (its index in `map.puzzles`) to solve before the gate opens (shared/puzzle.ts). */
   puzzle?: number;
   gate?: number;
+  /** Dens (their indices in `map.blocks`) to burn or break before the gate opens (Sallow Carr: territories.md). */
+  dens?: number[];
+  /** A gate that is hauled open (two-leaf doors): seconds for one hero at it; more of them are quicker (sim/stretches.ts). */
+  haul?: number;
   at?: { x: number; y: number; w: number; h: number };
   check?: { x: number; y: number };
 }
@@ -126,6 +130,8 @@ export interface Block {
   torched?: number;
   held?: number;
   pulled?: number;
+  /** A hauled gate (`Stretch.haul`): how far open it has come, 0 to 1. */
+  open?: number;
   pullT?: number;
   /**
    * Boards you stand on over water (the Staithe's jetty, a log laid across a gap): never collided with,
@@ -346,6 +352,9 @@ export interface GameMap {
   ledges?: Ledge[];
   /** People on the land with a job of their own (shared/miniquest.ts; sim/minis.ts). */
   minis?: import('./miniquest.js').Mini[];
+  /** Tollan's farm dog (client/farmdog.ts), paint only: where it waits, in order (x, y, how high it stands there,
+   *  in tiles: on a wall); `late`: not till nobody named is left standing. */
+  dog?: { posts: [number, number, number?][]; late?: boolean };
   /** Anyone set down well inside a raised level stands on it (the new town, where most of it is raised); without it
    *  they're pushed out to its edge, as on a job's map. */
   settle?: boolean;
