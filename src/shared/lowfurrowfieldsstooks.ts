@@ -42,6 +42,8 @@ export function stooks(k: Kit, land: FieldsLand): void {
   const { cart, cart2, rick } = HAY;
   block(k, 'cart', cart.x, cart.y, 2.6, 1.3), block(k, 'cart', cart2.x, cart2.y, 2.6, 1.3);
   block(k, 'haystack', rick.x, rick.y, rick.w, rick.h);
+  // (`look: 1`: drawn as a field rick, tall and coursed, not the barn's low heap: client/pieces.ts.)
+  k.blocks[k.blocks.length - 1].look = 1;
   const keep: P[] = [{ x: cart.x + 1.3, y: cart.y + 0.6 }, { x: cart2.x + 1.3, y: cart2.y + 0.6 }, { x: rick.x + 1.7, y: rick.y + 1.3 }, CAGE, { x: 40, y: 27.4 }, { x: 63.6, y: 25.4 }];
   claim(k, CAGE.x, CAGE.y, 1.2);
   // The bank behind the near cart (MOUND): its back hedged, its ways up kept clear.

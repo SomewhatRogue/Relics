@@ -63,7 +63,7 @@ describe('THE FIELDS, the plan', () => {
     expect(fixed(a)).toEqual(fixed(b));
     expect(a.map.rounds).not.toEqual(b.map.rounds);
     expect(fieldsPlan(landJob('lowfurrow', 3)).map.name).toBe('LOWFURROW FIELDS');
-    expect(FIELDS_SPOTS).toEqual({ giver: { x: 38, y: 93.6 }, ryeGround: { x: 30, y: 52, r: 6 }, hiding: { x: 13, y: 53 }, cage: { x: 66, y: 24 } });
+    expect(FIELDS_SPOTS).toEqual({ giver: { x: 37.6, y: 90.9 }, ryeGround: { x: 30, y: 52, r: 6 }, hiding: { x: 13, y: 53 }, cage: { x: 66, y: 24 } });
   });
 
   it('is 96 by 112 in three stretches, both gates gate blocks, the last stretch none', () => {
@@ -105,7 +105,7 @@ describe('THE FIELDS, the plan', () => {
     for (const f of p.foes) expect(all.near(f.x, f.y), `foe ${f.pack} at ${f.x},${f.y}`).toBe(true);
     for (const c of [...p.props.filter((q) => q.kind === 'cage'), ...p.chests]) expect(all.near(c.x, c.y, 1.3), `${c.x},${c.y}`).toBe(true);
     for (const s of [FIELDS_SPOTS.ryeGround, FIELDS_SPOTS.hiding]) expect(all.near(s.x, s.y, 0.6), `${s.x},${s.y}`).toBe(true);
-    // The woman under the cart stands on her spot now (lowfurrowminis.ts): you walk up to her, well inside talking reach.
+    // The woman behind the cart stands on her spot now (lowfurrowminis.ts): you walk up to her, well inside talking reach.
     expect(all.near(FIELDS_SPOTS.giver.x, FIELDS_SPOTS.giver.y, 1.2), 'the giver').toBe(true);
     expect(walk(plan().map, plan().map.hero).minY).toBeGreaterThan(79);
     expect(walk(open(plan(), 0).map, plan().map.hero).minY).toBeGreaterThan(9.3);

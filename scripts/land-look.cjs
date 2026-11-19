@@ -13,6 +13,9 @@ const SIZES = { phone: { viewport: { width: 390, height: 844 }, deviceScaleFacto
 const SPOTS = {
   // Lowfurrow Fields, map 0 (THE FIELDS) and map 1 (THE RISE): shared/lowfurrowfields.ts, lowfurrowrise.ts.
   lowfurrow: [['in', 48, 107], ['camp', 45, 97], ['farcart', 66, 92], ['gate1', 48, 82], ['road', 48, 70], ['scarecrow', 66, 69], ['pond', 22, 53], ['rye', 31, 55], ['lynchet', 40, 63], ['hovel', 72, 53], ['loading', 40, 31], ['rick', 61, 28], ['drain', 48, 12], ['farbank', 48, 5]],
+  tollan: [['in', 48, 104], ['milk', 51, 99], ['gateway', 48, 94], ['shaken', 22, 75], ['ride', 34, 78], ['hives', 78, 88], ['pile', 52, 62], ['door', 48, 58], ['lanefoot', 48, 52], ['sidelane', 26, 34], ['shelter', 17, 36], ['pond', 62, 40], ['hay', 30, 22], ['out', 48, 5]],
+  'tollan:1': [['in', 48, 99], ['close', 40, 84], ['cart', 37, 76], ['rickyard', 18, 74], ['pond', 68, 80], ['flight', 48, 66], ['lip', 48, 55], ['steps', 86, 63], ['well', 32, 46], ['house', 74, 38], ['doors', 36, 29], ['barn', 50, 27], ['garden', 80, 16], ['yardgate', 62, 8]],
+  'tollan:2': [['in', 13, 16.4], ['floor', 13, 10], ['mow', 6.5, 8], ['larder', 20, 9]],
   'lowfurrow:1': [['in', 48, 99], ['foot', 40, 89], ['lanefoot', 41, 84], ['lane', 39, 76], ['lanebend', 43, 68], ['archers', 31, 78], ['orchard', 22, 74.5], ['barnyard', 66, 77], ['lanehead', 48, 60], ['gate', 50, 57.6], ['fold', 46, 43], ['hut', 63, 31], ['pond', 27, 33], ['brow', 50, 11]],
   knoll: [['in', 20, 42], ['field', 16, 30], ['face', 14, 23.5], ['steps', 10, 22.5], ['top', 14, 15.5], ['track', 26.5, 14], ['east', 29, 20], ['out', 24, 6]],
   hill: [['in', 22, 92], ['headland', 20, 83], ['gate1', 22, 79], ['lynchet1', 20, 72.5], ['strips', 16, 65], ['stooks', 22, 51], ['drain', 22, 45], ['lane', 22, 33], ['bank', 12, 34], ['barn', 33, 35], ['foldyard', 20, 14], ['out', 22, 4], ['slope1', 20, 70], ['bankslope', 10, 40], ['lanefoot', 19, 30], ['banklip', 27, 30], ['cages2', 15, 15.5], ['cages1', 15, 53]],

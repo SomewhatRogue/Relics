@@ -4,7 +4,8 @@
  *   Sheep country, and no sheep. The hungry penned what they caught in the big fold before they roped it: the ground
  *   in it is trodden to mud, what was taken off the gleaners lies in the straw, and one is still caged there. The
  *   line went out of the fold's gap and up the road over the brow. The shepherd's hut has its door hanging; three
- *   are eating what was in it. On the brow the stile, a wayside cross, and the lane going on north without you.
+ *   are eating what was in it. On the brow the old boundary wall, a wind-bent thorn, the cairn, the stile, and the
+ *   lane going on north without you.
  */
 import { along, block, claim, patch, round, type Kit, type Line, type P } from './expedkit.js';
 import { clump, markAt, sprinkle } from './lowfurrowrisekit.js';
@@ -98,13 +99,39 @@ function country(k: Kit): void {
     clump(k, ['bush', 'bush', 'rock'], x, y, 3, 1.7, [0.3, 0.55], 1.6);
   }
   sprinkle(k, 'weeds', 18, 12, 17, 84, 53, 2, 1);
+  gathering(k);
 }
 
-/** The brow: the stile in its hedge, a wayside cross, gorse back from the lip so the view south stays open. */
+/**
+ * The gathering ground between the fold and the gate (it was plain grass): where the flock was brought together
+ * before the fold. The shepherd's cart with spare hurdles leant on it, the water tub and the salt barrels, a hay
+ * rack's row of sheaves, the corner of a drystone creep, and the sheep's own paths worn from the gate to the fold
+ * and to the pens.
+ */
+function gathering(k: Kit): void {
+  block(k, 'cart', 33.4, 48.6, 2.6, 1.3), across(k, 50.4, 33, 37.4), across(k, 47.9, 36.4, 38.6);
+  round(k, 'washtub', 44.4, 43.4, 0.42), round(k, 'barrels', 45.6, 42.6, 0.36), markAt(k, 'puddle', 44.2, 44.3, 1.6, 0.7);
+  for (const x of [54.2, 56, 57.8]) round(k, 'hay', x + k.rng.range(-0.2, 0.2), 51.2 + k.rng.range(-0.2, 0.2), 0.46);
+  markAt(k, 'straw', 56, 52.2, 5, 1.2), markAt(k, 'straw', 34.6, 50.9, 3, 1);
+  // The creep: two short walls meeting, a gap a sheep's width, tumbled at one end.
+  block(k, 'rockwall', 62.4, 46.6, 3.4, 0.6), block(k, 'rockwall', 66.4, 46.6, 0.6, 2.6), block(k, 'rubble', 60.2, 46.6, 1.8, 0.6);
+  // Worn paths: gate to the fold's gap, gate to the pens, the tub to the fold.
+  for (const [a, b] of [[[50, 53], [49.6, 41]], [[51.4, 52.4], [58.4, 48.6]], [[44.6, 42.8], [41, 40.6]]] as const) k.marks.push({ kind: 'path', x: a[0], y: a[1], w: b[0] - a[0], h: b[1] - a[1] });
+  clump(k, ['reed'], 30.4, 46.4, 4, 1.2, [0.22, 0.3], 1.6), clump(k, ['reed'], 68.6, 43.6, 3, 1, [0.22, 0.3], 1.6);
+}
+
+/** The brow: the old boundary wall, the thorn and the cairn, the stile in its hedge, gorse and long grass. */
 function brow(k: Kit): void {
   thickHedge(k, 2.2, 0.4, 50.3), thickHedge(k, 2.2, 53.7, 95.6);
   block(k, 'fence', 48.2, 2.1, 2.1, 0.32), block(k, 'fence', 53.7, 2.1, 2.1, 0.32);
-  round(k, 'cross', 47, 5.8, 0.3), markAt(k, 'weeds', 47, 6.6, 1.2, 0.6);
+  // Where the lane tops the brow: a thorn bent by the wind and the cairn travellers add a stone to (it was a wayside
+  // cross, which read as a grave), what the line dropped going over, and the long grass nobody grazed this year.
+  round(k, 'tree', 45.6, 6.2, 0.6);
+  for (const [dx, dy, r] of [[0, 0, 0.42], [0.6, 0.3, 0.3], [-0.5, 0.4, 0.28], [0.1, 0.7, 0.24]] as const) round(k, 'rock', 56.6 + dx, 7.2 + dy, r);
+  round(k, 'sacks', 50.6, 9.6, 0.3), markAt(k, 'debris', 52.4, 11.8, 1.2, 0.6), markAt(k, 'straw', 49.8, 13.4, 1.6, 0.8), markAt(k, 'weeds', 45.8, 7.2, 1.6, 0.7);
+  for (const [x, y] of [[26, 9], [34.6, 12.4], [60.4, 12], [68.6, 9.6], [76.4, 13], [18.4, 12.6], [40.6, 5.2], [84, 12]] as const) clump(k, ['reed'], x, y, 4, 1.4, [0.22, 0.32], 1.6);
+  // The old boundary along the brow: what is left of a drystone wall, two runs standing and the rest down.
+  for (const [x, w, kind] of [[20.6, 2.4, 'rubble'], [24, 7, 'rockwall'], [32.2, 1.8, 'rubble'], [43, 2.2, 'rubble'], [58.6, 2, 'rubble'], [61.2, 8, 'rockwall'], [70.4, 2.6, 'rubble']] as const) block(k, kind, x, 14.6, w, 0.6);
   for (const [x, y, r] of [[30.4, 4.4, 0.85], [72.4, 4, 0.9]] as const) round(k, 'tree', x, y, r);
   for (const [x, y] of [[12, 7.6], [21.6, 5], [37.4, 9.4], [63.4, 7.4], [80.6, 9.4], [86.4, 5], [44, 10.6]] as const) clump(k, ['bush', 'bush', 'rock'], x, y, 3, 1.5, [0.3, 0.5], 1.6);
   sprinkle(k, 'weeds', 6, 8, 4, 88, 12.6, 1.8, 0.9);

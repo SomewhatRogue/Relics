@@ -30,7 +30,7 @@ export function upRamp(q: Area, r: Run, x: number, y: number): number {
 export function heightAt(m: GameMap, x: number, y: number): number {
   let h = -1;
   for (const l of m.ledges ?? []) {
-    if (l.kind !== 'earth') continue;
+    if (!raised(l)) continue;
     for (const q of l.ramps) {
       if (!inArea(q, x, y)) continue;
       const r = runOf(m, l, q);

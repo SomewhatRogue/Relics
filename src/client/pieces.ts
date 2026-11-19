@@ -33,6 +33,20 @@ function rawBlockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | '
   if (STAITHE_KINDS.has(b.kind)) return staitheBoxes(b, r);
   if (FEN_KINDS.has(b.kind)) return fenBoxes(b, r);
   if (b.kind === 'oak') return oakBoxes(b, r);
+  if (b.kind === 'haystack' && b.look) {
+    // A rick out in a field (`look: 1`): hay built up in courses taller than a man, each a little in from the one
+    // under it, a rounded top, the darker line where each course was trodden down, loose wisps at its foot, a ladder
+    // leant on it and a fork left in it. (The barn's low heap, below, read as a pale slab out of doors.)
+    out.push([cx, 0, cz, w, 1.05, d, 0x8a7636], [cx, 0.95, cz, w * 0.96, 0.8, d * 0.94, 0x94803c, 'lump'], [cx, 1.65, cz, w * 0.84, 0.7, d * 0.8, 0x86722f, 'lump']);
+    // The top thatched to a ridge, darker than the hay under it (a pale flat top was what read as a slab).
+    out.push([cx, 2.25, cz, w * 0.66, 0.4, d * 0.56, 0x6e5e2a, 'lump'], [cx, 2.55, cz, w * 0.44, 0.28, d * 0.26, 0x5e5024, 'lump'], [cx, 2.78, cz, w * 0.36, 0.06, 0.08, 0x3e3418]);
+    for (const y of [0.98, 1.68]) out.push([cx, y, cz, w * (y < 1.5 ? 1.03 : 0.9), 0.06, d * (y < 1.5 ? 1.03 : 0.86), 0x5e5024]);
+    for (let i = 0; i < 9; i++) out.push([0.1 + r() * (w - 0.2), 0, (r() < 0.4 ? -0.14 : d + 0.02) + r() * 0.12, 0.16, 0.08, 0.12, 0xb09a4a]);
+    for (const x of [w * 0.24, w * 0.4]) out.push([x, 0, d + 0.12, 0.06, 2, 0.06, 0x4a3420]);
+    for (const y of [0.3, 0.65, 1, 1.35, 1.7]) out.push([w * 0.32, y, d + 0.12, w * 0.16 + 0.06, 0.05, 0.05, 0x5a3d22]);
+    out.push([w * 0.74, 2.2, cz, 0.05, 0.9, 0.05, 0x4a3420]);
+    return out;
+  }
   if (b.kind === 'haystack') {
     // A stack of hay on the threshing floor: a heaped base, a rounded top, loose wisps, a fork left in it.
     out.push([cx, 0, cz, w, 0.55, d, 0xb8a060], [cx, 0.45, cz, w * 0.9, 0.55, d * 0.85, 0xc8b06a, 'lump'], [cx, 0.85, cz, w * 0.6, 0.45, d * 0.6, 0xd8c47a, 'lump']);
@@ -110,8 +124,11 @@ function rawRoundBoxes(o: Pick<Round, 'kind' | 'r' | 'x' | 'y'>): Bx[] {
     return out;
   }
   // An apple tree: a short crooked trunk, a low round crown, apples in it.
-  out.push([0, 0, 0, 0.18, 0.75, 0.18, BARK], [0, 0.6, 0, 1.2, 0.85, 1.05, 0x3a5a2a, 'lump'], [0.15, 0.9, 0.1, 0.8, 0.6, 0.7, 0x456a32, 'lump']);
-  for (let i = 0; i < 4; i++) out.push([(r() - 0.5) * 0.9, 0.75 + r() * 0.5, 0.35 + r() * 0.15, 0.08, 0.08, 0.08, 0x9a2a1a]);
+  // (Its size follows its trunk: a half-tile trunk is the tree as it always was, an old broad one up to half as
+  // big again, a young one a little less. Every apple tree was one size, so an orchard read as a grid of saplings.)
+  const g = Math.min(1.5, Math.max(0.85, o.r / 0.5));
+  out.push([0, 0, 0, 0.18 * g, 0.75 * g, 0.18 * g, BARK], [0, 0.6 * g, 0, 1.2 * g, 0.85 * g, 1.05 * g, 0x3a5a2a, 'lump'], [0.15 * g, 0.9 * g, 0.1 * g, 0.8 * g, 0.6 * g, 0.7 * g, 0x456a32, 'lump']);
+  for (let i = 0; i < 4; i++) out.push([(r() - 0.5) * 0.9 * g, (0.75 + r() * 0.5) * g, (0.35 + r() * 0.15) * g, 0.08, 0.08, 0.08, 0x9a2a1a]);
   return out;
 }
 

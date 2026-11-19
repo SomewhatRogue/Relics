@@ -381,3 +381,78 @@ The chat planning and building docs/design/territories.md (Kyle, 2026-11-17). Ne
   Copperdeep room (`?hero=WARRIOR&job=1:1&area=1`) and THE FIELDS.
 - Signed: Claude Fable 5.2.
 
+
+## 2026-11-18, evening: Lowfurrow's thin places
+
+Kyle said go on the two things I named: Lowfurrow's thin places, then Tollan's Farm. This is the first; Tollan's
+two maps are being laid by two builders and get their own entry when reviewed.
+
+- **The pond is an oval** (`lowfurrowfieldsland.ts` `POND`): fourteen bands half a tile deep, the middle pushed a
+  little east. One box with two caps read as a tank in both views.
+- **The rick is a rick** (`client/pieces.ts`, `haystack` with `look: 1`; `lowfurrowfieldsstooks.ts` sets it): three
+  courses taller than a man, a dark thatched ridge, the trodden line between courses, a ladder up its front, the
+  fork in its top. The boss barn's low hay heaps (no `look`) are untouched, so nobody else's arena moved.
+- **The woman hides behind the near cart, not in front of it** (`lowfurrowfieldsfoot.ts` `GIVER`, 37.6, 90.9): the
+  cart's bed hides her to the chest in both views and she is drawn low (`terrkit.ts` `giverNpc`: `low` now kneels
+  as well as creeps). You walk round the cart's end to talk. Stood a step south of it she read as a man waiting
+  by a cart. The sacks that were behind the cart moved to its west end.
+- **The cut strip is not one sheet** (`lowfurrowfieldsland.ts`): bare swathe lines between the cut rows, the east
+  end cut in steps with rye standing past them, a tongue of rye left round a nest, wheel ruts to the rick. Paint.
+- **The Rise's gathering ground** (`lowfurrowrisefold.ts` `gathering`): between the fold and the gate was plain
+  grass. Now the shepherd's cart with spare hurdles leant by it, the water tub and salt barrels, a row of
+  sheaves, the corner of a drystone creep, the sheep's paths worn from the gate to the fold and the pens.
+- **The brow** (`brow`): the wayside cross is gone (it read as a grave). A wind-bent thorn, a travellers' cairn,
+  what the line dropped going over, long grass in clumps, and two standing runs of the old boundary wall with
+  the rest down. The `rockwall` kind draws near black in daylight, so I kept the runs short: a long one read as
+  a ridge of basalt. For Art: a paler drystone would let walls be used more.
+- Not done: the 2.5D stook is still small and bright; `villager` is the only look the woman has and it reads as
+  a bald man.
+- Tests: `lowfurrowfields`, `lowfurrowrise`, `lowfurrowminis` pass (the minis test stands a hero east of a
+  giver on the ground, since a cart may be south of her). Seen in both views.
+- Signed: Claude Fable 5.2.
+
+## 2026-11-18, evening: Tollan's Farm, slice 1 (three maps, played end to end)
+
+Built as a big system from its spec (territories.md, "2. Tollan's Farm"): two builders laid a map each to a
+brief, I reviewed with pictures and a played run and changed what did not hold.
+
+- **The frame** (`territory.ts`): `tollan` is a land of three maps, its job a hunt for MAWL (`WORK`), in `LANDS`
+  now. `knownLand` for the test link. `scripts/land-look.cjs` has picture spots for all three.
+- **Map 1, THE HOME GROUND** (`tollanorchard*.ts`, a builder's): the lane's end and milk stand, the walled
+  orchard in rows (one tree being shaken bare, the hives kicked over, a trail of spilt apples to the sacks by
+  the door), the door in the orchard wall as its gate, then the paddocks: hurdle lanes, a hay paddock, an oval
+  dewpond, a side lane to the field shelter with a cage standing in for the roped man. Eighteen goblins in six
+  packs. Flat. What I changed: the rows planted close in the row with shade under every tree (at 3.8 each way it
+  was a grid of single trees), and an apple tree's drawn size now follows its trunk (`client/pieces.ts`; every
+  apple tree was one size, so old and young read the same). A half-tile trunk draws as before.
+- **Map 2, THE YARD** (`tollanyard*.ts`, a builder's): the home close under the yard's wall (hay cart, rickyard,
+  troughs, duck pond), then the yard as the map's one raised area, a `'crag'` terrace two levels up right across
+  the map, a six-wide stone flight where the cart road climbs and two-wide steps at the east corner, two archers
+  on the lip either side of the flight. On it the farmhouse, cart shed, granary, byre, sties, well, midden, and
+  the house's goods dropped along the way to the barn. Fourteen goblins.
+- **The barn was laid as a walled court on the yard map and read as one, so I rebuilt it.** Outside, on the yard
+  map (`tollanyardbarn.ts`): a roofed barn, its body and a bay either side of the wagon porch, the great doors
+  shut in the porch's mouth as the yard's gate. They open when the yard's are dead and the party stands at them;
+  the porch behind them is the map's way out. **Map 3, THE BARN** (`tollanbarn.ts`, mine): the inside, 26 by 18,
+  a room with a plank back wall: six roof posts in two rows, three hay stacks down the west aisle, stalls along
+  the back, the flagged threshing floor open in the middle, MAWL's larder heaped down the east aisle, three
+  feeding at it, a chained chest behind. Its goal is the job's: kill MAWL, then the way home is back out of the
+  doors. An inside has to be a room, not ground with a wall round it.
+- **A bug of mine from this afternoon, found here and fixed** (`shared/heights.ts` `heightAt`): it sloped only
+  `'earth'` ramps, so a rock-faced bank's steps drew as two flat slabs with the face run across them, and bodies
+  popped up them. It tests `raised(l)` now. This also puts right the mines' banks pushed this afternoon. Drawing
+  only: the fight never used it.
+- **The duck pond** on the yard map is an oval in bands (it was one rect).
+- **Kept from the spec, not done:** the yard gate at the top stands open, as Tollan left it, and leads nowhere
+  yet (the dog's slice). The bows are on the wall's lip, not the cart shed's roof. No kitchen interior, no dog,
+  ordinary gate art for the great doors, a cage for the roped man.
+- **For Art, from both builders' wish lists:** straw skeps, ground windfalls, a milk stand with churns, an
+  open-fronted shelter and cart shed, a stone trough, a midden heap, a farmhouse door standing open, and a paler
+  drystone (`rockwall` is near black by day, and Tollan's orchard is walled in it).
+- **Words:** none new on screen. Zone and stretch names are not shown; the goal lines are the hunt's own.
+- **Tests:** `tests/tollanorchard.test.ts` (9), `tollanyard.test.ts` (11), `tollanbarn.test.ts` (5).
+  `tests/perfparity.sim.golden.json` re-recorded: only the hill scene moved, because a hiding giver's person now
+  carries `kneel` (paint). Whole suite: 258 files, that one failure, re-recorded and passing. A played run in
+  the browser by the room's own rules: orchard gate, paddocks, out; the yard, the doors, the porch; the barn,
+  MAWL dead, home.
+- Signed: Claude Fable 5.2.

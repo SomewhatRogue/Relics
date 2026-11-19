@@ -2,7 +2,7 @@
  * Lowfurrow's two mini quests (docs/design/territories.md, "Mini quests"; words in miniwords.ts). Plain data: who asks,
  * where, what is made only once they've been heard, and what it pays.
  *
- * THE FIELDS, the sister: a woman lies under the near handcart. She speaks once the two at the dinner are dead, and
+ * THE FIELDS, the sister: a woman is crouched behind the near handcart. She speaks once the two at the dinner are dead, and
  * sends you to the rye by the pond, where three goblins are beating the crop for her sister. Kill them and the sister
  * comes out of the willows; the woman leaves with her.
  *

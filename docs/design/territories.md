@@ -265,7 +265,16 @@ rows, hurdled paddocks, a yard with everything in its place and a bad smell from
 - **Solo and party:** MAWL is a named butcher on the boss kit, and this is the easiest of those fights. On
   screen MAWL and GUTCHAIN are "it" (jobs.ts); the quest postings say "him" today (a note for the Town
   quests chat).
-- **Needs:** the dog, the two-leaf door gate, the barn interior as a boss ground.
+- **Needs:** the dog, the two-leaf door gate, the farmhouse kitchen, the roped man's own art, the burned
+  barn as a result that stays.
+- **As laid (slice 1, 2026-11-18; `?land=tollan`):** three maps. **THE HOME GROUND** (`tollanorchard*.ts`): the
+  lane's end, the walled orchard, the door in its wall, the paddocks with the shelter (a cage stands in for the
+  roped man). **THE YARD** (`tollanyard*.ts`): the home close under the yard's wall, then the yard, a stone-faced
+  terrace two levels up with a flight where the cart road climbs and steps at the east corner; the bows are on
+  the wall's lip, not the cart shed's roof (elevation.md, "Raised areas"). The barn stands roofed at its top and
+  its great doors are the yard's gate. **THE BARN** (`tollanbarn.ts`): the inside, its own small map, where
+  MAWL is; the way home is back out of its doors. The yard gate at the top stands open and leads nowhere yet
+  (the spec's way out, for the dog's slice).
 
 ### 3. Sallow Carr: nobody kept the ditches (level 4; burn 3 dens; medium; opens Hangman's Wood)
 

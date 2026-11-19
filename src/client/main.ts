@@ -16,7 +16,7 @@ import { ExpedUi } from './expedui';
 import { expedition, fenmere, goalWords, hangmansWood } from '../shared/expedjob';
 import { board } from '../shared/jobs';
 import { openCut, stressJob } from '../shared/instances';
-import { LANDS, landJob, type LandId } from '../shared/territory';
+import { knownLand, landJob, type LandId } from '../shared/territory';
 import { stretchOf } from '../sim/stretches';
 import { barnHunt } from '../shared/bossjobs';
 import { plateOf } from '../sim/bossplate';
@@ -305,7 +305,7 @@ if (quick && cday) {
 // ?hero=WARRIOR&land=lowfurrow: straight onto a territory (docs/design/territories.md), a party of `party` (default 1),
 // at its map `map` (from 0). ?land=hill: the proving hill, a small test map.
 const land = new URLSearchParams(location.search).get('land');
-if (quick && land && (LANDS as string[]).includes(land)) game.startJob(landJob(land as LandId, game.world.day), Number(new URLSearchParams(location.search).get('party') ?? 1), Number(new URLSearchParams(location.search).get('map') ?? 0));
+if (quick && land && knownLand(land)) game.startJob(landJob(land as LandId, game.world.day), Number(new URLSearchParams(location.search).get('party') ?? 1), Number(new URLSearchParams(location.search).get('map') ?? 0));
 // ?hero=WARRIOR&barn=1: straight onto today's Doorkeepers hunt; ?barn=arena: straight into the great barn.
 const barn = new URLSearchParams(location.search).get('barn');
 if (quick && barn) game.startJob(barnHunt(game.world.day, barn === 'arena'));

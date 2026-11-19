@@ -13,7 +13,7 @@ export interface Mini {
   id: string;
   kind: MiniKind;
   /**
-   * The person: where they are and how they're drawn (an `Npc` look). `low`: keeping low, hiding (under a cart).
+   * The person: where they are and how they're drawn (an `Npc` look). `low`: keeping low, hiding (behind a cart).
    * `up`: off the ground by this many pixels (up a tree); paint only, you still talk from the ground beside them.
    */
   giver: { x: number; y: number; look: string; low?: boolean; up?: number };

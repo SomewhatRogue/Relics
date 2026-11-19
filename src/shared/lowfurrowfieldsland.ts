@@ -42,7 +42,11 @@ export const STRIPS: { x0: number; x1: number; is: 'rye' | 'oat' | 'fallow' | 'r
 ];
 
 /** The pond in the willows off to the west (shallow), the pocket. */
-export const POND = [{ x: 14.4, y: 50.6, w: 9.4, h: 5.6 }, { x: 15.6, y: 49.8, w: 6.2, h: 1 }, { x: 16.2, y: 56, w: 6, h: 1 }];
+// (An oval in fourteen bands half a tile deep, its middle pushed a little east: one box with two caps read as a tank.)
+export const POND = Array.from({ length: 14 }, (_, i) => {
+  const dy = -3.25 + i * 0.5, half = 4.7 * Math.sqrt(1 - (dy / 3.6) ** 2), cx = 19.1 + 0.5 * Math.sin(dy * 0.9);
+  return { x: Math.round((cx - half) * 10) / 10, y: 53.15 + dy, w: Math.round(half * 20) / 10, h: 0.5 };
+});
 
 /**
  * The one raised area (docs/design/elevation.md, "Raised areas"; the land is flat but for it): the old headland bank
@@ -103,6 +107,13 @@ function soil(k: Kit): void {
   // The stooks: the cut strip in stubble, the rye still standing at its ends, the rick's straw.
   patch(k, 'crop', 12, 12, 72, 28, false);
   patch(k, 'straw', 17, 14, 62, 22), patch(k, 'straw', 22, 19, 52, 19), patch(k, 'straw', 56, 17, 14, 10);
+  // The stubble was one flat sheet. Where the reaping stopped that morning: the swathes still show as bare lines
+  // between the cut rows, the east end is cut in steps (each reaper's last reach) with rye standing past them, a
+  // tongue of rye was left round a nest in the middle, and the carts' wheels have worn two ways to the rick.
+  for (const y of [16.4, 19.6, 24.4, 27.6, 30.8, 34]) patch(k, 'earth', 19 + (y * 7) % 5, y, 50 - (y * 3) % 9, 0.35, false);
+  for (const [x, y, w, h] of [[72, 14, 8, 4.4], [74.4, 18.4, 5.6, 4.6], [70.6, 23, 9.4, 4], [76, 27, 4, 5], [73, 32, 7, 4.4], [17, 30.4, 5.4, 5.8], [17, 14, 3.6, 5]]) patch(k, 'crop', x, y, w, h, false);
+  patch(k, 'crop', 47.4, 29.6, 4.6, 2.6), patch(k, 'grass', 48.6, 30.2, 1.8, 1.2);
+  for (const [x, y, w, h] of [[40.2, 26.8, 21, 0.4], [58.4, 22.2, 0.4, 5], [46.4, 36, 0.4, 5]]) k.marks.push({ kind: 'ruts', x, y, w, h });
   // The drain's banks, the far bank.
   patch(k, 'mud', 0, 6.4, FIELDS.w, 4.6, false), patch(k, 'grass', 0, 0, FIELDS.w, 6.4, false);
 }

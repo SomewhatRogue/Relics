@@ -24,7 +24,9 @@ function land(index: number) {
   for (let n = 0; n < 60; n++) room.step();
   const tick = () => (room.step(), tally(run, room, room.events, 'me'));
   const kill = (pack: number) => { for (const e of room.allEnemies) if (e.pack === pack) Object.assign(e, { hp: 0, act: 'dead' }); };
-  const by = () => Object.assign(h, { x: mini.giver.x, y: mini.giver.y + 0.9, z: levelAt(room.map, mini.giver.x, mini.giver.y + 0.9), safeT: 99, act: 'idle' });
+  // (Beside the giver: a step south of one up a tree, a step east of one on the ground, who may have a cart south of her.)
+  const [bx, by0] = mini.giver.up ? [mini.giver.x, mini.giver.y + 0.9] : [mini.giver.x + 0.9, mini.giver.y];
+  const by = () => Object.assign(h, { x: bx, y: by0, z: levelAt(room.map, bx, by0), safeT: 99, act: 'idle' });
   let seq = 0;
   const grab = () => {
     room.setIntent(h.id, { ...NO_INTENT, grabSeq: ++seq });

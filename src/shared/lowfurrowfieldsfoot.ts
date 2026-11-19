@@ -6,7 +6,7 @@
  *   far cart has been turned out, and a trodden way goes up to the field gate where they were roped and led.
  *   Two are squabbling over the dinner; three and a brute are going through the far cart.
  *
- * The near cart is left with clear ground under and beside it (someone hides there later: FIELDS_SPOTS.giver).
+ * The near cart is left with clear ground behind and beside it (someone hides behind it later: FIELDS_SPOTS.giver).
  */
 import { block, claim, mark, patch, prop, round, type Kit } from './expedkit.js';
 import { cast } from './encounter.js';
@@ -14,14 +14,15 @@ import { grove, marks, maybe, put, type FieldsLand } from './lowfurrowfieldskit.
 
 /** The three handcarts (fixed): the near one, the one by the fire, the far one being turned out. */
 export const CARTS = { near: { x: 36.8, y: 91.4 }, fire: { x: 54.8, y: 97.6 }, far: { x: 69, y: 87.4 } };
-export const GIVER = { x: 38, y: 93.6 };
+/** (Crouched behind the near cart, half hidden by its bed: stood in front of it she read as a man waiting by a cart.) */
+export const GIVER = { x: 37.6, y: 90.9 };
 
 export function headland(k: Kit, land: FieldsLand): void {
   const { near, fire, far } = CARTS, j = () => k.rng.range(-0.25, 0.25);
   for (const c of [near, fire, far]) block(k, 'cart', c.x, c.y, 2.4, 1.2);
   // Under and beside the near cart, kept clear.
   claim(k, GIVER.x, GIVER.y, 1.4), claim(k, near.x - 1, near.y + 0.6, 1);
-  round(k, 'sacks', near.x + 0.8, near.y - 0.8, 0.34), round(k, 'hay', near.x + 3, near.y - 0.4, 0.42);
+  round(k, 'sacks', near.x - 0.7, near.y - 0.2, 0.34), round(k, 'hay', near.x + 3, near.y - 0.4, 0.42);
   marks(k, 'straw', near.x + 1.2, near.y - 1.2, 3, 1.6, 0.8, 1.6, 0.7);
   // Their fire and the dinner on its cloth, fought over: the basket, the crocks, bread trodden in.
   round(k, 'cookfire', 52.8, 96.6, 0.45), round(k, 'smoke', 52.8, 96.2, 0.15);

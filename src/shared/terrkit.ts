@@ -67,4 +67,4 @@ export const layRoad = (k: Kit, l: Line, half: number) => path(k, 'earth', l, ha
  * A mini quest's giver as someone standing on the map (shared/miniquest.ts): drawn as any person out there is,
  * `talk` naming their quest so a screen can tell when they've gone home (sim/minis.ts giverThere).
  */
-export const giverNpc = (m: Mini): Npc => ({ x: m.giver.x, y: m.giver.y, name: '', talk: `mini:${m.id}`, look: m.giver.look, mute: true, ...(m.giver.low ? { sneak: true } : {}), ...(m.giver.up ? { lift: m.giver.up } : {}) });
+export const giverNpc = (m: Mini): Npc => ({ x: m.giver.x, y: m.giver.y, name: '', talk: `mini:${m.id}`, look: m.giver.look, mute: true, ...(m.giver.low ? { sneak: true, kneel: true } : {}), ...(m.giver.up ? { lift: m.giver.up } : {}) });
