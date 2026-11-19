@@ -8,6 +8,7 @@
 import type { Round } from '../../shared/arena';
 import { jit, type Boxes, type Seed } from './boxes';
 import { graded as gr } from '../darkgold';
+import { CROWN, floraLook, tintHex } from '../flora';
 
 /** The boxes with every colour through the dark-and-gold grade (../darkgold.ts): rocks and stones green-grey. */
 const graded = (B: Boxes): Boxes => ({
@@ -37,13 +38,17 @@ export function addNature(B: Boxes, o: Round, r: Seed): boolean {
       B.b(x, 0, z, w * 0.75, 0.04, d * 1.15, 0x34313a, ry);
       return true;
     }
-    case 'bush':
+    case 'bush': {
       // Three round clumps in the sprite's three greens, two red berries showing.
-      B.lump(x, 0.3, z, R * 2.1, 0.62, R * 1.5, jit(0x26361f, 0.08, r), r.next() * 3);
-      B.lump(x - R * 0.35, 0.48, z + R * 0.1, R * 1.15, 0.45, R * 0.95, jit(0x2f4a28, 0.08, r), r.next() * 3);
-      B.lump(x + R * 0.4, 0.42, z + R * 0.15, R * 1.0, 0.4, R * 0.85, jit(0x2a4024, 0.08, r), r.next() * 3);
-      for (const [dx, dy] of [[-0.45, 0.32], [0.45, 0.38]]) B.c(x + dx * R, dy, z + R * 0.62, 0.06, 0.06, 0.06, 0x7a2a3a);
+      // (Its look by where it stands, as the flat view's: low and spreading, upright, or as it was; one of four
+      // greens; berries on about one in three, blossom on a few, most with neither. ../flora.ts.)
+      const L = floraLook('bush', o.x, o.y, o.r), [kw, kh] = CROWN[L.shape], side = L.flip ? -1 : 1, g = (c: number) => jit(tintHex(c, L.green), 0.08, r);
+      B.lump(x, 0.3 * kh, z, R * 2.1 * kw, 0.62 * kh, R * 1.5 * kw, g(0x26361f), r.next() * 3);
+      B.lump(x - R * 0.35 * kw * side, 0.48 * kh, z + R * 0.1, R * 1.15 * kw, 0.45 * kh, R * 0.95 * kw, g(0x2f4a28), r.next() * 3);
+      B.lump(x + R * 0.4 * kw * side, 0.42 * kh, z + R * 0.15, R * 1.0 * kw, 0.4 * kh, R * 0.85 * kw, g(0x2a4024), r.next() * 3);
+      if (L.fruit) for (const [dx, dy] of [[-0.45, 0.32], [0.45, 0.38], [0.05, 0.5]].slice(0, L.fruit === 2 ? 3 : 2)) B.c(x + dx * R * kw, dy * kh, z + R * 0.62 * kw, 0.06, 0.06, 0.06, L.fruit === 2 ? 0xd6d0b4 : 0x7a2a3a);
       return true;
+    }
     case 'hay': {
       // A stook: sheaves stood on end and leant together, tied at the waist, their ears in a tuft on top. Upright
       // stalks in three straws, a dark twine band, darker ears, a gap of shadow at its foot. (It was a rounded bale

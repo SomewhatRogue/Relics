@@ -10,6 +10,7 @@ import { LANTERN_Y } from '../daispieces';
 import { putBoxes } from './pieces3d';
 import { addNature } from './nature3d';
 import { graded as gr } from '../darkgold';
+import { CROWN, floraLook, tintHex } from '../flora';
 
 export type Spot = [number, number, number, number];
 
@@ -34,9 +35,13 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       // A round crown of a few lumps, the biggest low, a lighter one up on the sunny side. (Its leaves move in the
       // living world's wind, wind3d.ts.)
       B.sway = 1;
-      B.lump(x, 1.85 + up, z, R * 2.6, R * 2.1, R * 2.4, jit(LEAF[0], 0.08, r), r.next() * 3);
-      B.lump(x + (r.next() - 0.5) * R, 1.75 + up + r.next() * 0.2, z + R * 0.5, R * 1.7, R * 1.4, R * 1.5, jit(LEAF[2], 0.08, r), r.next() * 3);
-      B.lump(x - R * 0.35, 2.25 + up, z + R * 0.2, R * 1.5, R * 1.2, R * 1.4, jit(LEAF[1], 0.08, r), r.next() * 3);
+      // Its look by where it stands, as the flat view's (../flora.ts): a round crown, a taller narrower one or a
+      // broader lower one; one of four greens, graded as every other plant is; mirrored or not.
+      const L = floraLook('tree', o.x, o.y, o.r), [kw, kh] = CROWN[L.shape], side = L.flip ? -1 : 1, lift = (kh - 1) * R;
+      const leaf = LEAF.map((c) => gr(tintHex(c, L.green), 'wall'));
+      B.lump(x, 1.85 + up + lift, z, R * 2.6 * kw, R * 2.1 * kh, R * 2.4 * kw, jit(leaf[0], 0.08, r), r.next() * 3);
+      B.lump(x + (r.next() - 0.5) * R * kw, 1.75 + up + lift * 0.6 + r.next() * 0.2, z + R * 0.5, R * 1.7 * kw, R * 1.4 * kh, R * 1.5 * kw, jit(leaf[2], 0.08, r), r.next() * 3);
+      B.lump(x - R * 0.35 * kw * side, 2.25 + up + lift * 2, z + R * 0.2, R * 1.5 * kw, R * 1.2 * kh, R * 1.4 * kw, jit(leaf[1], 0.08, r), r.next() * 3);
       B.sway = 0;
       break;
     }
@@ -44,7 +49,8 @@ export function addRound(B: Boxes, o: Round, fires: Spot[], r: Seed): void {
       B.b(x, 0, z, 0.24, 0.8, 0.24, bark);
       // Three tiers, each a cone overlapping the one under it (the flat sprite's stacked triangles).
       B.sway = 1;
-      for (let i = 0; i < 3; i++) B.cone(x, 1.25 + i * 0.62, z, R * (2.5 - i * 0.62), 1.1 - i * 0.12, jit(PINE[i], 0.06, r), r.next() * 2);
+      // (Its own green or the blue one, by where it stands: ../flora.ts.)
+      for (let i = 0, pg = floraLook('pine', o.x, o.y, o.r).green; i < 3; i++) B.cone(x, 1.25 + i * 0.62, z, R * (2.5 - i * 0.62), 1.1 - i * 0.12, jit(gr(tintHex(PINE[i], pg), 'wall'), 0.06, r), r.next() * 2);
       B.sway = 0;
       break;
     case 'well':

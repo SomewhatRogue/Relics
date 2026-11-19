@@ -86,5 +86,14 @@ clumps of one-pixel stems at mixed heights, dark foot and pale tip, a few heads,
 flipped by place (`sprites.ts` `reedClump`, `makeSprite`'s new `outline` switch, `blocks.ts`). Reeds in 2.5D are
 graded, two-tone by height, mixed heights, heads on a few (`three/rounds3d.ts`). A living tree's trunk follows
 its size in 2.5D. Crop and straw flecks are fewer and calmer (`soil.ts`). Still open from the table: 3, 4, 6, 7,
-8 (the proper cure) and tree leaves' grade in 2.5D. Slices 2 to 4 are not started; whose they are is Kyle's
-call.
+8 (the proper cure).
+
+**Slice 2 is in (2026-11-19, the Territories chat, at Kyle's "continue").** A plant's look is chosen by where it
+stands, the same in both views (`client/flora.ts` `floraLook`): a tree is one of three outlines (round, taller
+and narrower, broader and lower), one of four greens (the old one for four in ten, an olive, a blue-green, a
+deep shade), mirrored or not, and one of three sizes by its radius. A pine keeps its outline, in its own green
+or the blue one, three sizes. A bush has the three outlines and four greens; about one in three shows berries,
+one in nine blossom, the rest neither. The flat view builds each look from the one drawing the first time it
+is wanted (`client/florasprites.ts`); the 2.5D view shapes and tints its lumps from the same choice, and tree
+and pine leaves are graded now as bushes always were (`three/rounds3d.ts`, `three/nature3d.ts`). Fixes 3 and 7
+of the table. Open: 4 (rye), 6 (flat apple trees), 8, and slices 3 and 4.

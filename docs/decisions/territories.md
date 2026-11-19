@@ -550,3 +550,24 @@ Kyle, on the flora research: "do it". Slice 1 of `docs/design/flora.md`, as smal
 - **Crop and straw** (`client/soil.ts`): 20% and 17% flecks, not 35% and 30%, and the near-white gold is gone.
 - Seen in both views on Sallow Carr and Lowfurrow. Whole suite: 262 files pass.
 - Signed: Claude Fable 5.2.
+
+## 2026-11-19: flora slice 2 (trees, pines and bushes that are not copies)
+
+Kyle: "kk continue". Slice 2 of `docs/design/flora.md`.
+
+- **One chooser for both views** (`client/flora.ts`, pure): `floraLook(kind, x, y, r)` gives an outline (three),
+  a green (four: the old one for four in ten, olive, blue-green, deep shade), a mirror, a size (three, from the
+  radius), and for a bush berries, blossom or neither. `tintHex` moves leaf greens only; bark and berries are
+  left alone.
+- **Flat view** (`client/florasprites.ts`, new; `client/blocks.ts` `drawRound`): each look is made from the one
+  drawing the first time it is wanted, by stretching the crown about its foot, tinting, and growing it to its
+  size. `client/sprites.ts` now exports the three drawings as `FLORA_PARTS` and `grown` (the Art chat's file:
+  the drawings themselves are untouched).
+- **2.5D** (`three/rounds3d.ts`, `three/nature3d.ts`): the same choice shapes and tints the crown's lumps, a
+  pine's tiers and a bush's clumps. Tree and pine leaves go through the grade now, as bushes and the flat
+  sprites always did, so a hedge and the tree beside it are one family of green. Berries only on the bushes
+  that have them; blossom is three pale flecks.
+- Seen in both views on the knoll, the Rise and Sallow Carr's holt: the holt reads as a wood of different
+  trees now, not 400 stamps. Not done: a real willow (slice 3), flat apple trees, rye.
+- Tests: `tests/flora.test.ts` (5). Whole suite: 263 files pass.
+- Signed: Claude Fable 5.2.

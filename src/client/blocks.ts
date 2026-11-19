@@ -17,6 +17,8 @@ import { furnish, mouth, type Look } from './furnish';
 import { LOOK } from './blocklook';
 import { drawText, textWidth } from './pixfont';
 import { SPRITES } from './sprites';
+import { floraLook } from './flora';
+import { floraSprite } from './florasprites';
 import { drawLife } from './streetlife';
 import { dressOutside, liveOutside } from './exterior';
 import { drawHallRound } from './hallsdraw';
@@ -283,6 +285,11 @@ export function drawRound(c: Ctx, r: Round, x: number, y: number): void {
   if (r.kind === 'crows' || r.kind === 'moths' || r.kind === 'dog' || r.kind === 'smoke') return void drawLife(c, r, x, y);
   if (r.kind === 'candles' || r.kind === 'witchfire') return void drawHallRound(c, r, x, y);
   if (drawSite(c, r, x, y)) return;
+  if (r.kind === 'tree' || r.kind === 'pine' || r.kind === 'bush') {
+    // One of its looks, by where it stands (flora.ts): outline, green, size, mirrored or not.
+    const l = floraLook(r.kind, r.x, r.y, r.r);
+    return void blit(c, gradeSprite(floraSprite(r.kind, l)), x, y + Math.round(r.r * 6), l.flip);
+  }
   if (r.kind === 'reed') {
     // One of three clumps, flipped or not, by where it stands (docs/design/flora.md).
     const k = Math.abs(Math.floor(r.x * 7.3 + r.y * 13.7)) % 6;
