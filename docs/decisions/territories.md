@@ -523,3 +523,12 @@ and a played run.
 - **Tests:** `tests/sallowbeds.test.ts` (9), `sallowholt.test.ts` (13), `sallowcarr.test.ts` (3: the job, a
   sluice shut by its den and then wound, the last map's goal). Played in the browser end to end.
 - Signed: Claude Fable 5.2.
+
+## 2026-11-18, late: flora research (no build)
+
+Kyle: "grass (reeds?) look a little weird sometimes in general and trees etc could use more variety. I want
+these worlds to be beautiful. Spin up some sub agents and get them researching." Three researchers: an audit of
+how every plant is drawn today in both views (pictures in `scratch/flora/`), and two reading how other games do
+ground cover and trees. Written up as `docs/design/flora.md`: nine defects worst first with their causes, what
+good looks like, and four slices. Nothing built. Most of what it would touch is the Art chat's, so who builds
+it is Kyle's call. Signed: Claude Fable 5.2.
