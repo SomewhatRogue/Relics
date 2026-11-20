@@ -75,7 +75,7 @@ export const CAPS: Partial<Record<ModId, number>> = {
  * three levels under it, a TURNING five, a HUNGRY seven. TOUCHED and TURNING carry their cost (costs.ts
  * COST_POINTS, 5 and 8) on top, so their modifiers are worth 29 and 36 before it.
  */
-export const PER_MOD: Record<Tier, number> = { plain: 0, fine: 13, forged: 8, tolmouth: 10, touched: 29 / 3, turning: 12, hungry: 32 / 3 };
+export const PER_MOD: Record<Tier, number> = { plain: 0, fine: 13, forged: 8, tolmouth: 10, touched: 29 / 3, turning: 12, hungry: 18 };
 export const MOD_COUNT: Record<Tier, number> = { plain: 0, fine: 1, forged: 2, tolmouth: 2, touched: 3, turning: 3, hungry: 3 };
 
 /**
