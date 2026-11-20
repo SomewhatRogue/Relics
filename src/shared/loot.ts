@@ -98,6 +98,9 @@ export function itemName(i: Item): string {
   const el = i.traits.find((t) => ELEMENT_TRAITS.includes(t));
   if (i.hungry) return HUNGRY[i.hungry as HungryId].name;
   if (i.holy && VOWED[i.holy as VowedId]) return VOWED[i.holy as VowedId].name;
+  // A fallen vowed piece keeps its name, and that it was vowed (shared/crossroads.ts).
+  const once = (i as { once?: VowedId }).once;
+  if (once && VOWED[once]) return `${VOWED[once].name}, ONCE VOWED`;
   if (i.unique && UNIQUE_NAMES[i.unique]) return UNIQUE_NAMES[i.unique];
   const base = i.slot === 'armor' ? ARMOR_NAME[i.armor ?? 'light'] : i.slot === 'legs' ? LEGS_NAME[i.armor ?? 'light'] : i.slot === 'ring' ? 'RING' : WEAPONS[i.kit ?? 'sword'].name;
   return (el ? TRAITS[el].name + ' ' : '') + base + (i.level ? ' +' + i.level : '');
