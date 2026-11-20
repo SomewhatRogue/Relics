@@ -551,3 +551,14 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   stone, so it takes the tile grid: darker and colder than today's warm cobbles, goblins easier to pick out; a
   village on earth, not stone, is still slice 5.
 - For other chats: your look scripts now shoot the tile look. Add `&tiles=0` for the old. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw, spec (slice 9)
+
+- Kyle: "Yes" to the full redraw. Spec in docs/design/tile-redraw.md; nothing built.
+- The core of it, found from the `?even=1` lesson: keep today's 2.5D scale (20 a tile, figures as they are) and look
+  down at 36.87 degrees (sine 0.6, cosine 0.8), so a floor tile is exactly 20 by 12 render pixels and a wall 16 a
+  tile of height. Floors and fronts drawn at that size give one even pixel everywhere. TILT's 30 does not fit and
+  would come out.
+- Art from a code-drawn tile kit (floors, walls, roofs, stamps for doors and windows), props as front-on cards
+  (slice 4 folded in); figures stay slice 8's. The proof first: the floor and the JOBS house on the street.
+- Waiting on Kyle: the grid, where the art comes from, the proof first. (Claude Opus 5.5)

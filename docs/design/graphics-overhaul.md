@@ -147,7 +147,7 @@ the old path comes out a slice later.
 | 7 | Spells and effects | One language for what glows: spells and fire bloom a little under the clean light, red stays for danger only, element colours checked against the new grade | `spellground.ts`, `three/skills3d.ts`, `fire3d.ts`, `fx.ts` | unclaimed; the Deep and Instances chats' own boss effects stay theirs | The spell fight shot: every effect readable, red only where you must move |
 | 8 | Heroes and enemies redrawn (Kyle, 2026-11-17: "more stylized and cleaner, keeping the dark RPG look and feel") | Mocks first: the knight, one caster and two goblins drawn two or three ways at the game's own size, on the game's floor under the smooth light, beside today's. What "cleaner" most likely means at this size: fewer colours a figure, bigger flat shapes, one dark outline, one accent (gold on heroes, the eyes on goblins), less shading noise inside the body. Kyle picks; then the looks are redrawn class by class in the same sizes, cuts and poses, so every move and timing carries over | `herolooks*.ts`, `herosides*.ts`, `sprites.ts` (goblin parts), `foekits*.ts`, `charpaint.ts`, `charmean.ts` | Art (sprites, herolooks, foekits); New look: characters (charpaint, charmean); Side view finished (herosides free) | The mock sheet first. Then the lineup page (`?lineup`) before and after, and a fight on a phone: each class and each goblin kind known from its outline alone |
 | T | The tile look, light pass (2026-11-19, above) | Behind TILES and TILT: a few shades a material, the stone floor laid tile by tile, a tile exactly 16 render pixels in 2.5D, near-black outlines, less moss; the camera at 30 degrees | `tilelook.ts`, `tilefloor.ts` (new, mine); small edits in `darkgold.ts`, `three/darkgold3d.ts`, `three/post.ts`, `three/figmat.ts` (mine), `world.ts`, `three/view3d.ts`, `three/camera3d.ts`, `main.ts` | this plan | The street and square side by side on a phone, 2.5D. **In; TILES the default, TILT a switch** |
-| 9 | The full redraw (Kyle's later call) | Drawn tiles and sprite sheets; buildings as drawn fronts | its own spec | not started | Once Kyle has seen how far T gets |
+| 9 | The tile redraw (Kyle's yes, 2026-11-19) | The 2.5D world drawn as tile art: 20 a tile at 36.87 degrees so every pixel is one size, a code-drawn tile kit for floors, walls and roofs, props as front-on cards (slice 4 folded in); figures not here (slice 8) | docs/design/tile-redraw.md | spec written, waiting on Kyle's three answers | The street with the floor and one building drawn, before anything else |
 
 Sizes, roughly: 0 and 1a small; 1b medium; 2 medium; 3 small pieces; 4 the big one (six prop families, each a
 small slice); 5 medium; 6 with its own chat; 7 small; 8 a mock round, then large (every look), so it wants its own
@@ -177,7 +177,7 @@ chat or the Art chat once a direction is picked.
 
 ## Open for Kyle
 
-- TILT: keep it or take it out. Then whether the full redraw (slice 9) is worth it.
+- The tile redraw's three questions (docs/design/tile-redraw.md, at its foot); TILT comes out if the grid is agreed.
 - Slice 8's direction, once its mocks are up.
 - LIVING WORLD's sun and figure shadows as a default, once the light is smooth.
 
