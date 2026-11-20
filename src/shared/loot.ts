@@ -79,7 +79,7 @@ export interface Item {
   hungry?: string;
   /** A hungry piece's count, in job-units worn, and the bites it has come to (shared/hunger.ts, the Holy and hungry chat). */
   /** A VOWED piece's id (shared/vowed.ts, the Holy and hungry chat). */
-  holy?: string;
+  holy?: VowedId;
   worn?: number;
   bites?: import('./hunger.js').BiteId[];
   /** A unique piece's id (uniques.ts): its own name, fixed modifiers, its boss's pool. */
