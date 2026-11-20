@@ -147,8 +147,29 @@ starts modest and grows with use.
 - **It keeps its growth** off and on, in the bag, and traded (its count stays in the piece, as hungry's does).
 - **Shown on the piece:** how grown it is, and the jobs to its next step.
 
+**At its cap it ripens: give it up, or fall** (Kyle, 2026-11-19: "encourage to give it up and get the reward
+with church, or fall to temptation, get it even BIGGER but then it starts corrupting. You have to make the choice
+when you next return to town").
+
+- A piece that reaches its cap is **ripe**, marked so on the piece. It goes on working at its cap for the rest
+  of that job.
+- **The next time you come back to town, you choose** before you do anything else there: a moment of its own
+  *(lore: Isolde's words, and the piece's)*, one per ripe piece.
+  - **Give it up:** to the church. A large penance, a fresh holy piece for that slot (starting over at the
+    bottom, to grow again), and the church's thanks *(lore)*. You stay clean. The game leans you this way:
+    the reward is shown first and plainly.
+  - **Fall:** it turns. It becomes a hungry piece **stronger than any hungry piece that dropped** (a first
+    guess: 1.2 times a fresh hungry piece, the top of the game), and its bites (section 2b) start at once and
+    grow as any hungry piece's do. Wearing it, you're corrupt (section 1), with everything that costs.
+  - No putting it off: the choice is made there and then.
+- A ripe piece on a hero who has since gone corrupt by other means can still be given up: the church takes back
+  its own, even from them.
+- **Fallen pieces** are the strongest gear in the game and a story on the piece ("Once HALLOWED") *(lore)*,
+  so a corrupt hero's best piece is often one that was holy first.
+
 **What it makes of the two paths:** hungry is the strongest now and costs you later, so you cycle it; holy is
-weaker now, strongest for the long haul, and never bites. One hero chases the peak, the other builds a kit.
+weaker now and grows, and at its height asks you a question. One hero chases the peak, the other builds toward
+a crossroads.
 
 *The alternative, not taken:* holy that starts strong and fades to plain. It leaves no reason to stay holy and
 copies hungry's decay without its power; say if it should come back.

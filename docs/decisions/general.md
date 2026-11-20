@@ -194,3 +194,6 @@ Claude Opus 5.5
 Claude Opus 5.5
 - Section 5b: holy pieces grow with clean jobs worn, from PRE-WAR's strength to a cap under a fresh hungry
   piece (above PRE-WAR and the uniques); corruption pauses it, never takes it back. Spec only.
+- Section 5b, the crossroads (Kyle loved it): a holy piece at its cap ripens; on next return to town you must
+  choose: give it up (big penance, a fresh holy piece, stay clean) or fall (it turns hungry at about 1.2x a
+  fresh hungry piece, bites start, you're corrupt). Spec only.
