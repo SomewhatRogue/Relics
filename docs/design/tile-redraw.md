@@ -1,8 +1,9 @@
 # The tile redraw: the 2.5D world as drawn tile art
 
 Spec, 2026-11-19 (Kyle and Claude Opus 5.5). Slice 9 of docs/design/graphics-overhaul.md: after the tile look's light
-pass (TILES, on by default), Kyle said yes to the full redraw. **Not built. Nothing starts until Kyle has answered the
-three questions at the foot.**
+pass (TILES, on by default), Kyle said yes to the full redraw. **Kyle's answers, 2026-11-19:** today's angle (so
+36.87 degrees, TILT out), the art drawn by code, the proof first. **The proof (R0 and R1) is in behind `?redraw=1`:
+nothing past it until Kyle has seen it.**
 
 ## What it is for
 
@@ -51,8 +52,8 @@ Each behind `?redraw=1` and an options button first, as TILES was; on by default
 
 | # | Slice | Done when |
 | --- | --- | --- |
-| R0 | The grid: 20 a tile, 36.87 degrees, the render scale per screen; the 2.5D floor painted at 20 by 12 a tile from the kit (stone street and flags first). The ground's marks, soil, puddles and scatter repainted at the new size, not stretched | The street from the light pass side by side on a phone: same tiles across, every floor pixel one size |
-| R1 | **One building, drawn:** the JOBS house on that street, its front and roof from the kit | Kyle's eye on the street shot. **The proof: nothing past R1 until he has seen it** |
+| R0 (in) | The grid: 20 a tile, 36.87 degrees, the render scale per screen; the 2.5D floor painted at 20 by 12 a tile from the kit (stone street and flags first). The ground's marks, soil, puddles and scatter repainted at the new size, not stretched (for now laid over from today's painting, stretched: the second half of R0) | The street from the light pass side by side on a phone: same tiles across, every floor pixel one size |
+| R1 (in) | **One building, drawn:** the JOBS house on that street, its front and roof from the kit. Built for every roofed building at once (the same code): four wall faces (stone courses, or timber on daub over a stone plinth, windows framed, the door's hole), the roof's front slope (slate or thatch). A building turned to face east or west keeps today's roof (its slopes are seen side-on) | Kyle's eye on the street shot. **The proof: nothing past R1 until he has seen it** |
 | R2 | Every house kind in town (cottage, hall, shop, the church, the keep) and the town's walls, steps and ledges | The town sheet, day and night, phone and laptop |
 | R3 | Props as front-on cards | The town and a village: nothing reads as a lump of boxes |
 | R4 | The rest of the places, a theme at a time: a village (on earth, slice 5's call), a wood, the Open Cut, the Deep's floors | The full yardstick sheet |
@@ -66,6 +67,9 @@ are untouched.
 
 ## For Kyle
 
-1. **The grid:** 20 a tile at 36.87 degrees, with TILT taken out. Agreed?
-2. **The art:** drawn by code from a tile kit (recommended), or generated and cut to the palette?
-3. **The proof first:** the floor and one building on the street (R0 and R1), then your eye before the rest?
+Answered 2026-11-19: today's angle (36.87 is it, TILT out), drawn by code, the proof first. Open: the proof itself
+(`?redraw=1`), and then R2 on.
+
+Files: `client/tilekit.ts` (the kit), `three/redraw3d.ts` (faces and slope), `three/redrawfloor.ts` (the floor), the
+switch in `client/tilelook.ts`; small edits in `three/houses3d.ts`, `three/ground.ts`, `world.ts` (paintMap `bare`),
+`three/camera3d.ts`, `three/view3d.ts`.

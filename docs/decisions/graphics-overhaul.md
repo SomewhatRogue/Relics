@@ -562,3 +562,20 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Art from a code-drawn tile kit (floors, walls, roofs, stamps for doors and windows), props as front-on cards
   (slice 4 folded in); figures stay slice 8's. The proof first: the floor and the JOBS house on the street.
 - Waiting on Kyle: the grid, where the art comes from, the proof first. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw's proof (R0 and R1), behind ?redraw=1; TILT out
+
+- Kyle's answers to the spec: "Whichever one was the today tilt and scene you linked" (today's angle: 36.87 is it,
+  so TILT comes out), the art drawn by code, the proof first.
+- **R0:** under REDRAW the 2.5D camera looks down at 36.87 degrees and a tile is 20 render pixels (the render scale
+  picked per screen for the same tiles across), so a floor tile is 20 by 12 and a wall 16 a tile of height. A stone
+  street or flags is drawn at that size from the kit (`tilekit.ts` `floorStamp`, `three/redrawfloor.ts`); what lies
+  on it (soil, marks, water, scatter) is today's painting with its base left clear (`world.ts` paintMap `bare`),
+  laid over stretched for now. Blood lands at the new size (`three/ground.ts`).
+- **R1:** every roofed building (the same code as for one): four wall faces drawn (stone courses four pixels a
+  course; or timber on daub over a stone plinth with braces; windows framed with a sill; a clear hole for the 3D
+  door), and the roof's front slope (slate courses, or thatch) as a child of the roof, so it lifts with it
+  (`three/redraw3d.ts`, small edits in `three/houses3d.ts`: no posts or window timbers in 3D under REDRAW). A building
+  turned east or west keeps today's roof: its slope drawn showed a hatch, being seen side-on.
+- TILT removed from `tilelook.ts` and the options; REDRAW is the second button there.
+- Checked: tsc clean; the street and the square on the phone in 2.5D, against today's default. (Claude Opus 5.5)

@@ -13,6 +13,8 @@ import type { GameMap, Round } from '../../shared/arena';
 import { torchIn } from '../daytime';
 import type { Fx } from '../fx';
 import { OX, OY, PX } from '../world';
+import { REDRAW } from '../tilelook';
+import { redrawFloor, redrawPx } from './redrawfloor';
 import { Boxes, Seed, jit } from './boxes';
 import type { Lamp3 } from './lamps3d';
 import type { L3 } from './lights3d';
@@ -60,11 +62,11 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // The town's stone levels over its gorge; land's earth levels (landledges.ts) get the normal ground and edge.
   const town = stacked(m) && !isLand(m);
   // The floor: the 2D painting's floor, a copy we can bleed on.
-  const fc = document.createElement('canvas');
-  fc.width = m.w * PX;
-  fc.height = m.h * PX;
+  // (The tile redraw, `?redraw=1`: a stone floor drawn at 20 by 12 a tile, redrawfloor.ts.)
+  const rf = REDRAW.on ? redrawFloor(m) : null, fc = rf ?? document.createElement('canvas');
+  if (!rf) (fc.width = m.w * PX), (fc.height = m.h * PX);
   const fg = fc.getContext('2d')!;
-  fg.drawImage(bg, OX, OY, fc.width, fc.height, 0, 0, fc.width, fc.height);
+  if (!rf) fg.drawImage(bg, OX, OY, fc.width, fc.height, 0, 0, fc.width, fc.height);
   const floorTex = texture(fc), floorMat = toonize(new THREE.MeshLambertMaterial({ map: floorTex }));
   // (The living world, wind3d.ts: cloud shadows drifting over the floor.)
   clouded(floorMat);
@@ -233,7 +235,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
       if (done.has(d)) break;
       done.add(d);
       fg.fillStyle = d.col;
-      fg.fillRect(d.x - OX, d.y - OY, 1, 1);
+      if (rf) fg.fillRect(...redrawPx(d.x, d.y), 1, 1);
+      else fg.fillRect(d.x - OX, d.y - OY, 1, 1);
       dirty++;
     }
     if (dirty) (floorTex.needsUpdate = true), (dirty = 0);
