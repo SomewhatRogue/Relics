@@ -318,3 +318,10 @@ docs/design/holy-gear.md slice 8; names from the lore keeper.
   7's map: the dry arch, the cistern, the trough; no light but yours), reached only by a corrupt hero; when it's in,
   the bricked arch button moves there.
 - **Checked:** the touched tests, `npm run check`, the full suite (2265 passed). Next: slice 10, elements (spec section 8), when Kyle wants it.
+
+## 2026-11-20: element augments drafted as their own spec (Claude Opus 5.5)
+
+Kyle, on the spec's section 6 (elements): pull elements off random weapon rolls and have a townsperson put one on
+your weapon for 5 jobs instead. Drafted in docs/design/element-augments.md with his answers (strip old ones, any 5
+jobs, not for the Mage, a replacement warns first) and drafts for the rest; on the board's Waiting list for a
+chat of its own. Holy and hungry's section 6 now points there for anything elemental.

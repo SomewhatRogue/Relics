@@ -47,6 +47,8 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **Element augments** (docs/design/element-augments.md, drafted 2026-11-20 with Kyle): elemental traits off random weapons (stripped from old ones), an element put on your weapon for 5 jobs by a townsperson with an arcane corner from level 5 (Old Merren, to confirm), 20s, first of each free, not for the Mage. A few drafts and the person's name wait on Kyle.
+
 - **Lantern Square, slices 2 and 3** (docs/design/lantern-square.md): Best in Wickhold into the town hall in place of the vote boards, the council decided by deeds, and a weekly stipend for the top three on each Best board. Systems work; the art chat did slice 1.
 
 - **Balance: the bench** (docs/design/balance.md): a bench over every kit, element, skill level, level and tier
