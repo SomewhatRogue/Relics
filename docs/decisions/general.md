@@ -197,3 +197,12 @@ Claude Opus 5.5
 - Section 5b, the crossroads (Kyle loved it): a holy piece at its cap ripens; on next return to town you must
   choose: give it up (big penance, a fresh holy piece, stay clean) or fall (it turns hungry at about 1.2x a
   fresh hungry piece, bites start, you're corrupt). Spec only.
+
+## 2026-11-20: guards look the way they walk (Kyle: "STILL walking looking left but walking right")
+
+- The side-on townsfolk (npcside.ts): headwear sat flat on the crown, so under it the back of the head was bare
+  skin, more of it than the face, and read as the face. Headwear now comes down over the nape (a helm's neck
+  guard, a hood) in its own colour: guards, the ranger and rogue hoods, the soldier's cap. Both views use it.
+  Checked: Watchman Hob on his patrol, close up.
+
+Claude Opus 5.5

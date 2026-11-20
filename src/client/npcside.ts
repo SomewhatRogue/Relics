@@ -59,6 +59,10 @@ function profile(l: Look, apart: boolean): Sprite {
     const s = sideHair(q, hat);
     if (s) parts.push(s);
   }
+  // Headwear comes down over the nape at the back (a helm's neck guard, a hood, a cap's flap): bare, the back of the
+  // head was more skin than the face, and a guard walking east still read as looking west (Kyle, 2026-11-20).
+  const crown = l.hair.find((q) => q[0] === 'r' && (q[2] as number) <= 0);
+  if (hat && crown) parts.push(['r', 3, 3, 2, 3, crown[5] as string]);
   return tallPerson(parts);
 }
 
