@@ -63,8 +63,8 @@ gains another debuff, so at a certain point you want to get rid of it."
   for the corrupt (section 7). Taking it off and storing it doesn't reset its count: the hunger stays in it.
 - **The pull:** a fresh hungry piece is the best thing you can wear; an old one is a weight. So hungry
   heroes keep cycling pieces, keep coming back to the butchers, and keep choosing when to let go.
-- *To settle:* how many jobs from 5% to 50% (a first guess: 12); whether a piece bought or traded keeps its
-  count (a guess: yes, so there's no laundering a hungry piece through a friend).
+- **Settled (Kyle, 2026-11-19):** about 12 jobs from 5% to 50%; a piece bought or traded keeps its count, so
+  trading never resets it.
 
 ## 3. Turning hunger in pays
 
