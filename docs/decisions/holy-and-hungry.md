@@ -166,7 +166,7 @@ start, amends shown only by Odric's line, the costs as drafted.
 - **Words:** lore keeper (Odric never says holy or blessed; "the step", not stairs, except the third stair that
   rocks; names said in title case, not shouted; nothing dated "a long while back") and line editor (Odric's hedges;
   the nine gifts and costs plainer, the two heals given numbers, "coin", not "gold", per the lore keeper).
-- **For Gear (added to the branch `gear-asks`):** `loot.ts` an `Item.holy` field and `itemName` knowing vowed names
+- **For Gear (all five asks now on the branch `gear-asks-2`, on today's main; the old `gear-asks` is stale, safe to delete):** `loot.ts` an `Item.holy` field and `itemName` knowing vowed names
   (until then a vowed piece shows as its PRE-WAR kit, SWORD, in the pack); `card.ts` the VOWED chip, its GIFT and COST
   rows and DIM. **For Economy:** `plusCost` (forgeplus.ts) refusing a vowed piece, as hungry. **For Trading:**
   `cleanItem` keeping `holy` and `worn`.
