@@ -10,6 +10,8 @@ import { Boxes, Seed, jit } from './boxes';
 
 import { stacked } from '../levelpaint';
 import { graded } from '../darkgold';
+import { REDRAW } from '../tilelook';
+import { drawnLedgeFace, drawnStep } from './redraw3d';
 
 // The retaining walls' and steps' stone, through the world's grade (../darkgold.ts) so they are the town's slate, not
 // their own violet (docs/design/graphics-overhaul.md, slice 2).
@@ -49,7 +51,7 @@ function wall(B: Boxes, ax: 'x' | 'z', a0: number, a1: number, c: number, out: n
 }
 
 /** A ramp as a flight of steps, from the level on its low side up to the level on its high side. */
-function steps(B: Boxes, q: Area, m: GameMap, H: number, r: Seed): void {
+function steps(B: Boxes, q: Area, m: GameMap, H: number, r: Seed, group: THREE.Group): void {
   const mx = q.x + q.w / 2, my = q.y + q.h / 2, lv = (x: number, y: number) => levelAt(m, x, y);
   const n = lv(mx, q.y - 0.2), s = lv(mx, q.y + q.h + 0.2), w = lv(q.x - 0.2, my), e = lv(q.x + q.w + 0.2, my);
   const alongY = n !== s || w === e, lo = alongY ? Math.min(n, s) : Math.min(w, e), hi = alongY ? Math.max(n, s) : Math.max(w, e);
@@ -60,6 +62,11 @@ function steps(B: Boxes, q: Area, m: GameMap, H: number, r: Seed): void {
     const at = up > 0 ? f : 1 - f, col = jit(i % 2 ? STONE : TREAD, 0.05, r);
     if (alongY) B.b(mx, 0, q.y + at * q.h, q.w, h, d + 0.01, col);
     else B.b(q.x + at * q.w, 0, my, d + 0.01, h, q.h, col);
+    // The tile redraw (redraw3d.ts): each step's tread drawn, and its riser where it faces the camera.
+    if (!REDRAW.on) continue;
+    const y0 = (lo + ((hi - lo) * i) / (k + 1)) * H, c = alongY ? q.y + at * q.h : q.x + at * q.w, seed = Math.round(q.x * 31 + q.y * 17 + i);
+    if (alongY) drawnStep(group, q.x, q.x + q.w, c - d / 2, c + d / 2, y0, h, up < 0, seed);
+    else drawnStep(group, c - d / 2, c + d / 2, q.y, q.y + q.h, y0, h, false, seed);
   }
 }
 
@@ -70,6 +77,9 @@ export function stackLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THR
     const h = (l.lv ?? 1) * H;
     B.b(l.x + l.w / 2, 0, l.y + l.h / 2, l.w - 0.02, h - 0.02, l.h - 0.02, 0x2e2b34);
     group.add(top(l, h, m, floor));
+    // The tile redraw (redraw3d.ts): a face toward the camera drawn as courses with a coping, not built of stones.
+    const put = (ax: 'x' | 'z', s: number, a: number, c: number, out: number) =>
+      REDRAW.on && ax === 'x' && out > 0 ? group.add(drawnLedgeFace(s, a, c + 0.006, h, Math.round(s * 31 + c * 17))) : wall(B, ax, s, a, c, out, h, r);
     // Faces only where the ground beside the edge is lower than this level (and inside the map).
     const face = (ax: 'x' | 'z', c: number, out: number, a0: number, a1: number) => {
       let s = -1;
@@ -77,15 +87,15 @@ export function stackLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THR
         const mid = (a + Math.min(a + 0.5, a1)) / 2, px = ax === 'x' ? mid : c + out * 0.2, pz = ax === 'x' ? c + out * 0.2 : mid;
         const low = px > 0 && pz > 0 && px < m.w && pz < m.h && levelAt(m, px, pz) < (l.lv ?? 1);
         if (low && s < 0) s = a;
-        if (!low && s >= 0) wall(B, ax, s, a, c, out, h, r), (s = -1);
+        if (!low && s >= 0) put(ax, s, a, c, out), (s = -1);
       }
-      if (s >= 0) wall(B, ax, s, a1, c, out, h, r);
+      if (s >= 0) put(ax, s, a1, c, out);
     };
     face('x', l.y + l.h, 1, l.x, l.x + l.w);
     face('x', l.y, -1, l.x, l.x + l.w);
     face('z', l.x, -1, l.y, l.y + l.h);
     face('z', l.x + l.w, 1, l.y, l.y + l.h);
-    for (const q of l.ramps) steps(B, q, m, H, r);
+    for (const q of l.ramps) steps(B, q, m, H, r, group);
   }
 }
 

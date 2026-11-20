@@ -19,6 +19,7 @@ import { woodpile } from './woodpile3d';
 import type { Kindling } from '../../shared/kindling';
 import { asLamp, lampMeshes } from './lamps3d';
 import { REDRAW } from '../tilelook';
+import { gradeHex } from '../darkgold';
 import { drawHouse } from './redraw3d';
 import { doorGlow, shutDoor } from './shut3d';
 import { dress3d } from './darkdress3d';
@@ -74,7 +75,7 @@ const shade = (c: number, k: number) => {
 export function buildBlock(b: Block, kin?: Kindling | null): Built {
   const a = turnOf(b);
   if (!a) return buildFront(b, kin);
-  const built = buildFront(asFront(b), null, true), cx = b.x + b.w / 2, cz = b.y + b.h / 2;
+  const built = buildFront(asFront(b), null, a), cx = b.x + b.w / 2, cz = b.y + b.h / 2;
   const turn = new THREE.Group(), holder = new THREE.Group();
   built.group.position.set(-cx, 0, -cz);
   turn.add(built.group);
@@ -91,8 +92,8 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
   return { ...built, group: holder, fires };
 }
 
-/** `turned`: built facing south and turned after (buildBlock); the redraw then leaves its roof as it is. */
-function buildFront(b: Block, kin?: Kindling | null, turned = false): Built {
+/** `turn`: built facing south and turned by this after (buildBlock), for the redraw to map its slopes to the screen. */
+function buildFront(b: Block, kin?: Kindling | null, turn = 0): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
   // The new look's stalls, benches and carts from the kit (streetprops.ts, `?hd&street`).
   const kf = STREET ? kitFurniture(b.kind, b.x, b.y, b.w, b.h) : null;
@@ -228,7 +229,7 @@ function buildFront(b: Block, kin?: Kindling | null, turned = false): Built {
   if (roof) group.add(roof);
   if (drawn) {
     const thatch = !!home && !!asBuilt(b, home).thatch && b.kind === 'house';
-    drawHouse(group, roof, { x0, x1, z0, z1, H, stone, thatch, door, dw, dh, wins, angle: 0.62, slope: !turned && b.kind !== 'tower' && !roofGap(b) }, Math.round(b.x * 31 + b.y * 17 + 3));
+    drawHouse(group, roof, { x0, x1, z0, z1, H, stone, thatch, door, dw, dh, wins, angle: 0.62, slope: b.kind !== 'tower' && !roofGap(b), turn, cx: b.x + b.w / 2, cz: b.y + b.h / 2, wall: gradeHex(wallC, 'wall'), roof: gradeHex(shade(hex(hc?.roof ?? L.roof), k), 'roof') }, Math.round(b.x * 31 + b.y * 17 + 3));
   }
   return { group, roof, fires, top: H + 1, lamps: lampMeshes(group) };
 }

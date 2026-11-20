@@ -579,3 +579,18 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   turned east or west keeps today's roof: its slope drawn showed a hatch, being seen side-on.
 - TILT removed from `tilelook.ts` and the options; REDRAW is the second button there.
 - Checked: tsc clean; the street and the square on the phone in 2.5D, against today's default. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw, R2 (the town), behind ?redraw=1
+
+- Kyle, after the proof: "Continue." R2 in, still behind the switch.
+- Every drawn face is now mapped by where its corners land on screen (`three/redraw3d.ts` `screenQuad`): one drawn
+  pixel is one render pixel whichever way it faces. That let a turned building's roof be drawn (its slopes are seen
+  side-on, so its courses run up the picture: `tilekit.ts` `roofCanvas` `side`); the hatch is gone.
+- The town's level faces toward the camera drawn as courses with a coping, every flight's treads and the risers that
+  face the camera (`three/layoutledges.ts`, small edits; the Town layout chat is finished). The first steps had a pale
+  front edge on every tread and read as a grate: the edge is one shade up now.
+- On the laptop the town had gone one slate (the church's pale front and the town hall's brown roof lost): each
+  building's drawn walls and roof now take its own colours (`tilekit.ts` `tint`), still a handful of shades each.
+  A timber house's daub takes its colour; its plinth stays stone. The street is a shade darker than the walls.
+- Checked: tsc clean; the street at night, the church and the square by day on the phone and the church on the
+  laptop, against today's default; no page errors. (Claude Opus 5.5)
