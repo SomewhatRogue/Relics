@@ -192,3 +192,5 @@ Claude Opus 5.5
   grows with jobs worn, 5% to 50%, then it gains a second; its count stays in the piece. Not built.
 
 Claude Opus 5.5
+- Section 5b: holy pieces grow with clean jobs worn, from PRE-WAR's strength to a cap under a fresh hungry
+  piece (above PRE-WAR and the uniques); corruption pauses it, never takes it back. Spec only.

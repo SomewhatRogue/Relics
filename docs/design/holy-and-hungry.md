@@ -123,6 +123,30 @@ drops a relic". Penance (section 3) pays in holy pieces instead.
   Moll's while worn, say) *(lore)*.
 - Got from: turning hunger in (section 3), rare church-side spoils, and the church shop for clean heroes.
 
+## 5b. Holy pieces grow with you (Kyle, 2026-11-19)
+
+Kyle: "maybe holy starts out strong but degrades down to basically a white gear. Or inverted, it gets stronger up
+to a high cap but never as high as hungry but above unique and pre-war."
+
+**The plan: inverted, the mirror of hungry (section 2b).** Hungry starts at its peak and sours with use; holy
+starts modest and grows with use.
+
+- **Starts about PRE-WAR's strength** (tier step 3) when you first put it on.
+- **Grows with each job finished wearing it while clean**, toward a cap a little under a fresh hungry piece:
+  above PRE-WAR and the uniques, at about HALLOWED's top (step 5 and a half against hungry's 6). A first
+  guess: full in about 15 jobs.
+- **Corruption stops it.** It doesn't grow while you're corrupt, and it goes dim anyway (section 1). It never
+  loses what it had grown: clean again, it picks up where it stopped. This is the holy path's reward for
+  staying the course.
+- **It keeps its growth** off and on, in the bag, and traded (its count stays in the piece, as hungry's does).
+- **Shown on the piece:** how grown it is, and the jobs to its next step.
+
+**What it makes of the two paths:** hungry is the strongest now and costs you later, so you cycle it; holy is
+weaker now, strongest for the long haul, and never bites. One hero chases the peak, the other builds a kit.
+
+*The alternative, not taken:* holy that starts strong and fades to plain. It leaves no reason to stay holy and
+copies hungry's decay without its power; say if it should come back.
+
 ## 6. Later: elements
 
 Both paths can carry an element (fire, frost, storm), each bending it: holy fire heals what it touches
