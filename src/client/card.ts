@@ -15,6 +15,8 @@ import { areas } from './guardarea';
 import { barWord, barWords } from '../shared/barword';
 import { shown as bigNum } from '../shared/shown';
 import { biteLines } from './bitewords';
+import { VOWED, VOWED_WORD, dimmed, vowedOf } from '../shared/vowed';
+import { VOWEDW } from './vowedwords';
 
 /** How a weapon fights, as three short labelled rows (TAP, HOLD, PERFECT, and ALSO where there's a
  *  bonus; kitlines.ts), then its GUARD and DODGE areas (guardarea.ts). */
@@ -135,13 +137,13 @@ export function card(it: Item, h?: Hero, brief = false): string {
   // Its item level beside the tier (shared/itemlevel.ts): where it dropped, read from its points if it's from before levels.
   // `LV 7 +2`: where it dropped, then Halvard's pluses on top (the name drops its own +2 here).
   const lvp = `LV ${ilvlOf(it)}${plusOf(it) ? ' +' + plusOf(it) : ''}`;
-  return `<div class="card-head" style="--t:${itemCol(it)}"><span class="chip${chip}">${isUnique(it) ? LOOTW.title : t.name}</span><span class="ilv">${lvp}</span><b>${itemName(it).replace(/ \+\d+$/, '')}</b></div>` +
+  return `<div class="card-head" style="--t:${itemCol(it)}"><span class="chip${chip}">${isUnique(it) ? LOOTW.title : vowedOf(it) ? VOWED_WORD : t.name}</span><span class="ilv">${lvp}</span><b>${itemName(it).replace(/ \+\d+$/, '')}</b></div>` +
     (uniqueLine(it) ? `<div class="uline">${uniqueLine(it)}</div>` : '') +
     // SOULBOUND: taken by another class (sim/loot.ts); it sells, it never trades.
     (it.bound ? `<div class="tr"><b>SOULBOUND:</b> ${CARDW.bound}</div>` : '') +
     (how ? `<div class="how">${how}</div>` : '') + [...plus, ...mods, ...traits].join('') +
     (it.cost ? labelRows([[CARDW.cost, costText(it.cost, cls)]], 'hungry') : '') +
-    (it.hungry ? hungryRows(it.hungry as HungryId, cls) + labelRows(biteLines(it, cls), 'hungry') : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
+    (it.hungry ? hungryRows(it.hungry as HungryId, cls) + labelRows(biteLines(it, cls), 'hungry') : '') + (vowedOf(it) ? labelRows([['GIFT', barWords(VOWED[vowedOf(it)!].gift, cls)], ['COST', barWords(VOWED[vowedOf(it)!].cost, cls)]], 'vowed') + (h && dimmed(h) ? `<div class="tr">${VOWEDW.dim}</div>` : '') : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }
 
 /** A potion: EFFECT, LASTS, and THROWN for a flask. */
