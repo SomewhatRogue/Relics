@@ -192,3 +192,25 @@ start, amends shown only by Odric's line, the costs as drafted.
   Coat's raise, both rings' relic gifts (the Relics chat's files: asked then), Moll's dice vow, Tobin and Nettle
   refusing a vowed piece.
 - **Checked:** the touched tests, `npm run check`, the full suite (2242 passed).
+
+## 2026-11-19: slice 4, stage 3 in: the censer, the coat, Moll's vow, Tobin and Nettle (Claude Opus 5.5)
+
+- **The Infirmary Censer:** a heal on a friend reaches the next nearest (not the healer, not the one healed) at half
+  of what landed (`noteCarry` from `mend`, sim/holy.ts, paid by `payVowed`; a carry never carries again); heals on
+  yourself do half (`heals`, sim/hungry.ts).
+- **The Cart-hand's Coat:** picking a friend up twice as fast (sim/party.ts, the pick-up rate).
+- **The Sworn-Off Ring's vow:** Dicer Moll won't play (client/squareui.ts shows her line and the rule; `Game.dice`
+  refuses too). While it's dim the vow lapses with the gift.
+- **Tobin and Nettle won't buy a vowed piece** (shared/fence.ts: `tobinWont` gives 'vowed', `nettleTakes` never;
+  client/stores.ts gives Tobin his own line for it, not his hungry-gear fear).
+- **For the Relics chat (asked):** both rings' gifts, ready in sim/vowed.ts as two calls: `moreRelicUses(h)` (1 more
+  for THE SWORN-OFF RING) wherever a relic's uses are counted, and `vowedRelicUsed(h, heroes, ev)` when a relic is
+  used (THE TITHE RING heals friends within 4 tiles 4 each). Until then the two rings have their costs and no gift.
+- **Words:** lore keeper (Moll shrugs, points you to Gannet, "love"; Tobin defers to the church, it came off Odric's
+  shelf; for the bible: vowed pieces sit on Odric's shelf, and Moll and Tobin know them by sight) and line editor
+  (both run on). 
+- **Small edits:** `sim/holy.ts`, `sim/party.ts`, `sim/hungry.ts`, `shared/fence.ts`, `client/stores.ts`,
+  `client/squareui.ts`, `client/game.ts` (`dice`).
+- **Checked:** the touched tests, `npm run check`, the full suite (2246 passed).
+- Slice 4 is done but for the asks: Gear (names and card rows, `gear-asks-2`), Economy (no pluses), Trading
+  (`cleanItem`), Relics (the rings). Next: slice 5, vowed pieces grow (holy-and-hungry 5b).

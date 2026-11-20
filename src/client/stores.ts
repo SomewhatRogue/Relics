@@ -32,6 +32,7 @@ import { WEAPONS } from '../shared/tuning';
 import { openShiftDesk } from './shiftui';
 import { SHIFTW } from './shiftwords';
 import './stores.css';
+import { VOWEDW } from './vowedwords';
 
 const p = (s: string) => `<p>${s}</p>`;
 const h3 = (s: string, n?: string) => `<h3 class="sh">${s}${n ? ` <i>${n}</i>` : ''}</h3>`;
@@ -97,7 +98,10 @@ function merchant(g: Game, panel: Panel): void {
   const tap = (s: string, i: number) => {
     const it = s === 'bag' ? pr.bag[i] : undefined, price = it ? sellValue(it) : 0;
     if (!it) return;
-    if (wont(it)) return itemPop({ icon: itemIcon(it), name: itemName(it), col: itemCol(it), body: says('Tobin', PAWN.hungry) + card(it, g.hero, true), acts: [], again, why: PAWN.wont });
+    if (wont(it)) {
+      const vowed = tobinWont(pr, it) === 'vowed';
+      return itemPop({ icon: itemIcon(it), name: itemName(it), col: itemCol(it), body: says('Tobin', vowed ? VOWEDW.tobin : PAWN.hungry) + card(it, g.hero, true), acts: [], again, why: vowed ? VOWEDW.tobinRule : PAWN.wont });
+    }
     piece(g, it, [{ label: PAWN.sell(price), primary: true, act: () => void (pawn(pr, i) && syncPack(g)) }], again);
   };
   const goods: Good[] = [

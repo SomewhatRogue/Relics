@@ -86,3 +86,44 @@ describe('vowed gifts', () => {
     expect(goldKeep(wearing('tithe'))).toBeCloseTo(VOWED_FX.kills);
   });
 });
+
+describe('vowed, stage 3', () => {
+  it('THE INFIRMARY CENSER: a heal on a friend reaches a second at half; heals on yourself do half', async () => {
+    const { mend } = await import('../src/sim/holy');
+    const { heals } = await import('../src/sim/hungry');
+    const c = wearing('infirmary', 5, 5, 'c'), a = newHero('a', 6, 5), b = newHero('b', 7, 5);
+    a.hp = a.maxHp - 40, b.hp = b.maxHp - 40;
+    mend(c, a, 20, []);
+    const got = a.hp - (a.maxHp - 40);
+    expect(got).toBeGreaterThan(0);
+    payVowed([c, a, b], 0, []);
+    expect(b.hp - (b.maxHp - 40)).toBeCloseTo(Math.round(got / 2), 0);
+    expect(heals(c, c, 10)).toBeCloseTo(10 * VOWED_FX.selfHeal);
+    expect(heals(a, c, 10)).toBe(10);
+  });
+  it("THE SWORN-OFF RING: Moll won't play", async () => {
+    const { wearsVowed } = await import('../src/shared/vowed');
+    const h = wearing('swornoff');
+    expect(wearsVowed(h, 'swornoff')).toBe(true);
+    h.rings = [...h.rings, hungryRing];
+    expect(wearsVowed(h, 'swornoff')).toBe(false);
+  });
+  it('Tobin and Nettle won\'t buy a vowed piece', async () => {
+    const { tobinWont, nettleTakes } = await import('../src/shared/fence');
+    const ring = piece('tithe'), p = { bag: [ring] };
+    expect(tobinWont(p, ring)).toBe('vowed');
+    expect(nettleTakes(ring, { bag: [ring, hungryRing] })).toBe(false);
+  });
+});
+
+describe('the rings, ready for the Relics chat', () => {
+  it('THE SWORN-OFF RING holds one more use; THE TITHE RING heals friends near on a relic use', async () => {
+    const { moreRelicUses, vowedRelicUsed } = await import('../src/sim/vowed');
+    expect(moreRelicUses(wearing('swornoff'))).toBe(1);
+    expect(moreRelicUses(newHero('x', 0, 0))).toBe(0);
+    const t = wearing('tithe', 5, 5, 't'), f = newHero('f', 6, 5);
+    f.hp = f.maxHp - 30;
+    vowedRelicUsed(t, [t, f], []);
+    expect(f.hp).toBeGreaterThan(f.maxHp - 30);
+  });
+});

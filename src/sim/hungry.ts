@@ -7,6 +7,8 @@ import { isDead } from './damage';
 import type { Enemy, FightEvent, Hero } from './types';
 import { count } from './score';
 import { healBite, othersHeal } from './bites';
+import { vowedOn } from './vowed';
+import { VOWED_FX } from '../shared/vowed';
 
 export const HUNGRY_FX = { leech: 0.2, fed: 0.1, starve: 8, bite: 3, chain: 4, chainDmg: 0.6, apron: 0.5, lure: 6, ransom: 50, near: 4 };
 
@@ -20,7 +22,7 @@ export function heals(to: Hero, by: Hero | undefined, n: number): number {
   if (by?.cold) return 0;
   if (wears(to, 'cleaver') && by !== to) return 0;
   // A STARVED bite on the one healed takes its share, and a heal from someone else does less at a high Want (sim/bites.ts).
-  const k = healBite(to) * (by && by !== to ? othersHeal(to) : 1);
+  const k = healBite(to) * (by && by !== to ? othersHeal(to) : 1) * (by === to && vowedOn(to, 'infirmary') ? VOWED_FX.selfHeal : 1);
   if (wears(by, 'keeping')) return n * (by === to ? 2 : 0.5) * k;
   return n * k;
 }

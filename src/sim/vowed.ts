@@ -7,12 +7,15 @@
  * - Blows on goblins (`noteVowed`, sim/damage.ts) are queued and paid each tick with the party in hand
  *   (`payVowed`, sim/room.ts): KETTERBY'S BOW's full draw heals the nearest friend, THE RETURNED PAIR's backstab
  *   guards friends near, THE APPRENTICE'S STAFF's kill refills the nearest friend's bar.
- * Still to wire (slice 4, stage 3): THE INFIRMARY CENSER's carry, THE CART-HAND'S COAT's raise, both rings' relic gifts.
+ * - THE INFIRMARY CENSER: a heal on a friend reaches the next nearest at half (`noteCarry`, from `mend`, sim/holy.ts);
+ *   its cost, heals on yourself at half, is in `heals` (sim/hungry.ts). THE CART-HAND'S COAT raises twice as fast (sim/party.ts).
+ * Both rings' relic gifts are asked of the Relics chat (its relic charges and uses).
  */
 import type { GearStats } from '../shared/tuning';
 import { VOWED_FX, dimmed, vowedOf, type VowedId } from '../shared/vowed';
 import type { FightEvent, Hero } from './types';
 import { mend } from './holy';
+import { healMult } from './lantern';
 import { breathCap } from './brandy';
 
 const wornBy = (h: Hero) => [h.arms?.[h.weapon], h.armor, h.legs, ...(h.rings ?? [])];
@@ -68,8 +71,22 @@ const queue: { by: string; backstab: boolean; charged: boolean; killed: boolean 
 export function noteVowed(by: string | undefined, o: { backstab?: boolean; charged?: boolean }, killed: boolean): void {
   if (by && (o.backstab || o.charged || killed)) queue.push({ by, backstab: !!o.backstab, charged: !!o.charged, killed });
 }
-/** Pay what was queued, with the party in hand; the queue is emptied either way. */
+/** Heals a censer's wearer gave friends this tick, to carry to a second. */
+const carries: { by: Hero; to: Hero; n: number }[] = [];
+let carrying = false;
+export function noteCarry(by: Hero, to: Hero, n: number): void {
+  if (!carrying && n > 0 && vowedOn(by, 'infirmary')) carries.push({ by, to, n });
+}
+/** Pay what was queued, with the party in hand; the queues are emptied either way. */
 export function payVowed(heroes: Hero[], now: number, ev: FightEvent[]): void {
+  carrying = true;
+  for (const c of carries.splice(0)) {
+    if (!heroes.includes(c.by)) continue;
+    const o = nearest(c.to, heroes.filter((x) => x !== c.by));
+    // Half of what landed, already grown once by the healer's own (so `mend` doesn't grow it twice).
+    if (o) mend(c.by, o, (c.n * VOWED_FX.carry) / healMult(c.by), ev);
+  }
+  carrying = false;
   for (const q of queue.splice(0)) {
     const h = heroes.find((x) => x.id === q.by);
     if (!h || !up(h)) continue;
@@ -83,4 +100,12 @@ export function payVowed(heroes: Hero[], now: number, ev: FightEvent[]): void {
       if (o) fill(o, VOWED_FX.stam, now);
     }
   }
+}
+
+/** For the Relics chat to call (asked): how many more uses `h`'s relic holds, THE SWORN-OFF RING's gift. */
+export const moreRelicUses = (h: Hero) => (vowedOn(h, 'swornoff') ? VOWED_FX.relicUses : 0);
+/** For the Relics chat to call on a relic used (asked): THE TITHE RING heals friends near its wearer. */
+export function vowedRelicUsed(h: Hero, heroes: Hero[], ev: FightEvent[]): void {
+  if (!vowedOn(h, 'tithe')) return;
+  for (const o of heroes) if (o !== h && up(o) && near(h, o)) mend(h, o, VOWED_FX.tithe, ev);
 }

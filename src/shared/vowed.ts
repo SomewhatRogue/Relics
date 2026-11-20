@@ -9,7 +9,7 @@ import type { Rng } from './rng.js';
 import { budget, modPool, rollMods } from './gear.js';
 import type { Item } from './loot.js';
 import type { HeroClass, WeaponId } from './weapons.js';
-import { wearsHungry } from './corrupt.js';
+import { wearsHungry, wornPieces } from './corrupt.js';
 import { shown } from './shown.js';
 
 /** What the gifts and costs do, in the fight's own units (sim/vowed.ts). Heals in health (shown x10). */
@@ -60,3 +60,5 @@ export function rollVowed(rng: Rng, cls: HeroClass, slot: 'weapon' | 'armor' | '
 export const dimmed = (k: Parameters<typeof wearsHungry>[0]) => wearsHungry(k);
 /** A vowed piece won't go on while a hungry one is worn. */
 export const blocksVowed = (k: Parameters<typeof wearsHungry>[0], it: Item) => isVowed(it) && wearsHungry(k);
+/** Wearing vowed piece `id`, and not dim: for a profile in town or a hero. */
+export const wearsVowed = (k: Parameters<typeof wearsHungry>[0], id: VowedId) => !dimmed(k) && wornPieces(k).some((it) => vowedOf(it) === id);

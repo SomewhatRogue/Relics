@@ -16,6 +16,12 @@ export const VOWEDW = {
     "You keep coming back to the step. I've noticed, that's all.",
     "More than most, now, though I won't say any more than that. Mind the third stair, it rocks.",
   ],
+  /** Dicer Moll, to a hero in THE SWORN-OFF RING: a shrug, no lecture. And the plain rule. */
+  moll: "Not in that ring, love, I don't take a sworn-off hand at my table, and it's your money to keep, so there's no harm in it. Gannet's pouring, anyway, and I'll be here when you take it off, cheating just the same.",
+  mollRule: "No dice at Moll's while you wear THE SWORN-OFF RING.",
+  /** Tobin, offered a vowed piece: the church kept it, and he won't buy it. And the plain rule. */
+  tobin: "That came off Odric's shelf, and it's not mine to buy whatever you'd take for it, so keep it on you, and anything else in that sack I'll gladly look at.",
+  tobinRule: "Tobin won't buy vowed gear.",
   /** The card's chip and the dim row (asked of the Gear chat's card.ts). */
   dim: 'DIM: gives nothing while you wear hungry gear.',
 };

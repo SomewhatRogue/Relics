@@ -40,7 +40,7 @@ import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, t
 import { feedKit } from '../shared/hunger';
 import { jobUnits } from '../shared/jobunits';
 import { isCorrupt } from '../shared/corrupt';
-import { isVowed, rollVowed } from '../shared/vowed';
+import { isVowed, rollVowed, wearsVowed } from '../shared/vowed';
 import { amendsOf, stepCrossed } from '../shared/amends';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
@@ -1790,7 +1790,7 @@ export class Game {
    */
   dice(bet: number): { you: number[]; moll: number[]; won: boolean } | null {
     const p = this.profile;
-    if (p.gold < bet || bet <= 0) return null;
+    if (p.gold < bet || bet <= 0 || wearsVowed(p, 'swornoff')) return null;
     const r = new Rng(p.id.length * 7919 + p.dice * 104729 + p.gold * 31 + p.runs);
     p.dice++;
     const roll = () => [1 + r.int(6), 1 + r.int(6)], you = roll(), moll = roll(), a = you[0] + you[1], b = moll[0] + moll[1];
