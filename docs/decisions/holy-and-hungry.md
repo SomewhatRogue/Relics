@@ -80,4 +80,7 @@ floors. Note for the spec: 2b says a traded hungry piece keeps its count, but hu
      against 36), spec 2b's "super strong from the start". Yours to check against `CAPS` and the rarity and budget tests.
   3. `client/card.ts`: one call after `hungryRows`, `labelRows(biteLines(it, cls), 'hungry')`, so the bites show.
   Without 3 the bites work but don't show; without 2 the piece only got worse. So 2 and 3 should land with slice 1.
+  On that branch, 2 fails two of Gear's own tests in `tests/itemlevel.test.ts` ("tiers close, 13 to 32 after costs",
+  and "a level beats a tier: ... HUNGRY seven"): 1.5 times puts HUNGRY at 54 and further from the levels. Those are Gear's
+  rules, so the number, or a smaller lift (1.25 is 45), and those tests are Gear's to settle; I didn't touch them.
 - Next: slice 2, corrupt and the Want's table.
