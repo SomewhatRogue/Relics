@@ -15,7 +15,6 @@
  *   at `HUNGRY_CUT`, less again: him or the forge, and nobody else.
  * Selling to either is trade: it never touches the Want.
  */
-import { RARE } from './gear.js';
 import { PER_LEVEL, priceOf } from './prices.js';
 import type { Stores } from './bags.js';
 import type { Item } from './loot.js';
@@ -29,12 +28,13 @@ export function carriesHungry(p: Carrier): boolean {
   return [...Object.values(p.arms ?? {}), p.armor, ...(p.rings ?? []), ...p.bag].some((it) => it?.quality === 'hungry');
 }
 
-/** Why Tobin won't buy `it` off `p` ('' if he will): you carry hungry gear, or it's one of the rare three. */
+/** Why Tobin won't buy `it` off `p` ('' if he will): you carry hungry gear, it's vowed, or it's hungry. */
 export function tobinWont(p: Carrier, it: Item): '' | 'panic' | 'rare' | 'vowed' {
   if (carriesHungry(p)) return 'panic';
   // A VOWED piece is the church's: neither he nor Nettle buys it (shared/vowed.ts).
   if (isVowed(it)) return 'vowed';
-  return RARE.includes(it.quality) ? 'rare' : '';
+  // Only hungry gear frightens him now; SIEGE and MARSHAL are clean (holy-and-hungry slice 8).
+  return it.quality === 'hungry' ? 'rare' : '';
 }
 
 /** Nettle's cut of a piece's worth: two thirds of Tobin's (prices.ts PAWN_CUT, 0.2 since the economy). */
