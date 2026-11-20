@@ -171,7 +171,8 @@ export class View3D {
     let ppu = STREET ? STREET_PPU : Math.sqrt((W * H) / (Math.sin((PITCH_TODAY * Math.PI) / 180) * floor));
     // The tile look (../tilelook.ts): a tile exactly 16 render pixels across, so the floor's art pixels are one render
     // pixel each and every one the same width; the render scale picked to keep about as many tiles on screen.
-    if (TILES.on && !STREET && !HD) {
+    // (Only with `even` since 2026-11-19: figures keep their size, so this makes them bigger against the floor.)
+    if (TILES.on && TILES.even && !STREET && !HD) {
       const across = W / ppu;
       S = this.S = Math.max(1, Math.round(Dw / (16 * across)));
       (W = Math.ceil(Dw / S)), (H = Math.ceil(Dh / S)), (ppu = 16);

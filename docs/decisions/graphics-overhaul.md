@@ -530,3 +530,14 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Checked: tsc clean; the full suite 2199 passed, 1 skipped; the street and the square shot on the phone in 2.5D
   today, TILES, and TILES with TILT. Not looked at: laptop, the flat view, jobs and the Deep under TILES, a real phone.
   (Claude Opus 5.5)
+
+## 2026-11-19: the tile look, Kyle's first try: too close, the walk too slow
+
+- Kyle: "I think i like it but it makes walking speed seem superrrr slow. And its a little too zoomed in."
+- Measured: the tiles across were about the same (a phone 10.5 against 10), but the even 16 pixel tile made figures
+  about a fifth bigger against the floor (half again on a big phone), since they keep their own pixel size. Bigger
+  bodies covering the same ground read as closer and slower.
+- The even tile is now its own switch, `?even=1`, off; TILES keeps today's 2.5D scale exactly. A cobble street is now
+  mostly small cobbles (slabs one tile in twelve), so the ground ticks past under a walk. The walk itself is untouched.
+- Left as it is: TILT makes a walk up or down the screen cover about 15 percent fewer pixels (30 degrees against 36).
+- Checked: tsc clean; the street on the phone in 2.5D against today's shot, same scale. (Claude Opus 5.5)

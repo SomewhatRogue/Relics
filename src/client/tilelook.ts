@@ -28,7 +28,12 @@ function read(name: 'tiles' | 'tilt'): string | null {
 const on = (v: string | null) => v !== null && v !== '0' && v !== 'off';
 const tiltRaw = read('tilt'), tiltN = Number(tiltRaw);
 
-export const TILES = { on: on(read('tiles')) };
+/**
+ * `even`: a tile exactly 16 render pixels in 2.5D, so floor pixels are all one width (`?even=1`, off by default). Off,
+ * a tile keeps today's 2.5D size (about 19.5 on a phone): Kyle found the even tile too close and the walk too slow,
+ * since figures stay their own size and so stand about a fifth bigger against the floor (2026-11-19).
+ */
+export const TILES = { on: on(read('tiles')), even: typeof location !== 'undefined' && on(new URLSearchParams(location.search).get('even')) };
 /** The 2.5D camera's pitch in degrees: a number in the address is tried as given (20 to 60). */
 export const TILT = { deg: !on(tiltRaw) ? PITCH_TODAY : tiltN >= 20 && tiltN <= 60 ? tiltN : PITCH_TILTED };
 

@@ -33,7 +33,9 @@ TILT buttons in the options box (each saves and reloads; `client/tilelook.ts`):
 - **The stone floor laid tile by tile** (`tilefloor.ts`, from `world.ts`): each 16 pixel tile is four cobbles, two
   half slabs or one slab, lit from the upper left, in dark mortar, no flecks; moss in short runs in the joints. Kept
   to the bottom of the ladder so the ground stays the quietest tier. Cobble and flagstone floors only.
-- **Even pixels in 2.5D** (`three/view3d.ts`): a tile is exactly 16 render pixels across (it was about 19.5 on a
+- **Even pixels in 2.5D, now its own switch `?even=1`** (`three/view3d.ts`; off by default since Kyle's first try: figures
+  keep their own size, so they stood about a fifth bigger against the floor, which read as too close and a slow walk).
+  With it a tile is exactly 16 render pixels across (it was about 19.5 on a
   phone, so floor pixels came out uneven widths); the render scale is picked to keep about as many tiles on screen.
   Everything in the tile floor that runs across is two pixels tall, so at 30 degrees (exactly half the rows) every
   floor pixel is the same size, and at 36 none drops out.
