@@ -1,9 +1,10 @@
 /**
- * The three rare tiers are dangerous (Kyle, 2026-11-05: "orange, yellow and red are really good but rare
- * and dangerous"). Red, HUNGRY, is plain steel the hunger has taken (hungry.ts): a gift, a named cost,
- * the Want, the church. Below it the same thing caught partway: TOUCHED (yellow) has only just begun,
- * TURNING (orange) is most of the way. Each carries one COST the fight feels, worth budget points like a
- * modifier but taken away, and each grows the Want a little for every job it's worn on.
+ * The three rare tiers each ask something of you (Kyle, 2026-11-05: "orange, yellow and red are really good but
+ * rare and dangerous"). Red, HUNGRY, is plain steel the hunger has taken (hungry.ts): a gift, a named cost, the
+ * Want, the church. Below it, clean since 2026-11-20 (Kyle: "make them clean"): SIEGE (yellow), struck fast in the
+ * three winters for someone not meant to wear it long, and MARSHAL (orange), a captain's set fitted to one man.
+ * Good steel made for someone else's measure: each carries one COST the fight feels, worth budget points like a
+ * modifier but taken away. Neither grows the Want.
  */
 import type { Rng } from './rng.js';
 import type { HeroClass } from './weapons.js';
@@ -23,8 +24,9 @@ export const COSTS: Record<CostId, { unit: '%' | ''; per: number; text: (n: numb
 export const COST_ORDER = Object.keys(COSTS) as CostId[];
 /** Points a cost takes back at item level 1, by tier (only the two that carry one); it grows with the level as the modifiers do (itemlevel.ts). */
 export const COST_POINTS: Partial<Record<Tier, number>> = { touched: 5, turning: 8 };
-/** The Want each piece grows by, for every job it's worn on (hungry pieces have their own, hungry.ts). */
-export const TIER_WANT: Partial<Record<Tier, number>> = { touched: 1, turning: 2 };
+/** The Want a tier grows by, for every job it's worn on: none now (SIEGE and MARSHAL are clean; hungry pieces have
+ *  their own, hungry.ts). Kept, empty, for callers. */
+export const TIER_WANT: Partial<Record<Tier, number>> = {};
 
 export const costValue = (id: CostId, pts: number) => (COSTS[id].unit === '' ? Math.max(1, Math.round(pts / COSTS[id].per)) : Math.round(pts / COSTS[id].per) / 100);
 export const costPoints = (c: NonNullable<Item['cost']>) => (COSTS[c.id].unit === '' ? c.v : c.v * 100) * COSTS[c.id].per;
