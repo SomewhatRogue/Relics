@@ -36,3 +36,12 @@ export const wornPieces = (k: Worn): Item[] => [k.arms?.[k.weapon], k.armor, k.l
 export const wearsHungry = (k: Worn) => wornPieces(k).some((it) => it.quality === 'hungry');
 /** Corrupt: wearing hungry gear, or the Want at `CORRUPT_AT` or above (section 1). */
 export const isCorrupt = (k: Worn) => wearsHungry(k) || (Number(k.want) || 0) >= CORRUPT_AT;
+
+/**
+ * What being corrupt costs in town and from the butchers (section 2's 30 band; per hero, whoever they came in with).
+ * `price`: what a corrupt hero pays (for the Economy chat's prices, asked). `pull`: how much nearer a named butcher
+ * counts a corrupt hero when it picks whom to go for (sim/enemies.ts), as the Butcher's Apron's lure.
+ */
+export const CORRUPT = { price: 1.25, pull: 6 };
+/** A price as this hero pays it. */
+export const corruptPrice = (k: Worn, base: number) => (isCorrupt(k) ? Math.ceil(base * CORRUPT.price) : base);

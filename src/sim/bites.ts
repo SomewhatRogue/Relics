@@ -6,7 +6,7 @@
  */
 import type { GearStats } from '../shared/tuning';
 import { biteOn } from '../shared/hunger';
-import { bandOf } from '../shared/corrupt';
+import { CORRUPT, bandOf, isCorrupt } from '../shared/corrupt';
 import { WEAPONS } from '../shared/weapons';
 import type { Hero } from './types';
 
@@ -33,3 +33,5 @@ export const seenBy = (h: Hero) => 1 + bandOf(h.want).seen + biteOn(wornBy(h), '
 export const goldKeep = (h: Hero) => 1 - biteOn(wornBy(h), 'greedy', clsOf(h));
 /** What a heal from someone else does on `h`: half at the Want's top band. */
 export const othersHeal = (h: Hero) => bandOf(h.want).othersHeal;
+/** A named butcher comes for a corrupt hero first: how much nearer it counts them (0 for the clean, or any other goblin). */
+export const hunted = (e: { name?: string }, h: Hero) => (e.name && isCorrupt(h) ? CORRUPT.pull : 0);

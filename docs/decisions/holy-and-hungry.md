@@ -105,3 +105,33 @@ floors. Note for the spec: 2b says a traded hungry piece keeps its count, but hu
   "It eats N% of the coin you pick up.").
 - **Checked:** the touched tests, `npm run check`, the full suite (2221 passed).
 - Next: slice 3, the town's side.
+
+## 2026-11-19: slice 3, the town's side, my part in; the rest asked (Claude Opus 5.5)
+
+Corrupt (shared/corrupt.ts `isCorrupt`: wearing hungry gear, or the Want at 30) now costs something outside the
+fight. Per hero, whoever they came in with (Kyle, 2026-11-08).
+
+- **In:** named butchers come for a corrupt hero first (`hunted`, sim/bites.ts, a lure of 6 on the target line in
+  sim/enemies.ts, beside the Apron's); Sister Agne won't sell the Bitter to a corrupt hero (client/shops.ts `infirmary`:
+  her old line, then a refusal, two versions, with hungry gear on or the hunger alone, and the plain rule); the
+  Want's bar, ready to place (client/wantbar.ts, wantbar.css): HUNGER, no number, ticks at 15, 30 and 60, filling to
+  80, and under it only the costs that are in the game now; `corruptPrice` (a quarter more, rounded up) ready for the
+  Economy chat.
+- **Mine, new:** `client/wantbar.ts`, `wantbar.css`, `corruptwords.ts`, `tests/wantbar.test.ts`. Small edits:
+  `client/shops.ts` (the infirmary), `sim/enemies.ts` (the target line, `hunted`).
+- **Words:** lore keeper (HUNGER kept as the bar's word; never "Want"; "friends", not "others"; Agne sends you to the
+  church and its step, not to Isolde) and line editor (Agne's hedges, "your hunger is high", "Healing from friends is
+  halved on you."). For the bible (lore keeper): HUNGER is the on-screen name of the bar; Agne refuses the Bitter
+  to the corrupt and sends them to the church; giving gear up at the church still works for the corrupt.
+- **Asked, each a small edit in your own file (I'll write any new lines with the lore pass if you'd rather):**
+  - **UI** (`pack.ts`): in the foot, after the Healer's coal row, `wantBar(h)` from client/wantbar.ts, and `h.want`
+    in the third key so it redraws. The character panel is the pack's foot, so that's the one place.
+  - **Economy** (`prices.ts` or wherever a town price is paid and shown): every price a hero pays in town through
+    `corruptPrice(profile, base)`, shown and charged the same. When it's in I add "Prices are a quarter higher." to the bar.
+  - **Relics and Economy** (`churchrelics.ts`, `shared/church.ts`): no relic recharge for a corrupt hero, and no church
+    light from leaving a relic on the step; giving hungry gear up still works (it's how they come clean). Isolde's
+    relic quests: no reward handed to a corrupt hero (section 1, "no turn-in rewards"). Isolde says why in her own words.
+  - **Art** (`actors.ts`): at a Want of 60 the party should see it on you (section 2); today the eyes brighten with the
+    Want. Something more at 60, your call.
+- **Checked:** the touched tests, `npm run check`, the full suite (2225 passed).
+- The plan's later slices are unchanged (4: penance and the first holy pieces).

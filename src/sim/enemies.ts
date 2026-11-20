@@ -54,7 +54,7 @@ import { clockHolds, trackAim } from './bosskit';
 import { keeperPause, stepKeeper } from './doorkeepers';
 import { bossStun } from './poise';
 import { markSum } from '../shared/deepmarks';
-import { seenBy } from './bites';
+import { hunted, seenBy } from './bites';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
@@ -95,7 +95,7 @@ function nearest(e: Enemy, heroes: Hero[], now: number): Hero | null {
     const apron = wears(h, 'apron') ? (e.name ? 999 : HUNGRY_FX.lure) : 0;
     // A netted hero: they all come for them (sim/netter.ts).
     // Archers and throwers look first for whoever's running in the open (sim/chase.ts).
-    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron - (netted(h, now) ? NETTER.lure : 0) - (OWN_KIT.pace ? rangedPull(e, h) : 0);
+    const raw = Math.hypot(h.x - e.x, h.y - e.y), d = raw - lure(h) - apron - hunted(e, h) - (netted(h, now) ? NETTER.lure : 0) - (OWN_KIT.pace ? rangedPull(e, h) : 0);
     if (!visible(h, raw, now) || vanished(h, now) || smokeBlind(e, raw, now)) continue;
     if (d < bd) (bd = d), (best = h);
     // A Mage's blink image draws them off while it lasts: they swing at where you were.

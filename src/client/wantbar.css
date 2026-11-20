@@ -1,0 +1,5 @@
+/* The Want's bar (client/wantbar.ts): no number, three ticks at its bands, hungry green filling it. */
+.wantbar .wb { position: relative; height: 8px; margin: 4px 0 6px; background: var(--i-well, #14151a); border: 1px solid var(--i-outline, #07080a); }
+.wantbar .wb > i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--i-hungry, #9cc95a); opacity: 0.85; }
+.wantbar .wb > b { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--i-quiet, #8d929c); }
+.wantbar.corrupt h3 { color: var(--i-hungry, #9cc95a); }

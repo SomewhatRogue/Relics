@@ -18,6 +18,8 @@ import { itemIcon } from './itemicons';
 import { RUMOURS } from './rumours';
 import { CHURCH } from './copy';
 import { FORGE, PAWN } from './storewords';
+import { isCorrupt, wearsHungry } from '../shared/corrupt';
+import { AGNEW } from './corruptwords';
 
 const p = (s: string) => `<p>${s}</p>`;
 const dim = (s: string) => `<p class="dim">${s}</p>`;
@@ -41,6 +43,8 @@ function infirmary(g: Game, panel: Panel): void {
   const pr = g.profile, w = g.world, again = () => infirmary(g, panel);
   const lines = says('Sister Agne', w.rescued ? `${w.rescued} through that gate so far. Some of them still won't sleep in the dark. I leave a candle.` : "Empty beds. First time in my life I've wanted them full. Bring someone home and I'll have work.") +
     (pr.want >= WANT.noticed ? says('Sister Agne', CHURCH.agne) : '');
+  // A corrupt hero is turned away: no Bitter (shared/corrupt.ts; docs/design/holy-and-hungry.md section 2).
+  if (isCorrupt(pr)) return show(panel, PLACES.infirmary, lines + says('Sister Agne', AGNEW.refuse(wearsHungry(pr))) + dim(AGNEW.rule), [], beltFoot(g), again);
   show(panel, PLACES.infirmary, lines, potions(g, ['bitter']), `Lit houses on Rescue Row: ${housesFor(w.rescued)}. ` + beltFoot(g), again);
 }
 
