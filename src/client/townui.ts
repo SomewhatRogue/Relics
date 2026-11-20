@@ -39,6 +39,7 @@ import { questBack, questHeld } from '../shared/heroquests';
 import { QUESTW } from './questwords';
 import { coinsHtml } from '../shared/coins';
 import { givenUp } from './vowedui';
+import { churchVowed } from './shelfui';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -118,6 +119,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       p(`Given to the Lantern so far: ${coinsHtml(w.lantern)}.`) + p(`You have ${coinsHtml(pr.gold)}.`),
       [...[20, 100].map((n) => ({ label: `GIVE ${coinsHtml(n)}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), townVoice.pray(voiceClock()), again()) })),
         { label: RELICW.churchButton, primary: pr.relics.length > 0, act: () => openStep(g, panel, again) },
+        // Amends paid out, and Odric's shelf, for clean heroes (shelfui.ts).
+        ...churchVowed(g, panel, again),
         ...hungry.map((it) => ({ label: `LEAVE ${itemName(it)} ON THE STEP`, act: () => { const r = g.giveUp(it); townVoice.rite(voiceClock()); if (r) givenUp(panel, r, again); else again(); } }))]);
   } else if (id === 'yard') {
     panel.show('SQUIRE PELL', say('Squire Pell', "Yard's out back. Straw men, a butcher made of sacking on a chain, and me. Mostly me, getting hit. If you're the sort that heals, I'd take it kindly."), [{ label: 'TO THE YARD', primary: true, act: () => (panel.hide(), g.enterYard()) }]);

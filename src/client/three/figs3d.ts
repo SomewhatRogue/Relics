@@ -103,7 +103,9 @@ export class Figs {
     }
     this.drawn = true;
     // Snapped so the card's pixels fall on the view's: across by x, down the screen by z.
-    const px = x + (Math.round(sx) - sx) / this.ppu, pz = z + (Math.round(sy) - sy) / (this.ppu * SIN), b = o.bias ?? 0;
+    // (A hair's bias so a figure exactly between two pixels always goes the same way, not by the float's noise.)
+    const rx = Math.round(sx + 1e-3), ry = Math.round(sy + 1e-3);
+    const px = x + (rx - sx) / this.ppu, pz = z + (ry - sy) / (this.ppu * SIN), b = o.bias ?? 0;
     const card = s.card;
     card.position.set(px, h, pz).addScaledVector(BACK, b);
     // (The new look's chase camera, swing.ts: turned to face it.)

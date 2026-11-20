@@ -101,6 +101,10 @@ export interface Profile {
   want: number;
   /** AMENDS, from hungry gear given up (shared/amends.ts): kept for good, never shown as a number. None in older saves. */
   penance?: number;
+  /** Amends steps already paid out (shared/shelf.ts). */
+  amendsPaid?: number;
+  /** Odric's shelf this window: what this hero took (shared/shelf.ts). */
+  shelf?: { win: number; took: number[] };
   /** Steel from melting gear down (Halvard's upgrades). */
   steel: number;
   /** Worn armor and rings (shared/gear.ts). */

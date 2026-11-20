@@ -84,8 +84,12 @@ export class Cam {
     }
     let r = this.at.dot(this.right), u = this.at.dot(this.up);
     const b = this.at.dot(this.back);
-    r = Math.round(r * this.ppu) / this.ppu;
-    u = Math.round(u * this.ppu) / this.ppu;
+    // Snapped so the world's pixel grid lands on whole screen pixels: with an odd width or height the screen's middle
+    // is half a pixel, so the camera sits half a pixel over (else ties flick a figure, and a floor's texels, a pixel
+    // to and fro as the camera eases: Kyle, the mouse moving the aim on a computer, 2026-11-20).
+    const ox = (this.W % 2) / 2, oy = (this.H % 2) / 2;
+    r = (Math.round(r * this.ppu - ox) + ox) / this.ppu;
+    u = (Math.round(u * this.ppu - oy) + oy) / this.ppu;
     if (shake > 0.2) r += Math.round((Math.random() - 0.5) * shake) / this.ppu, (u += Math.round((Math.random() - 0.5) * shake) / this.ppu);
     this.cam.position.copy(this.right).multiplyScalar(r).addScaledVector(this.up, u).addScaledVector(this.back, b + DIST);
     this.cam.updateMatrixWorld();

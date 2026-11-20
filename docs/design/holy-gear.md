@@ -94,3 +94,27 @@ holy piece can't be melted or upgraded), UI (the chip's look), Trading (`cleanIt
 2. **Nine** to start.
 3. **AMENDS: Odric's line only,** no number, no bar.
 4. **The costs as drafted.**
+
+## Slice 7: amends pay out, and Odric's shelf (Kyle's yes, 2026-11-20)
+
+Holy-and-hungry section 3: "Penance thresholds pay in the church's best holy pieces"; section 5: holy pieces from
+"the church shop for clean heroes". No new names: both use the nine, so nothing new to learn.
+
+**Amends pay out.** At each amends step (3, 8, 15, 25), as well as Odric's line, he hands the hero a vowed piece
+for a slot they pick, already part grown: a quarter, a half, three quarters, then nine tenths (never ripe, so
+the crossroads stays the hero's own doing). "The church's best" is the most grown it lends. Only to a clean
+hero; reached while corrupt, it waits for them on the shelf until they're clean.
+
+**Odric's shelf.** At the church, beside the step, the vowed pieces nobody is carrying: three at a time, for the
+hero's class, changing with the shops' window. Clean heroes only (holy-and-hungry section 1: no church shop for
+the corrupt). Fresh, not grown. Its price is Kyle's call (question 2). Its own file, `shared/shelf.ts` (the vestry is
+the Gear chat's and Oswin's, and the bible keeps it to maces, flails and robes).
+
+### Questions for Kyle
+1. **Payout:** a part-grown vowed piece of your choice of slot at each step, as above?
+2. **The shelf's price:** gold like any shop (about a strong PRE-WAR piece), or a gift at the Lantern (the gold goes
+   in the box, so it lowers the Want too; the bible's own currency for the church)?
+3. **The shelf at all:** three for your class a window, or leave vowed pieces to the turn-in and amends only?
+
+**Kyle's answers (2026-11-20):** part-grown pieces at each step, as drafted; the shelf's price is a gift at the
+Lantern (its gold goes in the box and lowers the Want).
