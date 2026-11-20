@@ -621,3 +621,15 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Caught by the full suite: `tests/parity3d.test.ts` could not load, because the fence hook pulled in the camera, the
   camera the ground, the ground the prop cards and the flat view's sprites (which need a page). `three/redraw3d.ts`
   now reads the pitch from `tilelook.ts`. Suite then green.
+
+## 2026-11-20: the tile redraw, R0 second half (what lies on the ground), behind ?redraw=1
+
+- Kyle: "ya this is great please continue."
+- On a stone floor under the redraw, what lies on it is no longer today's 16-a-tile picture stretched (uneven
+  slivers: one-pixel columns beside two-pixel ones). The same painters paint onto the 20 by 12 grid
+  (`three/redrawfloor.ts`): the soil through a new optional `at` grid on `soil.ts` `paintSoil` (Art's file, one
+  parameter, today's grid by default); water, scatter, marks, grime, a job's rock shelves and torch feet through
+  `onGrid`, which moves each rectangle onto the grid with its edges rounded to whole pixels, so a fleck stays one pixel.
+  `world.ts` exports `ledge`; the `bare` option on `paintMap` came out again.
+- Checked: tsc clean; the town on the phone, ground zoomed before and after: even two-by-two soil, square stones.
+  (Claude Opus 5.5)
