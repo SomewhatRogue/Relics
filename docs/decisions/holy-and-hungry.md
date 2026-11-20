@@ -135,3 +135,12 @@ fight. Per hero, whoever they came in with (Kyle, 2026-11-08).
     Want. Something more at 60, your call.
 - **Checked:** the touched tests, `npm run check`, the full suite (2225 passed).
 - The plan's later slices are unchanged (4: penance and the first holy pieces).
+
+## 2026-11-19: slice 4 drafted as a spec, for Kyle's yes (Claude Opus 5.5)
+
+- docs/design/holy-gear.md (mine; the General chat owns holy-and-hungry.md, so the detail goes in its own file):
+  what a holy piece is (steel someone gave, kept by the church), the first nine (a weapon a class, two bodies, two
+  rings) with gifts for the party and small fair costs, penance and the paid turn-in, how it shows, whose files.
+- Through the lore keeper: names for all nine (THE WIDOW'S SWORD to THE TITHE RING), the path's word GIVEN (not
+  HOLY: the Lantern isn't holy), AMENDS on screen for penance, HALLOWED to be renamed before slice 5. Four questions
+  for Kyle at its foot. Nothing built until he answers.
