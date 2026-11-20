@@ -11,7 +11,11 @@ import * as THREE from 'three';
 import { Rng } from '../../shared/rng';
 import { faceCanvas, KX, KY, KZ, ledgeCanvas, roofCanvas, stepCanvas, type FaceWin } from '../tilekit';
 import { toonize } from './post';
-import { PITCH } from './camera3d';
+// (The pitch from the switch, not camera3d.ts: that loads the ground and the flat view's sprites, which the Node tests
+// that build walls cannot load.)
+import { PITCH_DEG } from '../tilelook';
+
+const PITCH = (PITCH_DEG * Math.PI) / 180;
 
 type V3 = [number, number, number];
 const TO_CAM = new THREE.Vector3(0, Math.sin(PITCH), Math.cos(PITCH));

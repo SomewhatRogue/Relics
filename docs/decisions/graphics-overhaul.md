@@ -605,3 +605,19 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Tried and taken back on sight: benches, tables, casks and stumps as cards. The flat view paints them as plain slabs,
   which stood up read as crates, worse than the built ones. They stay built until the kit draws them.
 - Checked: tsc clean; the whole yardstick under `redraw=1` on the phone, no page errors. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw, R3 second part (furniture, fences, walls), behind ?redraw=1
+
+- Kyle: "Continue." Built by two Sonnet builders at once in this folder (no worktrees in this session: each built
+  to its own folder and port, neither committed), reviewed here against the spec.
+- Furniture and stumps drawn in the kit as cards filling their footprint (`tilefurn.ts`, `tilefurn2.ts`,
+  `tilefurnkit.ts`, routed in `three/propcards.ts`). On review the square's benches read as dark tables (a plank top
+  over the whole footprint): a bench's seat is now a narrow plank at the front, the floor behind it.
+- Fences, hurdles, stone walls and rock walls drawn as screen-mapped faces (`tilefence.ts`, a two-line hook in
+  `three/walls3d.ts`): posts and rails with the ground between, coursed stone with a coping. Not seen on any map: a
+  fence or hurdle running north and south, and a rock wall. The tavern's tables lost the mugs the flat painting had.
+- Checked: tsc clean; the whole yardstick under `redraw=1` on the phone, no page errors; the square, a village, a wood
+  and the tavern against the first part's shots. (Claude Opus 5.5)
+- Caught by the full suite: `tests/parity3d.test.ts` could not load, because the fence hook pulled in the camera, the
+  camera the ground, the ground the prop cards and the flat view's sprites (which need a page). `three/redraw3d.ts`
+  now reads the pitch from `tilelook.ts`. Suite then green.

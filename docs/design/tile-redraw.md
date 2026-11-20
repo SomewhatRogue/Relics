@@ -55,7 +55,7 @@ Each behind `?redraw=1` and an options button first, as TILES was; on by default
 | R0 (in) | The grid: 20 a tile, 36.87 degrees, the render scale per screen; the 2.5D floor painted at 20 by 12 a tile from the kit (stone street and flags first). The ground's marks, soil, puddles and scatter repainted at the new size, not stretched (for now laid over from today's painting, stretched: the second half of R0) | The street from the light pass side by side on a phone: same tiles across, every floor pixel one size |
 | R1 (in) | **One building, drawn:** the JOBS house on that street, its front and roof from the kit. Built for every roofed building at once (the same code): four wall faces (stone courses, or timber on daub over a stone plinth, windows framed, the door's hole), the roof's front slope (slate or thatch). A building turned to face east or west keeps today's roof (its slopes are seen side-on) | Kyle's eye on the street shot. **The proof: nothing past R1 until he has seen it** |
 | R2 (in) | Every house kind in town (cottage, hall, shop, the church, the keep) and the town's walls, steps and ledges. In: the town's level faces as courses with a coping, every flight's treads and the risers that face the camera; a turned building's slopes, seen side-on, drawn with their courses running up the picture; each building's drawn walls and roof in its own colours (a handful of shades each), so the church is pale stone and the town hall's roof brown again | The town sheet, day and night, phone and laptop |
-| R3 (first part in) | Props as front-on cards | The town and a village: nothing reads as a lump of boxes. In: trees, pines, bushes, dead trees, rocks, reeds, hay, wells, stones, targets, pillars, market stalls and tents as the flat view's own pictures stood up, one sprite pixel to one render pixel like the figures (`three/propcards.ts`); a map's round things share one picture and one mesh. Kept built: stumps and most furniture (benches, tables, casks), which the flat view paints as plain slabs that stood up read as crates; fences and walls, which run on. Those want drawing in the kit |
+| R3 (in) | Props as front-on cards | The town and a village: nothing reads as a lump of boxes. In: trees, pines, bushes, dead trees, rocks, reeds, hay, wells, stones, targets, pillars, market stalls and tents as the flat view's own pictures stood up, one sprite pixel to one render pixel like the figures (`three/propcards.ts`); a map's round things share one picture and one mesh. Then the second part: benches, tables (and the map, dice, arms and skinning tables), desks, counters, pews, beds, altars, anvils, casks, sacks, carts, tubs and stumps drawn in the kit as cards that fill their footprint (`tilefurn.ts`, `tilefurn2.ts`, `tilefurnkit.ts`); fences, hurdles, stone walls and rock walls drawn as faces mapped to the screen (`tilefence.ts`, a hook in `three/walls3d.ts`). Still built: shelves, racks, hearths, looms, booths, bunks, stands, dummies and the rest; burning or ruined ones |
 | R4 | The rest of the places, a theme at a time: a village (on earth, slice 5's call), a wood, the Open Cut, the Deep's floors | The full yardstick sheet |
 
 ## Cost
@@ -68,8 +68,8 @@ are untouched.
 ## For Kyle
 
 Answered 2026-11-19: today's angle (36.87 is it, TILT out), drawn by code, the proof first. Kyle saw the proof and
-said "Continue": R2 is in, and R3's first part. Open: R3's second part (furniture, fences and stumps drawn in the
-kit), R0's second half (the ground's marks redrawn), R4 (other places), then REDRAW as the default.
+said "Continue" each time: R2 and R3 are in. Open: R0's second half (the ground's marks redrawn), R4 (other places),
+then REDRAW as the default.
 
 **How every drawn face is mapped** (`three/redraw3d.ts` `screenQuad`): its picture's columns and rows come from where
 its corners land on screen (20 columns a tile across, 12 rows a tile of floor, 16 a tile of height), so one drawn

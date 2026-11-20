@@ -17,21 +17,23 @@ import { PX } from '../world';
 import { cardMaterial } from './figmat';
 import { PITCH } from './camera3d';
 import { KX, KZ } from '../tilekit';
+import { FURN, furnCut } from '../tilefurn';
+import { stumpCut } from '../tilefurn2';
 
 /** The round things drawn as cards. */
-// (Not stumps: the flat view paints a stump as a block, which stood up reads as a crate.)
-export const CARD_ROUNDS = new Set<string>(['tree', 'pine', 'bush', 'deadtree', 'rock', 'reed', 'hay', 'well', 'stone', 'target', 'pillar']);
+// (A stump is drawn in the kit, tilefurn2.ts: the flat view paints it as a block, which stood up reads as a crate.)
+export const CARD_ROUNDS = new Set<string>(['stump', 'tree', 'pine', 'bush', 'deadtree', 'rock', 'reed', 'hay', 'well', 'stone', 'target', 'pillar']);
 /**
- * The blocks drawn as cards: only those the flat view paints as a real picture (a stall's awning, a tent). Most
- * furniture is painted flat as a plain slab (furnish.ts), which stood up reads as a crate: those stay built until
- * the kit draws them (Kyle's eye on the first try, 2026-11-19).
+ * The blocks drawn as cards: those the flat view paints as a real picture (a stall's awning, a tent), and the
+ * furniture the kit draws (tilefurn.ts; the flat view paints it as plain slabs, which stood up read as crates). Hearths,
+ * shelves, racks and the like stay built.
  */
-const CARD_BLOCKS = new Set<string>(['stall', 'tent']);
+const CARD_BLOCKS = new Set<string>(['stall', 'tent', ...FURN]);
 export const isCardRound = (r: Round) => CARD_ROUNDS.has(r.kind) && !PIECE_ROUNDS.has(r.kind);
 export const isCardBlock = (b: Block) => CARD_BLOCKS.has(b.kind) && !PIECE_BLOCKS.has(b.kind) && !b.ruined && b.lands === undefined && !b.door;
 
 const COS = Math.cos(PITCH);
-interface Cut { lit: HTMLCanvasElement; glow: HTMLCanvasElement; w: number; h: number; ax: number; ay: number }
+export interface Cut { lit: HTMLCanvasElement; glow: HTMLCanvasElement; w: number; h: number; ax: number; ay: number }
 
 /** Paint with the flat view's code onto a scratch pair, the anchor at (ax, ay), and cut it to what was drawn. */
 function cut(paint: (c: Ctx, x: number, y: number) => void, W: number, H: number, ax: number, ay: number): Cut | null {
@@ -61,6 +63,7 @@ export class CardSheet {
   }
   /** A round thing: drawn about its middle, it stands where its lowest pixel is, that much nearer the camera. */
   addRound(r: Round, up = 0): void {
+    if (r.kind === 'stump') return this.add(stumpCut(r.r), r.x, r.y + Math.max(0.2, r.r), up);
     const c = roundCut(r);
     if (!c) return;
     const dz = (c.h - c.ay) / PX;
@@ -102,6 +105,7 @@ export const roundCut = (r: Round): Cut | null => cut((c, x, y) => drawRound(c, 
 
 /** A block as the flat view paints it (lamps lit by `lit`), anchored at its front edge's middle. */
 export function blockCut(b: Block, lit: boolean): Cut | null {
+  if (FURN.has(b.kind)) return furnCut(b);
   const w = Math.round(b.w * PX), d = Math.round(b.h * PX), tall = LOOK[b.kind]?.tall ?? 16, m = 24;
   return cut((c, x, y) => drawBlock(c, b, x - w / 2, y - d, lit), w + m * 2, d + tall + m * 2, m + w / 2, m + tall + d);
 }
