@@ -99,6 +99,8 @@ export interface Profile {
   met?: string[];
   /** The Want: hidden, never shown as a number (shared/hungry.ts, docs/lore/story-bible.md). */
   want: number;
+  /** AMENDS, from hungry gear given up (shared/amends.ts): kept for good, never shown as a number. None in older saves. */
+  penance?: number;
   /** Steel from melting gear down (Halvard's upgrades). */
   steel: number;
   /** Worn armor and rings (shared/gear.ts). */

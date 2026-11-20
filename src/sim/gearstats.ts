@@ -5,6 +5,8 @@ import type { Hero } from './types';
 import { markSum } from '../shared/deepmarks';
 import { withBites } from './bites';
 import { bandOf } from '../shared/corrupt';
+import { dimmed, isVowed } from '../shared/vowed';
+import type { Item } from '../shared/tuning';
 
 type Stats = GearStats & { crit: number; fx: Fx };
 const cache = new WeakMap<Hero, { key: unknown[]; s: Stats }>();
@@ -14,7 +16,9 @@ export function statsOf(h: Hero): Stats {
   const w = h.arms?.[h.weapon], rings = h.rings ?? [], c = cache.get(h), d = h.drills;
   const mk = (h.marks ?? []).join();
   if (c && c.key[0] === w && c.key[1] === h.armor && c.key[8] === (h.legs ?? null) && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d && c.key[5] === (h.perks ?? []).join() && c.key[7] === (h.streakStep ?? 0) && c.key[6] === mk && c.key[9] === bandOf(h.want)) return c.s;
-  const g = gearStats(w, h.armor, rings, h.legs ?? null);
+  // Vowed pieces worn beside hungry gear go dim: they give nothing (shared/vowed.ts).
+  const dim = dimmed(h), lit = (it: Item | null | undefined) => (dim && isVowed(it) ? null : it ?? null);
+  const g = gearStats(lit(w) ?? undefined, lit(h.armor), rings.filter((r) => lit(r)), lit(h.legs));
   const fx = perkFx(h.perks);
   const s = { ...g, fx, damage: g.damage + drilled(d, 'power'), health: g.health + drilled(d, 'health'), speed: g.speed * (1 + (WEAPONS[h.weapon]?.cls === 'MAGE' ? 0 : drilled(d, 'speed'))), breath: g.breath + drilled(d, 'wind'), crit: g.crit + drilled(d, 'crit') };
   withKnacks(s, fx);

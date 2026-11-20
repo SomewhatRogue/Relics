@@ -36,9 +36,12 @@ import { wayGot, wayLine } from '../shared/waypay';
 import { SPOT_REACH, housesFor, townMap, townPoint, townProps, townSpots, type SpotId } from '../shared/town';
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
-import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, raise, dropLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, raise, dropLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, slotOf, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
 import { feedKit } from '../shared/hunger';
 import { jobUnits } from '../shared/jobunits';
+import { isCorrupt } from '../shared/corrupt';
+import { isVowed, rollVowed } from '../shared/vowed';
+import { amendsOf, stepCrossed } from '../shared/amends';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
@@ -1438,17 +1441,32 @@ export class Game {
     return [held, p.armor, ...p.rings].filter((x): x is Item => !!x && x.quality === 'hungry');
   }
 
-  /** At the church: give a hungry piece up, wherever it is. The Want falls hard. */
-  giveUp(it: Item): void {
+  /** At the church: give a hungry piece up, wherever it is. The Want falls hard, amends grow, and a clean hero
+   *  is handed a vowed piece for that slot, where the given one was (docs/design/holy-gear.md). */
+  giveUp(it: Item): { vowed: Item | null; step: number } | undefined {
     const p = this.profile;
     if (it.quality !== 'hungry') return;
+    const worn = p.arms[p.weapon] === it ? 'hand' : p.armor === it ? 'armor' : p.rings.includes(it) ? 'ring' : 'bag';
     for (const k of Object.keys(p.arms) as WeaponId[]) if (p.arms[k] === it) (delete p.arms[k]), (p.weapon = CLASS_KITS[p.cls][0]);
     if (p.armor === it) p.armor = null;
     p.rings = p.rings.filter((r) => r !== it);
     p.bag = p.bag.filter((r) => r !== it);
     p.want = Math.max(0, p.want - WANT.giveUp);
+    // Amends, kept for good (shared/amends.ts); Odric says a word at a step.
+    const was = p.penance ?? 0;
+    p.penance = was + amendsOf(it);
+    // Clean after the give: a vowed piece for that slot, worn where the hungry one was (shared/vowed.ts).
+    const rolled = isCorrupt(p) ? null : rollVowed(new Rng(p.runs * 131 + Math.round(p.penance * 7) + p.want), p.cls, slotOf(it), it.armor);
+    const vowed = rolled && raise(rolled, dropLevel(p.level));
+    if (vowed) {
+      if (worn === 'hand') (p.arms = { [vowed.kit!]: vowed }), (p.weapon = vowed.kit!);
+      else if (worn === 'armor') p.armor = vowed;
+      else if (worn === 'ring') p.rings.push(vowed);
+      else p.bag.push(vowed);
+    }
     this.equip(this.hero, this.hero);
     store(this.save);
+    return { vowed, step: stepCrossed(was, p.penance) };
   }
 
   /** While the wood holds: true to stay held. A card waits for a tap or a key (its press goes nowhere);
@@ -1565,7 +1583,7 @@ export class Game {
   /** Halvard: melt a packed piece down for steel (never a hungry one). */
   melt(it: Item): boolean {
     const p = this.profile, i = p.bag.indexOf(it);
-    if (i < 0 || it.quality === 'hungry') return false;
+    if (i < 0 || it.quality === 'hungry' || isVowed(it)) return false;
     p.bag.splice(i, 1);
     this.hero.bag = [...p.bag];
     p.steel += STEEL[it.quality];
@@ -1597,7 +1615,7 @@ export class Game {
   /** Ivo: reroll modifier `k` on a green, blue or purple piece. */
   rerollMod(it: Item, k: number): boolean {
     const p = this.profile;
-    if (p.gold < REROLL || it.quality === 'plain' || it.quality === 'hungry' || !it.mods?.[k]) return false;
+    if (p.gold < REROLL || it.quality === 'plain' || it.quality === 'hungry' || isVowed(it) || !it.mods?.[k]) return false;
     p.gold -= REROLL;
     this.replace(it, reroll(new Rng(p.runs * 97 + p.gold * 13 + k), it, k, p.cls));
     return true;

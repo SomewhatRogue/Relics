@@ -144,3 +144,30 @@ fight. Per hero, whoever they came in with (Kyle, 2026-11-08).
 - Through the lore keeper: names for all nine (THE WIDOW'S SWORD to THE TITHE RING), the path's word GIVEN (not
   HOLY: the Lantern isn't holy), AMENDS on screen for penance, HALLOWED to be renamed before slice 5. Four questions
   for Kyle at its foot. Nothing built until he answers.
+
+## 2026-11-19: slice 4, stage 1 in: the nine VOWED pieces, amends, the paid turn-in (Claude Opus 5.5)
+
+Kyle's answers to docs/design/holy-gear.md: **VOWED** on screen (over the lore keeper's GIVEN), nine pieces to
+start, amends shown only by Odric's line, the costs as drafted.
+
+- **Mine, new:** `shared/vowed.ts` (the nine with the lore keeper's names, `rollVowed`, `dimmed`, `blocksVowed`,
+  `VOWED_FX` for stage 2), `shared/amends.ts` (`amendsOf`: 1, and 1 more for every 12 units the piece was worn;
+  `AMENDS_STEPS` 3, 8, 15, 25), `client/vowedwords.ts`, `client/vowedui.ts` (Odric at the step), `tests/vowed.test.ts`.
+- **The turn-in** (`Game.giveUp`, now returning what happened): the Want falls by 30 as before, `Profile.penance`
+  (new, optional) grows by the piece's weight, and a hero clean after the give is handed a vowed piece for that slot,
+  raised to their level, put where the hungry one was (in hand, on the body, a ring, or the pack). The church's
+  button shows Odric handing it over, or the plain rule if they aren't clean, and his line at an amends step.
+- **Never with hunger:** `statsOf` leaves vowed pieces out while any hungry piece is worn (DIM); `applyGear` won't put
+  a vowed piece on over hungry gear; Halvard won't melt one, Ivo won't reroll one.
+- **Small edits:** `client/game.ts` (`giveUp`, `melt`, `rerollMod`), `sim/gearstats.ts` (dim), `sim/pack.ts` (the
+  block), `client/townui.ts` (the step's button, one line), `shared/progress.ts` (`penance?`).
+- **Not yet, stage 2:** the nine gifts and costs in the fight (`VOWED_FX` holds their numbers), Moll's dice vow,
+  Tobin and Nettle refusing a vowed piece.
+- **Words:** lore keeper (Odric never says holy or blessed; "the step", not stairs, except the third stair that
+  rocks; names said in title case, not shouted; nothing dated "a long while back") and line editor (Odric's hedges;
+  the nine gifts and costs plainer, the two heals given numbers, "coin", not "gold", per the lore keeper).
+- **For Gear (added to the branch `gear-asks`):** `loot.ts` an `Item.holy` field and `itemName` knowing vowed names
+  (until then a vowed piece shows as its PRE-WAR kit, SWORD, in the pack); `card.ts` the VOWED chip, its GIFT and COST
+  rows and DIM. **For Economy:** `plusCost` (forgeplus.ts) refusing a vowed piece, as hungry. **For Trading:**
+  `cleanItem` keeping `holy` and `worn`.
+- **Checked:** the touched tests, `npm run check`, the full suite (2234 passed).

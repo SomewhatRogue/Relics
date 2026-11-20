@@ -7,6 +7,7 @@ import { relicName } from '../shared/relicitems';
 import { CLASS_KITS, RELICS, WEAPONS, abilitiesOf, itemName, slotOf, type Item } from '../shared/tuning';
 import { refreshHealth } from './gearstats';
 import { BAG } from '../shared/bags';
+import { blocksVowed } from '../shared/vowed';
 import type { FightEvent, Hero, Intent } from './types';
 
 /** What a new pack holds (it's bought bigger in town: shared/bags.ts). */
@@ -42,6 +43,8 @@ export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): v
   if (op === GEAR.equip) {
     const it = arg >= 0 ? h.bag[arg] : undefined;
     if ((arg >= 0 && !it) || (arg < 0 && h.arms[h.weapon] && full(h))) return;
+    // A vowed piece won't go on over hungry gear (shared/vowed.ts).
+    if (it && blocksVowed(h, it)) return;
     if (it && slotOf(it) !== 'weapon') return wear(h, arg, it, ev);
     if (it && WEAPONS[it.kit!].cls !== cls) return;
     // What was in hand goes in the pack, the plain one a hero starts with too (so it's never lost under the new).

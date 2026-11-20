@@ -1,6 +1,6 @@
 # Holy gear: penance and the first holy pieces
 
-Draft, 2026-11-19 (Claude Opus 5.5), for Kyle's yes. The detail of docs/design/holy-and-hungry.md sections 1,
+Approved by Kyle 2026-11-19 (his answers at the foot). Written by Claude Opus 5.5. The detail of docs/design/holy-and-hungry.md sections 1,
 3 and 5, built as slice 4 (docs/decisions/holy-and-hungry.md). Section 5b (holy pieces grow) and the crossroads
 are slices 5 and 6, on top of this. Names and words are the lore keeper's (2026-11-19), for Kyle to pass.
 
@@ -86,3 +86,11 @@ holy piece can't be melted or upgraded), UI (the chip's look), Trading (`cleanIt
 2. **Nine to start,** mirroring hungry, or one per class per slot (twenty with legs) as section 5 first said?
 3. **AMENDS shown** as a number, a bar like the Want's, or only Odric's line at each step?
 4. **The gifts and costs above:** any to swap?
+
+## Kyle's answers (2026-11-19)
+
+1. **VOWED** is the path's word on screen (over the lore keeper's GIVEN). The chip reads VOWED. HALLOWED's rename waits
+   for slice 8 (the tiers), asked then.
+2. **Nine** to start.
+3. **AMENDS: Odric's line only,** no number, no bar.
+4. **The costs as drafted.**
