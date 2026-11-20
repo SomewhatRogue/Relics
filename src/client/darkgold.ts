@@ -8,6 +8,8 @@
  * Cosmetic only.
  */
 
+import { TILES } from './tilelook';
+
 /** Which rules apply: the ground (stone only), a wall or furniture, a roof (slate), an enemy (foeHex), a townsman (folkHex). */
 export type Grade = 'floor' | 'wall' | 'roof' | 'foe' | 'folk';
 
@@ -41,6 +43,10 @@ export function gradeHex(c: number, mode: Grade): number {
   const [h, s, l] = hsl((c >> 16) & 255, (c >> 8) & 255, c & 255);
   if (mode === 'foe') return foeHex(c, h, s, l);
   if (mode === 'folk') return folkHex(c, h, s, l);
+  if (TILES.on) {
+    const t = tileHex(h, s, l, mode);
+    if (t !== null) return t;
+  }
   if (greyish(h, s, l)) {
     // Stone is a cool slate (Kyle, 2026-11-17, graphics-overhaul.md slice 2: off dark and gold's green-grey, which
     // left the whole town one olive by day; moss stays green, as the accent). Roofs of grey stone or lead a step
@@ -58,6 +64,36 @@ export function gradeHex(c: number, mode: Grade): number {
   // Painted greens (shutters, doors) dull to the moss's colour.
   if (h > 70 && h < 170 && l < 0.5) return rgb(h * 0.8 + 18, s * 0.75, l * 0.88);
   return c;
+}
+
+/**
+ * The tile look (tilelook.ts TILES): a material keeps a few shades and no in-between, as tile art does. Stone gets five
+ * slate shades, roofs five a step darker and bluer, timber four; each colour goes to the nearest, its lightness first
+ * pushed out from the middle so the steps sit further apart. One hue a material, so a wall reads as one stuff, not a
+ * speckle of near-greys. Null for anything else (moss, gold, lit panes, cloth, figures keep the normal rules).
+ */
+const STONE_L = [0.075, 0.14, 0.215, 0.3, 0.41];
+const TIMBER_L = [0.09, 0.15, 0.225, 0.31];
+function rung(ladder: number[], l: number): number {
+  let i = 0;
+  for (let k = 1; k < ladder.length; k++) if (Math.abs(ladder[k] - l) < Math.abs(ladder[i] - l)) i = k;
+  return i;
+}
+function tileHex(h: number, s: number, l: number, mode: Grade): number | null {
+  if (greyish(h, s, l)) {
+    const roof = mode === 'roof', base = l * (0.96 - 0.15 * l) * (roof ? 0.84 : 1);
+    // Pale greys (lettering, bone, a lit edge) are highlights, not stone: left to the normal rule.
+    if (base > 0.46) return null;
+    const i = rung(STONE_L, 0.23 + (base - 0.23) * 1.3), n = STONE_L.length - 1;
+    // Darker shades a little bluer, the lightest nearly grey: cold slate, lit from one side.
+    return rgb(STONE_HUE + (roof ? 8 : 0) - i * 2, (roof ? 0.2 : 0.15) - (i / n) * 0.07, STONE_L[i]);
+  }
+  if (mode === 'floor' || mode === 'foe' || mode === 'folk') return null;
+  if (h >= 14 && h <= 55 && s > 0.12 && l < 0.5 && !(h >= 36 && s >= 0.35)) {
+    const i = rung(TIMBER_L, 0.2 + (l * 0.78 - 0.2) * 1.3);
+    return rgb(24 + i * 2, 0.3 - i * 0.03, TIMBER_L[i]);
+  }
+  return null;
 }
 
 /**

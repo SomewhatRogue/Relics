@@ -10,10 +10,12 @@ import { groundLv } from '../../shared/heights';
 import { upright } from '../phoneband';
 import { STREET } from './streetkit';
 import { SWING } from '../swing';
+import { TILT } from '../tilelook';
 
 // (The new look's test street, `?hd&street`: a perspective chase camera, lower, looking down 26 degrees at your hero
 // through a 28 degree lens, turning up to 45 degrees toward where you walk in town; streetkit.ts, swing.ts.)
-export const PITCH = ((STREET ? 26 : 36) * Math.PI) / 180;
+// (TILT, the tile look's switch, ../tilelook.ts: 30 degrees in place of 36, to compare.)
+export const PITCH = ((STREET ? 26 : TILT.deg) * Math.PI) / 180;
 const FOV = 28, SWING_MAX = Math.PI / 4, IN_PITCH = (36 * Math.PI) / 180;
 export const NEAR = 20;
 export const FAR = 110;

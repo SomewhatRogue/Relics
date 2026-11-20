@@ -10,6 +10,7 @@ import { FOG_BANDS } from '../light';
 import { MIST_GLSL, MIST_KEEP, MIST_MAX } from '../fenmistdraw';
 import { HD, hdPostMaterial } from './hdlook';
 import { AIR_GLSL, airUniforms } from './air3d';
+import { TILES } from '../tilelook';
 
 /**
  * Smooth light (docs/design/graphics-overhaul.md slice 1b; the only light since Kyle's "should kill bands",
@@ -95,8 +96,9 @@ void main(){
     float dd = D(uv - vec2(0.0, t.y)), du = D(uv + vec2(0.0, t.y));
     float behind = max(max(dl, dr), max(du, dd)) - d;
     float lap = dl + dr + du + dd - 4.0 * d;
-    // An edge in front of something further off: a darker shade of its own colour, not black.
-    if (behind > 0.32) { vec3 o = col * 0.42; col = max(mix(vec3(dot(o, vec3(0.3, 0.55, 0.15))), o, 1.4), 0.0) + vec3(0.006, 0.005, 0.012); }
+    // An edge in front of something further off: a darker shade of its own colour, not black. (The tile look,
+    // ../tilelook.ts: nearly black, the clean dark line of tile art.)
+    if (behind > 0.32) { vec3 o = col * ${TILES.on ? '0.16' : '0.42'}; col = max(mix(vec3(dot(o, vec3(0.3, 0.55, 0.15))), o, ${TILES.on ? '0.6' : '1.4'}), 0.0) + vec3(0.006, 0.005, 0.012); }
     else if (lap > 0.04) col *= 1.4;
     else if (lap < -0.04) col *= 0.72;
   }

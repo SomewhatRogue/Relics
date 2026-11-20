@@ -1,7 +1,8 @@
 # Graphics sweep and overhaul
 
 Plan, 2026-11-17 (Kyle and Claude Fable 5.2). Approved the same day; built slice by slice. **In so far: slices 0
-and 1** (the yardstick; smooth light in both views, LIGHT: SMOOTH or BANDS in the options box, smooth the default).
+and 1** (the yardstick; smooth light in both views), slice 2's first part (slate), and **the tile look's light pass,
+behind TILES and TILT** (2026-11-19, below; waiting on Kyle's eye).
 The assessment with screenshots and the side-by-side mocks are on the page linked from docs/decisions/graphics-overhaul.md.
 
 ## Kyle's calls, 2026-11-17
@@ -14,6 +15,43 @@ The assessment with screenshots and the side-by-side mocks are on the page linke
 - **Lived-in world and Side view to Finished;** this chat takes `three/air3d.ts` and the scatter.
 - **New, to think about: the heroes and enemies redrawn**, "more stylized and cleaner, keeping the dark RPG look and
   feel." Slice 8 below: mocks first, no drawing until he has picked a direction.
+
+## The tile look (Kyle, 2026-11-19)
+
+A new direction for the sweep, from a reference Kyle likes: SNES-era 16-bit tile art (Chrono Trigger the reference),
+but dark and gritty. **Kept from it:** one even pixel size on a tile grid (ground, cobbles, walls laid tile by tile),
+buildings seen front-on with chunky readable shapes, a limited palette a material (3 to 5 shades, strong value
+contrast), light from one side, clean dark outlines on characters and props, very little noise or grain. **Ours:**
+night and torchlight, cold slate, grime, damp and soot; warm light only from torches, braziers and windows. Plus the
+camera tilted up a little, toward the reference's angle, as a switch to compare.
+
+**The light pass** (in, behind switches, 2026-11-19). `?tiles=1` and `?tilt=1` (or `?tilt=<degrees>`), TILES and
+TILT buttons in the options box (each saves and reloads; `client/tilelook.ts`):
+- **A few shades a material** (`darkgold.ts` `tileHex`): stone snapped to five slate shades, roofs five a step darker,
+  timber four, each with its lightness pushed apart first. One hue a material, no near-greys. Pale greys (lettering,
+  bone), gold, moss, cloth and every figure keep the normal rules.
+- **The stone floor laid tile by tile** (`tilefloor.ts`, from `world.ts`): each 16 pixel tile is four cobbles, two
+  half slabs or one slab, lit from the upper left, in dark mortar, no flecks; moss in short runs in the joints. Kept
+  to the bottom of the ladder so the ground stays the quietest tier. Cobble and flagstone floors only.
+- **Even pixels in 2.5D** (`three/view3d.ts`): a tile is exactly 16 render pixels across (it was about 19.5 on a
+  phone, so floor pixels came out uneven widths); the render scale is picked to keep about as many tiles on screen.
+  Everything in the tile floor that runs across is two pixels tall, so at 30 degrees (exactly half the rows) every
+  floor pixel is the same size, and at 36 none drops out.
+- **Outlines** (`three/post.ts`, `three/figmat.ts`): a figure's own edge pixels drawn near black; the depth outline
+  round anything in front of something further off nearly black too, not a darker shade of its own colour.
+- **Less grain:** no flecks in the stone floor; a third as much moss on 2.5D roofs and walls (`three/darkgold3d.ts`).
+- **TILT** (`three/camera3d.ts`): the 2.5D camera at 30 degrees in place of 36, the same tiles across (so it shows
+  more rows, fronts a little taller, floors a little shorter). The flat view is untouched.
+- Not done in the light pass: light from one side beyond the floor's own stones (the moon and sky lights are the
+  Performance sweep chat's `lights3d.ts`); walls laid tile by tile on the 2.5D buildings (they are coloured boxes, so
+  that is the redraw below); the village's earth ground.
+
+**Judged by:** the phone side-by-side of one Wickhold street (`node scripts/sweep-look.cjs <tag> <url> "tiles=1"`,
+the new `street` spot, between the JOBS house and the barracks) and the square. Kyle's call: keep TILES, TILT,
+both or neither, then whether the full redraw is worth it.
+
+**The full redraw** (Kyle's later call, once the light pass has been seen): drawn tiles and sprite sheets, the
+buildings as drawn fronts rather than coloured boxes. Its own spec when it comes.
 
 ## The three changes that would make the biggest difference
 
@@ -38,7 +76,8 @@ they show is what the change would draw. 3 is a call about where the work goes, 
 
 ## Settled, not reopened here
 
-- 1.5x bodies, about 12 tiles across a phone, no camera tilt, even pixels (art-pass.md).
+- 1.5x bodies, about 12 tiles across a phone, even pixels (art-pass.md). The camera's tilt was settled too; Kyle
+  reopened it on 2026-11-19 as the TILT switch, to compare (the tile look, above).
 - The HD street look (`?look=3d&hd&street`: generated kit, chase camera, 32 px tiles) is parked and stays parked.
   Nothing in this plan raises the art's resolution or mixes pixel sizes.
 - The UI is iron and ember (ui-look.md). Not touched, except where it sits over the fight (slice 3).
@@ -83,6 +122,11 @@ first street, the Drowned Rat. (No Node on the machine this chat ran on, so no l
 ## Slices
 
 Order matters: 0, then 1, then 2 (so colour is judged under the new light), then 3, then the rest in any order.
+**What the tile look moved (2026-11-19):** if Kyle keeps TILES, its ladder *is* slice 2's grade (the three tiers are
+then judged under it, not on the old curve), its floor *is* slice 5's stone ground (slice 5 keeps the village's earth
+and the scatter), and its outlines come before slice 8's figure mocks (which then start from outlined figures).
+Slice 4 (2.5D props redrawn from the flat sprites) waits on Kyle's call on slice 9: if the full redraw goes ahead,
+4 is folded into it rather than done twice. Slices 3, 6 and 7 are unchanged.
 Main chat in stages; a Sonnet builder only for slice 4's narrow prop families. Each visual slice goes behind a switch
 first (an address switch and an options button, as CAMERA and LIVING WORLD do), flips to default on Kyle's yes, and
 the old path comes out a slice later.
@@ -99,6 +143,8 @@ the old path comes out a slice later.
 | 6 | Interiors | The six big rooms and job houses under slice 2's value rule: floor, furniture, people in three steps; lamps doing the work | `insidepaint.ts`, `three/insidefurn3d.ts`, `insidekit.ts`, `furnish.ts` | New look: interiors | Their chat's own shots; findable people on a phone |
 | 7 | Spells and effects | One language for what glows: spells and fire bloom a little under the clean light, red stays for danger only, element colours checked against the new grade | `spellground.ts`, `three/skills3d.ts`, `fire3d.ts`, `fx.ts` | unclaimed; the Deep and Instances chats' own boss effects stay theirs | The spell fight shot: every effect readable, red only where you must move |
 | 8 | Heroes and enemies redrawn (Kyle, 2026-11-17: "more stylized and cleaner, keeping the dark RPG look and feel") | Mocks first: the knight, one caster and two goblins drawn two or three ways at the game's own size, on the game's floor under the smooth light, beside today's. What "cleaner" most likely means at this size: fewer colours a figure, bigger flat shapes, one dark outline, one accent (gold on heroes, the eyes on goblins), less shading noise inside the body. Kyle picks; then the looks are redrawn class by class in the same sizes, cuts and poses, so every move and timing carries over | `herolooks*.ts`, `herosides*.ts`, `sprites.ts` (goblin parts), `foekits*.ts`, `charpaint.ts`, `charmean.ts` | Art (sprites, herolooks, foekits); New look: characters (charpaint, charmean); Side view finished (herosides free) | The mock sheet first. Then the lineup page (`?lineup`) before and after, and a fight on a phone: each class and each goblin kind known from its outline alone |
+| T | The tile look, light pass (2026-11-19, above) | Behind TILES and TILT: a few shades a material, the stone floor laid tile by tile, a tile exactly 16 render pixels in 2.5D, near-black outlines, less moss; the camera at 30 degrees | `tilelook.ts`, `tilefloor.ts` (new, mine); small edits in `darkgold.ts`, `three/darkgold3d.ts`, `three/post.ts`, `three/figmat.ts` (mine), `world.ts`, `three/view3d.ts`, `three/camera3d.ts`, `main.ts` | this plan | The street and square side by side on a phone, 2.5D. **In, waiting on Kyle** |
+| 9 | The full redraw (Kyle's later call) | Drawn tiles and sprite sheets; buildings as drawn fronts | its own spec | not started | Once Kyle has seen how far T gets |
 
 Sizes, roughly: 0 and 1a small; 1b medium; 2 medium; 3 small pieces; 4 the big one (six prop families, each a
 small slice); 5 medium; 6 with its own chat; 7 small; 8 a mock round, then large (every look), so it wants its own
@@ -128,6 +174,7 @@ chat or the Art chat once a direction is picked.
 
 ## Open for Kyle
 
+- The tile look: keep TILES, TILT, both or neither; then whether the full redraw (slice 9) is worth it.
 - Slice 8's direction, once its mocks are up.
 - LIVING WORLD's sun and figure shadows as a default, once the light is smooth.
 

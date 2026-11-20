@@ -16,6 +16,8 @@ import { paintGaps } from './wayout';
 import { paintWater } from './waterpaint';
 import { gradeCanvas, MOSS } from './darkgold';
 import { paintLevels, stacked, upAt } from './levelpaint';
+import { TILES } from './tilelook';
+import { tileFloor } from './tilefloor';
 
 export const PX = 16;
 export const OX = 8;
@@ -55,7 +57,10 @@ export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
   // Floor.
   const f = FLOORS[m.theme.floor], [tw, th] = f.tile, fw = m.w * PX, fh = m.h * PX;
   const stony = m.theme.floor === 'cobble' || m.theme.floor === 'flagstone' || m.theme.floor === 'rock', moss = new Rng(m.w * 13 + m.h * 5 + 3);
-  for (let r = 0; r * th < fh; r++) {
+  // The tile look (tilelook.ts): a stone street laid tile by tile on the 16 pixel grid (tilefloor.ts), on its own seed.
+  const tiled = TILES.on && (m.theme.floor === 'cobble' || m.theme.floor === 'flagstone');
+  if (tiled) tileFloor(rect, new Rng(m.w * 17 + m.h * 3 + 1), OX, OY, fw, fh, m.theme.floor === 'flagstone');
+  for (let r = 0; !tiled && r * th < fh; r++) {
     const off = (r % 2) * (tw / 2);
     for (let x = OX - tw + off; x < OX + fw; x += tw) {
       const y0 = OY + r * th;

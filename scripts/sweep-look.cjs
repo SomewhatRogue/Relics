@@ -12,6 +12,8 @@ const WOOD = { name: 'Gallows Wood', kind: 'forest', region: 'Barrowfields', rui
 const SCENES = {
   townday: { q: 'hero=WARRIOR&day=0.5', note: 'Wickhold, day', at: SQUARE },
   townnight: { q: 'hero=WARRIOR&day=0.9', note: 'Wickhold, night', at: SQUARE },
+  // (Between the forge and the town hall: building fronts, for the tile look and the tilt.)
+  street: { q: 'hero=WARRIOR&day=0.9', note: 'Wickhold, a street at night', at: [24, 23] },
   village: { q: 'hero=WARRIOR', note: 'A village at dusk', job: { time: 'dusk', place: { name: 'Barrowby', kind: 'village', region: 'Barrowfields', ruin: 1 }, objective: 'rescue', rooms: 2, seed: 7 } },
   woodfog: { q: 'hero=WARRIOR', note: 'A wood by day, in fog', job: { time: 'day', place: WOOD, objective: 'hunt', rooms: 1, seed: 11 }, mid: true },
   woodnight: { q: 'hero=WARRIOR', note: 'A wood at night', job: { time: 'night', place: WOOD, objective: 'hunt', rooms: 1, seed: 11 }, mid: true },

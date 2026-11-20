@@ -6,6 +6,7 @@
  */
 import * as THREE from 'three';
 import { gradeHex, MOSS, type Grade } from '../darkgold';
+import { TILES } from '../tilelook';
 
 const c = new THREE.Color(), MOSSN = MOSS.map((h) => parseInt(h.slice(1), 16));
 const memo = new Map<string, number>();
@@ -36,7 +37,8 @@ export function gradeBuilt(group: THREE.Group, roof: THREE.Mesh | null, seed: nu
     // Moss, a face at a time: on a roof the faces turned up; on a wall the low faces turned out, on stone.
     for (let f = 0; f + 18 <= a.length; f += 18) {
       const ny = nor[f + 1], y = pos[f + 1];
-      const want = isRoof ? ny > 0.55 && rnd() < 0.13 : ny < 0.3 && y < 0.55 && stoneish(a, f) && rnd() < 0.2;
+      // (The tile look, ../tilelook.ts: a third as much, so a roof reads as one slate with a little moss, not a speckle.)
+      const k = TILES.on ? 0.35 : 1, want = isRoof ? ny > 0.55 && rnd() < 0.13 * k : ny < 0.3 && y < 0.55 && stoneish(a, f) && rnd() < 0.2 * k;
       if (!want) continue;
       c.setHex(MOSSN[Math.floor(rnd() * MOSSN.length)]);
       for (let v = f; v < f + 18; v += 3) a[v] = c.r, a[v + 1] = c.g, a[v + 2] = c.b;

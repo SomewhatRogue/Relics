@@ -59,6 +59,7 @@ import { drawBolts3, strikeLights3 } from './storm3d';
 import { flashTheme, fogLook } from '../skyfx';
 import { flashOf } from '../../sim/stormshape';
 import { drawChalkMarks } from '../chalkdraw';
+import { PITCH_TODAY, TILES } from '../tilelook';
 
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
 const ZOOM = { tall: 0.8, wide: 1 };
@@ -160,13 +161,22 @@ export class View3D {
     this.dpr = Math.min(devicePixelRatio || 1, 3);
     const Dw = innerWidth * this.dpr, Dh = innerHeight * this.dpr;
     // (The new look: a tile 32 render pixels, each a whole number of screen pixels: streetkit.ts `streetScale`.)
-    const S = (this.S = STREET ? streetScale(this.dpr, innerWidth, innerHeight, this.town) : Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
-    const W = Math.ceil(Dw / S), H = Math.ceil(Dh / S);
+    let S = (this.S = STREET ? streetScale(this.dpr, innerWidth, innerHeight, this.town) : Math.max(1, Math.round(Math.sqrt((Dw * Dh) / (HD ? HD_AREA : this.q.area)))));
+    let W = Math.ceil(Dw / S), H = Math.ceil(Dh / S);
     // As much floor as the pixel scene shows (its tiles across times down, scene.ts), so a figure stands
     // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.
     // `__zoom3` (a share of that floor) is for screenshots.
     const s2 = camScale(Dw, Dh), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
-    this.view.size(W, H, STREET ? STREET_PPU : Math.sqrt((W * H) / (Math.sin(PITCH) * floor)));
+    // (Sized as at today's 36 degrees, so TILT, ../tilelook.ts, keeps the tiles across and shows more rows, not a closer view.)
+    let ppu = STREET ? STREET_PPU : Math.sqrt((W * H) / (Math.sin((PITCH_TODAY * Math.PI) / 180) * floor));
+    // The tile look (../tilelook.ts): a tile exactly 16 render pixels across, so the floor's art pixels are one render
+    // pixel each and every one the same width; the render scale picked to keep about as many tiles on screen.
+    if (TILES.on && !STREET && !HD) {
+      const across = W / ppu;
+      S = this.S = Math.max(1, Math.round(Dw / (16 * across)));
+      (W = Math.ceil(Dw / S)), (H = Math.ceil(Dh / S)), (ppu = 16);
+    }
+    this.view.size(W, H, ppu);
     this.gl.setSize(W, H, false);
     const css: [string, string] = [(W * S) / this.dpr + 'px', (H * S) / this.dpr + 'px'];
     [this.canvas.style.width, this.canvas.style.height] = css;

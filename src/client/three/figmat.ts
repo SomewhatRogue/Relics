@@ -8,6 +8,7 @@
  */
 import * as THREE from 'three';
 import { BAYER, toonize } from './post';
+import { TILES } from '../tilelook';
 
 const PICK = `
 vec4 litT = texture2D(map, vMapUv);
@@ -16,6 +17,14 @@ float cut = bay4(gl_FragCoord.xy) + 0.03;
 bool keepLit = litT.a > cut, keepGlow = glowT.a > cut;
 if (!keepLit && !keepGlow) discard;
 diffuseColor.rgb *= keepLit ? litT.rgb : vec3(0.0);
+#ifdef TILE_EDGE
+// The tile look (../tilelook.ts): the sprite's own edge pixels (opaque, beside a clear one) drawn near black.
+if (keepLit) {
+  vec2 ts = 1.0 / vec2(textureSize(map, 0));
+  float e = min(min(texture2D(map, vMapUv + vec2(ts.x, 0.0)).a, texture2D(map, vMapUv - vec2(ts.x, 0.0)).a), min(texture2D(map, vMapUv + vec2(0.0, ts.y)).a, texture2D(map, vMapUv - vec2(0.0, ts.y)).a));
+  if (e < 0.5) diffuseColor.rgb = vec3(0.035, 0.03, 0.045);
+}
+#endif
 diffuseColor.a = 1.0;
 `;
 
@@ -35,7 +44,7 @@ export function cardMaterial(lit: THREE.Texture, glow: THREE.Texture): THREE.Mes
   m.onBeforeCompile = (sh, r) => {
     toon.call(m, sh, r);
     sh.uniforms.tGlow = tGlow;
-    sh.fragmentShader = ('uniform sampler2D tGlow;\n' + sh.fragmentShader).replace('#include <map_fragment>', PICK).replace('#include <opaque_fragment>', '#include <opaque_fragment>\n' + OVER);
+    sh.fragmentShader = ((TILES.on ? '#define TILE_EDGE\n' : '') + 'uniform sampler2D tGlow;\n' + sh.fragmentShader).replace('#include <map_fragment>', PICK).replace('#include <opaque_fragment>', '#include <opaque_fragment>\n' + OVER);
   };
   m.customProgramCacheKey = () => 'figcard';
   m.userData.glow = tGlow;

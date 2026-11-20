@@ -507,3 +507,26 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   `near` pass. Not checked with two real players.
 - Cost of the rule: to trade with a friend who stands at a stall, both step a couple of paces away.
   (Claude Fable 5.2)
+
+## 2026-11-19: the tile look, light pass, behind TILES and TILT
+
+- Kyle, from a reference (SNES-era tile art, Chrono Trigger, but dark and gritty): keep one even pixel size on a tile
+  grid, front-on chunky buildings, 3 to 5 shades a material with strong value contrast, light from one side, clean dark
+  outlines, little grain; ours is night, torchlight, cold slate, grime. A light pass first inside the plan, a camera
+  tilted up as a switch, a phone side-by-side of one Wickhold street before rolling out. (The reference picture did
+  not come through to this session; built from his list.)
+- In, behind switches only: `?tiles=1`, `?tilt=1` (or `?tilt=<degrees>`), TILES and TILT buttons under CAMERA in the
+  options box, each saving and reloading (the grade is painted into cached canvases, the pitch into every card).
+  Details in docs/design/graphics-overhaul.md, "The tile look"; what it moves in the slices is written there too.
+- Found on the way: on a phone the 2.5D floor drew a tile about 19.5 render pixels across, so the floor's art pixels
+  came out in uneven widths. Under TILES a tile is exactly 16 and the render scale is picked to keep the tiles across.
+- First try had the floor the loudest thing on screen (mortar near black, stones bright); taken down to the bottom of
+  the ladder and to more slabs than cobbles. The tilt first zoomed in (the view kept its floor area); now it keeps
+  today's tiles across.
+- New in the yardstick: a `street` spot (Wickhold at night, 24, 23: the JOBS house, the barracks, the stalls).
+- Small edits outside my own files: `world.ts` (the floor's hook), `three/view3d.ts` (the 16 pixel tile, the zoom
+  under TILT), `three/camera3d.ts` (one line, the pitch), `main.ts` (the buttons). Off the switches nothing changes:
+  the pitch, the size sums and every shader are as before.
+- Checked: tsc clean; the full suite 2199 passed, 1 skipped; the street and the square shot on the phone in 2.5D
+  today, TILES, and TILES with TILT. Not looked at: laptop, the flat view, jobs and the Deep under TILES, a real phone.
+  (Claude Opus 5.5)
