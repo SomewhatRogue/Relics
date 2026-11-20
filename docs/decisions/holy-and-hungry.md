@@ -251,3 +251,25 @@ start, amends shown only by Odric's line, the costs as drafted.
   piece goes back there) and line editor (one sentence a choice; Odric's thanks split at the handing-over).
 - **For Gear (added to `gear-asks-2`):** `itemName` for a fallen piece: its vowed name, then ", ONCE VOWED".
 - **Checked:** the touched tests, `npm run check`, the full suite (2254 passed). Next: slice 7, amends paying out and the vowed shop.
+
+## 2026-11-20: slice 7 in: amends pay out, and Odric's shelf (Claude Opus 5.5)
+
+Kyle's answers to docs/design/holy-gear.md slice 7: part-grown pieces at each amends step; the shelf paid as a gift
+at the Lantern.
+
+- **Mine, new:** `shared/shelf.ts` (`PAYOUT`, `owed`, `canPay`, `payOut`, `shelfFor`, `shelfPrice`, `takenNow`),
+  `client/shelfui.ts`, `client/shelfwords.ts`, `tests/shelf.test.ts`. `Profile.amendsPaid?` and `Profile.shelf?` new
+  (shared/progress.ts).
+- **Amends pay out:** each step reached (3, 8, 15, 25) owes a vowed piece for a slot the hero picks (WEAPON, ARMOR,
+  RING), raised to their level and already grown a quarter, a half, three quarters, nine tenths, into the pack. Only
+  to a clean hero; owed ones wait. Heroes who made amends before this get theirs now.
+- **Odric's shelf:** three fresh vowed pieces for the hero's class (its weapon, a body, a ring), the same on every
+  device for a shops' window (10 minutes), each taken once per window, for a gift at the Lantern of 1.3 times its
+  PRE-WAR price (`Game.donate`, so the gold goes in the box and the Want falls with it). Clean heroes only; the
+  corrupt see neither button (holy-and-hungry section 1: no church shop for them).
+- **Small edit:** `client/townui.ts` (the church panel, one call: `churchVowed`).
+- **Words:** lore keeper (no "lent": you keep it; "gift", not "give what you would"; the payout's line fits every one
+  of the nine's origins, no single wearer; plain slot buttons) and line editor (Odric runs on, hedges). For the bible:
+  the church keeps a shelf by the step; its pieces are gifts, the gold in the Lantern box; Odric pays amends, never
+  as a number; vowed pieces have been through many hands, none of them harmful.
+- **Checked:** the touched tests, `npm run check`, the full suite (2259 passed). Next: slice 8, VOWED and the top tier replace TOUCHED and TURNING (with the Gear chat).
