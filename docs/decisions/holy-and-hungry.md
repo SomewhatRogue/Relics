@@ -294,3 +294,27 @@ docs/design/holy-gear.md slice 8; names from the lore keeper.
   yellow and orange), 245 ("buys anything but touched, turning and hungry" to "anything but hungry"), 175 ("hungry
   gear" means red alone). New lore: SIEGE and MARSHAL steel as above.
 - Nothing lands on main from this slice; it's ready when Gear, Economy and General say yes.
+
+## 2026-11-20: slice 9 in: the Keeping Room and Dorcas, as panels (Claude Opus 5.5)
+
+- **Mine, new:** `shared/keeping.ts` (`KEEPING`, `findsRoom`, `feedRelic`, `piecesToFill`, `giveToDorcas`,
+  `dorcasPays`), `client/keepingui.ts`, `client/keepingwords.ts`, `tests/keeping.test.ts`.
+- **How it's reached, for now:** the open sewer grate's panel (client/squareui.ts, one button: THE BRICKED ARCH) for
+  a corrupt hero only; a clean one sees nothing there. The first time in a visit, the door line: the scratches bright
+  where your eyes fall, a bolt going back. The walkable node in the Sewers (the arch, the cistern, the trough, the
+  map in section 7) is the maps' owners' (Deep, Territories, Art): asked below. Soured relics don't exist yet, so
+  carrying one isn't a way in.
+- **Feed a relic:** vowed pieces from the pack, least grown first, each filling 1 use (up to 3 for a grown one),
+  until it's full or they run out; elemental relics never; each piece eaten grows the Want 3. The corrupt hero's
+  only recharge (the church's refusing them is still asked of Relics and Economy, slice 3).
+- **Give a vowed piece to Dorcas:** she pays 40% of its PRE-WAR price, and the Want grows 10. Her trade in what the
+  town hid (section 7's draft) isn't built: nothing to sell yet.
+- **Small edit:** `client/squareui.ts` (the grate's buttons).
+- **Words:** lore keeper (the hoard's origin left unsaid on screen; "vowed pieces", not "church steel"; the door
+  about you, not the scratches; one "always" only) and line editor (Dorcas's cup line). For the bible: the cradle is
+  part of the hoard, empty, never a child's; Dorcas pays coin for vowed pieces (trade, never the Lantern box); she
+  has regulars; what she's given stays on her shelf, never resold on screen.
+- **Asked of the Deep and Territories chats, and Art:** the Keeping Room as a node off the Sewers' cistern (section
+  7's map: the dry arch, the cistern, the trough; no light but yours), reached only by a corrupt hero; when it's in,
+  the bricked arch button moves there.
+- **Checked:** the touched tests, `npm run check`, the full suite (2265 passed). Next: slice 10, elements (spec section 8), when Kyle wants it.

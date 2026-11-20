@@ -25,6 +25,7 @@ import { deepBlocks } from './deepbest';
 import { coinsHtml } from '../shared/coins';
 import { wearsVowed } from '../shared/vowed';
 import { VOWEDW } from './vowedwords';
+import { archButton } from './keepingui';
 
 let link: WorldLink | null = null;
 /** The page hands over its line to the world server. */
@@ -119,8 +120,10 @@ export function openSquare(id: SpotId, g: Game, panel: Panel, _arg: number, key:
       return true;
     }
     const tell = pr.level >= DEEP_GATE.level && mine ? say(D.keeper, D.tellWord(deepWord(deepWeek(now)))) : '';
+    // The bricked arch, for a corrupt hero only (keepingui.ts).
+    const back = () => void openSquare('sewer', g, panel, 0, key);
     panel.show('THE SEWER GRATE', head + say(D.keeper, D.speech) + p(D.rules) + tell + (mine ? '' : p(D.partyLead)) + deepBlocks(w, pr.id),
-      mine ? [{ label: D.go, primary: true, act: go }] : []);
+      [...(mine ? [{ label: D.go, primary: true, act: go }] : []), ...archButton(g, panel, back)]);
     return true;
   }
   if (id === 'locked') {
