@@ -43,6 +43,7 @@ import { isCorrupt } from '../shared/corrupt';
 import { isVowed, rollVowed, wearsVowed } from '../shared/vowed';
 import { amendsOf, stepCrossed } from '../shared/amends';
 import { growKit } from '../shared/vowgrow';
+import { FALL, fallWith, giveRipe } from '../shared/crossroads';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
@@ -1319,7 +1320,7 @@ export class Game {
     if (ransom) p.gold = 0;
     // The Want grows with every job finished in hungry gear, and with what it killed.
     const hungry = this.hungryWorn();
-    p.want += hungry.reduce((s, it) => s + HUNGRY[it.hungry as HungryId].want, 0) + (hungry.length ? run.kills * WANT.perKill : 0);
+    p.want += hungry.reduce((s, it) => s + (HUNGRY[it.hungry as HungryId]?.want ?? FALL.want), 0) + (hungry.length ? run.kills * WANT.perKill : 0);
     // TOUCHED and TURNING gear grows it a little too, for every job it's worn on (shared/costs.ts).
     p.want += [p.arms[p.weapon], p.armor, p.legs, ...p.rings].reduce((s, it) => s + (it ? TIER_WANT[it.quality] ?? 0 : 0), 0);
     // Each hungry piece worn gets hungrier by the job's size (shared/hunger.ts, jobunits.ts).
@@ -1442,6 +1443,16 @@ export class Game {
   hungryWorn(): Item[] {
     const p = this.profile, held = p.arms[p.weapon];
     return [held, p.armor, ...p.rings].filter((x): x is Item => !!x && x.quality === 'hungry');
+  }
+
+  /** The crossroads (shared/crossroads.ts): a ripe vowed piece given up, or kept and fallen. Returns the piece that
+   *  takes its place (a fresh vowed one, or the fallen one), and the amends step crossed (-1 for none). */
+  crossroads(it: Item, give: boolean): { next: Item | null; step: number } {
+    const p = this.profile, was = p.penance ?? 0;
+    const next = give ? giveRipe(p, it, new Rng(p.runs * 173 + Math.round(was * 11) + p.level)) : fallWith(p, it);
+    this.equip(this.hero, this.hero);
+    store(this.save);
+    return { next, step: stepCrossed(was, p.penance ?? 0) };
   }
 
   /** At the church: give a hungry piece up, wherever it is. The Want falls hard, amends grow, and a clean hero

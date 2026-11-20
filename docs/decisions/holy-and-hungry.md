@@ -231,3 +231,23 @@ start, amends shown only by Odric's line, the costs as drafted.
 - **For Gear (added to `gear-asks-2`):** the GROWS row on a vowed piece's card. **For Trading:** `cleanItem` keeps
   `vowBase` too.
 - **Checked:** the touched tests, `npm run check`, the full suite (2250 passed). Next: slice 6, the crossroads.
+
+## 2026-11-20: slice 6 in: the crossroads (Claude Opus 5.5)
+
+- **Mine, new:** `shared/crossroads.ts` (`FALL`, `firstRipe`, `giveRipe`, `fallWith`, `onceOf`), `client/ripeui.ts`,
+  `client/ripewords.ts`, `tests/crossroads.test.ts`.
+- **When:** back in town with a ripe vowed piece (full strength, shared/vowgrow.ts), worn or in the pack, the choice
+  opens by itself before anything else (client/main.ts, ahead of Dunn's raid news), titled with the piece's name,
+  with no close: one ripe piece at a time. The vault isn't looked in: a stowed piece doesn't grow, so can't ripen.
+- **GIVE IT UP:** amends +5 (a hungry piece given up is 1 to 3), and a fresh vowed piece for that slot where it was;
+  Odric's thanks, and his line at an amends step.
+- **KEEP IT, and fall:** it turns hungry (no hungry id: no named gift or cost, only power, bites and the Want), its
+  modifiers at 1.2 times a fresh hungry piece's of its slot and level (`budget('hungry')`, so it follows Gear's
+  number), its count back to 0 so its bites start at 5%, and it adds 8 to the Want a job (a fresh hungry piece 5).
+  It keeps `once` (which vowed piece it was), for its name. `finish`'s Want line now reads a missing hungry id as 8.
+- **Small edits:** `client/game.ts` (`crossroads`, the Want line), `client/main.ts` (the moment).
+- **Words:** lore keeper (nobody speaks at the moment itself, the plain choice; no "It can't stay as it is.";
+  ONCE VOWED after the name, for good; for the bible: the church lends vowed steel, Odric keeps the shelf, a ripe
+  piece goes back there) and line editor (one sentence a choice; Odric's thanks split at the handing-over).
+- **For Gear (added to `gear-asks-2`):** `itemName` for a fallen piece: its vowed name, then ", ONCE VOWED".
+- **Checked:** the touched tests, `npm run check`, the full suite (2254 passed). Next: slice 7, amends paying out and the vowed shop.
