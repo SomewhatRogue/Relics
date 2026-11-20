@@ -189,7 +189,7 @@ describe('light against heavy', () => {
 describe('the seven tiers', () => {
   it('sort white to red, each its own colour, the rare three last with red on top', () => {
     expect(TIER_ORDER).toEqual(['plain', 'fine', 'forged', 'tolmouth', 'touched', 'turning', 'hungry']);
-    expect(TIER_ORDER.map((t) => TIERS[t].name)).toEqual(['PLAIN', 'FINE', 'FORGED', 'PRE-WAR', 'TOUCHED', 'TURNING', 'HUNGRY']);
+    expect(TIER_ORDER.map((t) => TIERS[t].name)).toEqual(['PLAIN', 'FINE', 'FORGED', 'PRE-WAR', 'SIEGE', 'MARSHAL', 'HUNGRY']);
     expect(new Set(TIER_ORDER.map((t) => TIERS[t].col)).size).toBe(7);
     expect(TIER_ORDER.map((t) => TIERS[t].step)).toEqual([0, 1, 2, 3, 4, 5, 6]);
     expect(RARE).toEqual(['touched', 'turning', 'hungry']);

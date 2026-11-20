@@ -31,10 +31,10 @@ async function tobin(pr: Profile): Promise<string> {
 }
 
 describe("Tobin won't touch the rare three", () => {
-  it('refuses TOUCHED, TURNING and HUNGRY, and buys every tier below them', () => {
+  it('refuses only HUNGRY, and buys every tier below it, SIEGE and MARSHAL too (clean, holy-and-hungry slice 8)', () => {
     for (const t of TIER_ORDER) for (const slot of ['weapon', 'armor', 'ring'] as const) {
       if (t === 'hungry' && slot !== 'weapon') continue;
-      const it = gear(t, slot), p = hero(it), rare = RARE.includes(t);
+      const it = gear(t, slot), p = hero(it), rare = t === 'hungry';
       expect(tobinWont(p, it), `${t} ${slot}`).toBe(rare ? (t === 'hungry' ? 'panic' : 'rare') : '');
       expect(pawn(p, 0) > 0, `${t} ${slot}`).toBe(!rare);
       expect(p.bag.length).toBe(rare ? 1 : 0);
@@ -85,13 +85,12 @@ describe('a hungry piece on you', () => {
     const html = await tobin({ ...p, bag: [gear('fine'), gear('touched')] });
     expect(html).not.toContain(PAWN.panicRule);
     expect(html).toContain(PAWN.greet.slice(0, 20));
-    // On the SELL tab, the touched piece sits dim in his grid, with the reason under it.
+    // On the SELL tab, a SIEGE piece is clean now (holy-and-hungry slice 8): he prices it like any other.
     const { pawnTabTo } = await import('../src/client/stores');
     pawnTabTo('sell');
     const sell = await tobin({ ...p, bag: [gear('fine'), gear('touched')] });
     pawnTabTo('buy');
-    expect(sell).toContain('tile dim');
-    expect(sell).toContain(PAWN.wont);
+    expect(sell).not.toContain('tile dim');
   });
 
   it('given to the church, it is gone: Tobin trades again', async () => {
