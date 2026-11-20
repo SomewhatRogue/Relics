@@ -22,9 +22,21 @@ export const VOWEDW = {
   /** Tobin, offered a vowed piece: the church kept it, and he won't buy it. And the plain rule. */
   tobin: "That came off Odric's shelf, and it's not mine to buy whatever you'd take for it, so keep it on you, and anything else in that sack I'll gladly look at.",
   tobinRule: "Tobin won't buy vowed gear.",
+  /** How far a vowed piece has grown (shared/vowgrow.ts), on its card: the label, then one line. */
+  growLabel: 'GROWS',
+  grows: (pct: number, jobs: number) => `Gets stronger each job you finish without hungry gear or high hunger. ${pct}% grown, full in about ${jobs} ${jobs === 1 ? 'job' : 'jobs'}.`,
+  frozen: 'Not growing: you wear hungry gear or your hunger is high. It keeps what it has.',
+  full: 'Full strength.',
   /** The card's chip and the dim row (asked of the Gear chat's card.ts). */
   dim: 'DIM: gives nothing while you wear hungry gear.',
 };
 
 /** A name as it's said, not shouted: THE WIDOW'S SWORD as The Widow's Sword. */
 export const spoken = (name: string) => name.toLowerCase().replace(/(^|[\s-])([a-z])/g, (_m, a: string, b: string) => a + b.toUpperCase());
+
+/** A vowed piece's GROWS row for its card (asked of the Gear chat's card.ts): `corrupt`, the wearer is now. */
+export function growRow(share: number, unitsLeft: number, corrupt: boolean): [string, string] {
+  if (share >= 1) return [VOWEDW.growLabel, VOWEDW.full];
+  const line = VOWEDW.grows(Math.floor(share * 100), Math.max(1, Math.ceil(unitsLeft)));
+  return [VOWEDW.growLabel, corrupt ? `${line} ${VOWEDW.frozen}` : line];
+}

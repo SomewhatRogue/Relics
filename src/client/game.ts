@@ -42,6 +42,7 @@ import { jobUnits } from '../shared/jobunits';
 import { isCorrupt } from '../shared/corrupt';
 import { isVowed, rollVowed, wearsVowed } from '../shared/vowed';
 import { amendsOf, stepCrossed } from '../shared/amends';
+import { growKit } from '../shared/vowgrow';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
@@ -1323,6 +1324,8 @@ export class Game {
     p.want += [p.arms[p.weapon], p.armor, p.legs, ...p.rings].reduce((s, it) => s + (it ? TIER_WANT[it.quality] ?? 0 : 0), 0);
     // Each hungry piece worn gets hungrier by the job's size (shared/hunger.ts, jobunits.ts).
     feedKit(p, jobUnits(run.job, won ? 'won' : how));
+    // Each vowed piece worn grows by the same, if the hero ends the job clean (shared/vowgrow.ts).
+    growKit(p, jobUnits(run.job, won ? 'won' : how));
     const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;

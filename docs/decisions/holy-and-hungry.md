@@ -214,3 +214,20 @@ start, amends shown only by Odric's line, the costs as drafted.
 - **Checked:** the touched tests, `npm run check`, the full suite (2246 passed).
 - Slice 4 is done but for the asks: Gear (names and card rows, `gear-asks-2`), Economy (no pluses), Trading
   (`cleanItem`), Relics (the rings). Next: slice 5, vowed pieces grow (holy-and-hungry 5b).
+
+## 2026-11-19: slice 5 in: vowed pieces grow (Claude Opus 5.5)
+
+- **Mine, new:** `shared/vowgrow.ts` (`GROW`, `growMult`, `grownBy`, `growKit`, `grown`, `ripe`), `tests/vowgrow.test.ts`.
+- **How:** the same count as hungry gear (`worn`, job-units by size), grown in `finish` beside `feedKit` (one line in
+  `client/game.ts`), but only when the hero ends the job clean (`isCorrupt` false); corrupt, nothing grows and
+  nothing is lost. From PRE-WAR's 20 points to 45 over 30 units: 1.25 times TURNING's 36, halfway to hungry's
+  hoped-for 1.5 times, so under hungry once Gear's number lands. The piece keeps its modifiers as given (`vowBase`)
+  and its live ones are rewritten from them, so the card, stats and fight read the grown numbers with no other
+  hook, and growing never compounds. A grown piece can pass its modifiers' caps, as hungry's Want gift can.
+- **At full strength a piece is ripe** (`ripe`): the crossroads is slice 6.
+- **Words:** the card's GROWS row (`growRow` in client/vowedwords.ts), lore keeper ("clean" reads as no damage taken,
+  so the condition is said plainly; "Full strength." not "Fully grown."; the frozen line says it keeps what it has)
+  and line editor ("each job", "% grown").
+- **For Gear (added to `gear-asks-2`):** the GROWS row on a vowed piece's card. **For Trading:** `cleanItem` keeps
+  `vowBase` too.
+- **Checked:** the touched tests, `npm run check`, the full suite (2250 passed). Next: slice 6, the crossroads.
