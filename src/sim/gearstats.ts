@@ -4,6 +4,7 @@ import { MAGE_PACE, WEAPONS, cutMax, drilled, gearStats, perkFx, type Fx, type G
 import type { Hero } from './types';
 import { markSum } from '../shared/deepmarks';
 import { withBites } from './bites';
+import { bandOf } from '../shared/corrupt';
 
 type Stats = GearStats & { crit: number; fx: Fx };
 const cache = new WeakMap<Hero, { key: unknown[]; s: Stats }>();
@@ -12,7 +13,7 @@ const cache = new WeakMap<Hero, { key: unknown[]; s: Stats }>();
 export function statsOf(h: Hero): Stats {
   const w = h.arms?.[h.weapon], rings = h.rings ?? [], c = cache.get(h), d = h.drills;
   const mk = (h.marks ?? []).join();
-  if (c && c.key[0] === w && c.key[1] === h.armor && c.key[8] === (h.legs ?? null) && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d && c.key[5] === (h.perks ?? []).join() && c.key[7] === (h.streakStep ?? 0) && c.key[6] === mk) return c.s;
+  if (c && c.key[0] === w && c.key[1] === h.armor && c.key[8] === (h.legs ?? null) && c.key[2] === rings[0] && c.key[3] === rings[1] && c.key[4] === d && c.key[5] === (h.perks ?? []).join() && c.key[7] === (h.streakStep ?? 0) && c.key[6] === mk && c.key[9] === bandOf(h.want)) return c.s;
   const g = gearStats(w, h.armor, rings, h.legs ?? null);
   const fx = perkFx(h.perks);
   const s = { ...g, fx, damage: g.damage + drilled(d, 'power'), health: g.health + drilled(d, 'health'), speed: g.speed * (1 + (WEAPONS[h.weapon]?.cls === 'MAGE' ? 0 : drilled(d, 'speed'))), breath: g.breath + drilled(d, 'wind'), crit: g.crit + drilled(d, 'crit') };
@@ -25,7 +26,7 @@ export function statsOf(h: Hero): Stats {
   if (WEAPONS[h.weapon]?.cls === 'MAGE') s.speed = Math.min(s.speed, 1 + MAGE_PACE.most);
   // Hungry pieces' bites last, so they take their share of all of it (sim/bites.ts).
   withBites(s, h);
-  cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join(), mk, h.streakStep ?? 0, h.legs ?? null], s });
+  cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join(), mk, h.streakStep ?? 0, h.legs ?? null, bandOf(h.want)], s });
   return s;
 }
 

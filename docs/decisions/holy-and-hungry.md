@@ -84,3 +84,24 @@ floors. Note for the spec: 2b says a traded hungry piece keeps its count, but hu
   and "a level beats a tier: ... HUNGRY seven"): 1.5 times puts HUNGRY at 54 and further from the levels. Those are Gear's
   rules, so the number, or a smaller lift (1.25 is 45), and those tests are Gear's to settle; I didn't touch them.
 - Next: slice 2, corrupt and the Want's table.
+
+## 2026-11-19: pushed; slice 2 in, the Want bites in the fight (Claude Opus 5.5)
+
+- Kyle said push: slice 1 is on main; Gear's three asks are on the branch `gear-asks` (not main), still for Gear.
+- **Slice 2 split in two** (the plan's 2 was too big for one go): **2, the fight's side** (this), and **3, the town's
+  side** (corrupt heroes refused by the church, Isolde and the healers, prices up 25%, named butchers come for you
+  first, the Want's bar on the panel and pack: other chats' files, each asked). The plan's 3 to 9 become 4 to 10.
+- **Mine, new:** `shared/corrupt.ts` (`WANT_BANDS`, `bandOf`, `CORRUPT_AT`, `isCorrupt`, `wearsHungry`), `tests/corrupt.test.ts`.
+- **The bands in the fight:** at 15, 30 and 60 the Want lifts each hungry piece's own modifiers by 10, 20 and 35%
+  (`withBites`, on top of the caps, as the bites are; the named gifts themselves don't scale yet); from 15 goblins
+  see you from 15% further off (`seenBy`, sim/enemies.ts's sight line); at 60, heals from anyone else do half
+  (`othersHeal`, in `heals`). `statsOf`'s cache now keys on the Want's band too.
+- **Two more bites, so all six from the spec are in:** NOTICED (goblins see you N% further off, with the band's) and
+  GREEDY (you pick up N% less coin, sim/pickups.ts). A piece whose bite wasn't kept yet may show another now that
+  there are six to roll from; pieces worn through a job since slice 1 keep theirs.
+- **Small edits:** `sim/enemies.ts` (one factor on the sight line, an import), `sim/pickups.ts` (the coin line, an
+  import), `sim/gearstats.ts` (the cache key), `sim/hungry.ts` (`heals`).
+- **Words:** lore keeper (ON THEME, "coin" right, never "gold") and line editor ("You pick up N% less coin." taken over
+  "It eats N% of the coin you pick up.").
+- **Checked:** the touched tests, `npm run check`, the full suite (2221 passed).
+- Next: slice 3, the town's side.

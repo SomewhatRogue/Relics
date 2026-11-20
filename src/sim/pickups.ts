@@ -8,6 +8,7 @@ import type { Rng } from '../shared/rng';
 import type { Enemy, FightEvent, Hero } from './types';
 import { HUNGRY_FX, wears } from './hungry';
 import { relicName, type RelicItem } from '../shared/relicitems';
+import { goldKeep } from './bites';
 
 export interface Pickup { id: number; x: number; y: number; life: number; gold?: number; potion?: PotionId; relic?: RelicItem }
 let nextId = 1;
@@ -67,7 +68,8 @@ export function stepPickups(pickups: Pickup[], heroes: Hero[], ev: FightEvent[],
       if (tooth && players(heroes).length > 1) ev.push({ k: 'tooth', x: tooth.x, y: tooth.y });
       for (const o of party) {
         // Someone's Wedding Ring: every coin counts twice.
-        const n = (share + (o === (tooth ?? h) ? p.gold - share * party.length : 0)) * (wears(o, 'wedding') ? 2 : 1);
+        // A GREEDY bite eats its share of what's left (sim/bites.ts).
+        const n = Math.floor((share + (o === (tooth ?? h) ? p.gold - share * party.length : 0)) * (wears(o, 'wedding') ? 2 : 1) * goldKeep(o));
         if (n > 0) (o.purse += n), ev.push({ k: 'gold', id: o.id, x: o.x, y: o.y, n });
       }
       return false;

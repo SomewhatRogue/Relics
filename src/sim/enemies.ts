@@ -54,6 +54,7 @@ import { clockHolds, trackAim } from './bosskit';
 import { keeperPause, stepKeeper } from './doorkeepers';
 import { bossStun } from './poise';
 import { markSum } from '../shared/deepmarks';
+import { seenBy } from './bites';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
@@ -416,7 +417,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     const mist = m.fen ? mistSight(m, h.x, h.y, now) : 1;
     // (Cursed in the Deep to be seen sooner: shared/deepmarks.ts.)
     // (No marks sum to 0, so 1 + it is 1: skipped without making an empty list each time.)
-    if (d < sight * noticeFor(theme) * mist * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) * (h.marks?.length ? 1 + markSum(h.marks, 'seen') : 1) + seenFrom(h) * glowIn(theme)) seen = true;
+    if (d < sight * noticeFor(theme) * mist * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) * (h.marks?.length ? 1 + markSum(h.marks, 'seen') : 1) * seenBy(h) + seenFrom(h) * glowIn(theme)) seen = true;
   }
   // (Always asked: its list is made by the tick's first asking, so skipping it could make it later.)
   const loud = noisy(others, now);

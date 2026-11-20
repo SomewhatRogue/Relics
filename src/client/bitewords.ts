@@ -14,7 +14,9 @@ export const BITEW = {
     winded: (n: number) => `Stamina recovers ${n}% slower.`,
     clumsy: (n: number) => `Each dodge costs ${n}% more stamina.`,
     starved: (n: number) => `Healing on you is ${n}% weaker.`,
-  } as Record<BiteId, (n: number) => string>,
+    noticed: (n: number) => `Goblins notice you from ${n}% further off.`,
+    greedy: (n: number) => `You pick up ${n}% less coin.`,
+  } satisfies Record<BiteId, (n: number) => string>,
   /** About how many medium jobs until it bites harder; `twice` when the next step is the second bite. */
   next: (jobs: number, twice: boolean) => (twice ? `It gains a second bite ${when(jobs)}.` : `It bites harder ${when(jobs)}.`),
   worst: "It can't bite any harder.",

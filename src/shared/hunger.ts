@@ -11,9 +11,9 @@ import { Rng } from './rng.js';
 import { CLASS_DODGES, type HeroClass } from './weapons.js';
 import { HUNGRY, type HungryId } from './hungry.js';
 
-/** What a bite does to the wearer. This slice: health, refill, the dodge, heals on you. */
-export type BiteId = 'frail' | 'winded' | 'clumsy' | 'starved';
-export const BITE_ORDER: BiteId[] = ['frail', 'winded', 'clumsy', 'starved'];
+/** What a bite does to the wearer: health, recovery, the dodge, heals on you, how far off goblins see you, coin picked up. */
+export type BiteId = 'frail' | 'winded' | 'clumsy' | 'starved' | 'noticed' | 'greedy';
+export const BITE_ORDER: BiteId[] = ['frail', 'winded', 'clumsy', 'starved', 'noticed', 'greedy'];
 
 /** The count and the bites a piece carries (to move into loot.ts's Item when the Gear chat says yes). */
 export interface Fed { worn?: number; bites?: BiteId[] }
