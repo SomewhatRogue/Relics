@@ -93,15 +93,19 @@ function colourAt(mat: Exclude<Soil['mat'], 'cobble' | 'shade'>, x: number, y: n
 }
 
 /** Paint the soil straight into the floor's pixels: material per 4x4 block, colour per 2x2. */
-export function paintSoil(m: GameMap, g: CanvasRenderingContext2D): void {
+/**
+ * `at`: the grid painted on, its top left and its pixels a tile across and down (the tile redraw paints the 2.5D floor
+ * at 20 by 12: three/redrawfloor.ts); today's floor by default.
+ */
+export function paintSoil(m: GameMap, g: CanvasRenderingContext2D, at = { x: OX, y: OY, sx: PX, sy: PX }): void {
   const soil = m.soil;
   if (!soil?.length) return;
-  const boxes = soil.map(box), W = m.w * PX, H = m.h * PX, img = g.getImageData(OX, OY, W, H), d = img.data;
+  const { sx, sy } = at, boxes = soil.map(box), W = m.w * sx, H = m.h * sy, img = g.getImageData(at.x, at.y, W, H), d = img.data;
   for (let by = 0; by < H; by += 4) for (let bx = 0; bx < W; bx += 4) {
-    const mat = matAt(soil, boxes, (bx + 2) / PX, (by + 2) / PX);
+    const mat = matAt(soil, boxes, (bx + 2) / sx, (by + 2) / sy);
     if (mat === 'cobble' || mat === 'shade') continue;
     for (let py = by; py < Math.min(H, by + 4); py += 2) for (let px = bx; px < Math.min(W, bx + 4); px += 2) {
-      const [r, gg, b] = toRgb(colourAt(mat, px / PX, py / PX, px, py));
+      const [r, gg, b] = toRgb(colourAt(mat, px / sx, py / sy, px, py));
       for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) {
         const o = ((py + j) * W + px + i) * 4;
         (d[o] = r), (d[o + 1] = gg), (d[o + 2] = b), (d[o + 3] = 255);
@@ -112,8 +116,8 @@ export function paintSoil(m: GameMap, g: CanvasRenderingContext2D): void {
   for (const s of soil) {
     if (s.mat !== 'shade') continue;
     const [x0, y0, x1, y1] = box(s);
-    for (let py = Math.max(0, Math.floor(y0 * PX / 2) * 2); py < Math.min(H, y1 * PX); py += 2) for (let px = Math.max(0, Math.floor(x0 * PX / 2) * 2); px < Math.min(W, x1 * PX); px += 2) {
-      const x = px / PX, y = py / PX, wob = (noise(x, y, 1.1, 21) - 0.5) * 0.9;
+    for (let py = Math.max(0, Math.floor(y0 * sy / 2) * 2); py < Math.min(H, y1 * sy); py += 2) for (let px = Math.max(0, Math.floor(x0 * sx / 2) * 2); px < Math.min(W, x1 * sx); px += 2) {
+      const x = px / sx, y = py / sy, wob = (noise(x, y, 1.1, 21) - 0.5) * 0.9;
       if (depth(s, x, y) + wob <= 0) continue;
       const k = noise(x, y, 0.7, 23) > 0.68 ? 0.84 : 0.66;
       for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) {
@@ -122,5 +126,5 @@ export function paintSoil(m: GameMap, g: CanvasRenderingContext2D): void {
       }
     }
   }
-  g.putImageData(img, OX, OY);
+  g.putImageData(img, at.x, at.y);
 }

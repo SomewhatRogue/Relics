@@ -42,11 +42,8 @@ const FLOORS: Record<GameMap['theme']['floor'], { tile: [number, number]; base: 
   planks: { tile: [24, 5], base: ['#5a3f28', '#5e432a', '#553b25', '#624630', '#583d27'], line: '#2a1d12', fleck: ['#4a321f', '#6b4e34'] },
 };
 
-/**
- * The room's painting; `flat` for the pixel view (the 2.5D view builds the water's drop itself). `bare`: a stone floor's
- * base left clear, for the tile redraw to lay what lies on the ground over its own (three/redrawfloor.ts).
- */
-export function paintMap(m: GameMap, flat = true, bare = false): HTMLCanvasElement {
+/** The room's painting; `flat` for the pixel view (the 2.5D view builds the water's drop itself). */
+export function paintMap(m: GameMap, flat = true): HTMLCanvasElement {
   const W = worldW(m), H = worldH(m), c = document.createElement('canvas');
   c.width = W;
   c.height = H;
@@ -61,9 +58,8 @@ export function paintMap(m: GameMap, flat = true, bare = false): HTMLCanvasEleme
   const f = FLOORS[m.theme.floor], [tw, th] = f.tile, fw = m.w * PX, fh = m.h * PX;
   const stony = m.theme.floor === 'cobble' || m.theme.floor === 'flagstone' || m.theme.floor === 'rock', moss = new Rng(m.w * 13 + m.h * 5 + 3);
   // The tile look (tilelook.ts): a stone street laid tile by tile on the 16 pixel grid (tilefloor.ts), on its own seed.
-  const tiled = (bare || TILES.on) && (m.theme.floor === 'cobble' || m.theme.floor === 'flagstone');
-  if (tiled && bare) g.clearRect(OX, OY, fw, fh);
-  else if (tiled) tileFloor(rect, new Rng(m.w * 17 + m.h * 3 + 1), OX, OY, fw, fh, m.theme.floor === 'flagstone');
+  const tiled = TILES.on && (m.theme.floor === 'cobble' || m.theme.floor === 'flagstone');
+  if (tiled) tileFloor(rect, new Rng(m.w * 17 + m.h * 3 + 1), OX, OY, fw, fh, m.theme.floor === 'flagstone');
   for (let r = 0; !tiled && r * th < fh; r++) {
     const off = (r % 2) * (tw / 2);
     for (let x = OX - tw + off; x < OX + fw; x += tw) {
@@ -165,7 +161,8 @@ function back(m: GameMap, rect: Rect, rng: Rng, pick: (a: string[]) => string, W
 }
 
 /** Raised ground: its top lifted, a face down to the floor, stairs or a slope where the ramp is. */
-function ledge(l: Ledge, rect: Rect, rng: Rng, pick: (a: string[]) => string): void {
+/** A job's rock shelf painted into the floor (exported for the tile redraw's floor, three/redrawfloor.ts). */
+export function ledge(l: Ledge, rect: Rect, rng: Rng, pick: (a: string[]) => string): void {
   const rock = l.kind !== 'wood', x = OX + l.x * PX, y = OY + l.y * PX - LIFT, w = l.w * PX, h = l.h * PX;
   // The face first, a shadow at its foot, then the top over it.
   rect(x, y + h, w, LIFT, rock ? '#2a2733' : '#3a2a1a');

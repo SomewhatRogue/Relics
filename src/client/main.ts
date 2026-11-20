@@ -173,6 +173,7 @@ import { weaponsAbout } from './weaponsabout';
 import { mageTrails } from './fxmagetap';
 import { iceTrails } from './fxice';
 import { one, setData, setHidden, setHtml, setStyle, setText, setTitle, toggle } from './domset';
+import { openCrossroads } from './ripeui';
 
 // The UI's frames and icons, drawn once before anything shows.
 paintFrames();
@@ -687,7 +688,10 @@ function tick(t: number): void {
   // Out of the wood: the road to Wickhold (Orla walked you here; she met you in the wood).
   if (game.greeting === 'road' && !panel.open) (game.greeting = null), panel.show('WICKHOLD', `<p class="dim">${line(WOOD_ROAD)}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   // Back to a town the hungry raided while you were away: Dunn tells you, the first time you see it.
-  else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result) {
+  // A vowed piece at full strength: the crossroads first, before anything else in town (ripeui.ts).
+  else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result && openCrossroads(game, panel)) {
+    /* opened */
+  } else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result) {
     // (After it, once: the relics that went when relics became earned, relicgone.ts; told, it's saved.)
     const raid = raidNews(game.world), gone = raid ? null : relicsGoneNews(game.profile);
     if (gone) game.keep();
