@@ -633,3 +633,15 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   `world.ts` exports `ledge`; the `bare` option on `paintMap` came out again.
 - Checked: tsc clean; the town on the phone, ground zoomed before and after: even two-by-two soil, square stones.
   (Claude Opus 5.5)
+
+## 2026-11-20: figures flicking a pixel as the mouse moves (computer)
+
+- Kyle: on a computer, moving the mouse round, figures "jitter in place a little", as if clipping into a spot.
+- Cause found: the camera looks a little ahead of where your hero faces (the mouse, on a computer), so it eases as
+  the mouse moves, snapped to whole pixels. With an odd view width or height the screen's middle is half a pixel, so
+  under the redraw (a whole 20 pixels a tile) a figure's card sat exactly half a pixel off the floor's grid, and the
+  rounding went either way by the float's noise as the camera moved. Measured in a 1511 by 981 window: the card's
+  offset from a floor point was always x.50 down the screen before, whole after.
+- Fix: the camera sits half a pixel over on an odd side (`three/camera3d.ts`), so the world's pixel grid lands on
+  whole screen pixels (floor texels too); a figure's rounding gets a hair's bias so a tie always goes the same way
+  (`three/figs3d.ts`). Small edits in both (finished chats' files). (Claude Opus 5.5)
