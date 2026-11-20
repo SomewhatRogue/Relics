@@ -6,6 +6,7 @@
 import { CLASS_DODGES, CLASS_GUARD, WEAPONS, type HeroClass, type WeaponId } from './weapons.js';
 import { barWords } from './barword.js';
 import { HUNGRY, type HungryId } from './hungry.js';
+import { VOWED, type VowedId } from './vowed.js';
 import { UNIQUE_NAMES } from './uniquenames.js';
 
 export type TraitId = 'riposte' | 'tempo' | 'bulwark' | 'deadeye' | 'crushing' | 'brutal' | 'reaper' | 'ember' | 'rime' | 'storm';
@@ -77,6 +78,8 @@ export interface Item {
   /** A hungry piece's id (hungry.ts). */
   hungry?: string;
   /** A hungry piece's count, in job-units worn, and the bites it has come to (shared/hunger.ts, the Holy and hungry chat). */
+  /** A VOWED piece's id (shared/vowed.ts, the Holy and hungry chat). */
+  holy?: string;
   worn?: number;
   bites?: import('./hunger.js').BiteId[];
   /** A unique piece's id (uniques.ts): its own name, fixed modifiers, its boss's pool. */
@@ -94,6 +97,7 @@ export const LEGS_NAME = { light: 'LEATHER TROUSERS', medium: 'MAIL SKIRT', heav
 export function itemName(i: Item): string {
   const el = i.traits.find((t) => ELEMENT_TRAITS.includes(t));
   if (i.hungry) return HUNGRY[i.hungry as HungryId].name;
+  if (i.holy && VOWED[i.holy as VowedId]) return VOWED[i.holy as VowedId].name;
   if (i.unique && UNIQUE_NAMES[i.unique]) return UNIQUE_NAMES[i.unique];
   const base = i.slot === 'armor' ? ARMOR_NAME[i.armor ?? 'light'] : i.slot === 'legs' ? LEGS_NAME[i.armor ?? 'light'] : i.slot === 'ring' ? 'RING' : WEAPONS[i.kit ?? 'sword'].name;
   return (el ? TRAITS[el].name + ' ' : '') + base + (i.level ? ' +' + i.level : '');
