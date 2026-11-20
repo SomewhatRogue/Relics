@@ -31,7 +31,24 @@ redraw does the same in 2.5D:
   (docs/design/new-figures.md), Kyle's call separately.
 - **The flat view stays frozen** as the weak-phone fallback, at 16 a tile with today's art and the light pass.
 
-## Where the art comes from
+## Making a new asset (the rule since 2026-11-20)
+
+Kyle: "we need to make sure in the future any new assets etc are done this way first." So, for any chat:
+- **The size.** A tile is 20 render pixels across; a floor tile 20 by 12; a wall 16 a tile of height. Draw at that
+  size, one pixel to one render pixel. Never stretch a 16-a-tile painting onto the 2.5D view.
+- **Where it goes.** A floor kind: a stamp in `tilegrounds.ts` (or `tilekit.ts` for stone). A wall, a ledge, a fence
+  or anything with faces: a canvas drawer, laid with `three/redraw3d.ts` `screenQuad` (it maps any face to the
+  screen's pixels). A prop or furniture: a card, drawn in `tilefurn*.ts` or by the flat view's own painter if that is
+  a real picture (`three/propcards.ts`). A building kind: `three/redraw3d.ts` `drawHouse` and the kit's faces.
+- **The style.** Three to five shades a material, light from the upper left, a darker edge right and bottom, clean
+  dark outlines (cards get theirs from the card material), no speckle, clear pixels where the ground should show.
+  Neutral greys and plain browns, then `gradeCanvas`, so it lands on the game's slate and timber; a building's own
+  colour through `tint`. The ground stays the darkest, quietest tier.
+- **The check.** `node scripts/sweep-look.cjs <tag>` on the phone in 2.5D, cropped close; look for uneven pixels, a
+  crate where a bench should be, a hatch on a slope. Never a 3D box as the finished look.
+- **The flat view** (the weak-phone fallback) needs nothing new unless the asset changes what is where.
+
+
 
 Tile art repeats, so it suits being drawn by code, as `tilefloor.ts` already draws the stone street: a **tile kit** of
 small stamps per material, each in three to five shades of one hue, lit from the upper left, with a few variants so a

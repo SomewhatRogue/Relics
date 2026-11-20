@@ -94,6 +94,15 @@ torches, braziers, moonlight and spells, in smooth pools of light over the crisp
 (`src/client/light.ts`); goblins in sickly greens with glowing eyes; red floor telegraphs, striped edge
 for unblockable ones. A 2.5D three.js view shares the same art.
 
+**Every new asset is made the tile way first** (Kyle, 2026-11-20; `docs/design/tile-redraw.md`, "Making a new
+asset"). The 2.5D view is SNES-era tile art, dark and gritty: 20 render pixels a tile, the camera at 36.87 degrees
+(a floor tile 20 by 12, a wall 16 a tile of height), one drawn pixel to one render pixel. Anything new on a map (a
+floor, a wall, a building, a prop, furniture, a creature's lair) is drawn by code in the kit (`src/client/tilekit.ts`
+and its family: `tilegrounds.ts`, `tilefurn*.ts`, `tilefence.ts`; faces through `three/redraw3d.ts` `screenQuad`,
+props and furniture as cards through `three/propcards.ts`), not built from 3D boxes: three to five shades a material,
+light from the upper left, clean dark outlines, no noise, the ground the darkest tier. Check it on the phone in 2.5D
+(`scripts/sweep-look.cjs`) before landing. `?redraw=0` shows the old look, for comparing only.
+
 ## Code conventions
 
 - One job per file; aim for under 200 lines.
