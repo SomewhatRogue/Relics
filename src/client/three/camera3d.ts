@@ -63,7 +63,7 @@ export class Cam {
    * feet must stay in, over the room's edge if need be (phoneband.ts). `ins`: low-res pixels a boss's plate
    * covers under the top HUD; the view looks that much higher and the room's top may come down under it.
    */
-  follow(map: GameMap, x: number, z: number, dt: number, shake: number, keep?: { z: number; top: number; bottom: number }, ins = 0): void {
+  follow(map: GameMap, x: number, z: number, dt: number, shake: number, keep?: { z: number; top: number; bottom: number }, ins = 0, anchor?: [number, number, number]): void {
     if (this.cam instanceof THREE.PerspectiveCamera) return this.chase(map, x, z, dt);
     const k = this.ready ? Math.min(1, dt * 7) : 1, up = ins / (Math.sin(PITCH) * this.ppu);
     z -= up;
@@ -87,9 +87,18 @@ export class Cam {
     // Snapped so the world's pixel grid lands on whole screen pixels: with an odd width or height the screen's middle
     // is half a pixel, so the camera sits half a pixel over (else ties flick a figure, and a floor's texels, a pixel
     // to and fro as the camera eases: Kyle, the mouse moving the aim on a computer, 2026-11-20).
-    const ox = (this.W % 2) / 2, oy = (this.H % 2) / 2;
-    r = (Math.round(r * this.ppu - ox) + ox) / this.ppu;
-    u = (Math.round(u * this.ppu - oy) + oy) / this.ppu;
+    const ox = (this.W % 2) / 2, oy = (this.H % 2) / 2, P = this.ppu;
+    if (anchor) {
+      // `anchor`: your hero (x, height, z). The camera is their whole-pixel spot plus its lag behind them rounded on its
+      // own, so as they walk they hold their pixel on screen and the world steps past a pixel at a time. Rounded apart,
+      // camera and hero stepped on different frames and the hero shook a pixel to and fro (Kyle, 2026-11-20).
+      const a = new THREE.Vector3(...anchor), ar = a.dot(this.right), au = a.dot(this.up);
+      r = (Math.round(ar * P - ox) + ox + Math.round((r - ar) * P)) / P;
+      u = (Math.round(au * P - oy) + oy + Math.round((u - au) * P)) / P;
+    } else {
+      r = (Math.round(r * P - ox) + ox) / P;
+      u = (Math.round(u * P - oy) + oy) / P;
+    }
     if (shake > 0.2) r += Math.round((Math.random() - 0.5) * shake) / this.ppu, (u += Math.round((Math.random() - 0.5) * shake) / this.ppu);
     this.cam.position.copy(this.right).multiplyScalar(r).addScaledVector(this.up, u).addScaledVector(this.back, b + DIST);
     this.cam.updateMatrixWorld();

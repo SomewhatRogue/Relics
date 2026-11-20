@@ -241,7 +241,7 @@ export class View3D {
       else {
         // Upright: the hero's feet kept between the top HUD and the touch cluster (phoneband.ts).
         const band = portrait ? feetBand(this.view.H, this.S / this.dpr) : null;
-        this.view.follow(map, hx + me.fx * 0.6, hy + me.fy * 0.5 + (portrait ? (this.view.H / this.view.ppu) * 0.1 : 0), dt, fx.shake, band ? { z: hy, top: band[0], bottom: band[1] } : undefined, topPush() / (this.S / this.dpr));
+        this.view.follow(map, hx + me.fx * 0.6, hy + me.fy * 0.5 + (portrait ? (this.view.H / this.view.ppu) * 0.1 : 0), dt, fx.shake, band ? { z: hy, top: band[0], bottom: band[1] } : undefined, topPush() / (this.S / this.dpr), [hx, this.heroUp, hy]);
       }
     }
     const at = this.view.at, fires: Spot[] = [...this.ground!.fires], ls: L3[] = [...this.ground!.lights];

@@ -645,3 +645,20 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Fix: the camera sits half a pixel over on an odd side (`three/camera3d.ts`), so the world's pixel grid lands on
   whole screen pixels (floor texels too); a figure's rounding gets a hair's bias so a tie always goes the same way
   (`three/figs3d.ts`). Small edits in both (finished chats' files). (Claude Opus 5.5)
+
+## 2026-11-20: R4's floors; the hero's walk; REDRAW on by default
+
+- R4's floors, by a Sonnet builder reviewed here: grass, dirt, mud, rock and planks as 20 by 12 stamps
+  (`tilegrounds.ts`, routed in `three/redrawfloor.ts`); what lies on them is painted onto the same grid. Wheat keeps
+  today's painting. On review: the wood's floor even, the dither under trees a clean shadow, each floor its material.
+  Rock and mud are on no yardstick map; seen only as stamps.
+- Kyle: "just walking around town the hero sort of stutters up and down or left and right ... like it's vibrating."
+  Not reproduced here (software rendering is too slow for the camera's lag to show; the walk measured the same before
+  and after). The likely cause at a real frame rate: the camera (eased, lagging) and the hero are rounded to whole
+  pixels apart, so they step on different frames. Fix: the camera is the hero's whole-pixel spot plus its lag rounded
+  on its own (`three/camera3d.ts` `follow` `anchor`, passed from `three/view3d.ts`). Waiting on Kyle to say if it holds.
+- Kyle: "I think i like the redraw should we jsut have as standard." Yes: REDRAW on by default (`tilelook.ts`);
+  `?redraw=0` or the button for the look before. Paint only; in town it adds 44 textures and 18 shapes to the frame.
+  (Claude Opus 5.5)
+- On the default: Node's tests have no page, so the switch read as unset and so on, and the 2.5D parity tests built
+  fences through the drawn path. On by default in a page only; the tests keep building today's 3D. Suite green.

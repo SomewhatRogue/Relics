@@ -5,12 +5,13 @@
  * stretched from today's picture: the soil on its own 20 by 12 grid (soil.ts `at`), and everything drawn a rectangle
  * at a time (water, scatter, marks, grime, a job's rock shelves, torch feet) through `onGrid`, which moves each
  * rectangle onto the grid with its edges on whole pixels, so a one-pixel fleck stays one pixel.
- * Other floors (grass, earth, planks, rock) keep today's painting: null.
+ * Grass, dirt, mud, rock and planks are drawn the same way (../tilegrounds.ts); wheat keeps today's painting: null.
  */
 import type { GameMap } from '../../shared/arena';
 import { Rng } from '../../shared/rng';
 import { gradeCanvas } from '../darkgold';
 import { floorStamp, KX, KZ, type Rect } from '../tilekit';
+import { groundStamp, grounds } from '../tilegrounds';
 import { ledge, OX, OY, PX, toPx } from '../world';
 import { paintSoil } from '../soil';
 import { paintWater } from '../waterpaint';
@@ -31,12 +32,16 @@ export function onGrid(g: CanvasRenderingContext2D): Rect {
 
 export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   const kind = m.theme.floor;
-  if (kind !== 'cobble' && kind !== 'flagstone') return null;
+  const street = kind === 'cobble' || kind === 'flagstone';
+  if (!street && !grounds(kind)) return null;
   const c = document.createElement('canvas');
   (c.width = m.w * KX), (c.height = m.h * KZ);
   const g = c.getContext('2d')!, rect: Rect = (x, y, w, h, col) => ((g.fillStyle = col), g.fillRect(x, y, w, h));
   const rng = new Rng(m.w * 23 + m.h * 7 + 5);
-  for (let ty = 0; ty < m.h; ty++) for (let tx = 0; tx < m.w; tx++) floorStamp(rect, rng, tx * KX, ty * KZ, kind === 'flagstone');
+  for (let ty = 0; ty < m.h; ty++) for (let tx = 0; tx < m.w; tx++) {
+    if (street) floorStamp(rect, rng, tx * KX, ty * KZ, kind === 'flagstone');
+    else groundStamp(kind, rect, rng, tx * KX, ty * KZ);
+  }
   // What lies on the ground, in today's order (world.ts paintMap), each on this grid.
   const R = onGrid(g), r2 = new Rng(m.w * 7 + m.h * 13 + 1), pick = (a: string[]) => a[r2.int(a.length)];
   paintSoil(m, g, { x: 0, y: 0, sx: KX, sy: KZ });

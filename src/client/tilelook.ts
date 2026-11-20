@@ -4,7 +4,8 @@
  * TILES, on by default since Kyle's yes: stone and timber snapped to a few shades each with more spread between them
  * (darkgold.ts), the stone floor laid tile by tile on the 16 pixel grid with no flecks (tilefloor.ts), dark outlines on
  * figures and on what stands in front of something further off (three/post.ts, three/figmat.ts).
- * REDRAW, the redraw's proof (`?redraw=1`, off by default): the 2.5D view at 20 render pixels a tile looking down at
+ * REDRAW, on by default since Kyle's "should we just have as standard" (2026-11-20; `?redraw=0` or the button for the
+ * look before it): the 2.5D view at 20 render pixels a tile looking down at
  * 36.87 degrees, so a floor tile is exactly 20 by 12 pixels and a wall 16 a tile of height; the floor and the house
  * fronts and roofs drawn at that size (three/redrawfloor.ts, three/redraw3d.ts).
  * (TILT, the camera at 30 degrees, came out the same day: Kyle kept today's angle, which the redraw's grid also wants.)
@@ -31,7 +32,7 @@ function read(name: keyof typeof KEY): string | null {
 }
 
 const on = (v: string | null) => v !== null && v !== '0' && v !== 'off';
-const tilesRaw = read('tiles');
+const tilesRaw = read('tiles'), redrawRaw = read('redraw');
 
 /**
  * TILES, on by default since Kyle's yes, 2026-11-19 (`?tiles=0` or the button for today's look). `even`: a tile exactly
@@ -39,7 +40,8 @@ const tilesRaw = read('tiles');
  * size and so stood about a fifth bigger against the floor. The redraw keeps today's scale instead (20 a tile).
  */
 export const TILES = { on: tilesRaw === null || on(tilesRaw), even: typeof location !== 'undefined' && on(new URLSearchParams(location.search).get('even')) };
-export const REDRAW = { on: on(read('redraw')) };
+// (On by default in a page only: Node's tests build today's 3D, which `?redraw=0` still shows.)
+export const REDRAW = { on: redrawRaw === null ? typeof location !== 'undefined' : on(redrawRaw) };
 /** The 2.5D camera's pitch in degrees. */
 export const PITCH_DEG = REDRAW.on ? PITCH_REDRAW : PITCH_TODAY;
 
