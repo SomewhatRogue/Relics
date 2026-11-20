@@ -40,8 +40,9 @@ import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, t
 import { feedKit } from '../shared/hunger';
 import { jobUnits } from '../shared/jobunits';
 import { isCorrupt } from '../shared/corrupt';
-import { isVowed, rollVowed } from '../shared/vowed';
+import { isVowed, rollVowed, wearsVowed } from '../shared/vowed';
 import { amendsOf, stepCrossed } from '../shared/amends';
+import { growKit } from '../shared/vowgrow';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
@@ -1323,6 +1324,8 @@ export class Game {
     p.want += [p.arms[p.weapon], p.armor, p.legs, ...p.rings].reduce((s, it) => s + (it ? TIER_WANT[it.quality] ?? 0 : 0), 0);
     // Each hungry piece worn gets hungrier by the job's size (shared/hunger.ts, jobunits.ts).
     feedKit(p, jobUnits(run.job, won ? 'won' : how));
+    // Each vowed piece worn grows by the same, if the hero ends the job clean (shared/vowgrow.ts).
+    growKit(p, jobUnits(run.job, won ? 'won' : how));
     const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;
@@ -1790,7 +1793,7 @@ export class Game {
    */
   dice(bet: number): { you: number[]; moll: number[]; won: boolean } | null {
     const p = this.profile;
-    if (p.gold < bet || bet <= 0) return null;
+    if (p.gold < bet || bet <= 0 || wearsVowed(p, 'swornoff')) return null;
     const r = new Rng(p.id.length * 7919 + p.dice * 104729 + p.gold * 31 + p.runs);
     p.dice++;
     const roll = () => [1 + r.int(6), 1 + r.int(6)], you = roll(), moll = roll(), a = you[0] + you[1], b = moll[0] + moll[1];

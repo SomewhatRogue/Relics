@@ -13,6 +13,9 @@ import type { GameMap, Round } from '../../shared/arena';
 import { torchIn } from '../daytime';
 import type { Fx } from '../fx';
 import { OX, OY, PX } from '../world';
+import { REDRAW } from '../tilelook';
+import { redrawFloor, redrawPx } from './redrawfloor';
+import { CardSheet, isCardRound } from './propcards';
 import { Boxes, Seed, jit } from './boxes';
 import type { Lamp3 } from './lamps3d';
 import type { L3 } from './lights3d';
@@ -60,11 +63,11 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // The town's stone levels over its gorge; land's earth levels (landledges.ts) get the normal ground and edge.
   const town = stacked(m) && !isLand(m);
   // The floor: the 2D painting's floor, a copy we can bleed on.
-  const fc = document.createElement('canvas');
-  fc.width = m.w * PX;
-  fc.height = m.h * PX;
+  // (The tile redraw, `?redraw=1`: a stone floor drawn at 20 by 12 a tile, redrawfloor.ts.)
+  const rf = REDRAW.on ? redrawFloor(m) : null, fc = rf ?? document.createElement('canvas');
+  if (!rf) (fc.width = m.w * PX), (fc.height = m.h * PX);
   const fg = fc.getContext('2d')!;
-  fg.drawImage(bg, OX, OY, fc.width, fc.height, 0, 0, fc.width, fc.height);
+  if (!rf) fg.drawImage(bg, OX, OY, fc.width, fc.height, 0, 0, fc.width, fc.height);
   const floorTex = texture(fc), floorMat = toonize(new THREE.MeshLambertMaterial({ map: floorTex }));
   // (The living world, wind3d.ts: cloud shadows drifting over the floor.)
   clouded(floorMat);
@@ -157,20 +160,25 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // The map's own trees and stumps stand in a mesh of their own, so that when one is felled (sim/felling.ts) they
   // alone are rebuilt, not the whole ground. (Not the new look's town, whose trees are the kit's.)
   const own = new Set(STREET && m.name === 'WICKHOLD' ? [] : m.rounds.filter(woody));
-  let wood: THREE.Mesh | null = null, felled = -1;
+  let wood: THREE.Mesh | null = null, woodCards: THREE.Mesh | null = null, felled = -1;
   const trees = () => {
     syncFelled(m);
     if (felled === (felled = felledCount(m))) return;
     if (wood) group.remove(wood), wood.geometry.dispose();
-    const T = new Boxes(), none: Spot[] = [];
+    if (woodCards) group.remove(woodCards), woodCards.geometry.dispose();
+    // (The tile redraw, `?redraw=1`: trees and stumps as the flat view's own pictures, stood up: propcards.ts.)
+    const T = new Boxes(), none: Spot[] = [], S = new CardSheet();
     for (const o of own) {
       if (levelAt(wf, o.x, o.y) === DEEP) T.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
       const k = T.mark(), up = stacked(m) ? groundLv(m, o.x, o.y) * LEDGE_H : 0;
-      addRound(T, o, none, new Seed(Math.round(o.x * 31 + o.y * 17)));
+      if (REDRAW.on && isCardRound(o)) S.addRound(o, up);
+      else addRound(T, o, none, new Seed(Math.round(o.x * 31 + o.y * 17)));
       if (up) T.raise(k, up);
     }
     if ((wood = T.mesh(VCOL))) group.add(wood);
+    if ((woodCards = S.mesh())) group.add(woodCards);
   };
+  const cards = new CardSheet();
   for (const o of [...m.rounds, ...scatterOf(m).stand]) {
     if (own.has(o)) continue;
     const n = fires.length;
@@ -183,10 +191,16 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
       if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: [], light: { x: o.x, y: 3 + up, z: o.y + 0.3, r: 6, i: 0.9, c: [1, 0.74, 0.44], f: 5 } });
       continue;
     }
+    if (REDRAW.on && isCardRound(o)) {
+      cards.addRound(o, up);
+      continue;
+    }
     addRound(B, o, fires, r);
     if (up) B.raise(k, up), fires.slice(n).forEach((f) => (f[1] += up));
     if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6 + up, z: o.y, r: 4.5, i: 0.8, c: [1, 0.72, 0.42], f: 9 } });
   }
+  const cm = cards.mesh();
+  if (cm) group.add(cm);
   for (const t of m.torches) {
     // A cottage's fire is a torch in its hearth's mouth (shared/inside.ts): its flames on the hearth's floor.
     const hearth = m.blocks.find((b) => b.kind === 'hearth' && t.x > b.x && t.x < b.x + b.w && t.y > b.y - 0.1 && t.y < b.y + b.h + 0.1);
@@ -233,7 +247,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
       if (done.has(d)) break;
       done.add(d);
       fg.fillStyle = d.col;
-      fg.fillRect(d.x - OX, d.y - OY, 1, 1);
+      if (rf) fg.fillRect(...redrawPx(d.x, d.y), 1, 1);
+      else fg.fillRect(d.x - OX, d.y - OY, 1, 1);
       dirty++;
     }
     if (dirty) (floorTex.needsUpdate = true), (dirty = 0);

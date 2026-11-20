@@ -19,6 +19,7 @@ import { RARE } from './gear.js';
 import { PER_LEVEL, priceOf } from './prices.js';
 import type { Stores } from './bags.js';
 import type { Item } from './loot.js';
+import { isVowed } from './vowed.js';
 
 /** What a hero has on them: the pack, and what's worn (a Profile has all of these). */
 export interface Carrier { bag: Item[]; arms?: Partial<Record<string, Item>>; armor?: Item | null; rings?: Item[] }
@@ -29,8 +30,10 @@ export function carriesHungry(p: Carrier): boolean {
 }
 
 /** Why Tobin won't buy `it` off `p` ('' if he will): you carry hungry gear, or it's one of the rare three. */
-export function tobinWont(p: Carrier, it: Item): '' | 'panic' | 'rare' {
+export function tobinWont(p: Carrier, it: Item): '' | 'panic' | 'rare' | 'vowed' {
   if (carriesHungry(p)) return 'panic';
+  // A VOWED piece is the church's: neither he nor Nettle buys it (shared/vowed.ts).
+  if (isVowed(it)) return 'vowed';
   return RARE.includes(it.quality) ? 'rare' : '';
 }
 
@@ -41,7 +44,7 @@ export const HUNGRY_CUT = 0.12;
 /** The rare three Nettle always buys. */
 const rare = (it: Item) => it.quality === 'touched' || it.quality === 'turning' || it.quality === 'hungry';
 /** What Nettle buys off `p`: the rare three; anything at all if `p` carries hungry gear. */
-export const nettleTakes = (it: Item, p?: Carrier) => rare(it) || (!!p && carriesHungry(p));
+export const nettleTakes = (it: Item, p?: Carrier) => !isVowed(it) && (rare(it) || (!!p && carriesHungry(p)));
 /** A piece's worth to Nettle: hungry gear has no price, so it's priced as turning gear. */
 const worth = (it: Item) => priceOf(it.quality === 'hungry' ? { ...it, quality: 'turning' } : it);
 /** What Nettle pays `p` for it (0: he won't take it). */

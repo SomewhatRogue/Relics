@@ -10,6 +10,7 @@ import { cure } from './poison';
 import type { World } from './elements';
 import type { Bolt, FightEvent, Hero } from './types';
 import { gave } from './score';
+import { noteCarry } from './vowed';
 
 /** Friends standing, within `r` of (x, y) (the squire too: a training partner to heal). */
 export const friendsNear = (heroes: Hero[], x: number, y: number, r: number) => heroes.filter((o) => o.act !== 'down' && Math.hypot(o.x - x, o.y - y) <= r + HERO.radius);
@@ -22,6 +23,8 @@ export function mend(by: Hero | undefined, o: Hero, n: number, ev: FightEvent[])
   o.hp += got;
   gave(by?.id, o.id, got);
   ev.push({ k: 'heal', x: o.x, y: o.y, n: got });
+  // THE INFIRMARY CENSER: a heal on a friend reaches a second at half (sim/vowed.ts, paid with the party in hand).
+  if (by && by !== o) noteCarry(by, o, got);
 }
 
 /** A holy shield on `o`: soaks HOLY_SHIELD.hp, lasts HOLY_SHIELD.time; a fresh one tops up an old one. */

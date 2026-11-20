@@ -18,6 +18,10 @@ import { flatBlock } from './walls3d';
 import { woodpile } from './woodpile3d';
 import type { Kindling } from '../../shared/kindling';
 import { asLamp, lampMeshes } from './lamps3d';
+import { REDRAW } from '../tilelook';
+import { gradeHex } from '../darkgold';
+import { drawHouse } from './redraw3d';
+import { blockCut, CardSheet, isCardBlock } from './propcards';
 import { doorGlow, shutDoor } from './shut3d';
 import { dress3d } from './darkdress3d';
 import { STREET } from './streetkit';
@@ -72,7 +76,7 @@ const shade = (c: number, k: number) => {
 export function buildBlock(b: Block, kin?: Kindling | null): Built {
   const a = turnOf(b);
   if (!a) return buildFront(b, kin);
-  const built = buildFront(asFront(b), null), cx = b.x + b.w / 2, cz = b.y + b.h / 2;
+  const built = buildFront(asFront(b), null, a), cx = b.x + b.w / 2, cz = b.y + b.h / 2;
   const turn = new THREE.Group(), holder = new THREE.Group();
   built.group.position.set(-cx, 0, -cz);
   turn.add(built.group);
@@ -89,11 +93,20 @@ export function buildBlock(b: Block, kin?: Kindling | null): Built {
   return { ...built, group: holder, fires };
 }
 
-function buildFront(b: Block, kin?: Kindling | null): Built {
+/** `turn`: built facing south and turned by this after (buildBlock), for the redraw to map its slopes to the screen. */
+function buildFront(b: Block, kin?: Kindling | null, turn = 0): Built {
   const group = new THREE.Group(), fires: Built['fires'] = [];
   // The new look's stalls, benches and carts from the kit (streetprops.ts, `?hd&street`).
   const kf = STREET ? kitFurniture(b.kind, b.x, b.y, b.w, b.h) : null;
   if (kf) return { group: kf, roof: null, fires, top: 1, lamps: [] };
+  // (The tile redraw, `?redraw=1`: freestanding furniture as the flat view's own picture, stood up: propcards.ts.)
+  if (REDRAW.on && isCardBlock(b)) {
+    const S = new CardSheet();
+    S.add(blockCut(b, false), b.x + b.w / 2, b.y + b.h);
+    const cm = S.mesh();
+    if (cm) group.add(cm);
+    return { group, roof: null, fires, top: 1, lamps: [] };
+  }
   if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1, lamps: [] };
   // The new look's test street (streetkit.ts, `?hd&street`): the building from the generated kit.
   if (STREET && !b.ruined) {
@@ -108,6 +121,8 @@ function buildFront(b: Block, kin?: Kindling | null): Built {
   const x0 = b.x + (lean < 0 ? lw : 0), x1 = b.x + b.w - (lean > 0 ? lw : 0), z0 = b.y, z1 = b.y + b.h, H = TALL[b.kind] ?? 1.4, t = 0.2;
   const W = new Boxes(), R = new Boxes(), stone = STONE.has(b.kind) || b.style === 'stone';
   const door = !!b.door && b.fate !== 'blocked' ? doorAt(b).x : null, dw = 0.45, dh = Math.min(2.05, H - 0.3);
+  // The tile redraw (redraw3d.ts, `?redraw=1`): the faces and the roof's slope drawn from the kit; no posts or window timbers in 3D.
+  const drawn = REDRAW.on && !ruined && !charred && b.kind !== 'den', wins: number[] = [];
   // A wall from a0 to a1 along x (front or back) or z (sides), courses of stone or planks.
   const wall = (ax: 'x' | 'z', a0: number, a1: number, c: number, y0: number, y1: number) => {
     const ch = stone ? 0.3 : 0.24;
@@ -143,7 +158,7 @@ function buildFront(b: Block, kin?: Kindling | null): Built {
   }
   if (!ruined) {
     // Timber framing on a wooden house: corner posts and a rail.
-    if (!stone) for (const [px, pz] of [[x0, z1], [x1, z1], [x0, z0], [x1, z0]]) W.b(px + (px === x0 ? 0.08 : -0.08), 0, pz + (pz === z0 ? 0.08 : -0.08), 0.18, H, 0.18, beam);
+    if (!stone && !drawn) for (const [px, pz] of [[x0, z1], [x1, z1], [x0, z0], [x1, z0]]) W.b(px + (px === x0 ? 0.08 : -0.08), 0, pz + (pz === z0 ? 0.08 : -0.08), 0.18, H, 0.18, beam);
     if (!stone) W.b((x0 + x1) / 2, H * 0.55, z1 - 0.06, b.w - 0.1, 0.08, 0.06, beam);
     // The floor inside, dark, so a doorway shows the dark within.
     W.b((x0 + x1) / 2, 0, (z0 + z1) / 2, b.w - 0.3, 0.02, b.h - 0.3, 0x24180f);
@@ -166,9 +181,12 @@ function buildFront(b: Block, kin?: Kindling | null): Built {
       const wx = x0 + bw * fx, boarded = (b.worn && fx > 0.5) || b.shut === 'boarded';
       if (door !== null && Math.abs(wx - door) < dw + 0.4) continue;
       // (Sized to the tall heroes: the sill at their chests.)
-      W.b(wx, H * 0.42, z1 + 0.01, 0.64, 0.07, 0.06, beam);
-      W.b(wx, H * 0.42 + 0.52, z1 + 0.01, 0.64, 0.07, 0.06, beam);
-      W.b(wx, H * 0.42 + 0.07, z1 + 0.012, 0.05, 0.45, 0.05, beam);
+      wins.push(wx);
+      if (!drawn) {
+        W.b(wx, H * 0.42, z1 + 0.01, 0.64, 0.07, 0.06, beam);
+        W.b(wx, H * 0.42 + 0.52, z1 + 0.01, 0.64, 0.07, 0.06, beam);
+        W.b(wx, H * 0.42 + 0.07, z1 + 0.012, 0.05, 0.45, 0.05, beam);
+      }
       const pane = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.04), lit && !boarded ? G(0xffc070, 0.35) : G(0x0a0808, 1));
       if (lit && !boarded) asLamp(pane, G(0x0a0808, 1));
       pane.position.set(wx, H * 0.42 + 0.3, z1 + 0.005);
@@ -218,5 +236,9 @@ function buildFront(b: Block, kin?: Kindling | null): Built {
   const wm = W.mesh(VCOL), roof = R.mesh(VCOL);
   if (wm) group.add(wm);
   if (roof) group.add(roof);
+  if (drawn) {
+    const thatch = !!home && !!asBuilt(b, home).thatch && b.kind === 'house';
+    drawHouse(group, roof, { x0, x1, z0, z1, H, stone, thatch, door, dw, dh, wins, angle: 0.62, slope: b.kind !== 'tower' && !roofGap(b), turn, cx: b.x + b.w / 2, cz: b.y + b.h / 2, wall: gradeHex(wallC, 'wall'), roof: gradeHex(shade(hex(hc?.roof ?? L.roof), k), 'roof') }, Math.round(b.x * 31 + b.y * 17 + 3));
+  }
   return { group, roof, fires, top: H + 1, lamps: lampMeshes(group) };
 }

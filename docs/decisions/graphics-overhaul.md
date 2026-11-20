@@ -562,3 +562,62 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Art from a code-drawn tile kit (floors, walls, roofs, stamps for doors and windows), props as front-on cards
   (slice 4 folded in); figures stay slice 8's. The proof first: the floor and the JOBS house on the street.
 - Waiting on Kyle: the grid, where the art comes from, the proof first. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw's proof (R0 and R1), behind ?redraw=1; TILT out
+
+- Kyle's answers to the spec: "Whichever one was the today tilt and scene you linked" (today's angle: 36.87 is it,
+  so TILT comes out), the art drawn by code, the proof first.
+- **R0:** under REDRAW the 2.5D camera looks down at 36.87 degrees and a tile is 20 render pixels (the render scale
+  picked per screen for the same tiles across), so a floor tile is 20 by 12 and a wall 16 a tile of height. A stone
+  street or flags is drawn at that size from the kit (`tilekit.ts` `floorStamp`, `three/redrawfloor.ts`); what lies
+  on it (soil, marks, water, scatter) is today's painting with its base left clear (`world.ts` paintMap `bare`),
+  laid over stretched for now. Blood lands at the new size (`three/ground.ts`).
+- **R1:** every roofed building (the same code as for one): four wall faces drawn (stone courses four pixels a
+  course; or timber on daub over a stone plinth with braces; windows framed with a sill; a clear hole for the 3D
+  door), and the roof's front slope (slate courses, or thatch) as a child of the roof, so it lifts with it
+  (`three/redraw3d.ts`, small edits in `three/houses3d.ts`: no posts or window timbers in 3D under REDRAW). A building
+  turned east or west keeps today's roof: its slope drawn showed a hatch, being seen side-on.
+- TILT removed from `tilelook.ts` and the options; REDRAW is the second button there.
+- Checked: tsc clean; the street and the square on the phone in 2.5D, against today's default. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw, R2 (the town), behind ?redraw=1
+
+- Kyle, after the proof: "Continue." R2 in, still behind the switch.
+- Every drawn face is now mapped by where its corners land on screen (`three/redraw3d.ts` `screenQuad`): one drawn
+  pixel is one render pixel whichever way it faces. That let a turned building's roof be drawn (its slopes are seen
+  side-on, so its courses run up the picture: `tilekit.ts` `roofCanvas` `side`); the hatch is gone.
+- The town's level faces toward the camera drawn as courses with a coping, every flight's treads and the risers that
+  face the camera (`three/layoutledges.ts`, small edits; the Town layout chat is finished). The first steps had a pale
+  front edge on every tread and read as a grate: the edge is one shade up now.
+- On the laptop the town had gone one slate (the church's pale front and the town hall's brown roof lost): each
+  building's drawn walls and roof now take its own colours (`tilekit.ts` `tint`), still a handful of shades each.
+  A timber house's daub takes its colour; its plinth stays stone. The street is a shade darker than the walls.
+- Checked: tsc clean; the street at night, the church and the square by day on the phone and the church on the
+  laptop, against today's default; no page errors. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw, R3 first part (props as cards), behind ?redraw=1
+
+- Kyle: "Continue." Props as the flat view's own pictures stood up as cards (`three/propcards.ts`, mine): painted once
+  by `drawRound` / `drawBlock` onto a scratch pair, cut to what was drawn, one sprite pixel to one render pixel as the
+  figures are, snapped to whole render pixels. A map's round things share one picture and one mesh (a wood is one
+  draw); a felled tree's rebuild redraws them. Hooks: `three/ground.ts` (the trees' rebuild and the other rounds) and
+  `three/houses3d.ts` (stalls and tents).
+- Tried and taken back on sight: benches, tables, casks and stumps as cards. The flat view paints them as plain slabs,
+  which stood up read as crates, worse than the built ones. They stay built until the kit draws them.
+- Checked: tsc clean; the whole yardstick under `redraw=1` on the phone, no page errors. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw, R3 second part (furniture, fences, walls), behind ?redraw=1
+
+- Kyle: "Continue." Built by two Sonnet builders at once in this folder (no worktrees in this session: each built
+  to its own folder and port, neither committed), reviewed here against the spec.
+- Furniture and stumps drawn in the kit as cards filling their footprint (`tilefurn.ts`, `tilefurn2.ts`,
+  `tilefurnkit.ts`, routed in `three/propcards.ts`). On review the square's benches read as dark tables (a plank top
+  over the whole footprint): a bench's seat is now a narrow plank at the front, the floor behind it.
+- Fences, hurdles, stone walls and rock walls drawn as screen-mapped faces (`tilefence.ts`, a two-line hook in
+  `three/walls3d.ts`): posts and rails with the ground between, coursed stone with a coping. Not seen on any map: a
+  fence or hurdle running north and south, and a rock wall. The tavern's tables lost the mugs the flat painting had.
+- Checked: tsc clean; the whole yardstick under `redraw=1` on the phone, no page errors; the square, a village, a wood
+  and the tavern against the first part's shots. (Claude Opus 5.5)
+- Caught by the full suite: `tests/parity3d.test.ts` could not load, because the fence hook pulled in the camera, the
+  camera the ground, the ground the prop cards and the flat view's sprites (which need a page). `three/redraw3d.ts`
+  now reads the pitch from `tilelook.ts`. Suite then green.

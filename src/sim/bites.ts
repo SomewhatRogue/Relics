@@ -8,6 +8,8 @@ import type { GearStats } from '../shared/tuning';
 import { biteOn } from '../shared/hunger';
 import { CORRUPT, bandOf, isCorrupt } from '../shared/corrupt';
 import { WEAPONS } from '../shared/weapons';
+import { VOWED_FX } from '../shared/vowed';
+import { vowedOn } from './vowed';
 import type { Hero } from './types';
 
 const wornBy = (h: Hero) => [h.arms?.[h.weapon], h.armor, h.legs, ...(h.rings ?? [])];
@@ -29,8 +31,8 @@ export const healBite = (h: Hero | undefined) => (h ? 1 - biteOn(wornBy(h), 'sta
 
 /** How much further off goblins notice `h`: the Want's band and any NOTICED bite (1 for neither). */
 export const seenBy = (h: Hero) => 1 + bandOf(h.want).seen + biteOn(wornBy(h), 'noticed', clsOf(h));
-/** What `h` keeps of coin picked up: a GREEDY bite eats its share. */
-export const goldKeep = (h: Hero) => 1 - biteOn(wornBy(h), 'greedy', clsOf(h));
+/** What `h` keeps of coin picked up: a GREEDY bite eats its share, THE TITHE RING a tenth (sim/vowed.ts). */
+export const goldKeep = (h: Hero) => (1 - biteOn(wornBy(h), 'greedy', clsOf(h))) * (vowedOn(h, 'tithe') ? VOWED_FX.kills : 1);
 /** What a heal from someone else does on `h`: half at the Want's top band. */
 export const othersHeal = (h: Hero) => bandOf(h.want).othersHeal;
 /** A named butcher comes for a corrupt hero first: how much nearer it counts them (0 for the clean, or any other goblin). */

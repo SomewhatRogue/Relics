@@ -9,11 +9,11 @@ import type { Rng } from './rng.js';
 import { budget, modPool, rollMods } from './gear.js';
 import type { Item } from './loot.js';
 import type { HeroClass, WeaponId } from './weapons.js';
-import { wearsHungry } from './corrupt.js';
+import { wearsHungry, wornPieces } from './corrupt.js';
 import { shown } from './shown.js';
 
 /** What the gifts and costs do, in the fight's own units (sim/vowed.ts). Heals in health (shown x10). */
-export const VOWED_FX = { draw: 6, tithe: 4, near: 4, ward: 0.1, wardFor: 4, breach: 0.1, raise: 2, relicUses: 1, kills: 0.9, slowSword: 0.05, slowMail: 0.08, drawLonger: 0.1, dodge: 0.1, skill: 0.1, carry: 0.5, selfHeal: 0.5, coat: 0.05 };
+export const VOWED_FX = { draw: 6, tithe: 4, near: 4, stam: 12, ward: 0.1, wardFor: 4, breach: 0.1, raise: 2, relicUses: 1, kills: 0.9, slowSword: 0.05, slowMail: 0.08, drawLonger: 0.1, dodge: 0.1, skill: 0.1, carry: 0.5, selfHeal: 0.5, coat: 0.05 };
 
 export type VowedId = 'widow' | 'ketterby' | 'returned' | 'apprentice' | 'infirmary' | 'breach' | 'carthand' | 'swornoff' | 'tithe';
 interface Vowed { name: string; slot: 'weapon' | 'armor' | 'ring'; kit?: WeaponId; armor?: 'light' | 'heavy'; cls?: HeroClass; gift: string; cost: string }
@@ -60,3 +60,5 @@ export function rollVowed(rng: Rng, cls: HeroClass, slot: 'weapon' | 'armor' | '
 export const dimmed = (k: Parameters<typeof wearsHungry>[0]) => wearsHungry(k);
 /** A vowed piece won't go on while a hungry one is worn. */
 export const blocksVowed = (k: Parameters<typeof wearsHungry>[0], it: Item) => isVowed(it) && wearsHungry(k);
+/** Wearing vowed piece `id`, and not dim: for a profile in town or a hero. */
+export const wearsVowed = (k: Parameters<typeof wearsHungry>[0], id: VowedId) => !dimmed(k) && wornPieces(k).some((it) => vowedOf(it) === id);

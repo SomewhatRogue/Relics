@@ -10,12 +10,12 @@ import { groundLv } from '../../shared/heights';
 import { upright } from '../phoneband';
 import { STREET } from './streetkit';
 import { SWING } from '../swing';
-import { TILT } from '../tilelook';
+import { PITCH_DEG } from '../tilelook';
 
 // (The new look's test street, `?hd&street`: a perspective chase camera, lower, looking down 26 degrees at your hero
 // through a 28 degree lens, turning up to 45 degrees toward where you walk in town; streetkit.ts, swing.ts.)
-// (TILT, the tile look's switch, ../tilelook.ts: 30 degrees in place of 36, to compare.)
-export const PITCH = ((STREET ? 26 : TILT.deg) * Math.PI) / 180;
+// (REDRAW, ../tilelook.ts: 36.87 degrees, so a floor tile is 20 by 12 render pixels and a wall 16 a tile of height.)
+export const PITCH = ((STREET ? 26 : PITCH_DEG) * Math.PI) / 180;
 const FOV = 28, SWING_MAX = Math.PI / 4, IN_PITCH = (36 * Math.PI) / 180;
 export const NEAR = 20;
 export const FAR = 110;

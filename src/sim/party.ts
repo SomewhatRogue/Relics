@@ -22,6 +22,8 @@ import type { Swing } from '../shared/tuning';
 import type { Enemy, FightEvent, Hero } from './types';
 import { raiseRate } from './techcleric';
 import { count } from './score';
+import { vowedOn } from './vowed';
+import { VOWED_FX } from '../shared/vowed';
 
 export const players = (heroes: Hero[]) => heroes.filter((h) => h.id !== 'squire');
 const inParty = (heroes: Hero[]) => players(heroes).length > 1;
@@ -90,7 +92,8 @@ export function stepParty(heroes: Hero[], dt: number, ev: FightEvent[]): void {
     // A friend kneeling by you: only while they stay close and aren't doing anything else.
     const by = h.raiser ? ps.find((o) => o.id === h.raiser) : undefined;
     if (by && by.act === 'idle' && !by.moving && Math.hypot(by.x - h.x, by.y - h.y) <= PARTY.reach) {
-      h.pickT = (h.pickT ?? 0) + dt * (WEAPONS[by.weapon].cls === 'HEALER' ? 2 : 1) * raiseRate(by);
+      // THE CART-HAND'S COAT: twice as fast (sim/vowed.ts).
+      h.pickT = (h.pickT ?? 0) + dt * (WEAPONS[by.weapon].cls === 'HEALER' ? 2 : 1) * raiseRate(by) * (vowedOn(by, 'carthand') ? VOWED_FX.raise : 1);
       if (h.pickT >= PARTY.pickUp) (up(h), ev.push({ k: 'pickedup', x: h.x, y: h.y, id: h.id, by: by.id }));
       continue;
     }

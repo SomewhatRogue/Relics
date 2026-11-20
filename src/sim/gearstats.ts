@@ -4,6 +4,7 @@ import { MAGE_PACE, WEAPONS, cutMax, drilled, gearStats, perkFx, type Fx, type G
 import type { Hero } from './types';
 import { markSum } from '../shared/deepmarks';
 import { withBites } from './bites';
+import { withVowed } from './vowed';
 import { bandOf } from '../shared/corrupt';
 import { dimmed, isVowed } from '../shared/vowed';
 import type { Item } from '../shared/tuning';
@@ -30,6 +31,8 @@ export function statsOf(h: Hero): Stats {
   if (WEAPONS[h.weapon]?.cls === 'MAGE') s.speed = Math.min(s.speed, 1 + MAGE_PACE.most);
   // Hungry pieces' bites last, so they take their share of all of it (sim/bites.ts).
   withBites(s, h);
+  // VOWED pieces' costs (sim/vowed.ts).
+  withVowed(s, h);
   cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join(), mk, h.streakStep ?? 0, h.legs ?? null, bandOf(h.want)], s });
   return s;
 }

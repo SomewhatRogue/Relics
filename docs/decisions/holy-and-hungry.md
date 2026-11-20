@@ -166,8 +166,68 @@ start, amends shown only by Odric's line, the costs as drafted.
 - **Words:** lore keeper (Odric never says holy or blessed; "the step", not stairs, except the third stair that
   rocks; names said in title case, not shouted; nothing dated "a long while back") and line editor (Odric's hedges;
   the nine gifts and costs plainer, the two heals given numbers, "coin", not "gold", per the lore keeper).
-- **For Gear (added to the branch `gear-asks`):** `loot.ts` an `Item.holy` field and `itemName` knowing vowed names
+- **For Gear (all five asks now on the branch `gear-asks-2`, on today's main; the old `gear-asks` is stale, safe to delete):** `loot.ts` an `Item.holy` field and `itemName` knowing vowed names
   (until then a vowed piece shows as its PRE-WAR kit, SWORD, in the pack); `card.ts` the VOWED chip, its GIFT and COST
   rows and DIM. **For Economy:** `plusCost` (forgeplus.ts) refusing a vowed piece, as hungry. **For Trading:**
   `cleanItem` keeping `holy` and `worn`.
 - **Checked:** the touched tests, `npm run check`, the full suite (2234 passed).
+
+## 2026-11-19: slice 4, stage 2 in: vowed costs and six gifts in the fight (Claude Opus 5.5)
+
+- **Mine, new:** `sim/vowed.ts`, `tests/vowedfight.test.ts`. Nothing works while DIM.
+- **All the costs** (`withVowed`, last in `statsOf`): the Widow's Sword 5% and the Breach Mail 8% off SPEED (`foot`),
+  Ketterby's Bow 10% off CHARGE SPEED (`draw`), the Returned Pair's dodge 10% dearer, the Apprentice's Staff 10%
+  off SKILL RECHARGE (`focus`), the Cart-hand's Coat 5% more taken; the Tithe Ring a tenth less coin (`goldKeep`;
+  all coin picked up for now, chest coin too, though the card says from kills).
+- **Six gifts:** the Breach Mail (friends within 4 tiles take 10% less) and the Returned Pair's backstab (friends
+  near take 10% less for 4 s), both `vowedGuard` on the blow's damage beside SHELTER in sim/combat.ts; the Widow's
+  Sword's block (12 stamina to the nearest friend, the block path); Ketterby's full draw that hits (heals the nearest
+  friend 6), the Returned Pair's backstab and the Apprentice's kill (12 to the nearest friend's bar), queued from
+  `damage()` (sim/damage.ts, one line; a new `charged` option, passed by sim/bolts.ts's two shot lines) and paid
+  each tick by `payVowed` (sim/room.ts, after the long cuts). "Killing with a spell" is any kill by the staff's wearer
+  (a Mage's every blow is a spell).
+- **Small edits:** `sim/gearstats.ts`, `sim/combat.ts` (two lines), `sim/damage.ts`, `sim/bolts.ts`, `sim/room.ts`,
+  `sim/bites.ts` (mine).
+- **Stage 3, still to wire:** the Infirmary Censer's carry and its cost (half heals on yourself), the Cart-hand's
+  Coat's raise, both rings' relic gifts (the Relics chat's files: asked then), Moll's dice vow, Tobin and Nettle
+  refusing a vowed piece.
+- **Checked:** the touched tests, `npm run check`, the full suite (2242 passed).
+
+## 2026-11-19: slice 4, stage 3 in: the censer, the coat, Moll's vow, Tobin and Nettle (Claude Opus 5.5)
+
+- **The Infirmary Censer:** a heal on a friend reaches the next nearest (not the healer, not the one healed) at half
+  of what landed (`noteCarry` from `mend`, sim/holy.ts, paid by `payVowed`; a carry never carries again); heals on
+  yourself do half (`heals`, sim/hungry.ts).
+- **The Cart-hand's Coat:** picking a friend up twice as fast (sim/party.ts, the pick-up rate).
+- **The Sworn-Off Ring's vow:** Dicer Moll won't play (client/squareui.ts shows her line and the rule; `Game.dice`
+  refuses too). While it's dim the vow lapses with the gift.
+- **Tobin and Nettle won't buy a vowed piece** (shared/fence.ts: `tobinWont` gives 'vowed', `nettleTakes` never;
+  client/stores.ts gives Tobin his own line for it, not his hungry-gear fear).
+- **For the Relics chat (asked):** both rings' gifts, ready in sim/vowed.ts as two calls: `moreRelicUses(h)` (1 more
+  for THE SWORN-OFF RING) wherever a relic's uses are counted, and `vowedRelicUsed(h, heroes, ev)` when a relic is
+  used (THE TITHE RING heals friends within 4 tiles 4 each). Until then the two rings have their costs and no gift.
+- **Words:** lore keeper (Moll shrugs, points you to Gannet, "love"; Tobin defers to the church, it came off Odric's
+  shelf; for the bible: vowed pieces sit on Odric's shelf, and Moll and Tobin know them by sight) and line editor
+  (both run on). 
+- **Small edits:** `sim/holy.ts`, `sim/party.ts`, `sim/hungry.ts`, `shared/fence.ts`, `client/stores.ts`,
+  `client/squareui.ts`, `client/game.ts` (`dice`).
+- **Checked:** the touched tests, `npm run check`, the full suite (2246 passed).
+- Slice 4 is done but for the asks: Gear (names and card rows, `gear-asks-2`), Economy (no pluses), Trading
+  (`cleanItem`), Relics (the rings). Next: slice 5, vowed pieces grow (holy-and-hungry 5b).
+
+## 2026-11-19: slice 5 in: vowed pieces grow (Claude Opus 5.5)
+
+- **Mine, new:** `shared/vowgrow.ts` (`GROW`, `growMult`, `grownBy`, `growKit`, `grown`, `ripe`), `tests/vowgrow.test.ts`.
+- **How:** the same count as hungry gear (`worn`, job-units by size), grown in `finish` beside `feedKit` (one line in
+  `client/game.ts`), but only when the hero ends the job clean (`isCorrupt` false); corrupt, nothing grows and
+  nothing is lost. From PRE-WAR's 20 points to 45 over 30 units: 1.25 times TURNING's 36, halfway to hungry's
+  hoped-for 1.5 times, so under hungry once Gear's number lands. The piece keeps its modifiers as given (`vowBase`)
+  and its live ones are rewritten from them, so the card, stats and fight read the grown numbers with no other
+  hook, and growing never compounds. A grown piece can pass its modifiers' caps, as hungry's Want gift can.
+- **At full strength a piece is ripe** (`ripe`): the crossroads is slice 6.
+- **Words:** the card's GROWS row (`growRow` in client/vowedwords.ts), lore keeper ("clean" reads as no damage taken,
+  so the condition is said plainly; "Full strength." not "Fully grown."; the frozen line says it keeps what it has)
+  and line editor ("each job", "% grown").
+- **For Gear (added to `gear-asks-2`):** the GROWS row on a vowed piece's card. **For Trading:** `cleanItem` keeps
+  `vowBase` too.
+- **Checked:** the touched tests, `npm run check`, the full suite (2250 passed). Next: slice 6, the crossroads.

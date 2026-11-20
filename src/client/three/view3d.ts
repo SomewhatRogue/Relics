@@ -59,7 +59,7 @@ import { drawBolts3, strikeLights3 } from './storm3d';
 import { flashTheme, fogLook } from '../skyfx';
 import { flashOf } from '../../sim/stormshape';
 import { drawChalkMarks } from '../chalkdraw';
-import { PITCH_TODAY, TILES } from '../tilelook';
+import { PITCH_TODAY, REDRAW, REDRAW_PPU, TILES } from '../tilelook';
 
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
 const ZOOM = { tall: 0.8, wide: 1 };
@@ -167,15 +167,17 @@ export class View3D {
     // about as big as there: tilted, the view takes in more rows and fewer columns than the flat one.
     // `__zoom3` (a share of that floor) is for screenshots.
     const s2 = camScale(Dw, Dh), floor = ((Dw / s2 / 16) * (Dh / s2 / 16)) * ((globalThis as { __zoom3?: number }).__zoom3 ?? (Dh > Dw ? ZOOM.tall : ZOOM.wide));
-    // (Sized as at today's 36 degrees, so TILT, ../tilelook.ts, keeps the tiles across and shows more rows, not a closer view.)
+    // (Sized as at today's 36 degrees, whatever the pitch, so the tiles across stay as they are.)
     let ppu = STREET ? STREET_PPU : Math.sqrt((W * H) / (Math.sin((PITCH_TODAY * Math.PI) / 180) * floor));
     // The tile look (../tilelook.ts): a tile exactly 16 render pixels across, so the floor's art pixels are one render
     // pixel each and every one the same width; the render scale picked to keep about as many tiles on screen.
     // (Only with `even` since 2026-11-19: figures keep their size, so this makes them bigger against the floor.)
-    if (TILES.on && TILES.even && !STREET && !HD) {
+    // (The redraw, ../tilelook.ts REDRAW: 20 a tile, which is today's scale, so figures keep their size against the floor.)
+    const fix = REDRAW.on ? REDRAW_PPU : TILES.on && TILES.even ? 16 : 0;
+    if (fix && !STREET && !HD) {
       const across = W / ppu;
-      S = this.S = Math.max(1, Math.round(Dw / (16 * across)));
-      (W = Math.ceil(Dw / S)), (H = Math.ceil(Dh / S)), (ppu = 16);
+      S = this.S = Math.max(1, Math.round(Dw / (fix * across)));
+      (W = Math.ceil(Dw / S)), (H = Math.ceil(Dh / S)), (ppu = fix);
     }
     this.view.size(W, H, ppu);
     this.gl.setSize(W, H, false);

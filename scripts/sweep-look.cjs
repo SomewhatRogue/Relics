@@ -14,6 +14,8 @@ const SCENES = {
   townnight: { q: 'hero=WARRIOR&day=0.9', note: 'Wickhold, night', at: SQUARE },
   // (Between the forge and the town hall: building fronts, for the tile look and the tilt.)
   street: { q: 'hero=WARRIOR&day=0.9', note: 'Wickhold, a street at night', at: [24, 23] },
+  // (Below the church on Kirkhill: the big buildings, the town's levels and steps.)
+  kirk: { q: 'hero=WARRIOR&day=0.5', note: 'Wickhold, the church by day', at: [29.5, 11] },
   village: { q: 'hero=WARRIOR', note: 'A village at dusk', job: { time: 'dusk', place: { name: 'Barrowby', kind: 'village', region: 'Barrowfields', ruin: 1 }, objective: 'rescue', rooms: 2, seed: 7 } },
   woodfog: { q: 'hero=WARRIOR', note: 'A wood by day, in fog', job: { time: 'day', place: WOOD, objective: 'hunt', rooms: 1, seed: 11 }, mid: true },
   woodnight: { q: 'hero=WARRIOR', note: 'A wood at night', job: { time: 'night', place: WOOD, objective: 'hunt', rooms: 1, seed: 11 }, mid: true },
