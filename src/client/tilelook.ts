@@ -33,7 +33,9 @@ const tiltRaw = read('tilt'), tiltN = Number(tiltRaw);
  * a tile keeps today's 2.5D size (about 19.5 on a phone): Kyle found the even tile too close and the walk too slow,
  * since figures stay their own size and so stand about a fifth bigger against the floor (2026-11-19).
  */
-export const TILES = { on: on(read('tiles')), even: typeof location !== 'undefined' && on(new URLSearchParams(location.search).get('even')) };
+// On by default since Kyle's yes, 2026-11-19; `?tiles=0` or the button for today's look, to compare.
+const tilesRaw = read('tiles');
+export const TILES = { on: tilesRaw === null || on(tilesRaw), even: typeof location !== 'undefined' && on(new URLSearchParams(location.search).get('even')) };
 /** The 2.5D camera's pitch in degrees: a number in the address is tried as given (20 to 60). */
 export const TILT = { deg: !on(tiltRaw) ? PITCH_TODAY : tiltN >= 20 && tiltN <= 60 ? tiltN : PITCH_TILTED };
 

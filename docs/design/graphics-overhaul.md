@@ -1,8 +1,8 @@
 # Graphics sweep and overhaul
 
 Plan, 2026-11-17 (Kyle and Claude Fable 5.2). Approved the same day; built slice by slice. **In so far: slices 0
-and 1** (the yardstick; smooth light in both views), slice 2's first part (slate), and **the tile look's light pass,
-behind TILES and TILT** (2026-11-19, below; waiting on Kyle's eye).
+and 1** (the yardstick; smooth light in both views), slice 2's first part (slate), and **the tile look's light pass**
+(2026-11-19, below): TILES on by default at Kyle's yes, TILT still a switch.
 The assessment with screenshots and the side-by-side mocks are on the page linked from docs/decisions/graphics-overhaul.md.
 
 ## Kyle's calls, 2026-11-17
@@ -49,8 +49,9 @@ TILT buttons in the options box (each saves and reloads; `client/tilelook.ts`):
   that is the redraw below); the village's earth ground.
 
 **Judged by:** the phone side-by-side of one Wickhold street (`node scripts/sweep-look.cjs <tag> <url> "tiles=1"`,
-the new `street` spot, between the JOBS house and the barracks) and the square. Kyle's call: keep TILES, TILT,
-both or neither, then whether the full redraw is worth it.
+the new `street` spot, between the JOBS house and the barracks) and the square. **Kyle, 2026-11-19: "This is great"** (after the
+scale fix): TILES is the default (`?tiles=0` or the button for today's look, kept a while to compare). TILT not
+called yet. Next his call: whether the full redraw is worth it.
 
 **The full redraw** (Kyle's later call, once the light pass has been seen): drawn tiles and sprite sheets, the
 buildings as drawn fronts rather than coloured boxes. Its own spec when it comes.
@@ -124,7 +125,7 @@ first street, the Drowned Rat. (No Node on the machine this chat ran on, so no l
 ## Slices
 
 Order matters: 0, then 1, then 2 (so colour is judged under the new light), then 3, then the rest in any order.
-**What the tile look moved (2026-11-19):** if Kyle keeps TILES, its ladder *is* slice 2's grade (the three tiers are
+**What the tile look moved (2026-11-19, TILES kept):** its ladder *is* slice 2's grade (the three tiers are
 then judged under it, not on the old curve), its floor *is* slice 5's stone ground (slice 5 keeps the village's earth
 and the scatter), and its outlines come before slice 8's figure mocks (which then start from outlined figures).
 Slice 4 (2.5D props redrawn from the flat sprites) waits on Kyle's call on slice 9: if the full redraw goes ahead,
@@ -145,7 +146,7 @@ the old path comes out a slice later.
 | 6 | Interiors | The six big rooms and job houses under slice 2's value rule: floor, furniture, people in three steps; lamps doing the work | `insidepaint.ts`, `three/insidefurn3d.ts`, `insidekit.ts`, `furnish.ts` | New look: interiors | Their chat's own shots; findable people on a phone |
 | 7 | Spells and effects | One language for what glows: spells and fire bloom a little under the clean light, red stays for danger only, element colours checked against the new grade | `spellground.ts`, `three/skills3d.ts`, `fire3d.ts`, `fx.ts` | unclaimed; the Deep and Instances chats' own boss effects stay theirs | The spell fight shot: every effect readable, red only where you must move |
 | 8 | Heroes and enemies redrawn (Kyle, 2026-11-17: "more stylized and cleaner, keeping the dark RPG look and feel") | Mocks first: the knight, one caster and two goblins drawn two or three ways at the game's own size, on the game's floor under the smooth light, beside today's. What "cleaner" most likely means at this size: fewer colours a figure, bigger flat shapes, one dark outline, one accent (gold on heroes, the eyes on goblins), less shading noise inside the body. Kyle picks; then the looks are redrawn class by class in the same sizes, cuts and poses, so every move and timing carries over | `herolooks*.ts`, `herosides*.ts`, `sprites.ts` (goblin parts), `foekits*.ts`, `charpaint.ts`, `charmean.ts` | Art (sprites, herolooks, foekits); New look: characters (charpaint, charmean); Side view finished (herosides free) | The mock sheet first. Then the lineup page (`?lineup`) before and after, and a fight on a phone: each class and each goblin kind known from its outline alone |
-| T | The tile look, light pass (2026-11-19, above) | Behind TILES and TILT: a few shades a material, the stone floor laid tile by tile, a tile exactly 16 render pixels in 2.5D, near-black outlines, less moss; the camera at 30 degrees | `tilelook.ts`, `tilefloor.ts` (new, mine); small edits in `darkgold.ts`, `three/darkgold3d.ts`, `three/post.ts`, `three/figmat.ts` (mine), `world.ts`, `three/view3d.ts`, `three/camera3d.ts`, `main.ts` | this plan | The street and square side by side on a phone, 2.5D. **In, waiting on Kyle** |
+| T | The tile look, light pass (2026-11-19, above) | Behind TILES and TILT: a few shades a material, the stone floor laid tile by tile, a tile exactly 16 render pixels in 2.5D, near-black outlines, less moss; the camera at 30 degrees | `tilelook.ts`, `tilefloor.ts` (new, mine); small edits in `darkgold.ts`, `three/darkgold3d.ts`, `three/post.ts`, `three/figmat.ts` (mine), `world.ts`, `three/view3d.ts`, `three/camera3d.ts`, `main.ts` | this plan | The street and square side by side on a phone, 2.5D. **In; TILES the default, TILT a switch** |
 | 9 | The full redraw (Kyle's later call) | Drawn tiles and sprite sheets; buildings as drawn fronts | its own spec | not started | Once Kyle has seen how far T gets |
 
 Sizes, roughly: 0 and 1a small; 1b medium; 2 medium; 3 small pieces; 4 the big one (six prop families, each a
@@ -176,7 +177,7 @@ chat or the Art chat once a direction is picked.
 
 ## Open for Kyle
 
-- The tile look: keep TILES, TILT, both or neither; then whether the full redraw (slice 9) is worth it.
+- TILT: keep it or take it out. Then whether the full redraw (slice 9) is worth it.
 - Slice 8's direction, once its mocks are up.
 - LIVING WORLD's sun and figure shadows as a default, once the light is smooth.
 

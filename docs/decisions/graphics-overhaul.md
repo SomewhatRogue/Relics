@@ -541,3 +541,13 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   mostly small cobbles (slabs one tile in twelve), so the ground ticks past under a walk. The walk itself is untouched.
 - Left as it is: TILT makes a walk up or down the screen cover about 15 percent fewer pixels (30 degrees against 36).
 - Checked: tsc clean; the street on the phone in 2.5D against today's shot, same scale. (Claude Opus 5.5)
+
+## 2026-11-19: TILES on by default
+
+- Kyle, after the scale fix: "This is great post fix yes." Taken as yes to TILES as the default; TILT not called,
+  so it stays a switch. `?tiles=0`, or the button, gives today's look until the old path comes out.
+- Before flipping it, the whole yardstick under TILES (both views, phone and laptop): no page errors. Jobs on grass,
+  the Open Cut and the Drowned Rat barely change (their floors are not cobble or flagstone). A village's street is
+  stone, so it takes the tile grid: darker and colder than today's warm cobbles, goblins easier to pick out; a
+  village on earth, not stone, is still slice 5.
+- For other chats: your look scripts now shoot the tile look. Add `&tiles=0` for the old. (Claude Opus 5.5)
