@@ -1,9 +1,10 @@
 /**
  * Gear: tiers, rolling a piece, upgrades and the sum of what's worn. A weapon's type says HOW it attacks
  * (weapons.ts); its modifiers say how WELL (mods.ts, each worth points); budget.ts holds the weights.
- * Seven tiers, white to red (Kyle, 2026-11-05): PLAIN, FINE, FORGED, PRE-WAR, then the rare and dangerous
- * three, TOUCHED, TURNING and HUNGRY, each stronger and rarer than the last and each with a cost
- * (costs.ts; HUNGRY's are its own, hungry.ts). Ids are as saved; only the names show.
+ * Seven tiers, white to red (Kyle, 2026-11-05): PLAIN, FINE, FORGED, PRE-WAR, then the rare three, SIEGE,
+ * MARSHAL and HUNGRY, each stronger and rarer than the last and each with a cost (costs.ts; HUNGRY's are its own,
+ * hungry.ts). SIEGE and MARSHAL are clean (Kyle, 2026-11-20; ids still `touched` and `turning`, as saved): fine
+ * pre-war steel made for someone else's measure, no Want. Only HUNGRY is the hunger's.
  * Everything here moves a number the fight already uses (gearStats), so the card shows the truth.
  */
 import { leanOdds } from './lootlevel.js';
@@ -29,12 +30,12 @@ export const TIERS: Record<Tier, { name: string; col: string; mods: number; step
   fine: { name: 'FINE', col: '#7fd07a', mods: 1, step: 1 },
   forged: { name: 'FORGED', col: '#6aa8ff', mods: 2, step: 2 },
   tolmouth: { name: 'PRE-WAR', col: '#b57aff', mods: 2, step: 3 },
-  touched: { name: 'TOUCHED', col: '#f2d54a', mods: 3, step: 4 },
-  turning: { name: 'TURNING', col: '#ff9330', mods: 3, step: 5 },
+  touched: { name: 'SIEGE', col: '#f2d54a', mods: 3, step: 4 },
+  turning: { name: 'MARSHAL', col: '#ff9330', mods: 3, step: 5 },
   hungry: { name: 'HUNGRY', col: '#ff3a2e', mods: 3, step: 6 },
 };
 export const TIER_ORDER: Tier[] = ['plain', 'fine', 'forged', 'tolmouth', 'touched', 'turning', 'hungry'];
-/** The rare three: strong, dangerous, each with a cost. */
+/** The rare three: strong, each with a cost (only HUNGRY the hunger's). */
 export const RARE: Tier[] = ['touched', 'turning', 'hungry'];
 export const tierAtLeast = (t: Tier, floor: Tier) => TIER_ORDER.indexOf(t) >= TIER_ORDER.indexOf(floor);
 
