@@ -21,6 +21,7 @@ import { asLamp, lampMeshes } from './lamps3d';
 import { REDRAW } from '../tilelook';
 import { gradeHex } from '../darkgold';
 import { drawHouse } from './redraw3d';
+import { blockCut, CardSheet, isCardBlock } from './propcards';
 import { doorGlow, shutDoor } from './shut3d';
 import { dress3d } from './darkdress3d';
 import { STREET } from './streetkit';
@@ -98,6 +99,14 @@ function buildFront(b: Block, kin?: Kindling | null, turn = 0): Built {
   // The new look's stalls, benches and carts from the kit (streetprops.ts, `?hd&street`).
   const kf = STREET ? kitFurniture(b.kind, b.x, b.y, b.w, b.h) : null;
   if (kf) return { group: kf, roof: null, fires, top: 1, lamps: [] };
+  // (The tile redraw, `?redraw=1`: freestanding furniture as the flat view's own picture, stood up: propcards.ts.)
+  if (REDRAW.on && isCardBlock(b)) {
+    const S = new CardSheet();
+    S.add(blockCut(b, false), b.x + b.w / 2, b.y + b.h);
+    const cm = S.mesh();
+    if (cm) group.add(cm);
+    return { group, roof: null, fires, top: 1, lamps: [] };
+  }
   if (!ROOFED.has(b.kind)) return { group: flatBlock(b, group, fires), roof: null, fires, top: 1, lamps: [] };
   // The new look's test street (streetkit.ts, `?hd&street`): the building from the generated kit.
   if (STREET && !b.ruined) {

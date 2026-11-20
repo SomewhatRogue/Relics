@@ -594,3 +594,14 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   A timber house's daub takes its colour; its plinth stays stone. The street is a shade darker than the walls.
 - Checked: tsc clean; the street at night, the church and the square by day on the phone and the church on the
   laptop, against today's default; no page errors. (Claude Opus 5.5)
+
+## 2026-11-19: the tile redraw, R3 first part (props as cards), behind ?redraw=1
+
+- Kyle: "Continue." Props as the flat view's own pictures stood up as cards (`three/propcards.ts`, mine): painted once
+  by `drawRound` / `drawBlock` onto a scratch pair, cut to what was drawn, one sprite pixel to one render pixel as the
+  figures are, snapped to whole render pixels. A map's round things share one picture and one mesh (a wood is one
+  draw); a felled tree's rebuild redraws them. Hooks: `three/ground.ts` (the trees' rebuild and the other rounds) and
+  `three/houses3d.ts` (stalls and tents).
+- Tried and taken back on sight: benches, tables, casks and stumps as cards. The flat view paints them as plain slabs,
+  which stood up read as crates, worse than the built ones. They stay built until the kit draws them.
+- Checked: tsc clean; the whole yardstick under `redraw=1` on the phone, no page errors. (Claude Opus 5.5)
