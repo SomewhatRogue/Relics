@@ -76,6 +76,9 @@ export interface Item {
   temper?: number;
   /** A hungry piece's id (hungry.ts). */
   hungry?: string;
+  /** A hungry piece's count, in job-units worn, and the bites it has come to (shared/hunger.ts, the Holy and hungry chat). */
+  worn?: number;
+  bites?: import('./hunger.js').BiteId[];
   /** A unique piece's id (uniques.ts): its own name, fixed modifiers, its boss's pool. */
   unique?: string;
   /** Its id in the item ledger, for a piece that can change hands (shared/ledger.ts): the server knows its owner. */
