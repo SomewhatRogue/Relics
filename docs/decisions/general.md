@@ -185,3 +185,10 @@ Claude Opus 5.5
   (sim/gearstats.ts); the price isn't refunded.
 
 Claude Opus 5.5
+
+## 2026-11-19: hungry pieces get hungrier (spec only)
+
+- docs/design/holy-and-hungry.md section 2b: hungry gear rolls far above the rest, but each piece's own bite
+  grows with jobs worn, 5% to 50%, then it gains a second; its count stays in the piece. Not built.
+
+Claude Opus 5.5

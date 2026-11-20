@@ -43,6 +43,29 @@ real price, scaling both ways:
 
 Shown as a **bar** on the character panel and in the pack (Kyle, 2026-11-08), banded at 15, 30 and 60.
 
+## 2b. Each piece gets hungrier (Kyle, 2026-11-19)
+
+Kyle: "hungry loot is SUPER strong but the debuffs on it become bigger in time up to like fifty percent and then
+gains another debuff, so at a certain point you want to get rid of it."
+
+- **Super strong from the start:** a hungry piece rolls well above the best non-hungry piece of its level (a
+  first guess: 1.5 times its worth), and keeps that strength while worn. Its gift from the Want (section 2) is
+  on top.
+- **Its hunger grows while you wear it.** Each piece keeps its own count, in jobs finished while it was worn
+  (not hours, so it moves with play, not the clock). Each piece has one **bite**, its debuff, which grows with
+  that count: 5% at first, rising to **50%**.
+- **At 50% it bites twice:** it gains a second bite, which grows the same way from there. Past that point
+  the piece usually costs more than it gives, so the player wants it gone.
+- **The bites** (drafts, one rolled per piece *(lore: words)*): less health; slower stamina or magic; heals
+  on you do less; goblins notice you sooner; it eats a share of the gold you pick up; your dodge costs more.
+  Each bite is shown on the piece, with its percent and how many jobs until the next step.
+- **Getting rid of it:** leave it on the step or give it to Isolde (section 3), or Dorcas in the Keeping Room
+  for the corrupt (section 7). Taking it off and storing it doesn't reset its count: the hunger stays in it.
+- **The pull:** a fresh hungry piece is the best thing you can wear; an old one is a weight. So hungry
+  heroes keep cycling pieces, keep coming back to the butchers, and keep choosing when to let go.
+- *To settle:* how many jobs from 5% to 50% (a first guess: 12); whether a piece bought or traded keeps its
+  count (a guess: yes, so there's no laundering a hungry piece through a friend).
+
 ## 3. Turning hunger in pays
 
 Leaving a hungry piece on the step (or giving it to Isolde):
