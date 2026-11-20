@@ -63,8 +63,14 @@ gains another debuff, so at a certain point you want to get rid of it."
   for the corrupt (section 7). Taking it off and storing it doesn't reset its count: the hunger stays in it.
 - **The pull:** a fresh hungry piece is the best thing you can wear; an old one is a weight. So hungry
   heroes keep cycling pieces, keep coming back to the butchers, and keep choosing when to let go.
-- **Settled (Kyle, 2026-11-19):** about 12 jobs from 5% to 50%; a piece bought or traded keeps its count, so
-  trading never resets it.
+- **Settled (Kyle, 2026-11-19):** about 12 jobs from 5% to 50%, counted by size (below); a piece bought or
+  traded keeps its count, so trading never resets it.
+
+**Jobs by size** (both paths; Kyle, 2026-11-19: "some jobs are bigger than others"). A piece's count goes up by
+the job's size, not by one: a short job about half, a medium one (about 10 minutes) one, a long job or an
+instance two, a great boss's end three *(to tune with the job board's sizes and the balance bench,
+docs/design/balance.md)*. So a hero playing big jobs grows a holy piece, and sours a hungry one, about as fast
+in minutes as one playing short jobs.
 
 ## 3. Turning hunger in pays
 
@@ -133,8 +139,8 @@ starts modest and grows with use.
 
 - **Starts about PRE-WAR's strength** (tier step 3) when you first put it on.
 - **Grows with each job finished wearing it while clean**, toward a cap a little under a fresh hungry piece:
-  above PRE-WAR and the uniques, at about HALLOWED's top (step 5 and a half against hungry's 6). A first
-  guess: full in about 15 jobs.
+  above PRE-WAR and the uniques, at about HALLOWED's top (step 5 and a half against hungry's 6). **Full in
+  about 30 jobs** (Kyle, 2026-11-19), counted by size: see "Jobs by size" below.
 - **Corruption stops it.** It doesn't grow while you're corrupt, and it goes dim anyway (section 1). It never
   loses what it had grown: clean again, it picks up where it stopped. This is the holy path's reward for
   staying the course.
