@@ -15,7 +15,7 @@ const piece = (id: VowedId): Item => {
   for (let s = 0; s < 50; s++) { const it = rollVowed(new Rng(s), cls, slot, id === 'breach' ? 'heavy' : 'light'); if (it?.holy === id) return it; }
   throw new Error(id);
 };
-const wearing = (id: VowedId, x = 5, y = 5, name = id): Hero => {
+const wearing = (id: VowedId, x = 5, y = 5, name: string = id): Hero => {
   const h = newHero(name, x, y), it = piece(id);
   if (it.slot === 'weapon') (h.weapon = it.kit!), (h.arms = { [it.kit!]: it });
   else if (it.slot === 'armor') h.armor = it;
