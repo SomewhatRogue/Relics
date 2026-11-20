@@ -3,12 +3,12 @@
  * flags and planks, each a 20 by 12 stamp, three to five shades, lit from the upper left, no speckle. Earth floors are
  * read from a blocky value field in world pixels, so a patch or a rut runs over the tile edges and the grid is felt
  * but not drawn; clumps, stones and glints are small stamps laid inside a tile. Cosmetic only; variety from the Rng
- * or from a hash of the tile, never Math.random. Wheat is not drawn here: it keeps today's painting (null).
+ * or from a hash of the tile, never Math.random. Wheat: rows of standing stalks on dark earth, two rows a tile.
  */
 import type { Rng } from '../shared/rng';
 import { KX, KZ, type Rect } from './tilekit';
 
-export type GroundKind = 'grass' | 'dirt' | 'mud' | 'rock' | 'planks';
+export type GroundKind = 'grass' | 'dirt' | 'mud' | 'rock' | 'planks' | 'wheat';
 
 const GRASS = ['#1b281b', '#223120', '#2a3a25', '#374a2d'];
 const DIRT = ['#2b2218', '#362b1f', '#3f3325', '#52432f'];
@@ -132,9 +132,24 @@ function planks(rect: Rect, rng: Rng, x: number, y: number): void {
   void rng;
 }
 
-const STAMPS: Record<GroundKind, (rect: Rect, rng: Rng, x: number, y: number) => void> = { grass, dirt, mud, rock, planks };
+/** Standing wheat: dark trodden earth, two rows of stalks a tile (every six rows), a stalk every three pixels, some gone. */
+const WHEAT = ['#5a4a26', '#7a6630', '#98823c', '#b8a052'];
+function wheat(rect: Rect, rng: Rng, x: number, y: number): void {
+  dirt(rect, rng, x, y);
+  for (let j = 5; j < KZ; j += 6) for (let i = (x / 3) % 3 ? 1 : 0; i < KX; i += 3) {
+    const wx = x + i, wy = y + j;
+    if (hash(wx, wy, 11) < 0.22) continue;
+    const h = 3 + Math.floor(hash(wx, wy, 12) * 3), c = hash(wx, wy, 13) < 0.5 ? 1 : 2;
+    // A stalk lit on its left, its ear a shade up; a dark foot where it stands.
+    rect(wx, wy - h, 1, h, WHEAT[c]);
+    rect(wx, wy - h - 1, 1, 1, WHEAT[c + 1]);
+    rect(wx + 1, wy - 1, 1, 1, WHEAT[0]);
+  }
+}
 
-/** True when `kind` is drawn here; wheat and anything else is left to today's painting (false). */
+const STAMPS: Record<GroundKind, (rect: Rect, rng: Rng, x: number, y: number) => void> = { grass, dirt, mud, rock, planks, wheat };
+
+/** True when `kind` is drawn here; anything else is left to today's painting (false). */
 export const grounds = (kind: string): kind is GroundKind => kind in STAMPS;
 
 /** One floor tile of `kind` at (x, y), 20 by 12. */

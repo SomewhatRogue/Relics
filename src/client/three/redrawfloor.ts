@@ -31,7 +31,10 @@ export function onGrid(g: CanvasRenderingContext2D): Rect {
 }
 
 export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
-  const kind = m.theme.floor;
+  // A village (a stone floor anywhere but the town, whose back is stone: shared/terrain.ts, a job's trees or palisade
+  // behind) lies on trodden earth, not one cobble pattern under its ploughland and all (graphics-overhaul.md slice 5,
+  // approved with the plan); its swept yards and lanes are earth.
+  const village = m.theme.floor === 'cobble' && m.theme.back !== 'stone', kind = village ? 'dirt' : m.theme.floor;
   const street = kind === 'cobble' || kind === 'flagstone';
   if (!street && !grounds(kind)) return null;
   const c = document.createElement('canvas');

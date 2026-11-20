@@ -662,3 +662,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   (Claude Opus 5.5)
 - On the default: Node's tests have no page, so the switch read as unset and so on, and the 2.5D parity tests built
   fences through the drawn path. On by default in a page only; the tests keep building today's 3D. Suite green.
+
+## 2026-11-20: villages on earth, wheat drawn (the redraw)
+
+- Kyle: "dope. continue."
+- A village lies on trodden earth under the redraw: a stone floor anywhere but the town (whose back is stone) is
+  drawn as dirt (`three/redrawfloor.ts`). The first try keyed on a palisade behind, but a village job's map has trees
+  behind; checked on the map itself. Slice 5's village base, approved with the plan. At dusk it reads very brown:
+  for Kyle's eye.
+- Wheat drawn as a stamp (`tilegrounds.ts`): dark earth, two rows of standing stalks a tile, an ear a shade up,
+  some gone. Seen on a field job (Hobb's Acre) on the phone. (Claude Opus 5.5)
+- The last box furniture drawn as cards by a Sonnet builder (`tilefurn3.ts`, two lines in `tilefurn.ts`): shelves,
+  bookcases, racks, looms, dummies, booths, bunks, armour stands, bellows, fonts. Seen in the game: shelf, booth; the
+  rest on a test page. Left built: hearths, partitions, pens, the monument, the gallows, stairs. Ten stray preview
+  servers from the session's checks stopped by PID. Suite green. (Claude Opus 5.5)
