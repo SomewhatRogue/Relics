@@ -14,6 +14,7 @@ import { kitRows } from './kitlines';
 import { areas } from './guardarea';
 import { barWord, barWords } from '../shared/barword';
 import { shown as bigNum } from '../shared/shown';
+import { biteLines } from './bitewords';
 
 /** How a weapon fights, as three short labelled rows (TAP, HOLD, PERFECT, and ALSO where there's a
  *  bonus; kitlines.ts), then its GUARD and DODGE areas (guardarea.ts). */
@@ -140,7 +141,7 @@ export function card(it: Item, h?: Hero, brief = false): string {
     (it.bound ? `<div class="tr"><b>SOULBOUND:</b> ${CARDW.bound}</div>` : '') +
     (how ? `<div class="how">${how}</div>` : '') + [...plus, ...mods, ...traits].join('') +
     (it.cost ? labelRows([[CARDW.cost, costText(it.cost, cls)]], 'hungry') : '') +
-    (it.hungry ? hungryRows(it.hungry as HungryId, cls) : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
+    (it.hungry ? hungryRows(it.hungry as HungryId, cls) + labelRows(biteLines(it, cls), 'hungry') : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }
 
 /** A potion: EFFECT, LASTS, and THROWN for a flask. */
