@@ -3,6 +3,7 @@ import { streakBonus } from '../shared/streak';
 import { MAGE_PACE, WEAPONS, cutMax, drilled, gearStats, perkFx, type Fx, type GearStats } from '../shared/tuning';
 import type { Hero } from './types';
 import { markSum } from '../shared/deepmarks';
+import { withBites } from './bites';
 
 type Stats = GearStats & { crit: number; fx: Fx };
 const cache = new WeakMap<Hero, { key: unknown[]; s: Stats }>();
@@ -22,6 +23,8 @@ export function statsOf(h: Hero): Stats {
   Object.assign(s, { damage: s.damage + sb.damage, speed: s.speed * (1 + sb.speed), breath: s.breath + sb.breath, crit: s.crit + sb.crit });
   // A Mage never more than MAGE_PACE.most faster, from everything together.
   if (WEAPONS[h.weapon]?.cls === 'MAGE') s.speed = Math.min(s.speed, 1 + MAGE_PACE.most);
+  // Hungry pieces' bites last, so they take their share of all of it (sim/bites.ts).
+  withBites(s, h);
   cache.set(h, { key: [w, h.armor, rings[0], rings[1], d, (h.perks ?? []).join(), mk, h.streakStep ?? 0, h.legs ?? null], s });
   return s;
 }

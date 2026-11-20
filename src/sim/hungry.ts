@@ -6,6 +6,7 @@ import { CLASS_SKILL, LANTERN, WEAPONS, type HungryId } from '../shared/tuning';
 import { isDead } from './damage';
 import type { Enemy, FightEvent, Hero } from './types';
 import { count } from './score';
+import { healBite } from './bites';
 
 export const HUNGRY_FX = { leech: 0.2, fed: 0.1, starve: 8, bite: 3, chain: 4, chainDmg: 0.6, apron: 0.5, lure: 6, ransom: 50, near: 4 };
 
@@ -18,8 +19,10 @@ export function wears(h: Hero | undefined, id: HungryId): boolean {
 export function heals(to: Hero, by: Hero | undefined, n: number): number {
   if (by?.cold) return 0;
   if (wears(to, 'cleaver') && by !== to) return 0;
-  if (wears(by, 'keeping')) return n * (by === to ? 2 : 0.5);
-  return n;
+  // A STARVED bite on the one healed takes its share (sim/bites.ts).
+  const k = healBite(to);
+  if (wears(by, 'keeping')) return n * (by === to ? 2 : 0.5) * k;
+  return n * k;
 }
 
 /** A hero's kill: the Larder Pike feeds, the Keeping Mace lights a coal, the Tooth Ring recharges. */

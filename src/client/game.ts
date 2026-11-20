@@ -37,6 +37,8 @@ import { SPOT_REACH, housesFor, townMap, townPoint, townProps, townSpots, type S
 import { buyDrill, learnLesson } from '../shared/training';
 import { knowsSkill, learnSkill } from '../shared/skillteach';
 import { ARRIVE_SAFE, cutMax, HOUSEBURN, PARTY, type DrillId, POTION, POTIONS, type PotionId, CLASS_KITS, CLASS_SKILL, SKILL_CHOICES, HERO, abilitiesOf, rollGear, HUNGRY, WANT, type HungryId, nextLevel, raise, dropLevel, reroll, REROLL, STEEL, sellValue, giveValue, TIER_WANT, type ArmorKind, type Augment, type HeroClass, type Item, type RelicId, type WeaponId, WEAPONS } from '../shared/tuning';
+import { feedKit } from '../shared/hunger';
+import { jobUnits } from '../shared/jobunits';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
 import { lessonOf, newWood, release, skipCut, stepWood, type WoodState } from '../sim/wood';
@@ -1316,6 +1318,8 @@ export class Game {
     p.want += hungry.reduce((s, it) => s + HUNGRY[it.hungry as HungryId].want, 0) + (hungry.length ? run.kills * WANT.perKill : 0);
     // TOUCHED and TURNING gear grows it a little too, for every job it's worn on (shared/costs.ts).
     p.want += [p.arms[p.weapon], p.armor, p.legs, ...p.rings].reduce((s, it) => s + (it ? TIER_WANT[it.quality] ?? 0 : 0), 0);
+    // Each hungry piece worn gets hungrier by the job's size (shared/hunger.ts, jobunits.ts).
+    feedKit(p, jobUnits(run.job, won ? 'won' : how));
     const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;

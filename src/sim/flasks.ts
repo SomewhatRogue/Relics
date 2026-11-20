@@ -5,6 +5,7 @@
 import { cure } from './poison';
 import { POTION, POTIONS } from '../shared/tuning';
 import { blast } from './bolts';
+import { healBite } from './bites';
 import type { World } from './elements';
 import type { Bolt, Hero } from './types';
 
@@ -68,7 +69,7 @@ export function stepPotions(heroes: Hero[], smokes: Smoke[], now: number, dt: nu
     if (h.mendLeft > 0 && h.act !== 'down') {
       const n = Math.min(h.mendLeft, (POTION.heal / POTION.healTime) * dt);
       h.mendLeft -= n;
-      h.hp = Math.min(h.maxHp, h.hp + n);
+      h.hp = Math.min(h.maxHp, h.hp + n * healBite(h));
     }
     if (smokes.some((s) => Math.hypot(s.x - h.x, s.y - h.y) < (s.r ?? POTION.smokeR))) h.hiddenUntil = now + 0.15;
   }

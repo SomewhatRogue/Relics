@@ -7,6 +7,7 @@ import { stepPickups } from '../src/sim/pickups';
 import { applyGear, GEAR } from '../src/sim/pack';
 import { NO_INTENT, type FightEvent, type Hero, type Intent } from '../src/sim/types';
 import { Game } from '../src/client/game';
+import { healBite } from '../src/sim/bites';
 
 const store = new Map<string, string>();
 (globalThis as unknown as { localStorage: unknown }).localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) };
@@ -56,7 +57,8 @@ describe('hungry gear', () => {
     expect(h.hp).toBeGreaterThan(50);
     const healer = { ...h, id: 'q', arms: {}, rings: [], armor: null } as Hero;
     expect(heals(h, healer, 10)).toBe(0);
-    expect(heals(h, h, 10)).toBe(10);
+    // Less any STARVED bite the piece has (shared/hunger.ts).
+    expect(heals(h, h, 10)).toBeCloseTo(10 * healBite(h));
   });
 
   it('the Larder Pike grows with kills and bites when it goes hungry', () => {
