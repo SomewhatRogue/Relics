@@ -146,7 +146,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   }
   putStatue(f, map);
   // A lived-in town's animals, each on its own card (../townbeasts.ts).
-  if (map.life) for (const b of lifeFigs(map, f.now, others.length ? [...room.heroes, ...others] : room.heroes)) f.put('lf' + b.key, b.x, b.up, b.y, b.draw, { pool: 0 });
+  // (On the level each stands on, as the flat view lifts them: the new town's stone levels. Kyle, 2026-11-20.)
+  if (map.life) for (const b of lifeFigs(map, f.now, others.length ? [...room.heroes, ...others] : room.heroes)) f.put('lf' + b.key, b.x, b.up + bodyLv(map, b.x, b.y, levelAt(map, b.x, b.y)) * LEDGE_H, b.y, b.draw, { pool: 0 });
   watched(me);
   (map.npcs ?? []).forEach((n, i) => {
     // (A mini quest's giver who has gone home: ../fxmini.ts.)

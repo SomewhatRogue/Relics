@@ -676,3 +676,20 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   bookcases, racks, looms, dummies, booths, bunks, armour stands, bellows, fonts. Seen in the game: shelf, booth; the
   rest on a test page. Left built: hearths, partitions, pens, the monument, the gallows, stairs. Ten stray preview
   servers from the session's checks stopped by PID. Suite green. (Claude Opus 5.5)
+
+## 2026-11-20: the town's animals, rats and folk know the new town
+
+- Kyle: "the rats in the main town area etc. and some of those dont seem to recognize where they're at in the NEW
+  map and should".
+- Found (a throwaway probe over today's town): the rats' haunts were still the old town's points, unmoved (so they
+  gathered mid-town, not at the grate or the Rat's step); the folk's work drawing told anvil from forge, tub from pond,
+  block from pile by the old town's fixed spots (the old anvil's spot is inside today's church; the washerwoman's new
+  round runs pond, tub, line west to east, so she'd have scrubbed at the pond); 15% of the hens' places were in a wall;
+  the ducks walked through the handcart and the works board; in 2.5D animals and rats stood at ground height on the
+  town's raised levels (the flat view already lifted them).
+- Fixed: rat haunts moved with their districts (`rats.ts`, `townPoint`): the grate's at the grate; folk tell what they
+  are at by which of their own round's stops they stand at (`folkwork.ts` `stopAt`), any layout; a flock kept on open
+  ground at its own level (`townbeasts.ts` `keepOn`); the ducks' file round the cart and the board
+  (`shared/layoutmove.ts` DUCKS); animals and rats on their level in 2.5D (`three/cards3d.ts`, `three/extras3d.ts`, one
+  line each). Probe after: hens and ducks never in a wall, water (hens) or a cart. Small edits in finished chats' files.
+  (Claude Opus 5.5)

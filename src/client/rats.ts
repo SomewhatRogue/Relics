@@ -11,6 +11,7 @@ import type { GameMap } from '../shared/arena';
 import type { ArenaRoom } from '../sim/room';
 import type { Hero } from '../sim/types';
 import { StainSpots, TOWN_HAUNTS, blocked, bolthole, type Haunt } from './ratspots';
+import { townPoint } from '../shared/town';
 
 export const RATS = { scare: 2.5, creep: 1.8, back: [15, 25], gap: [1.5, 3.5], cap: 8, reach: 18, flee: 7, walk: 1.6, quiet: 4 } as const;
 
@@ -52,7 +53,9 @@ export class Rats {
   private look(room: ArenaRoom, stains: { x: number; y: number; col: string }[], me: Hero | undefined): void {
     const town = room.map.name === 'WICKHOLD';
     let found: (Haunt & { rats?: number })[];
-    if (town) found = TOWN_HAUNTS;
+    // (Wickhold's haunts were laid in the old town: moved with their districts into the town being played, so the
+    // grate's rats are at the grate. Kyle, 2026-11-20: "the rats in the main town ... should" know where they are.)
+    if (town) found = TOWN_HAUNTS.map((h) => { const [x, y] = townPoint(h.x, h.y); return { ...h, x, y }; });
     else this.stains.read(stains), (found = this.stains.haunts(room.enemies));
     const at = me ?? { x: room.map.w / 2, y: room.map.h / 2 };
     const want = found.filter((h) => !blocked(room.map, h.x, h.y) && Math.hypot(h.x - at.x, h.y - at.y) < RATS.reach)

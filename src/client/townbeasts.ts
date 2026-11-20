@@ -9,6 +9,8 @@ import type { GameMap } from '../shared/arena';
 import type { Life } from '../shared/townlife';
 import type { Ctx } from './draw';
 import { dusk } from './streetlife';
+import { blocked } from './ratspots';
+import { groundLv } from '../shared/heights';
 
 /** One animal: where (tiles), how high (tiles), which way it faces, and how to draw it at its feet on screen. */
 export interface Beast { key: string; x: number; y: number; up: number; draw: (c: Ctx, px: number, py: number) => void }
@@ -102,13 +104,27 @@ function along(path: [number, number][], d: number): { x: number; y: number; fx:
   return { x: path[0][0], y: path[0][1], fx: 1 };
 }
 
+/**
+ * (x, y) kept on open ground at the flock's own level: pulled back toward its middle (l.x, l.y) until it is out of
+ * any building, wall, solid thing or water. A flock's ring was laid as a circle and ran into walls in the new town
+ * (Kyle, 2026-11-20: animals not knowing where they are).
+ */
+function keepOn(m: GameMap, l: Life, x: number, y: number): [number, number] {
+  const lv = groundLv(m, l.x, l.y), wet = (px: number, py: number) => (m.water ?? []).some((w) => px > w.x && px < w.x + w.w && py > w.y && py < w.y + w.h);
+  for (const k of [1, 0.75, 0.5, 0.25]) {
+    const px = l.x + (x - l.x) * k, py = l.y + (y - l.y) * k;
+    if (!blocked(m, px, py) && !wet(px, py) && groundLv(m, px, py) === lv) return [px, py];
+  }
+  return [l.x, l.y];
+}
+
 export function lifeFigs(m: GameMap, now: number, heroes: At[]): Beast[] {
   const out: Beast[] = [];
   (m.life ?? []).forEach((l, li) => {
     if (l.kind === 'hens') for (let i = 0; i < (l.n ?? 4); i++) {
       // A hero's feet among them: they run off a step or two, wings going.
       const w = wander(l, i, now, 4.5), { h, d } = near(heroes, w.x, w.y), scare = h && d < 1.4 ? (1.4 - d) / 1.4 : 0;
-      const x = w.x + (h && scare ? ((w.x - h.x) / (d || 1)) * scare * 1.6 : 0), y = w.y + (h && scare ? ((w.y - h.y) / (d || 1)) * scare * 1.2 : 0);
+      const [x, y] = keepOn(m, l, w.x + (h && scare ? ((w.x - h.x) / (d || 1)) * scare * 1.6 : 0), w.y + (h && scare ? ((w.y - h.y) / (d || 1)) * scare * 1.2 : 0));
       const fx = scare && h ? (x >= h.x ? 1 : -1) : w.fx;
       out.push({ key: `l${li}h${i}`, x, y, up: 0, draw: (c, px, py) => hen(c, px, py, fx, !scare && w.pecking, scare > 0.2 && Math.floor(now * 10) % 2 === 0, i === 0) });
     }
@@ -126,7 +142,7 @@ export function lifeFigs(m: GameMap, now: number, heroes: At[]): Beast[] {
       const { d } = near(heroes, l.x, l.y), up = d < 2.2 ? Math.min(1, (2.2 - d) / 0.8) : 0;
       for (let i = 0; i < (l.n ?? 5); i++) {
         const w = wander(l, i, now, 2.6), a = now * 1.6 + i * 0.9, fly = Math.round(up * (18 + (i % 3) * 5));
-        const x = w.x + (up ? Math.cos(a) * up * 1.4 : 0), y = w.y + (up ? Math.sin(a) * up * 0.8 : 0), fx = up ? (Math.sin(a) > 0 ? -1 : 1) : w.fx;
+        const [x, y] = up ? [w.x + Math.cos(a) * up * 1.4, w.y + Math.sin(a) * up * 0.8] : keepOn(m, l, w.x, w.y), fx = up ? (Math.sin(a) > 0 ? -1 : 1) : w.fx;
         out.push({ key: `l${li}p${i}`, x, y, up: fly / 16, draw: (c, px, py) => pigeon(c, px, py, fx, !up && w.pecking, fly, now) });
       }
     }

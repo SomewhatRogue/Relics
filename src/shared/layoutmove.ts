@@ -96,8 +96,8 @@ export const ROUNDS: Record<string, { path: [number, number][]; stops?: number[]
   'TOBIN THE PAWNBROKER': { path: [[39.8, 21.7]] },
   'HESTER THE TAILOR': { path: [[34.3, 21.7]] },
 };
-/** The ducks' file out of the millpond and back. */
-export const DUCKS: [number, number][] = [[32.2, 46.7], [33.8, 48.1], [34.4, 50.1], [31.8, 50.7], [29.6, 49.1], [31.4, 47.7]];
+/** The ducks' file out of the millpond and back (round the south of the handcart and between it and the works board, through neither: 2026-11-20). */
+export const DUCKS: [number, number][] = [[32.2, 46.7], [33.8, 48.1], [34.4, 50.1], [34, 51.8], [31, 51.8], [30.2, 50.6], [30.2, 49], [31.4, 47.7]];
 
 /** The new town kept quiet (Kyle, 2026-11-15: "too much happening"): the ambient walkers who aren't at a job of their
  *  own, and the birds, left out. Everyone you can talk to stays, and the folk at their work (the smith, the

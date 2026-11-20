@@ -5,7 +5,6 @@
  * walked in (their sprite faces it); `walking` false while they stop to work; tx their tile x, which stop. Paint only.
  */
 import type { Npc } from '../shared/arena';
-import { ANVIL, CHOPBLOCK, WASHTUB } from '../shared/townlife';
 import type { Ctx } from './draw';
 
 export const FOLK = new Set<NonNullable<Npc['work']>>(['smith', 'wash', 'chop', 'cart', 'hoop']);
@@ -13,13 +12,28 @@ export const FOLK = new Set<NonNullable<Npc['work']>>(['smith', 'wash', 'chop', 
 const HAFT = '#6b4a2b', IRON = '#8a8f9a', LOG = '#4a3a2a', CUT = '#9a7a4a', OAK = '#6b4a2b', OAK_D = '#4a3420', SACK = '#8a7a5a';
 const CLOTH = ['#8a8070', '#7a6a8a', '#9a8a6a', '#5a6a7a'];
 
+/**
+ * Which of `n`'s working stops (the points of its round it stops at, in order) it stands at, by its tile x: 0 the
+ * first, 1 the next, -1 between. Read off its own round, so the new town's layout and today's both work (the anvil,
+ * the tub and the block were fixed points of the old town; Kyle, 2026-11-20: folk not knowing where they are).
+ */
+function stopAt(n: Npc, tx: number): number {
+  const at = (n.path ?? []).filter((_, i) => (n.stops?.[i] ?? 0) > 0);
+  let best = -1, d = 1.3;
+  at.forEach((p, i) => Math.abs(p[0] - tx) < d && ((d = Math.abs(p[0] - tx)), (best = i)));
+  return best;
+}
+/** The x of `n`'s working stop `i` (its first if there is no such). */
+const stopX = (n: Npc, i: number) => (n.path ?? []).filter((_, j) => (n.stops?.[j] ?? 0) > 0)[i]?.[0] ?? n.x;
+
 export function drawFolk(c: Ctx, n: Npc, x: number, y: number, fx: number, walking: boolean, tx: number): void {
   const g = c.lit, t = c.now + n.y * 1.7, f = fx < 0 ? -1 : 1, X = Math.round(x), Y = Math.round(y);
   const r = (dx: number, dy: number, w: number, h: number, col: string) => ((g.fillStyle = col), g.fillRect(X + dx, Y + dy, w, h));
   const glow = (dx: number, dy: number, w: number, h: number, col: string) => ((c.glow.fillStyle = col), c.glow.fillRect(X + dx, Y + dy, w, h));
   if (n.work === 'smith') {
     if (walking) return r(f * 4, -8, 1, 6, IRON), void r(f * 4 - 1, -2, 3, 1, IRON);
-    if (tx > ANVIL.x + 1.5) {
+    // (Its stops: the anvil, then the forge's mouth.)
+    if (stopAt(n, tx) === 1) {
       // At the forge's mouth: the iron held into the fire, coming out bright.
       const k = (t * 0.4) % 1;
       r(f * 3, -9, f * 7, 1, IRON);
@@ -36,18 +50,21 @@ export function drawFolk(c: Ctx, n: Npc, x: number, y: number, fx: number, walki
   if (n.work === 'wash') {
     if (walking) {
       // A full bucket to the tub, the basket of wet washing to the line, the empty bucket swinging back.
-      const basket = fx > 0 && tx < WASHTUB.x + 3.2, sw = Math.round(Math.sin(t * 7));
+      // (Her stops: the pond, the tub, the line. The basket from the tub to the line, whichever way that is.)
+      const tubX = stopX(n, 1), lineX = stopX(n, 2), toLine = Math.sign(lineX - tubX);
+      const basket = Math.sign(fx) === toLine && (tx - tubX) * toLine > -0.3 && (lineX - tx) * toLine > -0.3, sw = Math.round(Math.sin(t * 7));
       if (basket) return r(-4, -12, 9, 4, '#8a7448'), r(-3, -13, 7, 1, CLOTH[(Math.floor(t) % 3) + 1]), void r(-4, -9, 9, 1, '#6a5a38');
       r(f * 5 - 1, -6 + sw, 4, 4, OAK), r(f * 5 - 1, -6 + sw, 4, 1, fx < 0 ? '#3a4a5c' : OAK_D);
       return r(f * 5, -9 + sw, 1, 3, '#8a7a5a');
     }
-    if (tx > WASHTUB.x + 5) {
+    const at = stopAt(n, tx);
+    if (at === 0) {
       // At the pond's edge: the bucket dipped and lifted out dripping.
       const k = (t * 0.5) % 1, dip = Math.round(Math.sin(k * Math.PI) * 5);
       r(f * 7 - 2, -6 + dip, 5, 4, OAK), r(f * 7 - 1, -6 + dip, 3, 1, '#3a4a5c');
       return void (k > 0.6 && r(f * 8, -1 + Math.round((k - 0.6) * 8), 1, 1, '#8aa0b8'));
     }
-    if (tx < WASHTUB.x + 1.2) {
+    if (at === 1) {
       // At the tub: a shirt worked up and down the board, suds going over the side.
       const k = Math.sin(t * 6), cy = -7 + Math.round(k * 2);
       r(f * 4 - (f < 0 ? 4 : 0), cy, 5, 3, CLOTH[0]), r(f * 4 - (f < 0 ? 4 : 0), cy + 2, 5, 1, '#6a6050');
@@ -69,7 +86,8 @@ export function drawFolk(c: Ctx, n: Npc, x: number, y: number, fx: number, walki
       for (let i = 0; i < 9; i++) r(-f * i * 0.6 + f * 2, -12 - i, 1, 1, HAFT);
       return r(-f * 6 - 2, -22, 4, 3, IRON);
     }
-    if (tx < CHOPBLOCK.x - 1.4) {
+    // (Its stops: the block, then the pile.)
+    if (stopAt(n, tx) === 1) {
       // At the pile: setting the logs down one by one.
       const k = (t * 0.8) % 1;
       return r(f * 3 - 1, -10 + Math.round(k * 7), 3, 3, LOG), void r(f * 3 - 1, -10 + Math.round(k * 7), 3, 1, CUT);
