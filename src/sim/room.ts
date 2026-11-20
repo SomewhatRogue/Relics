@@ -121,6 +121,7 @@ import { newBoss, useBook, type BossBook } from './bosskit';
 import { stepBosses } from './bossrooms';
 import { syncMarks } from './deepmarks';
 import { landed } from './afoot';
+import { payVowed } from './vowed';
 
 // Where each body stood last tick, `prev`'s keys made once per id rather than every tick, the tuple
 // written in place (nothing keeps one past the frame it was read in).
@@ -434,6 +435,8 @@ export class ArenaRoom {
     for (const h of this.heroes) stepHero(h, slipIntent(h, this.intents.get(h.id) ?? NO_INTENT, TICK), this.enemies, this.time, TICK, this.events, acts);
     // The long cuts whose moment has come land, all at once (sim/samuraicut.ts).
     stepCuts(this.enemies, this.time, this.events);
+    // VOWED gifts for blows struck this tick (sim/vowed.ts).
+    payVowed(this.heroes, this.time, this.events);
     // Blows on friends with lag whose time has come, judged by what their screen showed (sim/lagcomp.ts).
     this.late = stepLate(this.late, this.heroes, this.allEnemies, this.intents, this.time, this.events);
     useLate(this.late);

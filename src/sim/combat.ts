@@ -45,6 +45,7 @@ import { noteHurt } from './bosskit';
 import { graceDefer } from './bossgrace';
 import { cutCall } from './hornstate';
 import { blockBreath, blockStriped, guardBreak } from './blockhold';
+import { vowedBlock, vowedGuard } from './vowed';
 
 export { respawnOf, stunOf } from './damage';
 
@@ -335,6 +336,8 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
     h.counterUntil = now + counterWindow(h);
     // HEALING BLOCK heals friends near (sim/ladderhealer.ts).
     blockMend(h, heroes, ev);
+    // THE WIDOW'S SWORD: the nearest friend gets some stamina (sim/vowed.ts).
+    vowedBlock(h, heroes, now);
     return;
   }
   // A Cleric's holy shield soaks what it can (sim/holy.ts), then a spellblade's magic, unless the blow is
@@ -342,7 +345,7 @@ export function hitHero(e: Enemy, a: EnemyAttack, h: Hero, now: number, ev: Figh
   // IRON FEET: holding an attack, the blow lands but doesn't shove, stagger or knock down (sim/techwarrior.ts);
   // STAND FAST, while a taunt lasts, the same (sim/taunt.ts). SHELTER: a Healer blocking near takes some off.
   const iron = rooted(h), brace = !iron && braced(h, now), feet = iron || brace;
-  const soaked = soak(h, Math.round(a.dmg * taken * shelter(h, heroes, ev)), now, ev);
+  const soaked = soak(h, Math.round(a.dmg * taken * shelter(h, heroes, ev) * vowedGuard(h, heroes, now)), now, ev);
   const n = a.unblockable ? soaked : manaShield(h, soaked, now, ev);
   if (n < soaked && n <= 0 && !feet) shove(h, sx / sl, sy / sl, a.knock * 0.4, HERO.weight);
   if (n <= 0) return void (h.hitstop = Math.max(h.hitstop, HITSTOP.light));

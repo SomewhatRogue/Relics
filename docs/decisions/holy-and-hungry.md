@@ -171,3 +171,24 @@ start, amends shown only by Odric's line, the costs as drafted.
   rows and DIM. **For Economy:** `plusCost` (forgeplus.ts) refusing a vowed piece, as hungry. **For Trading:**
   `cleanItem` keeping `holy` and `worn`.
 - **Checked:** the touched tests, `npm run check`, the full suite (2234 passed).
+
+## 2026-11-19: slice 4, stage 2 in: vowed costs and six gifts in the fight (Claude Opus 5.5)
+
+- **Mine, new:** `sim/vowed.ts`, `tests/vowedfight.test.ts`. Nothing works while DIM.
+- **All the costs** (`withVowed`, last in `statsOf`): the Widow's Sword 5% and the Breach Mail 8% off SPEED (`foot`),
+  Ketterby's Bow 10% off CHARGE SPEED (`draw`), the Returned Pair's dodge 10% dearer, the Apprentice's Staff 10%
+  off SKILL RECHARGE (`focus`), the Cart-hand's Coat 5% more taken; the Tithe Ring a tenth less coin (`goldKeep`;
+  all coin picked up for now, chest coin too, though the card says from kills).
+- **Six gifts:** the Breach Mail (friends within 4 tiles take 10% less) and the Returned Pair's backstab (friends
+  near take 10% less for 4 s), both `vowedGuard` on the blow's damage beside SHELTER in sim/combat.ts; the Widow's
+  Sword's block (12 stamina to the nearest friend, the block path); Ketterby's full draw that hits (heals the nearest
+  friend 6), the Returned Pair's backstab and the Apprentice's kill (12 to the nearest friend's bar), queued from
+  `damage()` (sim/damage.ts, one line; a new `charged` option, passed by sim/bolts.ts's two shot lines) and paid
+  each tick by `payVowed` (sim/room.ts, after the long cuts). "Killing with a spell" is any kill by the staff's wearer
+  (a Mage's every blow is a spell).
+- **Small edits:** `sim/gearstats.ts`, `sim/combat.ts` (two lines), `sim/damage.ts`, `sim/bolts.ts`, `sim/room.ts`,
+  `sim/bites.ts` (mine).
+- **Stage 3, still to wire:** the Infirmary Censer's carry and its cost (half heals on yourself), the Cart-hand's
+  Coat's raise, both rings' relic gifts (the Relics chat's files: asked then), Moll's dice vow, Tobin and Nettle
+  refusing a vowed piece.
+- **Checked:** the touched tests, `npm run check`, the full suite (2242 passed).

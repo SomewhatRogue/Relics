@@ -10,6 +10,7 @@ import { meatySort } from '../shared/meaty';
 import { doorTake } from './doorwall';
 import { noteHurt } from './bosskit';
 import { cutCall } from './hornstate';
+import { noteVowed } from './vowed';
 
 const SPEC = { butcher: BUTCHER, scrapper: SCRAPPER, spider: SPIDER, brood: BROOD } as Record<string, { stun: number; respawn: number } | undefined>;
 export const stunOf = (e: Enemy) => SPEC[e.kind]?.stun ?? SWING_DUMMY.stun;
@@ -62,6 +63,8 @@ export interface DamageOpts {
   dy?: number;
   /** What it's made of, for a kind's weaknesses (shared/weakness.ts); a plain blow when left out. */
   el?: Hurt | '';
+  /** A full draw's shot (a VOWED bow's gift, sim/vowed.ts). */
+  charged?: boolean;
 }
 
 /** WEAK or RESIST over a foe (`m` the table's multiplier), at most one every WEAK_POP seconds. */
@@ -116,6 +119,8 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   }
   // THE SLUICER falls in the water while THE RAKER stands, to be stood up again (sim/pairfall.ts).
   if (e.hp <= 0 && fallsInstead(e, now, ev)) return false;
+  // A vowed gift may pay for this blow (sim/vowed.ts).
+  noteVowed(e.lastBy, o, e.hp <= 0);
   if (e.hp <= 0) {
     const how = o.tick ? o.how ?? 'burn' : -e.hp >= OVERKILL ? 'burst' : o.how ?? 'fall';
     return kill(e, ev, how, o.dx ?? 0, o.dy ?? 0), true;
