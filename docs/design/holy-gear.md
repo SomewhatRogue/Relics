@@ -118,3 +118,13 @@ the Gear chat's and Oswin's, and the bible keeps it to maces, flails and robes).
 
 **Kyle's answers (2026-11-20):** part-grown pieces at each step, as drafted; the shelf's price is a gift at the
 Lantern (its gold goes in the box and lowers the Want).
+
+## Slice 8: SIEGE and MARSHAL, the clean tiers (Kyle, 2026-11-20: "make them clean")
+
+TOUCHED (yellow) and TURNING (orange) stay random drops at the same strength and keep their one small cost, but
+they're no longer the hunger caught partway: they don't grow the Want, Tobin buys them, and they get new names.
+The lore keeper's: **SIEGE** (yellow: struck fast in the three winters for someone not meant to wear it long; rare
+because Halvard remelted nearly all of it) and **MARSHAL** (orange: a captain's set fitted to one man; the captains
+died on the walls in it). Their costs, in a line: good steel made for someone else's measure, it asks you to make
+up the difference (cards stay as they are, no why). Ids stay `touched` and `turning` (saves untouched). HUNGRY
+alone is the hunger's; VOWED is the church's nine, a separate path. Oswin's vestry: no change.

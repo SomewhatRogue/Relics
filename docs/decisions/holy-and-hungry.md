@@ -273,3 +273,24 @@ at the Lantern.
   the church keeps a shelf by the step; its pieces are gifts, the gold in the Lantern box; Odric pays amends, never
   as a number; vowed pieces have been through many hands, none of them harmful.
 - **Checked:** the touched tests, `npm run check`, the full suite (2259 passed). Next: slice 8, VOWED and the top tier replace TOUCHED and TURNING (with the Gear chat).
+
+## 2026-11-20: slice 8 planned and prepared: SIEGE and MARSHAL, the clean tiers (Claude Opus 5.5)
+
+Kyle's call: make TOUCHED and TURNING clean (over turning them into vowed pieces, or leaving them). Spec:
+docs/design/holy-gear.md slice 8; names from the lore keeper.
+
+- **All code is other chats', so it waits on the branch `gear-asks-2`, four commits:** (1) gear.ts: the names
+  SIEGE and MARSHAL; (2) costs.ts: `TIER_WANT` empty (no Want from either), the header retold; (3) fence.ts: Tobin
+  refuses only hungry gear (fence.ts is unclaimed, but it lands with the rest so the rules change together);
+  (4) tests/fence.test.ts and tests/shops.test.ts: the three assertions that held the old rules. `RARE` is unchanged
+  (it also drives the card's rare chip and loot-level odds). On the branch, every touched test passes but Gear's
+  two item-level tests the hungry 1.5x number already broke.
+- **Asked of Economy (its words):** storewords.ts `PAWN.wont` to "Tobin won't buy hungry gear.", and the end of
+  `PAWN.greet` ("Nothing touched, mind, or worse than touched") to hungry gear alone; vendorwords.ts Nettle's `about`
+  and `wont` ("buys touched and turning gear"): Nettle still buys SIEGE and MARSHAL at a third under Tobin, so his
+  lines and his role (hungry gear, and anyone carrying it) are yours to retell. Through your own lore pass.
+- **Asked of the General chat (the bible, lines by the lore keeper):** story-bible.md 325 ("the same thing as hungry
+  gear caught partway", "grows the Want", the names), 327 (the vestry's reason), 328 to 331 (Tobin and Nettle on
+  yellow and orange), 245 ("buys anything but touched, turning and hungry" to "anything but hungry"), 175 ("hungry
+  gear" means red alone). New lore: SIEGE and MARSHAL steel as above.
+- Nothing lands on main from this slice; it's ready when Gear, Economy and General say yes.
