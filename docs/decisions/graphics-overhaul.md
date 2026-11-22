@@ -720,3 +720,18 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Seen, not L1's: a dithered shadow from the lighting pass under figures and trees; the town's raised level meets the
   ground below in a straight seam with no face. Checked: tsc clean; village, town by day, a wood on the phone, before
   and after. (Claude Opus 5.5)
+
+## 2026-11-22: the living world, L2 (what moves and reacts)
+
+- Kyle: "Continue." The frame here (`ambient.ts`, mine: one list of ambient figures a frame, at most 24, drawn as
+  cards in 2.5D and sorted in by depth in the flat view; one-line hooks in `three/cards3d.ts` and `scene.ts`), the two
+  halves by two Sonnet builders at once in this folder (each to its own build folder and port, no git), reviewed here.
+- Town (`ambienttown.ts`): moths round lit lamps near a hero after dusk, bats over the roofs at dusk, the forge's
+  sparks; five more rat haunts in `ratspots.ts`, each checked on open ground after the move into the new town.
+- Wild (`ambientwild.ts`, `ambientwild2.ts`, `ambientwildkit.ts`): leaves under trees, birds flushing from cover,
+  crows lifting as you pass (moved here from `streetlife.ts`, which no longer draws them), drips in mines. Reactions
+  proven in a throwaway test (crows 0.1 to 2 tiles up with a hero 1.5 tiles off, back down after); not caught on
+  screen. A flush's timing is a per-screen memo, not the room's: cosmetic, the trigger the same for all.
+- Checked here: tsc clean; the town at dusk and at night on the phone, ambient figures present, no page errors; the
+  builders' crops (leaves, a mine's drip, moths at a torch, sparks over the forge). Bats not told apart from pigeons in
+  a still. (Claude Opus 5.5)

@@ -17,6 +17,12 @@ export const TOWN_HAUNTS: (Haunt & { rats: number })[] = [
   { x: 23.1, y: 35.4, weight: 99, town: true, rats: 3 },
   { x: 11.5, y: 34.8, weight: 99, town: true, rats: 2 },
   { x: 21.6, y: 34.6, weight: 99, town: true, rats: 2 },
+  // (Living world L2, 2026-11-22: between the market's stalls, behind the tavern's west end, down two alleys.)
+  { x: 38, y: 16.8, weight: 99, town: true, rats: 2 },
+  { x: 38.5, y: 18.6, weight: 99, town: true, rats: 1 },
+  { x: 16.5, y: 35.2, weight: 99, town: true, rats: 2 },
+  { x: 11.5, y: 31.2, weight: 99, town: true, rats: 1 },
+  { x: 9.6, y: 21.2, weight: 99, town: true, rats: 1 },
 ];
 
 /** Blood: a dark red, red well over green and blue. */
