@@ -175,10 +175,30 @@ chat or the Art chat once a direction is picked.
 - **Instances, Deep**. Their boss and arena draws are untouched; they get the new light and grade for free through
   the shared passes. A note in each log when 1 and 2 flip to default, so they reshoot their own bosses.
 
+## Eight facings, part of slice 8 (Kyle, 2026-11-22)
+
+Kyle: "diagonal walking for every unit (heroes, goblins, bosses, townsfolk, the hound)". Today a figure turns through
+three facings, side (mirrored for left), back and front, so a hero going up and to the right shows its back or its
+side, never between. Added to slice 8:
+- **Two new facings drawn, front-diagonal and back-diagonal, each mirrored for the other side**: eight directions in
+  all, chosen from where the figure is going (the camera's swing still turns it, as today).
+- **Walk frames first.** Attacks, blocks and reactions stay on the nearest of today's three facings until later.
+- **Done as part of the hero and enemy redraw, not before it**, so nothing is drawn twice.
+- **Every unit:** heroes, goblins, bosses, townsfolk, the hound.
+- **One choice of facing for all of them**: a pure `facing8(fx, fy)` (with the swing), read by every painter. Today
+  the choice is in several places: `charframe.ts` `facingFor` (New look: characters, for its kit figures), and for
+  the figures in the game by default, the Art chat's `actors.ts` (heroes), `npcs.ts` and `npcback.ts` (townsfolk),
+  `hound.ts`, and `foepose.ts` with the goblins' and bosses' sprites.
+- **Who:** New look: characters owns `charframe.ts`, `charpaint.ts` and `three/chars3d.ts`; the Art chat's painters
+  get small edits. Settled on the board before any code (Collisions to settle).
+- **The gate:** one hero and one goblin walking in all eight directions shown to Kyle (a phone sheet in 2.5D, and the
+  walk played) before it rolls out to the rest.
+
 ## Open for Kyle
 
 - The tile redraw's proof (`?redraw=1`), then R2 on. (TILT came out at Kyle's answer: today's angle.)
-- Slice 8's direction, once its mocks are up.
+- Slice 8's direction, once its mocks are up; with it the eight facings (above), one hero and one goblin first.
+- The living world (docs/design/living-world.md): its three questions, then L1 (edges) on his go.
 - LIVING WORLD's sun and figure shadows as a default, once the light is smooth.
 
 ## Cost and checking

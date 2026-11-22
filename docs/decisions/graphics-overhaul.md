@@ -693,3 +693,15 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   (`shared/layoutmove.ts` DUCKS); animals and rats on their level in 2.5D (`three/cards3d.ts`, `three/extras3d.ts`, one
   line each). Probe after: hens and ducks never in a wall, water (hens) or a cart. Small edits in finished chats' files.
   (Claude Opus 5.5)
+
+## 2026-11-22: the living world spec; eight facings into slice 8
+
+- Kyle: "Ya id like that" (a spec for making the world feel alive, edges first): `docs/design/living-world.md`,
+  four slices (L1 edges, L2 what moves and reacts with more rats, L3 lived-in fronts, L4 each place its own), three
+  questions for him. Nothing built.
+- Kyle: diagonal walking for every unit, front- and back-diagonal drawn and mirrored, walks first, as part of the
+  hero and enemy redraw, coordinated with New look: characters, one hero and one goblin in eight directions shown
+  first. Written into graphics-overhaul.md slice 8 ("Eight facings"). Found: the facing is chosen in New look:
+  characters' `charframe.ts` for its kit figures, but for the figures in the game by default in the Art chat's
+  `actors.ts`, `npcs.ts`, `npcback.ts`, `hound.ts`, `foepose.ts`; so a shared `facing8` and the owner are put on the
+  board's Collisions to settle. (Claude Opus 5.5)
