@@ -14,6 +14,7 @@ import { floorStamp, KX, KZ, type Rect } from '../tilekit';
 import { groundStamp, grounds } from '../tilegrounds';
 import { ledge, OX, OY, PX, toPx } from '../world';
 import { paintSoil } from '../soil';
+import { softEdges } from '../tileedges';
 import { paintWater } from '../waterpaint';
 import { paintScatter } from '../scatterpaint';
 import { paintMarks } from '../marks';
@@ -47,7 +48,9 @@ export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   }
   // What lies on the ground, in today's order (world.ts paintMap), each on this grid.
   const R = onGrid(g), r2 = new Rng(m.w * 7 + m.h * 13 + 1), pick = (a: string[]) => a[r2.int(a.length)];
-  paintSoil(m, g, { x: 0, y: 0, sx: KX, sy: KZ });
+  paintSoil(m, g, { x: 0, y: 0, sx: KX, sy: KZ, calm: true });
+  // Where the materials meet, drawn as tile art draws an edge (tileedges.ts: the living world's L1).
+  softEdges(m, rect, KX, KZ);
   paintWater(m, R, r2, toPx, PX);
   paintScatter(m, R);
   paintMarks(m, R);

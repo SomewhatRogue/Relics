@@ -705,3 +705,18 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   characters' `charframe.ts` for its kit figures, but for the figures in the game by default in the Art chat's
   `actors.ts`, `npcs.ts`, `npcback.ts`, `hound.ts`, `foepose.ts`; so a shared `facing8` and the owner are put on the
   board's Collisions to settle. (Claude Opus 5.5)
+
+## 2026-11-22: the living world, L1 (edges where materials meet)
+
+- Kyle on the spec: "Ha looks good. Also not too too busy for two and kepe things silent for now" (order as written,
+  a lightly peopled night street, silent). L1 built.
+- `tileedges.ts` (mine): on the redraw's floor after the soil, each 2 by 2 block compared with its neighbours; where
+  materials meet, edges drawn as tile art draws them, lit from the upper left (grass: shadowed lip below, lit fringe
+  and the odd blade above; a patch set into the floor with a rim; mud wet-rimmed). `soil.ts` (Art's file, small
+  edits): `calm` for the redraw's grid (a material per 2 by 2, colour from the slow noise only, a third of the
+  flecks, tree shade one soft shadow) and `soilAt` (the material at a point, its boxes cached). Today's flat view
+  painting unchanged.
+- First try judged edges 4 by 4, so outlines showed every step of the staircase (the village's fields); 2 by 2 now.
+- Seen, not L1's: a dithered shadow from the lighting pass under figures and trees; the town's raised level meets the
+  ground below in a straight seam with no face. Checked: tsc clean; village, town by day, a wood on the phone, before
+  and after. (Claude Opus 5.5)

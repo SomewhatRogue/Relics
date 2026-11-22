@@ -69,7 +69,8 @@ function matAt(soil: Soil[], boxes: number[][], x: number, y: number): Soil['mat
 }
 
 /** A 2x2 block's colour in a material. */
-function colourAt(mat: Exclude<Soil['mat'], 'cobble' | 'shade'>, x: number, y: number, px: number, py: number): string {
+/** `calm`: the tile redraw's grid (three/redrawfloor.ts): colour from the slow noise only, a third of the flecks, no checker. */
+function colourAt(mat: Exclude<Soil['mat'], 'cobble' | 'shade'>, x: number, y: number, px: number, py: number, calm = false): string {
   // Flagstones: 16 by 10, every other course set over by half, each stone its own grey, the joints dark.
   if (mat === 'flags') {
     const row = Math.floor(py / 10), sx = px + (row % 2 ? 8 : 0), col = Math.floor(sx / 16);
@@ -77,7 +78,7 @@ function colourAt(mat: Exclude<Soil['mat'], 'cobble' | 'shade'>, x: number, y: n
     const k = hash(col, row, 13);
     return hash(px, py, 4) < 0.03 ? '#3a3640' : FAMILY.flags[Math.floor(k * 4)];
   }
-  const fam = FAMILY[mat], k = noise(x, y, 2.2, 3) * 0.8 + hash(px, py, 5) * 0.3, r = hash(px, py, 9);
+  const fam = FAMILY[mat], k = noise(x, y, 2.2, 3) * (calm ? 1 : 0.8) + (calm ? 0 : hash(px, py, 5) * 0.3), r = hash(px, py, 9) * (calm ? 3 : 1);
   const col = fam[Math.min(fam.length - 1, Math.floor(k * fam.length))];
   if (mat === 'earth' || mat === 'swept') return r < 0.025 ? '#57525e' : r < 0.035 ? '#2e2820' : col;
   if (mat === 'mud') return r < 0.03 ? '#3a4044' : r < 0.06 ? '#1c1813' : col;
@@ -92,20 +93,32 @@ function colourAt(mat: Exclude<Soil['mat'], 'cobble' | 'shade'>, x: number, y: n
   return r < 0.04 ? '#6a5a4a' : col;
 }
 
+/** The soil's material at a point (tiles): 'cobble' where the floor's own shows (the tile redraw's edges: tileedges.ts). */
+const BOXES = new WeakMap<Soil[], number[][]>();
+export function soilAt(m: GameMap, x: number, y: number): Soil['mat'] {
+  const soil = m.soil ?? [];
+  if (!soil.length) return 'cobble';
+  let b = BOXES.get(soil);
+  if (!b) BOXES.set(soil, (b = soil.map(box)));
+  return matAt(soil, b, x, y);
+}
+
 /** Paint the soil straight into the floor's pixels: material per 4x4 block, colour per 2x2. */
 /**
  * `at`: the grid painted on, its top left and its pixels a tile across and down (the tile redraw paints the 2.5D floor
  * at 20 by 12: three/redrawfloor.ts); today's floor by default.
  */
-export function paintSoil(m: GameMap, g: CanvasRenderingContext2D, at = { x: OX, y: OY, sx: PX, sy: PX }): void {
+export function paintSoil(m: GameMap, g: CanvasRenderingContext2D, at: { x: number; y: number; sx: number; sy: number; calm?: boolean } = { x: OX, y: OY, sx: PX, sy: PX }): void {
   const soil = m.soil;
   if (!soil?.length) return;
   const { sx, sy } = at, boxes = soil.map(box), W = m.w * sx, H = m.h * sy, img = g.getImageData(at.x, at.y, W, H), d = img.data;
-  for (let by = 0; by < H; by += 4) for (let bx = 0; bx < W; bx += 4) {
-    const mat = matAt(soil, boxes, (bx + 2) / sx, (by + 2) / sy);
+  // (Calm, the redraw's grid: a material per 2 by 2, so an edge steps a pixel or two, not four; tileedges.ts SOIL_B.)
+  const B = at.calm ? 2 : 4;
+  for (let by = 0; by < H; by += B) for (let bx = 0; bx < W; bx += B) {
+    const mat = matAt(soil, boxes, (bx + B / 2) / sx, (by + B / 2) / sy);
     if (mat === 'cobble' || mat === 'shade') continue;
-    for (let py = by; py < Math.min(H, by + 4); py += 2) for (let px = bx; px < Math.min(W, bx + 4); px += 2) {
-      const [r, gg, b] = toRgb(colourAt(mat, px / sx, py / sy, px, py));
+    for (let py = by; py < Math.min(H, by + B); py += 2) for (let px = bx; px < Math.min(W, bx + B); px += 2) {
+      const [r, gg, b] = toRgb(colourAt(mat, px / sx, py / sy, px, py, at.calm));
       for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) {
         const o = ((py + j) * W + px + i) * 4;
         (d[o] = r), (d[o + 1] = gg), (d[o + 2] = b), (d[o + 3] = 255);
@@ -119,7 +132,8 @@ export function paintSoil(m: GameMap, g: CanvasRenderingContext2D, at = { x: OX,
     for (let py = Math.max(0, Math.floor(y0 * sy / 2) * 2); py < Math.min(H, y1 * sy); py += 2) for (let px = Math.max(0, Math.floor(x0 * sx / 2) * 2); px < Math.min(W, x1 * sx); px += 2) {
       const x = px / sx, y = py / sy, wob = (noise(x, y, 1.1, 21) - 0.5) * 0.9;
       if (depth(s, x, y) + wob <= 0) continue;
-      const k = noise(x, y, 0.7, 23) > 0.68 ? 0.84 : 0.66;
+      // (Calm: one soft shadow, not a two-pixel dapple, which read as grain.)
+      const k = at.calm ? 0.72 : noise(x, y, 0.7, 23) > 0.68 ? 0.84 : 0.66;
       for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) {
         const o = ((py + j) * W + px + i) * 4;
         (d[o] = d[o] * k), (d[o + 1] = d[o + 1] * k), (d[o + 2] = d[o + 2] * k * 1.04);
