@@ -112,9 +112,24 @@ export function faceCanvas(f: Face, rng: Rng): HTMLCanvasElement {
     // A brace in each end panel, from the rail down to the plinth.
     for (const [x0, dir] of [[3, 1], [W - 4, -1]] as const) for (let k = 0; k < H - plinth - rail - 3; k++) rect(x0 + dir * Math.round(k * 0.8), rail + 3 + k, 2, 1, TIMBER[k % 3 ? 1 : 0]);
   }
+  // The living world's L3: grime under the eaves; ivy up a third of the stone faces from a foot corner (before the
+  // windows, so it never covers one). Greens are not grey, so tint leaves them; the grade keeps moss's hue.
+  rect(0, 0, W, 2, '#1c1c1c');
+  const hs = (k: number) => ((Math.sin(f.seed * 12.9898 + k * 78.233) * 43758.5453) % 1 + 1) % 1;
+  if (f.stone && hs(1) < 0.34) {
+    const left = hs(2) < 0.5, reach = Math.round(H * (0.45 + hs(3) * 0.3)), IVY = ['#18221a', '#25331f', '#344628'];
+    for (let y = H - 3, k = 0; y > H - reach; y -= 3, k++) {
+      const spread = Math.max(3, Math.round(10 - (k * 7) / Math.max(1, reach / 3))), x0 = left ? Math.round(hs(10 + k) * 3) : W - spread - Math.round(hs(10 + k) * 3);
+      rect(x0, y, spread, 3, IVY[1]);
+      rect(x0, y + 2, spread, 1, IVY[0]);
+      rect(x0, y, Math.max(1, Math.floor(spread / 2)), 1, IVY[2]);
+    }
+  }
   for (const w of f.wins ?? []) {
     // A window: a timber frame two pixels round a dark pane (the lit pane is the 3D one in front), a stone sill.
     const x = Math.round(w.x * KX - (w.w * KX) / 2), y = row(w.y + w.h), ww = Math.round(w.w * KX), hh = Math.round(w.h * KY);
+    // Soot over the window: a stain tapering up from its head.
+    rect(x, y - 4, ww, 2, '#1e1e1e'), rect(x + 2, y - 6, Math.max(1, ww - 4), 2, '#262626');
     rect(x - 2, y - 2, ww + 4, hh + 4, TIMBER[1]), rect(x - 2, y - 2, ww + 4, 1, TIMBER[2]);
     rect(x, y, ww, hh, '#0a0808');
     rect(x - 3, y + hh + 2, ww + 6, 2, LIGHT[1]), rect(x - 3, y + hh + 3, ww + 6, 1, STONE[0]);

@@ -1,7 +1,7 @@
 # A living world
 
 Spec, 2026-11-22 (Kyle and Claude Opus 5.5). Kyle: "are there other assets we should think through based off the maps to
-make the world feel more alive?", then "Ya id like that", with drawn edges as slice one. **L1 and L2 in (2026-11-22); L3 next.**
+make the world feel more alive?", then "Ya id like that", with drawn edges as slice one. **L1, L2 and L3 in (2026-11-22); L4 next, asked of each place's chat.**
 
 ## What is there, what is missing
 

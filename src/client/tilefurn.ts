@@ -110,10 +110,23 @@ const DRAW: Record<string, Draw> = {
 export const FURN = new Set(Object.keys(DRAW));
 
 /** A block's card, or null for a kind not drawn here. */
+/**
+ * A plain table laid (the living world's L3: the tavern's tables had lost their mugs in the redraw): one to three of a
+ * pewter mug (a handle, a lit rim) or a pale plate, set along its top by a hash of where it stands.
+ */
+function laid(r: Rect, W: number, D: number, seed: number): void {
+  const h = (k: number) => ((Math.sin(seed * 12.9898 + k * 78.233) * 43758.5453) % 1 + 1) % 1, n = 1 + Math.floor(h(1) * 3);
+  for (let i = 0; i < n; i++) {
+    const x = 3 + Math.floor(((i + h(2 + i) * 0.6) / n) * (W - 9)), y = Math.max(1, Math.min(D - 5, 1 + Math.floor(h(9 + i) * (D - 5))));
+    if (h(20 + i) < 0.6) (r(x, y, 3, 4, IRON[3]), r(x, y, 3, 1, IRON[4]), r(x + 2, y + 1, 1, 3, IRON[2]), r(x + 3, y + 1, 1, 2, IRON[3]));
+    else (r(x, y + 1, 5, 2, '#b8ae96'), r(x, y + 2, 5, 1, '#8a8270'), r(x + 1, y + 1, 3, 1, '#d0c6ac'));
+  }
+}
+
 export function furnCut(b: Block): Cut | null {
   const draw = DRAW[b.kind];
   if (!draw) return null;
   const W = Math.max(8, Math.round(b.w * KX)), D = Math.max(4, Math.round(b.h * KZ));
   const T = b.kind === 'casks' ? caskTall(W, D, LOOK[b.kind].tall) : LOOK[b.kind].tall;
-  return toCut(paint(W, D + T, (r) => draw(r, W, D, T)));
+  return toCut(paint(W, D + T, (r) => (draw(r, W, D, T), b.kind === 'table' && laid(r, W, D, Math.round(b.x * 31 + b.y * 17)))));
 }

@@ -735,3 +735,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Checked here: tsc clean; the town at dusk and at night on the phone, ambient figures present, no page errors; the
   builders' crops (leaves, a mine's drip, moths at a torch, sparks over the forge). Bats not told apart from pigeons in
   a still. (Claude Opus 5.5)
+
+## 2026-11-22: living world L3, lived-in fronts
+
+- Stone faces in the kit (`tilekit.ts` faceCanvas) get a grime band under the eaves, soot above each window, and
+  ivy climbing from a foot corner on about a third of them. Plain tables are laid again with mugs and plates
+  (`tilefurn.ts` `laid`).
+- Wickhold's fronts (`townfronts.ts`, with `townfrontart.ts`, `townsigns.ts`, `townlaundry.ts`, all mine, built by a
+  Sonnet builder): 12 doorstep things on 9 doors, 7 hanging signs with a trade picture and no words (forge, tavern,
+  infirmary, lodge, counting house, tailor, pawnbroker), 2 laundry lines in the one lane wide enough, 3 notices
+  pinned beside the JOBS board. Placed from the map's doors, so they follow a re-laid town; silent, Wickhold only.
+- Open: the tavern's plank floor is speckled by the scatter painter, louder than the rest; some east-wall clutter
+  sits under the eave in 2.5D.
+- Checked: tsc clean; full suite 274 files passed; phone 2.5D crops of each kind, no page errors. (Claude Opus 5.5)
+
