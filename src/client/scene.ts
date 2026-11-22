@@ -120,6 +120,7 @@ import { lampAt } from '../shared/lamps';
 import { drawChalkMarks, drawTally } from './chalkdraw';
 import { noteKneels } from './kneel';
 import { lifeFigs } from './townbeasts';
+import { ambientFigs } from './ambient';
 import { scatterOf } from '../shared/scatter';
 
 
@@ -477,6 +478,7 @@ export class Scene {
     // (The windlass's post is drawn with the windlass: fendraw.ts.)
     fenScene(map, c, cx, cy, room.heroes, items);
     // A lived-in town's animals, each at its own spot (townbeasts.ts).
+    for (const b of ambientFigs(map, now, others.length ? [...room.heroes, ...others] : room.heroes)) items.push({ y: OY + b.y * PX, draw: () => b.draw(c, OX + b.x * PX - cx, OY + b.y * PX - cy - Math.round(b.up * PX) - lv(b.x, b.y)) });
     if (map.life) for (const b of lifeFigs(map, now, others.length ? [...room.heroes, ...others] : room.heroes)) items.push({ y: OY + b.y * PX, draw: () => b.draw(c, OX + b.x * PX - cx, OY + b.y * PX - cy - Math.round(b.up * PX) - lv(b.x, b.y)) });
     for (const r of [...map.rounds, ...scatterOf(map).stand]) if ((r.kind !== 'post' || !map.windlass) && (!big || !off(OX + r.x * PX - cx, OY + r.y * PX - cy))) items.push({ y: OY + r.y * PX, draw: () => drawRound(c, r, OX + r.x * PX - cx, OY + r.y * PX - cy - lv(r.x, r.y)) });
     for (const b of map.blocks) {

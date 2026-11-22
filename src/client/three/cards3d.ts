@@ -49,6 +49,7 @@ import { woodFigs } from '../wooddraw';
 import { noteKneels } from '../kneel';
 import { putStatue } from './statue3d';
 import { lifeFigs } from '../townbeasts';
+import { ambientFigs } from '../ambient';
 import { STREET } from './streetkit';
 import { watched } from '../alive';
 
@@ -147,6 +148,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   putStatue(f, map);
   // A lived-in town's animals, each on its own card (../townbeasts.ts).
   // (On the level each stands on, as the flat view lifts them: the new town's stone levels. Kyle, 2026-11-20.)
+  // (What moves in the air and reacts, on every map: ambient.ts, the living world's L2. Same lift as the animals.)
+  for (const b of ambientFigs(map, f.now, others.length ? [...room.heroes, ...others] : room.heroes)) f.put('am' + b.key, b.x, b.up + bodyLv(map, b.x, b.y, levelAt(map, b.x, b.y)) * LEDGE_H, b.y, b.draw, { pool: 0 });
   if (map.life) for (const b of lifeFigs(map, f.now, others.length ? [...room.heroes, ...others] : room.heroes)) f.put('lf' + b.key, b.x, b.up + bodyLv(map, b.x, b.y, levelAt(map, b.x, b.y)) * LEDGE_H, b.y, b.draw, { pool: 0 });
   watched(me);
   (map.npcs ?? []).forEach((n, i) => {
