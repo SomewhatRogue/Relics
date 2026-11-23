@@ -16,6 +16,14 @@ const VIOLET = ['#c9a8ff', '#ffffff', '#9a78e0'], BLOOD = ['#7a1d1d', '#9a2a2a',
 /** True if it was one of these (and has been drawn). */
 export function ladderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
   switch (ev.k) {
+    case 'chainspin':
+      // A chain sickle's cut round the Rogue (sim/sickle.ts): a glint of steel flung off the whirl.
+      fx.burst(x, y - 8, 3, IRON, 70, false, 160, true);
+      return true;
+    case 'chainsnag':
+      // Caught on the wall: sparks off the links.
+      fx.burst(x, y - 8, 6, ['#ffd27a', ...IRON], 50, true, 200, true);
+      return true;
     case 'airshot':
       // A kick of air off the jump as the string goes.
       fx.rings.push({ x, y: y - 6, life: 0.18, max: 0.18, col: '#e8f4ff', size: 8 });

@@ -112,6 +112,9 @@ export class Soundscape {
     if (ev.k === 'blinkthrough' || ev.k === 'recall' || ev.k === 'halfblink' || ev.k === 'spellthief') return sfx.channeled();
     if (ev.k === 'caltrops' && ev.r) return sfx.gold();
     if (ev.k === 'legstab') return sfx.backstab();
+    // The chain sickle's whirl, each cut, and its chain caught on a wall (sim/sickle.ts).
+    if (ev.k === 'chainspin') return sfx.swing();
+    if (ev.k === 'chainsnag') return sfx.wallhit();
     if (ev.k === 'blockmend' || ev.k === 'coverfor') return sfx.blessed();
     if (ev.k === 'taunt') return sfx.rally();
     if (ev.k === 'ironstance') return sfx.wardbreak();

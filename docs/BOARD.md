@@ -47,9 +47,6 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
-- **The chain sickle in the hand** (asks the Art chat, 2026-11-23, General): the Rogue's rapier is now a chain sickle
-  (docs/design/chain-sickle.md, weapon id still `rapier`). heldkits.ts, cloaklife.ts and itemicons.ts still draw a
-  rapier: a sickle on a chain in hand, at the belt and as its icon would match. The spin and the throw are drawn.
 
 - **Element augments** (docs/design/element-augments.md, drafted 2026-11-20 with Kyle): elemental traits off random weapons (stripped from old ones), an element put on your weapon for 5 jobs by a townsperson with an arcane corner from level 5 (Old Merren, to confirm), 20s, first of each free, not for the Mage. A few drafts and the person's name wait on Kyle.
 

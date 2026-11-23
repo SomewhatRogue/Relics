@@ -3,7 +3,7 @@
  * behind to below the knees and sway; walking they trail; on a dash, a SHADOW STEP or a lunge they flare
  * out behind and lift off the legs, then settle. While vanished it's drawn wrapped shut round the body.
  * Walking away it covers the back. And what the kit hangs off the belt: spare knives on the strap for the
- * daggers, a scabbard for the rapier, a vial for the poisoner (the blowpipe itself is heldkits.ts).
+ * daggers, a coil of chain for the chain sickle, a vial for the poisoner (the blowpipe itself is heldkits.ts).
  * Lit layer only; drawing only, from the wall clock and what the room already says.
  */
 import { WEAPONS } from '../shared/tuning';
@@ -69,9 +69,9 @@ function gear(put: Put, h: Hero, layer: 'back' | 'front'): void {
   if (h.weapon === 'daggers' && layer === 'front') {
     // Two spare throwing knives along the strap, their pommels catching the light.
     put('front', 6, 7, 1, 1, '#a8b0b8', 3), put('front', 7, 8, 1, 1, '#a8b0b8', 3);
-  } else if (h.weapon === 'rapier' && layer === 'back') {
-    // The empty scabbard hanging behind the off hip, a steel chape at its foot.
-    put('back', 2, 10, 1, 4, '#3a2a1e'), put('back', 2, 14, 1, 1, '#9aa3ad', 3);
+  } else if (h.weapon === 'rapier' && layer === 'front') {
+    // The chain sickle's spare chain, coiled at the hip, the weight hanging under it.
+    put('front', 6, 10, 2, 1, '#6a6470'), put('front', 6, 11, 1, 1, '#9aa3ad', 3), put('front', 7, 11, 1, 1, '#6a6470'), put('front', 7, 12, 1, 1, '#5a5560');
   } else if (h.weapon === 'poisoner' && layer === 'front') {
     // A stoppered vial of venom at the belt, and the darts' little case.
     put('front', 7, 10, 1, 1, '#5a8a32', 3), put('front', 4, 10, 1, 1, '#7a5a34', 3);

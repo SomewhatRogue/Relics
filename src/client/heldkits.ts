@@ -1,5 +1,5 @@
 /**
- * The Rogue's and Cleric's other kits in hand (held.ts has the rest): the rapier, the short sword and
+ * The Rogue's and Cleric's other kits in hand (held.ts has the rest): the chain sickle (id 'rapier'), the short sword and
  * blowpipe, the sword and censer, the flail. Their rest and charge poses, and how each is drawn. Swings,
  * thrusts and shots use held.ts's shared poses, so what sweeps on screen is the arc the room judges.
  */
@@ -12,6 +12,7 @@ import type { Ctx } from './draw';
 // Lengths in the old body's pixels, drawn 1.5x on whole pixels (heroscale.ts).
 import { HS, hline as line, hs } from './heroscale';
 import type { Pose } from './held';
+import { drawSickle } from './sickledraw';
 
 const KITS = new Set<Hero['weapon']>(['rapier', 'poisoner', 'censer', 'flail']);
 
@@ -19,7 +20,7 @@ const KITS = new Set<Hero['weapon']>(['rapier', 'poisoner', 'censer', 'flail']);
 export function bladeLength(w: Hero['weapon']): number {
   if (w === 'greatsword' || w === 'spear') return 21;
   if (w === 'daggers') return 7;
-  if (w === 'rapier') return 14;
+  if (w === 'rapier') return 8;
   if (w === 'poisoner') return 9;
   return w === 'mace' || w === 'flail' || w === 'censer' ? 0 : 12;
 }
@@ -33,8 +34,8 @@ const aiming = (h: Hero) => h.weapon === 'poisoner' && (h.act === 'charge' || (h
 export function kitPose(h: Hero, now: number, fa: number, side: number, charge: number): Pose | null {
   if (!KITS.has(h.weapon) || h.act === 'attack' || h.blocking) return null;
   if (h.act === 'charge') {
-    // The fencer coils back for the lunge; the blowpipe comes up to the lips.
-    if (h.weapon === 'rapier') return { a: fa, ext: -6 * charge, reach: 0, pull: charge };
+    // The chain sickle's chain whirls, faster as it builds; the blowpipe comes up to the lips.
+    if (h.weapon === 'rapier') return { a: now * (8 + 10 * charge), ext: 0, reach: 0, pull: charge };
     if (h.weapon === 'poisoner') return { a: fa, ext: -3, reach: 0, pull: charge };
     // The censer whirls round the Cleric, faster as it fills; the flail spins overhead.
     if (h.weapon === 'censer') return { a: now * (8 + 10 * charge), ext: 0, reach: 0, pull: charge };
@@ -93,11 +94,8 @@ export function drawKit(c: Ctx, h: Hero, px: number, py: number, ox: number, oy:
   const g = c.lit, side = h.fx >= -0.2 ? 1 : -1, s = h.act === 'attack' ? currentSwing(h) : null;
   const out = !!s && h.actT >= s.windup && h.actT < s.windup + 0.08;
   if (h.weapon === 'rapier') {
-    // A long thin blade and a swept gilt hilt.
-    line(g, ox, oy, p.a, 0, 2, '#2a2420');
-    line(g, ox + Math.cos(p.a) * 2 * HS, oy + Math.sin(p.a) * 2 * HS, p.a + Math.PI / 2, -1.5, 1.5, '#d4a537');
-    line(g, ox, oy, p.a, 2, 15, '#e6ecf0');
-    if (out) line(c.glow, ox, oy, p.a, 6, 15, '#ffffff');
+    // The chain sickle (the rapier's id; General chat, 2026-11-23): sickledraw.ts.
+    drawSickle(c, h, px, py, ox, oy, p, out);
   } else if (h.weapon === 'poisoner') {
     if (aiming(h)) {
       // The blowpipe up, the sword held low meanwhile; the white flash at the mouth when a perfect breath is ready.

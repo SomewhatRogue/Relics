@@ -24,7 +24,8 @@ const blade = (len: number, wide: boolean, guard: string): Paint => (px, line) =
 };
 const ICONS: Record<string, Paint> = {
   sword: blade(7, false, G),
-  rapier: (px, line) => { line(11, 0, 4, 7, M); px(3, 7, G), px(4, 8, G), px(2, 7, G), px(4, 9, G), px(3, 8, G); line(2, 9, 0, 11, W); },
+  // The chain sickle (the rapier's id): a hooked blade on a short haft, its chain trailing to a weight.
+  rapier: (px, line) => { line(8, 1, 10, 1, M); px(11, 2, M), px(11, 3, MD), px(10, 4, MD); line(7, 2, 4, 5, W); px(3, 6, MD), px(2, 7, M), px(2, 8, MD), px(1, 9, M), px(1, 10, MD); px(0, 11, MD), px(1, 11, MD); },
   greatsword: blade(8, true, MD),
   spear: (px, line) => { line(0, 11, 8, 3, W); line(9, 2, 11, 0, M); px(8, 2, M), px(9, 3, M), px(10, 0, MD), px(11, 1, MD); },
   daggers: (px, line) => { line(9, 1, 4, 6, M); line(3, 7, 1, 9, W); line(2, 1, 7, 6, M); line(8, 7, 10, 9, W); px(3, 5, G), px(8, 5, G); },

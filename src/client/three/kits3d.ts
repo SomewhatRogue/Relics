@@ -1,7 +1,7 @@
 /**
  * What a hero holds, by kit, each its own thing in hand (a new figure is built when the kit changes,
  * so one replaces the other, never on top): sword and shield, greatsword, spear; longbow, shortbow,
- * crossbow (and the Ranger's short sword); twin daggers, the rapier, the short sword with a blowgun;
+ * crossbow (and the Ranger's short sword); twin daggers, the chain sickle, the short sword with a blowgun;
  * wand, staff, spellblade; mace and censer, sword and censer, flail and censer.
  */
 import type * as THREE from 'three';
@@ -57,10 +57,12 @@ export function hands(cls: string, w: WeaponId, held: THREE.Group, off: THREE.Gr
   }
   if (cls === 'ROGUE') {
     if (w === 'rapier') {
-      // A long thin blade, a swept gilt hilt round the hand; nothing in the other.
-      part(held, 0.03, 0.95, 0.02, steel, 0, -0.58, 0);
-      part(held, 0.2, 0.03, 0.05, gold, 0, -0.06, 0), part(held, 0.03, 0.12, 0.1, gold, 0.08, -0.02, 0.03);
-      part(held, 0.04, 0.12, 0.04, dark, 0, 0.04, 0);
+      // The chain sickle (the rapier's id): a short haft, the hooked blade off its head, the chain hanging from the
+      // butt to a little weight; the other hand holds the slack.
+      part(held, 0.05, 0.42, 0.05, wood, 0, -0.2, 0);
+      part(held, 0.22, 0.04, 0.03, steel, 0.1, -0.42, 0), part(held, 0.04, 0.12, 0.03, steel, 0.2, -0.36, 0);
+      part(held, 0.02, 0.5, 0.02, chain, 0, 0.25, 0), part(held, 0.07, 0.07, 0.07, iron, 0, 0.52, 0);
+      part(off, 0.02, 0.3, 0.02, chain, 0, -0.15, 0);
       return null;
     }
     if (w === 'poisoner') {

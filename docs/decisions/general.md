@@ -234,3 +234,18 @@ Claude Opus 5.5
 - tests/perfparity.sim.golden.json recorded again: the rules changed on purpose.
 
 Claude Opus 5.5
+
+## 2026-11-23: the chain sickle's look (Kyle: "change all of it, like a rope dart chain thing")
+
+- Drawn in my own client/sickledraw.ts: a short dark haft, a hooked steel blade off its head (bright back, dark
+  inner edge, an unlit glint), a chain from the butt hanging in a loop to a little weight at rest, trailing behind
+  a cut; spinning or thrown, only the chain runs out of the fist. In flight, the hook's line ends in the sickle.
+- The spin (client/sicklespin.ts): the chain out to the blade, a fading arc behind it, a faint ring on the floor.
+- One-line hooks in the Art chat's files, with Kyle's say-so: heldkits.ts (draw call, a spinning charge pose, the
+  charge glow 8 long), relicsdraw.ts (the sickle head in flight), cloaklife.ts (a coil of chain at the hip for the
+  scabbard), itemicons.ts (the icon), weaponmarks.ts (marks along the blade), three/kits3d.ts (the box figure).
+  Sound: its hits slash, not pierce (weaponsfx.ts); each spin cut a swing, the chain caught a wall-hit
+  (soundscape.ts); sparks for both (fxladder.ts). The board's ask to the Art chat is withdrawn.
+- Checked on the phone in 2.5D: at rest and spinning.
+
+Claude Opus 5.5

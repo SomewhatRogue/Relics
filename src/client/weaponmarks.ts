@@ -17,7 +17,7 @@ import { WEAPONS } from '../shared/weapons';
 
 /** Where each kit's metal runs along it from the hand (hero units, as held.ts draws them). */
 const METAL: Partial<Record<Hero['weapon'], [number, number]>> = {
-  sword: [3.6, 17.4], greatsword: [5, 24.4], spear: [16.2, 20.6], mace: [9.8, 14.6], daggers: [2.4, 6.6], rapier: [2.6, 14.6],
+  sword: [3.6, 17.4], greatsword: [5, 24.4], spear: [16.2, 20.6], mace: [9.8, 14.6], daggers: [2.4, 6.6], rapier: [4, 8],
   spellblade: [2.4, 11.6], poisoner: [2.4, 8.6], censer: [2.4, 10.6], wand: [0.4, 5.6], staff: [-7, 14.6],
 };
 const VEINS: Record<Tier, number> = { plain: 0, fine: 0, forged: 0, tolmouth: 2, touched: 4, turning: 6, hungry: 8 };
