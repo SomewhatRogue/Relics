@@ -24,7 +24,7 @@ import type { Enemy, EnemyAttack, FightEvent, Hero, Survivor } from './types';
 import { stepMeal } from './meal';
 import { isRound } from './types';
 import { vanished } from './rogue';
-import { smokeBlind } from './smokebomb';
+import { smokeBlind, stumbleBlind } from './smokebomb';
 import { wayTo } from './pathing';
 import { hearFrom, samePack } from './packs';
 import { stepOwn } from './ownfoes';
@@ -311,6 +311,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   // A butcher at the dead, or making for a body (sim/meal.ts).
   if ((e.kind === 'butcher' || gorges(e)) && spec && stepMeal(e, heroes, others, OWN_KIT.freed, spec.speed * (e.chillUntil > now ? FROST.slow : 1), now, dt, ev)) return;
   const t = nearest(e, heroes, now);
+  // Lost in a smoke bomb's smoke: stumbling, the big ones swinging blind (sim/smokebomb.ts).
+  if (!t && spec && (e.smokedUntil ?? -9) > now && e.kind !== 'dummy' && e.kind !== 'swingDummy') return stumbleBlind(e, now, dt, ev);
   if (!t || e.kind === 'dummy') return;
   const d = Math.hypot(t.x - e.x, t.y - e.y);
   if (e.kind === 'swingDummy') {

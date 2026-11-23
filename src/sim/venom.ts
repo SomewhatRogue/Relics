@@ -5,6 +5,7 @@
  * you land behind. The room judges all of it, so a guest's goblins bleed and retch as the leader's do.
  */
 import { SKEWER, VENOM, foeKind, venomTakes } from '../shared/tuning';
+import { KNIFEWORK } from '../shared/techniques';
 import { damage, isDead, isDummy, sayWeak, small } from './damage';
 import { stun } from './stuns';
 import type { Enemy, FightEvent } from './types';
@@ -56,9 +57,12 @@ export function envenom(e: Enemy, perfect: boolean, by: string, now: number, ev:
 export function stepVenom(enemies: Enemy[], now: number, ev: FightEvent[]): void {
   for (const e of enemies) {
     if (isDead(e)) continue;
-    if (bleeding(e, now) && now >= (e.bleedNext ?? 0)) {
+    if (!bleeding(e, now)) e.bleedStacks = undefined;
+    else if (now >= (e.bleedNext ?? 0)) {
       e.bleedNext = now + SKEWER.every;
-      if (damage(e, SKEWER.dmg, now, ev, { tick: true, src: 'bleed', how: 'fall' })) continue;
+      // KNIFEWORK's stacks: each past the first ticks a share harder.
+      const n = Math.round(SKEWER.dmg * (1 + KNIFEWORK.per * ((e.bleedStacks ?? 1) - 1)));
+      if (damage(e, n, now, ev, { tick: true, src: 'bleed', how: 'fall' })) continue;
     }
     if (!envenomed(e, now)) {
       if (e.venom) (e.venom = 0), (e.venomHard = false);

@@ -16,7 +16,7 @@ import type { HeroClass } from './weapons.js';
  * `flash` s on that window, `leap` to the dodge's distance, `light` off its breath, `snareCd` off the
  * snare's wait, `snareHold` to its hold, `snares` more down at once, `houndEvery` off the hound's
  * wait, `houndBite` to a bite, `houndBites` more bites a run, `slip` s on the last-moment dodge,
- * `angle` on how far round counts as behind, `rear` to a backstab, `ambush` to an ambush, `quiet` off
+ * `angle` on how far round counts as behind, `rear` to a backstab, `ambush` to an ambush, `sharp` to the first blow out of vanish or smoke, `quiet` off
  * the distance goblins see you creeping, `image` s on the blink's image, `primed` on a primed spell,
  * `clear` breath back on a turn, `twice` more primed spells, `burst` to a spell's burst, `mercyReach`
  * to the heal's reach, `mercy` of the heal on the blow before it, `smiteStun` s on a smite's stun,
@@ -25,7 +25,7 @@ import type { HeroClass } from './weapons.js';
  */
 export type FxKey = ModId | 'crit' | 'down' | 'winded' | 'block' | 'guardArc' | 'counter' | 'counterTime' | 'full' | 'skillFar' | 'skillHold'
   | 'perfect' | 'flash' | 'leap' | 'light' | 'snareCd' | 'snareHold' | 'snares' | 'houndEvery' | 'houndBite' | 'houndBites'
-  | 'slip' | 'angle' | 'rear' | 'ambush' | 'quiet' | 'image' | 'primed' | 'clear' | 'twice' | 'burst'
+  | 'slip' | 'angle' | 'rear' | 'ambush' | 'quiet' | 'sharp' | 'image' | 'primed' | 'clear' | 'twice' | 'burst'
   | 'mercyReach' | 'mercy' | 'smiteStun' | 'bless' | 'blessTime';
 export type Fx = Partial<Record<FxKey, number>>;
 export interface Knack { name: string; text: string; gain: string; fx: Fx }
@@ -70,7 +70,8 @@ const LIST = {
   g_draw: { name: 'QUICK DRAW', text: 'Held blow ready 15% sooner', gain: 'held 15% sooner', fx: { draw: 0.15 } },
   g_foot: { name: 'QUICK FEET', text: 'Move 6% faster', gain: '+6% speed', fx: { foot: 0.06 } },
   g_focus: { name: 'QUICK RECHARGE', text: 'Skill and relic recharge 20% faster', gain: 'recharge 20% faster', fx: { focus: 0.2 } },
-  g_quiet: { name: 'QUIET FEET', text: 'While creeping, goblins must be 20% closer to see you', gain: 'seen 20% closer', fx: { quiet: 0.2 } },
+  // (The id is QUIET FEET's, which it replaced: Kyle, 2026-11-23, "no one really creeps".)
+  g_quiet: { name: 'SHARP RETURN', text: 'Your first blow after Vanish or smoke does 20% more', gain: 'first blow +20%', fx: { sharp: 0.2 } },
   // The Mage: the blink, the channel, the spells, the breath.
   m_blink: { name: 'QUICK BLINK', text: 'Blink recharges 20% faster', gain: 'blink 20% sooner', fx: { dodge: 0.2 } },
   m_leap: { name: 'FAR BLINK', text: 'Blink goes 20% further', gain: 'blink +20% further', fx: { leap: 0.2 } },

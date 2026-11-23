@@ -7,6 +7,7 @@ import { CENSER, BLESSING, DODGE, WARD, FLINCH, POISE, HORN, OVERKILL, TRAIT, GU
 import { shove } from './bodies';
 import { knack, statsOf } from './gearstats';
 import { counterWindow, guardArc, rearCos, slipWindow } from './knacks';
+import { sharpBlow, vanished } from './rogue';
 import { HUNGRY_FX, wears } from './hungry';
 import { damage, frozen, isDead, isDummy, kill, sayWeak, small, snared, stunOf } from './damage';
 import { defer } from './latelist';
@@ -27,7 +28,6 @@ import { OWN_KIT } from './enemies';
 import { travelTo } from '../shared/sweep';
 import { knockDown, rooted, takeShoulder } from './techwarrior';
 import { judge } from './techcleric';
-import { legStab } from './ladderrogue';
 import { blockMend, cover, shelter } from './ladderhealer';
 import { braced, ironHeld, ironStance, softer } from './taunt';
 import { roundGuard } from './holyguard';
@@ -71,7 +71,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   const tx = h.x - e.x, ty = h.y - e.y, tl = Math.hypot(tx, ty) || 1;
   // A nest is a mound of web: no back to stab and no front to glance off (Kyle: too hard for a Rogue).
   // (THROUGH THE LEGS: a hit just after dashing through a goblin counts as from behind: sim/ladderrogue.ts.)
-  const mound = e.kind === 'nest', rear = !isDummy(e) && !mound && ((e.fx * tx + e.fy * ty) / tl < rearCos(h) || legStab(h, e, now, ev));
+  const mound = e.kind === 'nest', rear = !isDummy(e) && !mound && ((e.fx * tx + e.fy * ty) / tl < rearCos(h));
   const ice = frozen(e, now), blessed = h.blessedUntil > now ? BLESSING.dmgMult : 1;
   const heldFast = e.act === 'stunned' || e.act === 'pinned' || ice || snared(e, now);
   // A Rogue's knives are weak head on (unless it's held fast): keep moving and get behind.
@@ -80,7 +80,10 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // TEMPO: the first hit after dodging through a blow lands double.
   const tempo = h.tempoUntil > now ? TRAIT.tempo : 1;
   if (tempo > 1) h.tempoUntil = -9;
-  const crit = rollCrit(h), ambush = e.alert === false && !isDummy(e);
+  // Out of a Rogue's VANISH, the first blow is an ambush too (Kyle, 2026-11-23). SHARP RETURN: that blow, or the
+  // first from smoke, does more again.
+  const out = vanished(h, now), crit = rollCrit(h), ambush = (e.alert === false || out) && !isDummy(e);
+  const sharp = sharpBlow(h, out, now);
   // A shield-bearer's board stops a blow from the front dead, whatever it is (sim/board.ts), unless it's lowered
   // for its own swing, or the goblin is held fast or caught unaware.
   const storm = stormCut(h, s), boarded = !rear && !s.precise && shieldFaces(e, tx, ty, now);
@@ -96,7 +99,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   sayWeak(e, weak, now, ev, 'physical');
   // STAMINA ON COUNTER: a counter's first hit fills your stamina. (The spear's shaft halves a blow up close.)
   if (h.counter && has(h, 'bulwark') && h.hitIds.filter((id) => id > 0).length === 1) h.stamina = Math.max(h.stamina, HERO.stamina);
-  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
+  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * sharp * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
   // An ironhide's plates (sim/ironhide.ts): a charged blow or a perfect breaks its guard; else a fifth gets through.
   const plate = clanks(e, now) && !(h.heavy || h.perfect), raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.

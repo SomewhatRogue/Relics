@@ -206,3 +206,31 @@ Claude Opus 5.5
   Checked: Watchman Hob on his patrol, close up.
 
 Claude Opus 5.5
+
+## 2026-11-23: the Rogue pass, and the chain sickle in the rapier's place (Kyle, talking through the Rogue)
+
+- VANISH: you move 1.3x while vanished, and the first blow out of it is an ambush (2.2x and the 1.2 s stun,
+  HARD AMBUSH counts). Its smoke at your feet is `soft`: goblins in it are blind but never swing blind.
+- KNIFE FAN, a shotgun: 7 knives, a 0.3 rad cone, 4.5 tiles; 10 within 1.5 tiles falling to 4 at the end
+  (Bolt.fall). Point blank a big goblin takes several.
+- SMOKE: a goblin in smoke now sees no one, even close: it stumbles (1.4 tiles/s, turning every 0.7 s), drops
+  anything aimed, and a big one (weight 2 up) swings a blind cleave where it faces every 3 s. No damage bonus
+  for attacking out of it (there never was; what Kyle saw was backstabs).
+- KNIFEWORK stacks: one a backstab, up to 5, each past the first ticks 0.6 of a skewer's more.
+- QUICK RETURN replaces SLIP AWAY (id 'slip' kept): a backstab kill takes 3 s off the skill's wait.
+- Dash rung 2: SHADOW SMOKE replaces DASH THROUGH (id 'underlegs' kept): the dash's shadow (it gives one even
+  without the lesson) bursts into smoke 1.8 tiles round for 3 s as it fades. Shake Off unchanged.
+- SHARP RETURN replaces QUIET FEET (id 'g_quiet' kept): the first blow after Vanish or from smoke +20%,
+  stacking with the ambush.
+- The chain sickle (docs/design/chain-sickle.md) in the rapier's place, its id 'rapier' kept: cuts close (two
+  or three a swing, 0.85x head on, 1.75x behind); held, the chain spins (3 to 6 every 0.3 s within 2.8 tiles,
+  a 2 s bleed, walk 0.55, caught by a wall within 1.2); let go it flies on the hook (6 tiles, 8 on the flash);
+  fully spun it snags a wall (you're pulled there), a big goblin (you're pulled behind it) or a small one
+  (yanked). On the flash what it snags bleeds 3 s. Drawn: the spin in client/sicklespin.ts; the flying sickle
+  as the hook's claw (one condition in relicsdraw.ts, the Art chat's file). The sickle in the hand is still
+  the rapier's drawing (heldkits.ts, the Art chat's): asked on the board.
+- Writing: the skill, technique, rung and knack lines through the lore keeper and line editor. The sickle's
+  card labels reuse approved words.
+- tests/perfparity.sim.golden.json recorded again: the rules changed on purpose.
+
+Claude Opus 5.5

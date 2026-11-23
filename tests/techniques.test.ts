@@ -3,7 +3,7 @@ import { coinsHtml } from '../src/shared/coins';
 import { describe, expect, it } from 'vitest';
 import { jumpShot } from '../src/sim/ladderranger';
 import { CHARGE, PARTY, TICK, WEAPONS, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
-import { AIM_DRIFT, CUTPURSE, JUDGEMENT, MENDING, QUICK_NOCK, SANCT_STEP, SHOULDER, TECHS, TECH_WORDS, knowsTech } from '../src/shared/techniques';
+import { AIM_DRIFT, CUTPURSE, JUDGEMENT, KNIFEWORK, SLIP, MENDING, QUICK_NOCK, SANCT_STEP, SHOULDER, TECHS, TECH_WORDS, knowsTech } from '../src/shared/techniques';
 import { buyDrill, drillState, learnLesson } from '../src/shared/training';
 import { trainerRows } from '../src/shared/trainrows';
 import { Rng } from '../src/shared/rng';
@@ -165,17 +165,20 @@ describe('the Rogue', () => {
     expect(front.bleedUntil ?? 0).toBe(0);
   });
 
-  it('SLIP AWAY: a backstab kill hides you and drops a blow wound up at you', () => {
-    const h = hero('rapier', 2), dead = Object.assign(goblin(1, 9, 8), { act: 'dead' as const, hp: 0 }), other = goblin(2, 10, 9), w = world([h], [dead, other]);
-    other.attack = blow(other, 'me');
+  it('QUICK RETURN: a backstab kill brings the skill 3 s nearer ready; a backstab that does not kill, no', () => {
+    const h = Object.assign(hero('daggers', 2), { relics: ['vanish'], relic: 'vanish' }), dead = Object.assign(goblin(1, 9, 8), { act: 'dead' as const, hp: 0 }), w = world([h], [dead]);
+    h.relicReady.vanish = w.now + 10;
     backstabbed(h, dead, w);
-    expect(h.vanishUntil).toBeCloseTo(w.now + 2);
-    expect(other.attack).toBeNull();
+    expect(h.relicReady.vanish).toBeCloseTo(w.now + 10 - SLIP.back);
     expect(w.ev.some((x) => x.k === 'slipaway')).toBe(true);
-    // A backstab that doesn't kill hides nobody.
-    const h2 = hero('rapier', 2);
-    backstabbed(h2, goblin(3, 9, 8), w);
-    expect(h2.vanishUntil ?? 0).toBe(0);
+    backstabbed(h, goblin(3, 9, 8), w);
+    expect(h.relicReady.vanish).toBeCloseTo(w.now + 10 - SLIP.back);
+  });
+
+  it('KNIFEWORK: each backstab stacks the bleed, up to five', () => {
+    const h = hero('daggers', 1), e = goblin(1, 9, 8), w = world([h], [e]);
+    for (let i = 0; i < 7; i++) backstabbed(h, e, w);
+    expect(e.bleedStacks).toBe(KNIFEWORK.most);
   });
 
   it('CUTPURSE: now and then a little gold, once a goblin, the same with the same seed', () => {

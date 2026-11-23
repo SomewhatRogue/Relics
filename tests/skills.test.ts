@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { CHAIN, CLASS_KITS, FIRE_RING, KNIVES, LIGHT, SIC, SKILL_CHOICES, STAMP, TETHER, TICK, VANISH, VOLLEY, RELICS, type HeroClass, type RelicId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { castElement } from '../src/sim/channel';
+import { fallDmg } from '../src/sim/rogue';
+import { walkSpeed } from '../src/sim/walkspeed';
+import { hitEnemy } from '../src/sim/combat';
 import { NO_INTENT, type FightEvent, type Intent } from '../src/sim/types';
 
 const ticks = (s: number) => Math.round(s / TICK);
@@ -100,7 +103,45 @@ describe('three skills a class', () => {
     expect(h.vanishUntil ?? -9).toBeLessThan(room.time);
   });
 
-  it('KNIFE FAN: five knives spread wide, hitting goblins off to either side', () => {
+  it('VANISH: you move faster while vanished, and your first blow out of it is an ambush', () => {
+    const { room, h, s } = setup('ROGUE', 'vanish');
+    const walk = (vanished: boolean) => walkSpeed(Object.assign(h, { vanishUntil: vanished ? room.time + 9 : -9 }), { ...NO_INTENT, mx: 1 }, room.time);
+    expect(walk(true) / walk(false)).toBeCloseTo(VANISH.pace);
+    Object.assign(s, { x: 9, y: 9, fx: 0, fy: -1, act: 'idle', alert: true, hp: 500 });
+    h.vanishUntil = room.time + 9;
+    const ev: FightEvent[] = [];
+    hitEnemy(h, { windup: 0, active: 0.1, recover: 0, dmg: 10, range: 1.5, arc: 90, lunge: 0, knock: 0 }, s, room.time, ev);
+    expect(ev.some((x) => x.k === 'hit' && x.ambush)).toBe(true);
+  });
+
+  it('SMOKE: goblins in a smoke bomb see no one, even close, and stumble; a big one swings blind, not at you', () => {
+    const { room, h, butcher, s } = setup('ROGUE', 'smoke');
+    room.smokes.push({ x: 9, y: 9, until: room.time + 5, r: 2.4 });
+    Object.assign(s, { x: 9.4, y: 9, act: 'idle', actDur: 0, cooldown: 0 });
+    Object.assign(butcher, { x: 8.6, y: 9, act: 'idle', actDur: 0, cooldown: 0 });
+    Object.assign(h, { x: 9, y: 9.9 });
+    const sx = s.x;
+    run(room, 0.3);
+    expect(s.attack?.aimed ?? '').toBe('');
+    expect(s.x).not.toBeCloseTo(sx, 2);
+    expect(butcher.attack?.kind).toBe('cleave');
+    expect(butcher.attack?.aimed).toBe('');
+  });
+
+  it('KNIFE FAN: a shotgun, point blank a big goblin takes several knives at full', () => {
+    const { room, butcher } = setup('ROGUE', 'knives');
+    Object.assign(butcher, { x: 9, y: 8.9, act: 'stunned', actDur: 99, hp: 500 });
+    fire(room, { ay: -1 });
+    run(room, KNIVES.windup + 0.6);
+    expect(500 - butcher.hp).toBeGreaterThanOrEqual(KNIVES.dmg * 3);
+  });
+
+  it('KNIFE FAN: a knife at its far end does less than one up close', () => {
+    expect(fallDmg({ fall: { at: KNIVES.full, near: KNIVES.dmg, far: KNIVES.far }, travelled: 1, range: KNIVES.range, dmg: KNIVES.dmg })).toBe(KNIVES.dmg);
+    expect(fallDmg({ fall: { at: KNIVES.full, near: KNIVES.dmg, far: KNIVES.far }, travelled: KNIVES.range, range: KNIVES.range, dmg: KNIVES.dmg })).toBe(KNIVES.far);
+  });
+
+  it('KNIFE FAN: the knives fan out, hitting goblins off to either side', () => {
     const { room, s, butcher } = setup('ROGUE', 'knives');
     const side = 3.5 * Math.sin(KNIVES.spread), up = 10 - 3.5 * Math.cos(KNIVES.spread);
     Object.assign(s, { x: 9 - side, y: up, act: 'stunned', actDur: 99 });

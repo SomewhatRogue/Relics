@@ -20,7 +20,8 @@ export const KIT: Record<WeaponId, KitRow> = {
   crossbow: { tap: 'Short sword', hold: 'Aim and fire', perfect: 'Glint: 1.5x damage, whole line', also: 'RELOAD winds it' },
   // Rogue (shared/venom.ts): the daggers' thrown knife is a drawn shot, so its flash is simply full power.
   daggers: { tap: 'Fast stabs', hold: 'Throw a dagger', perfect: 'Full-power throw', also: '2.5x damage from behind' },
-  rapier: { tap: 'Long thrusts', hold: 'Lunge through two', perfect: 'Skewers, bleeds' },
+  // The chain sickle (the rapier's id: shared/kits.ts, shared/sickle.ts).
+  rapier: { tap: 'Sickle cuts, hits two', hold: 'Spin it, bleeds all round', perfect: 'What it snags bleeds', also: 'Fully spun, it snags and pulls' },
   poisoner: { tap: 'Short sword, hits two', hold: 'Poison dart', perfect: 'Stuns, stronger poison' },
   // Mage (shared/mage.ts): what a tap and a hold are, the element decides (MAGE_KIT below); these are fire's.
   wand: { tap: 'Firebolt, burns', hold: 'Heavy firebolt, small burst', perfect: 'Bigger, interrupts any blow' },

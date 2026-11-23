@@ -49,6 +49,8 @@ export interface Swing {
   shieldBash?: boolean;
   /** The spear thrown on its chain: reels in a small goblin, or you to a big one (shared/warrior.ts SPEAR_CHAIN). */
   chain?: boolean;
+  /** The chain sickle's throw (shared/sickle.ts): it snags only fully spun, and pulls you behind a big goblin. */
+  sickle?: boolean;
   /** PRECISE: goes past a shield-bearer's board (the spear's last thrust). */
   precise?: boolean;
   /** An overhead: released on the white flash it sends out a shockwave (shared/warrior.ts QUAKE). */

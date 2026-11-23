@@ -17,7 +17,7 @@ import { bendShot } from './mark';
 import { damage, frozen, isDead, isDummy } from './damage';
 import { backstabOf, fromBehind, rogueShot } from './backshot';
 import { backstabbed } from './techrogue';
-import { legStab } from './ladderrogue';
+import { fallDmg } from './rogue';
 import { afflict, shatter, type World } from './elements';
 import { shotElement } from './spellbook';
 import { fling } from './iceslide';
@@ -145,7 +145,7 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
   const by = w.heroes.find((h) => h.id === b.owner), crit = !!by && (!!b.blind || rollCrit(by));
   // A Rogue's bolt or knife in a goblin's back is a backstab too, at that weapon's rate.
   // (THROUGH THE LEGS: the next hit after dashing through a goblin's legs is a backstab: sim/ladderrogue.ts.)
-  const back = !!by && rogueShot(b) && WEAPONS[by.weapon].cls === 'ROGUE' && !isDummy(e) && (fromBehind(e, b.dx, b.dy, by) || legStab(by, e, w.now, w.ev, false));
+  const back = !!by && rogueShot(b) && WEAPONS[by.weapon].cls === 'ROGUE' && !isDummy(e) && fromBehind(e, b.dx, b.dy, by);
   const rear = back && by ? backstabOf(by) : 1;
   // A boss of the kit: a shot into a shut door cuts its straps; a perfect, a full draw or one in its back fills its POISE (sim/doorwall.ts, poise.ts).
   if (e.boss) bossShot(e, b, back, w);
@@ -227,6 +227,7 @@ export function stepBolt(b: Bolt, w: World, dt: number): boolean {
       if (b.kind === 'net') return openNet(w, b), false;
       if (b.burst) return blast(w, b, b.x, b.y), false;
       b.hit.push(e.id);
+      if (b.fall) b.dmg = fallDmg(b);
       if (!strike(w, b, e) || spent(b)) return false;
     }
     // A teammate in the way takes it (not the one who loosed it, and not a net).

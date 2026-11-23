@@ -1,16 +1,17 @@
 /**
  * The Rogue's movement ladder, the dash (numbers: shared/ladder.ts). CALTROPS: a dash drops a patch
- * where it began (a zone, judged and drawn at one size), slowing and bleeding goblins on it. THROUGH THE
- * LEGS: dash through a goblin and the next hit soon after counts as from behind. SHAKE IT OFF: a dash
+ * where it began (a zone, judged and drawn at one size), slowing and bleeding goblins on it. SHADOW
+ * SMOKE (the rung still called 'underlegs' in saves): the dash's shadow bursts into smoke as it fades. SHAKE IT OFF: a dash
  * clears poison, and fire underfoot can't burn you a moment after.
  */
 import { afoot } from './afoot';
 import { SKEWER, WEAPONS } from '../shared/tuning';
-import { CALTROPS, LEGS, SHAKE_OFF, knowsRung } from '../shared/ladder';
+import { CALTROPS, SHADOW_SMOKE, SHAKE_OFF, knowsRung } from '../shared/ladder';
 import { isDead, isDummy } from './damage';
 import { cure } from './poison';
 import { bleeding } from './venom';
 import type { World } from './elements';
+import type { Smoke } from './flasks';
 import type { Enemy, FightEvent, Hero, Zone } from './types';
 
 const isRogue = (h: Hero) => WEAPONS[h.weapon]?.cls === 'ROGUE';
@@ -31,28 +32,14 @@ export function dashStart(h: Hero, zones: Zone[], w: World): void {
   w.ev.push({ k: 'caltrops', x: h.rollX, y: h.rollY, r: CALTROPS.r });
 }
 
-/** Mid-dash, from (px, py) to where the Rogue is now: through a goblin's legs (once a dash). */
-export function dashThrough(h: Hero, px: number, py: number, enemies: Enemy[], now: number, ev: FightEvent[]): void {
-  if (!isRogue(h) || !knowsRung(h, 'underlegs') || (h.legsUntil ?? -9) > h.lastRollAt + LEGS.within - 1e-6) return;
-  const sx = h.x - px, sy = h.y - py, l2 = sx * sx + sy * sy || 1e-9;
-  for (const e of enemies) {
-    if (!onFoot(e)) continue;
-    // The nearest point of this tick's stretch of the dash to the goblin.
-    const t = Math.max(0, Math.min(1, ((e.x - px) * sx + (e.y - py) * sy) / l2));
-    if (Math.hypot(px + sx * t - e.x, py + sy * t - e.y) > e.radius) continue;
-    h.legsUntil = h.lastRollAt + LEGS.within;
-    return void ev.push({ k: 'underlegs', x: e.x, y: e.y });
-  }
-}
-
-/** THROUGH THE LEGS: this hit is the one that counts as a backstab (spent on it). `mark`: a blade's, so
- *  the room's backstab techniques know it (sim/techrogue.ts rogueStruck); a thrown one calls them itself. */
-export function legStab(h: Hero, e: Enemy, now: number, ev: FightEvent[], mark = true): boolean {
-  if ((h.legsUntil ?? -9) <= now) return false;
-  h.legsUntil = -9;
-  if (mark) h.legsStab = e.id;
-  ev.push({ k: 'legstab', x: e.x, y: e.y });
-  return true;
+/** SHADOW SMOKE: a Rogue's shadow (the dash's decoy) gone, it bursts into smoke where it stood. Once a shadow. */
+export function shadowSmoke(h: Hero, smokes: Smoke[], now: number, ev: FightEvent[]): void {
+  if (!isRogue(h) || !knowsRung(h, 'underlegs')) return;
+  if (h.decoyUntil > now) return void (h.shadowSmoke = h.decoyUntil);
+  if (h.shadowSmoke === undefined || h.shadowSmoke > now) return;
+  h.shadowSmoke = undefined;
+  smokes.push({ x: h.decoyX, y: h.decoyY, until: now + SHADOW_SMOKE.time, r: SHADOW_SMOKE.r });
+  ev.push({ k: 'vanish', x: h.decoyX, y: h.decoyY });
 }
 
 /** SHAKE IT OFF: fire underfoot doesn't burn this hero now. */

@@ -48,25 +48,7 @@ describe('Shadowstep', () => {
   });
 });
 
-describe('the rapier skewer', () => {
-  it('a lunge loosed on the white flash skewers: it staggers and bleeds over a few seconds', () => {
-    const { e, loose } = arena('rapier', 'scrapper', 7.2);
-    const ev = loose(WEAPONS.rapier.draw! + 0.1, SKEWER.time + 0.5);
-    expect(ev.some((x) => x.k === 'perfect')).toBe(true);
-    expect(ev.some((x) => x.k === 'skewer')).toBe(true);
-    const bled = ticks(ev, 'bleed');
-    expect(bled.length).toBeGreaterThanOrEqual(SKEWER.time / SKEWER.every - 1);
-    expect(bled.every((n) => n === SKEWER.dmg)).toBe(true);
-    expect(e.bleedUntil).toBeLessThan(999);
-  });
-  it('held too long, the lunge only lunges', () => {
-    const { loose } = arena('rapier', 'scrapper', 7.2);
-    const ev = loose(WEAPONS.rapier.draw! + 0.6, 1);
-    expect(ev.some((x) => x.k === 'skewer')).toBe(false);
-    expect(ticks(ev, 'bleed')).toEqual([]);
-  });
-});
-
+/** (The rapier's skewer went with the rapier: the chain sickle took its place, tests/sickle.test.ts.) */
 describe("the poisoner's dart", () => {
   const perfect = WEAPONS.poisoner.draw! + 0.1, late = WEAPONS.poisoner.draw! + 0.5;
   it('poisons: a stack that ticks for a few seconds, then wears off', () => {

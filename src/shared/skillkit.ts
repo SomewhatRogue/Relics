@@ -19,18 +19,28 @@ export const VOLLEY = { cooldown: 18, windup: 0.25, recover: 0.3, range: 8, fall
 export const SIC = { cooldown: 16, windup: 0.1, recover: 0.15, range: 9, speed: 1.8, pin: 2.6 };
 
 /** The Rogue's vanish: smoke at your feet. Goblins lose you (even close) for `time` or until you
- *  strike; any blow wound up at you is dropped; small ones in `radius` cough and flinch. */
-export const VANISH = { cooldown: 18, windup: 0.06, recover: 0.1, time: 4, radius: 2.2, cough: 0.8 };
+ *  strike; any blow wound up at you is dropped; small ones in `radius` cough and flinch. While vanished
+ *  you move `pace` times as fast, and your first blow out of it is an ambush (Kyle, 2026-11-23: tuning.ts
+ *  STEALTH.ambush and its stun, sim/combat.ts). */
+export const VANISH = { cooldown: 18, windup: 0.06, recover: 0.1, time: 4, radius: 2.2, cough: 0.8, pace: 1.3 };
 
-/** The Rogue's knife fan: `count` knives thrown wide, `spread` radians either side of where you face. */
-export const KNIVES = { cooldown: 12, windup: 0.12, recover: 0.25, count: 5, spread: 0.5, dmg: 11, knock: 3, speed: 18, range: 7 };
+/** The Rogue's knife fan, a shotgun (Kyle, 2026-11-23): `count` knives in a tight cone, `spread` radians
+ *  either side of where you face, out to `range`. Each knife does `dmg` within `full` tiles, falling to
+ *  `far` at its range, and each is its own shot, so up close a goblin takes several. */
+export const KNIVES = { cooldown: 12, windup: 0.12, recover: 0.25, count: 7, spread: 0.3, dmg: 10, far: 4, full: 1.5, knock: 3, speed: 18, range: 4.5 };
 
 /** The Rogue's smoke bomb (Kyle, 2026-11-05; it took Shadow Step's place among the three): thrown up to
  *  `range` (where you aim, else the goblin you face, else `fallback` ahead), it lands after `flight` and
  *  smokes `radius` round for `time`. The smoke's rules (sim/smokebomb.ts, sim/flasks.ts): no goblin sees
  *  anyone in it, nor anyone at all from inside it, unless close (POTION.seen); a blow wound up across
- *  its edge is dropped, an archer's too. */
-export const SMOKEBOMB = { cooldown: 16, windup: 0.15, recover: 0.2, range: 6, fallback: 3.5, flight: 0.45, radius: 2.4, time: 5 };
+ *  its edge is dropped, an archer's too. Goblins in the smoke see no one, even close: they stumble
+ *  about, and the big ones (`blindWeight` and up) swing blind (`blind`) every `blindEvery` s
+ *  (Kyle, 2026-11-23: "run around while it's up but can't attack you, but can AOE blindly"). */
+export const SMOKEBOMB = {
+  cooldown: 16, windup: 0.15, recover: 0.2, range: 6, fallback: 3.5, flight: 0.45, radius: 2.4, time: 5,
+  stumble: 1.4, turn: 0.7, blindWeight: 2, blindEvery: 3,
+  blind: { windup: 0.9, active: 0.1, recover: 0.8, dmg: 16, knock: 6, range: 2.1, arc: 150, unblockable: false },
+};
 
 /** The Mage's fire ring: fire bursts out around you (`radius`), throwing goblins off and setting them
  *  alight, then burns on where it stood for `linger`, lighting anything that walks in (every `every`). */

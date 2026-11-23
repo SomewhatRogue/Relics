@@ -95,6 +95,11 @@ const PROBES: Partial<Record<FxKey, [(c: HeroClass, perks: string[]) => number, 
     return hitEnemy(h, melee(h), e, 5, ev);
   }, 1],
   quiet: [(c, p) => K.sneakSight(scene(c, p).h), -1],
+  sharp: [(c, p) => {
+    const { h, e, ev } = scene(c, p);
+    h.vanishUntil = 99;
+    return hitEnemy(h, melee(h), e, 5, ev);
+  }, 1],
   image: [(c, p) => K.decoyTime(scene(c, p).h), 1],
   primed: [(c, p) => {
     const { h } = scene(c, p);

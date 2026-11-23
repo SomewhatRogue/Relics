@@ -79,6 +79,7 @@ import { forgedElement, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { throwSpear } from './spearchain';
 import { stepDomes } from './staffholds';
+import { stepSpins } from './sickle';
 import { layTrap, stepTraps } from './blinktrap';
 import { stepJavelin, throwJavelin } from './javelin';
 import { stepHound, stepSnare } from './ranger';
@@ -524,7 +525,7 @@ export class ArenaRoom {
     // A staff's wall of fire rolls on and burns whoever it touches, friends too (sim/firewall.ts); its charged ring zaps what's
     // in it (sim/staffrings.ts); a wand's storm stream ticks on the goblin it holds (sim/stream.ts), and the
     // lightning it calls falls when it's due (sim/skystrike.ts).
-    stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w), stepDomes(this.heroes, this.enemies, this.time), stepTraps(this.zones, w);
+    stepWalls(this.zones, w, this.slicks), stepRings(this.zones, w), stepStreams(w), stepSkyStrikes(this.zones, w), stepDomes(this.heroes, this.enemies, this.time), stepTraps(this.zones, w), stepSpins(this.heroes, w);
     // A Rogue who keeps walking into an earth face goes up it (sim/climb.ts).
     if (this.map.ledges) for (const h of this.heroes) stepClimb(this.map, h, this.intents.get(h.id), TICK, this.events);
     this.landings();
@@ -628,7 +629,7 @@ export class ArenaRoom {
   private struck(h: Hero, e: Enemy, n: number, w: World): void {
     // A Rogue out of a vanish: seen again the moment they strike.
     h.vanishUntil = undefined;
-    // A Rogue's backstab: KNIFEWORK, SLIP AWAY, CUTPURSE (sim/techrogue.ts).
+    // A Rogue's backstab: KNIFEWORK, QUICK RETURN, CUTPURSE (sim/techrogue.ts).
     rogueStruck(h, e, w);
     // A Mage's blade builds its charge; its cuts and a staff's slash carry the element.
     bladeStruck(h, currentSwing(h), e, n, w);
@@ -638,7 +639,7 @@ export class ArenaRoom {
       if (back > 0) (h.hp += back), w.ev.push({ k: 'heal', x: h.x, y: h.y, n: back });
     }
     const charged = (h.heavy && h.power >= 0.7) || h.counter;
-    // A rapier's lunge loosed on the white flash: run through on the tip, staggered and bleeding.
+    // A lunge loosed on the white flash (a kit with `skewer`): run through on the tip, staggered and bleeding.
     if (h.heavy && h.perfect && currentSwing(h).skewer) skewer(e, h.id, w.now, w.ev);
     if (isDead(e)) {
       const tx = h.x - e.x, ty = h.y - e.y, rear = (e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < GUARD.rearCos;

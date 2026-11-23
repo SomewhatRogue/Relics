@@ -199,6 +199,8 @@ export interface Hero extends Body {
   chalkedUntil?: number;
   /** A Rogue's vanish: no goblin sees them, even close, until then (or till they strike). */
   vanishUntil?: number;
+  /** SHARP RETURN (shared/perks.ts g_sharp): set on stepping into smoke, spent on the first blow from it. */
+  sharpReady?: boolean;
   /** A Mage's storm tether: the goblin it holds, until when, and its next strike (sim/tether.ts). */
   tether?: { id: number; until: number; next: number };
   /** Weapons, armor and rings carried, not worn. */
@@ -275,8 +277,10 @@ export interface Hero extends Body {
   throughId?: number;
   perfectAt?: number;
   caltropReady?: number;
-  legsUntil?: number;
-  legsStab?: number;
+  /** The chain sickle's spin: when it next cuts round them (sim/sickle.ts). */
+  spinNext?: number;
+  /** SHADOW SMOKE: when this Rogue's shadow fades, to burst it into smoke then (sim/ladderrogue.ts). */
+  shadowSmoke?: number;
   fireproofUntil?: number;
   tauntReady?: number;
   tauntUntil?: number;
@@ -498,6 +502,10 @@ export interface Enemy extends Body {
   /** The Rogue's (sim/venom.ts): bleeding from a skewer until, its next tick; poison stacks, until, next
    *  tick, ticking harder (a perfect dart); retching until. */
   bleedUntil?: number;
+  /** KNIFEWORK's stacks on that bleed (one a backstab, up to KNIFEWORK.most; gone when it stops). */
+  bleedStacks?: number;
+  /** In a smoke it may swing blind in (not only a vanish's): sim/smokebomb.ts. */
+  smokeSwing?: boolean;
   /** CUTPURSE has shaken this one's purse (once a goblin). */
   cut?: boolean;
   bleedNext?: number;
@@ -997,11 +1005,11 @@ export type FightEvent =
   | { k: 'timber'; x: number; y: number; way: number; wood: number; r: number }
   | { k: 'mow' | 'ignite' | 'chill' | 'freeze' | 'shatter' | 'steam' | 'flare' | 'blink' | 'bless' | 'blessed' | 'rally' | 'rallied' | 'smite' | 'net' | 'snared' | 'well' | 'shadow' | 'perfect' | 'tempo' | 'grab' | 'hurl' | 'slam' | 'bodyhit' | 'wriggle' | 'lift' | 'oilfire' | 'freed' | 'exitopen' | 'blaze' | 'chop' | 'denspawn' | 'hallow' | 'ward' | 'warded' | 'reflect' | 'wardbreak' | 'spotted' | 'skewer' | 'envenom' | 'shieldbash' | 'quake' | 'pin' | 'blinded' | 'wind' | 'loaded' | 'glint' | 'trueshot' | 'holyshield' | 'shieldsoak' | 'shieldgone' | 'coalburst' | 'coalflare' | 'snag' | 'flailstun' | 'holysmite' | 'shrug'
       /** Techniques firing (shared/techniques.ts): SLAM's bursts, SHOULDER CHARGE ready and landing, IRON FEET,
-       *  KNIFEWORK's bleed, SLIP AWAY, CUTPURSE, QUICK NOCK, STEADY, MENDING HANDS, SANCTUARY STEP, JUDGEMENT. */
+       *  KNIFEWORK's bleed, QUICK RETURN, CUTPURSE, QUICK NOCK, STEADY, MENDING HANDS, SANCTUARY STEP, JUDGEMENT. */
       | 'slamburst' | 'shoulderready' | 'shoulder' | 'ironfeet' | 'cutbleed' | 'slipaway' | 'cutpurse' | 'quicknock' | 'steady' | 'mending' | 'sanctstep' | 'judged'; x: number; y: number }
   /** The movement ladder and the Mage's techniques firing (shared/ladder.ts, techniques.ts): `r` a reach,
    *  `el` an element, `n` magic given back, (x2, y2) the friend covered or the goblin gone through. */
-  | { k: 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'recall' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'blockmend' | 'coverfor' | 'ironstance' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
+  | { k: 'chainspin' | 'chainsnag' | 'airshot' | 'twinsnare' | 'landing' | 'blinkburst' | 'blinkthrough' | 'recall' | 'halfblink' | 'caltrops' | 'underlegs' | 'legstab' | 'shakeoff' | 'shelter' | 'blockmend' | 'coverfor' | 'ironstance' | 'taunt' | 'taunted' | 'braced' | 'attuned' | 'spellthief'; x: number; y: number; r?: number; el?: Augment; n?: number; x2?: number; y2?: number }
   /** A goblin retching up a perfect dart's poison, facing (dx, dy) (sim/venom.ts). */
   | { k: 'puke'; x: number; y: number; dx: number; dy: number }
   | { k: 'collapse'; x: number; y: number; w: number; h: number }
@@ -1062,6 +1070,8 @@ export interface Hook {
   el: Augment;
   /** The spear on its chain (sim/spearchain.ts): its own damage and reach, and only a small goblin reeled in. */
   spear?: { dmg: number; range: number };
+  /** The chain sickle's (sim/spearchain.ts): spun full (it snags), let go on the flash (the snagged goblin bleeds). */
+  sickle?: { full: boolean; bleed: boolean };
 }
 
 /** A thrown relic javelin: flying (maybe carrying a goblin), or stuck in a wall, the floor or a body. */
@@ -1094,6 +1104,8 @@ export interface Bolt {
   id: number;
   owner: string;
   kind: 'arrow' | 'bolt' | 'knife' | 'dart' | 'spark' | 'orb' | 'lance' | 'smite' | 'net' | 'lodestone' | 'flask' | 'bomb';
+  /** A knife fan's knife (sim/rogue.ts): `near` damage within `at` tiles flown, falling to `far` at its range. */
+  fall?: { at: number; near: number; far: number };
   /** A relic's: it never hurts a friend or anyone freed (friends caught in it are told they're spared). */
   relic?: boolean;
   /** A mace's smite: its light mends friends in the burst this much; `holy`: let go on the flash, it shields them (sim/holy.ts). */

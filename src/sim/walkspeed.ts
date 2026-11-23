@@ -3,11 +3,11 @@
  * your hero the moment you press with the same numbers, so it never runs ahead of where the leader's
  * room will put it and gets pulled back). Everything that changes a walk is here: the kit and gear,
  * creeping (a stick pushed less than STEALTH.slow), a block held (the kit's blockSpeed), the shallows
- * (wading), Wall Brandy, the bell's QUICK, and what the act allows (a charge, a wand's cast walk).
+ * (wading), Wall Brandy, the bell's QUICK, a Rogue's vanish, and what the act allows (a charge, a wand's cast walk).
  * An oil slick works on the stick before it gets here (sim/oil.ts slipIntent), the same on both sides.
  */
 import { wadeAt } from '../shared/arena';
-import { HERO, STEALTH, STREAM, WEAPONS, guardOf } from '../shared/tuning';
+import { HERO, STEALTH, STREAM, VANISH, WEAPONS, guardOf } from '../shared/tuning';
 import { brandySpeed } from './brandy';
 import { quickMult } from './charge';
 import { statsOf } from './gearstats';
@@ -25,7 +25,7 @@ export function walkSpeed(h: Hero, inp: Intent, now: number, k = 1): number {
   if (m < 0.05) return 0;
   // (A storm stream at its full build slows you: shared/spellbook.ts STREAM.topWalk.)
   const heavy = h.stream && h.stream.step >= STREAM.steps.length ? STREAM.topWalk : 1;
-  return HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * heavy * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now);
+  return HERO.speed * WEAPONS[h.weapon].speed * statsOf(h).speed * k * heavy * (m >= STEALTH.slow ? 1 : STEALTH.creep) * wadeAt(h.x, h.y) * brandySpeed(h, now) * quickMult(h, now) * ((h.vanishUntil ?? -9) > now ? VANISH.pace : 1);
 }
 
 /** The walking pace of what the hero is doing now (`null`: this act doesn't walk on the stick). */

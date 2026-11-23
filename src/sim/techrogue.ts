@@ -1,7 +1,7 @@
 /**
  * The Rogue's techniques in the room, all on a backstab (numbers: shared/techniques.ts), by blade or by
- * a thrown knife or dart in the back. KNIFEWORK: the goblin bleeds. SLIP AWAY: a kill hides you, as
- * the VANISH skill does (no goblin sees you till you strike again). CUTPURSE: now and then a little
+ * a thrown knife or dart in the back. KNIFEWORK: the goblin bleeds, harder with each backstab. QUICK RETURN
+ * (the id 'slip'): a kill brings your skill nearer ready. CUTPURSE: now and then a little
  * gold knocked loose, once a goblin, on the room's own purse stream so no other dice shift.
  */
 import { SKEWER, WEAPONS } from '../shared/tuning';
@@ -17,16 +17,14 @@ import type { Enemy, Hero } from './types';
 export function rogueStruck(h: Hero, e: Enemy, w: World): void {
   if (WEAPONS[h.weapon].cls !== 'ROGUE' || isDummy(e) || e.kind === 'nest') return;
   const tx = h.x - e.x, ty = h.y - e.y;
-  // (THROUGH THE LEGS made this hit a backstab wherever it came from: combat.ts hitEnemy.)
-  const legs = h.legsStab === e.id;
-  if (legs) h.legsStab = undefined;
-  if (legs || (e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < rearCos(h)) backstabbed(h, e, w);
+  if ((e.fx * tx + e.fy * ty) / (Math.hypot(tx, ty) || 1) < rearCos(h)) backstabbed(h, e, w);
 }
 
 /** A backstab landed on `e` (killed or not): whatever techniques this Rogue knows. */
 export function backstabbed(h: Hero, e: Enemy, w: World): void {
   if (knowsTech(h, 'knifework') && !isDead(e) && e.kind !== 'nest') {
-    if (!bleeding(e, w.now)) e.bleedNext = w.now + SKEWER.every;
+    if (!bleeding(e, w.now)) (e.bleedNext = w.now + SKEWER.every), (e.bleedStacks = 0);
+    e.bleedStacks = Math.min(KNIFEWORK.most, (e.bleedStacks ?? 0) + 1);
     e.bleedUntil = Math.max(e.bleedUntil ?? 0, w.now + KNIFEWORK.time);
     w.ev.push({ k: 'cutbleed', x: e.x, y: e.y });
   }
@@ -34,10 +32,11 @@ export function backstabbed(h: Hero, e: Enemy, w: World): void {
   if (knowsTech(h, 'cutpurse')) cutpurse(e, w);
 }
 
-/** SLIP AWAY: hidden a moment; anything winding up at you lets its blow go. */
+/** QUICK RETURN: the skill's wait cut short. */
 function slip(h: Hero, w: World): void {
-  h.vanishUntil = Math.max(h.vanishUntil ?? 0, w.now + SLIP.time);
-  for (const o of w.enemies) if (!isDead(o) && o.attack?.aimed === h.id && o.attack.t < o.attack.windup) Object.assign(o, { attack: null, act: 'chase', actT: 0 });
+  const r = h.relics[0];
+  if (!r || h.relicReady[r] <= w.now) return;
+  h.relicReady[r] = Math.max(w.now, h.relicReady[r] - SLIP.back);
   w.ev.push({ k: 'slipaway', x: h.x, y: h.y });
 }
 

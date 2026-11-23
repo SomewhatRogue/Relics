@@ -13,6 +13,7 @@ import { drawStreams, streamLights } from './streamdraw';
 import { drawSkyBolts, drawSkyMarks, skyLights } from './skystrikedraw';
 import { OX, OY, PX } from './world';
 import { drawLadderGround } from './ladderground';
+import { drawSpins } from './sicklespin';
 import { drawWalls, drawWalls3, wallLights } from './firewalldraw';
 import { drawWorldGround, worldLights } from './worlddraw';
 
@@ -122,6 +123,8 @@ function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number
   for (const z of room.zones) if (z.kind === 'trap' && room.time < z.until) trap(g, z, P, ppu, room.time);
   // The movement ladder's caltrops, burst and roar, the same way (ladderground.ts).
   drawLadderGround(g, room, P, ppu);
+  // A chain sickle whirled (sicklespin.ts).
+  drawSpins(g, room, P, ppu, at);
   drawSkyMarks(g, room, P, ppu);
   drawStreams(g, room, P, at);
   g.globalAlpha = 1;

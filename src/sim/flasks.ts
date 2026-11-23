@@ -15,6 +15,8 @@ export interface Smoke {
   y: number;
   until: number;
   r?: number;
+  /** A vanish's, at a Rogue's feet: goblins in it are blind but don't swing blind (sim/smokebomb.ts). */
+  soft?: boolean;
   /** Steam (sim/steam.ts): white, and it scalds every so often (`next`); whose fire raised it. */
   steam?: boolean;
   next?: number;
@@ -71,7 +73,10 @@ export function stepPotions(heroes: Hero[], smokes: Smoke[], now: number, dt: nu
       h.mendLeft -= n;
       h.hp = Math.min(h.maxHp, h.hp + n * healBite(h));
     }
-    if (smokes.some((s) => Math.hypot(s.x - h.x, s.y - h.y) < (s.r ?? POTION.smokeR))) h.hiddenUntil = now + 0.15;
+    if (!smokes.some((s) => Math.hypot(s.x - h.x, s.y - h.y) < (s.r ?? POTION.smokeR))) continue;
+    // Stepping into smoke readies SHARP RETURN's blow (sim/rogue.ts sharpBlow).
+    if (h.hiddenUntil <= now) h.sharpReady = true;
+    h.hiddenUntil = now + 0.15;
   }
   return smokes.filter((s) => s.until > now);
 }

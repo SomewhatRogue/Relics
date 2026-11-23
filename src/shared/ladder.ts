@@ -41,7 +41,7 @@ export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
   blinkthrough: { name: 'RECALL', text: 'Blink again within 3 s to snap back to where you started.' },
   halfblink: { name: 'PERFECT BLINK', text: 'A blink within 2 s of a PERFECT hold costs half the magic.' },
   caltrops: { name: 'CALTROPS', text: 'Your dash drops caltrops where you started, once every 5 s. Goblins on them slow down and bleed.' },
-  underlegs: { name: 'DASH THROUGH', text: 'Dash through a goblin and your next hit within 2 s is a backstab.' },
+  underlegs: { name: 'SHADOW SMOKE', text: 'Your dash leaves a shadow that goblins chase, and when it fades it bursts into smoke.' },
   shakeoff: { name: 'SHAKE OFF', text: 'Dashing clears your poison, and fire on the floor can\'t burn you for 1 s.' },
   shelter: { name: 'SHELTER', text: 'While you block, friends within 2 tiles take 30% less damage.' },
   // (Kyle, 2026-11-05: "you AND an ally, the ally for free but again stamina drain"; it took COVER's place.)
@@ -77,8 +77,9 @@ export const HALF_BLINK = { within: 2, cost: 0.5 };
 /** CALTROPS: dropped where the dash began, at most every `every` s, `r` tiles round, for `life` s, `most`
  *  down at once. A goblin on them moves at `slow` and bleeds `bleed` s (a skewer's ticks). */
 export const CALTROPS = { every: 5, r: 0.9, life: 6, most: 2, slow: 0.5, bleed: 3 };
-/** THROUGH THE LEGS: dash through a goblin, and a hit within `within` s counts as from behind. */
-export const LEGS = { within: 2 };
+/** SHADOW SMOKE (id 'underlegs', from when it was THROUGH THE LEGS): the dash's shadow, faded, leaves smoke
+ *  `r` tiles round for `time` s (Kyle, 2026-11-23). The rung gives the shadow itself too. */
+export const SHADOW_SMOKE = { r: 1.8, time: 3 };
 /** SHAKE IT OFF: a dash clears poison, and fire underfoot can't burn you for `fireproof` s. */
 export const SHAKE_OFF = { fireproof: 1 };
 /** SHELTER: friends within `reach` tiles of a Healer holding a block take `taken` of a blow. */

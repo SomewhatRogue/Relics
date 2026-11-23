@@ -2,7 +2,7 @@
 import { coinsHtml } from '../src/shared/coins';
 import { describe, expect, it } from 'vitest';
 import { BLINK, DODGE, HERO, SNARE, TEACHES, TICK, drillLevel, drillPrice, newProfile, type WeaponId } from '../src/shared/tuning';
-import { ALLY_WARD, BLINK_BURST, RECALL, BLOCK_MEND, CALTROPS, IRON_STANCE, LADDER_LEVELS, LADDER_TITLE, LANDING, RUNGS, RUNG_WORDS, SHELTER, STAND_FAST, TAUNT_GUARD, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
+import { ALLY_WARD, BLINK_BURST, RECALL, BLOCK_MEND, CALTROPS, IRON_STANCE, LADDER_LEVELS, LADDER_TITLE, LANDING, RUNGS, RUNG_WORDS, SHADOW_SMOKE, SHELTER, STAND_FAST, TAUNT_GUARD, TWIN_SNARE, knowsRung } from '../src/shared/ladder';
 import { buyDrill, drillState, learnLesson } from '../src/shared/training';
 import { trainerRows } from '../src/shared/trainrows';
 import { ArenaRoom } from '../src/sim/room';
@@ -232,18 +232,16 @@ describe('the Rogue: the dash', () => {
     }
   });
 
-  it('THROUGH THE LEGS: dash through a goblin and the next hit, from the front, is a backstab', () => {
+  it('SHADOW SMOKE: the dash leaves a shadow, and it bursts into smoke as it fades', () => {
     for (const rungs of [1, 2]) {
-      const h = hero('daggers', rungs, 'me', 9, 9), e = Object.assign(goblin(1, 10.5, 9), { fx: -1, fy: 0 });
-      const { room, run } = arena([h], [e]);
+      const h = hero('daggers', rungs, 'me', 9, 9);
+      const { room, run } = arena([h], []);
       run(0.3, { rollSeq: 1, mx: 1 });
-      expect(h.x).toBeGreaterThan(11);
-      // Turned round to face it: from its front.
-      Object.assign(h, { x: 9.6, y: 9, fx: 1, fy: 0, hitIds: [] });
-      e.fx = -1;
-      const ev: FightEvent[] = [];
-      hitEnemy(h, { windup: 0, active: 0.1, recover: 0, dmg: 10, range: 1.5, arc: 90, lunge: 0, knock: 0 }, e, room.time, ev);
-      expect(ev.some((x) => x.k === 'hit' && x.backstab)).toBe(rungs === 2);
+      if (rungs === 2) expect(h.decoyUntil).toBeGreaterThan(room.time);
+      const before = room.smokes.length;
+      run(3);
+      expect(room.smokes.length > before).toBe(rungs === 2);
+      if (rungs === 2) expect(room.smokes.some((s) => Math.hypot(s.x - h.decoyX, s.y - h.decoyY) < 0.01 && s.r === SHADOW_SMOKE.r)).toBe(true);
     }
   });
 

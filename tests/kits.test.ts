@@ -37,29 +37,7 @@ function held(run: ReturnType<typeof arena>['run'], hold: number, after = 0.8): 
   return [...run(hold, { attackSeq: 1, attack: true }), ...run(after, { attackSeq: 1, attack: false })];
 }
 
-describe('the rapier', () => {
-  it('thrusts further than the daggers, at one goblin, and is fairer head on', () => {
-    const r = arena('rapier', [{ x: 9, y: 7.0 }, { x: 9.3, y: 7.1 }]);
-    r.run(0.3, { attackSeq: 1 });
-    expect(r.room.enemies.filter((e) => e.hp < e.maxHp).length).toBe(1);
-    const d = arena('daggers', [{ x: 9, y: 7.0 }]);
-    d.run(0.3, { attackSeq: 1 });
-    expect(hurt(d.room.enemies[0])).toBe(0);
-    expect(WEAPONS.rapier.front!).toBeGreaterThan(WEAPONS.daggers.front!);
-    expect(WEAPONS.rapier.backstab!).toBeLessThan(WEAPONS.daggers.backstab!);
-  });
-
-  it('held, it lunges forward through two goblins in a line, never a third', () => {
-    const { room, h, run } = arena('rapier', [{ x: 9, y: 6.4 }, { x: 9, y: 5.6 }, { x: 9, y: 4.9 }]);
-    const ev = held(run, 0.9);
-    // (The third may be hurt by the second thrown into it: that's the knock, not the blade.)
-    const blade = ev.filter((e) => e.k === 'hit' && e.on === 'enemy' && e.src === 'rapier').map((e) => (e as { y: number }).y);
-    expect(blade.sort()).toEqual([5.6, 6.4]);
-    expect(hurt(room.enemies[2])).toBeLessThan(hurt(room.enemies[0]));
-    expect(h.y).toBeLessThan(8);
-  });
-});
-
+/** (The rapier went: the chain sickle took its place, tests/sickle.test.ts.) */
 describe("the poisoner's kit", () => {
   it('a tap is the short sword, 80% head on (Kyle, 2026-11-04), catching two; held, a dart that poisons (a little on its own)', () => {
     const tap = arena('poisoner', [{ x: 8.7, y: 8 }, { x: 9.3, y: 8 }]);

@@ -7,7 +7,8 @@
  */
 import { travel, travelTo } from '../shared/sweep';
 import { collide } from '../shared/arena';
-import { HERO, HOOK, HOOK_PROP } from '../shared/tuning';
+import { HERO, HOOK, HOOK_PROP, SKEWER } from '../shared/tuning';
+import { SICKLE_THROW } from '../shared/sickle';
 import { shove } from './bodies';
 import type { World } from './elements';
 import { isDead } from './damage';
@@ -23,6 +24,16 @@ export function fireHook(h: Hero): Hook {
 
 function release(h: Hero | undefined): void {
   if (h && h.act === 'zip') Object.assign(h, { act: 'idle', actT: 0 });
+}
+
+/** Landed off a chain sickle's pull: behind the goblin (opposite where it faces), turned to its back. */
+function behind(h: Hero, e: Enemy, stopAt: number, ev: FightEvent[]): void {
+  const fl = Math.hypot(e.fx, e.fy) || 1;
+  travelTo(h, e.x - (e.fx / fl) * stopAt, e.y - (e.fy / fl) * stopAt, HERO.radius);
+  const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy) || 1;
+  Object.assign(h, { fx: dx / d, fy: dy / d });
+  release(h);
+  ev.push({ k: 'land', x: h.x, y: h.y, dx: h.fx, dy: h.fy });
 }
 
 /** Advance one hook a tick; false when it is done. */
@@ -45,6 +56,8 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
       k.y = p.y;
       k.travelled += d;
       if (Math.hypot(p.x - want.x, p.y - want.y) > 1e-4) {
+        // (A chain sickle not fully spun only glances off a wall.)
+        if (k.sickle && !k.sickle.full) return void (k.state = 'back'), true;
         k.state = 'zip';
         Object.assign(h, { act: 'zip', actT: 0, kvx: 0, kvy: 0 });
         ev.push({ k: 'latch', x: k.x, y: k.y, dx: k.dx, dy: k.dy });
@@ -59,6 +72,7 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
         return false;
       }
       if (prop) {
+        if (k.sickle && !k.sickle.full) return void (k.state = 'back'), true;
         k.state = 'zip';
         Object.assign(h, { act: 'zip', actT: 0, kvx: 0, kvy: 0 });
         ev.push({ k: 'latch', x: k.x, y: k.y, dx: k.dx, dy: k.dy });
@@ -74,6 +88,13 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
         afflict(t, k.el, dmg);
         if (isDead(t)) return false;
         t.lastBy = h.id;
+        // The chain sickle: not fully spun it only cuts, and comes back; on the flash what it snags bleeds.
+        if (k.sickle && !k.sickle.full) return void (k.state = 'back'), true;
+        if (k.sickle?.bleed && t.kind !== 'nest') {
+          if ((t.bleedUntil ?? 0) <= now) t.bleedNext = now + SKEWER.every;
+          t.bleedUntil = Math.max(t.bleedUntil ?? 0, now + SICKLE_THROW.bleed);
+          ev.push({ k: 'cutbleed', x: t.x, y: t.y });
+        }
         // (The spear's chain reels in only a small goblin: anything bigger pulls you to it.)
         if (Number.isFinite(t.weight) && t.act !== 'pinned' && (!k.spear || t.weight <= 1)) {
           k.state = 'yank';
@@ -125,6 +146,8 @@ export function stepHook(k: Hook, heroes: Hero[], enemies: Enemy[], now: number,
   h.fx = dx / (d || 1);
   h.fy = dy / (d || 1);
   if (d - step <= stopAt || h.actT > 1.2) {
+    // The chain sickle on a big goblin: round behind it, facing its back.
+    if (e && k.sickle) return void behind(h, e, stopAt, ev), false;
     travelTo(h, k.x - h.fx * stopAt, k.y - h.fy * stopAt, HERO.radius);
     release(h);
     ev.push({ k: 'land', x: h.x, y: h.y, dx: h.fx, dy: h.fy });

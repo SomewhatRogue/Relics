@@ -29,7 +29,7 @@ import { knows, type Enemy, type FightEvent, type Hero, type Intent } from './ty
 import { primeShoulder, stride } from './techwarrior';
 import { nockHead, quickNock } from './techranger';
 import { airShot, airSwing, jumpShot } from './ladderranger';
-import { JUMP_SHOT } from '../shared/ladder';
+import { JUMP_SHOT, knowsRung } from '../shared/ladder';
 import { blinkCost, recall } from './laddermage';
 
 export function newHero(id: string, x: number, y: number): Hero {
@@ -493,7 +493,7 @@ function startRoll(h: Hero, inp: Intent, now: number, ev: FightEvent[]): void {
   h.jumpShot = false;
   // A Rogue's dash leaves a shadow of you where you stood, and the goblins near it go for that (Kyle,
   // 2026-11-16: it was the Mage's blink; a Mage's blink leaves a trap now: sim/blinktrap.ts, in the room).
-  if (WEAPONS[h.weapon].cls === 'ROGUE' && knows(h, 'leave')) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + decoyTime(h) });
+  if (WEAPONS[h.weapon].cls === 'ROGUE' && (knows(h, 'leave') || knowsRung(h, 'underlegs'))) Object.assign(h, { decoyX: h.x, decoyY: h.y, decoyUntil: now + decoyTime(h) });
   h.rollQueuedAt = -9;
   spend(h, WEAPONS[h.weapon].dodge.stamina * DODGE.cost * dodgeBreath(h) * blinkCost(h, now, ev), now);
   ev.push({ k: kind === 'blink' ? 'blink' : 'roll', x: h.x, y: h.y });

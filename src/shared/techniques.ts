@@ -31,8 +31,9 @@ export const TECH_WORDS: Record<TechId, { name: string; text: string }> = {
   slam: { name: 'WIDE SLAM', text: 'Slamming a goblin also kills the small goblins right next to it.' },
   shoulder: { name: 'STRIDING BLOW', text: 'Walk one way for 1 s and your next blow knocks the first goblin it hits flat.' },
   ironfeet: { name: 'IRON FEET', text: 'While you charge a blow, hits don\'t knock you back or stagger you.' },
-  knifework: { name: 'KNIFEWORK', text: 'Backstabs make the goblin bleed for 3 s.' },
-  slip: { name: 'SLIP AWAY', text: 'Kill with a backstab and goblins lose you for 2 s.' },
+  knifework: { name: 'KNIFEWORK', text: 'Backstabs make goblins bleed for 3 s, and each backstab after the first makes the bleed worse.' },
+  // (The id is SLIP AWAY's, which it replaced: Kyle, 2026-11-23.)
+  slip: { name: 'QUICK RETURN', text: 'A backstab kill readies your skill 3 s sooner.' },
   cutpurse: { name: 'CUTPURSE', text: 'A backstab has a 1 in 4 chance to knock a few coins loose, once per goblin.' },
   // (Kept its old id: it was TRAPPER, for the snare the jump used to leave.)
   trapper: { name: 'PIERCING SHOT', text: 'Leap shot goes through goblins.' },
@@ -52,10 +53,12 @@ export const SLAM_BURST = { reach: 1.3, most: 4 };
  *  readies it; it lapses `grace` s after you stop. The first goblin the next blow hits is down `down` s
  *  (a butcher `big` as long), shoved `knock` more. */
 export const SHOULDER = { walk: 1, turn: 0.45, pace: 0.5, grace: 0.4, down: 1, big: 0.5, knock: 6 };
-/** KNIFEWORK: a backstab's bleed, `time` s (it ticks as a skewer's: shared/venom.ts SKEWER). */
-export const KNIFEWORK = { time: 3 };
-/** SLIP AWAY: a backstab kill hides you `time` s (the Rogue's vanish rule: no goblin sees you, till you strike). */
-export const SLIP = { time: 2 };
+/** KNIFEWORK: a backstab's bleed, `time` s from the last (it ticks as a skewer's: shared/venom.ts SKEWER). Each
+ *  backstab adds a stack, up to `most`, and each stack past the first ticks `per` of a skewer's more (Kyle,
+ *  2026-11-23: "increase depending on hits given, good for dagger builds"). */
+export const KNIFEWORK = { time: 3, most: 5, per: 0.6 };
+/** QUICK RETURN (the id 'slip', from SLIP AWAY): a backstab kill takes `back` s off your skill's wait. */
+export const SLIP = { back: 3 };
 /** CUTPURSE: a backstab's `chance` of knocking `min` to `max` gold loose, once a goblin (the floor's
  *  gold was just cut back: about half a coin a goblin, if every one is backstabbed). */
 export const CUTPURSE = { chance: 0.25, min: 1, max: 3 };
