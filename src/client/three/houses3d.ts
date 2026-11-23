@@ -100,7 +100,8 @@ function buildFront(b: Block, kin?: Kindling | null, turn = 0): Built {
   const kf = STREET ? kitFurniture(b.kind, b.x, b.y, b.w, b.h) : null;
   if (kf) return { group: kf, roof: null, fires, top: 1, lamps: [] };
   // (The tile redraw, `?redraw=1`: freestanding furniture as the flat view's own picture, stood up: propcards.ts.)
-  if (REDRAW.on && isCardBlock(b)) {
+  // (Only standing and unburnt: one alight, charred or burned down goes the old way below, with its flames.)
+  if (REDRAW.on && isCardBlock(b) && blockState(b) === 0) {
     const S = new CardSheet();
     S.add(blockCut(b, false), b.x + b.w / 2, b.y + b.h);
     const cm = S.mesh();

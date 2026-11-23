@@ -74,8 +74,9 @@ export const OVERRIDES: { kind: string; at: [number, number]; to: [number, numbe
   { kind: 'stall', at: [38.5, 12.5], to: [43.5, 19.8] }, { kind: 'stall', at: [38.5, 16.5], to: [39.8, 19.8] },
   // (The tailor's, the other side of the town hall's door from Tobin's: clear of the door and of MARKET ROW's spot.)
   { kind: 'stall', at: [38.9, 20.6], to: [34.3, 19.8] },
-  { kind: 'spot', at: [38.5, 14.2], to: [41.65, 22.2] }, { kind: 'crates', at: [42.25, 14.45], to: [46.1, 20.7] },
-  { kind: 'crate', at: [40.5, 12.7], to: [46.2, 19.2] }, { kind: 'crate', at: [40.5, 16.6], to: [45.9, 22.4] },
+  { kind: 'spot', at: [38.5, 14.2], to: [41.65, 22.2] }, { kind: 'crates', at: [42.25, 14.45], to: null },
+  // (No boxes on the road from the north gate to the square: Kyle, 2026-11-23, "extremely annoying".)
+  { kind: 'crate', at: [40.5, 12.7], to: null }, { kind: 'crate', at: [40.5, 16.6], to: null },
   { kind: 'gallows', at: [37.3, 24.85], to: [51, 17.05] }, { kind: 'rubble', at: [26.2, 31.5], to: [37, 38.3] },
   // (The lanes' tumbled stone that came to rest in the street before the forge, in the way: left out. Kyle, 2026-11-16.)
   { kind: 'rubble', at: [37.2, 8.75], to: null },

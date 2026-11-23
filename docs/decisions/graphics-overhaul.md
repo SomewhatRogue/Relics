@@ -760,3 +760,13 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   Checked: two frames of a wood differ only at the trees' edges and the hero; no shader errors; full suite passed.
   (Claude Opus 5.5)
 
+## 2026-11-23: no boxes on the gate road; burning stalls burn
+
+- Kyle: "the boxes on your way from the main entrance gate to the town square are extremely annoying please remove them".
+  The market's crate pile (layoutmove.ts, at 46.1, 20.7, a solid round at the road's mouth into the square) and the
+  two single crates moved with it are gone; the doorstep clutter (townfronts.ts) keeps off the gate road (x 42.5 to 49,
+  y under 24). Checked in a phone 2.5D shot of the road.
+- The redraw audit: a stall, tent or piece of furniture alight, charred or burned down now goes the old way with its
+  flames (houses3d.ts `blockState(b) === 0` before the card path); as cards they burned without fire. Felling, mowing,
+  decals, burning fences and houses were already kept. (Claude Opus 5.5)
+

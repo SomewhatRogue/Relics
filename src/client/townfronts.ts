@@ -37,6 +37,10 @@ export function frontFigs(m: GameMap, _now: number): Beast[] {
   return out;
 }
 
+/** The road from the north gate down to the square, kept clear of anything that looks like it is in the way (Kyle,
+ * 2026-11-23: the boxes along it "extremely annoying"). */
+const onGateRoad = (x: number, y: number) => x > 42.5 && x < 49 && y < 24;
+
 /** Everything the map's doors and houses allow, found once: clutter, signs, laundry, notices. */
 function place(m: GameMap): Beast[] {
   const out: Beast[] = [];
@@ -49,7 +53,7 @@ function place(m: GameMap): Beast[] {
     const len = w.ax ? b.w : b.h, inside = Math.abs(a) <= len / 2 - 0.45;
     const clear = !doors.some((d) => Math.hypot(d.x - x, d.y - y) < 0.85);
     const free = [-0.2, 0, 0.2].every((s) => !blocked(m, x + w.ax * s, y + w.ay * s));
-    return inside && clear && free && !water(x, y) ? { x, y } : null;
+    return inside && clear && free && !water(x, y) && !onGateRoad(x, y) ? { x, y } : null;
   };
 
   // Doorstep clutter: a third of the doors (the ones the hash ranks first), one or two things on one side, against the wall.
