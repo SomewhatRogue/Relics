@@ -769,4 +769,12 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - The redraw audit: a stall, tent or piece of furniture alight, charred or burned down now goes the old way with its
   flames (houses3d.ts `blockState(b) === 0` before the card path); as cards they burned without fire. Felling, mowing,
   decals, burning fences and houses were already kept. (Claude Opus 5.5)
+- Grass and wheat that stand and react (Kyle's yes to "one and two", 2026-11-23): tufts drawn the tile way
+  (`tiletufts.ts`: a handful of blades, three shades, lit left, a dark foot, graded like the floor), stood up as one
+  sheet of cards a map (`three/tufts3d.ts`): grass in loose patches on grass floors and grass soil, standing wheat a
+  clump or two a tile on wheat floors, none on paths, water or anything solid. They lean a pixel in the gusts and part
+  up to two pixels round the eight heroes and live foes nearest yours (wind3d.ts `swayCards(m, push)`, `setMovers`, fed
+  each frame from view3d.ts). Cards gained an `edge` switch (figmat.ts): a pixel-wide blade is all edge, so tufts skip
+  the black edge and keep their own dark foot. No old grass wind brought back (Kyle cut the rolling bands 2026-11-16).
+  Checked: wood and field shots on phone 2.5D, no shader errors. (Claude Opus 5.5)
 

@@ -60,6 +60,7 @@ import { flashTheme, fogLook } from '../skyfx';
 import { flashOf } from '../../sim/stormshape';
 import { drawChalkMarks } from '../chalkdraw';
 import { PITCH_TODAY, REDRAW, REDRAW_PPU, TILES } from '../tilelook';
+import { setMovers } from './wind3d';
 
 /** How much of the flat view's floor the 2.5D view shows: on a phone held upright a little closer in. */
 const ZOOM = { tall: 0.8, wide: 1 };
@@ -251,6 +252,10 @@ export class View3D {
     // (Live foes near your hero, for the new look's fade: a building hiding one of them fades.)
     const ha = this.heroAt, near = STREET && ha ? room.enemies.filter((e) => e.act !== 'dead' && Math.hypot(e.x - ha[0], e.y - ha[1]) < 10).map((e) => [e.x, e.y] as [number, number]) : [];
     this.buildings.update(map, this.heroAt, fires, near);
+    // (Who the grass and wheat part round: the nearest heroes and live foes to yours, wind3d.ts.)
+    if (ha) setMovers([...room.heroes.map((h) => lerp('h:' + h.id, h.x, h.y)), ...others.map((h) => [h.x, h.y] as [number, number]),
+      ...room.enemies.filter((e) => e.act !== 'dead').map((e) => lerp('e:' + e.id, e.x, e.y))]
+      .filter((p) => Math.abs(p[0] - ha[0]) < 12 && Math.abs(p[1] - ha[1]) < 10).sort((p, q) => Math.hypot(p[0] - ha[0], p[1] - ha[1]) - Math.hypot(q[0] - ha[0], q[1] - ha[1])));
     for (const e of room.enemies) if (e.act !== 'dead' && e.burnUntil > room.time) {
       const [x, y] = lerp('e:' + e.id, e.x, e.y);
       fires.push([x, 0.5, y, e.kind === 'butcher' || e.ashAt ? 1.3 : 0.8]);

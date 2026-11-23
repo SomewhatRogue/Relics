@@ -46,3 +46,10 @@ Order: L1, then L2 (movement is what sells "alive"), then L3, then L4 place by p
 
 "Ha looks good. Also not too too busy for two and kepe things silent for now": the order as written; a night street
 lightly peopled with rats and moths, not crowded; everything silent for now. L1 started the same day.
+
+## Grass and wheat that react (2026-11-23, in)
+
+Kyle: "beautiful and dynamic worlds that you impact". Tufts of grass in loose patches and clumps of standing wheat,
+drawn the tile way, lean a pixel in the gusts and part round heroes and foes walking through (three/tufts3d.ts).
+Trees, bushes and reeds sway again under the redraw (wind3d.ts `swayCards`). Silent.
+

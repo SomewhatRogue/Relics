@@ -16,6 +16,7 @@ import { OX, OY, PX } from '../world';
 import { REDRAW } from '../tilelook';
 import { redrawFloor, redrawPx } from './redrawfloor';
 import { CardSheet, isCardRound } from './propcards';
+import { tuftMesh } from './tufts3d';
 import { Boxes, Seed, jit } from './boxes';
 import type { Lamp3 } from './lamps3d';
 import type { L3 } from './lights3d';
@@ -199,6 +200,9 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     if (up) B.raise(k, up), fires.slice(n).forEach((f) => (f[1] += up));
     if (o.kind === 'post') lamps.push({ x: o.x, y: o.y, fires: fires.splice(n), light: { x: o.x, y: 1.6 + up, z: o.y, r: 4.5, i: 0.8, c: [1, 0.72, 0.42], f: 9 } });
   }
+  // (Grass and wheat standing up off the redraw's floor, parting round whoever walks through: tufts3d.ts.)
+  const tm = REDRAW.on ? tuftMesh(m, LEDGE_H) : null;
+  if (tm) group.add(tm);
   const cm = cards.mesh();
   if (cm) group.add(cm);
   for (const t of m.torches) {

@@ -129,17 +129,36 @@ if (uLife > 0.5 && aSway > 0.5) {
  * lean snapped to whole render pixels (20 a tile) so the art stays crisp; `aSway` is the most pixels it may lean
  * (0 at the foot). The old trees bent in windify; the cards had lost it.
  */
-export function swayCards(m: THREE.Material): void {
+export function swayCards(m: THREE.Material, push = false): void {
   const dx = WIND.dir[0] < 0 ? -1 : 1;
   chain(m, (sh) => {
-    Object.assign(sh.uniforms, LIFE);
-    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + 'attribute float aSway;\nvoid main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
+    Object.assign(sh.uniforms, LIFE, push ? MOVERS : {});
+    const decl = push ? `uniform vec2 uMovers[${MAX_MOVERS}];\nuniform int uNM;\n` : '';
+    // (Grass and wheat: bent away from anyone within a step, up to two pixels more, the nearer the further.)
+    const parted = push ? `
+  for (int i = 0; i < ${MAX_MOVERS}; i++) {
+    if (i >= uNM) break;
+    vec2 d = wp.xz - uMovers[i];
+    float L = length(d);
+    if (L < 0.8) lean += (d.x < 0.0 ? -1.0 : 1.0) * (1.0 - L / 0.8) * 2.4;
+  }` : '';
+    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + decl + 'attribute float aSway;\nvoid main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
 if (uLife > 0.5 && aSway > 0.0) {
   vec4 wp = modelMatrix * vec4(transformed, 1.0);
   float g = lifeGust(wp.xz, uLifeT), rock = 0.35 * sin(uLifeT * 1.3 + wp.x * 0.9 + wp.z * 1.7);
-  transformed.x += ${dx}.0 * floor(clamp(g * 1.1 + rock, -0.5, 1.0) * aSway + 0.5) / 20.0;
+  float lean = ${dx}.0 * clamp(g * 1.1 + rock, -0.5, 1.0) * aSway;${parted}
+  transformed.x += floor(clamp(lean, -2.5, 2.5) + 0.5) / 20.0;
 }`);
-  }, '|cardsway');
+  }, push ? '|cardpush' : '|cardsway');
+}
+
+/** Up to eight bodies near your hero (heroes, foes), tiles x and y: the grass and wheat part round them. */
+const MAX_MOVERS = 8;
+const MOVERS = { uMovers: { value: Array.from({ length: MAX_MOVERS }, () => new THREE.Vector2()) }, uNM: { value: 0 } };
+export function setMovers(at: [number, number][]): void {
+  const n = Math.min(MAX_MOVERS, at.length);
+  for (let i = 0; i < n; i++) MOVERS.uMovers.value[i].set(at[i][0], at[i][1]);
+  MOVERS.uNM.value = n;
 }
 
 /** A floor's material: cloud shadows over it. */

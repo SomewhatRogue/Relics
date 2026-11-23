@@ -60,6 +60,10 @@ function cut(paint: (c: Ctx, x: number, y: number) => void, W: number, H: number
  * row being the foot. Upright, snapped so its pixels land on whole render pixels.
  */
 export class CardSheet {
+  /** Whether its cards part round whoever walks through them (wind3d.ts `setMovers`): grass and wheat, not trees. */
+  push = false;
+  /** Whether its cards carry the tile look's black edge (figmat.ts); not tufts, whose blades are a pixel wide. */
+  edge = true;
   private cuts: { c: Cut; x: number; z: number; up: number; sway: number }[] = [];
   /** `sway`: the most render pixels its top leans in the wind (wind3d.ts `swayCards`); 0 stands still. */
   add(c: Cut | null, x: number, z: number, up = 0, sway = 0): void {
@@ -102,8 +106,8 @@ export class CardSheet {
     g.computeVertexNormals();
     g.setAttribute('aSway', new THREE.Float32BufferAttribute(sw, 1));
     const tex = (cv: HTMLCanvasElement) => Object.assign(new THREE.CanvasTexture(cv), { magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter, generateMipmaps: false });
-    const mat = cardMaterial(tex(lit), tex(glow));
-    if (sw.some((v) => v > 0)) swayCards(mat);
+    const mat = cardMaterial(tex(lit), tex(glow), this.edge);
+    if (sw.some((v) => v > 0)) swayCards(mat, this.push);
     return new THREE.Mesh(g, mat);
   }
 }

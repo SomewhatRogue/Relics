@@ -36,17 +36,18 @@ if (keepLit) gl_FragColor = vec4(mix(gl_FragColor.rgb, glowT.rgb, glowT.a), min(
 else gl_FragColor = vec4(mix(vec3(0.05), glowT.rgb, min(1.0, glowT.a * 1.6)), 1.0 - glowT.a);
 `;
 
-/** The lit card material: `lit` as the map, `glow` beside it. */
-export function cardMaterial(lit: THREE.Texture, glow: THREE.Texture): THREE.MeshLambertMaterial {
+/** The lit card material: `lit` as the map, `glow` beside it; `edge` false leaves off the tile look's black edge
+ * (a blade of grass a pixel wide would be all edge: tufts3d.ts). */
+export function cardMaterial(lit: THREE.Texture, glow: THREE.Texture, edge = true): THREE.MeshLambertMaterial {
   const m = toonize(new THREE.MeshLambertMaterial({ map: lit, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -8 }));
   const toon = m.onBeforeCompile;
   const tGlow = { value: glow };
   m.onBeforeCompile = (sh, r) => {
     toon.call(m, sh, r);
     sh.uniforms.tGlow = tGlow;
-    sh.fragmentShader = ((TILES.on ? '#define TILE_EDGE\n' : '') + 'uniform sampler2D tGlow;\n' + sh.fragmentShader).replace('#include <map_fragment>', PICK).replace('#include <opaque_fragment>', '#include <opaque_fragment>\n' + OVER);
+    sh.fragmentShader = ((TILES.on && edge ? '#define TILE_EDGE\n' : '') + 'uniform sampler2D tGlow;\n' + sh.fragmentShader).replace('#include <map_fragment>', PICK).replace('#include <opaque_fragment>', '#include <opaque_fragment>\n' + OVER);
   };
-  m.customProgramCacheKey = () => 'figcard';
+  m.customProgramCacheKey = () => (edge ? 'figcard' : 'figcard-flat');
   m.userData.glow = tGlow;
   return m;
 }
