@@ -341,6 +341,9 @@ export interface Hero extends Body {
   /** The crossbow (sim/crossbow.ts): no bolt on it; the reload wound so far (0 to 1); this hold is winding,
    *  not aiming; this wind began from nothing and hasn't been broken; the bolt on it glints. */
   xbowEmpty?: boolean;
+  /** The poisoner's darts left (sim/darts.ts; undefined a full pouch), and when the next comes back. */
+  darts?: number;
+  dartAt?: number;
   xbowWind?: number;
   winding?: boolean;
   xbowClean?: boolean;
@@ -901,7 +904,7 @@ export type FightEvent =
   /** RAISE (sim/raise.ts): a Cleric (`by`) begins raising a friend who is out (`id`), is broken off, or has raised them (`n`: the cut, in %). */
   | { k: 'rising' | 'risebroke' | 'risen'; x: number; y: number; id: string; by: string; n?: number }
   /** A press that did nothing, said to that hero: GRAB with nothing to take hold of, ATTACK held on an empty crossbow. */
-  | { k: 'nograb' | 'reloadcue'; x: number; y: number; id: string }
+  | { k: 'nograb' | 'reloadcue' | 'nodart'; x: number; y: number; id: string }
   /** The class's own button (sim/signature.ts): a Ranger's MARK on a goblin (`id` the Ranger); a Healer's
    *  MEND from (x, y) to (x2, y2), `n` given (`self` on themselves); a press that did nothing (`why`). */
   | { k: 'hunted'; x: number; y: number; id: string }

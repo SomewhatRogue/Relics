@@ -778,3 +778,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   the black edge and keep their own dark foot. No old grass wind brought back (Kyle cut the rolling bands 2026-11-16).
   Checked: wood and field shots on phone 2.5D, no shader errors. (Claude Opus 5.5)
 
+## 2026-11-23: the poisoner's darts (Kyle's aside in this chat)
+
+- Kyle: "the blow dart shouldnt stagger anyone out of an attack specifically not a big guy and i hate the sound it
+  makes now when it goes. Should be a short little puff of air", then "you get five max and they return at a rate
+  of one every five seconds".
+- No stagger: a dart's hit no longer flinches (sim/bolts.ts, `flinch` 0 for a dart), its full draw no longer knocks
+  (kits.ts poisoner `knockFull` 0), and a perfect dart's retch only takes a small goblin that isn't mid-blow
+  (sim/venom.ts). The poison still builds and ticks harder off a perfect one.
+- The sound: the goblin blowpipe sample and the spider hiss are gone; a dart is a short breathy puff, two noise
+  bursts under a tenth of a second (soundscape.ts `dartPuff`).
+- Five darts (sim/darts.ts, shared/venom.ts DARTS): one spent a shot, one back every five seconds whatever you do; a
+  hold with none looses nothing and says NO DARTS. Five small green pips over the hero while the pouch isn't full
+  (client/dartmark.ts), none when it is. tests/darts.test.ts. (Claude Opus 5.5)
+

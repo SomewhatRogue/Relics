@@ -15,6 +15,8 @@ export const SKEWER = { dmg: 3, every: 0.5, time: 3, stagger: 0.7 };
  * a goblin retches at most once every `pukeEvery` seconds, so one can't be held down by darts alone.
  */
 export const VENOM = { dmg: 1, every: 0.5, time: 10, most: 5, hard: 2, puke: 1, pukeEvery: 10 };
+/** The poisoner's darts (sim/darts.ts, Kyle 2026-11-23): `most` in the pouch, one back every `back` seconds. */
+export const DARTS = { most: 5, back: 5 };
 
 /**
  * How much of the poison a foe takes, by its weakness row (shared/weakness.ts foeKind): butchers and

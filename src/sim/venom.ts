@@ -5,7 +5,7 @@
  * you land behind. The room judges all of it, so a guest's goblins bleed and retch as the leader's do.
  */
 import { SKEWER, VENOM, foeKind, venomTakes } from '../shared/tuning';
-import { damage, isDead, isDummy, sayWeak } from './damage';
+import { damage, isDead, isDummy, sayWeak, small } from './damage';
 import { stun } from './stuns';
 import type { Enemy, FightEvent } from './types';
 
@@ -44,8 +44,10 @@ export function envenom(e: Enemy, perfect: boolean, by: string, now: number, ev:
   ev.push({ k: 'envenom', x: e.x, y: e.y });
   if (!perfect) return;
   e.venomHard = true;
-  // Retching only once in a while, so darts alone can't hold one goblin down.
-  if (now - (e.pukeAt ?? -1e9) < VENOM.pukeEvery) return;
+  // Retching only once in a while, so darts alone can't hold one goblin down; and only a small one not in the middle
+  // of a blow (Kyle, 2026-11-23: a dart never staggers anyone out of an attack, and never a big one). The poison
+  // still ticks harder.
+  if (now - (e.pukeAt ?? -1e9) < VENOM.pukeEvery || e.attack || !small(e)) return;
   const retch = VENOM.puke * takes;
   if (daze(e, retch, by, now, ev)) (e.pukeUntil = now + retch), (e.pukeAt = now), ev.push({ k: 'puke', x: e.x, y: e.y, dx: e.fx, dy: e.fy });
 }

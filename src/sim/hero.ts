@@ -16,6 +16,7 @@ import { fedMult, jealousBlocks, jealousCooldown, needlesBreath, wears } from '.
 import { hitEnemy } from './combat';
 import { flashBash, quake } from './warrior';
 import { autoWind, beginHold, emptyHold, looseBolt, stepWind } from './crossbow';
+import { noDart, refillDarts, spendDart } from './darts';
 import { brandySpeed, breathCap } from './brandy';
 import { quickMult, relicDark, spendCharge } from './charge';
 import { paySpell, refuseSpell } from './spells';
@@ -141,6 +142,7 @@ export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h 
 
 export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], acts: HeroActs): void {
   gear(h, inp, ev);
+  refillDarts(h, now);
   if (inp.relicSeq !== h.seen.relic) (h.seen.relic = inp.relicSeq), (h.relicQueuedAt = now);
   // (The old relic swap is gone, docs/design/relics.md: the relic carried is chosen in town. relicSwapSeq is still
   // counted so an older friend's press does nothing.)
@@ -310,6 +312,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       h.perfect = held >= full && held <= full + releaseWindow(h);
       // A crossbow's perfect is its glint, not the flash.
       looseBolt(h);
+      spendDart(h, now);
       // A big spell is paid for now; short of magic, it fizzles and nothing is cast (sim/spells.ts).
       if (!paySpell(h, now, ev)) return void Object.assign(h, { act: 'idle', actT: 0, perfect: false });
       // (PERFECT BLINK: a blink soon after costs half: sim/laddermage.ts.)
@@ -354,7 +357,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       const queued = now - h.attackQueuedAt < INPUT_BUFFER && h.attackQueuedAt > now - h.actT;
       if (queued && !h.heavy && h.combo < w.combo.length - 1) {
         if (!inp.attack) return startSwing(h, h.combo + 1, inp, enemies, now, ev);
-        if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h, now);
+        if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev) && !noDart(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h, now);
       }
       if (wantsRoll) return startRoll(h, inp, now, ev);
       if (h.actT >= swingTime(s)) (h.act = 'idle'), (h.actT = 0);
@@ -397,7 +400,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       if (w.castWalk) walk(h, inp, w.castWalk, dt, now, ev), collide(h, HERO.radius);
       return startSwing(h, 0, inp, enemies, now, ev);
     }
-    if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h, now);
+    if (now - h.attackQueuedAt >= CHARGE.start && !emptyHold(h, now, ev) && !noDart(h, now, ev)) return refuseSpell(h, now, ev) ? undefined : startCharge(h, now);
   }
   // Only a Warrior's or Healer's kit holds a block.
   h.blocking = guardUp(h, inp);

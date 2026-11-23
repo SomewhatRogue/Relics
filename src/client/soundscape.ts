@@ -6,7 +6,7 @@ import { bossSound } from './fxboss';
 import { listenSound } from './fxlisten';
 import { leechSound } from './fxleech';
 import { streamSound } from './streamsound';
-import { chestSound } from './sfx';
+import { burst, chestSound } from './sfx';
 import { mageTapSound } from './magesfx';
 import { spellSound } from './spellsound';
 import { iceSound } from './icesound';
@@ -87,7 +87,8 @@ export class Soundscape {
     if (ev.k === 'swing') return swingSound(ev.src, ev.heavy);
     if (ev.k === 'chest') return chestSound(ev.state, ev.tier);
     // The poisoner's: the blowpipe's puff, a skewer's wet stab, a goblin retching (the spiders' own wet sounds).
-    if (ev.k === 'shoot' && ev.kind === 'dart') return spiderSounds.hiss();
+    // (The dart: a short little puff of air, Kyle 2026-11-23; it was a goblin's blowpipe and a spider's hiss.)
+    if (ev.k === 'shoot' && ev.kind === 'dart') return dartPuff();
     if (ev.k === 'skewer') return spiderSounds.wetbite();
     if (ev.k === 'puke') return spiderSounds.spit(), spiderSounds.splat();
     // The Warrior's: the shield's thump, the shockwave, the pin.
@@ -298,4 +299,10 @@ export class Soundscape {
     const k = run.job.place.kind, area = (k === 'river' || k === 'marsh' ? 'forest' : k === 'ruins' ? 'village' : k) as Area;
     return [area, run.job.seed + run.index];
   }
+}
+
+/** A dart loosed: a breath through a reed, short and soft (a breathy hiss falling away, a faint pop under it). */
+function dartPuff(): void {
+  burst('bandpass', 2400, 900, 0.9, 0.16, 0.07);
+  burst('lowpass', 520, 220, 0.7, 0.07, 0.045);
 }

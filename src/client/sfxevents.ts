@@ -28,7 +28,6 @@ const BY_KIND: Partial<Record<FightEvent['k'], SfxName>> = {
 };
 
 export function eventSample(ev: FightEvent): boolean {
-  if (ev.k === 'shoot' && ev.kind === 'dart') return playPick('gob_blowpipe');
   // The long cut's own (fxcut.ts).
   if (cutSample(ev, playPick)) return true;
   const name = BY_KIND[ev.k];

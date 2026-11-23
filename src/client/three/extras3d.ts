@@ -17,6 +17,7 @@ import { pose } from '../held';
 import { drawHook } from '../relicsdraw';
 import { drawStatus } from '../status';
 import { drawLoad } from '../xbowmark';
+import { drawDarts } from '../dartmark';
 import { drawBladeMark } from '../blademark';
 import { drawnNew } from './chars3d';
 import { drawHolyGuard } from '../holyguardmark';
@@ -123,6 +124,7 @@ export function drawExtras(g: CanvasRenderingContext2D, x: Extra): void {
   if (BOXFIGS) for (const h of room.heroes) {
     const [hx, hy] = lerp('h:' + h.id, h.x, h.y), [sx, sy] = P(hx, up(h.z), hy);
     drawLoad(c, h, sx, sy);
+    drawDarts(c, h, sx, sy, room.time);
     drawBladeMark(c, h, sx, sy, room.time);
     drawHolyGuard(c, h, sx, sy);
   }

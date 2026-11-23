@@ -18,6 +18,7 @@ import { heroPose } from './heropose';
 import { drawWeapon, pose } from './held';
 import { EL_COL, heldEl } from './palette';
 import { drawLoad } from './xbowmark';
+import { drawDarts } from './dartmark';
 import { drawBladeMark } from './blademark';
 import { drawHolyGuard } from './holyguardmark';
 import { drawRaise } from './raisemark';
@@ -229,6 +230,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   }
   aura(c, h, bx, by, t);
   drawLoad(c, h, bx, by);
+  drawDarts(c, h, bx, by, t);
   drawBladeMark(c, h, bx, by, t);
   drawHolyGuard(c, h, bx, by);
 }

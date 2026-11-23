@@ -149,7 +149,8 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
   const rear = back && by ? backstabOf(by) : 1;
   // A boss of the kit: a shot into a shut door cuts its straps; a perfect, a full draw or one in its back fills its POISE (sim/doorwall.ts, poise.ts).
   if (e.boss) bossShot(e, b, back, w);
-  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board) * highShot(b, e)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back, charged: b.charged });
+  // (A dart doesn't flinch what it hits, small or big: it poisons, it never staggers one out of a blow. Kyle, 2026-11-23.)
+  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board) * highShot(b, e)), w.now, w.ev, { heavy: b.knock >= 8 || crit, flinch: b.kind === 'dart' ? 0 : FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back, charged: b.charged });
   // (A board tuned to let a little of a plain shot by still stops it there.)
   if (board === 'blocked') w.ev.push({ k: 'deflect', x: e.x, y: e.y });
   // A Rogue's techniques on a backstab (sim/techrogue.ts).
