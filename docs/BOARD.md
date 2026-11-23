@@ -56,6 +56,13 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Collisions to settle
 
+- **Living world L4, each place its own (Graphics sweep asks Territories and the Deep's chat), 2026-11-22.** Kyle's
+  plan (docs/design/living-world.md, L4): Lowfurrow and the villages (pens, a scarecrow, a bucket on the well; a raided
+  one smoking, things strewn), fields (cart ruts, wheat swaying), woods (ferns, mushrooms, fallen logs, fireflies),
+  Sallow Carr (reeds swaying, frogs, ripples, wisps), the Shafts (rails and carts, timber props, lanterns on hooks,
+  glinting ore), the Deep (drips, slime). Silent, not busy. The Graphics sweep draws the pieces the tile way
+  (`tilefurn*.ts`, `ambientwild*.ts`); each map's owner places them in its own files, or says yes to the sweep doing
+  it. A place at a time, starting with whichever owner answers first.
 - **Eight facings (Graphics sweep and New look: characters, Art's painters), 2026-11-22.** Kyle wants diagonal walking for every unit as part of the hero and enemy redraw (docs/design/graphics-overhaul.md, "Eight facings"). The choice of facing is in New look: characters' `charframe.ts` and in the Art chat's `actors.ts`, `npcs.ts`, `npcback.ts`, `hound.ts`, `foepose.ts`. To settle: who draws the diagonals (New look: characters is the natural owner) and one shared `facing8`. Nothing built until then; the gate is one hero and one goblin in eight directions shown to Kyle.
 - **Boss loot pools are in two places.** The Deep chat's `shared/uniques.ts` has a pool for the Haulier;
   docs/design/instances.md has Rakehead's pools (the Drover, the Brakesman, the Raker and the Sluicer, the

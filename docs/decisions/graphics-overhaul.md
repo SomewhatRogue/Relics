@@ -748,4 +748,8 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Open: the tavern's plank floor is speckled by the scatter painter, louder than the rest; some east-wall clutter
   sits under the eave in 2.5D.
 - Checked: tsc clean; full suite 274 files passed; phone 2.5D crops of each kind, no page errors. (Claude Opus 5.5)
+- Follow-up the same night: the tavern's speckle was its `sawdust` mark (hallfloor.ts, a tenth of the floor in pale
+  flecks) painted onto the drawn planks; the redraw floor now lays sawdust and rushes the tile way, about one dull fleck
+  or straw a tile (`three/redrawfloor.ts` `strewn`). Doorstep clutter on a side wall stands 0.6 out, clear of the eave;
+  none on a back wall. L4 asked of Territories and the Deep's chat on the board (Collisions). (Claude Opus 5.5)
 

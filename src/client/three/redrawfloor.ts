@@ -31,6 +31,16 @@ export function onGrid(g: CanvasRenderingContext2D): Rect {
   };
 }
 
+const STREWN_KINDS = new Set(['sawdust', 'rushes']);
+/** Sawdust or rushes the tile way: about one fleck or straw a tile, two dull shades, whole pixels. */
+function strewn(rect: Rect, rng: Rng, k: { kind: string; x: number; y: number; w: number; h: number }): void {
+  const cols = k.kind === 'rushes' ? ['#4e4a2a', '#5c5632'] : ['#5a4c34', '#6a5a3e'], n = Math.round(k.w * k.h * 1.1);
+  for (let i = 0; i < n; i++) {
+    const x = Math.floor((k.x + rng.next() * k.w) * KX), y = Math.floor((k.y + rng.next() * k.h) * KZ);
+    rect(x, y, k.kind === 'rushes' ? 3 : 2, 1, cols[rng.int(2)]);
+  }
+}
+
 export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   // A village (a stone floor anywhere but the town, whose back is stone: shared/terrain.ts, a job's trees or palisade
   // behind) lies on trodden earth, not one cobble pattern under its ploughland and all (graphics-overhaul.md slice 5,
@@ -53,7 +63,10 @@ export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   softEdges(m, rect, KX, KZ);
   paintWater(m, R, r2, toPx, PX);
   paintScatter(m, R);
-  paintMarks(m, R);
+  // (A hall's sawdust and rushes, hallfloor.ts, are a tenth of the floor in pale flecks: on drawn planks that reads
+  // as speckle. Here a few dull ones a tile, on the grid. The living world's L3, 2026-11-22.)
+  paintMarks({ ...m, marks: (m.marks ?? []).filter((k) => !STREWN_KINDS.has(k.kind)) }, R);
+  for (const k of m.marks ?? []) if (STREWN_KINDS.has(k.kind)) strewn(rect, r2, k);
   paintGrim(m, R);
   R(OX, OY, m.w * PX, 4, 'rgba(0,0,0,0.35)');
   if (!stacked(m)) for (const l of m.ledges ?? []) ledge(l, R, r2, pick);

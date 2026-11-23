@@ -59,12 +59,14 @@ function place(m: GameMap): Beast[] {
     .map((b, bi) => ({ b, bi, h: hash(b.x * 3.1 + 1, b.y * 1.7 + bi) }))
     .sort((p, q) => p.h - q.h)
     .forEach(({ b, bi, h }) => {
-      if (placed >= want || b.door === 'townhall') return;
+      // (A back wall's door is behind the house in 2.5D; a side wall's things stand clear of the eave.)
+      const wl = wallOf(b), out0 = wl.oy === 1 ? 0.3 : 0.6;
+      if (placed >= want || b.door === 'townhall' || wl.oy === -1) return;
       const side = hash(b.x, b.y + 5) < 0.5 ? 1 : -1;
       let a = 0.95 + hash(b.x, b.y) * 0.3, any = false;
       const n = 1 + (hash(b.y, b.x) < 0.4 ? 1 : 0);
       for (let i = 0; i < n; i++) {
-        const kind = CLUTTER[Math.floor(hash(b.x + i * 7, b.y * 2 + i) * CLUTTER.length)], p = spot(b, a * side, 0.3);
+        const kind = CLUTTER[Math.floor(hash(b.x + i * 7, b.y * 2 + i) * CLUTTER.length)], p = spot(b, a * side, out0);
         if (!p) break;
         any = true;
         out.push({ key: `fc${bi}_${i}`, x: p.x, y: p.y, up: 0, draw: (c, px, py) => drawClutter(c, kind, px, py) });
