@@ -752,4 +752,11 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   flecks) painted onto the drawn planks; the redraw floor now lays sawdust and rushes the tile way, about one dull fleck
   or straw a tile (`three/redrawfloor.ts` `strewn`). Doorstep clutter on a side wall stands 0.6 out, clear of the eave;
   none on a back wall. L4 asked of Territories and the Deep's chat on the board (Collisions). (Claude Opus 5.5)
+- Kyle, 2026-11-22: "i thought trees and wind and grass that moved etc were in here but i dont see them", then "we want
+  beautiful and dynamic worlds that you impact". Since REDRAW became the default, trees, bushes and reeds are cards
+  (propcards.ts) and the wind's bend (wind3d.ts `windify`) only reached the old 3D trees. Now `swayCards`: a card's top
+  leans with the same gust plus a slow rock, at most 2 render pixels for trees and 1 for bushes, reeds and dead trees,
+  snapped to whole pixels, the foot still. Felling still rebuilds the cards; mown rye and reeds are blocks, untouched.
+  Checked: two frames of a wood differ only at the trees' edges and the hero; no shader errors; full suite passed.
+  (Claude Opus 5.5)
 

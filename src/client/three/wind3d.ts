@@ -124,6 +124,24 @@ if (uLife > 0.5 && aSway > 0.5) {
   }, '|life');
 }
 
+/**
+ * The tile redraw's cards (propcards.ts): a tree's, a bush's, a reed's top leans with the gust and a slow rock, the
+ * lean snapped to whole render pixels (20 a tile) so the art stays crisp; `aSway` is the most pixels it may lean
+ * (0 at the foot). The old trees bent in windify; the cards had lost it.
+ */
+export function swayCards(m: THREE.Material): void {
+  const dx = WIND.dir[0] < 0 ? -1 : 1;
+  chain(m, (sh) => {
+    Object.assign(sh.uniforms, LIFE);
+    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + 'attribute float aSway;\nvoid main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
+if (uLife > 0.5 && aSway > 0.0) {
+  vec4 wp = modelMatrix * vec4(transformed, 1.0);
+  float g = lifeGust(wp.xz, uLifeT), rock = 0.35 * sin(uLifeT * 1.3 + wp.x * 0.9 + wp.z * 1.7);
+  transformed.x += ${dx}.0 * floor(clamp(g * 1.1 + rock, -0.5, 1.0) * aSway + 0.5) / 20.0;
+}`);
+  }, '|cardsway');
+}
+
 /** A floor's material: cloud shadows over it. */
 export function clouded(m: THREE.Material): void {
   chain(m, (sh) => {

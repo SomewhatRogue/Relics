@@ -15,6 +15,7 @@ import { PIECE_BLOCKS, PIECE_ROUNDS } from '../pieces';
 import type { Ctx } from '../draw';
 import { PX } from '../world';
 import { cardMaterial } from './figmat';
+import { swayCards } from './wind3d';
 import { PITCH } from './camera3d';
 import { KX, KZ } from '../tilekit';
 import { FURN, furnCut } from '../tilefurn';
@@ -33,6 +34,8 @@ export const isCardRound = (r: Round) => CARD_ROUNDS.has(r.kind) && !PIECE_ROUND
 export const isCardBlock = (b: Block) => CARD_BLOCKS.has(b.kind) && !PIECE_BLOCKS.has(b.kind) && !b.ruined && b.lands === undefined && !b.door;
 
 const COS = Math.cos(PITCH);
+/** How far each round's top may lean in the wind, in render pixels. */
+const SWAY: Record<string, number> = { tree: 2, pine: 2, bush: 1, reed: 1, deadtree: 1 };
 export interface Cut { lit: HTMLCanvasElement; glow: HTMLCanvasElement; w: number; h: number; ax: number; ay: number }
 
 /** Paint with the flat view's code onto a scratch pair, the anchor at (ax, ay), and cut it to what was drawn. */
@@ -57,9 +60,10 @@ function cut(paint: (c: Ctx, x: number, y: number) => void, W: number, H: number
  * row being the foot. Upright, snapped so its pixels land on whole render pixels.
  */
 export class CardSheet {
-  private cuts: { c: Cut; x: number; z: number; up: number }[] = [];
-  add(c: Cut | null, x: number, z: number, up = 0): void {
-    if (c) this.cuts.push({ c, x, z, up });
+  private cuts: { c: Cut; x: number; z: number; up: number; sway: number }[] = [];
+  /** `sway`: the most render pixels its top leans in the wind (wind3d.ts `swayCards`); 0 stands still. */
+  add(c: Cut | null, x: number, z: number, up = 0, sway = 0): void {
+    if (c) this.cuts.push({ c, x, z, up, sway });
   }
   /** A round thing: drawn about its middle, it stands where its lowest pixel is, that much nearer the camera. */
   addRound(r: Round, up = 0): void {
@@ -67,7 +71,7 @@ export class CardSheet {
     const c = roundCut(r);
     if (!c) return;
     const dz = (c.h - c.ay) / PX;
-    this.add({ ...c, ay: c.h }, r.x, r.y + dz, up);
+    this.add({ ...c, ay: c.h }, r.x, r.y + dz, up, SWAY[r.kind] ?? 0);
   }
   mesh(): THREE.Mesh | null {
     if (!this.cuts.length) return null;
@@ -80,8 +84,8 @@ export class CardSheet {
     }
     const H = sy + row + 1, mk = () => Object.assign(document.createElement('canvas'), { width: W, height: H });
     const lit = mk(), glow = mk(), lg = lit.getContext('2d')!, gg = glow.getContext('2d')!;
-    const pos: number[] = [], uv: number[] = [];
-    this.cuts.forEach(({ c, x, z, up }, i) => {
+    const pos: number[] = [], uv: number[] = [], sw: number[] = [];
+    this.cuts.forEach(({ c, x, z, up, sway }, i) => {
       const [px, py] = at[i];
       lg.drawImage(c.lit, px, py), gg.drawImage(c.glow, px, py);
       // Left edge on a whole render pixel; the foot's row on a whole render pixel (12 a tile deep).
@@ -90,13 +94,17 @@ export class CardSheet {
       const u0 = px / W, u1 = (px + c.w) / W, v0 = 1 - (py + c.h) / H, v1 = 1 - py / H;
       pos.push(l, b, fz, r, b, fz, r, t, fz, l, b, fz, r, t, fz, l, t, fz);
       uv.push(u0, v0, u1, v0, u1, v1, u0, v0, u1, v1, u0, v1);
+      sw.push(0, 0, sway, 0, sway, sway);
     });
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     g.computeVertexNormals();
+    g.setAttribute('aSway', new THREE.Float32BufferAttribute(sw, 1));
     const tex = (cv: HTMLCanvasElement) => Object.assign(new THREE.CanvasTexture(cv), { magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter, generateMipmaps: false });
-    return new THREE.Mesh(g, cardMaterial(tex(lit), tex(glow)));
+    const mat = cardMaterial(tex(lit), tex(glow));
+    if (sw.some((v) => v > 0)) swayCards(mat);
+    return new THREE.Mesh(g, mat);
   }
 }
 
