@@ -417,3 +417,14 @@ the sewer grate", in place of "Talk to the under church about growing the Want";
 - Not yet: the iron door in the dry arch and Dorcas's own look (she wears the stock elder). The brazier is the
   stock one; a kettle on it would be a card of its own.
 - **Checked:** phone 2.5D sweep (shots/sweep/keep3), the room and furniture tests, `npm run check`, the full suite.
+
+## 2026-11-24: the Keeping Room's iron door and kettle (Claude Opus 5.5)
+
+- Two more cards in `src/client/tilefurnkeep.ts`: `irondoor` (riveted plates in a stone frame, the slot at chest
+  height, dark behind it) at the dry arch's end, and `kettle` (black, on an iron trivet, a breath of steam) beside
+  the brazier. Kinds in `shared/arena.ts`, looks in `client/blocklook.ts`, small edits as before.
+- The door stood in the dark at the room's edge; it moved in to the arch's end (x 2), with the tallow stubs at its
+  foot (the stock `candles` round, which lights both views). The kettle sat behind the brazier's flame; it moved
+  to the brazier's right.
+- Still the stock elder for Dorcas. The candles draw as a stand, not loose stubs; a stub round would be its own card.
+- **Checked:** phone 2.5D sweep (shots/sweep/keep5), the room and furniture tests, `npm run check`, the full suite.

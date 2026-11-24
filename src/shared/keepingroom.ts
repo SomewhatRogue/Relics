@@ -2,7 +2,7 @@
  * The Keeping Room, walkable (docs/design/keeping-room.md; Kyle, 2026-11-23: "claim walkable room here, map it out").
  * A town interior entered from the sewer grate's bricked arch (client/keepingui.ts), walked out of at the bottom,
  * back up at the grate. Its own furniture drawn the tile way (client/tilefurnkeep.ts: the trough, the cradle, the
- * hoard's shelves). No light but yours, the brazier's coals and the tallow stubs.
+ * hoard's shelves, the cistern's lip, the iron door, the kettle). No light but yours, the brazier's coals and the tallow stubs.
  *
  *       0 1 2 3 4 5 6 7 8 9 0 1
  *    0  # # # # # # # # # # # #      shelves all along the back and down both sides
@@ -34,9 +34,14 @@ export function keepingRoom(): GameMap {
     // The cistern's lip, either side of the steps down from the arch.
     b('lip', 0, 8, 4, 0.6),
     b('lip', 8, 8, 4, 0.6),
+    // The dry arch's end: the iron door, its slot. The kettle on its trivet by the brazier.
+    b('irondoor', 1.9, 9.3, 1.4, 0.4),
+    b('kettle', 9.3, 3.5, 0.7, 0.5),
   ], [n('DORCAS', 7.4, 4.9, KEEPING_DOOR, 'elder')], {
     // No torches: the brazier's coals, and whatever light the hero brings.
     torches: [],
     braziers: [{ x: 8.5, y: 4.3, r: 0.4 }],
+    // Tallow stubs at the iron door's foot, by its slot.
+    rounds: [{ kind: 'candles', x: 3.6, y: 9.9, r: 0.2 }],
   });
 }

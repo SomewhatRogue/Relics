@@ -1,7 +1,8 @@
 /**
  * The Keeping Room's own furniture (docs/design/keeping-room.md, slice 2), drawn in the kit as cards (tilefurn.ts
  * routes it; docs/design/tile-redraw.md "Making a new asset"): the trough under its drip, the empty cradle among the
- * hoard, and the hoard's shelves (pewter, rings, plate, a tallow stub on every board). Light from the upper left, a
+ * hoard, the hoard's shelves (pewter, rings, plate, a tallow stub on every board), the cistern's lip, the dry arch's
+ * iron door with its slot, and the kettle by the brazier. Light from the upper left, a
  * darker edge right and bottom, three to five shades a material, clean outlines from the card. Cosmetic only.
  */
 import type { Rect } from './tilekit';
@@ -107,4 +108,34 @@ const lip: DrawK = (r, W, D, T) => {
   for (let x = 4 + (W % 7); x < W - 2; x += 7) r(x, D + 1, 1, T - 2, ROCK[1]);
 };
 
-export const DRAWK: Record<string, DrawK> = { trough, cradle, hoard, lip };
+/** The dry arch's iron door: a stone frame, the door in riveted plates, a slot at chest height with dark behind it. */
+const irondoor: DrawK = (r, W, D, T) => {
+  const H = D + T;
+  slab(r, 0, 0, W, D, ROCK, 2);
+  slab(r, 0, D, W, T, ROCK, 2);
+  // The door, inset in its frame: plates lit left, darker right, rows of rivets, a band where the plates meet.
+  const x0 = 3, x1 = W - 3, y0 = D + 3;
+  for (let c = x0; c < x1; c++) r(c, y0, 1, H - y0, roundShade(c - x0, x1 - x0, IRON));
+  r(x0, y0, x1 - x0, 1, IRON[4]), r(x1, y0, 1, H - y0, ROCK[0]);
+  for (let y = y0 + 4; y < H - 2; y += Math.max(6, Math.floor((H - y0) / 3))) {
+    r(x0, y, x1 - x0, 1, IRON[0]);
+    for (let c = x0 + 2; c < x1 - 1; c += 4) r(c, y + 1, 1, 1, IRON[4]);
+  }
+  // The slot: a dark gap with a lit lower lip, where things go in.
+  const sy = y0 + Math.round((H - y0) * 0.3), sw = Math.max(4, Math.round((x1 - x0) * 0.5)), sx = Math.round((W - sw) / 2);
+  r(sx, sy, sw, 2, '#050506'), r(sx, sy + 2, sw, 1, IRON[4]), r(sx - 1, sy - 1, sw + 2, 1, IRON[1]);
+};
+
+/** A black kettle on an iron trivet: three thin legs, the pot's round belly lit left, a lid, a thin breath of steam. */
+const kettle: DrawK = (r, W, D, T) => {
+  const H = D + T, pw = Math.min(W - 2, 10), px = Math.round((W - pw) / 2), ph = Math.min(T - 3, 7), py = H - 3 - ph;
+  r(px, H - 3, 1, 3, IRON[2]), r(px + pw - 1, H - 3, 1, 3, IRON[1]), r(px + (pw >> 1), H - 2, 1, 2, IRON[1]);
+  r(px - 1, H - 4, pw + 2, 1, IRON[3]);
+  for (let c = 0; c < pw; c++) r(px + c, py + 1, 1, ph - 1, roundShade(c, pw, IRON));
+  r(px + 1, py, pw - 2, 1, IRON[3]), r(px + 2, py - 1, pw - 4, 1, IRON[2]), r(px + (pw >> 1), py - 2, 1, 1, IRON[4]);
+  r(px + pw, py + 2, 2, 1, IRON[2]), r(px + pw + 1, py + 1, 1, 1, IRON[2]);
+  r(px + 1, py + 2, 1, 2, IRON[4]);
+  for (let i = 0; i < 4 && py - 3 - i * 2 > 0; i++) r(px + (pw >> 1) + (i % 2 ? 1 : 0), py - 3 - i * 2, 1, 1, i < 2 ? '#6a6e72' : '#4a4e52');
+};
+
+export const DRAWK: Record<string, DrawK> = { trough, cradle, hoard, lip, irondoor, kettle };

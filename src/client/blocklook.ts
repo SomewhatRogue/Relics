@@ -28,6 +28,8 @@ export const LOOK: Record<Block['kind'], Look> = {
   trough: { tall: 8, roof: '#3c3c3c', ridge: '#16282a', wall: '#2c2c2c', windows: false, furniture: true },
   cradle: { tall: 8, roof: '#3a2a1e', ridge: '#4e3826', wall: '#24180f', windows: false, furniture: true },
   lip: { tall: 5, roof: '#4f4f4f', ridge: '#070c0c', wall: '#2c2c2c', windows: false, furniture: true },
+  irondoor: { tall: 26, roof: '#3c3c3c', ridge: '#414852', wall: '#2c3138', windows: false, furniture: true },
+  kettle: { tall: 10, roof: '#1c1f24', ridge: '#414852', wall: '#101215', windows: false, furniture: true },
   hoard: { tall: 20, roof: '#3a2a1e', ridge: '#5e6872', wall: '#24180f', windows: false, furniture: true },
   anvil: { tall: 8, roof: '#6a6470', ridge: '#8a8494', wall: '#34313a', windows: false, furniture: true },
   altar: { tall: 11, roof: '#d8d0bc', ridge: '#e8e0c8', wall: '#6a6470', windows: false, furniture: true },
