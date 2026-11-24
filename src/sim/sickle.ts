@@ -19,6 +19,9 @@ export const spinning = (h: Hero) => h.act === 'charge' && !!WEAPONS[h.weapon]?.
 /** How far the spin has built, 0 to 1. */
 export const spinBuild = (h: Hero) => Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
 
+/** How far the chain reaches now: short as the spin starts, out to its full reach as it builds. */
+export const spinReach = (h: Hero) => SICKLE_SPIN.r0 + (SICKLE_SPIN.r - SICKLE_SPIN.r0) * spinBuild(h);
+
 /** A wall close by on any side catches the chain. */
 export function caught(h: Hero): boolean {
   for (let i = 0; i < 8; i++) {
@@ -44,12 +47,13 @@ export function stepSpins(heroes: Hero[], w: World): void {
       continue;
     }
     const k = spinBuild(h), full = k >= 0.999, n = Math.round(SICKLE_SPIN.dmg + (SICKLE_SPIN.top - SICKLE_SPIN.dmg) * k);
-    w.ev.push({ k: 'chainspin', x: h.x, y: h.y, r: SICKLE_SPIN.r });
+    const reach = spinReach(h);
+    w.ev.push({ k: 'chainspin', x: h.x, y: h.y, r: reach });
     let landed = false;
     for (const e of w.enemies) {
       if (isDead(e) || e.act === 'carried') continue;
       const d = Math.hypot(e.x - h.x, e.y - h.y);
-      if (d > SICKLE_SPIN.r + e.radius) continue;
+      if (d > reach + e.radius) continue;
       e.lastBy = h.id;
       // The bleed only once the spin is fully going (Kyle, 2026-11-23: it was too strong).
       if (full && e.kind !== 'nest') {

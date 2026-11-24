@@ -4,6 +4,7 @@ import { SKEWER, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { SICKLE_SPIN, SICKLE_THROW } from '../src/shared/sickle';
 import { ArenaRoom } from '../src/sim/room';
 import { chargeFull } from '../src/sim/hero';
+import { spinReach } from '../src/sim/sickle';
 import { newEnemy } from '../src/sim/enemies';
 import { NO_INTENT, type Enemy, type FightEvent, type Intent } from '../src/sim/types';
 
@@ -37,8 +38,15 @@ describe('the chain sickle', () => {
     expect(WEAPONS.rapier.heavy.sickle).toBe(true);
   });
 
-  it('not yet up to speed, the first cut that lands stops the spin', () => {
+  it('the chain goes out short as the spin starts and reaches further each turn to its full reach', () => {
     const { h, e, hold } = arena([9 - 2]);
+    hold(0.4);
+    expect(spinReach(h)).toBeLessThan(1.6);
+    expect(lost(e)).toBe(0);
+  });
+
+  it('not yet up to speed, the first cut that lands stops the spin', () => {
+    const { h, e, hold } = arena([9 - 1]);
     const ev = hold(1);
     // (And says so: TOO SLOW, client/fxladder.ts.)
     expect(ev.some((x) => x.k === 'chainstop')).toBe(true);

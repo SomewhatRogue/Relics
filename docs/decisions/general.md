@@ -331,3 +331,4 @@ Claude Opus 5.5
   guards it. Measured: a low-level touched sickle's damage line is the same +9% as forged; its pull is three
   modifiers, a trait and a cost. Touched pieces don't sour on their own today; they grow the Want a job at a time,
   and become VOWED in the Holy and hungry chat's slice 6. Claude Opus 5.5
+- The spin's reach grows as it builds: 1.1 tiles as it starts, out to 2.8 at full (SICKLE_SPIN.r0, sim/sickle.ts spinReach), what it cuts and what's drawn alike. Claude Opus 5.5

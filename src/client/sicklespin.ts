@@ -8,8 +8,7 @@ import type { ArenaRoom } from '../sim/room';
 import { chargeFull } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { CHARGE, WEAPONS } from '../shared/tuning';
-import { spinBuild, spinning } from '../sim/sickle';
-import { SICKLE_SPIN } from '../shared/sickle';
+import { spinBuild, spinReach, spinning } from '../sim/sickle';
 
 type Proj = (x: number, y: number, z: number) => [number, number];
 type At = (key: string, x: number, y: number) => [number, number];
@@ -39,7 +38,7 @@ export function spinAngle(h: Hero): number {
 export function drawSpins(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number, at?: At): void {
   for (const h of room.heroes) {
     if (!spinning(h)) continue;
-    const [x, y] = at ? at('h:' + h.id, h.x, h.y) : [h.x, h.y], k = spinBuild(h), r = SICKLE_SPIN.r;
+    const [x, y] = at ? at('h:' + h.id, h.x, h.y) : [h.x, h.y], k = spinBuild(h), r = spinReach(h);
     // The whirl turns round the hand that holds the chain, out to the weapon side, not round the body's middle.
     const side = h.fx >= -0.2 ? 1 : -1, hx = x + h.fx * 0.25 + (Math.abs(h.fy) > 0.7 ? side * 0.28 : 0), hy = y + h.fy * 0.25, HAND = 0.65;
     const turn = spinAngle(h), dir = 1;

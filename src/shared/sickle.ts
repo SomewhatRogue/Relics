@@ -6,5 +6,7 @@
  * weapon's draw, so anything that draws faster spins up faster), it flies `range` tiles (`big` on the white flash)
  * and snags (sim/hook.ts); on the flash the goblin it snags bleeds `bleed` s. Let go short of full, nothing goes out.
  */
-export const SICKLE_SPIN = { every: 0.5, r: 2.8, dmg: 2, top: 7, bleed: 2, catch: 1.2 };
+/** (`r0`: the chain's reach as the spin starts, growing turn by turn to `r` at full: Kyle, 2026-11-23, "shouldn't go out
+ *  long unless fully charged; further each cycle until the max".) */
+export const SICKLE_SPIN = { every: 0.5, r0: 1.1, r: 2.8, dmg: 2, top: 7, bleed: 2, catch: 1.2 };
 export const SICKLE_THROW = { range: 6, big: 8, bleed: 3 };
