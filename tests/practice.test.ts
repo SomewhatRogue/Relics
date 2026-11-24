@@ -57,7 +57,7 @@ describe('the practice board', () => {
     expect(now.some((e) => before.includes(e))).toBe(false);
     g.clearPractice();
     expect(g.drill).toBeNull();
-    expect(g.room.enemies.map((e) => e.kind).sort()).toEqual(['butcher', 'dummy', 'scrapper', 'scrapper', 'swingDummy']);
+    expect(g.room.enemies.map((e) => e.kind).sort()).toEqual(['dummy', 'swingDummy']);
     expect(g.practice({ k: 'single', key: 'nothing' })).toBe(false);
   });
 
@@ -182,5 +182,23 @@ describe('nothing pays in the yard', () => {
       g.practiceAgain();
     }
     expect({ gold: p.gold, xp: p.xp, bag: p.bag.length, runs: p.runs }).toEqual(was);
+  });
+
+  it('starts empty but for the straw dummies, and a relic used there keeps its light (not filled)', () => {
+    const g = new Game();
+    g.create('WARRIOR', 'KYLE');
+    if (g.mode === 'wood') g.skipWood();
+    g.enterYard();
+    expect(g.room.enemies.map((e) => e.kind).sort()).toEqual(['dummy', 'swingDummy']);
+    const h = g.hero, c0 = h.found[0]?.charge ?? 0;
+    expect(c0).toBeGreaterThan(0);
+    // Thrown and thrown again: the light is as it came in.
+    for (let k = 1; k <= 6; k++) g.step(0.1, { ...NO_INTENT, relicSeq: k });
+    for (let k = 0; k < 20; k++) g.step(0.1, NO_INTENT);
+    expect(g.hero.found[0].charge).toBe(c0);
+    // Spent by whatever means: back to what it held at the gate after one step, and no more than that.
+    g.hero.found[0].charge = 0;
+    g.step(0.1, NO_INTENT);
+    expect(g.hero.found[0].charge).toBe(c0);
   });
 });

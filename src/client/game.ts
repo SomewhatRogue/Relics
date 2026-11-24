@@ -89,7 +89,7 @@ import { kitOf, nameBoard, recapOf, type Kit, type Recap } from './recaptally';
 import { JobRooms, doorPushed, type DoorMark, type SavedHouses } from './jobrooms';
 import { packRoom, unpackRoom } from './bigsave';
 import type { Parties } from './parties';
-import { again as practiceAgain, clearPractice, letOut, practiceOf, stepPractice, type Pick } from '../sim/practice';
+import { again as practiceAgain, clearPractice, keepLight, letOut, practiceOf, stepPractice, type Pick } from '../sim/practice';
 import { RACK, sortKey } from '../shared/practice';
 import { settleBids } from './statuebuy';
 import { blessesAt, blessingsAt, cursesAt, forksAt, isCurse, type MarkId, WAYS } from '../shared/deepmarks';
@@ -560,6 +560,9 @@ export class Game {
     this.mode = 'yard';
     this.place(Object.assign(new ArenaRoom(this.world.day, { squire: true }), { dread: SET_BACK }));
     this.hero.calmHound = true;
+    // Empty but for the two straw dummies until you ask Squire Pell; your relic keeps its light here (sim/practice.ts).
+    clearPractice(this.room);
+    keepLight(this.room, this.hero);
   }
 
   /** The yard's straw men (sim/practice.ts): set going `pick` (and the yard's own go back on the rack). */

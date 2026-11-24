@@ -448,3 +448,14 @@ the sewer grate", in place of "Talk to the under church about growing the Want";
 - The bible's "no live goblin in Wickhold" gets one bullet under it: the exception, never explained, so the lore
   keeper doesn't flag it.
 - **Checked:** phone 2.5D sweep (shots/sweep/keep7), the room tests, `npm run check`, the full suite.
+
+## 2026-11-24: the training yard, quiet until you ask (Claude Opus 5.5)
+
+- Kyle: "the training room - you get attacked IMMEDIATELY ... no enemies on spawn", and the relic tried there
+  "won't diminish the light there (lets make sure it doesn't)". The practice files had no row; claimed on mine.
+- `sim/practice.ts`: CLEAR (and entering) leaves only the two straw dummies; the yard's standing butcher and
+  scrappers are gone. `keepLight`: each relic's charge as you came in, put back after every step. Not filled, so
+  a dark relic stays dark (the yard is no free refill). `client/game.ts` enterYard calls both (small edit).
+- `tests/practice.test.ts`: CLEAR's yard is the dummies; a new test for the empty yard and the held light.
+- Next: the first quests' chain (church, trainer's white weapon, the yard, then the board), with coin.
+- **Checked:** the practice tests, `npm run check`, the full suite (2314 passed).

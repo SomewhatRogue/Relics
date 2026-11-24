@@ -16,7 +16,7 @@ import { isDead } from './damage';
 import { newEnemy } from './enemies';
 import { shapeFoe } from './ownfoes';
 import type { ArenaRoom } from './room';
-import type { Enemy, FightEvent } from './types';
+import type { Enemy, FightEvent, Hero } from './types';
 
 export type Pick = { k: 'single' | 'pack'; key: string } | { k: 'drill'; key: DrillId };
 export interface Practice {
@@ -94,13 +94,26 @@ export function letOut(room: ArenaRoom, pick: Pick): Practice | null {
   return p;
 }
 
-/** Back on the rack, all of it; the yard as it stands every day. */
+/**
+ * Back on the rack, all of it: the yard as it stands every day, only its two straw dummies up (Kyle, 2026-11-24: "you
+ * get attacked IMMEDIATELY ... no enemies on spawn"). Nothing comes at you until you ask Squire Pell for it.
+ */
 export function clearPractice(room: ArenaRoom): void {
   states.delete(room);
   emptyYard(room);
-  const s = ARENA.spawn, id = () => Math.max(0, ...room.allEnemies.map((o) => o.id)) + 1;
-  room.enemies.push(newEnemy(id(), 'butcher', s.butcher.x, s.butcher.y));
-  for (const at of s.scrappers) room.enemies.push(newEnemy(id(), 'scrapper', at.x, at.y));
+}
+
+/**
+ * A relic used in the yard keeps its light (Kyle, 2026-11-24: the trainer says trying it there won't dim it): each
+ * relic's charge as the hero came in, put back after every step. Not filled: a dark relic stays dark.
+ */
+const lights = new WeakMap<ArenaRoom, Map<string, number>>();
+export function keepLight(room: ArenaRoom, h: Hero): void {
+  lights.set(room, new Map(h.found.map((r) => [r.id, r.charge])));
+}
+function holdLight(room: ArenaRoom, h: Hero | undefined): void {
+  const was = lights.get(room);
+  if (h && was) for (const r of h.found) if (was.has(r.id)) r.charge = was.get(r.id)!;
 }
 
 /** The same again, from the start. */
@@ -114,6 +127,7 @@ export function stepPractice(room: ArenaRoom, ev: FightEvent[], me: string): voi
   // Nothing is won in the yard: what a goblin drops there is gone before anyone can take it.
   if (room.drops.length) room.drops.length = 0;
   if (room.pickups.length) room.pickups.length = 0;
+  holdLight(room, room.heroes.find((x) => x.id === me));
   const p = practiceOf(room);
   if (!p) return;
   const h = room.heroes.find((x) => x.id === me);
