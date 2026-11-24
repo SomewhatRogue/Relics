@@ -111,10 +111,10 @@ black limbs, a crow on some, a length of old rope on others. Stumps keep their p
 
 ## Behind a tree (2026-11-24, in)
 
-Nobody is lost behind a tree. A tree standing between the camera and a body (your hero, another, a foe near you)
-opens round them: a leafy, dark-lined window in its crown, bigger than the body so the ground behind shows round
-them, the trunk left standing in front (three/cardopen.ts). They are seen as themselves, lit and in colour. It
-replaces the pale chequered ghost for trees; walls and roofs keep theirs.
+Nobody is lost behind a tree, and nobody looks stood in front of one. A hero hidden by a tree, a wall or a roof is
+seen through it: themselves, in their own colours, on every other pixel, the thing in front on the rest
+(three/figmat.ts `xrayMaterial`). Kyle chose it from four (the old pale ghost, a window cut in the canopy, the hero
+solid and in shadow, and this): "See-Through is cool".
 
 ## Ridges (2026-11-24, in)
 

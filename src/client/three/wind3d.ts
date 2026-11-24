@@ -95,7 +95,7 @@ float lifeCloud(vec2 w, float t) {
 `;
 
 /** Chain an edit after whatever the material already does to its shaders (post.ts's toon). */
-export function chain(m: THREE.Material, edit: (sh: THREE.WebGLProgramParametersWithUniforms) => void, key: string): void {
+function chain(m: THREE.Material, edit: (sh: THREE.WebGLProgramParametersWithUniforms) => void, key: string): void {
   const before = m.onBeforeCompile.bind(m), keyBefore = m.customProgramCacheKey.bind(m);
   m.onBeforeCompile = (sh, r) => (before(sh, r), edit(sh));
   m.customProgramCacheKey = () => keyBefore() + key;
@@ -156,8 +156,8 @@ if (uLife > 0.5 && aSway > 0.0) {
 }
 
 /** Up to eight bodies near your hero (heroes, foes), tiles x and y: the grass and wheat part round them. */
-export const MAX_MOVERS = 8;
-export const MOVERS = { uMovers: { value: Array.from({ length: MAX_MOVERS }, () => new THREE.Vector2()) }, uNM: { value: 0 } };
+const MAX_MOVERS = 8;
+const MOVERS = { uMovers: { value: Array.from({ length: MAX_MOVERS }, () => new THREE.Vector2()) }, uNM: { value: 0 } };
 export function setMovers(at: [number, number][]): void {
   const n = Math.min(MAX_MOVERS, at.length);
   for (let i = 0; i < n; i++) MOVERS.uMovers.value[i].set(at[i][0], at[i][1]);

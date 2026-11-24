@@ -55,15 +55,16 @@ export function cardMaterial(lit: THREE.Texture, glow: THREE.Texture, edge = tru
 const VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
 
 /**
- * A hero's card seen through whatever stands in front of them: the dithered violet silhouette of
- * mats.ts XRAY, cut to the figure's own shape (a foe's in its own tint).
+ * A hero's card seen through whatever stands in front of them (a tree, a wall, a roof): themselves, in their own
+ * colours, on every other pixel, the thing in front on the rest, cut to the figure's own shape (Kyle, 2026-11-24:
+ * "See-Through is cool"; it was a flat pale shape, a ghost). `tint`: a foe's leans red.
  */
-export function xrayMaterial(lit: { value: THREE.Texture | null }, tint: [number, number, number] = [0.86, 0.8, 1]): THREE.ShaderMaterial {
+export function xrayMaterial(lit: { value: THREE.Texture | null }, tint: [number, number, number] = [1, 1, 1]): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     uniforms: { map: lit, uTint: { value: new THREE.Vector3(...tint) } },
     vertexShader: VS,
     fragmentShader: `uniform sampler2D map; uniform vec3 uTint; varying vec2 vUv;
-void main(){ if (texture2D(map, vUv).a < 0.9) discard; if (mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard; gl_FragColor = vec4(uTint, 0.35); }`,
+void main(){ vec4 t = texture2D(map, vUv); if (t.a < 0.9) discard; if (mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard; gl_FragColor = vec4(t.rgb * 0.85 * uTint, 0.35); }`,
     depthFunc: THREE.GreaterDepth,
     depthWrite: false,
     side: THREE.DoubleSide,

@@ -1000,3 +1000,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   out in the water, a flight of steps (Lowfurrow's pond). Inside a rounded bank those are water now.
 - Checked on phone 2.5D at HIGH and LOWEST in Gallows Wood, and Lowfurrow's pond; no page errors. (Claude Fable 5.2)
 
+## 2026-11-24: behind a tree, second go: see-through
+
+- Kyle on the before and after picture: "one of these images looks like a ghost, the other is TOO visible maybe".
+  The window showed the hero whole and bright, as if stood in front of the tree.
+- Tried and dropped: thinning the leaves over the body by the art's own shades (the dark leaf rims kept). The kept
+  pixels still hid the hero, so the ghost drew on them: a jumble.
+- Sent Kyle one picture of four ways at the same spot: the old ghost, the window, themselves in shadow (their own
+  colours gone dark and cool, drawn solid), and see-through (themselves in their own colours on every other pixel,
+  the tree on the rest). Kyle: "See-Through is cool ya do that".
+- figmat.ts `xrayMaterial` is see-through now, for anything that hides a hero: a tree, a wall, a roof. The other
+  three are out: three/cardopen.ts deleted, propcards.ts and wind3d.ts back as they were, no option in the address.
+- A foe behind a tree is not shown (only the window showed them). Foes have no silhouette pass of their own on a
+  job (three/cards3d.ts is Art's); to raise with Kyle.
+- Checked on phone 2.5D in Gallows Wood; no page errors. (Claude Fable 5.2)

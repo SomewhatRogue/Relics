@@ -16,7 +16,6 @@ import type { Ctx } from '../draw';
 import { PX } from '../world';
 import { cardMaterial } from './figmat';
 import { swayCards } from './wind3d';
-import { OPENS_AT, openCards } from './cardopen';
 import { oakCut, pineCut, reedCut } from '../tiletrees';
 import { bushCut, rockCut, snagCut } from '../tileflora';
 import { PITCH } from './camera3d';
@@ -67,8 +66,6 @@ export class CardSheet {
   push = false;
   /** Whether its cards carry the tile look's black edge (figmat.ts); not tufts, whose blades are a pixel wide. */
   edge = true;
-  /** Whether its tall cards open round a body standing behind them (cardopen.ts): the map's trees. */
-  open = false;
   private cuts: { c: Cut; x: number; z: number; up: number; sway: number }[] = [];
   /** `sway`: the most render pixels its top leans in the wind (wind3d.ts `swayCards`); 0 stands still. */
   add(c: Cut | null, x: number, z: number, up = 0, sway = 0): void {
@@ -93,7 +90,7 @@ export class CardSheet {
     }
     const H = sy + row + 1, mk = () => Object.assign(document.createElement('canvas'), { width: W, height: H });
     const lit = mk(), glow = mk(), lg = lit.getContext('2d')!, gg = glow.getContext('2d')!;
-    const pos: number[] = [], uv: number[] = [], sw: number[] = [], ph: number[] = [], tall: number[] = [];
+    const pos: number[] = [], uv: number[] = [], sw: number[] = [], ph: number[] = [];
     this.cuts.forEach(({ c, x, z, up, sway }, i) => {
       const [px, py] = at[i];
       lg.drawImage(c.lit, px, py), gg.drawImage(c.glow, px, py);
@@ -107,9 +104,6 @@ export class CardSheet {
       // Each card its own moment in the wind (wind3d.ts), from where it stands.
       const p = ((Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1 + 1) % 1 * Math.PI * 2;
       ph.push(p, p, p, p, p, p);
-      const t1 = c.h >= OPENS_AT ? 1 : 0;
-      // (Whether it opens, and the height its foot stands at: cardopen.ts keeps the trunk.)
-      for (let n = 0; n < 6; n++) tall.push(t1, b);
     });
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -120,7 +114,6 @@ export class CardSheet {
     const tex = (cv: HTMLCanvasElement) => Object.assign(new THREE.CanvasTexture(cv), { magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter, generateMipmaps: false });
     const mat = cardMaterial(tex(lit), tex(glow), this.edge);
     if (sw.some((v) => v > 0)) swayCards(mat, this.push);
-    if (this.open && tall.some((v, n) => n % 2 === 0 && v > 0)) g.setAttribute('aTall', new THREE.Float32BufferAttribute(tall, 2)), openCards(mat);
     return new THREE.Mesh(g, mat);
   }
 }
