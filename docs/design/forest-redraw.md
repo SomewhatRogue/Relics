@@ -91,5 +91,8 @@ Also: a dirt floor is the same rippled earth as a path now, a shade warmer; its 
 - Ridges: drawn earth lips where the land rises (the height levels we have).
 - Groves inside maps: trees placed in clumps rather than one by one (the map generators, Territories' files).
 - Mist banks at the edges and drifting motes (living world L4).
-- Water drawn the tile way (today a flat grey band); more looks and motifs as places ask for them; a look chosen by
-  the place's story, not only its name.
+- Water drawn the tile way. Today a pool is a hard rectangle that the floor's grade turns grey; with its own colours
+  back it is a pale glassy slab with dashed foam (tried and backed out, 2026-11-23). Wanted: rounded banks, dark still
+  water with a few glints, a turf lip over it, reeds as drawn cards. The pattern book's `pool` motif is the model.
+- More looks and motifs as places ask for them; a look chosen by the place's story, not only its name.
+- Groves that move a map's trees (the generators; changes fights).

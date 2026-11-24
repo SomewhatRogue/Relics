@@ -86,7 +86,7 @@ are untouched.
 
 Answered 2026-11-19: today's angle (36.87 is it, TILT out), drawn by code, the proof first. Kyle saw the proof and
 said "Continue" each time: R0 to R3 are in, R4's floors too. **REDRAW is on by default since 2026-11-20** (Kyle:
-"I think i like the redraw should we jsut have as standard"); `?redraw=0` or the button for the look before. Open: R4 (other places: a village on earth, the woods' floors, the Open
+"I think i like the redraw should we jsut have as standard"); `?redraw=0` in the address for the look before (the button went 2026-11-23: the redraw and the tile look are the game, not options). Open: R4 (other places: a village on earth, the woods' floors, the Open
 Cut, the Deep), then REDRAW as the default.
 
 **How every drawn face is mapped** (`three/redraw3d.ts` `screenQuad`): its picture's columns and rows come from where

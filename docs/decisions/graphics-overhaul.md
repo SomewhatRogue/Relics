@@ -872,3 +872,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Checked: whole-map floors of Gallows Wood (mossy), Lowfurrow (fallow), Sallow Carr (charcoal), Barrowby (raided),
   the Copperdeep's yard (warcamp); each motif and scene on phone 2.5D; no page errors. (Claude Fable 5.2)
 
+## 2026-11-23: TILES and REDRAW are the game, not options
+
+- Kyle: "I also want to just leave on tiles and redraw and add in everything weve been working on for high quality
+  graphics and lower camera angle etc. leave wide and close options for camera tho".
+- tilelook.ts: the TILES and REDRAW buttons and their saved settings are gone (as the living world's were,
+  2026-11-17); the old keys are cleared at load, so a device that once switched one off to compare is on the new look
+  again. `?tiles=0` and `?redraw=0` in the address still work, for the look scripts. main.ts: the call removed.
+- Already standard and left as they are: 2.5D and QUALITY: HIGH by default, the living world, the redraw's own camera
+  angle. Kept as options: CAMERA: WIDE / CLOSE (Kyle's ask), and VIEW, QUALITY and BRIGHT (the weak-phone fallback
+  and dim screens). Not touched: `?hd`, `?street` (the generated look the tile look replaced).
+- Water, looked at and left: the redraw's floor grade turns a pool grey; with its own colours back (tried, backed out)
+  Sallow Carr's pools are pale glassy rectangles with dashed foam. Water needs its own slice: rounded banks, dark
+  still water, a turf lip. In forest-redraw.md, "Later". (Claude Fable 5.2)
+

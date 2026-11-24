@@ -111,7 +111,6 @@ import { Scene } from './scene';
 import { Views } from './three/views';
 import { options } from './options';
 import { camButton } from './camwide';
-import { tileButtons } from './tilelook';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { heroVoices, primeSpot, townVoice, voiceClock } from './voiceplay';
@@ -860,8 +859,6 @@ $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.conta
 options();
 // CAMERA: CLOSE or WIDE, the wider camera to try (camwide.ts).
 camButton();
-// TILES and TILT, the tile look's light pass and the camera tilted up, to compare (tilelook.ts).
-tileButtons();
 ironUi();
 if (input.touch) document.body.classList.add('touch');
 
