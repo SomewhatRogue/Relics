@@ -35,6 +35,13 @@ effect, but the trade-off is a lot worse at single target." So: taps 7, 7, 10 at
 a full spin cuts for 7 plus the bleed's 3, about 10 a turn to everything in reach. On four goblins that's about the
 daggers' from behind on one; on one goblin, a quarter.
 
+## Later the same night (Kyle, playing)
+
+- Not up to speed, the spin's first cut that lands stops it ("TOO SLOW"): spin up at a distance and walk in.
+- The whirl turns round the chain hand; the sickle's point leads, in the spin and on the cut.
+- The spin never shoves or staggers. The throw goes out only fully spun; let go short, "TOO SLOW" and nothing.
+- The time to full is the weapon's draw, so anything that draws faster (QUICK DRAW, gear) spins it up faster.
+
 ## In the code
 
 - The weapon id stays `rapier` (saves, loot tables, gear looks and stores all carry it); only its name and

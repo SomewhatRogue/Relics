@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { SKEWER, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { SICKLE_SPIN, SICKLE_THROW } from '../src/shared/sickle';
 import { ArenaRoom } from '../src/sim/room';
+import { chargeFull } from '../src/sim/hero';
 import { newEnemy } from '../src/sim/enemies';
 import { NO_INTENT, type Enemy, type FightEvent, type Intent } from '../src/sim/types';
 
@@ -92,12 +93,32 @@ describe('the chain sickle', () => {
     expect(lost(e)).toBe(0);
   });
 
-  it('let go before a full spin, it cuts the first goblin and comes back: no pull', () => {
-    const { h, e, loose } = arena([5]);
+  it('let go short of a full spin, nothing goes out: TOO SLOW', () => {
+    const { room, h, e, loose } = arena([5]);
     const ev = loose(0.5, 1);
-    expect(lost(e)).toBeGreaterThan(0);
-    expect(ev.some((x) => x.k === 'yank')).toBe(false);
+    expect(lost(e)).toBe(0);
+    expect(room.hooks.length).toBe(0);
+    expect(ev.some((x) => x.k === 'chainstop')).toBe(true);
     expect(h.y).toBeGreaterThan(8);
+  });
+
+  it('the spin never shoves or staggers what it cuts', () => {
+    const ys = [2.5];
+    const { es, hold, keep } = arena(ys, true);
+    Object.assign(es[0], { act: 'stunned', actDur: WEAPONS.rapier.draw! + 0.2 });
+    hold(WEAPONS.rapier.draw! + 0.1);
+    Object.assign(es[0], { x: 9, y: 7, act: 'chase', actT: 0, kvx: 0, kvy: 0 });
+    keep(0.6);
+    expect(lost(es[0])).toBeGreaterThan(0);
+    expect(['flinch', 'stunned']).not.toContain(es[0].act);
+  });
+
+  it('anything that draws faster spins it up faster', () => {
+    const h = arena([]).h;
+    const plain = chargeFull(WEAPONS.rapier, h);
+    // (QUICK DRAW, the Rogue's knack: "held blow ready 15% sooner".)
+    h.perks = ['g_draw'];
+    expect(chargeFull(WEAPONS.rapier, h)).toBeLessThan(plain);
   });
 
   it('fully spun, a small goblin is yanked to your feet', () => {

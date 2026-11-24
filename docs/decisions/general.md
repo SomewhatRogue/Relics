@@ -303,3 +303,4 @@ Claude Opus 5.5
   height), not the body's middle; the floor ring of its reach stays on the Rogue. Claude Opus 5.5
 - An early spin stopped says TOO SLOW over the Rogue, with a clank and a drop of links ('chainstop'). Claude Opus 5.5
 - The sickle's point now leads: in the spin it hooks forward round the turn, and on a cut it points the way the swing goes (the swings alternate with the combo). Claude Opus 5.5
+- The spin no longer shoves (no stagger); the throw goes out only fully spun (short of it, TOO SLOW and nothing, in sim/hero.ts's release); the spin-up time is the weapon's draw, so QUICK DRAW and draw gear speed it. Claude Opus 5.5

@@ -56,7 +56,7 @@ export function stepSpins(heroes: Hero[], w: World): void {
         if ((e.bleedUntil ?? 0) <= w.now) e.bleedNext = w.now + SKEWER.every;
         e.bleedUntil = Math.max(e.bleedUntil ?? 0, w.now + SICKLE_SPIN.bleed);
       }
-      if (d > 1e-6 && e.weight <= 1) (e.kvx += ((e.x - h.x) / d) * SICKLE_SPIN.knock), (e.kvy += ((e.y - h.y) / d) * SICKLE_SPIN.knock);
+      // (No shove and no flinch: the spin cuts, it doesn't stagger. Kyle, 2026-11-23.)
       damage(e, n, w.now, w.ev, { src: 'sickle' });
       landed = true;
     }

@@ -302,6 +302,8 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       const held = h.actT + CHARGE.start, full = chargeFull(w, h), short = held < full - 1e-9;
       // Let go before the full draw: a Mage's spell, the crossbow's bolt and the smite come to nothing, the
       // shortbow flies full anyway, the rest go weaker (shared/weapons.ts `early`). Nothing is spent.
+      // The chain sickle goes out only spun up to full (Kyle, 2026-11-23): short of it, TOO SLOW and nothing thrown.
+      if (short && w.heavy.sickle) return void (ev.push({ k: 'chainstop', x: h.x, y: h.y }), Object.assign(h, { act: 'idle', actT: 0, perfect: false, power: 0 }));
       if (short && w.early === 'fizzle') {
         ev.push({ k: 'early', x: h.x, y: h.y });
         return void Object.assign(h, { act: 'idle', actT: 0, perfect: false, power: 0 });
