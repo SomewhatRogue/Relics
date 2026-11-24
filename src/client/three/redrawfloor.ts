@@ -13,10 +13,12 @@ import { gradeCanvas } from '../darkgold';
 import { floorStamp, KX, KZ, type Rect } from '../tilekit';
 import { groundStamp, grounds } from '../tilegrounds';
 import { ledge, OX, OY, PX, toPx } from '../world';
-import { paintSoil } from '../soil';
+import { paintSoil, soilAt } from '../soil';
 import { softEdges } from '../tileedges';
 import { paintWater } from '../waterpaint';
-import { paintScatter } from '../scatterpaint';
+import { groveFloors } from '../tilelitter';
+import { strew } from '../tilestrew';
+import { paintScenes } from '../tilescenes';
 import { paintMarks } from '../marks';
 import { paintGrim } from '../grimpaint';
 import { stacked } from '../levelpaint';
@@ -61,8 +63,14 @@ export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   paintSoil(m, g, { x: 0, y: 0, sx: KX, sy: KZ, calm: true });
   // Where the materials meet, drawn as tile art draws an edge (tileedges.ts: the living world's L1).
   softEdges(m, rect, KX, KZ);
+  // (Ground laid with intent: a grove's floor of needle litter and roots under the trees, tilelitter.ts; and what
+  // lies about, thick round things and thin in the open, drawn the tile way, tilestrew.ts.)
+  groveFloors(m, rect);
   paintWater(m, R, r2, toPx, PX);
-  paintScatter(m, R);
+  const laid = new Set(['earth', 'swept', 'flags', 'furrow', 'crop', 'straw', 'ash', 'wet', 'mud']);
+  strew(m, rect, (x, y) => !!m.soil?.length && laid.has(soilAt(m, x, y)));
+  // (The small scenes' part in the floor: a grave's mound, a dead fire's ring, a stain: tilescenes.ts.)
+  paintScenes(m, rect);
   // (A hall's sawdust and rushes, hallfloor.ts, are a tenth of the floor in pale flecks: on drawn planks that reads
   // as speckle. Here a few dull ones a tile, on the grid. The living world's L3, 2026-11-22.)
   paintMarks({ ...m, marks: (m.marks ?? []).filter((k) => !STREWN_KINDS.has(k.kind)) }, R);

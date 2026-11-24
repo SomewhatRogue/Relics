@@ -18,6 +18,7 @@ import { redrawFloor, redrawPx } from './redrawfloor';
 import { CardSheet, isCardRound } from './propcards';
 import { tuftMesh } from './tufts3d';
 import { treeLine } from './treeline3d';
+import { sceneCards, scenesOf } from '../tilescenes';
 import { type Shaded, treeShade } from './treeshade';
 import { Boxes, Seed, jit } from './boxes';
 import type { Lamp3 } from './lamps3d';
@@ -219,6 +220,19 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // (Grass and wheat standing up off the redraw's floor, parting round whoever walks through: tufts3d.ts.)
   const tm = REDRAW.on ? tuftMesh(m, LEDGE_H) : null;
   if (tm) group.add(tm);
+  // The small scenes' standing things (a marker, a cairn, candle stubs: ../tilescenes.ts), a candle's light with them.
+  const scenes = new CardSheet();
+  scenes.edge = false;
+  for (const sc of REDRAW.on ? scenesOf(m) : []) {
+    let lit = false;
+    for (const c of sceneCards(sc)) {
+      const up = stacked(m) ? groundLv(m, c.x, c.y) * LEDGE_H : 0;
+      scenes.add(c.cut, c.x, c.y, up);
+      if (c.lit && !lit) (lit = true), lights.push({ x: c.x, y: 0.5 + up, z: c.y, r: 2.8, i: 0.55, c: [1, 0.74, 0.44], f: 12 });
+    }
+  }
+  const scm = scenes.mesh();
+  if (scm) group.add(scm);
   const sm = treeShade(standShade);
   if (sm) group.add(sm);
   const cm = cards.mesh();

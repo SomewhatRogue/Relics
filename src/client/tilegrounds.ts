@@ -107,8 +107,9 @@ function grass(rect: Rect, rng: Rng, x: number, y: number): void {
       i += n;
     }
   }
-  // A clump now and then (rarer than before): a mound lit on the top left, its shadow under the right.
-  if (rng.next() < 0.12) {
+  // A clump once in a long while: a mound lit on the top left, its shadow under the right. (The ground's small
+  // things are gathered by tilestrew.ts, not sprinkled a tile at a time.)
+  if (rng.next() < 0.025) {
     const cx = x + 1 + rng.int(13), cy = y + 1 + rng.int(7);
     sprite(rect, cx, cy, ['.a.b.', '.bbb.', 'bbbbb', '.dddd'], { a: BLADE[3], b: BLADE[2], d: BLADE[0] });
   }

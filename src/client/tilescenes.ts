@@ -1,0 +1,108 @@
+/**
+ * Small scenes that make a map a place (docs/design/forest-redraw.md, "Small scenes"; Kyle, 2026-11-23: "a beautiful
+ * but dark world"). One or two a job's outdoor map, chosen and placed from the map alone (every screen the same), off
+ * the paths and near a tree: a shallow grave with a leaning marker and pale flowers; a cairn with a skull on it and a
+ * candle stub; a dead campfire; a ring of bones round an old bloodstain, candles guttering. Mostly laid in the floor,
+ * with one low thing standing, so walking over one reads right: they are paint only, never collided (as the scatter's
+ * standing things: shared/scatter.ts). Drawn the tile way, a pixel to a pixel; a candle is the only light.
+ */
+import type { GameMap } from '../shared/arena';
+import { Rng } from '../shared/rng';
+import { scattered } from '../shared/scatter';
+import { blocked } from './ratspots';
+import { soilAt } from './soil';
+import { KX, KZ, type Rect } from './tilekit';
+import type { Cut } from './three/propcards';
+
+export type SceneKind = 'grave' | 'cairn' | 'campfire' | 'circle';
+export interface Scene { kind: SceneKind; x: number; y: number }
+
+const cache = new WeakMap<GameMap, Scene[]>();
+
+/** The map's scenes. Not the town, not indoors, not a floor that isn't open ground. */
+export function scenesOf(m: GameMap): Scene[] {
+  const hit = cache.get(m);
+  if (hit) return hit;
+  const out: Scene[] = [];
+  cache.set(m, out);
+  const floor = m.theme.floor as string;
+  if (!scattered(m) || (floor !== 'grass' && floor !== 'dirt' && floor !== 'mud')) return out;
+  const rng = new Rng([...m.name].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) % 1000003, m.w * 131 + m.h * 977 + 17));
+  const kinds: SceneKind[] = ['grave', 'cairn', 'campfire', 'circle'], want = Math.min(4, Math.max(1, Math.round((m.w * m.h) / 400)));
+  const wet = (x: number, y: number) => !!m.water?.some((w) => x > w.x - 1 && x < w.x + w.w + 1 && y > w.y - 1 && y < w.y + w.h + 1);
+  const bare = (x: number, y: number) => {
+    const s = m.soil?.length ? soilAt(m, x, y) : 'cobble';
+    return s !== 'cobble' && s !== 'grass' && s !== 'shade';
+  };
+  for (let i = 0; i < 240 && out.length < want; i++) {
+    const x = 2 + rng.next() * (m.w - 4), y = 2.5 + rng.next() * (m.h - 5);
+    // Open ground a step wide, off every path and patch, not at a door or where anyone starts.
+    if ([[0, 0], [-0.9, 0], [0.9, 0], [0, -0.6], [0, 0.6]].some(([dx, dy]) => blocked(m, x + dx, y + dy) || bare(x + dx, y + dy)) || wet(x, y)) continue;
+    if (Math.hypot(m.hero.x - x, m.hero.y - y) < 4 || (m.exit && Math.hypot(m.exit.x + m.exit.w / 2 - x, m.exit.y + m.exit.h / 2 - y) < 3)) continue;
+    // By a tree or a rock (company), never on top of one; apart from the other scenes.
+    const d = Math.min(...m.rounds.map((r) => Math.hypot(r.x - x, r.y - y) - r.r), 99);
+    if (d < 0.7 || d > 3.2 || out.some((s) => Math.hypot(s.x - x, s.y - y) < 9)) continue;
+    out.push({ kind: kinds.splice(rng.int(kinds.length), 1)[0], x, y });
+  }
+  return out;
+}
+
+const C: Record<string, string> = {
+  // earth turned, ash, stone, bone, wood, wax, rag and old blood, a ghost-pale flower
+  E: '#1a140f', e: '#2a2019', f: '#3a2d22', A: '#17161a', a: '#26252a', h: '#35333a',
+  K: '#15141a', s: '#34323c', p: '#4a4753', W: '#8b8982', w: '#5f5d5a', o: '#0d0c0b',
+  B: '#1c130c', b: '#33241a', t: '#4a3626', x: '#8a8474', R: '#4a1616', r: '#2c0e10', F: '#8a8894', g: '#243322',
+};
+const put = (rect: Rect, x0: number, y0: number, rows: string[]) => rows.forEach((row, j) => [...row].forEach((ch, i) => C[ch] && rect(x0 + i, y0 + j, 1, 1, C[ch])));
+
+const FLOOR: Record<SceneKind, string[]> = {
+  // A mound of turned earth, lit along its upper left, flowers at its head.
+  grave: ['..F.....ffff......', '.FgF.ffeeeeeeff...', '..g.feeeeeeeeeee..', '...feeeeEeeeeeeEE.', '...eeeEeeeeeEeeEE.', '....EEeeeeeEEEEE..', '......EEEEEEE.....'],
+  // Bare trodden earth round the pile's foot.
+  cairn: ['....eeeeeeee....', '..eeeeeeeeeeee..', '.eeeEeeeeeeEeee.', '..EEeeeeeeeeEE..', '....EEEEEEEE....'],
+  // A ring of stones round cold ash, charred ends in it.
+  campfire: ['....ps.ps.ps....', '..ps.aaaaaa.ps..', '.sK.aaBaahaaa.pK', '.ps.aAaabBaAa.sK', '..sK.aaAaaa.sK..', '....sK.sK.sK....'],
+  // Bones laid in a ring round an old stain.
+  circle: ['.....W..w..W.....', '..w....rrrr....W.', '.W...rrRRRRrr...w', '....rRRrRRRRRr...', '.w...rrRRRrrr...W', '..W....rrr.....w.', '.....w..W..w.....'],
+};
+
+/** Each scene's part in the floor. */
+export function paintScenes(m: GameMap, rect: Rect): void {
+  for (const s of scenesOf(m)) {
+    const rows = FLOOR[s.kind];
+    put(rect, Math.round(s.x * KX) - (rows[0].length >> 1), Math.round(s.y * KZ) - (rows.length >> 1), rows);
+  }
+}
+
+const UP: Record<SceneKind, { rows: string[]; glow?: [number, number][]; dx: number; dy: number }[]> = {
+  // A marker of two planks, leaning, a rag tied to it.
+  grave: [{ dx: -0.42, dy: -0.05, rows: ['..ot...', '.obt...', 'obbbbto', 'ottbtRo', '..obRRo', '..obtRo', '..obt.o', '..obt..', '..obt..', '.oEbtE.'] }],
+  // Stones heaped, a skull on top; a candle stub at its foot.
+  cairn: [
+    { dx: 0, dy: 0.02, rows: ['....oWWo....', '...oWoWWo...', '...oWWwwo...', '..oppoWwoo..', '.opsspoopso.', '.osssKpsssKo', 'oppsKpssKpso', 'ossKKssKKssK', '.KKKKKKKKKK.'] },
+    { dx: 0.44, dy: 0.12, rows: ['.o.', '.o.', 'oxo', 'oxo', 'KxK'], glow: [[1, 0], [1, 1]] },
+  ],
+  // Two forked sticks and a spit, nothing on it.
+  campfire: [{ dx: 0, dy: -0.05, rows: ['t.t.........t.t', '.b...........b.', 'obtttttttttttbo', '.b...........b.', '.b...........b.', '.b...........b.', '.B...........B.'] }],
+  // Three candle stubs among the bones.
+  circle: [
+    { dx: -0.3, dy: -0.12, rows: ['.o.', '.o.', 'oxo', 'KxK'], glow: [[1, 0], [1, 1]] },
+    { dx: 0.34, dy: -0.04, rows: ['.o.', '.o.', 'oxo', 'oxo', 'KxK'], glow: [[1, 0], [1, 1]] },
+    { dx: 0.02, dy: 0.2, rows: ['.o.', '.o.', 'KxK'], glow: [[1, 0], [1, 1]] },
+  ],
+};
+const FLAME = ['#ffd27a', '#e8862e'];
+
+/** A scene's standing things: each a card, where it stands (tiles), and whether it burns. */
+export function sceneCards(s: Scene): { cut: Cut; x: number; y: number; lit: boolean }[] {
+  return UP[s.kind].map((u) => {
+    const w = u.rows[0].length, h = u.rows.length, mk = () => Object.assign(document.createElement('canvas'), { width: w, height: h });
+    const lit = mk(), glow = mk(), lg = lit.getContext('2d')!, gg = glow.getContext('2d')!;
+    put((x, y, ww, hh, col) => ((lg.fillStyle = col), lg.fillRect(x, y, ww, hh)), 0, 0, u.rows);
+    (u.glow ?? []).forEach(([x, y], i) => ((gg.fillStyle = FLAME[i % 2]), gg.fillRect(x, y, 1, 1), lg.clearRect(x, y, 1, 1), (lg.fillStyle = FLAME[i % 2]), lg.fillRect(x, y, 1, 1)));
+    return { cut: { lit, glow, w, h, ax: w >> 1, ay: h - 1 }, x: s.x + u.dx, y: s.y + u.dy, lit: !!u.glow };
+  });
+}
+
+// A test hook (scripts and screenshots find a map's scenes): window.__scenesOf(map).
+if (typeof window !== 'undefined') (window as unknown as { __scenesOf: typeof scenesOf }).__scenesOf = scenesOf;

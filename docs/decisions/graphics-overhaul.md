@@ -847,3 +847,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Groves and small scenes asked of the maps' owners on the board (Collisions).
 - Checked on phone 2.5D: the town's street, Gallows Wood, a village, a field; no page errors. (Claude Fable 5.2)
 
+## 2026-11-23: ground laid with intent; small dark scenes
+
+- Kyle: "Go for it yourself. And lets get more mindful and present with ground layout too i want this to be a beautiful
+  but dark world". Looked at four maps whole (the floor texture with every round drawn on it): nothing gathered.
+- Grove floors and roots (tilelitter.ts), the scatter redrawn dark at a pixel to a pixel (tilestrew.ts, in place of
+  scatterpaint.ts under the redraw), standing tufts gathered round things (tufts3d.ts), the grass stamp's clumps cut
+  from 12% of tiles to 2.5%.
+- Scenes (tilescenes.ts): grave, cairn, dead campfire, ring of bones; one to four a map by its size, seeded from the
+  map, off paths and starts, 0.7 to 3.2 tiles from a round; cards without the tile edge; one warm light a scene that
+  has a candle (ground.ts). `window.__scenesOf(map)` for scripts.
+- Not yet: groves that move the trees themselves (the generators; changes fights, so on its own).
+- Checked on phone 2.5D: Gallows Wood by day and night, Sallow Carr by night, each scene close up; no page errors.
+  (Claude Fable 5.2)
+

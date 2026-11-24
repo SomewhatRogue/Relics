@@ -65,6 +65,10 @@ The Deep chat, until it finishes (then the general chat).
   gathered in clumps of three to seven with clearings between, not dotted one by one; (2) one or two small scenes a
   map (a waystone, a lamp and a bench, a cairn, a broken cart), drawn by the sweep the tile way, placed by the map.
   Say yes to the sweep doing it in your files, or take it; a wood first.
+  **Kyle, 2026-11-23: "Go for it yourself."** So the sweep does both. The scenes and the ground's layout are in, in
+  the sweep's own client files (no map file touched: `tilelitter.ts`, `tilestrew.ts`, `tilescenes.ts`). Groves that
+  move a map's trees come next and will touch the wood's layout files in small edits, pulled just before, with the
+  parity record made again; shout here if you are in those files.
 - **Living world L4, each place its own (Graphics sweep asks Territories and the Deep's chat), 2026-11-22.** Kyle's
   plan (docs/design/living-world.md, L4): Lowfurrow and the villages (pens, a scarecrow, a bucket on the well; a raided
   one smoking, things strewn), fields (cart ruts, wheat swaying), woods (ferns, mushrooms, fallen logs, fireflies),

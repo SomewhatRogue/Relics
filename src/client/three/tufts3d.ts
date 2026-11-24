@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { groundLv } from '../../shared/heights';
+import { nearby } from '../../shared/mapgrid';
 import { stacked } from '../levelpaint';
 import { blocked } from '../ratspots';
 import { soilAt } from '../soil';
@@ -31,6 +32,15 @@ function growth(m: GameMap, x: number, y: number): 'grass' | 'wheat' | null {
 
 const VARIANTS = 6;
 
+/** Is (x, y) by something grass grows long against: a tree, a rock, a post, a wall, the map's edge? */
+function near(m: GameMap, x: number, y: number): boolean {
+  if (Math.min(x, y, m.w - x, m.h - y) < 1.6) return true;
+  const g = nearby(m, x, y) ?? m;
+  for (const r of g.rounds) if (Math.hypot(r.x - x, r.y - y) - r.r < 1.3) return true;
+  for (const b of g.blocks) if (x > b.x - 1 && x < b.x + b.w + 1 && y > b.y - 1 && y < b.y + b.h + 1) return true;
+  return false;
+}
+
 /** The map's tufts as one mesh, or null if nothing grows here; `ledge` the height of a level (ground.ts LEDGE_H). */
 export function tuftMesh(m: GameMap, ledge: number): THREE.Mesh | null {
   const cuts = new Map<string, Cut>(), cutOf = (k: 'grass' | 'wheat', v: number) => {
@@ -46,9 +56,11 @@ export function tuftMesh(m: GameMap, ledge: number): THREE.Mesh | null {
   for (let ty = 0; ty < m.h; ty++) for (let tx = 0; tx < m.w; tx++) {
     const k = growth(m, tx + 0.5, ty + 0.5);
     if (!k) continue;
-    // Grass in loose patches (a slow field over the map, so tufts gather), wheat a clump or two a tile.
+    // Grass gathered where it would grow long: round trees, rocks and walls and along the map's edge, with the odd
+    // loose patch in the open (a slow field over the map); the open ground otherwise calm. Wheat a clump or two a tile.
     const patch = 0.6 * h01(Math.floor(tx / 4), Math.floor(ty / 3), 1) + 0.4 * h01(Math.floor(tx / 3), Math.floor(ty / 4), 2);
-    const n = k === 'wheat' ? 1 + (h01(tx, ty, 3) < 0.5 ? 1 : 0) : patch > 0.62 && h01(tx, ty, 4) < 0.55 ? 1 + (h01(tx, ty, 5) < 0.3 ? 1 : 0) : 0;
+    const by = k === 'grass' && near(m, tx + 0.5, ty + 0.5);
+    const n = k === 'wheat' ? 1 + (h01(tx, ty, 3) < 0.5 ? 1 : 0) : by ? (h01(tx, ty, 4) < 0.5 ? 1 + (h01(tx, ty, 5) < 0.3 ? 1 : 0) : 0) : patch > 0.74 && h01(tx, ty, 4) < 0.4 ? 1 : 0;
     for (let i = 0; i < n; i++) {
       const x = tx + 0.15 + h01(tx, ty, 6 + i) * 0.7, y = ty + 0.2 + h01(tx, ty, 9 + i) * 0.7;
       if (blocked(m, x, y) || water(x, y)) continue;

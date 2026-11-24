@@ -44,10 +44,30 @@ trees.
 - **Turf over paths** (`tileedges.ts`): a grass floor is grass to its edges too. Turf's foot and right side dark, its
   top and left lit with blades standing proud; the bare ground under it takes the turf's shadow.
 
+## Ground layout (2026-11-23, in)
+
+Kyle: "lets get more mindful and present with ground layout too i want this to be a beautiful but dark world." Seen
+whole, the maps were sprinkled evenly from edge to edge: tufts from three places, pale stones, the same turf under a
+tree as in the open. Now, in the redraw's floor:
+
+- **A grove's floor** (`tilelitter.ts`): under every tree, pine, snag, bush and stump the turf gives way to dark needle
+  litter, its edge broken into the turf's clumps, roots running out from the trunk. Trees near each other share one
+  floor and read as a grove; the open ground between is calm.
+- **What lies about** (`tilestrew.ts`): the scatter's own places (thick round trees, rocks, walls, water; thin in the
+  open) drawn the tile way at a pixel to a pixel, dark, with our accents: rust leaves, bone, a blood-red cap on a
+  mushroom, a ghost-pale flower. Growing things keep off paths and laid ground.
+- **Standing tufts** (`three/tufts3d.ts`) gather round trees, rocks, walls and the map's edge; the grass stamp's own
+  clumps all but gone.
+
+## Small scenes (2026-11-23, in)
+
+One or two a job's outdoor map (`tilescenes.ts`), chosen and placed from the map alone, off the paths, by a tree:
+a shallow grave with a leaning marker and pale flowers; a cairn with a skull and a candle stub; a dead campfire with
+its spit; a ring of bones round an old bloodstain, candles guttering. Mostly in the floor, one low thing standing;
+paint only, never collided. A candle throws a small warm pool: the only light they have.
+
 ## Later
 
 - Ridges: drawn earth lips where the land rises (the height levels we have).
-- One or two small scenes a map (a waystone, a lamp and bench, a cairn): the pieces drawn here, placed by each map's
-  owner (Territories), or by this chat with their yes.
 - Groves inside maps: trees placed in clumps rather than one by one (the map generators, Territories' files).
 - Mist banks at the edges and drifting motes (living world L4).
