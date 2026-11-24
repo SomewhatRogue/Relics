@@ -69,6 +69,10 @@ What that changes here:
 One caution from the same game: its makers cut some of its largest areas down after players found them a slog. Long
 is good while something new is on screen every screen or two; the beats still matter more than the tile count.
 
+(Kyle, later the same day: "one long map might work for SOME of them": missions keep their different types, and
+the long ground is mostly the land you walk into from the gate: docs/design/outside-the-gate.md. The proof below is
+that land's first map, the Gate Fields, not a mission.)
+
 ## Slices
 
 (Re-ordered for the direction above: after slice 1, the proof is one continuous mission, built as new files behind a

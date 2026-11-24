@@ -1059,3 +1059,12 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Docs only. Kyle also saw "two competing lines" pointing to a newly opened area; not found in three looks
   (the gold arrow, wayfind.ts, overlay3d.ts): asked him where. (Claude Fable 5.2)
 
+## 2026-11-24: outside the gate, a spec
+
+- Kyle: one long map for some missions only; the missions keep different types; "maps that you can access by just
+  going out of the gate", with killing, materials and quests out there, worked out slowly.
+- docs/design/outside-the-gate.md: three kinds of ground (town, missions of several types, the land), the land's
+  first map (the Gate Fields, from the North Gate, on the territory kit), what you do there, the order, who, and
+  three calls for Kyle. On the board under Waiting: a big new topic, so a chat of its own.
+- biome-sets.md: its proof is that first map, not a mission. Docs only. (Claude Fable 5.2)
+

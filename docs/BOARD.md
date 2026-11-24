@@ -47,6 +47,10 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **The land outside the gate (Graphics sweep, 2026-11-24, Kyle's ask):** docs/design/outside-the-gate.md: walk out
+  of the North Gate into a map with no board and no gates, grown a map at a time; kills, materials and quests out
+  there. Spec only, no chat yet. Its look is docs/design/biome-sets.md (the Graphics sweep's).
+
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.
 
