@@ -428,3 +428,11 @@ the sewer grate", in place of "Talk to the under church about growing the Want";
   to the brazier's right.
 - Still the stock elder for Dorcas. The candles draw as a stand, not loose stubs; a stub round would be its own card.
 - **Checked:** phone 2.5D sweep (shots/sweep/keep5), the room and furniture tests, `npm run check`, the full suite.
+
+## 2026-11-24: Dorcas cloaked and hooded (Claude Opus 5.5)
+
+- Kyle: "fix up dorcas have them be cloaked and hooded". A new look, `keeper`, in `client/npcs.ts` (a small edit
+  in a shared file): a dark umber cloak to the shins, the hood deep over her brow with her face in its shadow, a dull
+  clasp at the throat. The hood starts on the top row and is eight wide, so the side view keeps it square on her
+  head (npcside.ts `hat`). She wears it in `shared/keepingroom.ts` in place of the stock elder.
+- **Checked:** phone 2.5D sweep (shots/sweep/keep6), the room tests, `npm run check`, the full suite.

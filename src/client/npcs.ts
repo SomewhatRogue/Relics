@@ -51,6 +51,13 @@ export const LOOKS: Record<string, Look> = {
   survivor: { body: '#7a6a58', trim: '#5a4a3a', skin: SKIN, hair: [['r', 4, 1, 4, 1, '#3a2a1a'], ['r', 3, 2, 6, 1, '#e8e0c8']] },
   // Foreman Judd: a leather jerkin over his shirt, a flat cap, a beard going grey.
   foreman: { body: '#6a4a2e', trim: '#b8a070', skin: DARK, apron: '#4a3420', hair: [['r', 2, 1, 8, 1, '#3a3a40'], ['r', 3, 0, 6, 1, '#3a3a40'], ['r', 4, 5, 4, 2, '#8a8490']] },
+  // Dorcas in the Keeping Room (Kyle, 2026-11-24: "cloaked and hooded"): a dark umber cloak to the shins, the hood
+  // deep over her brow and her face in its shadow, a dull clasp at the throat, the cloak falling over her shoulders.
+  keeper: { body: '#2e2824', trim: '#463a2e', skin: SKIN, hair: [
+    ['r', 3, -1, 6, 1, '#3e352e'], ['r', 2, 0, 8, 3, '#2e2824'], ['r', 2, 0, 1, 3, '#3e352e'], ['r', 4, 2, 4, 1, '#141218'],
+    ['r', 2, 3, 2, 4, '#2e2824'], ['r', 8, 3, 2, 4, '#221c18'], ['r', 1, 6, 2, 5, '#2e2824'], ['r', 9, 6, 2, 5, '#221c18'],
+    ['p', 6, 6, '#8a7a5a'], ['r', 2, 11, 8, 2, '#2e2824'], ['r', 2, 12, 8, 1, '#221c18'],
+  ] },
   // His crew: work-worn smocks, a hood or a kerchief, dust to the knees.
   labourer: { body: '#5a5240', trim: '#3a3428', skin: SKIN, hair: [['r', 3, 0, 6, 2, '#4a4030']] },
   labourer2: { body: '#4e5a5a', trim: '#3a3a30', skin: DARK, apron: '#7a6e58', hair: [['r', 3, 0, 6, 2, '#8a3a2a'], ['p', 9, 2, '#8a3a2a']] },

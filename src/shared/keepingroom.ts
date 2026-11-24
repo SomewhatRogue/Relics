@@ -37,7 +37,7 @@ export function keepingRoom(): GameMap {
     // The dry arch's end: the iron door, its slot. The kettle on its trivet by the brazier.
     b('irondoor', 1.9, 9.3, 1.4, 0.4),
     b('kettle', 9.3, 3.5, 0.7, 0.5),
-  ], [n('DORCAS', 7.4, 4.9, KEEPING_DOOR, 'elder')], {
+  ], [n('DORCAS', 7.4, 4.9, KEEPING_DOOR, 'keeper')], {
     // No torches: the brazier's coals, and whatever light the hero brings.
     torches: [],
     braziers: [{ x: 8.5, y: 4.3, r: 0.4 }],
