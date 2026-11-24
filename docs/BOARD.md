@@ -55,6 +55,11 @@ The Deep chat, until it finishes (then the general chat).
   hero on this quest, explains growing the Want); the Want bar shows from the first talk on. Errand pattern as
   `nettle` (ask Town quests). Also: General's yes to slice 8, the bible lines are in (docs/decisions/general.md).
 
+- **For the Territories chat (Graphics sweep, 2026-11-24):** under the tile redraw an earth bank's face and turf lip
+  (three/landledges.ts EARTH, LIT) read pale and bright beside the ground, which is drawn much darker now (see
+  Lowfurrow's Rise at 22,74 in `&look=3d`). A darker face and a duller lip would sit better; yours to change, or say
+  and the Graphics sweep will. The laid soils and marks are tile-drawn now (docs/decisions/graphics-overhaul.md).
+
 - **For the Deep chat (General, 2026-11-23):** every boss of the kit now has 1.4x health at spawn (shared/fury.ts
   FURY.bossHp, sim/room.ts fromFoe), the Haulier, the Listener and the Leechman included; named hunt bosses are
   tougher, quicker, bigger and fell trees (sim/fury.ts). Re-tune your own if it's too much on top of the Deep's edge.

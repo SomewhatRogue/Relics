@@ -64,9 +64,9 @@ function build(m: GameMap): WaterField | null {
   return { n, cols, rows, level, far, flow };
 }
 
-/** Whether this map's banks are earth or turf, drawn rounded under the redraw: a job's ground, not masonry (a stone
- *  quay's water keeps its straight edge), not the town. */
-export const softBanks = (m: GameMap) => REDRAW.on && scattered(m) && ['grass', 'dirt', 'mud'].includes(m.theme.floor as string);
+/** Whether this map's banks are earth or turf, drawn rounded under the redraw: a job's ground (a field of
+ *  wheat's pond too), not masonry (a stone quay's water keeps its straight edge), not the town. */
+export const softBanks = (m: GameMap) => REDRAW.on && scattered(m) && ['grass', 'dirt', 'mud', 'wheat'].includes(m.theme.floor as string);
 
 /**
  * The redraw's banks (docs/design/forest-redraw.md, "Water"): the room's water is rectangles, and drawn so a pool is

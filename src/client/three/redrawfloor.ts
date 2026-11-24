@@ -22,6 +22,7 @@ import { strew } from '../tilestrew';
 import { paintScenes } from '../tilescenes';
 import { paintDrifts, paintZones } from '../tilemotifs';
 import { paintMarks } from '../marks';
+import { TILED_MARKS, tileMark } from '../tilemarks';
 import { paintGrim } from '../grimpaint';
 import { stacked } from '../levelpaint';
 
@@ -111,8 +112,12 @@ export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   paintScenes(m, rect);
   // (A hall's sawdust and rushes, hallfloor.ts, are a tenth of the floor in pale flecks: on drawn planks that reads
   // as speckle. Here a few dull ones a tile, on the grid. The living world's L3, 2026-11-22.)
-  paintMarks({ ...m, marks: (m.marks ?? []).filter((k) => !STREWN_KINDS.has(k.kind)) }, R);
-  for (const k of m.marks ?? []) if (STREWN_KINDS.has(k.kind)) strewn(rect, r2, k);
+  // (Churned mud, trampled ground, puddles, weeds and loose straw are drawn the tile way too: tilemarks.ts.)
+  paintMarks({ ...m, marks: (m.marks ?? []).filter((k) => !STREWN_KINDS.has(k.kind) && !TILED_MARKS.has(k.kind)) }, R);
+  for (const k of m.marks ?? []) {
+    if (STREWN_KINDS.has(k.kind)) strewn(rect, r2, k);
+    else if (TILED_MARKS.has(k.kind)) tileMark(rect, new Rng(Math.round(k.x * 131 + k.y * 71 + k.w * 13)), k);
+  }
   paintGrim(m, R);
   R(OX, OY, m.w * PX, 4, 'rgba(0,0,0,0.35)');
   if (!stacked(m)) for (const l of m.ledges ?? []) ledge(l, R, r2, pick);

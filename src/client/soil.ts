@@ -6,6 +6,7 @@
  * for the stepped lighting, apart enough to read on a phone at night.
  */
 import { EARTH, SWEPT, earthAt, grassAt } from './tilegrounds';
+import { ashAt, cropAt, mudAt, siltAt, strawAt } from './tilesoils';
 import type { GameMap, Soil } from '../shared/arena';
 import { OX, OY, PX } from './world';
 
@@ -104,6 +105,11 @@ export function soilAt(m: GameMap, x: number, y: number): Soil['mat'] {
   return matAt(soil, b, x, y);
 }
 
+/** The tile redraw's soils, each one floor pixel at a time (tilegrounds.ts, tilesoils.ts). */
+const CALM: Partial<Record<Soil['mat'], (px: number, py: number) => string>> = {
+  grass: grassAt, earth: (x, y) => earthAt(x, y, EARTH), swept: (x, y) => earthAt(x, y, SWEPT), mud: mudAt, wet: siltAt, straw: strawAt, crop: cropAt, ash: ashAt,
+};
+
 /** Paint the soil straight into the floor's pixels: material per 4x4 block, colour per 2x2. */
 /**
  * `at`: the grid painted on, its top left and its pixels a tile across and down (the tile redraw paints the 2.5D floor
@@ -118,18 +124,12 @@ export function paintSoil(m: GameMap, g: CanvasRenderingContext2D, at: { x: numb
   for (let by = 0; by < H; by += B) for (let bx = 0; bx < W; bx += B) {
     const mat = matAt(soil, boxes, (bx + B / 2) / sx, (by + B / 2) / sy);
     if (mat === 'cobble' || mat === 'shade') continue;
-    // (Calm grass: the redraw's own blade marks, a pixel at a time, one ground with the grass floor: tilegrounds.ts.)
-    if (at.calm && mat === 'grass') {
+    // (Calm: the redraw's own ground, a pixel at a time and one ground with the floor's stamps: grass in blade marks,
+    // earth and swept ground rippled, mud, wet silt, straw, a crop and ash as tilesoils.ts draws them. No speckle.)
+    const tile = at.calm ? CALM[mat] : undefined;
+    if (tile) {
       for (let py = by; py < Math.min(H, by + B); py++) for (let px = bx; px < Math.min(W, bx + B); px++) {
-        const [r, gg, b] = toRgb(grassAt(px, py)), o = (py * W + px) * 4;
-        (d[o] = r), (d[o + 1] = gg), (d[o + 2] = b), (d[o + 3] = 255);
-      }
-      continue;
-    }
-    // (Calm earth and swept ground the same way: rippled, no speckle.)
-    if (at.calm && (mat === 'earth' || mat === 'swept')) {
-      for (let py = by; py < Math.min(H, by + B); py++) for (let px = bx; px < Math.min(W, bx + B); px++) {
-        const [r, gg, b] = toRgb(earthAt(px, py, mat === 'earth' ? EARTH : SWEPT)), o = (py * W + px) * 4;
+        const [r, gg, b] = toRgb(tile(px, py)), o = (py * W + px) * 4;
         (d[o] = r), (d[o + 1] = gg), (d[o + 2] = b), (d[o + 3] = 255);
       }
       continue;

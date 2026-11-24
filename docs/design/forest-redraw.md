@@ -109,6 +109,15 @@ sizes of bush and boulder by the map's own radius): a bush a mound of leafy lobe
 old blood; a boulder with a lit top plane, a darker face, cracks, moss on some; a dead tree a bare trunk forking into
 black limbs, a crow on some, a length of old rope on others. Stumps keep their painting.
 
+## The laid soils (2026-11-24, in)
+
+A hand-laid map's own ground is drawn as the floor round it is: mud is the path's ripples gone dark and cold with
+water in its lowest places; a drained bed is black silt, a sixth of it standing wet; straw is stalks lying over their
+shadows; a crop is the wheat floor's rows; ash is the same ground gone grey (tilesoils.ts, through soil.ts). The
+ground's marks follow: churned mud, trampled ground and puddles are shapes with a wandering edge, weeds and loose
+straw are the kit's small stamps (tilemarks.ts). Furrows keep their rows; rubble, scorch and ruts keep their painters
+for now.
+
 ## After dark (2026-11-24, in)
 
 A night under the open sky is moonlit, not black: the ambient has a floor (lights3d.ts `MOONLIT`, a cold blue at

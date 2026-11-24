@@ -951,3 +951,19 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - tests/looks.test.ts: the town's country, and that its puddles, moss and drains are on paving.
 - Checked on phone 2.5D round Wickhold's square; no page errors. (Claude Fable 5.2)
 
+## 2026-11-24: the laid soils and the ground's marks the tile way (the quest maps)
+
+- Looked at the hand-laid territories under the redraw (Lowfurrow Fields, Sallow Carr). The book's looks reach them,
+  but their own ground did not: mud, wet, straw, crop and ash were the old flecked painting scaled onto the new grid
+  (Sallow Carr's drained bottom a grey slab), and trampled ground was a plain rectangle.
+- tilesoils.ts (new): `mudAt`, `siltAt` (a drained bed: black silt, a sixth of it standing wet), `strawAt` (stalks
+  lying over their shadows), `cropAt` (the wheat floor's stalks), `ashAt`; soil.ts paints them under the redraw
+  through one table, `CALM`, with grass, earth and swept ground. The flat view is untouched.
+- tilemarks.ts (new): mud, trample, puddle, weeds and straw marks as shapes with a wandering edge or the kit's own
+  stamps; three/redrawfloor.ts sends those five there. Debris, scorch, ruts and the rest keep their painters.
+- waterfield.ts `softBanks`: a wheat field's pond gets rounded banks too.
+- Not mine, noted on the board for Territories: an earth bank's face and lip (three/landledges.ts) are pale and
+  bright beside the redraw's ground.
+- Checked on phone 2.5D: Lowfurrow Fields (camp, pond, strips, hovel), its Rise (barnyard, orchard), Sallow Carr
+  (the bottom, the beds, the pen); no page errors. (Claude Fable 5.2)
+
