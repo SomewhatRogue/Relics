@@ -1067,4 +1067,7 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   first map (the Gate Fields, from the North Gate, on the territory kit), what you do there, the order, who, and
   three calls for Kyle. On the board under Waiting: a big new topic, so a chat of its own.
 - biome-sets.md: its proof is that first map, not a mission. Docs only. (Claude Fable 5.2)
+- Later the same day, Kyle's calls written into outside-the-gate.md: one self revive a trip (friends lift you without
+  limit), way stations as safe ground you travel between and to and from town, a keeper at each (potions, a relic's
+  recharge at some). Still open: what falling alone with the revive spent costs. (Claude Fable 5.2)
 
