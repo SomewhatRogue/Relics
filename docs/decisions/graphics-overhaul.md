@@ -913,3 +913,13 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Checked at all three: Wickhold's street, a village, a wood, Sallow Carr's pools on phone 2.5D; no page errors; full
   suite 280 files passed. main.ts: `angleButton()` after `camButton()`. (Claude Fable 5.2)
 
+## 2026-11-23: bushes, boulders and dead trees drawn the tile way
+
+- Kyle: "keep working on making the game beautiful". The props still in the old look stood out against the new ground:
+  Barrowby alone has 62 bushes as hedges.
+- tileflora.ts (`bushCut`, `rockCut`, `snagCut`), reached from propcards.ts `roundCut` as the trees are; tiletrees.ts
+  exports its grid and shades for it. A limb is black with a lit left edge and no outline (a twig a pixel wide would
+  be all outline).
+- Checked on phone 2.5D: Barrowby's hedges, the Copperdeep's yard, Sallow Carr, Gallows Wood; no page errors.
+  (Claude Fable 5.2)
+

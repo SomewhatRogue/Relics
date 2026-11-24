@@ -17,6 +17,7 @@ import { PX } from '../world';
 import { cardMaterial } from './figmat';
 import { swayCards } from './wind3d';
 import { oakCut, pineCut, reedCut } from '../tiletrees';
+import { bushCut, rockCut, snagCut } from '../tileflora';
 import { PITCH } from './camera3d';
 import { KX, KZ } from '../tilekit';
 import { FURN, furnCut } from '../tilefurn';
@@ -126,6 +127,13 @@ export const roundCut = (r: Round): Cut | null => {
     const v = Math.floor(Math.abs(Math.sin(r.x * 12.9898 + r.y * 78.233) * 43758.5453) % 4), key = r.kind + v;
     let c = TREES.get(key);
     if (!c) TREES.set(key, (c = r.kind === 'pine' ? pineCut(v) : oakCut(v)));
+    return c;
+  }
+  // (Bushes, boulders and dead trees the same way: tileflora.ts. A stump stays the flat view's own.)
+  if (r.kind === 'bush' || r.kind === 'rock' || r.kind === 'deadtree') {
+    const v = Math.floor(Math.abs(Math.sin(r.x * 12.9898 + r.y * 78.233) * 43758.5453) % 5), big = r.r > (r.kind === 'bush' ? 0.42 : 0.5), key = r.kind + v + (big ? 'B' : '');
+    let c = TREES.get(key);
+    if (!c) TREES.set(key, (c = r.kind === 'bush' ? bushCut(v, big) : r.kind === 'rock' ? rockCut(v, big) : snagCut(v)));
     return c;
   }
   if (r.kind === 'reed') {

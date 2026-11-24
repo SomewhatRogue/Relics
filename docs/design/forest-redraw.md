@@ -101,6 +101,14 @@ earth or turf (not masonry: a quay's water keeps its straight edge; not the town
 - **Foam** (`three/wind3d.ts`): none on a still pool, only the bank's shadow; dim on a river.
 - **Reeds** (`tiletrees.ts` `reedCut`): thin drawn blades with dark heads, as cards.
 
+## Standing things (2026-11-23, in)
+
+Bushes, boulders and dead trees were still the flat view's paintings stood up: a hedge was one green ball in a row, a
+rock a grey blob, a snag a thin grey outline. Now drawn as the trees are (`tileflora.ts`, five variants each, two
+sizes of bush and boulder by the map's own radius): a bush a mound of leafy lobes, some with berries the colour of
+old blood; a boulder with a lit top plane, a darker face, cracks, moss on some; a dead tree a bare trunk forking into
+black limbs, a crow on some, a length of old rope on others. Stumps keep their painting.
+
 ## Where the book reaches (2026-11-23)
 
 Every room of every job on 14 days of the board, 252 rooms: fen 74, bare yards 62, wood 31, fields 28 had a look;

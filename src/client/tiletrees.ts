@@ -8,17 +8,17 @@ import type { Cut } from './three/propcards';
 import { clumpLight as clump } from './tilegrounds';
 
 const PINE = ['#060b0b', '#0b1615', '#10211e', '#162d27', '#1f3e31', '#2b523e'];
-const LEAF = ['#080d07', '#10180c', '#172211', '#203017', '#2b3f1d', '#3a5025'];
-const BARK = ['#120c08', '#24180f', '#352416', '#47321f'];
+export const LEAF = ['#080d07', '#10180c', '#172211', '#203017', '#2b3f1d', '#3a5025'];
+export const BARK = ['#120c08', '#24180f', '#352416', '#47321f'];
 
-const hash = (a: number, b: number, s: number) => {
+export const hash = (a: number, b: number, s: number) => {
   let h = Math.imul(a | 0, 374761393) ^ Math.imul(b | 0, 668265263) ^ Math.imul(s | 0, 2147483647);
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 };
 
 /** A pixel grid of palette indices (-1 clear), painted to a card at the end. */
-class Grid {
+export class Grid {
   readonly a: Int8Array;
   readonly pal: string[] = [];
   constructor(readonly w: number, readonly h: number) {
@@ -52,7 +52,7 @@ class Grid {
 }
 
 /** Palette: 0..5 the foliage, 6..9 the bark. */
-const quant = (v: number) => Math.max(1, Math.min(5, Math.round(v * 5)));
+export const quant = (v: number) => Math.max(1, Math.min(5, Math.round(v * 5)));
 
 /** A trunk from (cx, top) down to the foot, `w` wide, lit on its left. */
 function trunk(G: Grid, cx: number, top: number, foot: number, w: number): void {
