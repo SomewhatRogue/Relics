@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { firstErrands, fitErrands, openErrands, openSkillLevel, relicDone, runnerDue, talkedTo, told } from '../src/shared/errands';
+import { firstErrands, fitErrands, openErrands, openSkillLevel, relicDone, runnerDue, talkedTo, told, yardDone } from '../src/shared/errands';
 import { gainXp, newProfile, xpFor } from '../src/shared/progress';
 import { fromJson } from '../src/client/save';
 import { newWorld } from '../src/shared/story';
@@ -13,24 +13,33 @@ describe('town errands', () => {
     expect(openErrands(p)).toEqual([]);
     told(p);
     expect(runnerDue(p)).toBe(false);
-    expect(openErrands(p)).toEqual(['relic', 'trainer']);
+    // (Church first: the trainer waits for it, Kyle 2026-11-24.)
+    expect(openErrands(p)).toEqual(['relic']);
+    relicDone(p);
+    expect(openErrands(p)).toEqual(['trainer']);
   });
 
   it('not before the wood is done (or skipped)', () => {
     expect(runnerDue({ ...newProfile('WARRIOR'), prologue: false })).toBe(false);
   });
 
-  it('each ticks off in either order; both done, the first two are over', () => {
+  it('in order (Kyle, 2026-11-24): the church, then the trainer, then the yard; all done, the first ones are over', () => {
     const p = fresh('RANGER');
     told(p);
     expect(talkedTo(p, 'trainer', 0)).toBe(false); // the Warrior's trainer isn't a Ranger's
-    expect(talkedTo(p, 'trainer', 1)).toBe(true);
-    expect(firstErrands(p)).toEqual([{ id: 'relic', done: false }, { id: 'trainer', done: true }]);
+    talkedTo(p, 'trainer', 1);
+    expect(p.errands!.trainer).toBe(false); // not before the church
     expect(relicDone(p)).toBe(true);
     expect(relicDone(p)).toBe(false);
-    // (Meeting the trainer handed over the first job: tests/heroquests.test.ts.)
-    expect(openErrands(p)).toEqual(['job']);
+    expect(talkedTo(p, 'trainer', 1)).toBe(true);
+    expect(firstErrands(p)).toEqual([{ id: 'relic', done: true }, { id: 'trainer', done: true }, { id: 'yard', done: false }]);
+    expect(openErrands(p)).toEqual(['yard']);
+    expect(errandWho(p, 'yard')).toEqual({ door: 'hall', talk: 'yard' });
+    expect(yardDone(p)).toBe(40);
+    expect(yardDone(p)).toBe(0);
     expect(firstErrands(p)).toEqual([]);
+    // (Back at the trainer, the first job: tests/heroquests.test.ts.)
+    expect(openErrands(p)).toEqual(['quest']);
   });
 
   it('old saves: a hero from before errands never gets the first two', () => {
@@ -49,12 +58,12 @@ describe('town errands', () => {
     const p = fresh();
     told(p);
     const s = fromJson(JSON.parse(JSON.stringify({ heroes: [p], current: 0, world: newWorld() })))!;
-    expect(openErrands(s.heroes[0])).toEqual(['relic', 'trainer']);
+    expect(openErrands(s.heroes[0])).toEqual(['relic']);
   });
 
   it('a level that opens a skill sends you to the trainer; talking to them ends it', () => {
     const p = fresh();
-    told(p), relicDone(p), talkedTo(p, 'trainer', 0);
+    told(p), relicDone(p), talkedTo(p, 'trainer', 0), yardDone(p);
     p.quests = undefined; // (the skill's word alone: hero quests are tests/heroquests.test.ts)
     expect(openSkillLevel(p)).toBe(0);
     gainXp(p, xpFor(3));
@@ -172,7 +181,7 @@ import { metNettle, sendToNettle, errandWho } from '../src/shared/errands';
 describe('Tobin sends you to Nettle (Kyle, 2026-11-14)', () => {
   const hungryHero = () => {
     const p = { ...newProfile('MAGE', 'H'), prologue: true };
-    told(p), relicDone(p), talkedTo(p, 'trainer', 3);
+    told(p), relicDone(p), talkedTo(p, 'trainer', 3), yardDone(p);
     p.quests = undefined; // (hero quests aside: tests/heroquests.test.ts)
     const it = p.bag[0] ?? (p.bag.push({ ...(p.armor as object) } as never), p.bag[0]);
     it.quality = 'hungry';

@@ -13,6 +13,8 @@ import { line } from './speech';
 import { relicDone } from '../shared/errands';
 import { relicMax } from '../shared/relicitems';
 import { ERRANDW } from './errandwords';
+import { ERRAND_PAY } from '../shared/errandpay';
+import { paidToast } from './errandpaid';
 import { ROLL_RELICS } from '../shared/relicroll';
 import { questOffered, takeQuest } from '../shared/relicquests';
 import { RELICS } from '../shared/magic';
@@ -29,7 +31,7 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
   // A new hero's first recharge is Isolde's to give (the relic's errand, shared/errands.ts); with nothing
   // to fill (it's full, or there's none), the errand's done all the same.
   const free = !!pr.errands?.told && !pr.errands.relic;
-  if (free && !pr.relics.some((r) => canRecharge(r))) relicDone(pr), g.keep();
+  if (free && !pr.relics.some((r) => canRecharge(r)) && relicDone(pr)) g.keep(), paidToast(ERRAND_PAY.relic);
   const lit = pr.lit ?? 0;
   const head = (said.startsWith('~') ? p(said.slice(1)) : said ? say('Father Odric', said) : say('Father Odric', RELICW.churchIntro)) + (lit ? p(`<b>${RELICW.litLeft(lit)}</b>`) : '') + p(`You have ${coinsHtml(pr.gold)}.`);
   const rows = pr.relics.map((r) => {
@@ -57,6 +59,7 @@ export function openStep(g: Game, panel: Panel, back: () => void, said = ''): vo
       if (!r || !canRecharge(r) || !relicDone(pr)) return;
       r.charge = relicMax(r);
       g.relicsChanged();
+      paidToast(ERRAND_PAY.relic);
       return again('~' + ERRANDW.freeDone);
     }
   };

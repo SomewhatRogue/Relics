@@ -148,7 +148,7 @@ import { BannerFold, calm } from './bannerfold';
 import { ObjFlash } from './objflash';
 import { GoalPulse, goalHtml } from './goalpulse';
 import { errandLine } from './errandline';
-import { errandTargets } from './errandmarks';
+import { errandTargets, yardTargets } from './errandmarks';
 import { runner } from './runner';
 import { toast } from './partytoast';
 import { QUESTW } from './questwords';
@@ -707,7 +707,7 @@ function tick(t: number): void {
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   // In town, only someone with an errand or a quest for you is marked (errandmarks.ts).
   scene.markEach = game.mode === 'town';
-  scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : game.mode === 'town' ? errandTargets(game.profile, game.room.map, game.room.time, game.outside ? [] : townSpots(game.world)) : [];
+  scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : game.mode === 'town' ? errandTargets(game.profile, game.room.map, game.room.time, game.outside ? [] : townSpots(game.world)) : game.mode === 'yard' ? yardTargets(game.profile) : [];
   scene.doors = game.mode === 'run' ? game.doorMarks() : [];
   scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold && spoken(game.wood) ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
   // An expedition: MAP, the map screen, and a word over you as things happen (expedui.ts).

@@ -9,6 +9,7 @@
  */
 import type { Profile } from './progress.js';
 import { carriesHungry } from './fence.js';
+import { payErrand } from './errandpay.js';
 
 type Who = 'church' | 'under';
 const rec = (p: Profile) => p.errands;
@@ -26,11 +27,12 @@ export function hungryHome(p: Profile): boolean {
 /** Is this one open (still to do)? */
 export const wantOpen = (p: Profile, who: Who) => rec(p)?.[who] === 1;
 
-/** Talked to Odric (`church`) or Dorcas (`under`) about it: done. True if it was open. */
+/** Talked to Odric (`church`) or Dorcas (`under`) about it: done, and paid (shared/errandpay.ts). True if it was open. */
 export function wantTalked(p: Profile, who: Who): boolean {
   const e = rec(p);
   if (e?.[who] !== 1) return false;
   e[who] = 2;
+  payErrand(p, who);
   return true;
 }
 

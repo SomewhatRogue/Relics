@@ -2,6 +2,8 @@
  * The Keeping Room (shared/keeping.ts), off the sewer grate (client/squareui.ts): for a corrupt hero only. Panels for
  * now; the walkable node in the Sewers is asked of the chats that own those maps.
  */
+import { ERRAND_PAY } from '../shared/errandpay';
+import { paidToast } from './errandpaid';
 import type { Game } from './game';
 import type { Button, Panel } from './panels';
 import { says } from './shopui';
@@ -44,7 +46,7 @@ function room(g: Game, panel: Panel, back: () => void, first = false): void {
   const again = () => room(g, panel, back), p = g.profile;
   // The quest's talk, once: the other road (shared/wanterrands.ts). Talking to her is the quest.
   const talk = wantOpen(p, 'under') ? WANTQW.dorcas.map((l) => says('Dorcas', l)).join('') : '';
-  if (talk && wantTalked(p, 'under')) (g.hero.wantSeen = true), g.keep();
+  if (talk && wantTalked(p, 'under')) (g.hero.wantSeen = true), g.keep(), paidToast(ERRAND_PAY.under);
   // Feeding and giving are for the corrupt only; a clean hero on the quest has come to listen.
   const deals = findsRoom(p) ? [{ label: KEEPW.feedButton, primary: true, act: () => feed(g, panel, again) }, { label: KEEPW.giveButton, act: () => give(g, panel, again) }, { label: TITLEW.button, act: () => openTitles(g, panel, 'under', again) }] : [];
   panel.show('DORCAS', (first ? dim(KEEPW.scene) : '') + (talk || says('Dorcas', KEEPW.greet)), [...deals, { label: 'BACK', act: back }]);

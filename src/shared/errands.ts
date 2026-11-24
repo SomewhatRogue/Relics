@@ -13,11 +13,12 @@ import { CLASS_ORDER, type HeroClass } from './weapons.js';
 import { carriesHungry } from './fence.js';
 import { questBack, questDue, questHeld, reported, takeQuest } from './heroquests.js';
 import { deepSkillOpen } from './deepskill.js';
+import { payErrand } from './errandpay.js';
 
 /** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do; `back`: one done, to tell them of (shared/heroquests.ts).
  *  `nettle`: Tobin, frightened of your hungry gear, sent you to Nettle. `church` and `under`: your first hungry piece
  *  home, the church and the Keeping Room each have a word for you (shared/wanterrands.ts, the Holy and hungry chat). */
-export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle' | 'church' | 'under';
+export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle' | 'church' | 'under' | 'yard';
 export interface Errands {
   /** The runner has found you and said their line (the first two are yours from then). */
   told: boolean;
@@ -34,6 +35,9 @@ export interface Errands {
    *  Room's Dorcas, about it: 1 to go, 2 been. */
   church?: number;
   under?: number;
+  /** The first chain (Kyle, 2026-11-24): church, then the trainer, who sends you to the yard to try your kit; then back
+   *  to the trainer for the board's first quest. 1 to go, 2 done (shared/errandpay.ts pays it), 3 the trainer's heard. */
+  yard?: number;
 }
 
 export const newErrands = (): Errands => ({ told: false, relic: false, trainer: false, seen: 1 });
@@ -64,11 +68,16 @@ export function openSkillLevel(p: Profile): number {
 export function openErrands(p: Profile): ErrandId[] {
   const e = p.errands ?? doneErrands(p.level), out: ErrandId[] = [];
   if (e.told && !e.relic) out.push('relic');
-  if (e.told && !e.trainer) out.push('trainer');
+  // (The trainer after the church: the runner says church first, and now the trainer waits for it.)
+  if (e.told && !e.trainer) {
+    if (e.relic) out.push('trainer');
+  }
   // (A new skill by level, or the Deep skill a floor opened and the trainer hasn't told you of: shared/deepskill.ts.)
   else if (openSkillLevel(p) > e.seen || (deepSkillOpen(p) && !p.deepTaught && !e.deep)) out.push('skill');
   // (Not before the runner's been: the first is handed over at the first meeting.)
-  if (questDue(p) && e.told && e.trainer) out.push('quest');
+  if (e.yard === 1) out.push('yard');
+  // (After the yard, if the trainer sent you there.)
+  if (questDue(p) && e.told && e.trainer && e.yard !== 1) out.push('quest');
   if (questHeld(p)) out.push('job');
   if (questBack(p)) out.push('back');
   // (Only while there's still something hungry on you to sell him.)
@@ -82,8 +91,8 @@ export function openErrands(p: Profile): ErrandId[] {
 /** The first two, while either is still to do (done ones too, so the goal line can tick them off). */
 export function firstErrands(p: Profile): { id: ErrandId; done: boolean }[] {
   const e = p.errands;
-  if (!e?.told || (e.relic && e.trainer)) return [];
-  return [{ id: 'relic', done: e.relic }, { id: 'trainer', done: e.trainer }];
+  if (!e?.told || (e.relic && e.trainer && e.yard !== 1)) return [];
+  return [{ id: 'relic', done: e.relic }, { id: 'trainer', done: e.trainer }, ...(e.trainer ? [{ id: 'yard' as ErrandId, done: e.yard !== 1 }] : [])];
 }
 
 /** Does the runner still have to come? */
@@ -98,12 +107,15 @@ export function told(p: Profile): void {
 export function relicDone(p: Profile): boolean {
   if (!p.errands?.told || p.errands.relic) return false;
   p.errands.relic = true;
+  payErrand(p, 'relic');
   return true;
 }
 
 /** Who an errand sends you to: a door in town and who's behind it (an npc's `talk` and `arg`). */
 export function errandWho(p: Profile, id: ErrandId): { door: string; talk: string; arg?: number; spot?: string } {
   if (id === 'relic') return { door: 'church', talk: 'church' };
+  // Squire Pell, in the barracks, takes you through to the yard.
+  if (id === 'yard') return { door: 'hall', talk: 'yard' };
   if (id === 'nettle') return { door: 'tavern', talk: 'vendor', arg: CLASS_ORDER.indexOf('ROGUE') };
   if (id === 'church') return { door: 'church', talk: 'church' };
   // The Keeping Room is behind the sewer grate's bricked arch.
@@ -118,13 +130,14 @@ export function talkedTo(p: Profile, talk: string, arg?: number): boolean {
   const e = p.errands;
   if (!e || talk !== 'trainer' || arg !== CLASS_ORDER.indexOf(p.cls)) return false;
   const was = JSON.stringify(e);
-  if (e.told) e.trainer = true;
+  // (Not before the church: the first meeting waits for it. Then the yard, before any quest.)
+  if (e.told && e.relic && !e.trainer) (e.trainer = true), (e.yard = 1);
   e.seen = Math.max(e.seen, p.level);
   if (deepSkillOpen(p)) e.deep = true;
   // Hears of the one you've done, and hands over the quest they have for you (the first at the first meeting).
   const back = !!questBack(p);
   reported(p);
-  const took = e.told && e.trainer && takeQuest(p);
+  const took = e.told && e.trainer && e.yard !== 1 && takeQuest(p);
   return back || took || JSON.stringify(e) !== was;
 }
 
@@ -141,5 +154,20 @@ export function metNettle(p: Profile): boolean {
   const e = p.errands;
   if (e?.nettle !== 1) return false;
   e.nettle = 2;
+  payErrand(p, 'nettle');
+  return true;
+}
+
+/** A straw man set going in the yard on the trainer's word: the yard's errand done, and paid. The copper paid (0: not open). */
+export function yardDone(p: Profile): number {
+  if (p.errands?.yard !== 1) return 0;
+  p.errands.yard = 2;
+  return payErrand(p, 'yard');
+}
+
+/** Back from the yard, the trainer's word on the board (the first job): once. True the first time. */
+export function backFromYard(p: Profile): boolean {
+  if (p.errands?.yard !== 2) return false;
+  p.errands.yard = 3;
   return true;
 }

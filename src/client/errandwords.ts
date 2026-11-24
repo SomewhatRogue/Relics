@@ -24,12 +24,12 @@ const trainer = (cls: HeroClass) => title(TRAINERS[cls].name);
 
 export const ERRANDW = {
   /** The tracker's rows: a label and what to do. */
-  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR', ...WANTQW.pin } as Record<ErrandId, string>,
+  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR', yard: 'THE YARD', ...WANTQW.pin } as Record<ErrandId, string>,
   todo: (id: ErrandId, cls: HeroClass) =>
-    id === 'church' || id === 'under' ? WANTQW.todo[id] : id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
+    id === 'church' || id === 'under' ? WANTQW.todo[id] : id === 'yard' ? 'Ask Squire Pell for a straw man in the yard behind the barracks' : id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
   /** Folded, one line. */
   small: (id: ErrandId, cls: HeroClass) =>
-    id === 'church' || id === 'under' ? WANTQW.small[id] : id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
+    id === 'church' || id === 'under' ? WANTQW.small[id] : id === 'yard' ? 'TRY YOUR KIT IN THE YARD' : id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
   freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",
@@ -51,6 +51,19 @@ export const ERRANDW = {
     MAGE: "Nobody here knows who you are, which is, well, the trouble. Work mends that, mostly. There's a job on the board in the square, it's yours, and do come back after.",
     HEALER: "Folk here don't know you from the next face, and they'll not hand a stranger their dying. There's a job on the board in the square. Go and do it, and mind you come back with the same number of arms.",
   } as Record<HeroClass, string>,
+  /** The first meeting's second beat (Kyle, 2026-11-24): a plain weapon of a kind you've none of, and off to the yard to
+   *  try it and the javelin, which won't dim there (never why). The board's word (firstWork) waits for your return.
+   *  Lore keeper and line editor, 2026-11-24. */
+  firstGift: {
+    WARRIOR: "Plain, but it's yours. Yard's round the back, and take the javelin, it won't dim out there.",
+    RANGER: "Here, you'll want something else to hand. Try it in the yard behind the barracks, the javelin too, it doesn't fade out there, and don't ask me why.",
+    ROGUE: 'A little something, on the ~house~, the only thing that will be. Take it round the back of the barracks, the javelin too, it doesn\'t go dark there.',
+    MAGE: 'This is for you, plain, I know, but do try it in the yard behind the barracks, and the javelin as well, because it won\'t dim there, I checked, *twice*.',
+    HEALER: 'Take this, and the javelin too, it won\'t dim in the yard behind the barracks, so go and swing it about there before you hurt anyone that matters.',
+  } as Record<HeroClass, string>,
+  /** Under the gift, the game's plain word, and the gift's own label. */
+  giftNote: 'Your new weapon is in your pack. Equip it from there, then try it in the yard.',
+  gift: 'NEW WEAPON',
   /** The quest they've just handed over, shown under the second beat and in a toast. */
   fresh: 'NEW QUEST',
   /** Under that first talk, the game's own plain word (Kyle, 2026-11-17: make it clear there are things to learn,

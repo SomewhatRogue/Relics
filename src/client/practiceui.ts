@@ -8,6 +8,8 @@ import { offers, type Pick } from '../sim/practice';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { line } from './speech';
+import { yardDone } from '../shared/errands';
+import { paidToast } from './errandpaid';
 import { PRACTICEW } from './practicewords';
 
 const say = (s: string) => `<p><b>Squire Pell:</b> ${line(`"${s}"`, 'Squire Pell')}</p>`;
@@ -24,7 +26,12 @@ export function openPractice(g: Game, panel: Panel): void {
     (o.singles.length < SINGLES.length ? `<p class="dim">${PRACTICEW.more}</p>` : '');
   const go = (pk: string) => {
     const [k, key] = pk.split(':') as [Pick['k'], string];
-    if (g.practice({ k, key } as Pick)) panel.hide();
+    if (!g.practice({ k, key } as Pick)) return;
+    // The yard's errand, on the trainer's word: done the first time a straw man's set going, and paid (shared/errands.ts).
+    const paid = yardDone(g.profile);
+    if (paid) g.keep();
+    panel.hide();
+    paidToast(paid);
   };
   panel.show(PRACTICEW.title, html, [
     { label: PRACTICEW.again, primary: !!cur, disabled: !cur, act: () => (g.practiceAgain(), panel.hide()) },

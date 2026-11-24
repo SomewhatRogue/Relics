@@ -43,7 +43,10 @@ import { churchVowed } from './shelfui';
 import { openKeeping } from './keepingui';
 import { wantOpen, wantTalked } from '../shared/wanterrands';
 import { WANTQW } from './wanterrandwords';
-import { firstMeeting } from './firstmeet';
+import { firstMeeting, workBeat } from './firstmeet';
+import { ERRAND_PAY, trainerGift } from '../shared/errandpay';
+import { paidToast } from './errandpaid';
+import { backFromYard } from '../shared/errands';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -60,7 +63,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   if (id === 'keeping') return openKeeping(g, panel);
   // A class's vendor, at a counter in its place (vendorui.ts); `arg` is the class.
   // Come from Tobin with hungry gear: Nettle knows, and his table opens on SELL QUIETLY (shared/errands.ts).
-  if (id === 'vendor' && CLASS_ORDER[arg] === 'ROGUE' && metNettle(g.profile)) return g.keep(), openVendor(g, panel, arg, 'fence', ERRANDW.nettleMet);
+  if (id === 'vendor' && CLASS_ORDER[arg] === 'ROGUE' && metNettle(g.profile)) return g.keep(), paidToast(ERRAND_PAY.nettle), openVendor(g, panel, arg, 'fence', ERRANDW.nettleMet);
   if (id === 'vendor') return openVendor(g, panel, arg);
   if (id === 'practice') {
     openPractice(g, panel);
@@ -93,7 +96,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return panel.show(t.name, say(name, ELSEWHERE[cls].replace('{who}', title(yours.name)).replace('{where}', yours.where)));
     }
     // Your own trainer: the first errand's done, and they've heard you've a new skill open (shared/errands.ts).
-    const first = !!pr.errands?.told && !pr.errands.trainer, had = questHeld(pr)?.q.id, back = !!questBack(pr);
+    // (The first meeting waits for the church; back from the yard, the board's word: shared/errands.ts.)
+    const first = !!pr.errands?.told && !!pr.errands.relic && !pr.errands.trainer, had = questHeld(pr)?.q.id, back = !!questBack(pr), work = pr.errands?.yard === 2;
     if (talkedTo(pr, 'trainer', arg)) g.keep();
     // The first meeting, and the word after your first job, are a talk, not the training screen (Kyle's
     // playtest, 2026-11-13): there's nothing to buy at level 1, so what they say is the point.
@@ -102,7 +106,14 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const relit = pr.cls === 'HEALER' && pr.cold;
     if (relit) (pr.cold = false), g.keep(), (g.hero.cold = false);
     const lit = relit ? p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') : '';
-    if (first) return firstMeeting(g, panel, head, (s) => say(name, s), lit, { label: 'TRAINING', act: () => openTrainer(g, panel, head, name, '') });
+    const training = { label: 'TRAINING', act: () => openTrainer(g, panel, head, name, '') };
+    if (first) {
+      // A plain weapon of a kind you've none of, into the pack (shared/errandpay.ts).
+      const gift = trainerGift(pr);
+      if (gift) (g.hero.bag = [...pr.bag]), g.keep();
+      return firstMeeting(g, panel, head, (s) => say(name, s), lit, training, gift);
+    }
+    if (work && backFromYard(pr)) return g.keep(), workBeat(g, panel, head, (s) => say(name, s), training);
     if (relit) return panel.show(head, lit + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }], true);
     if (back && pr.level < 3) return talk(ERRANDW.back[pr.cls]);
     // A hero quest handed over just now (shared/heroquests.ts): the trainer's one line for it.
@@ -121,7 +132,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const hew = pr.tally ? say('Father Odric', TALLY.odric) : '';
     // The first hungry piece home: Odric's word on it, once (shared/wanterrands.ts). Talking to him is the quest.
     const want = wantOpen(pr, 'church') ? WANTQW.odric.map((l) => say('Father Odric', l)).join('') + p(WANTQW.odricRule) : '';
-    if (want && wantTalked(pr, 'church')) (g.hero.wantSeen = true), g.keep();
+    if (want && wantTalked(pr, 'church')) (g.hero.wantSeen = true), g.keep(), paidToast(ERRAND_PAY.church);
     if (pr.tally) (pr.tally = false), g.keep();
     panel.show('FATHER ODRIC', hew + want + say('Father Odric', 'Give what you can spare to the Lantern. It keeps the light burning, and it does the giver good, more than you\'d think.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') +

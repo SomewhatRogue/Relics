@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fitQuests, gateOf, isOpen, questCount, questDue, questHeld, questJob, takeQuest, type QuestFacts } from '../src/shared/heroquests';
-import { openErrands, talkedTo, relicDone, told } from '../src/shared/errands';
+import { openErrands, talkedTo, relicDone, told, yardDone } from '../src/shared/errands';
 import { gainXp, newProfile, xpFor } from '../src/shared/progress';
 import { PLACES, type Job } from '../src/shared/jobs';
 import { fromJson } from '../src/client/save';
@@ -10,7 +10,7 @@ import { openCut } from '../src/shared/instances';
 
 const hero = (level: number) => {
   const p = { ...newProfile('WARRIOR', 'Q'), prologue: true };
-  told(p), relicDone(p), talkedTo(p, 'trainer', 0);
+  told(p), relicDone(p), talkedTo(p, 'trainer', 0), yardDone(p);
   // (The first job, handed over at the first meeting, done and told: its own test below.)
   p.quests = { at: null, n: 0, done: ['q1'] };
   if (level > 1) gainXp(p, xpFor(level));
@@ -23,21 +23,26 @@ const facts = (o: Partial<QuestFacts>): QuestFacts => ({ job: job({}), won: true
 describe('hero quests', () => {
   it('the first meeting sends you to the board; your first job, any won job, brings you back to the trainer', () => {
     const p = { ...newProfile('ROGUE', 'NEW'), prologue: true };
-    told(p);
-    // Before meeting them: the trainer's errand, no quest yet.
-    expect(openErrands(p)).toEqual(['relic', 'trainer']);
+    told(p), relicDone(p);
+    // Before meeting them: the trainer's errand, no quest yet; then the yard first (Kyle, 2026-11-24).
+    expect(openErrands(p)).toEqual(['trainer']);
+    talkedTo(p, 'trainer', 2);
+    expect(questHeld(p)).toBeNull();
+    expect(openErrands(p)).toEqual(['yard']);
+    yardDone(p);
+    expect(openErrands(p)).toEqual(['quest']);
     talkedTo(p, 'trainer', 2);
     expect(questHeld(p)?.q.id).toBe('q1');
-    expect(openErrands(p)).toEqual(['relic', 'job']);
+    expect(openErrands(p)).toEqual(['job']);
     const j = questJob(p, words)!;
     expect(j).toMatchObject({ quest: 'q1', objective: 'rescue', size: 'short', time: 'day', place: { name: 'Lowfurrow Fields', ruin: 1 } });
     // A run lost doesn't do; one won does, and sends you back.
     expect(questCount(p, facts({ won: false }))).toBeNull();
     expect(questCount(p, facts({ job: job({ objective: 'burn' }) }))?.id).toBe('q1');
-    expect(openErrands(p)).toEqual(['relic', 'back']);
+    expect(openErrands(p)).toEqual(['back']);
     // Telling the trainer ends it; nothing more till level 3.
     talkedTo(p, 'trainer', 2);
-    expect(openErrands(p)).toEqual(['relic']);
+    expect(openErrands(p)).toEqual([]);
     expect(questDue(p)).toBeNull();
   });
 

@@ -110,6 +110,10 @@ most Want among the heroes is the one the bells don't spare).
   brazier, never speaks, can't be fought, and pays heroes no mind. **Nothing ever explains it**: no line, no name,
   and Dorcas never mentions it. Not a captive, not a pet, not a turning person on screen. Don't flag it as a
   break of the rule above, and don't write anything that answers it.
+- **The yard keeps a relic's light** (Kyle, 2026-11-24). A relic used in the training yard behind the barracks doesn't
+  dim there. **No reason, ever**: not a blessing (blessed is Sanctuary's ground only), not the straw, not the
+  Want. Trainers just say so; a shrug (Maeve's) is as far as it goes. At the first meeting every trainer gives a
+  plain weapon of a kind the hero lacks and sends them there; Squire Pell sets straw men going on request.
 - **Habits.** The hungry hoard lamp oil, the way they hoard everything: more than they can use. It's
   greed, not stupidity, and it burns.
 - **The valley.** Barrowfields (Barrowby, Tollan's Farm, Lowfurrow Fields), Greyhollow (the Charcoal

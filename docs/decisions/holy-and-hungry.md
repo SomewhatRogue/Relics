@@ -459,3 +459,24 @@ the sewer grate", in place of "Talk to the under church about growing the Want";
 - `tests/practice.test.ts`: CLEAR's yard is the dummies; a new test for the empty yard and the held light.
 - Next: the first quests' chain (church, trainer's white weapon, the yard, then the board), with coin.
 - **Checked:** the practice tests, `npm run check`, the full suite (2314 passed).
+
+## 2026-11-24: the first quests in order, and small quests pay (Claude Opus 5.5)
+
+- Kyle: after the church's refill, the trainer, who gives "a weapon type you don't have yet ... just a white" and
+  sends you to the yard, where the relic "won't diminish the light"; quests for talking to someone or doing
+  something pay "~20c to ~40c". His calls (AskUserQuestion): the board quest after the yard; church 20c, the
+  trainer's weapon only, the yard 40c; the yard done when a straw man is set going; the hungry-gear talks pay too.
+- Mine: `shared/errandpay.ts` (ERRAND_PAY: relic 20, yard 40, nettle 20, church 30, under 30; `trainerGift`, a
+  plain weapon of a kit you hold nothing for, seeded by the hero, not into a full pack), `client/errandpaid.ts`
+  (QUEST DONE: 20c; NEW WEAPON: its name), `tests/errandpay.test.ts`. `shared/wanterrands.ts` pays Odric's and
+  Dorcas's talks.
+- Small edits in Town quests' files: `shared/errands.ts` (the `yard` errand, 1 to go, 2 done, 3 heard; the trainer
+  waits for the church; the first quest waits for the yard; `yardDone`, `backFromYard`; the refill and Nettle pay),
+  `client/errandwords.ts` (THE YARD rows; `firstGift`, five lines; `giftNote`), `client/errandmarks.ts` (the
+  straw men's post marked in the yard), `client/main.ts` (one line), `client/churchrelics.ts` and `townui.ts`
+  (toasts; the trainer's gift, then `workBeat` on the way back). In General's `client/firstmeet.ts`: the second
+  beat is the gift and the yard; the board's beat is `workBeat`. Their tests (errands, heroquests, firstmeet) moved
+  to the new order. `client/practiceui.ts`: setting one going does the yard's errand.
+- Words: lore keeper (cut "bow" from Maeve's, no reason for the yard, ever) and line editor (Vell's run-on and
+  his *twice*, Whisper's ~house~). The bible records the yard's light, no reason.
+- **Checked:** the quest and yard tests (60), `npm run check`, the full suite.

@@ -8,6 +8,7 @@ import { doorAt, npcAt, type GameMap } from '../shared/arena';
 import { errandWho, openErrands } from '../shared/errands';
 import type { Profile } from '../shared/progress';
 import type { Target } from '../sim/targets';
+import { RACK } from '../shared/practice';
 
 export function errandTargets(p: Profile, map: GameMap, t: number, spots: { id: string; x: number; y: number }[] = []): Target[] {
   const out: Target[] = [], seen = new Set<string>();
@@ -34,3 +35,6 @@ export function errandTargets(p: Profile, map: GameMap, t: number, spots: { id: 
   }
   return out;
 }
+
+/** In the yard on the trainer's word (Kyle, 2026-11-24): the mark on the straw men's post, where Pell sets them going. */
+export const yardTargets = (p: Profile): Target[] => (openErrands(p).includes('yard') ? [{ kind: 'folk', x: RACK.post.x, y: RACK.post.y }] : []);
