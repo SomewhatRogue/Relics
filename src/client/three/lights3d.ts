@@ -5,6 +5,7 @@
  */
 import * as THREE from 'three';
 import type { Theme } from '../../shared/arena';
+import { REDRAW } from '../tilelook';
 import { sunAt } from './sun3d';
 
 /** A light in tiles: x, height, z; reach; strength; colour 0..1; flicker rate (0: steady). */
@@ -12,6 +13,14 @@ export interface L3 { x: number; y: number; z: number; r: number; i: number; c: 
 
 /** How strong the moon's blue-silver key is (FLAT's moon is a pool over the middle at its theme strength). */
 const MOON = 0.6;
+/**
+ * The least an open-sky night's ambient may be under the tile redraw (Kyle, 2026-11-23: "a beautiful but dark world").
+ * A wood at night came to an eighth of its daylight, and the redraw's ground and trees are drawn far darker than the
+ * look that number was set for: the two together were black, and nothing drawn could be seen. This is a moonlit
+ * blue at about a third of the day's light: dark, cold, and every shape still there; a torch or a candle still owns
+ * the ground round it. Not underground or indoors (no moon there), not the flat view.
+ */
+const MOONLIT = [0.25, 0.3, 0.43];
 /** A point light's strength and reach over its FLAT figures: FLAT's pools are lit in screen space with
  *  no slant, so in 3D (lights up off the floor, faces turned from them) they need a little more of both. */
 const POINT = 3.1;
@@ -55,7 +64,10 @@ export class Lights {
     // and a key slanting in from the sky in the ambient's own colour, so a lit floor lands near its
     // flat colour and faces still model. At night the moon adds its blue-silver to the key; indoors
     // (no moon) the room's own warmth stays warm.
-    const [r, g, b] = t.ambient, f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : (t.moon ?? 0) * MOON;
+    // (The tile redraw's nights: under an open sky the moon keeps a floor under the dark, MOONLIT below.)
+    const moonlit = REDRAW.on && t.time === 'night' && (t.moon ?? 0) > 0;
+    const [r, g, b] = moonlit ? t.ambient.map((v, i) => Math.max(v, MOONLIT[i])) : t.ambient;
+    const f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : Math.max((t.moon ?? 0) * MOON, moonlit ? 0.2 : 0);
     this.amb.color.setRGB(r * f, g * f, b * f);
     this.amb.intensity = Math.PI;
     const [sr, sg, sb] = t.day ? SUN : [1, 1, 1];

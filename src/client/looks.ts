@@ -16,7 +16,7 @@ import { blocked } from './ratspots';
 import { soilAt } from './soil';
 
 export type MotifKind = 'hollow' | 'pool' | 'bald' | 'tallgrass' | 'burn' | 'ring' | 'drift:leaves' | 'drift:bones' | 'drift:stones' | 'drift:pale' | 'drift:red';
-export type SceneKind = 'grave' | 'graves' | 'cairn' | 'campfire' | 'circle' | 'stake';
+export type SceneKind = 'grave' | 'graves' | 'cairn' | 'campfire' | 'circle' | 'stake' | 'log';
 export type Country = 'wood' | 'fen' | 'fields' | 'yard' | 'crop' | 'cave';
 /** A motif laid on a map: its middle and half sizes (tiles), a drift's heading (radians), a variant. */
 export interface Motif { kind: MotifKind; x: number; y: number; rx: number; ry: number; a: number; v: number }
@@ -24,8 +24,8 @@ export interface Look { name: string; country: Country; motifs: [MotifKind, numb
 
 /** The looks. A count is for a room of 28 by 24 tiles; bigger maps get more in proportion. */
 export const LOOKS: Look[] = [
-  { name: 'gallows', country: 'wood', motifs: [['drift:leaves', 3], ['drift:bones', 1], ['hollow', 2], ['bald', 1]], scenes: ['grave', 'circle', 'stake'] },
-  { name: 'mossy', country: 'wood', motifs: [['hollow', 2], ['pool', 1], ['ring', 2], ['drift:pale', 2], ['tallgrass', 1]], scenes: ['cairn', 'campfire', 'grave'] },
+  { name: 'gallows', country: 'wood', motifs: [['drift:leaves', 3], ['drift:bones', 1], ['hollow', 2], ['bald', 1]], scenes: ['grave', 'circle', 'stake', 'log'] },
+  { name: 'mossy', country: 'wood', motifs: [['hollow', 2], ['pool', 1], ['ring', 2], ['drift:pale', 2], ['tallgrass', 1]], scenes: ['log', 'cairn', 'campfire', 'grave'] },
   { name: 'charcoal', country: 'wood', motifs: [['burn', 2], ['bald', 2], ['drift:stones', 2], ['drift:leaves', 1]], scenes: ['campfire', 'cairn', 'stake'] },
   { name: 'drowned', country: 'fen', motifs: [['pool', 4], ['drift:stones', 2], ['tallgrass', 2]], scenes: ['cairn', 'circle'] },
   { name: 'reedmoor', country: 'fen', motifs: [['tallgrass', 4], ['pool', 2], ['drift:pale', 2]], scenes: ['grave', 'stake'] },

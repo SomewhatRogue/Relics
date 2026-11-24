@@ -39,7 +39,7 @@ export function scenesOf(m: GameMap): Scene[] {
     const x = 2 + rng.next() * (m.w - 4), y = 2.5 + rng.next() * (m.h - 5);
     // Open ground a step wide, off every path and patch, not at a door or where anyone starts.
     if (!kinds.length) kinds = [...pool];
-    const ki = rng.int(kinds.length), wide = kinds[ki] === 'graves' ? 1.9 : 0.9;
+    const ki = rng.int(kinds.length), wide = kinds[ki] === 'graves' ? 1.9 : kinds[ki] === 'log' ? 1.4 : 0.9;
     if ([[0, 0], [-wide, 0], [wide, 0], [0, -0.6], [0, 0.6]].some(([dx, dy]) => blocked(m, x + dx, y + dy) || bare(x + dx, y + dy)) || wet(x, y)) continue;
     if (Math.hypot(m.hero.x - x, m.hero.y - y) < 4 || (m.exit && Math.hypot(m.exit.x + m.exit.w / 2 - x, m.exit.y + m.exit.h / 2 - y) < 3)) continue;
     // By a tree or a rock (company), never on top of one; apart from the other scenes.
@@ -55,6 +55,7 @@ const C: Record<string, string> = {
   E: '#1a140f', e: '#2a2019', f: '#3a2d22', A: '#17161a', a: '#26252a', h: '#35333a',
   K: '#15141a', s: '#34323c', p: '#4a4753', W: '#8b8982', w: '#5f5d5a', o: '#0d0c0b',
   B: '#1c130c', b: '#33241a', t: '#4a3626', x: '#8a8474', R: '#4a1616', r: '#2c0e10', F: '#8a8894', g: '#243322',
+  m: '#2a3d25', c: '#64201b', y: '#6a5238', Y: '#8a6e4a',
 };
 const put = (rect: Rect, x0: number, y0: number, rows: string[]) => rows.forEach((row, j) => [...row].forEach((ch, i) => C[ch] && rect(x0 + i, y0 + j, 1, 1, C[ch])));
 
@@ -67,6 +68,8 @@ const FLOOR: Record<Exclude<SceneKind, 'graves'>, string[]> = {
   campfire: ['....ps.ps.ps....', '..ps.aaaaaa.ps..', '.sK.aaBaahaaa.pK', '.ps.aAaabBaAa.sK', '..sK.aaAaaa.sK..', '....sK.sK.sK....'],
   // Bare ground at the stake's foot, bones dropped by it.
   stake: ['...eeeeee...', '.eeWeeeeeee.', '.eeeeeewEee.', '..EEeeeeEE..', '....EEEE....'],
+  // The dark it lies in, moss creeping out from under it.
+  log: ['...EEEEEEEEEEEEEEEEEEEEE....', '.EEEgEEEEEEEEEEEEEEEgEEEEE..', '...EEEEEEEEEEEEEEEEEEEEE....'],
   // Bones laid in a ring round an old stain.
   circle: ['.....W..w..W.....', '..w....rrrr....W.', '.W...rrRRRRrr...w', '....rRRrRRRRRr...', '.w...rrRRRrrr...W', '..W....rrr.....w.', '.....w..W..w.....'],
 };
@@ -96,6 +99,8 @@ const UP: Record<Exclude<SceneKind, 'graves'>, { rows: string[]; glow?: [number,
   campfire: [{ dx: 0, dy: -0.05, rows: ['t.t.........t.t', '.b...........b.', 'obtttttttttttbo', '.b...........b.', '.b...........b.', '.b...........b.', '.B...........B.'] }],
   // A skull set on a stake, a rag tied under it: a goblin's warning, or someone's to them.
   stake: [{ dx: 0, dy: 0, rows: ['.oWWo.', 'oWoWoo', 'oWWWwo', '.owwo.', '.RbtR.', '.RbtRR', '..bt.R', '..bt..', '..bt..', '..bt..', '..bt..', '..bt..', '.Ebte.'] }],
+  // A fallen trunk: its cut end pale, its top lit, moss along it and a red cap grown on it.
+  log: [{ dx: 0, dy: 0.05, rows: ['..........mm......c.......', '...oooommmmmmooooccoooo...', '..oYyottttmmttttttttttto..', '.oYyYobbbbbbbbbbbbbbbbbbo.', '.oyYyobbbbbBbbbbbbbBbbbbo.', '.oYyYoBBBBBBBBBBBBBBBBBBo.', '..oyyoBBBBBBBBBBBBBBBBBo..', '...ooooooooooooooooooooo..'] }],
   // Three candle stubs among the bones.
   circle: [
     { dx: -0.3, dy: -0.12, rows: ['.o.', '.o.', 'oxo', 'KxK'], glow: [[1, 0], [1, 1]] },

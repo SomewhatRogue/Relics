@@ -13,6 +13,7 @@ import { scatterOf } from '../shared/scatter';
 import { soilAt } from './soil';
 import { clumpLight } from './tilegrounds';
 import { KX, KZ, type Rect } from './tilekit';
+import { fern } from './tilestrew';
 
 const LITTER = ['#11120d', '#181811', '#201e15', '#2a251a'], ROOT = '#120d09', ROOT_LIT = '#34261a';
 /** How far each kind's floor reaches (tiles across; half that deep), and whether it has roots. */
@@ -55,6 +56,16 @@ export function groveFloors(m: GameMap, rect: Rect): void {
         if (d > 1 + clumpLight(px, py, 6, 4, 61) * 0.55 || !open(px, py)) continue;
         rect(px, py, 1, 1, litterAt(px, py));
       }
+    }
+  }
+  // Ferns at the edge of a tree's floor, on the turf side: one or two round about half the trees.
+  for (const r of list) {
+    if (r.kind !== 'tree' && r.kind !== 'pine') continue;
+    const [reach] = REACH[r.kind], k = reach * Math.min(1.3, Math.max(0.8, r.r / 0.5));
+    for (let i = 0; i < 2; i++) {
+      if (h01(r.x, r.y, 20 + i) > 0.38) continue;
+      const a = h01(r.y, r.x, 22 + i) * 6.28, px = Math.round((r.x + Math.cos(a) * k * 1.02) * KX), py = Math.round((r.y + Math.sin(a) * k * 0.62 * 1.05) * KZ);
+      if (px > 4 && py > 6 && px < W - 4 && py < H - 2 && open(px, py)) fern(rect, Math.floor(h01(r.x, r.y, 24 + i) * 3), px, py);
     }
   }
   // Roots over the litter, so a neighbour's floor never paints them out.

@@ -59,3 +59,10 @@ export function stamp(rect: Rect, k: ScatterKind, v: number, px: number, py: num
   const rows = ART[k][v % ART[k].length], x0 = px - (rows[0].length >> 1), y0 = py - rows.length + 1;
   rows.forEach((row, j) => [...row].forEach((ch, c) => C[ch] && rect(x0 + c, y0 + j, 1, 1, C[ch])));
 }
+
+const FERNS = [['l.....l', '.lg.gl.', '..lgl..', '.lgdgl.', '..ddd..'], ['.l...l.', 'l.lgl.l', '.lgdgl.', '..ddd..'], ['l...l', '.lgl.', 'lgdgl', '.ddd.']];
+/** A fern at a grove's edge (tilelitter.ts), variant `v`, its foot's middle at floor pixel (px, py). */
+export function fern(rect: Rect, v: number, px: number, py: number): void {
+  const rows = FERNS[v % FERNS.length], x0 = px - (rows[0].length >> 1), y0 = py - rows.length + 1;
+  rows.forEach((row, j) => [...row].forEach((ch, c) => C[ch] && rect(x0 + c, y0 + j, 1, 1, C[ch])));
+}

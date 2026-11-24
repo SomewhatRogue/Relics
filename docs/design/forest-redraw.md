@@ -109,6 +109,13 @@ sizes of bush and boulder by the map's own radius): a bush a mound of leafy lobe
 old blood; a boulder with a lit top plane, a darker face, cracks, moss on some; a dead tree a bare trunk forking into
 black limbs, a crow on some, a length of old rope on others. Stumps keep their painting.
 
+## After dark (2026-11-24, in)
+
+A night under the open sky is moonlit, not black: the ambient has a floor (lights3d.ts `MOONLIT`, a cold blue at
+about a third of the day's light), so the drawn ground and trees still read and a torch still owns the ground round
+it. Fireflies drift over the book's tall grass, hollows, rings and pools at dusk and night; wisps hang over a fen's
+pools (ambientglow.ts). Ferns grow at the edges of the grove floors, and a fallen log is one of the wood's scenes.
+
 ## Where the book reaches (2026-11-23)
 
 Every room of every job on 14 days of the board, 252 rooms: fen 74, bare yards 62, wood 31, fields 28 had a look;

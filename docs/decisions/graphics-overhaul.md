@@ -926,3 +926,15 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   were 37, 30 and 24 degrees; now 37, 24 and 17.5 (asin 0.4 and asin 0.3: a floor tile 8 and 6 pixels deep). Clicked
   through in a browser: the camera reads 36.9, 23.6, 17.5 degrees and the choice is saved. (Claude Fable 5.2)
 
+## 2026-11-24: after dark: fireflies, wisps, a moonlit floor, ferns and a fallen log
+
+- Kyle: "keep working on making the game beautiful". A wood at night was black under the redraw: the night ambient
+  (an eighth of the day's) was set for the old, brighter ground, and nothing drawn could be seen.
+- lights3d.ts `MOONLIT`: under the redraw, an open-sky night's ambient never falls below a cold blue at about a third
+  of the day's light, and the moon keeps a small key. Not indoors or underground (no moon), not the flat view, not
+  the room: what a goblin sees at night is unchanged.
+- ambientglow.ts (new, from ambient.ts): fireflies over the tall grass, hollows, rings and pools of the pattern book
+  at dusk and night (half at dawn); pale wisps over a fen's pools. Cosmetic only.
+- tilestrew.ts `fern`, tilelitter.ts: ferns at the edges of the grove floors. looks.ts, tilescenes.ts: a fallen log,
+  mossy with a pale cut end, in the gallows and mossy woods' scene pools. Paint and a card, never collided.
+- Checked on phone 2.5D: Gallows Wood by day and night, Sallow Carr at night; no page errors. (Claude Fable 5.2)
