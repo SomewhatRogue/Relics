@@ -62,6 +62,6 @@ export function stepSpins(heroes: Hero[], w: World): void {
     }
     // Not yet up to speed, the chain stops on what it hits: one cut, and you start the spin again (Kyle,
     // 2026-11-23: "start it at a distance and come in").
-    if (landed && !full) Object.assign(h, { act: 'idle', actT: 0, spinNext: undefined }), w.ev.push({ k: 'chainsnag', x: h.x, y: h.y });
+    if (landed && !full) Object.assign(h, { act: 'idle', actT: 0, spinNext: undefined }), w.ev.push({ k: 'chainstop', x: h.x, y: h.y });
   }
 }

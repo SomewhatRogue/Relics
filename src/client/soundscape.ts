@@ -115,6 +115,7 @@ export class Soundscape {
     // The chain sickle's whirl, each cut, and its chain caught on a wall (sim/sickle.ts).
     if (ev.k === 'chainspin') return sfx.swing();
     if (ev.k === 'chainsnag') return sfx.wallhit();
+    if (ev.k === 'chainstop') return sfx.wallhit();
     if (ev.k === 'blockmend' || ev.k === 'coverfor') return sfx.blessed();
     if (ev.k === 'taunt') return sfx.rally();
     if (ev.k === 'ironstance') return sfx.wardbreak();

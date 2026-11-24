@@ -20,6 +20,11 @@ export function ladderFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean 
       // A chain sickle's cut round the Rogue (sim/sickle.ts): a glint of steel flung off the whirl.
       fx.burst(x, y - 8, 3, IRON, 70, false, 160, true);
       return true;
+    case 'chainstop':
+      // Not up to speed, the chain stopped on what it hit (sim/sickle.ts): say so, and a dull drop of links.
+      fx.say(x, y - 34, 'TOO SLOW', '#ff9a6a');
+      fx.burst(x, y - 8, 5, IRON, 30, false, 160, true);
+      return true;
     case 'chainsnag':
       // Caught on the wall: sparks off the links.
       fx.burst(x, y - 8, 6, ['#ffd27a', ...IRON], 50, true, 200, true);

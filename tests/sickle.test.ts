@@ -38,7 +38,9 @@ describe('the chain sickle', () => {
 
   it('not yet up to speed, the first cut that lands stops the spin', () => {
     const { h, e, hold } = arena([9 - 2]);
-    hold(1);
+    const ev = hold(1);
+    // (And says so: TOO SLOW, client/fxladder.ts.)
+    expect(ev.some((x) => x.k === 'chainstop')).toBe(true);
     expect(lost(e)).toBeGreaterThan(0);
     expect(lost(e)).toBeLessThanOrEqual(SICKLE_SPIN.top);
     expect(h.act).not.toBe('charge');
