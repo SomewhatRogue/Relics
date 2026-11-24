@@ -6,6 +6,7 @@
 import type { ErrandId } from '../shared/errands';
 import { TRAINERS } from '../shared/town';
 import type { HeroClass } from '../shared/weapons';
+import { WANTQW } from './wanterrandwords';
 
 /** Who runs up to a new hero (by class, Kyle 2026-11-12), how they're drawn, and their one line. A Ranger's is Maeve's hound with a note. */
 export const RUNNERS: Record<HeroClass, { who: string; look: string; hound?: boolean; text: string }> = {
@@ -23,12 +24,12 @@ const trainer = (cls: HeroClass) => title(TRAINERS[cls].name);
 
 export const ERRANDW = {
   /** The tracker's rows: a label and what to do. */
-  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR' } as Record<ErrandId, string>,
+  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR', ...WANTQW.pin } as Record<ErrandId, string>,
   todo: (id: ErrandId, cls: HeroClass) =>
-    id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
+    id === 'church' || id === 'under' ? WANTQW.todo[id] : id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
   /** Folded, one line. */
   small: (id: ErrandId, cls: HeroClass) =>
-    id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
+    id === 'church' || id === 'under' ? WANTQW.small[id] : id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
   freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",

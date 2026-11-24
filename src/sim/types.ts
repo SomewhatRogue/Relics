@@ -243,6 +243,8 @@ export interface Hero extends Body {
   poisonNext?: number;
   /** The Want, for the eyes (never shown as a number). */
   want: number;
+  /** The Want's bar shows on the pack (shared/wanterrands.ts); copied from the profile, never decided here. */
+  wantSeen?: boolean;
   /**
    * The eye dial, -1 (red) to +1 (gold); unset or 0 is the middle, plain eyes (PLAN.md "red eyes and
    * gold eyes"). Only drawn for now (client/heroeyes.ts); nothing sets it yet.

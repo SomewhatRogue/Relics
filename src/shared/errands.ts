@@ -15,8 +15,9 @@ import { questBack, questDue, questHeld, reported, takeQuest } from './heroquest
 import { deepSkillOpen } from './deepskill.js';
 
 /** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do; `back`: one done, to tell them of (shared/heroquests.ts).
- *  `nettle`: Tobin, frightened of your hungry gear, sent you to Nettle. */
-export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle';
+ *  `nettle`: Tobin, frightened of your hungry gear, sent you to Nettle. `church` and `under`: your first hungry piece
+ *  home, the church and the Keeping Room each have a word for you (shared/wanterrands.ts, the Holy and hungry chat). */
+export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle' | 'church' | 'under';
 export interface Errands {
   /** The runner has found you and said their line (the first two are yours from then). */
   told: boolean;
@@ -29,6 +30,10 @@ export interface Errands {
   deep?: boolean;
   /** Tobin sent you to Nettle with your hungry gear: 1 to go, 2 been (Kyle, 2026-11-14). Once only. */
   nettle?: number;
+  /** Your first hungry piece home (Kyle, 2026-11-23; shared/wanterrands.ts): talk to the church, and to the Keeping
+   *  Room's Dorcas, about it: 1 to go, 2 been. */
+  church?: number;
+  under?: number;
 }
 
 export const newErrands = (): Errands => ({ told: false, relic: false, trainer: false, seen: 1 });
@@ -39,7 +44,7 @@ export const doneErrands = (level: number): Errands => ({ told: true, relic: tru
 export function fitErrands(e: unknown, level: number): Errands {
   if (!e || typeof e !== 'object') return doneErrands(level);
   const o = e as Partial<Errands>;
-  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}) };
+  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}), ...(o.church === 1 || o.church === 2 ? { church: o.church } : {}), ...(o.under === 1 || o.under === 2 ? { under: o.under } : {}) };
 }
 
 /** Where each class's trainer is (the hall's door in town, shared/town.ts). */
@@ -68,6 +73,9 @@ export function openErrands(p: Profile): ErrandId[] {
   if (questBack(p)) out.push('back');
   // (Only while there's still something hungry on you to sell him.)
   if (e.nettle === 1 && carriesHungry(p)) out.push('nettle');
+  // Your first hungry piece home: the church, and the Keeping Room under the town (shared/wanterrands.ts).
+  if (e.church === 1) out.push('church');
+  if (e.under === 1) out.push('under');
   return out;
 }
 
@@ -97,6 +105,9 @@ export function relicDone(p: Profile): boolean {
 export function errandWho(p: Profile, id: ErrandId): { door: string; talk: string; arg?: number; spot?: string } {
   if (id === 'relic') return { door: 'church', talk: 'church' };
   if (id === 'nettle') return { door: 'tavern', talk: 'vendor', arg: CLASS_ORDER.indexOf('ROGUE') };
+  if (id === 'church') return { door: 'church', talk: 'church' };
+  // The Keeping Room is behind the sewer grate's bricked arch.
+  if (id === 'under') return { door: '', talk: 'sewer', spot: 'sewer' };
   // A quest in hand: the board, where your job for it is; or Cobb's ladder, for what's found in the Deep.
   if (id === 'job') return questHeld(p)?.q.post ? { door: '', talk: 'board', spot: 'board' } : { door: '', talk: 'sewer', spot: 'sewer' };
   return { door: TRAINER_DOOR[p.cls], talk: 'trainer', arg: CLASS_ORDER.indexOf(p.cls) };

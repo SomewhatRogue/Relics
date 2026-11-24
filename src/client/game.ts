@@ -43,6 +43,7 @@ import { isCorrupt } from '../shared/corrupt';
 import { isVowed, rollVowed, wearsVowed } from '../shared/vowed';
 import { amendsOf, stepCrossed } from '../shared/amends';
 import { growKit } from '../shared/vowgrow';
+import { hungryHome, wantShown } from '../shared/wanterrands';
 import { FALL, fallWith, giveRipe } from '../shared/crossroads';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
@@ -392,6 +393,8 @@ export class Game {
     h.glow = p.glow;
     h.belt = [...p.belt];
     h.want = p.want;
+    // The Want's bar shows on the pack from the first talk about it (shared/wanterrands.ts).
+    h.wantSeen = wantShown(p);
     h.cold = p.cold;
     h.purse = p.gold + (this.run?.gold ?? 0);
     // Copies: the room spends charge on its own, and keepkit.ts brings it home.
@@ -1325,6 +1328,8 @@ export class Game {
     p.want += [p.arms[p.weapon], p.armor, p.legs, ...p.rings].reduce((s, it) => s + (it ? TIER_WANT[it.quality] ?? 0 : 0), 0);
     // Each hungry piece worn gets hungrier by the job's size (shared/hunger.ts, jobunits.ts).
     feedKit(p, jobUnits(run.job, won ? 'won' : how));
+    // The first hungry piece home: the church's and the Keeping Room's quests (shared/wanterrands.ts).
+    hungryHome(p);
     // Each vowed piece worn grows by the same, if the hero ends the job clean (shared/vowgrow.ts).
     growKit(p, jobUnits(run.job, won ? 'won' : how));
     const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;

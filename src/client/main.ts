@@ -174,6 +174,7 @@ import { mageTrails } from './fxmagetap';
 import { iceTrails } from './fxice';
 import { one, setData, setHidden, setHtml, setStyle, setText, setTitle, toggle } from './domset';
 import { openCrossroads } from './ripeui';
+import { openWhisper } from './wanterrandui';
 
 // The UI's frames and icons, drawn once before anything shows.
 paintFrames();
@@ -689,7 +690,7 @@ function tick(t: number): void {
   if (game.greeting === 'road' && !panel.open) (game.greeting = null), panel.show('WICKHOLD', `<p class="dim">${line(WOOD_ROAD)}</p>`, [{ label: 'INTO WICKHOLD', primary: true, act: () => panel.hide() }], true);
   // Back to a town the hungry raided while you were away: Dunn tells you, the first time you see it.
   // A vowed piece at full strength: the crossroads first, before anything else in town (ripeui.ts).
-  else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result && openCrossroads(game, panel)) {
+  else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result && (openCrossroads(game, panel) || openWhisper(game, panel))) {
     /* opened */
   } else if (game.mode === 'town' && !game.outside && !panel.open && !title.open && !game.result) {
     // (After it, once: the relics that went when relics became earned, relicgone.ts; told, it's saved.)

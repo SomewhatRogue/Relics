@@ -24,6 +24,7 @@ import './pack.css';
 import { relicCard } from './reliccard';
 import { carriedRelic, relicRow } from './relicshelf';
 import { RELICW } from './relicwords';
+import { wantBar } from './wantbar';
 
 /** The pack says how to compare once, the first time, then never again (Kyle, 2026-11-13: declutter). */
 const HINT_KEY = 'relic.packHint';
@@ -162,7 +163,7 @@ export class PackView {
     this.h = h;
     if (!this.open || this.el.querySelector('.dragging')) return;
     const town = this.town(), fresh = this.tree.fresh?.() ?? [], gear = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.bagSize, h.relics, h.relicItem, h.found, h.augments, h.belt, h.armor, h.rings, town, fresh]);
-    const keys = [gear + this.sel + this.tree.picks(), gear + this.sel + this.hover, JSON.stringify([h.glow, h.weapon, h.armor, h.rings, h.arms[h.weapon]])];
+    const keys = [gear + this.sel + this.tree.picks(), gear + this.sel + this.hover, JSON.stringify([h.glow, h.weapon, h.armor, h.rings, h.arms[h.weapon], h.wantSeen ? h.want : -1])];
     const [head, top, detail, foot] = this.parts;
     if (keys[0] !== this.keys[0]) {
       const size = h.bagSize || 8, isFull = full(h);
@@ -177,6 +178,8 @@ export class PackView {
     if (keys[2] !== this.keys[2]) {
       const open = (foot.querySelector('details') as HTMLDetailsElement | null)?.open ?? false;
       foot.innerHTML = (WEAPONS[h.weapon].cls === 'HEALER' ? `<h3>${COAL.name} <i>${h.glow} / ${LANTERN.max}</i></h3><div class="none">${COAL.line}</div>` : '') +
+        // The Want's bar, from the first talk about it (client/wantbar.ts, the Holy and hungry chat).
+        (h.wantSeen ? wantBar(h) : '') +
         `<details${open ? ' open' : ''}><summary>${COPY.stats}</summary>${heroSheet(h)}</details>`;
     }
     this.keys = keys;

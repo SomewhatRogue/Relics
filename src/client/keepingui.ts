@@ -11,22 +11,26 @@ import { VOWED, vowedOf } from '../shared/vowed';
 import { canFeed, dorcasPays, feedRelic, findsRoom, giveToDorcas, packVowed, piecesToFill } from '../shared/keeping';
 import { itemName, type Item } from '../shared/tuning';
 import { KEEPW } from './keepingwords';
+import { wantOpen, wantTalked } from '../shared/wanterrands';
+import { WANTQW } from './wanterrandwords';
 
 const dim = (s: string) => `<p class="dim">${s}</p>`;
 const nameOf = (it: Item) => { const id = vowedOf(it); return id ? VOWED[id].name : itemName(it); };
 
 /** The sewer grate's button for the room, if this hero finds it. */
 export function archButton(g: Game, panel: Panel, back: () => void): Button[] {
-  return findsRoom(g.profile) ? [{ label: KEEPW.arch, act: () => room(g, panel, back, true) }] : [];
+  // A hero on the quest from their first hungry piece home is let in even before they're corrupt (shared/wanterrands.ts).
+  return findsRoom(g.profile) || wantOpen(g.profile, 'under') ? [{ label: KEEPW.arch, act: () => room(g, panel, back, true) }] : [];
 }
 
 function room(g: Game, panel: Panel, back: () => void, first = false): void {
-  const again = () => room(g, panel, back);
-  panel.show(KEEPW.title, (first ? dim(KEEPW.door) : '') + dim(KEEPW.scene) + says('Dorcas', KEEPW.greet), [
-    { label: KEEPW.feedButton, primary: true, act: () => feed(g, panel, again) },
-    { label: KEEPW.giveButton, act: () => give(g, panel, again) },
-    { label: 'BACK', act: back },
-  ]);
+  const again = () => room(g, panel, back), p = g.profile;
+  // The quest's talk, once: the other road (shared/wanterrands.ts). Talking to her is the quest.
+  const talk = wantOpen(p, 'under') ? WANTQW.dorcas.map((l) => says('Dorcas', l)).join('') : '';
+  if (talk && wantTalked(p, 'under')) (g.hero.wantSeen = true), g.keep();
+  // Feeding and giving are for the corrupt only; a clean hero on the quest has come to listen.
+  const deals = findsRoom(p) ? [{ label: KEEPW.feedButton, primary: true, act: () => feed(g, panel, again) }, { label: KEEPW.giveButton, act: () => give(g, panel, again) }] : [];
+  panel.show(KEEPW.title, (first ? dim(KEEPW.door) : '') + dim(KEEPW.scene) + (talk || says('Dorcas', KEEPW.greet)), [...deals, { label: 'BACK', act: back }]);
 }
 
 function feed(g: Game, panel: Panel, again: () => void): void {

@@ -325,3 +325,48 @@ Kyle, on the spec's section 6 (elements): pull elements off random weapon rolls 
 your weapon for 5 jobs instead. Drafted in docs/design/element-augments.md with his answers (strip old ones, any 5
 jobs, not for the Mage, a replacement warns first) and drafts for the rest; on the board's Waiting list for a
 chat of its own. Holy and hungry's section 6 now points there for anything elemental.
+
+## 2026-11-23: the first hungry piece home, two quests (Claude Opus 5.5)
+
+Kyle's call: the first time a hero brings a hungry piece home, two quests at once: talk to the church about giving it
+up, and talk to the under church about growing the Want; the Want's bar shows from the first of those talks on.
+Also confirmed: TOUCHED and TURNING become SIEGE and MARSHAL (slice 8), so Odric speaks of hungry gear only.
+
+- **Mine, new:** `shared/wanterrands.ts` (`hungryHome`, `wantOpen`, `wantTalked`, `wantShown`),
+  `client/wanterrandwords.ts`, `tests/wanterrands.test.ts`.
+- **On the errand pattern** (as Nettle's): `Errands.church` and `Errands.under` (1 to go, 2 been), the ids `church` and
+  `under` in `openErrands` and `errandWho` (the church; the sewer grate), kept by `fitErrands`; their goal-line words
+  in `ERRANDW` (client/errandwords.ts). Opened by `hungryHome` at a job's end (client/game.ts `finish`, beside the
+  hungry count) when hungry gear is on the hero or in the pack, once only, old heroes too.
+- **Done by talking:** the church panel shows Odric's two lines and the rule above its usual line, once, and that's the
+  church's quest done; behind the bricked arch, Dorcas's three lines in place of her greeting, once, and that's the
+  under one. The arch lets a hero on the quest in even before they're corrupt; feeding and giving stay corrupt-only,
+  so a clean one has come to listen. The grate must be open (the sewers' public work) to reach her.
+- **The Want's bar placed myself (Kyle's word: the UI chat hadn't):** in the pack's foot, above the stats, while
+  `Hero.wantSeen` (new, optional, copied in `equip` from `wantShown`), redrawn when the Want changes.
+- **Small edits in other chats' files:** Town quests' `shared/errands.ts` and `client/errandwords.ts`; UI's
+  `client/pack.ts` (the bar); `sim/types.ts` (`wantSeen?`); `client/game.ts` (`finish`, `equip`); `client/townui.ts`
+  (the church); mine `client/keepingui.ts`.
+- **Words:** the two titles are Kyle's as written. The lore keeper would change the second ("Talk to the under church
+  about growing the Want" names the Want, which is otherwise never on screen, and calls the Keeping Room a church,
+  never a shrine): its pick is "Talk to Dorcas below the grate about feeding it". Put to Kyle. The rest through the
+  lore keeper (Odric: "goes bad", Kyle's words, not "turns", the old tier; Dorcas names only live costs; no invented
+  church refusal of relics) and line editor (all kept). For the bible: Dorcas and the Keeping Room as a place apart
+  from the Deep's door, the trough; a vowed piece that goes bad turns hungry (slice 6, ONCE VOWED).
+- **The whisper** (Kyle, same day: "it's a whisper you hear leading you there"): back in town with the first red
+  piece, A WHISPER opens by itself before anything else, once (client/wanterrandui.ts, beside the crossroads in
+  client/main.ts; `Profile.whispered?`): an unnamed voice, an arch past the grate that will open for you, a woman
+  who knows what you're carrying. The goal line's row for the Keeping Room reads A WHISPER. Lore keeper (not "keeps
+  what was never given": that's the hoard's secret) and line editor.
+- **Checked:** the touched tests, `npm run check`, the full suite (2298 passed).
+
+## 2026-11-23: titles drafted; the Keeping Room claimed and mapped (Claude Opus 5.5)
+
+- **Titles** (docs/design/titles.md): Kyle's calls (cosmetic, from both roads, never worn on the other road, shown
+  to everyone, a flex, easy ones early) and the lore keeper's eight names (church: THE GIVEN, VOWED, THE STEADFAST,
+  THE HOLY, Kyle's word kept as the church's own; under: THE GREEDY, THE KEPT, SHADOW, GILDED); 1, 5, 15, 40 deeds;
+  about 2, 6, 15 and 60 jobs' pay. Waiting on Kyle's yes.
+- **The walkable Keeping Room is this chat's now** (Kyle: "claim walkable room here, map it out"):
+  docs/design/keeping-room.md maps it (a 12 by 11 interior through the dry arch, entered from the grate's button as
+  a door, out at the grate), and its build in three slices (the room with stand-in furniture, the art in the kit,
+  the titles). The ask of the Deep, Territories and Art chats (slice 9) is withdrawn.

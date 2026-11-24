@@ -40,6 +40,8 @@ import { QUESTW } from './questwords';
 import { coinsHtml } from '../shared/coins';
 import { givenUp } from './vowedui';
 import { churchVowed } from './shelfui';
+import { wantOpen, wantTalked } from '../shared/wanterrands';
+import { WANTQW } from './wanterrandwords';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -113,8 +115,11 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const hungry = g.gearList().filter((it) => it.quality === 'hungry');
     // The first time in after the wood: one line about Hew (Orla brought the stick; you carry nothing).
     const hew = pr.tally ? say('Father Odric', TALLY.odric) : '';
+    // The first hungry piece home: Odric's word on it, once (shared/wanterrands.ts). Talking to him is the quest.
+    const want = wantOpen(pr, 'church') ? WANTQW.odric.map((l) => say('Father Odric', l)).join('') + p(WANTQW.odricRule) : '';
+    if (want && wantTalked(pr, 'church')) (g.hero.wantSeen = true), g.keep();
     if (pr.tally) (pr.tally = false), g.keep();
-    panel.show('FATHER ODRIC', hew + say('Father Odric', 'Give what you can spare to the Lantern. It keeps the light burning, and it does the giver good, more than you\'d think.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
+    panel.show('FATHER ODRIC', hew + want + say('Father Odric', 'Give what you can spare to the Lantern. It keeps the light burning, and it does the giver good, more than you\'d think.') + (pr.cls === 'HEALER' ? say('Father Odric', COAL.odric) : '') +
       (hungry.length ? say('Father Odric', CHURCH.hungry) : '') +
       p(`Given to the Lantern so far: ${coinsHtml(w.lantern)}.`) + p(`You have ${coinsHtml(pr.gold)}.`),
       [...[20, 100].map((n) => ({ label: `GIVE ${coinsHtml(n)}`, disabled: pr.gold < n || pr.armor?.hungry === 'ransom', act: () => (g.donate(n), townVoice.pray(voiceClock()), again()) })),
