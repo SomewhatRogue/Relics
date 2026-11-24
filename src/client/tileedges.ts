@@ -16,7 +16,7 @@ import type { Rect } from './tilekit';
 
 /** The soil's block on the redraw's grid (soil.ts, calm): an edge is judged a 2 by 2 at a time. */
 const B = 2;
-const LIP = '#1d2818', FRINGE = '#46582f', BLADE = '#56683a', RIM_D = '#1e1a16', RIM_L = '#4e4740', MUD_RIM = '#16120e';
+const LIP = '#0f1710', FRINGE = '#33462b', BLADE = '#43583a', SHADOW = '#1c1611', RIM_D = '#1e1a16', RIM_L = '#4e4740', MUD_RIM = '#16120e';
 
 export function softEdges(m: GameMap, rect: Rect, sx: number, sy: number): void {
   if (!m.soil?.length) return;
@@ -24,18 +24,29 @@ export function softEdges(m: GameMap, rect: Rect, sx: number, sy: number): void 
   for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) mats[j * cw + i] = soilAt(m, (i * B + B / 2) / sx, (j * B + B / 2) / sy);
   const at = (i: number, j: number) => (i < 0 || j < 0 || i >= cw || j >= ch ? null : mats[j * cw + i]);
   const soft = (a: Soil['mat'] | null) => a === 'shade' || a === null;
+  // (A grass floor is grass to its edges too: a path through a wood is earth under overhanging turf.)
+  const floorGrass = (m.theme.floor as string) === 'grass', grassy = (a: Soil['mat'] | null) => a === 'grass' || (floorGrass && a === 'cobble');
+  const hsh = (i: number, j: number) => ((Math.imul(i, 374761393) ^ Math.imul(j, 668265263)) >>> 0) % 16;
   for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) {
     const me = mats[j * cw + i], x = i * B, y = j * B;
     if (me === 'shade') continue;
     const up = at(i, j - 1), dn = at(i, j + 1), lf = at(i - 1, j), rt = at(i + 1, j);
-    if (me === 'grass') {
-      if (dn !== 'grass' && !soft(dn)) rect(x, y + B - 1, B, 1, LIP);
-      if (up !== 'grass' && !soft(up)) {
+    const bare = (a: Soil['mat'] | null) => !grassy(a) && !soft(a);
+    if (grassy(me)) {
+      // The turf's foot and its right side in shadow; its top and left edge lit, blades standing proud of it.
+      if (bare(dn)) rect(x, y + B - 1, B, 1, LIP);
+      if (bare(rt)) rect(x + B - 1, y, 1, B, LIP);
+      if (bare(lf)) rect(x, y, 1, B, FRINGE);
+      if (bare(up)) {
         rect(x, y, B, 1, FRINGE);
-        if (((i * 7 + j * 13) & 15) === 0) rect(x, y - 1, 1, 1, BLADE);
+        const h = hsh(i, j);
+        if (h < 5) rect(x + (h & 1), y - 1 - (h < 2 ? 1 : 0), 1, 1 + (h < 2 ? 1 : 0), h === 0 ? BLADE : FRINGE);
       }
       continue;
     }
+    // Bare ground under turf: the turf's shadow falls on it from above and from the left.
+    if (me !== 'mud' && grassy(up)) rect(x, y, B, 1, SHADOW), hsh(i, j) < 8 && rect(x, y + 1, 1, 1, SHADOW);
+    if (me !== 'mud' && grassy(lf)) rect(x, y, 1, B, SHADOW);
     if (me === 'mud') {
       if (dn !== 'mud' && !soft(dn)) rect(x, y + B - 1, B, 1, MUD_RIM);
       if (up !== 'mud' && !soft(up)) rect(x, y, B, 1, MUD_RIM);
@@ -43,7 +54,7 @@ export function softEdges(m: GameMap, rect: Rect, sx: number, sy: number): void 
       if (rt !== 'mud' && !soft(rt)) rect(x + B - 1, y, 1, B, MUD_RIM);
       continue;
     }
-    if (me === 'cobble') continue;
+    if (me === 'cobble' || floorGrass) continue;
     // A patch of earth, swept ground, crop or the like against the floor's own: set into it.
     if (dn === 'cobble') rect(x, y + B - 1, B, 1, RIM_D);
     if (rt === 'cobble') rect(x + B - 1, y, 1, B, RIM_D);

@@ -37,7 +37,14 @@ collisions don't change.
 Shown to Kyle on a phone in 2.5D, before and after; landed on his "Land it", 2026-11-23, for every map with grass or
 trees.
 
-## Later, if the proof lands
+## The land (2026-11-23, in, on Kyle's "Incredible. More of this")
+
+- **Earth** (`tilegrounds.ts` `earthAt`, used by soil.ts's earth and swept ground in the redraw): a calm dark base with
+  low ripples, a pale crest over a dark trough in short wavy runs; no speckle.
+- **Turf over paths** (`tileedges.ts`): a grass floor is grass to its edges too. Turf's foot and right side dark, its
+  top and left lit with blades standing proud; the bare ground under it takes the turf's shadow.
+
+## Later
 
 - Ridges: drawn earth lips where the land rises (the height levels we have).
 - One or two small scenes a map (a waystone, a lamp and bench, a cairn): the pieces drawn here, placed by each map's

@@ -57,6 +57,14 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Collisions to settle
 
+- **Forests that feel like a place (Graphics sweep asks Territories and whoever lays a map's trees), 2026-11-23.**
+  Kyle, after Ruinsong: "the forests and land seem more tailored", then "Incredible. More of this"
+  (docs/design/forest-redraw.md). In and live, in the sweep's own files: turf grass, rippled earth with a turf lip,
+  drawn pines and broadleafs, a wood's edge of overlapping trees where a map's back is trees. Two things left need the
+  maps' own files (`wood.ts`, `hillmap.ts`, the `*land.ts` files, `shared/scatter.ts`): (1) groves, a map's trees
+  gathered in clumps of three to seven with clearings between, not dotted one by one; (2) one or two small scenes a
+  map (a waystone, a lamp and a bench, a cairn, a broken cart), drawn by the sweep the tile way, placed by the map.
+  Say yes to the sweep doing it in your files, or take it; a wood first.
 - **Living world L4, each place its own (Graphics sweep asks Territories and the Deep's chat), 2026-11-22.** Kyle's
   plan (docs/design/living-world.md, L4): Lowfurrow and the villages (pens, a scarecrow, a bucket on the well; a raided
   one smoking, things strewn), fields (cart ruts, wheat swaying), woods (ferns, mushrooms, fallen logs, fireflies),

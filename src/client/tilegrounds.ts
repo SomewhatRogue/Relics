@@ -84,6 +84,19 @@ export function grassAt(x: number, y: number): string {
   return BLADE[lv < 0.3 ? 0 : lv < 0.52 ? 1 : lv < 0.64 ? 2 : 3];
 }
 
+/**
+ * Trodden earth, one world pixel (docs/design/forest-redraw.md, the land): a calm dark base with low ripples, a pale
+ * crest over a dark trough in short wavy runs, a rut's worth every five rows, and a broad slow shift of tone; no
+ * speckle. `cols`: dark, base, mid, pale. Shared by soil.ts's earth and swept ground in the redraw.
+ */
+export const EARTH = ['#29211a', '#352c25', '#3b322a', '#453b31'], SWEPT = ['#302a25', '#3f3933', '#46403a', '#4f4840'];
+export function earthAt(x: number, y: number, cols: string[] = EARTH): string {
+  const row = Math.floor((y + 1.6 * Math.sin(x * 0.27 + Math.floor(y / 5) * 1.9)) / 5), band = Math.floor(y + 1.6 * Math.sin(x * 0.27 + Math.floor(y / 5) * 1.9)) - row * 5;
+  // Short runs: about half of each row's length carries a ripple.
+  if (band <= 1 && cell(x + row * 7, row, 11, 1, 71) < 0.42) return cols[band === 0 ? 3 : 0];
+  return cols[cell(x, y, 34, 20, 72) + cell(x + 17, y + 10, 26, 16, 73) > 1.15 ? 2 : 1];
+}
+
 function grass(rect: Rect, rng: Rng, x: number, y: number): void {
   for (let j = 0; j < KZ; j++) {
     for (let i = 0; i < KX; ) {

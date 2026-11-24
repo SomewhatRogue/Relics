@@ -839,3 +839,11 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   note: the wand bot there takes 253 s where it took 233 (it was 7 s from the limit), the other nine rooms as before
   or faster. For the General chat to weigh. Full suite otherwise as it was. (Claude Fable 5.2)
 
+## 2026-11-23: the land: rippled earth, turf over paths
+
+- Kyle: "Incredible. More of this." Paths were blotched earth with stepped edges. Now `earthAt` (tilegrounds.ts): a
+  calm dark base with short wavy ripples, for soil.ts's earth and swept ground in the redraw; and tileedges.ts treats a
+  grass floor as grass, so turf overhangs a path with a dark foot, a lit top with blades, and its shadow on the earth.
+- Groves and small scenes asked of the maps' owners on the board (Collisions).
+- Checked on phone 2.5D: the town's street, Gallows Wood, a village, a field; no page errors. (Claude Fable 5.2)
+

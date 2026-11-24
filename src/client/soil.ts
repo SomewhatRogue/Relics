@@ -5,7 +5,7 @@
  * answer is cobble, the floor's own cobbles show. Each material has its own colour family, dark enough
  * for the stepped lighting, apart enough to read on a phone at night.
  */
-import { grassAt } from './tilegrounds';
+import { EARTH, SWEPT, earthAt, grassAt } from './tilegrounds';
 import type { GameMap, Soil } from '../shared/arena';
 import { OX, OY, PX } from './world';
 
@@ -122,6 +122,14 @@ export function paintSoil(m: GameMap, g: CanvasRenderingContext2D, at: { x: numb
     if (at.calm && mat === 'grass') {
       for (let py = by; py < Math.min(H, by + B); py++) for (let px = bx; px < Math.min(W, bx + B); px++) {
         const [r, gg, b] = toRgb(grassAt(px, py)), o = (py * W + px) * 4;
+        (d[o] = r), (d[o + 1] = gg), (d[o + 2] = b), (d[o + 3] = 255);
+      }
+      continue;
+    }
+    // (Calm earth and swept ground the same way: rippled, no speckle.)
+    if (at.calm && (mat === 'earth' || mat === 'swept')) {
+      for (let py = by; py < Math.min(H, by + B); py++) for (let px = bx; px < Math.min(W, bx + B); px++) {
+        const [r, gg, b] = toRgb(earthAt(px, py, mat === 'earth' ? EARTH : SWEPT)), o = (py * W + px) * 4;
         (d[o] = r), (d[o + 1] = gg), (d[o + 2] = b), (d[o + 3] = 255);
       }
       continue;
