@@ -46,18 +46,58 @@ function sprite(rect: Rect, x: number, y: number, rows: string[], cols: Record<s
 
 const tileKey = (x: number, y: number, s: number) => hash(Math.floor(x / KX), Math.floor(y / KZ), s);
 
+/**
+ * Grass, one world pixel (Kyle, 2026-11-23, after Ruinsong: calm ground, "a PLACE"): one base tone covered evenly
+ * in small blade marks, a lit pixel or two over a dark one, a mark to a staggered 6 by 4 cell at a jittered spot, so
+ * the field reads as grass without a grid or blotches. Shared with soil.ts's grass patches, so both are one ground.
+ */
+const BLADE = ['#141e16', '#1b281b', '#223120', '#2c3d27'];
+
+/**
+ * Clumps, the SNES scallop (grass here, foliage in tiletrees.ts): a jittered clump centre to each staggered `cw` by
+ * `ch` cell; a pixel takes the nearest clump and is lit toward its top left, darkened along its lower rim. A nudge to
+ * the light, about -0.34 to +0.22.
+ */
+export function clumpLight(x: number, y: number, cw: number, ch: number, s: number): number {
+  let best = 1e9, bdx = 0, bdy = 0;
+  const r0 = Math.floor(y / ch);
+  for (let r = r0 - 1; r <= r0 + 1; r++) {
+    const off = (r & 1) * (cw / 2), c0 = Math.floor((x + off) / cw);
+    for (let c = c0 - 1; c <= c0 + 1; c++) {
+      const px = c * cw - off + cw / 2 + (hash(c, r, s) - 0.5) * cw * 0.5, py = r * ch + ch / 2 + (hash(c, r, s + 1) - 0.5) * ch * 0.5;
+      const dx = x + 0.5 - px, dy = y + 0.5 - py, d = dx * dx + dy * dy * 1.4;
+      if (d < best) (best = d), (bdx = dx), (bdy = dy);
+    }
+  }
+  const rad = Math.min(cw, ch) * 0.75, d = Math.sqrt(best) / rad;
+  if (d > 0.85 && bdy > 0) return -0.34;
+  return 0.22 * Math.max(0, 1 - Math.hypot(bdx + rad * 0.45, bdy + rad * 0.45) / rad) - (bdy > 0 ? 0.1 * d : 0);
+}
+
+/**
+ * Grass, one world pixel (Kyle, 2026-11-23, after Ruinsong: calm ground, "a PLACE"): low turf in clumps, each lit on
+ * its top left with a dark rim under it, four close shades, so the field reads as grass without blotches or a grid.
+ * Shared with soil.ts's grass patches, so both are one ground.
+ */
+export function grassAt(x: number, y: number): string {
+  const lv = 0.5 + clumpLight(x, y, 6, 4, 61) * 0.72 + (cell(x, y, 40, 24, 66) - 0.5) * 0.08;
+  return BLADE[lv < 0.3 ? 0 : lv < 0.52 ? 1 : lv < 0.64 ? 2 : 3];
+}
+
 function grass(rect: Rect, rng: Rng, x: number, y: number): void {
-  const bias = (tileKey(x, y, 31) - 0.5) * 0.1;
-  paintField(rect, x, y, GRASS, (wx, wy) => { const v = patch(wx, wy, 11) + bias; return v < 0.3 ? 0 : v < 0.7 ? 1 : 2; });
-  // Clumps: a mound with its light on the top left and its shadow under the right.
-  const n = rng.next() < 0.4 ? 1 : rng.next() < 0.3 ? 2 : 0;
-  for (let k = 0; k < n; k++) {
+  for (let j = 0; j < KZ; j++) {
+    for (let i = 0; i < KX; ) {
+      const c = grassAt(x + i, y + j);
+      let n = 1;
+      while (i + n < KX && grassAt(x + i + n, y + j) === c) n++;
+      rect(x + i, y + j, n, 1, c);
+      i += n;
+    }
+  }
+  // A clump now and then (rarer than before): a mound lit on the top left, its shadow under the right.
+  if (rng.next() < 0.12) {
     const cx = x + 1 + rng.int(13), cy = y + 1 + rng.int(7);
-    const tall = rng.next() < 0.5;
-    sprite(rect, cx, cy, tall
-      ? ['.a.b.', '.bbb.', 'bbbbb', '.dddd']
-      : ['.bb..', 'bbbbb', '.dddd'], { a: GRASS[2], b: GRASS[2], d: GRASS[0] });
-    rect(cx + (tall ? 1 : 0), cy + (tall ? 1 : 0), 2, 1, GRASS[3]);
+    sprite(rect, cx, cy, ['.a.b.', '.bbb.', 'bbbbb', '.dddd'], { a: BLADE[3], b: BLADE[2], d: BLADE[0] });
   }
 }
 

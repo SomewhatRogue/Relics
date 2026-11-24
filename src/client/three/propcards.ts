@@ -16,6 +16,7 @@ import type { Ctx } from '../draw';
 import { PX } from '../world';
 import { cardMaterial } from './figmat';
 import { swayCards } from './wind3d';
+import { oakCut, pineCut } from '../tiletrees';
 import { PITCH } from './camera3d';
 import { KX, KZ } from '../tilekit';
 import { FURN, furnCut } from '../tilefurn';
@@ -117,7 +118,18 @@ export class CardSheet {
 }
 
 /** A round thing as the flat view paints it, anchored at its middle (where drawRound is told it stands). */
-export const roundCut = (r: Round): Cut | null => cut((c, x, y) => drawRound(c, r, x, y), 160, 200, 80, 150);
+/** A round's picture: pines and broadleafs drawn the tile way (tiletrees.ts, docs/design/forest-redraw.md), each
+ *  picture shared by every tree of its variant; everything else the flat view's own painting. */
+const TREES = new Map<string, Cut>();
+export const roundCut = (r: Round): Cut | null => {
+  if (r.kind === 'pine' || r.kind === 'tree') {
+    const v = Math.floor(Math.abs(Math.sin(r.x * 12.9898 + r.y * 78.233) * 43758.5453) % 4), key = r.kind + v;
+    let c = TREES.get(key);
+    if (!c) TREES.set(key, (c = r.kind === 'pine' ? pineCut(v) : oakCut(v)));
+    return c;
+  }
+  return cut((c, x, y) => drawRound(c, r, x, y), 160, 200, 80, 150);
+};
 
 /** A block as the flat view paints it (lamps lit by `lit`), anchored at its front edge's middle. */
 export function blockCut(b: Block, lit: boolean): Cut | null {

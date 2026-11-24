@@ -17,6 +17,7 @@ import { REDRAW } from '../tilelook';
 import { redrawFloor, redrawPx } from './redrawfloor';
 import { CardSheet, isCardRound } from './propcards';
 import { tuftMesh } from './tufts3d';
+import { treeLine } from './treeline3d';
 import { type Shaded, treeShade } from './treeshade';
 import { Boxes, Seed, jit } from './boxes';
 import type { Lamp3 } from './lamps3d';
@@ -102,7 +103,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   wc.getContext('2d')!.drawImage(bg, 0, 8, bg.width, wc.height, 0, 0, bg.width, wc.height);
   const wallMat = toonize(new THREE.MeshLambertMaterial({ map: texture(wc) }));
   const gaps = [m.exit, ...(m.roads ?? []).map((q) => q.area)].filter((a): a is NonNullable<typeof a> => !!a && a.y < 1).sort((a, b) => a.x - b.x);
-  const segs: [number, number][] = [];
+  const segs: [number, number][] = [], northRuns: [number, number][] = [], sideRuns = { W: [] as [number, number][], E: [] as [number, number][] };
   let at = -1;
   for (const g of gaps) segs.push([at, g.x]), (at = g.x + g.w);
   segs.push([at, m.w + 1]);
@@ -111,6 +112,13 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     // A palisade: the logs themselves, stood up, not their painting (palisade3d.ts).
     if (m.theme.back === 'palisade') {
       palisadeRun(B, a, b, WALL_H, r);
+      continue;
+    }
+    // (The tile redraw: a wood's edge is drawn trees, not a painted wall and lumpy crowns, the dark fill set back behind
+    // their rows: treeline3d.ts.)
+    if (REDRAW.on && m.theme.back === 'trees') {
+      B.b((a + b) / 2, 0, -3.1, b - a + 2, WALL_H, 1.2, body);
+      northRuns.push([a, b]);
       continue;
     }
     B.b((a + b) / 2, 0, -0.55, b - a, WALL_H, 1.1, body);
@@ -139,9 +147,11 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   };
   for (const [sx, side] of [[-0.45, 'W'], [m.w + 0.45, 'E']] as const) {
     const holes = cuts.filter((g) => g.side === side).map((g): [number, number] => [g.a.y, g.a.y + g.a.h]);
-    for (const [z0, z1] of runs(-1, m.h, holes)) B.b(sx, 0, (z0 + z1) / 2, 0.9, 1.0, z1 - z0, body);
+    for (const [z0, z1] of runs(-1, m.h, holes)) B.b(sx, 0, (z0 + z1) / 2, 0.9, 1.0, z1 - z0, body), sideRuns[side].push([z0, z1]);
     for (const [z0, z1] of holes) for (const z of [z0, z1]) B.b(sx, 0, z, 0.3, 1.5, 0.3, 0x3a3640);
   }
+  const edge = REDRAW.on && m.theme.back === 'trees' ? treeLine(m.w, northRuns, sideRuns) : null;
+  if (edge) group.add(edge);
   const kerb = cuts.filter((g) => g.side === 'S').map((g): [number, number] => [g.a.x, g.a.x + g.a.w]);
   // (The new town's front is a cliff over a gorge, not a kerb: layoutledges.ts.)
   const cliff = town ? gorge(m, LEDGE_H, VCOL) : null;

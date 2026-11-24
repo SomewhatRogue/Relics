@@ -807,3 +807,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   the way it is moving, nor while it stands still, and rounds plainly where a room's edge holds it (camera3d.ts).
   Measured walking up the Drowned Rat: 28 reversals in 120 frames before, 0 after. (Claude Opus 5.5)
 
+## 2026-11-23: forests and land, the proof (docs/design/forest-redraw.md)
+
+- Kyle, after Ruinsong: "the forests and land seem more tailored", "helps each map seem like a PLACE", "better
+  researched and better skilled in execution", "This but dark you know ... our sort of bloody".
+- Grass: one pure function of the world pixel (`tilegrounds.ts` `grassAt`): low turf clumps lit top left with a dark
+  rim (`clumpLight`, the SNES scallop), four close dark shades, used by the grass floor and by soil.ts's grass patches
+  (painted a pixel at a time in the redraw) so the two are one ground.
+- Trees: `tiletrees.ts` draws a pine (five tiers of hanging needle clumps, lit left, dark undersides) and a broadleaf
+  (lobes in rows, each lit on its own, a short trunk in the crown's shade), four variants each, blue-black and
+  olive-black, outlined; the `pine` and `tree` cards use them (propcards.ts `roundCut`).
+- The wood's edge: `three/treeline3d.ts`, three rows of overlapping drawn trees along the top and two down each side
+  where the back is trees, gaps open, nothing along the foot; the dark fill set back behind them (ground.ts).
+- Shown to Kyle as a before and after before rolling out. (Claude Opus 5.5)
+

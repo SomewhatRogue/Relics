@@ -5,6 +5,7 @@
  * answer is cobble, the floor's own cobbles show. Each material has its own colour family, dark enough
  * for the stepped lighting, apart enough to read on a phone at night.
  */
+import { grassAt } from './tilegrounds';
 import type { GameMap, Soil } from '../shared/arena';
 import { OX, OY, PX } from './world';
 
@@ -117,6 +118,14 @@ export function paintSoil(m: GameMap, g: CanvasRenderingContext2D, at: { x: numb
   for (let by = 0; by < H; by += B) for (let bx = 0; bx < W; bx += B) {
     const mat = matAt(soil, boxes, (bx + B / 2) / sx, (by + B / 2) / sy);
     if (mat === 'cobble' || mat === 'shade') continue;
+    // (Calm grass: the redraw's own blade marks, a pixel at a time, one ground with the grass floor: tilegrounds.ts.)
+    if (at.calm && mat === 'grass') {
+      for (let py = by; py < Math.min(H, by + B); py++) for (let px = bx; px < Math.min(W, bx + B); px++) {
+        const [r, gg, b] = toRgb(grassAt(px, py)), o = (py * W + px) * 4;
+        (d[o] = r), (d[o + 1] = gg), (d[o + 2] = b), (d[o + 3] = 255);
+      }
+      continue;
+    }
     for (let py = by; py < Math.min(H, by + B); py += 2) for (let px = bx; px < Math.min(W, bx + B); px += 2) {
       const [r, gg, b] = toRgb(colourAt(mat, px / sx, py / sy, px, py, at.calm));
       for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) {
