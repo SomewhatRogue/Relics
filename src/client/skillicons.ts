@@ -5,13 +5,16 @@
 import type { RelicId } from '../shared/tuning';
 import { gridCanvas, type Grid } from './pixgrid';
 
-const SKILLS: Partial<Record<RelicId | 'fire' | 'frost' | 'storm' | 'mark' | 'heal', Grid>> = {
+const SKILLS: Partial<Record<RelicId | 'fire' | 'frost' | 'storm' | 'mark' | 'heal' | 'hound', Grid>> = {
   bash: ['............', '.....gsssss.', '.....suuyus.', '.www.syyyys.', '.....suuyus.', '..www.suyus.', '......suus..', '.www...ss...', '............', '............', '............', '............'],
   horn: ['............', '..........w.', '.........w..', 'yy.....w...w', 'yYyy.....w..', '.yyyyy.....w', '..yyyyyyw...', '...yyyyyy...', '....BBBB....', '............', '............', '............'],
   stamp: ['....gsssss..', '....suuyus..', '....syyyys..', '....suuyus..', '.....suus...', '......ss....', '............', '.y.y.ww.y.y.', '..y.wwww.y..', 'oooooooooooo', '............', '............'],
   net: ['w...w...w...', '.w.w.w.w.w..', '..w...w...w.', '.w.w.w.w.w..', 'w...w...w...', '.w.w.w.w.w..', '..w...w...w.', '.w.w.w.w.w..', 'w...w...w...', '............', '............', '............'],
   volley: ['..g.....g...', '.gs....gs...', 'g.s...g.s...', '..s.g...s...', '..sgs...s...', '..g.s...s...', '....s.......', '..b.s...b...', '.b.bs..b.b..', '....s.......', '...b.b......', '............'],
-  sic: ['............', '.oo.........', '.ooo........', '.oooooo.....', 'ooWooooo....', 'oooooooooo..', '..oooooooo..', '...oooooooo.', '...o..o.o.o.', '...o..o.o.o.', '............', '............'],
+  // HEARTSEEKER (in SEND THE HOUND's id): a heavy arrow driven through a red heart.
+  sic: ['..........gW', '.........gs.', '..rr.rr.gs..', '.rRrrRrgs...', '.rrrrrgsr...', '.rrrrgsrr...', '..rrgsrr....', '...gsrr.....', '..bsrr......', '.bb.r.......', 'bb..........', '............'],
+  // The hound (its knacks' tiles): its old SEND THE HOUND picture.
+  hound: ['............', '.oo.........', '.ooo........', '.oooooo.....', 'ooWooooo....', 'oooooooooo..', '..oooooooo..', '...oooooooo.', '...o..o.o.o.', '...o..o.o.o.', '............', '............'],
   shadow: ['.......pp...', '......pPPp..', '.....pP..p..', '.....p......', '..gs..p.....', '...gs..p....', '....gs......', '.....gs.....', '......gs....', '.....b..s...', '....b.......', '............'],
   vanish: ['............', '...oooo.....', '..ogggo.....', '.ogggggoo...', 'ogggggggo...', '.oggggggggo.', '..ooggggggo.', '....oooooo..', '.o......o...', '...o..o.....', '............', '............'],
   // SMOKE BOMB: a clay pot of the Rogue's powder, smoke curling out of its neck (no fuse: the world has no gunpowder).
@@ -36,7 +39,7 @@ const SKILLS: Partial<Record<RelicId | 'fire' | 'frost' | 'storm' | 'mark' | 'he
 };
 
 /** The class skill's icon (a Mage's ELEMENT, `channel`, in its element), or null for a found relic (relicicons.ts draws those). */
-export function skillCanvas(r: RelicId | 'mark' | 'heal', el?: string): HTMLCanvasElement | null {
+export function skillCanvas(r: RelicId | 'mark' | 'heal' | 'hound', el?: string): HTMLCanvasElement | null {
   const key = r === 'channel' ? ((el as 'fire' | 'frost' | 'storm') || 'fire') : r;
   const g = SKILLS[key];
   return g ? gridCanvas('s-' + key, g) : null;

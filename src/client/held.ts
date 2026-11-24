@@ -1,7 +1,7 @@
 /** What a hero holds and how: each weapon's pose through rest, charge and swing, then drawn in hand. */
 import { OFF } from './sideview';
 import { cutPose } from './cutdraw';
-import { CHARGE, RELEASE, WEAPONS } from '../shared/tuning';
+import { CHARGE, RELEASE, RELICS, WEAPONS } from '../shared/tuning';
 import { chargeFull, currentSwing } from '../sim/hero';
 import type { Hero } from '../sim/types';
 import { ease, line as rawLine, smear, type Ctx } from './draw';
@@ -39,6 +39,8 @@ export function pose(h: Hero, now: number): Pose {
   const charge = Math.min(1, (h.actT + CHARGE.start) / chargeFull(WEAPONS[h.weapon], h));
   const kit = kitPose(h, now, fa, side, charge) ?? tapPose(h, fa, side);
   if (kit) return kit;
+  // HEARTSEEKER's aim (sim/heartseeker.ts): the bow drawn along the aim through the skill's wind-up (General chat, 2026-11-23).
+  if (h.act === 'throw' && h.relic === 'sic' && ranged(h)) return { a: fa, ext: 0, reach: 0, pull: Math.min(1, h.actT / RELICS.sic.windup) };
   if (h.act === 'charge') {
     // (Held past the flash a draw stays full and steady: Kyle, 2026-11-08.)
     const over = 0;

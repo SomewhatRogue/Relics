@@ -98,7 +98,7 @@ export class Soundscape {
     // Techniques (sim/tech*.ts): bursts, a shoulder's thump, iron feet, slipping away, coins, a quick nock, help up, judgement.
     if (ev.k === 'slamburst' || ev.k === 'shoulder') return sfx.bodyhit();
     if (ev.k === 'ironfeet') return sfx.block();
-    if (ev.k === 'slipaway') return sfx.shadow();
+    if (ev.k === 'slipaway') return sfx.channeled();
     if (ev.k === 'cutpurse') return sfx.gold();
     if (ev.k === 'quicknock') return sfx.latch();
     if (ev.k === 'judged') return sfx.smite();

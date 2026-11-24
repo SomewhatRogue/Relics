@@ -11,21 +11,21 @@ import type { RungId } from '../shared/ladder';
 
 const DRILL: Partial<Record<DrillId, string>> = { power: 'u:sword', health: 'i:heart', speed: 'u:boot', crit: 'u:star', wind: 'u:breath', skill: 'u:hourglass' };
 const TECH: Record<TechId, string> = {
-  slam: 'i:slam', shoulder: 'u:boot', ironfeet: 'u:plate', knifework: 'u:drop', slip: 's:vanish', cutpurse: 'i:coin',
+  slam: 'i:slam', shoulder: 'u:boot', ironfeet: 'u:plate', knifework: 'u:drop', slip: 'u:hourglass', cutpurse: 'i:coin',
   trapper: 's:net', quicknock: 's:volley', steady: 's:mark', mending: 'i:help', sanctstep: 's:sanctuary', judgement: 's:light',
   primed: 's:fire', attuned: 's:storm', spellthief: 's:grasp',
 };
 const RUNG: Record<RungId, string> = {
   airshot: 's:volley', twinsnare: 's:net', landing: 'i:jump', blinkburst: 's:firering', blinkthrough: 'i:blink', halfblink: 's:tether',
-  caltrops: 's:knives', underlegs: 'i:dash', shakeoff: 'i:poison', shelter: 's:ward', allyward: 'i:help', blockmend: 's:heal',
+  caltrops: 's:knives', underlegs: 's:smoke', shakeoff: 'i:poison', shelter: 's:ward', allyward: 'i:help', blockmend: 's:heal',
   tauntguard: 's:horn', ironstance: 'u:plate', standfast: 's:stamp',
 };
 /** A knack by what it moves. (`dodge`, `leap` and `light` are the class's own dodge: by the knack's letter.) */
 const FX: Partial<Record<FxKey, string>> = {
   guardArc: 'i:block', block: 'i:block', counterTime: 'u:counter', counter: 'u:counter', health: 'i:heart', tough: 'u:plate', foot: 'u:boot',
   draw: 'u:hourglass', full: 'u:sword', knock: 's:stamp', focus: 'u:hourglass', skillFar: 's:horn', skillHold: 's:horn',
-  perfect: 's:mark', flash: 's:mark', snareCd: 's:net', snareHold: 's:net', snares: 's:net', houndEvery: 's:sic', houndBite: 's:sic', houndBites: 's:sic',
-  slip: 'i:dash', angle: 's:shadow', rear: 's:shadow', ambush: 's:vanish', quick: 's:knives', quiet: 'i:view', image: 'i:blink',
+  perfect: 's:mark', flash: 's:mark', snareCd: 's:net', snareHold: 's:net', snares: 's:net', houndEvery: 's:hound', houndBite: 's:hound', houndBites: 's:hound',
+  slip: 'i:dash', angle: 's:shadow', rear: 's:shadow', ambush: 's:vanish', sharp: 's:vanish', quick: 's:knives', quiet: 'i:view', image: 'i:blink',
   primed: 's:fire', clear: 's:storm', twice: 's:firering', burst: 's:firering', damage: 's:fire', breath: 'u:breath',
   mending: 's:heal', mercyReach: 's:heal', mercy: 's:heal', smiteStun: 's:light', bless: 's:blessing', blessTime: 's:blessing',
 };

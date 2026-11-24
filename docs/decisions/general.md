@@ -288,3 +288,13 @@ Claude Opus 5.5
   LANDING (5), TWO ARROWS (10), FULL DRAW (15, the leap shot fully drawn, in Jump Shot's old id). Full Draw is my
   stand-in for the freed slot; Kyle may swap it.
 - Writing through the lore keeper and line editor. The story bible (docs/lore/story-bible.md) still lists Send the Hound and the snare on the jump for Maeve: flagged to Kyle, not mine to edit. Claude Opus 5.5
+
+## 2026-11-23: pictures and effects for the reworks (Kyle: "make sure we have animations and graphics for all of it")
+
+- HEARTSEEKER: its own icon (a heavy arrow through a red heart; the hound picture kept for the hound knacks as
+  'hound'); the bow drawn through the aim (one line in held.ts, the Art chat's); a gold sighting line out to the
+  arrow's reach, white when ready (client/skillmarks.ts, both views); a snap and flash on the loose, and its sound.
+- Goblins lost in a smoke bomb's smoke wear a turning swirl overhead (skillmarks.ts); not in a vanish's.
+- QUICK RETURN: says so in gold with a ring, a chime (it said GONE, Slip Away's).
+- Upgrade tiles: Quick Return an hourglass, Shadow Smoke the smoke pot, Sharp Return the vanish picture.
+- Checked on the phone in 2.5D. Claude Opus 5.5

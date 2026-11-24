@@ -39,8 +39,9 @@ export function techFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       fx.burst(x, y - 8, 10, BLOOD, 60, false, 200, true);
       return true;
     case 'slipaway':
-      fx.say(x, y - 34, 'GONE', '#c9a8ff');
-      fx.burst(x, y - 8, 16, ['#3a3346', '#5a5468', '#6a5a8a'], 40, false);
+      // QUICK RETURN (the id was SLIP AWAY's): the skill comes round sooner, a gold tick of time off it.
+      fx.say(x, y - 34, 'QUICK RETURN', '#ffd27a');
+      fx.rings.push({ x, y: y - 12, life: 0.3, max: 0.3, col: '#ffd27a', size: 10 });
       return true;
     case 'cutpurse':
       fx.burst(x, y - 10, 10, ['#ffd27a', '#d4a537', '#ffffff'], 55, true, 220, false);

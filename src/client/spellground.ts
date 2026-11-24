@@ -14,6 +14,7 @@ import { drawSkyBolts, drawSkyMarks, skyLights } from './skystrikedraw';
 import { OX, OY, PX } from './world';
 import { drawLadderGround } from './ladderground';
 import { drawSpins } from './sicklespin';
+import { drawSkillMarks } from './skillmarks';
 import { drawWalls, drawWalls3, wallLights } from './firewalldraw';
 import { drawWorldGround, worldLights } from './worlddraw';
 
@@ -125,6 +126,8 @@ function draw(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj, ppu: number
   drawLadderGround(g, room, P, ppu);
   // A chain sickle whirled (sicklespin.ts).
   drawSpins(g, room, P, ppu, at);
+  // Heartseeker's aim and goblins lost in smoke (skillmarks.ts).
+  drawSkillMarks(g, room, P, ppu, at);
   drawSkyMarks(g, room, P, ppu);
   drawStreams(g, room, P, at);
   g.globalAlpha = 1;
