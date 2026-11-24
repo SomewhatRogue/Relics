@@ -54,9 +54,10 @@ function weight(c: Ctx, x: number, y: number): void {
 export function drawSickle(c: Ctx, h: Hero, px0: number, py0: number, ox: number, oy: number, p: Pose, out: boolean): void {
   const side = h.fx >= -0.2 ? 1 : -1, a = p.a, dx = Math.cos(a), dy = Math.sin(a);
   // Spinning, or the sickle out on its chain: only the chain runs out of the fist.
-  if (h.act === 'charge' || h.chainOut) {
-    const reach = h.chainOut ? 3 : 5;
-    for (let k = 0; k < reach; k++) px(c.lit, ox + dx * k * HS, oy + dy * k * HS, LINK[k & 1]);
+  // (Spinning, the whirl itself is sicklespin.ts's, out of this fist: nothing more here, so it's one chain and one blade.)
+  if (h.act === 'charge') return;
+  if (h.chainOut) {
+    for (let k = 0; k < 3; k++) px(c.lit, ox + dx * k * HS, oy + dy * k * HS, LINK[k & 1]);
     // The slack of the chain looped over the other hand.
     chain(c, ox, oy, px0 - side * 6 * HS, py0 + 1 * HS, 2 * HS);
     return;

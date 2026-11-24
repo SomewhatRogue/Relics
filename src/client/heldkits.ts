@@ -13,6 +13,7 @@ import type { Ctx } from './draw';
 import { HS, hline as line, hs } from './heroscale';
 import type { Pose } from './held';
 import { drawSickle } from './sickledraw';
+import { spinAngle } from './sicklespin';
 
 const KITS = new Set<Hero['weapon']>(['rapier', 'poisoner', 'censer', 'flail']);
 
@@ -35,7 +36,7 @@ export function kitPose(h: Hero, now: number, fa: number, side: number, charge: 
   if (!KITS.has(h.weapon) || h.act === 'attack' || h.blocking) return null;
   if (h.act === 'charge') {
     // The chain sickle's chain whirls, faster as it builds; the blowpipe comes up to the lips.
-    if (h.weapon === 'rapier') return { a: now * (3.5 + 6 * charge), ext: 0, reach: 0, pull: charge };
+    if (h.weapon === 'rapier') return { a: spinAngle(h), ext: 0, reach: 0, pull: charge };
     if (h.weapon === 'poisoner') return { a: fa, ext: -3, reach: 0, pull: charge };
     // The censer whirls round the Cleric, faster as it fills; the flail spins overhead.
     if (h.weapon === 'censer') return { a: now * (8 + 10 * charge), ext: 0, reach: 0, pull: charge };
