@@ -298,3 +298,6 @@ Claude Opus 5.5
 - QUICK RETURN: says so in gold with a ring, a chime (it said GONE, Slip Away's).
 - Upgrade tiles: Quick Return an hourglass, Shadow Smoke the smoke pot, Sharp Return the vanish picture.
 - Checked on the phone in 2.5D. Claude Opus 5.5
+- Then (Kyle, the "get up to speed" felt odd): not yet full, the spin's first cut that lands stops it (one cut, then
+  start again), so you spin up at a distance and walk in. The whirl now turns round the chain hand (weapon side, arm
+  height), not the body's middle; the floor ring of its reach stays on the Rogue. Claude Opus 5.5

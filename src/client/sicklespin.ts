@@ -1,5 +1,6 @@
 /**
- * The chain sickle's spin, seen (sim/sickle.ts decides it): the chain whirled out from the Rogue's hand to
+ * The chain sickle's spin, seen (sim/sickle.ts decides it): the chain whirled round the Rogue's hand (on the weapon
+ * side, at arm height) out to
  * the sickle at its reach, turning faster as the spin builds, and a faint ring on the floor where it cuts.
  * Drawn on the glow layer of either view through its projection `P(x, up, y)` (tiles), as spellground.ts is.
  */
@@ -22,6 +23,8 @@ export function drawSpins(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj,
   for (const h of room.heroes) {
     if (!spinning(h)) continue;
     const [x, y] = at ? at('h:' + h.id, h.x, h.y) : [h.x, h.y], k = spinBuild(h), r = SICKLE_SPIN.r;
+    // The whirl turns round the hand that holds the chain, out to the weapon side, not round the body's middle.
+    const side = h.fx >= -0.2 ? 1 : -1, hx = x + h.fx * 0.25 + (Math.abs(h.fy) > 0.7 ? side * 0.28 : 0), hy = y + h.fy * 0.25, HAND = 0.65;
     const turn = room.time * (3.5 + 6 * k), dir = 1;
     // The ring it cuts, faint on the floor, firmer as it builds.
     const n = Math.max(24, Math.round(r * 2 * Math.PI * ppu * 0.5));
@@ -34,23 +37,23 @@ export function drawSpins(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj,
     for (let i = 1; i <= m; i++) {
       const a = turn - dir * (i / m) * trail, f = 1 - i / m;
       for (const rr of [r, r - 0.1]) {
-        const [sx, sy] = P(x + Math.cos(a) * rr, 0.5, y + Math.sin(a) * rr);
+        const [sx, sy] = P(hx + Math.cos(a) * rr, HAND, hy + Math.sin(a) * rr);
         dot(g, sx, sy, BLADE, 0.55 * f * (0.5 + 0.5 * k));
       }
     }
     // The chain out to the sickle, every link, two pixels thick.
     const steps = Math.max(10, Math.round(r * ppu));
     for (let s = 1; s <= steps; s++) {
-      const f = s / steps, [sx, sy] = P(x + Math.cos(turn) * r * f, 0.5, y + Math.sin(turn) * r * f);
+      const f = s / steps, [sx, sy] = P(hx + Math.cos(turn) * r * f, HAND, hy + Math.sin(turn) * r * f);
       dot(g, sx, sy, CHAIN[s & 1], 0.95), dot(g, sx, sy + 1, CHAIN[(s + 1) & 1], 0.6);
     }
     // The sickle at the end: a hooked blade curling back against the turn, bright on its back.
-    const [hx, hy] = P(x + Math.cos(turn) * r, 0.5, y + Math.sin(turn) * r);
+    const [tx, ty] = P(hx + Math.cos(turn) * r, HAND, hy + Math.sin(turn) * r);
     for (let j = 0; j <= 5; j++) {
-      const b = turn - dir * j * 0.07, rr = r - 0.05 - j * j * 0.012, [sx, sy] = P(x + Math.cos(b) * rr, 0.5 + j * 0.03, y + Math.sin(b) * rr);
+      const b = turn - dir * j * 0.07, rr = r - 0.05 - j * j * 0.012, [sx, sy] = P(hx + Math.cos(b) * rr, HAND + j * 0.03, hy + Math.sin(b) * rr);
       dot(g, sx, sy, BLADE, 1), dot(g, sx, sy + 1, '#9aa3ad', 0.9);
     }
-    dot(g, hx, hy - 1, '#ffffff', 1);
+    dot(g, tx, ty - 1, '#ffffff', 1);
   }
   g.globalAlpha = 1;
 }

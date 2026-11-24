@@ -1,7 +1,8 @@
 /**
  * The chain sickle's spin (docs/design/chain-sickle.md; numbers shared/sickle.ts): while its hold is held the
  * chain whirls round the Rogue, and every SICKLE_SPIN.every s it cuts every goblin within reach for a little,
- * more as the spin builds, and leaves it bleeding. Up against a wall the chain catches and cuts nothing.
+ * more as the spin builds, bleeding once it's full. Not yet full, the first cut that lands stops the spin
+ * (start it at a distance and walk in). Up against a wall the chain catches and cuts nothing.
  * The throw on letting go is the hook's (sim/spearchain.ts, sim/hook.ts).
  */
 import { collide } from '../shared/arena';
@@ -44,6 +45,7 @@ export function stepSpins(heroes: Hero[], w: World): void {
     }
     const k = spinBuild(h), full = k >= 0.999, n = Math.round(SICKLE_SPIN.dmg + (SICKLE_SPIN.top - SICKLE_SPIN.dmg) * k);
     w.ev.push({ k: 'chainspin', x: h.x, y: h.y, r: SICKLE_SPIN.r });
+    let landed = false;
     for (const e of w.enemies) {
       if (isDead(e) || e.act === 'carried') continue;
       const d = Math.hypot(e.x - h.x, e.y - h.y);
@@ -56,6 +58,10 @@ export function stepSpins(heroes: Hero[], w: World): void {
       }
       if (d > 1e-6 && e.weight <= 1) (e.kvx += ((e.x - h.x) / d) * SICKLE_SPIN.knock), (e.kvy += ((e.y - h.y) / d) * SICKLE_SPIN.knock);
       damage(e, n, w.now, w.ev, { src: 'sickle' });
+      landed = true;
     }
+    // Not yet up to speed, the chain stops on what it hits: one cut, and you start the spin again (Kyle,
+    // 2026-11-23: "start it at a distance and come in").
+    if (landed && !full) Object.assign(h, { act: 'idle', actT: 0, spinNext: undefined }), w.ev.push({ k: 'chainsnag', x: h.x, y: h.y });
   }
 }
