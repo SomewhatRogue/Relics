@@ -178,11 +178,11 @@ describe('a bigger party: toughness, not numbers', () => {
 });
 
 describe("the party's level", () => {
-  it('makes every goblin tougher and harder hitting by the curve, the same goblins', () => {
+  it('makes every goblin tougher and harder hitting by the curve, the same goblins (and a few more: LEVEL_CROWD)', () => {
     const job = jobs.find((j) => j.deep)!;
     for (const i of [1, job.rooms - 1]) {
       const low = runRoom({ ...newRun(job), index: i }), high = runRoom({ ...newRun(job), index: i, level: 7 });
-      expect(high.enemies.length).toBe(low.enemies.length);
+      expect(high.enemies.length).toBeGreaterThanOrEqual(low.enemies.length);
       for (const e of low.enemies) {
         const f = high.enemies.find((x) => x.id === e.id)!;
         expect([f.kind, f.variant, f.x, f.y]).toEqual([e.kind, e.variant, e.x, e.y]);

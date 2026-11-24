@@ -118,10 +118,10 @@ export const allOut = (heroes: Hero[]) => inParty(heroes) && players(heroes).eve
  * More goblins for more players: the room's own, then more of them, a step off each. Named ones once.
  * In a party of three or more, some of the extras come tougher (shared/roster.ts), rolled from `seed`.
  */
-export function scaleFoes(foes: Foe[], party: number, seed = 1): Foe[] {
+export function scaleFoes(foes: Foe[], party: number, seed = 1, lv = 1): Foe[] {
+  // A routed room's packs: more small ones, a tougher centrepiece, never more specials (sim/packs.ts); more as the heroes grow too.
+  if (foes.some((f) => f.pack !== undefined)) return scalePacks(foes, party, seed, undefined, lv);
   if (party <= 1) return foes;
-  // A routed room's packs: more small ones, a tougher centrepiece, never more specials (sim/packs.ts).
-  if (foes.some((f) => f.pack !== undefined)) return scalePacks(foes, party, seed);
   // Nests aren't copied: their waves grow instead. One brood mother is enough (she gets tougher, scaleBosses).
   for (const f of foes) if (f.kind === 'nest') f.wave = waveFor(party);
   const common = foes.filter((f) => !f.name && f.kind !== 'nest' && f.kind !== 'brood'), more = Math.round(common.length * PARTY.foes * (party - 1)), extra: Foe[] = [];

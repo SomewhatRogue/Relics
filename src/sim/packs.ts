@@ -9,7 +9,7 @@
  * (shared/threat.ts BIG). A pack's shout wakes only its own, and a fight in another pack is heard only from
  * close by: a room plays as fights in turn.
  */
-import { ALERT, BUDGET, ENCOUNTER, PARTY_TOUGH, VARIANTS, levelHarm, levelHp } from '../shared/tuning';
+import { ALERT, BUDGET, ENCOUNTER, PARTY_TOUGH, VARIANTS, levelCrowd, levelHarm, levelHp } from '../shared/tuning';
 import { isSpecial, cast } from '../shared/encounter';
 import { capsFor, foeThreat, meaty, threatIn } from '../shared/roombudget';
 import { Rng } from '../shared/rng';
@@ -23,16 +23,17 @@ export const samePack = (a: { pack?: number }, b: { pack?: number }) => a.pack =
 export const hearFrom = (a: { pack?: number }, b: { pack?: number }) => (samePack(a, b) ? ALERT.hear : ENCOUNTER.hearOther);
 
 /** A routed room's goblins for a party of `party` (the room's own first). `chaff`: more small ones a pack, a player past the first. */
-export function scalePacks(foes: Foe[], party: number, seed: number, chaff = PARTY_TOUGH.chaff): Foe[] {
-  const n = Math.max(1, Math.min(4, party)), hp = PARTY_TOUGH.hp[n - 1], harm = PARTY_TOUGH.harm[n - 1];
-  if (party <= 1) return foes;
+export function scalePacks(foes: Foe[], party: number, seed: number, chaff = PARTY_TOUGH.chaff, lv = 1): Foe[] {
+  const n = Math.max(1, Math.min(4, party)), hp = PARTY_TOUGH.hp[n - 1], harm = PARTY_TOUGH.harm[n - 1], crowd = levelCrowd(lv);
+  if (party <= 1 && crowd <= 0) return foes;
   const rng = new Rng(seed), extra: Foe[] = [], packs = [...new Set(foes.filter((f) => f.pack !== undefined).map((f) => f.pack!))];
   // What the extra may come to: the room's own threat grown to the party's budget (shared/threat.ts BUDGET.party).
-  let room = threatIn(foes.filter((f) => f.pack !== undefined && !f.name && (f.kind === 'scrapper' || f.kind === 'butcher'))) * (BUDGET.party[n - 1] - 1);
+  // (And as the heroes grow, the level's share: shared/threat.ts LEVEL_CROWD.)
+  let room = threatIn(foes.filter((f) => f.pack !== undefined && !f.name && (f.kind === 'scrapper' || f.kind === 'butcher'))) * (BUDGET.party[n - 1] - 1 + crowd);
   for (const id of packs) {
     const mine = foes.filter((f) => f.pack === id), small = mine.filter((f) => !isSpecial(f) && !f.name && f.kind === 'scrapper' && !f.task);
-    for (const f of mine) if (!f.name) Object.assign(f, { hp: Math.round(hpOf(f) * hp), harm: +((f.harm ?? 1) * harm).toFixed(3) });
-    const more = Math.round(small.length * chaff * (party - 1));
+    if (party > 1) for (const f of mine) if (!f.name) Object.assign(f, { hp: Math.round(hpOf(f) * hp), harm: +((f.harm ?? 1) * harm).toFixed(3) });
+    const more = Math.round(small.length * (chaff * (party - 1) + crowd));
     for (let i = 0; i < more && room >= foeThreat(small[i % small.length]); i++) {
       const f = small[i % small.length], a = i * 2.4 + rng.range(-0.3, 0.3);
       extra.push({ ...f, x: f.x + Math.cos(a) * 0.75, y: f.y + Math.sin(a) * 0.75 });

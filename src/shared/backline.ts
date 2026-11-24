@@ -59,5 +59,5 @@ export const ROSTER = {
   drumFor: 3,
   tougher: 0.15,
   partyMore: 1,
-  picks: { lunger: 3, shield: 2, heavy: 2, hexer: 1, drummer: 1 },
+  picks: { lunger: 3, shield: 3, heavy: 2, hexer: 1, drummer: 1 },
 };

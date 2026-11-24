@@ -98,7 +98,7 @@ export function runRoom(run: Run): ArenaRoom {
   const danger = (run.job.place.ruin >= 3 ? 1 : 0) + (run.job.deep ? 1 : 0);
   // A Deep floor: its band's levels on the party's, and its tier odds leant by the floor (shared/deepbands.ts, deeploot.ts).
   const fl = run.job.floor ?? 0, level = (run.level ?? 1) + (fl ? bandOf(fl).level : 0);
-  const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2), furniture: plan.props, chests: plan.chests, danger, level });
+  const room = new ArenaRoom(run.job.seed + run.index, { map: plan.map, foes: scaleFoes(plan.foes, n, run.job.seed * 17 + run.index * 5 + 2, level), furniture: plan.props, chests: plan.chests, danger, level });
   room.floor = fl;
   // A routed room plays the pacing rules (sim/pacing.ts, chase.ts): what's on screen held to the party's caps, and no easy kiting.
   if (run.job.layout && run.job.layout >= 3) room.pace = { index: run.index };

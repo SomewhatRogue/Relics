@@ -471,7 +471,7 @@ export class ArenaRoom {
     if (this.pace) flankers(this.enemies, this.heroes);
     const dozing = this.pace ? asleep(this.enemies) : null;
     for (const e of this.enemies) stepEnemy(e, this.heroes, this.rng, this.time, TICK, this.events, this.enemies);
-    if (dozing) stepPacing(this.enemies, this.heroes, dozing, this.pace!.index, this.time);
+    if (dozing) stepPacing(this.enemies, this.heroes, dozing, this.pace!.index, this.time, this.level);
     stepSleds(w);
     for (const h of this.heroes) stepHound(h, this.enemies, this.time, TICK, this.events);
     impacts(this.enemies, this.time, this.events);

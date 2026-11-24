@@ -35,10 +35,10 @@ export function onScreen(enemies: Enemy[], heroes: Hero[], but?: Set<Enemy>): Sc
 export const asleep = (enemies: Enemy[]) => new Set(enemies.filter((e) => e.alert === false && fighter(e) && holdable(e)));
 
 /** After the goblins have moved: hold the packs that just woke over the caps, and let go the ones whose time has come. */
-export function stepPacing(enemies: Enemy[], heroes: Hero[], was: Set<Enemy>, index: number, now: number): void {
+export function stepPacing(enemies: Enemy[], heroes: Hero[], was: Set<Enemy>, index: number, now: number, lv = 1): void {
   const hs = players(heroes).filter((h) => h.act !== 'down');
   if (!hs.length) return;
-  const caps = capsFor(hs.length, index), held = new Map<number, Enemy[]>(), woke = new Map<number, Enemy[]>();
+  const caps = capsFor(hs.length, index, lv), held = new Map<number, Enemy[]>(), woke = new Map<number, Enemy[]>();
   for (const e of enemies) {
     if (!fighter(e) || !holdable(e)) continue;
     if (e.held) (held.get(e.pack!) ?? held.set(e.pack!, []).get(e.pack!)!).push(e);

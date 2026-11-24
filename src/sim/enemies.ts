@@ -6,7 +6,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, wadeAt } from '../shared/arena';
-import { FURY, FRIENDLY, DECOY, ALERT, ARCHER, HEIGHT, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, HEIGHT, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
@@ -141,6 +141,11 @@ export function begin(e: Enemy, kind: EnemyAttack['kind'], s: EnemyAttackSpec, t
   if (e.heart) (e.attack.windup *= BANNER.heart.windup), (e.attack.dmg = Math.round(e.attack.dmg * BANNER.heart.dmg));
   // FED off a body: the same again (sim/meal.ts).
   if (e.fed) (e.attack.windup *= MEAL.fed.windup), (e.attack.dmg = Math.round(e.attack.dmg * MEAL.fed.dmg));
+  // A boss in its fury reaches as far as its size (shared/fury.ts reachFor): the blow and its floor alike.
+  if (e.reach) {
+    const a = e.attack;
+    (a.range *= e.reach), (a.radius *= e.reach), (a.cx = e.x + e.fx * ahead * e.reach), (a.cy = e.y + e.fy * ahead * e.reach);
+  }
   // A bigger or stronger party, or a BIG ONE: it hits harder (sim/packs.ts, shared/threat.ts), locked in here too.
   if (e.harm) e.attack.dmg = Math.round(e.attack.dmg * e.harm);
   // An elite that's Quick: a shorter wind-up, never under the floors (sim/elite.ts).
@@ -331,7 +336,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
   // (A boss in its FURY walks faster: shared/fury.ts.)
-  const slow = (e.fury ? FURY.pace : 1) * (e.stride ?? 1) * (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1) * (e.fed ? MEAL.fed.pace : 1) * quickPace(e);
+  const slow = (e.stride ?? 1) * (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1) * (e.fed ? MEAL.fed.pace : 1) * quickPace(e);
   // (A Planker and a shield-bearer turn their boards slowly: get round them.)
   const rate = e.variant === 'log' ? LOGS.turn : e.variant === 'planker' ? PLANKER.turn : e.variant === 'shield' ? VARIANTS.shield.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);

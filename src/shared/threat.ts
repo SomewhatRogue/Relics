@@ -39,7 +39,9 @@ export const threatOf = (role: Role | undefined, big = false): number =>
 export const BUDGET = {
   room: [8, 13, 17, 20],
   difficulty: { easy: 0.8, normal: 1, hard: 1.2, deep: 1.35 },
-  party: [1, 1.15, 1.3, 1.45],
+  // (1.15, 1.3, 1.45 to 1.3, 1.6, 1.9: Kyle, 2026-11-23, "increase that point value as the hero levels up or as party
+  // sizes grow". The level's share: LEVEL_CROWD.)
+  party: [1, 1.3, 1.6, 1.9],
   share: { splat: 0.3, tactic: 0.4, closer: 0.45 },
 };
 
@@ -48,10 +50,18 @@ export const BUDGET = {
  * size 1 to 4: threat, meaty ones (heavies count as meaty too), heavies. A lone hero meets a second
  * meaty one from the third room (`meaty2`). A swarm of eight is 4; a brute with four small ones is 6.
  */
+/**
+ * More on the field as the heroes grow (Kyle, 2026-11-23): from level `from`, each level more a room's packs carry
+ * `per` more small ones a pack (up to `most`, shared out of its threat the way a party's extra is: sim/packs.ts),
+ * and `screen` more threat may be awake on screen at once (up to `screenMost`: roombudget.ts capsFor).
+ */
+export const LEVEL_CROWD = { from: 3, per: 0.08, most: 0.6, screen: 1, screenMost: 6 };
+export const levelCrowd = (lv: number) => Math.min(LEVEL_CROWD.most, LEVEL_CROWD.per * Math.max(0, lv - LEVEL_CROWD.from));
+
 export const SCREEN = {
   near: 10,
-  threat: [10, 12, 14, 16],
-  meaty: [1, 2, 2, 3],
+  threat: [10, 13, 16, 19],
+  meaty: [1, 2, 3, 3],
   meaty2: 2,
   heavy: [1, 1, 1, 1],
 };

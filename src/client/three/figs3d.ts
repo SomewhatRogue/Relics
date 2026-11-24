@@ -17,7 +17,8 @@ import type { Proj } from './overlay3d';
 import { castFigures } from './sun3d';
 
 /** A cell of the atlas (sprite pixels), and where the feet go in it. */
-export const CELL = { w: 96, h: 96, fx: 48, fy: 64 };
+// (96 by 96 with the feet at 64 till 2026-11-23: a boss in its fury can stand three times a butcher's height now, shared/fury.ts.)
+export const CELL = { w: 128, h: 144, fx: 64, fy: 112 };
 const COLS = 10, SIN = Math.sin(PITCH), COS = Math.cos(PITCH);
 /** Which way a card's light-facing normal points (world): mostly at the camera, a little up, as the floor is lit. */
 const FACE = new THREE.Vector3(0, 0.75, 0.66).normalize();

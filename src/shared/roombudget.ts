@@ -7,7 +7,7 @@ import type { Beat, Role, Template } from './encounters.js';
 import type { Job } from './jobs.js';
 import { Rng } from './rng.js';
 import type { Foe } from './terrain.js';
-import { BUDGET, SCREEN, THREAT_TIER, threatOf } from './threat.js';
+import { BUDGET, LEVEL_CROWD, SCREEN, THREAT_TIER, threatOf } from './threat.js';
 import { eliteThreat, type Affix } from './elites.js';
 import { bandOf, deepGrow } from './deepbands.js';
 import { areaShare } from './deepshapes.js';
@@ -22,8 +22,8 @@ export const roomBudget = (job: Job, index: number, n = 1) =>
   BUDGET.room[Math.min(index, BUDGET.room.length - 1)] * BUDGET.difficulty[difficultyOf(job)] * BUDGET.party[party(n)] * (job.floor ? deepGrow(job.floor).budget : 1) * (job.hall ? areaShare(job.hall.w, job.hall.h) : 1);
 
 /** On screen at once, for a party of `n` in room `index`: threat, meaty ones (heavies too), heavies. */
-export const capsFor = (n: number, index = 0) => ({
-  threat: SCREEN.threat[party(n)],
+export const capsFor = (n: number, index = 0, lv = 1) => ({
+  threat: SCREEN.threat[party(n)] + Math.min(LEVEL_CROWD.screenMost, LEVEL_CROWD.screen * Math.max(0, lv - LEVEL_CROWD.from)),
   meaty: n <= 1 && index >= 2 ? SCREEN.meaty2 : SCREEN.meaty[party(n)],
   heavy: SCREEN.heavy[party(n)],
 });

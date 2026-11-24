@@ -267,7 +267,8 @@ export const VARIANTS = {
    * walks at `speed` of a goblin's pace and turns `turn` radians a second (a small goblin's 7). From the side or
    * behind, or with it stunned, pinned, frozen, netted or unaware, everything lands.
    */
-  shield: { hp: 44, cone: 0.34, drop: 1, after: 0.35, speed: 0.75, turn: 1.4 },
+  // (cone 0.34 to 0: the whole front half, Kyle, 2026-11-23, "able to block a full direction... most things from the front".)
+  shield: { hp: 44, cone: 0, drop: 1, after: 0.35, speed: 0.75, turn: 1.4 },
   /** The back of the pack (shared/backline.ts): a caster and a drummer. */
   hexer: HEXER,
   drummer: DRUMMER,

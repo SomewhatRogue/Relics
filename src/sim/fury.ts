@@ -4,7 +4,7 @@
  * (sim/felling.ts: the trunk goes over away from it, lands on whatever's under, and lies there). Stepped by the room
  * after the goblins.
  */
-import { FURY, HIGH_GROWTH } from '../shared/tuning';
+import { BUILDS, FURY, HIGH_GROWTH, buildOf, reachFor } from '../shared/tuning';
 import { isDead } from './damage';
 import { currentMap } from '../shared/arena';
 import { fell, fellable } from './felling';
@@ -27,16 +27,21 @@ export function growOn(e: Enemy, lv: number): void {
   const k = Math.min(G.sizeMost, 1 + G.size * n);
   e.scale = +k.toFixed(3);
   e.radius = +(e.radius * k).toFixed(3);
-  e.stride = +Math.min(G.paceMost, 1 + G.pace * n).toFixed(3);
+  // (A shield goblin grows but stays slow: Kyle, 2026-11-23, "not fast but able to block a full direction".)
+  if (e.variant !== 'shield') e.stride = +Math.min(G.paceMost, 1 + G.pace * n).toFixed(3);
 }
 
 /** Made a fury boss: tougher, harder-hitting, quicker to wind up and rest, broader (its pace: sim/enemies.ts). */
 export function furyOn(e: Enemy): void {
+  const b = BUILDS[buildOf(e.name ?? '')];
   e.fury = true;
-  e.hp = e.maxHp = Math.round(e.maxHp * FURY.hp);
-  e.harm = +((e.harm ?? 1) * FURY.harm).toFixed(3);
-  e.edge = { windup: (e.edge?.windup ?? 1) * FURY.windup, pause: (e.edge?.pause ?? 1) * FURY.pause };
-  e.radius = +(e.radius * FURY.radius).toFixed(3);
+  e.hp = e.maxHp = Math.round(e.maxHp * b.hp);
+  e.harm = +((e.harm ?? 1) * b.harm).toFixed(3);
+  e.edge = { windup: (e.edge?.windup ?? 1) * b.windup, pause: (e.edge?.pause ?? 1) * b.pause };
+  e.radius = +(e.radius * b.radius).toFixed(3);
+  e.scale = b.size;
+  e.stride = b.pace;
+  e.reach = +reachFor(b.size).toFixed(3);
 }
 
 /** A fury boss's landed blow or running charge: what it covers, smashed. Each prop once a blow. */

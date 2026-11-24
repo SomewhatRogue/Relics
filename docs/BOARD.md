@@ -47,6 +47,9 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
+  client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.
+
 - **For the Holy and hungry chat (General, 2026-11-23, Kyle's ask):** the first hungry piece home brings two quests:
   the church (Odric explains the Want and offers the give-up) and the under church (Dorcas, the Keeping Room open to a
   hero on this quest, explains growing the Want); the Want bar shows from the first talk on. Errand pattern as

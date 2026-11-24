@@ -115,15 +115,15 @@ describe('the board lowered for its own blow', () => {
 });
 
 describe('the cone', () => {
-  it('covers about 70 degrees either side of its facing, for blows and shots alike', () => {
-    expect(Math.acos(S.cone) * (180 / Math.PI)).toBeCloseTo(70, 0);
+  it('covers its whole front, 90 degrees either side of its facing, for blows and shots alike (Kyle, 2026-11-23)', () => {
+    expect(Math.acos(S.cone) * (180 / Math.PI)).toBeCloseTo(90, 0);
     const { room, h, e } = yard();
-    stand(h, e, 64);
+    stand(h, e, 84);
     expect(strike(h, e, room.time, [])).toBe(0);
-    stand(h, e, 76);
+    stand(h, e, 96);
     expect(strike(h, e, room.time, [])).toBe(20);
     const w = world(h, e, room.time);
-    for (const [deg, took] of [[64, 0], [76, 20]]) {
+    for (const [deg, took] of [[84, 0], [96, 20]]) {
       const a = (deg * Math.PI) / 180;
       Object.assign(e, { fx: Math.sin(a), fy: Math.cos(a) });
       expect(shot(w, h, e), `${deg}`).toBe(took);
@@ -164,7 +164,8 @@ describe('the slow turn', () => {
       const tx = h.x - e.x, ty = h.y - e.y;
       if (i > 15) (n++, (front += (e.fx * tx + e.fy * ty) / Math.hypot(tx, ty) > S.cone ? 1 : 0));
     }
-    expect(front / n).toBeLessThan(0.2);
+    // (Its board covers the whole front since 2026-11-23, so a circling hero is in front of it more: still under half.)
+    expect(front / n).toBeLessThan(0.45);
   });
 });
 

@@ -3,7 +3,7 @@
  * cleaver back and chops, or leaps and comes down on the slam; scrappers pull the knife back and stab.
  */
 import type { GameMap } from '../shared/arena';
-import { FURY, GUARD, HERO, HEMPEN_BOSS } from '../shared/tuning';
+import { GUARD, HERO, HEMPEN_BOSS } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
 import { isRound } from '../sim/types';
 import { drawRoundSign } from './telegraph2';
@@ -75,8 +75,7 @@ const hempenOf = (e: Enemy): 1 | 2 | undefined => (e.boss?.who === 'hempen' ? (e
 const KEEPER = 1.15;
 const isKeeper = (e: Enemy) => e.boss?.who === 'latch' || e.boss?.who === 'hasp';
 function butcherSprites(e: Enemy): { down: Sprite; up: Sprite; cut: typeof BUTCHER_CUT; k: number } {
-  // (A named boss in its FURY stands bigger again: shared/fury.ts.)
-  const l = butcherLook(e.name, e.variant, hempenOf(e)), k = Math.round((isKeeper(e) ? KEEPER : e.fury ? FURY.size : 1) * BODY.k * 20) / 20, key = `${l.build}.${l.trophy}.${l.soot}.${l.hempen ?? 0}.${l.tone ?? 0}.${k}`;
+  const l = butcherLook(e.name, e.variant, hempenOf(e)), k = Math.round((isKeeper(e) ? KEEPER : 1) * BODY.k * 20) / 20, key = `${l.build}.${l.trophy}.${l.soot}.${l.hempen ?? 0}.${l.tone ?? 0}.${k}`;
   let s = BUTCHERS.get(key);
   if (!s) {
     const make = (up: boolean) => makeSprite(Math.round(27 * k), Math.round(33 * k), k === 1 ? butcherParts(l, up) : grow(butcherParts(l, up), k));

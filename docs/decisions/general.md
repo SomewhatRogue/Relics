@@ -350,3 +350,18 @@ Claude Opus 5.5
   and 4% quicker (Enemy.stride, sim/enemies.ts) up to 1.25x. Drawn through client/pacedraw.ts and strawman.ts (one
   line each, the Art chat's). tests/fury.test.ts. Checked the boss's size on the phone (the yard draws straw men, so
   the grown goblins weren't seen there). Claude Opus 5.5
+
+## 2026-11-23: boss builds up to 3x; shield goblins; more on the field with level and party (Kyle)
+
+- Builds (shared/fury.ts BUILDS, BUILD_OF, buildOf): brute (1.8x drawn, quick), hulk (3x, slow, hardest hitting),
+  fat (2.4x, wide, the most health), quick (1.25x, 1.75x pace, high health, short wind-ups). Each board boss has its
+  own (MAWL fat, SKARN quick, OLD KNUCKLES and GUTCHAIN hulk, OLD SPOON brute, MOTHER RUST fat); any other name by
+  a hash. Drawn through Enemy.scale (client/pacedraw.ts, as the BIG ONE); blows reach as far as its size
+  (Enemy.reach, half its growth, sim/enemies.ts begin). The 2.5D figure cell 96x96 to 128x144, feet at 112
+  (client/three/figs3d.ts, the Graphics chat's: one line) so a 3x boss isn't cut off. Seen on the phone in a hunt.
+- Shield goblins: the board covers the whole front (cone 0.34 to 0); they grow at high levels but don't speed up;
+  commoner (encounters.ts 'wall' 2 to 3, 'hexer' 1 to 1.5, backline.ts picks 2 to 3). Layout pins re-pinned (with
+  the old weights the hashes are unchanged).
+- More on the field: a party's budget 1, 1.3, 1.6, 1.9 (was up to 1.45) and on-screen threat 10, 13, 16, 19 (was
+  up to 16), meaty 1, 2, 3, 3; and by level (shared/threat.ts LEVEL_CROWD): from level 3 each level adds 8% more small
+  ones a pack (up to 60%) and 1 more on-screen threat (up to 6). Claude Opus 5.5
