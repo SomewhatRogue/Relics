@@ -1132,4 +1132,7 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   was not seen between two real pages on a big map: only in the Node test.
 - Other chats' files: the Performance sweep's client/coop.ts (the two handshakes; nothing an honest pair sends
   changes but `sum`, and `wait` while someone is loading). On the board. (Claude Fable 5.2)
+- The first full suite on this failed 14 tests in four files (the Deep's and the petting tests, which hand the game
+  a `document` and no `window`): the loading page reached for `window`. Guarded; the suite is green. Nothing had
+  been pushed. (Claude Fable 5.2)
 

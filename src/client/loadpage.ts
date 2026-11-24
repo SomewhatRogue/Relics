@@ -69,13 +69,14 @@ class Loading {
 
   /** The fight stands still while the page is up (a page out of sight has no frames to lift it, so it does not hold). */
   holding(): boolean {
-    return this.up && !document.hidden;
+    return this.up && typeof document !== 'undefined' && !document.hidden;
   }
 
   /** Put the page up now: `name` the place, `seed` picks the words. */
   ask(name: string, seed: number): void {
-    if (typeof document === 'undefined') return;
-    window.clearTimeout(this.fade);
+    // (Only in a browser: a test may hand the game a `document` of its own and no window.)
+    if (typeof document === 'undefined' || typeof window === 'undefined' || typeof document.createElement !== 'function' || !document.body) return;
+    clearTimeout(this.fade);
     this.el?.remove();
     const el = (this.el = document.createElement('div'));
     el.id = 'loadpage';
@@ -127,13 +128,13 @@ class Loading {
     this.up = false;
     if (!el) return;
     el.classList.add('out');
-    this.fade = window.setTimeout(() => el.remove(), 320);
+    this.fade = setTimeout(() => el.remove(), 320) as unknown as number;
   }
 
   /** Gone at once (the job ended under it). */
   drop(): void {
     if (!this.up) return;
-    window.clearTimeout(this.fade);
+    clearTimeout(this.fade);
     this.el?.remove();
     this.up = false;
   }
