@@ -1047,3 +1047,15 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - tests/looks.test.ts: the wood's landmark is one of the map's oaks in its back half; no other set has one.
 - Checked on phone 2.5D: Gallows Wood (the hanged), Hangman's Wood (the cage), Rook Wood (crows). (Claude Fable 5.2)
 
+## 2026-11-24: biome sets, the direction: vast, alive, no gates
+
+- Kyle: Path of Exile 2's worlds as the model ("alive and vast with big backgrounds and really good view ...
+  biodiversity ... maybe not even gates between things, just longer pathways with other enemy types that can come
+  out"), and the weak-phone limit on worlds lifted ("I over indexed on 'make sure this works for all people' and
+  it's fine").
+- docs/design/biome-sets.md: a Direction section (one long map with no gates, drawn seams, biodiversity, views off
+  the map's edge, overlooks, the loosened budget, and the caution that the same game shrank its largest areas),
+  and the slices re-ordered round a proof: one continuous mission of four stretches, new files behind a switch.
+- Docs only. Kyle also saw "two competing lines" pointing to a newly opened area; not found in three looks
+  (the gold arrow, wayfind.ts, overlay3d.ts): asked him where. (Claude Fable 5.2)
+

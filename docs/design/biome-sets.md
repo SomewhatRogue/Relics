@@ -42,7 +42,40 @@ Rules:
    left, dark outlines, dark and bloody. No new 3D.
 5. New biomes later (the desert) are a new column in the table and nothing else.
 
+## Direction: vast, alive, no gates (Kyle, 2026-11-24)
+
+"I really want to take inspiration from the world designs and map designs of Path of Exile 2. They felt alive and
+vast with big backgrounds and really good view. Obviously we're more pixel based but I want that sort of
+biodiversity beauty. Maybe not even gates between things, just longer pathways with other enemy types that can come
+out. I think I over indexed on 'make sure this works for all people' and it's fine."
+
+What that changes here:
+
+1. **One long map, not rooms and gates.** A mission is a road through several kinds of ground with no shut gate
+   and no load between them. What paces it is distance and what comes out at you: a stretch has its own enemy kinds,
+   and some hold a thing that breaks out (a pack from a den, goblins up out of the reeds) where a gate used to stand.
+2. **Seams, drawn.** Where two biomes meet the ground blends over six to ten tiles: the wood thins to coppice and
+   reed, the corn gives out into rough pasture. The seam is a place of its own, not a line.
+3. **Biodiversity.** Each stretch has its own mix of trees and ground plants, its own small life (crows lifting,
+   frogs, a deer bolting), its own light and weather. The set's echoes sit on top of that.
+4. **Big backgrounds.** A map's edge is a view, not a wall, wherever the land allows: a drop to a valley floor far
+   below, water out to a far shore, the landmark seen across a gap long before you reach it. Drawn in two or three
+   layers that slide against each other as you walk.
+5. **A good view.** At an overlook the camera lifts and pulls back to show what is ahead; the landmark is in sight
+   on the way to it.
+6. **The budget is loosened.** World size and richness are no longer held to what the weakest phone can draw. The
+   flat view stays the frozen fallback.
+
+One caution from the same game: its makers cut some of its largest areas down after players found them a slog. Long
+is good while something new is on screen every screen or two; the beats still matter more than the tile count.
+
 ## Slices
+
+(Re-ordered for the direction above: after slice 1, the proof is one continuous mission, built as new files behind a
+switch and replacing nothing: fields, the wood's edge, the wood and its great oak, the fen and its belfry, about 48
+tiles wide and 160 long, with a view off one edge. Slices 2 to 5 below are what that proof needs, built for it
+first and then given to every generator.)
+
 
 1. **The wood's set, drawn (in, 2026-11-24).** client/sets.ts, tilelandmarks.ts. One of the map's own oaks, the
    northmost in the middle half, is drawn as the great oak (three mutations), with old ropes in about three oaks
@@ -65,5 +98,6 @@ asked on the board first, and each is its own push with the parity record re-mad
 
 ## Open, for Kyle
 
-- How big a job's room should go (slice 4): the proposal is about 44 by 36, two and a half times today's ground.
+- (Answered by the direction above: not bigger rooms but one long map. How long a first mission should run is
+  the proof's to find out.)
 - Whether the Deep and the mines get a set of their own now or with the desert.
