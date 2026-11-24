@@ -65,7 +65,9 @@ export function drawSickle(c: Ctx, h: Hero, px0: number, py0: number, ox: number
   line(c.lit, ox, oy, a, -1, 2, WRAP);
   line(c.lit, ox, oy, a, 2, 6, HAFT);
   const hx = ox + dx * 6 * HS, hy = oy + dy * 6 * HS;
-  blade(c, hx, hy, a, -side, out);
+  // The point leads the cut: it hooks the way the swing goes (held.ts swings alternate with the combo).
+  const swing = (h.heavy ? 1 : h.combo % 2 ? -1 : 1) * side;
+  blade(c, hx, hy, a, h.act === 'attack' ? swing : -side, out);
   // The chain from the butt: trailing behind a cut, else hanging in a loop to the weight by the hip, swaying.
   const bx = ox - dx * HS, by = oy - dy * HS;
   if (h.act === 'attack') {

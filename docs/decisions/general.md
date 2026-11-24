@@ -302,3 +302,4 @@ Claude Opus 5.5
   start again), so you spin up at a distance and walk in. The whirl now turns round the chain hand (weapon side, arm
   height), not the body's middle; the floor ring of its reach stays on the Rogue. Claude Opus 5.5
 - An early spin stopped says TOO SLOW over the Rogue, with a clank and a drop of links ('chainstop'). Claude Opus 5.5
+- The sickle's point now leads: in the spin it hooks forward round the turn, and on a cut it points the way the swing goes (the swings alternate with the combo). Claude Opus 5.5

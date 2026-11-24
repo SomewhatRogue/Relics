@@ -47,10 +47,10 @@ export function drawSpins(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj,
       const f = s / steps, [sx, sy] = P(hx + Math.cos(turn) * r * f, HAND, hy + Math.sin(turn) * r * f);
       dot(g, sx, sy, CHAIN[s & 1], 0.95), dot(g, sx, sy + 1, CHAIN[(s + 1) & 1], 0.6);
     }
-    // The sickle at the end: a hooked blade curling back against the turn, bright on its back.
+    // The sickle at the end: a hooked blade, its point leading the turn, bright on its back.
     const [tx, ty] = P(hx + Math.cos(turn) * r, HAND, hy + Math.sin(turn) * r);
     for (let j = 0; j <= 5; j++) {
-      const b = turn - dir * j * 0.07, rr = r - 0.05 - j * j * 0.012, [sx, sy] = P(hx + Math.cos(b) * rr, HAND + j * 0.03, hy + Math.sin(b) * rr);
+      const b = turn + dir * j * 0.07, rr = r - 0.05 - j * j * 0.012, [sx, sy] = P(hx + Math.cos(b) * rr, HAND + j * 0.03, hy + Math.sin(b) * rr);
       dot(g, sx, sy, BLADE, 1), dot(g, sx, sy + 1, '#9aa3ad', 0.9);
     }
     dot(g, tx, ty - 1, '#ffffff', 1);
