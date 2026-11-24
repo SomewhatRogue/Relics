@@ -47,6 +47,9 @@ function strewn(rect: Rect, rng: Rng, k: { kind: string; x: number; y: number; w
   }
 }
 
+/** waterpaint.ts's rows and surrounds for one water rectangle: its lit top row (deep, a ford, shallow) and its dark edge (deep, shallow). */
+const SEAMS = new Set([0x2a4a5a, 0xa2c0c0, 0x7a9a9a, 0x1a2a22, 0x3a3a2a]);
+
 /**
  * The water's painting under the redraw's rounded banks (../waterfield.ts `soften`): `paint` lays today's water (its
  * rectangles, a ford's stones, boards); then the ground comes back wherever the rounded bank says dry, the bed's
@@ -67,6 +70,9 @@ function softWater(m: GameMap, c: HTMLCanvasElement, g: CanvasRenderingContext2D
     if (v > 0) {
       // Wet outside the rectangles (a notch filled): the bed's own colour.
       if (a[o] === b[o] && a[o + 1] === b[o + 1] && a[o + 2] === b[o + 2]) v === DEEP ? set(o, 18, 32, 54) : set(o, 62, 90, 98);
+      // (A pond laid as rectangles one on another: each one's lit top row and dark surround, out in the water, drew
+      // it as a flight of steps. Inside the rounded bank they are water.)
+      else if (SEAMS.has((a[o] << 16) | (a[o + 1] << 8) | a[o + 2])) v === DEEP ? set(o, 18, 32, 54) : set(o, 62, 90, 98);
       continue;
     }
     // Dry: the ground as it was before the water's rectangles; then the bank's edge.

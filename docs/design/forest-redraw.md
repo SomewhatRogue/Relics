@@ -109,6 +109,13 @@ sizes of bush and boulder by the map's own radius): a bush a mound of leafy lobe
 old blood; a boulder with a lit top plane, a darker face, cracks, moss on some; a dead tree a bare trunk forking into
 black limbs, a crow on some, a length of old rope on others. Stumps keep their painting.
 
+## Behind a tree (2026-11-24, in)
+
+Nobody is lost behind a tree. A tree standing between the camera and a body (your hero, another, a foe near you)
+opens round them: a leafy, dark-lined window in its crown, bigger than the body so the ground behind shows round
+them, the trunk left standing in front (three/cardopen.ts). They are seen as themselves, lit and in colour. It
+replaces the pale chequered ghost for trees; walls and roofs keep theirs.
+
 ## Ridges (2026-11-24, in)
 
 Flat ground is drawn stepping down toward you here and there: a low bank, a lit lip of turf over a short face of

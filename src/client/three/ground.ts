@@ -183,6 +183,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     const shaded: Shaded[] = [];
     // (The tile redraw, `?redraw=1`: trees and stumps as the flat view's own pictures, stood up: propcards.ts.)
     const T = new Boxes(), none: Spot[] = [], S = new CardSheet();
+    S.open = true;
     for (const o of own) {
       if (levelAt(wf, o.x, o.y) === DEEP) T.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
       const k = T.mark(), up = stacked(m) ? groundLv(m, o.x, o.y) * LEDGE_H : 0;
@@ -196,6 +197,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     if ((shade = treeShade(shaded))) group.add(shade);
   };
   const cards = new CardSheet(), standShade: Shaded[] = [];
+  // (A tree between you and the camera opens round you, and round a foe near you: cardopen.ts.)
+  cards.open = true;
   for (const o of [...m.rounds, ...scatterOf(m).stand]) {
     if (own.has(o)) continue;
     const n = fires.length;

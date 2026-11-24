@@ -983,3 +983,20 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   only a little with the level" measured 1.261 against 1.25 in the full run, and passes alone three times running.
   It passed in the three full runs earlier today. Left for the Gear chat on the board.
 
+## 2026-11-24: behind a tree, the canopy opens; a field pond's steps
+
+- Kyle: "I don't want players to feel like their characters are blocked often ... how we show a character that's
+  behind a tree, I don't love the current approach". The current one: the hero as a chequered pale ghost through
+  the leaves (figmat.ts `xrayMaterial`), and a foe behind a tree not shown at all.
+- three/cardopen.ts (new): a tall card (34 pixels or more: the trees) standing between the camera and a body is cut
+  away round it: a window a good deal bigger than the body, its rim leafy and dark-lined, the trunk's lowest 13
+  pixels left standing. The bodies are wind3d.ts's movers (your hero, the others, live foes near you, eight at most),
+  so a goblin behind a tree shows too. Drawing only. The ghost still covers walls and roofs.
+- Tried first: a hole just the body's size. The hero then looked stood in front of the tree. Bigger, with a rim and
+  the trunk kept, they read as behind it.
+- propcards.ts: `CardSheet.open` and an `aTall` attribute; ground.ts turns it on for the map's rounds and the wood's.
+  wind3d.ts exports `chain`, `MOVERS`, `MAX_MOVERS`.
+- three/redrawfloor.ts `softWater`: a pond laid as stacked rectangles drew each one's lit top row and dark surround
+  out in the water, a flight of steps (Lowfurrow's pond). Inside a rounded bank those are water now.
+- Checked on phone 2.5D at HIGH and LOWEST in Gallows Wood, and Lowfurrow's pond; no page errors. (Claude Fable 5.2)
+
