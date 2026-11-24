@@ -1,6 +1,6 @@
 /** The skills taught after the first: each does what its trainer says, in the room, by the shared numbers. */
 import { describe, expect, it } from 'vitest';
-import { CHAIN, CLASS_KITS, FIRE_RING, KNIVES, LIGHT, SIC, SKILL_CHOICES, STAMP, TETHER, TICK, VANISH, VOLLEY, RELICS, type HeroClass, type RelicId } from '../src/shared/tuning';
+import { CHAIN, CLASS_KITS, FIRE_RING, HEARTSEEKER, KNIVES, LIGHT, SKILL_CHOICES, STAMP, TETHER, TICK, VANISH, VOLLEY, RELICS, type HeroClass, type RelicId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { castElement } from '../src/sim/channel';
 import { fallDmg } from '../src/sim/rogue';
@@ -69,20 +69,18 @@ describe('three skills a class', () => {
     expect(room.zones.some((z) => z.kind === 'volley')).toBe(false);
   });
 
-  it('SEND THE HOUND: the hound runs at the goblin faced and pins it', () => {
-    const { room, h, s } = setup('RANGER', 'sic');
-    run(room, 0.2);
-    Object.assign(s, { x: 9, y: 4, act: 'chase', cooldown: 99 });
-    expect(h.hound).toBeTruthy();
-    fire(room);
-    let pinned = false;
-    for (let i = 0; i < ticks(3); i++) {
-      room.step();
-      if (room.events.some((e) => e.k === 'houndpin')) pinned = true, i = ticks(3);
-    }
-    expect(pinned).toBe(true);
-    expect(s.act).toBe('stunned');
-    expect(s.snareUntil).toBeGreaterThan(room.time + SIC.pin - 0.2);
+  it('HEARTSEEKER: stand and aim, then one heavy arrow at the goblin faced', () => {
+    const { room, h, s: g } = setup('RANGER', 'sic');
+    Object.assign(g, { x: 9, y: 5, act: 'stunned', actDur: 99, hp: 400, maxHp: 400 });
+    fire(room, { ay: -1 });
+    run(room, 0.05);
+    const x0 = h.x, y0 = h.y;
+    fire(room, { ay: -1, my: -1 });
+    run(room, HEARTSEEKER.windup * 0.7);
+    expect([h.x, h.y]).toEqual([x0, y0]);
+    expect(g.hp).toBe(400);
+    run(room, HEARTSEEKER.windup * 0.3 + 0.5);
+    expect(400 - g.hp).toBeGreaterThanOrEqual(HEARTSEEKER.dmg * 0.9);
   });
 
   it('VANISH: goblins lose you (even close) and drop a blow wound up at you, until it clears or you strike', () => {

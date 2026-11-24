@@ -11,7 +11,7 @@ import { spotFor } from './facing';
 import type { Smoke } from './flasks';
 import { knifeFan, vanish } from './rogue';
 import { throwSmoke } from './smokebomb';
-import { sendHound, stepSic } from './sic';
+import { heartseeker } from './heartseeker';
 import { stamp } from './stamp';
 import { startTether, stepTethers } from './tether';
 import type { Bolt, Hero, Intent, Zone } from './types';
@@ -26,7 +26,7 @@ export function fireSkill(h: Hero, r: SkillRoom, w: World, mult: number): boolea
   switch (h.relic) {
     case 'stamp': return stamp(h, w, el), true;
     case 'volley': return r.zones.push(volley(h, spotFor(h, w.enemies, aim, VOLLEY.range, VOLLEY.fallback), w.now, el, w)), true;
-    case 'sic': return sendHound(h, w.enemies, w.now, w.ev), true;
+    case 'sic': return r.bolts.push(heartseeker(h, el, mult, w.ev)), true;
     case 'vanish': return vanish(h, w.enemies, r.smokes, w.now, w.ev), true;
     case 'knives': return r.bolts.push(...knifeFan(h, el, mult, w.ev)), true;
     case 'smoke': return r.bolts.push(throwSmoke(h, w.enemies, aim, w.now, w.ev)), true;
@@ -42,6 +42,5 @@ export function fireSkill(h: Hero, r: SkillRoom, w: World, mult: number): boolea
 export function stepSkills(r: SkillRoom, w: World, dt: number): void {
   stepAreas(r.zones, w);
   stepTethers(w);
-  for (const h of w.heroes) stepSic(h, w.enemies, w.now, dt, w.ev);
   stepTows([...w.heroes, ...w.enemies], w.now, dt);
 }

@@ -83,7 +83,7 @@ export const TEACHES = { skill: { level: 3, price: jobs(3) }, leave: { level: 5,
 /** The class's three skills: the first early, each after it an evening of jobs (economy.md section 3). */
 export const SKILL_STEPS = [TEACHES.skill, { level: 5, price: jobs(5) }, { level: 7, price: jobs(6) }] as const;
 export const LEAVES: Partial<Record<HeroClass, { name: string; short: string; text: string; gain: string }>> = {
-  RANGER: { name: 'LEAP SHOT', short: 'SHOT', text: 'Your jump fires an arrow by itself', gain: 'a shot as you jump' },
+  RANGER: { name: 'LEAP SHOT', short: 'SHOT', text: 'Jumping fires an arrow. Tap attack mid-jump to shoot a second', gain: 'a shot as you jump' },
   MAGE: { name: 'TRAP ON THE BLINK', short: 'TRAP', text: 'Your blink leaves a trap of your element behind', gain: 'a trap where you blinked' },
   ROGUE: { name: 'SHADOW ON THE DASH', short: 'SHADOW', text: 'Your dash leaves a shadow. Goblins chase it for 2.5 s', gain: 'a shadow where you dashed' },
 };

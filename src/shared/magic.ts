@@ -1,5 +1,5 @@
 /** Relics (rechargeable magic items) and the elements that can be fitted to them. */
-import { CHAIN, FIRE_RING, KNIVES, LIGHT, SIC, SMOKEBOMB, STAMP, TETHER, VANISH, VOLLEY } from './skillkit.js';
+import { CHAIN, FIRE_RING, HEARTSEEKER, KNIVES, LIGHT, SMOKEBOMB, STAMP, TETHER, VANISH, VOLLEY } from './skillkit.js';
 import { BELL, BOMB, KNUCKLE, SENTRY } from './relickit.js';
 /**
  * The relic javelin, thrown. It skewers every goblin in its line, whatever it weighs, carries them on
@@ -120,7 +120,8 @@ export const RELICS = {
   // The skills taught after the first (shared/skillkit.ts).
   stamp: { name: 'SHIELD STAMP', short: 'STAMP', cooldown: wait(STAMP.cooldown), windup: STAMP.windup, recover: STAMP.recover, range: STAMP.radius },
   volley: { name: 'VOLLEY', short: 'VOLLEY', cooldown: wait(VOLLEY.cooldown), windup: VOLLEY.windup, recover: VOLLEY.recover, range: VOLLEY.range },
-  sic: { name: 'SEND THE HOUND', short: 'HOUND', cooldown: wait(SIC.cooldown), windup: SIC.windup, recover: SIC.recover, range: SIC.range },
+  // HEARTSEEKER, in Send the Hound's place (its id kept for saves): sim/heartseeker.ts.
+  sic: { name: 'HEARTSEEKER', short: 'HEART', cooldown: wait(HEARTSEEKER.cooldown), windup: HEARTSEEKER.windup, recover: HEARTSEEKER.recover, range: HEARTSEEKER.range },
   vanish: { name: 'VANISH', short: 'VANISH', cooldown: wait(VANISH.cooldown), windup: VANISH.windup, recover: VANISH.recover, range: 0 },
   knives: { name: 'KNIFE FAN', short: 'KNIVES', cooldown: wait(KNIVES.cooldown), windup: KNIVES.windup, recover: KNIVES.recover, range: KNIVES.range },
   smoke: { name: 'SMOKE BOMB', short: 'SMOKE', cooldown: wait(SMOKEBOMB.cooldown), windup: SMOKEBOMB.windup, recover: SMOKEBOMB.recover, range: SMOKEBOMB.range },

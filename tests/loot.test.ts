@@ -134,7 +134,8 @@ describe('traits pay off on execution', () => {
     const plain = tap(room, t, 1);
     run(room, 0.4);
     h.tempoUntil = room.time + 1;
-    expect(tap(room, t, 2)).toBe(plain * 2);
+    // (Within one for rounding: the sword's tap is odd since 2026-11-23.)
+    expect(Math.abs(tap(room, t, 2) - plain * 2)).toBeLessThanOrEqual(1);
     run(room, 0.4);
     expect(tap(room, t, 3)).toBe(plain);
   });

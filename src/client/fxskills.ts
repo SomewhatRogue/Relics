@@ -57,6 +57,9 @@ export function skillFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
       return true;
     }
     case 'sic':
+      // HEARTSEEKER loosed (sim/heartseeker.ts): a hard snap of the string and a white kick off the bow.
+      fx.burst(x, y - 10, 6, ['#ffffff', '#ffe9a8'], 60, false, 180, true);
+      fx.rings.push({ x, y: y - 10, life: 0.2, max: 0.2, col: '#ffe9a8', size: 8 });
       return true;
     case 'houndpin':
       fx.say(x, y - 30, 'PINNED', '#d8c48a');
@@ -70,7 +73,7 @@ export function skillFx(fx: Fx, ev: FightEvent, x: number, y: number): boolean {
 /** Each skill event's sound, borrowed from sfx.ts (soundscape.ts plays it). */
 export const SKILL_SOUNDS: Partial<Record<FightEvent['k'], string>> = {
   stamp: 'boom', volleyshot: 'throw', arrowfall: 'arrow', vanish: 'smoke', knives: 'throw', firering: 'oilfire',
-  lanternlight: 'smite', tetherzap: 'spark', chainpull: 'hookfire', houndpin: 'pinned',
+  lanternlight: 'smite', tetherzap: 'spark', chainpull: 'hookfire', houndpin: 'pinned', sic: 'arrow',
   // Not a skill, but the same borrowing: a nest catching (sim/torch.ts).
   torched: 'oilfire',
   // The found relics (fxrelics.ts).

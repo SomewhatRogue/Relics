@@ -14,9 +14,9 @@ export const STAMP = { cooldown: 14, windup: 0.35, recover: 0.4, radius: 2.6, dm
  *  hits every goblin in `radius` for `dmg`, and small ones flinch (held in it). */
 export const VOLLEY = { cooldown: 18, windup: 0.25, recover: 0.3, range: 8, fallback: 5, delay: 0.7, time: 2.4, every: 0.3, radius: 2.2, dmg: 5, flinch: 0.2 };
 
-/** The Ranger's hound sent in: it runs (at `speed` times its pace) at the goblin you face within
- *  `range` and, reaching it, pins a small one flat for `pin` and hangs off a big one (slowed) as long. */
-export const SIC = { cooldown: 16, windup: 0.1, recover: 0.15, range: 9, speed: 1.8, pin: 2.6 };
+/** HEARTSEEKER (sim/heartseeker.ts; Kyle, 2026-11-23, in Send the Hound's place, its id 'sic' kept): aim `windup` s
+ *  standing still, then one arrow of `dmg` out to `range` at the goblin you face, through a shield. */
+export const HEARTSEEKER = { cooldown: 20, windup: 0.8, recover: 0.3, range: 14, dmg: 120, speed: 40, knock: 10 };
 
 /** The Rogue's vanish: smoke at your feet. Goblins lose you (even close) for `time` or until you
  *  strike; any blow wound up at you is dropped; small ones in `radius` cough and flinch. While vanished

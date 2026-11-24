@@ -279,3 +279,12 @@ Claude Opus 5.5
   class-by-class talk.
 
 Claude Opus 5.5
+- Then (Kyle): the greatsword slower and heavier a hit (32 and 44 a sweep, was 26 and 36, longer wind-ups and
+  recoveries: about the same a second, about 32), its overhead 45 to 90; its block kept but REALLY dear (guardCost
+  1.3 to 3). Sword 12, 12, 22 to 11, 11, 19 and spear 11, 11, 20 to 10, 10, 18: about 30 a second each, still the most.
+- HEARTSEEKER in Send the Hound's place (id 'sic' kept; sim/heartseeker.ts, sim/sic.ts gone): aim 0.8 s standing
+  still, then one arrow of 120 out to 14 tiles through a shield; 20 s base (30 with SKILL_WAIT).
+- Jump Shot folded into the LEAP SHOT lesson (the lesson gives the mid-jump tap shot). The jump rungs now: HARD
+  LANDING (5), TWO ARROWS (10), FULL DRAW (15, the leap shot fully drawn, in Jump Shot's old id). Full Draw is my
+  stand-in for the freed slot; Kyle may swap it.
+- Writing through the lore keeper and line editor. The story bible (docs/lore/story-bible.md) still lists Send the Hound and the snare on the jump for Maeve: flagged to Kyle, not mine to edit. Claude Opus 5.5

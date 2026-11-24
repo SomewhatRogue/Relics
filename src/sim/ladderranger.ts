@@ -1,6 +1,7 @@
 /**
- * The Ranger's movement ladder, the jump (numbers: shared/ladder.ts). JUMP SHOT: an attack press mid-jump
- * looses the bow at once, part drawn (a crossbow its bolt). TWO SNARES: the jump leaves a pair across
+ * The Ranger's jump (numbers: shared/ladder.ts). With the trainer's LEAP SHOT lesson the jump fires an arrow by
+ * itself, and an attack press mid-jump looses the bow at once, part drawn (a crossbow its bolt). FULL DRAW (rung 3):
+ * the leap shot fully drawn. TWO SNARES: the jump leaves a pair across
  * it (sim/ranger.ts lays them where `snareSpots` says). HARD LANDING: small goblins beside where you
  * land go over.
  */
@@ -15,7 +16,8 @@ import { knows, type Enemy, type FightEvent, type Hero } from './types';
 
 /** Mid-jump, a fresh attack press: shoot now (once a jump; a crossbow only with a bolt on). The press is spent. */
 export function airShot(h: Hero, now: number, ev: FightEvent[]): boolean {
-  if (h.airShot || !knowsRung(h, 'airshot') || h.attackQueuedAt < h.lastRollAt || now - h.attackQueuedAt >= INPUT_BUFFER) return false;
+  // (Part of the trainer's LEAP SHOT lesson since 2026-11-23: it was the first rung.)
+  if (h.airShot || WEAPONS[h.weapon].cls !== 'RANGER' || !knows(h, 'leave') || h.attackQueuedAt < h.lastRollAt || now - h.attackQueuedAt >= INPUT_BUFFER) return false;
   const w = WEAPONS[h.weapon];
   if (!w.heavy.shot || (w.reloads && h.xbowEmpty)) return false;
   Object.assign(h, { airShot: true, attackQueuedAt: -9, heavy: false, perfect: false });
@@ -41,7 +43,8 @@ export function jumpShot(h: Hero, now: number, ev: FightEvent[]): Swing[] {
   h.snareReady = now + JUMP_SHOT.cooldown * (1 - knack(h, 'snareCd'));
   ev.push({ k: 'airshot', x: h.x, y: h.y });
   // (HARD SHOT: harder; EXTRA ARROW one more arrow: r_hold and r_three, as were.)
-  const hv = w.heavy, k = JUMP_SHOT.draw, more = (1 + statsOf(h).damage) * (1 + knack(h, 'snareHold'));
+  // (FULL DRAW, the third rung: the leap shot fully drawn.)
+  const hv = w.heavy, k = knowsRung(h, 'airshot') ? 1 : JUMP_SHOT.draw, more = (1 + statsOf(h).damage) * (1 + knack(h, 'snareHold'));
   const s: Swing = { ...hv, dmg: Math.round((hv.dmg + (hv.dmgFull - hv.dmg) * k) * more), knock: hv.knock + (hv.knockFull - hv.knock) * k, pierce: knowsTech(h, 'trapper') };
   const n = 1 + (knowsRung(h, 'twinsnare') ? 1 : 0) + knack(h, 'snares');
   return Array.from({ length: n }, () => s);

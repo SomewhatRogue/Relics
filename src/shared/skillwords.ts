@@ -10,7 +10,7 @@ export const SKILL_WORDS: Partial<Record<RelicId, string>> = {
   stamp: 'Slam your shield down. Knocks back goblins close to you; small ones fall.',
   net: 'Pins a small goblin flat, slows a big one.',
   volley: 'Arrows rain on a spot for a few seconds.',
-  sic: 'Your hound runs down the goblin you face: pins a small one, hangs off a big one.',
+  sic: 'Aim for a moment, then loose a heavy arrow at the goblin you face. Goes through shields.',
   shadow: 'Appear behind the goblin you face. It\'s stunned for a second.',
   vanish: 'Smoke at your feet. Goblins lose track of you until you attack. You move faster, and your first blow does extra damage.',
   knives: 'Throw seven knives in a tight spread. They hit hardest up close.',

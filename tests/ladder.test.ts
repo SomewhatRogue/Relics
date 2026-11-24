@@ -10,6 +10,7 @@ import { newEnemy } from '../src/sim/enemies';
 import { newHero } from '../src/sim/hero';
 import { hitEnemy, hitHero } from '../src/sim/combat';
 import { laySnare } from '../src/sim/ranger';
+import { jumpShot } from '../src/sim/ladderranger';
 import { blinkCost } from '../src/sim/laddermage';
 import { tauntTarget } from '../src/sim/taunt';
 import { NO_INTENT, type Enemy, type EnemyAttack, type FightEvent, type Hero, type Intent, type Snare } from '../src/sim/types';
@@ -92,6 +93,15 @@ describe('the ladder at the trainer', () => {
 });
 
 describe('the Ranger: the jump', () => {
+  it('FULL DRAW (the third jump rung): the leap shot fully drawn', () => {
+    const dmg = (rungs: number) => {
+      const h = Object.assign(hero('longbow', rungs), { act: 'roll' as const, actT: 0.1, snareReady: 0, jumpShot: false });
+      return jumpShot(h, 1, [])[0].dmg;
+    };
+    expect(dmg(3)).toBeGreaterThan(dmg(2));
+    expect(RUNGS.RANGER).toEqual(['landing', 'twinsnare', 'airshot']);
+  });
+
   it("the trainer's lesson: a jump looses a quick arrow by itself, at the goblins; TWO ARROWS two, fanned", () => {
     for (const rungs of [0, 2]) {
       const h = hero('longbow', rungs), e = goblin(1, 9, 3), { room, run } = arena([h], [e]);
@@ -108,9 +118,10 @@ describe('the Ranger: the jump', () => {
     }
   });
 
-  it('JUMP SHOT: attack mid-jump looses an arrow at once, part drawn; nothing without it', () => {
+  it('the LEAP SHOT lesson: attack mid-jump looses an arrow at once, part drawn; nothing without the lesson', () => {
     for (const rungs of [0, 1]) {
-      const h = hero('longbow', rungs), { room, run } = arena([h], []);
+      // (Jump Shot was the first rung till 2026-11-23; it's the lesson's now. `rungs` 1 here: knows the lesson.)
+      const h = Object.assign(hero('longbow', 0), { learned: rungs ? ['leave'] : [] }), { room, run } = arena([h], []);
       // (Not the trainer's shot on the jump, which looses by itself: sim/ladderranger.ts jumpShot.)
       h.snareReady = 99;
       run(TICK, { rollSeq: 1 });
@@ -145,15 +156,15 @@ describe('the Ranger: the jump', () => {
   });
 
   it('HARD LANDING: small goblins beside where you land go over; a butcher and the far ones do not', () => {
-    for (const rungs of [2, 3]) {
-      // A backstep: you land 2.6 tiles behind where you face (down the screen).
+    for (const rungs of [0, 1]) {
+      // A backstep: you land 2.6 tiles behind where you face (down the screen). (The first rung since 2026-11-23.)
       const h = hero('longbow', rungs), near = goblin(1, 9, 11.6 + LANDING.r * 0.6), far = goblin(2, 13, 11.6), big = goblin(3, 8.2, 11.6, 'butcher');
       const { run } = arena([h], [near, far, big]);
       const ev = run(0.5, { rollSeq: 1 });
-      expect(near.act === 'stunned').toBe(rungs === 3);
+      expect(near.act === 'stunned').toBe(rungs === 1);
       expect(far.act).not.toBe('stunned');
       expect(big.act).not.toBe('stunned');
-      expect(ev.some((x) => x.k === 'landing')).toBe(rungs === 3);
+      expect(ev.some((x) => x.k === 'landing')).toBe(rungs === 1);
     }
   });
 });

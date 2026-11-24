@@ -21,7 +21,9 @@ export const LADDER_LEVELS = [5, 10, 15];
 
 /** Each class's three, in the order they're taught. */
 export const RUNGS: Record<HeroClass, RungId[]> = {
-  RANGER: ['airshot', 'twinsnare', 'landing'],
+  // (Jump Shot folded into the trainer's lesson, Kyle 2026-11-23: Hard Landing first, Two Arrows, then FULL DRAW in
+  // the old Jump Shot's id.)
+  RANGER: ['landing', 'twinsnare', 'airshot'],
   MAGE: ['blinkburst', 'blinkthrough', 'halfblink'],
   ROGUE: ['caltrops', 'underlegs', 'shakeoff'],
   HEALER: ['shelter', 'allyward', 'blockmend'],
@@ -33,7 +35,7 @@ export const LADDER_TITLE: Record<HeroClass, string> = { RANGER: 'JUMP', MAGE: '
 
 /** The name on the trainer's row and what it does (Kyle's style: the effect first, plainly). */
 export const RUNG_WORDS: Record<RungId, { name: string; text: string }> = {
-  airshot: { name: 'JUMP SHOT', text: 'Tap attack mid-jump to shoot, 60% drawn.' },
+  airshot: { name: 'FULL DRAW', text: 'Leap shot arrows hit as hard as a full draw.' },
   twinsnare: { name: 'TWO ARROWS', text: 'Leap shot fires two arrows.' },
   landing: { name: 'HARD LANDING', text: 'Landing a jump knocks small goblins next to you flat for 0.8 s.' },
   blinkburst: { name: 'BLINK BURST', text: 'Blinking leaves a burst of your element where you stood: 100 damage to goblins in it.' },

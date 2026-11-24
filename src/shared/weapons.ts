@@ -176,9 +176,10 @@ export const WEAPONS: Record<KitId, Weapon> = {
     name: 'SWORD AND SHIELD',
     cls: 'WARRIOR',
     combo: [
-      { windup: 0.1, active: 0.08, recover: 0.2, dmg: 12, range: 1.45, arc: 110, lunge: 0.35, knock: 3 },
-      { windup: 0.09, active: 0.08, recover: 0.2, dmg: 12, range: 1.45, arc: 110, lunge: 0.35, knock: 3 },
-      { windup: 0.16, active: 0.1, recover: 0.36, dmg: 22, range: 1.6, arc: 140, lunge: 0.6, knock: 7 },
+      // (12, 12, 22 to 11, 11, 19: Kyle, 2026-11-23, "tune it a little"; about 30 a second, still the most.)
+      { windup: 0.1, active: 0.08, recover: 0.2, dmg: 11, range: 1.45, arc: 110, lunge: 0.35, knock: 3 },
+      { windup: 0.09, active: 0.08, recover: 0.2, dmg: 11, range: 1.45, arc: 110, lunge: 0.35, knock: 3 },
+      { windup: 0.16, active: 0.1, recover: 0.36, dmg: 19, range: 1.6, arc: 140, lunge: 0.6, knock: 7 },
     ],
     // Held: a shield bash that stuns the goblin in front (Kyle's rework): short, little damage, a solid stagger.
     heavy: { windup: 0.06, active: 0.1, recover: 0.32, dmg: 6, dmgFull: 12, range: 1.35, arc: 80, lunge: 0.5, knock: 5, knockFull: 9, hits: 1, shieldBash: true },
@@ -191,14 +192,16 @@ export const WEAPONS: Record<KitId, Weapon> = {
     cls: 'WARRIOR',
     combo: [
       // Wide, slow, ponderous sweeps for a crowd (Kyle 2026-11-04: slower first swing, big heavy hits).
-      // Each lands with the heavy hitstop; the pair does about 15% less a second than before.
-      { windup: 0.38, active: 0.12, recover: 0.42, dmg: 26, range: 2.1, arc: 210, lunge: 0.45, knock: 8 },
-      { windup: 0.34, active: 0.12, recover: 0.6, dmg: 36, range: 2.2, arc: 240, lunge: 0.6, knock: 12 },
+      // Each lands with the heavy hitstop. Slower again and bigger a hit (Kyle, 2026-11-23: "slower but more
+      // damage"), about the same a second as before.
+      { windup: 0.48, active: 0.12, recover: 0.5, dmg: 32, range: 2.1, arc: 210, lunge: 0.45, knock: 9 },
+      { windup: 0.44, active: 0.12, recover: 0.7, dmg: 44, range: 2.2, arc: 240, lunge: 0.6, knock: 14 },
     ],
     // Held: the overhead (it breaks heavy wind-ups); let go on the white flash and it sends out a shockwave.
-    heavy: { windup: 0.1, active: 0.16, recover: 0.6, dmg: 38, dmgFull: 75, range: 2.4, arc: 110, lunge: 0.9, knock: 10, knockFull: 20, quake: true },
-    // A plain block like the Warrior's other kits, but a slow one: a narrow arc, dear on stamina, a crawl while held.
-    blockSpeed: 0.35, chargeSpeed: 0.25, guardArc: 110, guardCost: 1.3, speed: 0.8, ponderous: true,
+    heavy: { windup: 0.1, active: 0.16, recover: 0.6, dmg: 45, dmgFull: 90, range: 2.4, arc: 110, lunge: 0.9, knock: 10, knockFull: 20, quake: true },
+    // A plain block like the Warrior's other kits, but a slow one: a narrow arc, a crawl while held, and it REALLY
+    // drains stamina (Kyle, 2026-11-23: 1.3 to 3 times a blow's cost), so dodge or time it.
+    blockSpeed: 0.35, chargeSpeed: 0.25, guardArc: 110, guardCost: 3, speed: 0.8, ponderous: true,
     dodge: { kind: 'roll', distance: 1.9, time: 0.4, iFrom: 0.06, iTo: 0.28, stamina: 34, cooldown: 1.4 },
   },
   spear: {
@@ -206,9 +209,10 @@ export const WEAPONS: Record<KitId, Weapon> = {
     cls: 'WARRIOR',
     combo: [
       // Thrusts with a little reach past the sword's; the third, PRECISE, goes past a shield-bearer's board.
-      { windup: 0.09, active: 0.07, recover: 0.18, dmg: 11, range: 2.3, arc: 40, lunge: 0.3, knock: 3, thrust: true },
-      { windup: 0.08, active: 0.07, recover: 0.18, dmg: 11, range: 2.3, arc: 40, lunge: 0.3, knock: 3, thrust: true },
-      { windup: 0.16, active: 0.1, recover: 0.34, dmg: 20, range: 2.5, arc: 34, lunge: 0.7, knock: 7, thrust: true, precise: true },
+      // (11, 11, 20 to 10, 10, 18: Kyle, 2026-11-23, "tune it a little".)
+      { windup: 0.09, active: 0.07, recover: 0.18, dmg: 10, range: 2.3, arc: 40, lunge: 0.3, knock: 3, thrust: true },
+      { windup: 0.08, active: 0.07, recover: 0.18, dmg: 10, range: 2.3, arc: 40, lunge: 0.3, knock: 3, thrust: true },
+      { windup: 0.16, active: 0.1, recover: 0.34, dmg: 18, range: 2.5, arc: 34, lunge: 0.7, knock: 7, thrust: true, precise: true },
     ],
     // Held: thrown on its chain (shared/warrior.ts SPEAR_CHAIN): a small goblin reeled in, or you to a big one.
     heavy: { windup: 0.08, active: 0.04, recover: 0.3, dmg: 14, dmgFull: 30, range: 0, arc: 0, lunge: 0, knock: 0, knockFull: 0, chain: true },
