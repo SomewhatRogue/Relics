@@ -21,7 +21,7 @@ import type { TerrPlan, TerrZone } from './territory.js';
 import { lightFor } from './timeofday.js';
 import { BARN, GATE_FIELDS, layBarn, layFarmland, layGate, layPasture, layRoadAndEdges, layWood } from './gatefieldsland.js';
 import { GATE_PACKS, layFoes } from './gatefieldsfoes.js';
-import { CAMP_FOLK, layCamp } from './gatefieldscamp.js';
+import { CAMP_FOLK, CAMP_POSTS, layCamp } from './gatefieldscamp.js';
 import { KEEPER, layDetail } from './gatefieldsdetail.js';
 
 export { GATE_FIELDS };
@@ -45,8 +45,8 @@ export function gateFieldsPlan(job: Job): TerrPlan {
     hero: { x: 28, y: 93 }, exit: { x: 26.5, y: 0, w: 3, h: 0.9 }, theme: lightFor(THEMES.field, 'field', 'day'),
     water: k.water, soil: k.soil, marks: k.marks, stretches: [s0],
     grounds: [{ look: 'harvest', x: 0, y: 58, w: 56, h: 38 }, { look: 'fallow', x: 0, y: 28, w: 56, h: 30 }, { look: 'mossy', x: 0, y: 0, w: 56, h: 28 }],
-    npcs: [{ ...KEEPER, name: '', talk: 'station:fieldbarn', look: 'villager', mute: true }, ...CAMP_FOLK.map((f) => ({ ...f, name: '', talk: '', mute: true }))],
-    stations: [{ name: 'THE FIELD BARN', x: BARN.x, y: BARN.y, r: BARN.r }],
+    npcs: [{ ...KEEPER, name: '', talk: 'station:fieldbarn', look: 'villager', mute: true }, ...CAMP_FOLK.map((f) => ({ ...f, name: '', talk: '', mute: true })), ...CAMP_POSTS.map((p) => ({ x: p.x, y: p.y, name: '', talk: '', look: 'guard', mute: true }))],
+    stations: [{ name: 'THE FIELD BARN', x: BARN.x, y: BARN.y, r: BARN.r }], guards: CAMP_POSTS.map((p) => ({ ...p })),
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: GATE_ZONES.map((z) => ({ ...z })) };
 }

@@ -17,6 +17,7 @@ import { isDead } from './damage';
 import { players } from './party';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
+import { stepGuards } from './campguard';
 import type { FightEvent, Hero } from './types';
 
 type Station = { name: string; x: number; y: number; r: number };
@@ -103,5 +104,6 @@ export function stepLand(run: Run, room: ArenaRoom, ev: FightEvent[]): void {
   }
   for (const h of ps) if (h.act === 'down' && !h.selfUp && !h.out && h.actT >= HERO.respawn) selfRevive(h, ev);
   if (spent(ps)) return void (run.wipeAt = room.time);
+  stepGuards(room, ev);
   if (stations.length) rest(run, ps, stations, ev, room.time), guard(room, ps, stations, room.time);
 }

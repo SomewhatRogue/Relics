@@ -123,6 +123,13 @@ describe('the Gate Fields', () => {
       }
     }
     expect(m.blocks.filter((b) => b.kind === 'cart' && onRoad(b.y)).length).toBeGreaterThanOrEqual(4);
+    // The watch: three posts, each with its guard, clear of the way in and the gate's gap (x 25.5 to 30.5).
+    expect(m.guards).toHaveLength(3);
+    for (const p of m.guards!) {
+      expect(m.npcs!.some((n) => n.x === p.x && n.y === p.y && n.look === 'guard')).toBe(true);
+      expect(Math.hypot(p.x - m.hero.x, p.y - m.hero.y)).toBeGreaterThan(1.5);
+      expect(p.y > 92 ? p.x < 25.5 || p.x > 30.5 : Math.abs(p.x - m.hero.x) > 1.5).toBe(true);
+    }
     expect(m.blocks.filter((b) => b.kind === 'tent').length).toBeGreaterThanOrEqual(2);
     expect(m.braziers.filter((b) => onRoad(b.y) && b.wild).length).toBeGreaterThanOrEqual(2);
     expect(m.soil!.some((q) => q.mat === 'furrow')).toBe(false);

@@ -345,6 +345,8 @@ export interface GameMap {
   stretches?: Stretch[];
   /** Way stations on the land (docs/design/outside-the-gate.md): safe ground, a keeper, a fire. */
   stations?: { name: string; x: number; y: number; r: number }[];
+  /** The land's watch posts (sim/campguard.ts): a guard stands at each and shoots any goblin within `r`. */
+  guards?: { x: number; y: number; r: number }[];
   /** The land's ground by stretch (docs/design/biome-sets.md, "Biodiversity"): boxes naming the pattern book's look there (client/looks.ts), so one long map crosses several kinds of country. Drawing only. */
   grounds?: { look: string; x: number; y: number; w: number; h: number }[];
   /** THE BRAKESMAN's incline (sim/brake.ts): lanes of rail down it at these x, from `y0` by its brake to `y1` at the foot. */

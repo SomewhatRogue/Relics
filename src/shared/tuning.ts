@@ -565,3 +565,10 @@ export const STATUE_GIVEN = 1000;
  * home; `homeSpeed` tiles a second it walks back.
  */
 export const LAND = { rest: 2, giveUp: 1, homeSpeed: 2.2 };
+
+/**
+ * The camp's watch (sim/campguard.ts): a crossbow at each post looses a bolt every `every` seconds at the nearest goblin in its
+ * range; the bolt flies `speed` tiles a second, then takes the larger of `harm` and `share` of the goblin's full health, so
+ * three fell anything that is not a boss. They pay the party nothing.
+ */
+export const CAMP_GUARD = { every: 1.4, harm: 40, share: 0.34, speed: 16 };

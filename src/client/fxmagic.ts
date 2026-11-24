@@ -1,4 +1,5 @@
 /** Effects for magic and the new relics: bursts, gusts, lightning, steam, ice, blessings. Cosmetic only. */
+import { CAMP_GUARD } from '../shared/tuning';
 import { COAL } from './copy';
 import { POTIONS, TIERS, TIER_ORDER } from '../shared/tuning';
 import type { FightEvent } from '../sim/types';
@@ -14,6 +15,13 @@ const flash = (fx: Fx, x: number, y: number, r: number, i: number, c: [number, n
 export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
   switch (ev.k) {
     case 'shoot':
+      // A watch post's bolt (sim/campguard.ts): no bolt of the room's flies, so the bolt is drawn here, a pale streak
+      // five pixels long going the whole way at the speed the room counts its flight by.
+      if (ev.far) {
+        const sp = CAMP_GUARD.speed * 16, life = ev.far / CAMP_GUARD.speed;
+        for (let i = 0; i < 5; i++) fx.parts.push({ x: x - ev.dx * i * 1.6, y: y - 10 - ev.dy * i * 1.6, vx: ev.dx * sp, vy: ev.dy * sp, life, max: life, col: i < 2 ? '#e8dfb8' : '#8a7a56', glow: true, grav: 0, stick: false });
+        break;
+      }
       if (ev.kind !== 'arrow') fx.burst(x + ev.dx * 10, y - 10 + ev.dy * 6, ev.primed ? 14 : 5, [EL_COL[ev.el], '#ffffff'], ev.primed ? 70 : 40, true);
       // A primed spell (the first after a channel) goes with a ring and a flash.
       if (ev.primed) fx.rings.push({ x: x + ev.dx * 10, y: y - 10 + ev.dy * 6, life: 0.25, max: 0.25, col: EL_COL[ev.el], size: 14 }), flash(fx, x, y - 10, 60, 1, EL_LIGHT[ev.el]);

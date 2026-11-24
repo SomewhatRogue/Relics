@@ -75,6 +75,13 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
   the party wakes at the last shelter rested at, or the gate; two seconds in a shelter is a rest; no goblin enters
   one, and one pressing at you there gives up and walks home.
 
+- **The camp's watch** (Kyle, 2026-11-24: "maybe the camp has some guards that can wreck any goblins that have
+  followed you in"; sim/campguard.ts, `map.guards`): three of the town's guard stand at posts, two at the gate and
+  one where the road leaves the camp, and shoot any goblin that comes within nine tiles: a bolt every 1.4 seconds a
+  post, about a third of its health each, so a pack that follows you in is dead in a few seconds. Never a boss or a
+  nest. What the watch fells pays nothing (no experience, coin, drop or kill), even if you had hurt it first, so the
+  camp is a refuge and not a way to farm.
+
 Not yet: the view off the east side; saying on screen that you rested or have a get-up left; the keeper's wares;
 travel between shelters; bounties, materials, quests; the wood beyond the far end.
 

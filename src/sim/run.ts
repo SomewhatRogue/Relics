@@ -140,7 +140,7 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
   for (const ev of events) {
     if (ev.k === 'death') {
       const e = room.enemies.find((x) => Math.abs(x.x - ev.x) < 0.01 && Math.abs(x.y - ev.y) < 0.01);
-      const b = e?.name ? BOUNTY.boss : ev.kind === 'butcher' ? BOUNTY.butcher : ev.kind === 'scrapper' ? BOUNTY.scrapper : BOUNTY[ev.kind as 'spider'] ?? null;
+      const b = e?.unpaid ? null : e?.name ? BOUNTY.boss : ev.kind === 'butcher' ? BOUNTY.butcher : ev.kind === 'scrapper' ? BOUNTY.scrapper : BOUNTY[ev.kind as 'spider'] ?? null;
       // Spiders pay xp but aren't goblins killed (the Roll and the town works count goblins).
       // Spiders and wolves pay xp but aren't goblins killed.
       if (b) (run.xp += b.xp), (run.kills += isSpiderKind(ev.kind) || e?.variant === 'wolf' ? 0 : 1);

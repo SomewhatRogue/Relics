@@ -555,6 +555,8 @@ export interface Enemy extends Body {
   turnedUntil?: number;
   /** The hero who last hit it (who threw it into the wall). */
   lastBy: string;
+  /** Felled by the camp's watch (sim/campguard.ts): it pays the party nothing (no xp, no kill; run.ts tally). */
+  unpaid?: boolean;
   /** How it died, for the body left behind. */
   death: DeathKind;
   /** Comes back after dying (the training room); run goblins stay dead. */
@@ -1018,7 +1020,7 @@ export type FightEvent =
   | { k: 'spend'; id: string; x: number; y: number; n: number }
   | { k: 'ransom' | 'tooth'; x: number; y: number }
   | { k: 'drop'; x: number; y: number; q: Quality }
-  | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment; primed?: boolean }
+  | { k: 'shoot'; x: number; y: number; dx: number; dy: number; kind: Bolt['kind']; el: Augment; primed?: boolean; /** A watch post's bolt (sim/campguard.ts): how far it flies (tiles), for the screen to draw it going. */ far?: number }
   | { k: 'burst'; x: number; y: number; r: number; el: Augment }
   | { k: 'shock' | 'beam' | 'boltline'; x: number; y: number; x2: number; y2: number }
   | { k: 'heal'; x: number; y: number; n: number }

@@ -11,6 +11,9 @@ export const CAMP_FOLK = [
   { x: 33.6, y: 88.2, look: 'survivor' }, { x: 35.6, y: 89.8, look: 'villager' }, { x: 36.2, y: 86.4, look: 'villager' },
 ];
 
+/** The watch: a crossbowman either side of the gate just inside the wall, one where the road leaves the camp (sim/campguard.ts). */
+export const CAMP_POSTS = [{ x: 24.6, y: 92.4, r: 9 }, { x: 31.4, y: 92.4, r: 9 }, { x: 30.6, y: 82.6, r: 9 }];
+
 export function layCamp(k: Kit): void {
   patch(k, 'straw', 13.4, 83, 11, 9, true), patch(k, 'straw', 31, 83.4, 10, 9, true);
   // West of the road: three carts drawn up in a line, two tents, a fire between.
@@ -22,5 +25,6 @@ export function layCamp(k: Kit): void {
   block(k, 'tent', 38.4, 83.6, 2.6, 2.2), block(k, 'tent', 37.4, 91, 2.6, 2.2);
   k.braziers.push({ x: 34.6, y: 88.4, r: 0.35, wild: true });
   for (const [x, y] of [[20.4, 92.2], [16.6, 88.4], [31.6, 88.2], [34.8, 92.2]]) round(k, 'sacks', x, y, 0.34);
+  for (const p of CAMP_POSTS) claim(k, p.x, p.y, 0.6);
   claim(k, 19.5, 88, 6.6), claim(k, 35.5, 88, 6.4);
 }

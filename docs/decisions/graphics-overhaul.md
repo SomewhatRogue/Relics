@@ -1096,3 +1096,14 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Checked on phone 2.5D: the whole trip (the gate, out, away, back, in), every stretch with its enemies, resting at
   the barn with a goblin held at nine tiles; no page errors. (Claude Fable 5.2)
 
+## 2026-11-24: the camp's watch
+
+- Kyle: "maybe the camp has some guards that can wreck any goblins that have followed you in". One Sonnet builder:
+  sim/campguard.ts (three posts in `map.guards`, shared/gatefieldscamp.ts; tuning CAMP_GUARD; `Enemy.unpaid`, checked
+  in sim/run.ts's tally so a watch's kill pays nothing). Guards stand still and the room shoots for them, so nothing
+  new has to be sent between players; only a job with `roam` runs it and the parity record is untouched.
+- Review: the builder's bolts could not be seen in flight (the room's own bolts need a hero for an owner, so it
+  harms directly after the flight time). Added `far` to the shoot event and drew the bolt in client/fxmagic.ts.
+- In a browser: three goblins set at the camp's edge were dead in about three seconds; experience, kills and coin
+  stayed at nothing. (Claude Fable 5.2)
+
