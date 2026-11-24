@@ -15,6 +15,8 @@ import { VOWED, vowedFor, vowedOf } from '../shared/vowed';
 import { canPay, payOut, shelfFor, shelfPrice, takenNow } from '../shared/shelf';
 import { itemName, type Item } from '../shared/tuning';
 import { SHELFW } from './shelfwords';
+import { TITLEW } from './titlewords';
+import { openTitles } from './titlesui';
 import { spoken } from './vowedwords';
 
 const dim = (s: string) => `<p class="dim">${s}</p>`;
@@ -27,6 +29,7 @@ export function churchVowed(g: Game, panel: Panel, again: () => void): Button[] 
   const out: Button[] = [];
   if (canPay(pr)) out.push({ label: SHELFW.owedButton, primary: true, act: () => payPick(g, panel, again) });
   out.push({ label: SHELFW.shelfButton, act: () => shelf(g, panel, again) });
+  out.push({ label: TITLEW.button, act: () => openTitles(g, panel, 'church', again) });
   return out;
 }
 

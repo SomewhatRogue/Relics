@@ -7,6 +7,8 @@ export const KEEPW = {
   /** The sewer grate's button, for a corrupt hero only. */
   arch: 'THE BRICKED ARCH',
   title: 'THE KEEPING ROOM',
+  /** The door line's button: in, through the arch. */
+  goIn: 'GO IN',
   /** Finding it: plain. */
   door: 'Scratches at hand height on the bricked arch, bright where your eyes fall. Behind an iron slot someone looks you over, and a bolt goes back.',
   scene: 'A drained cistern, shelved all round with pewter, rings and plate, a tallow stub on every shelf. A cot, a brazier with a kettle on it, and a cradle in among it all. Under a drip, a stone trough.',

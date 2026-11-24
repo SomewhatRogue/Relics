@@ -8,6 +8,8 @@ import type { HeroClass } from '../shared/tuning';
 import { CLASSES, CLASS_NAME, CLASS_TAG, STATS } from '../shared/classes';
 import { heroPortrait } from './sprites';
 import { HOMEW } from './homewords';
+import { shownTitle, titled } from '../shared/titles';
+import type { Profile } from '../shared/progress';
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
@@ -28,9 +30,9 @@ export function ringCard(o: CardOpts): string {
 }
 
 /** Your hero of the picked class: who they are, the class's ratings, PLAY (their slot `i`). */
-export function ownCard(h: { cls: HeroClass; name: string; level: number; gold: number }, i: number): string {
+export function ownCard(h: { cls: HeroClass; name: string; level: number; gold: number; weapon?: string }, i: number): string {
   const s = CLASSES[h.cls];
   const bars = `<div class="bars">${STATS.map((k) => `<span>${k}</span><i>${'<em class="on"></em>'.repeat(s.stats[k])}${'<em></em>'.repeat(5 - s.stats[k])}</i>`).join('')}</div>`;
-  return `<div class="rhead"><h2 class="cname rown">${esc(h.name)}</h2><p class="ctag">${HOMEW.line(CLASS_NAME[h.cls], h.level, h.gold)}</p></div>${bars}` +
+  return `<div class="rhead"><h2 class="cname rown">${esc(titled(h.name, shownTitle(h as Profile)))}</h2><p class="ctag">${HOMEW.line(CLASS_NAME[h.cls], h.level, h.gold)}</p></div>${bars}` +
     `<button data-play="${i}" class="primary wide">PLAY</button>`;
 }

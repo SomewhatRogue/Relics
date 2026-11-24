@@ -41,7 +41,7 @@ describe('the nine', () => {
   it('every piece has words, and none says holy, blessed or the Lantern', () => {
     for (const id of VOWED_ORDER) for (const t of [VOWED[id].name, VOWED[id].gift, VOWED[id].cost]) {
       expect(t.length).toBeGreaterThan(5);
-      expect(t).not.toMatch(/holy|bless|lantern|—/i);
+      expect(t).not.toMatch(/holy|bless|lantern|\u2014/i);
     }
   });
   it('says a name as spoken, not shouted', () => {

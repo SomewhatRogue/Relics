@@ -11,6 +11,7 @@ import type { WorldState } from './story.js';
 import { HOME, b, hall, infirmary, n, room } from './townhalls.js';
 import { BIG, bigHall, bigHome, bigInfirmary } from './bighalls.js';
 import { LAYOUT } from './town.js';
+import { KEEPING_DOOR, keepingRoom } from './keepingroom.js';
 
 /** The families who take the houses on Rescue Row, in the order the houses are lit. */
 export const FAMILIES = [
@@ -28,6 +29,8 @@ export const PATIENTS = ['AMOS', 'LETTY', 'CORIN'];
 /** A Wickhold building's inside, by its door. */
 export function townInterior(door: string, w: WorldState): GameMap {
   // The bigger rooms (docs/design/new-look-interiors.md), on their own switch, or with the parked street look.
+  // The Keeping Room, through the sewer grate's bricked arch (shared/keepingroom.ts, the Holy and hungry chat).
+  if (door === KEEPING_DOOR) return keepingRoom();
   const on = BIG.on || LAYOUT.on, big = on ? bigHall(door) : null;
   if (big) return big;
   const h = hall(door);

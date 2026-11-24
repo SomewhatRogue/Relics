@@ -44,6 +44,8 @@ import { isVowed, rollVowed, wearsVowed } from '../shared/vowed';
 import { amendsOf, stepCrossed } from '../shared/amends';
 import { growKit } from '../shared/vowgrow';
 import { hungryHome, wantShown } from '../shared/wanterrands';
+import { DEED, deed } from '../shared/titles';
+import { wearsHungry } from '../shared/corrupt';
 import { FALL, fallWith, giveRipe } from '../shared/crossroads';
 import { partyLevel } from '../shared/threat';
 import { ArenaRoom } from '../sim/room';
@@ -1330,6 +1332,8 @@ export class Game {
     feedKit(p, jobUnits(run.job, won ? 'won' : how));
     // The first hungry piece home: the church's and the Keeping Room's quests (shared/wanterrands.ts).
     hungryHome(p);
+    // A job worn hungry: a share of a deed on the hungry road (shared/titles.ts).
+    if (wearsHungry(p) && (won || how === 'beaten')) deed(p, 'under', 1 / DEED.hungryJobs);
     // Each vowed piece worn grows by the same, if the hero ends the job clean (shared/vowgrow.ts).
     growKit(p, jobUnits(run.job, won ? 'won' : how));
     const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;
@@ -1455,6 +1459,8 @@ export class Game {
   crossroads(it: Item, give: boolean): { next: Item | null; step: number } {
     const p = this.profile, was = p.penance ?? 0;
     const next = give ? giveRipe(p, it, new Rng(p.runs * 173 + Math.round(was * 11) + p.level)) : fallWith(p, it);
+    // A deed on that road, for its titles (shared/titles.ts).
+    if (next) deed(p, give ? 'church' : 'under');
     this.equip(this.hero, this.hero);
     store(this.save);
     return { next, step: stepCrossed(was, p.penance ?? 0) };
@@ -1474,6 +1480,7 @@ export class Game {
     // Amends, kept for good (shared/amends.ts); Odric says a word at a step.
     const was = p.penance ?? 0;
     p.penance = was + amendsOf(it);
+    deed(p, 'church');
     // Clean after the give: a vowed piece for that slot, worn where the hungry one was (shared/vowed.ts).
     const rolled = isCorrupt(p) ? null : rollVowed(new Rng(p.runs * 131 + Math.round(p.penance * 7) + p.want), p.cls, slotOf(it), it.armor);
     const vowed = rolled && raise(rolled, dropLevel(p.level));
@@ -1779,6 +1786,8 @@ export class Game {
     if (this.profile.gold < n || this.profile.armor?.hungry === 'ransom') return false;
     this.profile.gold -= n;
     this.profile.want = Math.max(0, this.profile.want - n * WANT.perGold);
+    // A gift at the Lantern counts toward the church's titles (shared/titles.ts).
+    deed(this.profile, 'church', n / DEED.goldPerDeed);
     this.give({ lantern: n, stats: { given: n } });
     return true;
   }

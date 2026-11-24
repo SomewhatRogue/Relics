@@ -27,6 +27,7 @@ import { fitErrands } from '../shared/errands';
 import { fitQuests } from '../shared/heroquests';
 import { fitPurse } from '../shared/coins';
 import { fitRanks } from '../shared/drills';
+import { fitTitles } from '../shared/titles';
 
 const KEY = 'relic.save.v2', OLD = 'relic.save.v1';
 /** `savedAt`: when it was last kept here (it only goes forward), to tell which copy is newer (recovery.ts). */
@@ -95,6 +96,10 @@ const hero = (old: Partial<Profile>): Profile => {
   if (p.strikes !== undefined) out.strikes = Math.max(0, Math.floor(Number(p.strikes) || 0));
   // Town errands (shared/errands.ts): a hero from before them has done them all, and is never sent on the first two.
   out.errands = fitErrands(p.errands, out.level);
+  // Titles (shared/titles.ts): kept as they were, or none.
+  const titles = fitTitles(p.titles);
+  if (titles) out.titles = titles;
+  else delete out.titles;
   // Hero quests (shared/heroquests.ts): an old hero has done every one up to their level.
   out.quests = fitQuests(p.quests, out.level);
   // Knacks onto the tree: one the class can't use comes back as a pick (shared/chains.ts).

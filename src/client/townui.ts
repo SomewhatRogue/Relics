@@ -40,6 +40,7 @@ import { QUESTW } from './questwords';
 import { coinsHtml } from '../shared/coins';
 import { givenUp } from './vowedui';
 import { churchVowed } from './shelfui';
+import { openKeeping } from './keepingui';
 import { wantOpen, wantTalked } from '../shared/wanterrands';
 import { WANTQW } from './wanterrandwords';
 
@@ -54,6 +55,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   if (openSquare(id, g, panel, arg, key)) return;
   if (openStore(id, g, panel) || openShop(id, g, panel)) return;
   if (id === 'tailor') return openTailor(g, panel);
+  // Dorcas, in the Keeping Room (keepingui.ts).
+  if (id === 'keeping') return openKeeping(g, panel);
   // A class's vendor, at a counter in its place (vendorui.ts); `arg` is the class.
   // Come from Tobin with hungry gear: Nettle knows, and his table opens on SELL QUIETLY (shared/errands.ts).
   if (id === 'vendor' && CLASS_ORDER[arg] === 'ROGUE' && metNettle(g.profile)) return g.keep(), openVendor(g, panel, arg, 'fence', ERRANDW.nettleMet);

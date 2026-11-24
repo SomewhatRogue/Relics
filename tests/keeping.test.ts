@@ -52,7 +52,7 @@ describe('the Keeping Room', () => {
   it('her words never say holy, the Lantern or why', () => {
     for (const v of Object.values(KEEPW)) {
       const t = typeof v === 'function' ? (v as (...a: unknown[]) => string)(2, true) : v;
-      expect(t).not.toMatch(/holy|lantern|prayer|altar|—/i);
+      expect(t).not.toMatch(/holy|lantern|prayer|altar|\u2014/i);
     }
   });
 });

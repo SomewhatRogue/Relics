@@ -370,3 +370,35 @@ Also confirmed: TOUCHED and TURNING become SIEGE and MARSHAL (slice 8), so Odric
   docs/design/keeping-room.md maps it (a 12 by 11 interior through the dry arch, entered from the grate's button as
   a door, out at the grate), and its build in three slices (the room with stand-in furniture, the art in the kit,
   the titles). The ask of the Deep, Territories and Art chats (slice 9) is withdrawn.
+
+## 2026-11-24: the walkable Keeping Room (slice 1), and titles (stage A) (Claude Opus 5.5)
+
+Kyle: "yes to all": build the room, titles as drafted, and the lore keeper's second quest title ("Find the woman below
+the sewer grate", in place of "Talk to the under church about growing the Want"; his own wording back is one line).
+
+- **The room, slice 1** (docs/design/keeping-room.md): `shared/keepingroom.ts` (`keepingRoom`, `KEEPING_DOOR`), a
+  12 by 11 interior from `townInterior` (shared/interiors.ts, one line): shelves round three sides, the cradle, the
+  cot, the trough and the cistern's lip in the town's furniture as stand-ins (bench, bed, counter, partitions), no
+  torches, the brazier lit, Dorcas (the `elder` look for now) by it. THE BRICKED ARCH at the grate now shows the door
+  line and GO IN, which goes in as a door does (`Game.enter`, the grate as the door), out at the bottom to the grate.
+  Walking up to Dorcas opens her panels (talk `keeping`: shared/town.ts `SpotId`, client/townui.ts `openSpot`).
+  `tests/keepingroom.test.ts`. Slice 2: its own art, the tile way.
+- **Titles, stage A** (docs/design/titles.md): `shared/titles.ts` (`TITLES`, the lore keeper's eight; `STEPS` 1, 5, 15,
+  40 deeds and 2, 6, 15, 60 jobs' pay at the hero's level; `deed`, `deedsOn`, `own`, `wear`, `shownTitle`, `titled`,
+  `fitTitles`), `client/titlesui.ts`, `client/titlewords.ts`, `tests/titles.test.ts`; `Profile.titles?` (kept by
+  save.ts). Deeds: a hungry piece given up, a ripe piece given up (church) or let go bad (under), Lantern gifts (a
+  gold's worth a deed), amends steps (church); relics' pieces fed, vowed pieces given to Dorcas, jobs in hungry gear
+  (a fifth each) (under). TITLES at Odric's (church panel; paid as a Lantern gift, so it lowers the Want and counts as
+  a deed) and Dorcas's (coin, which doesn't touch the Want). One worn; shown only on its own road. Shown so far on
+  the hero's own card (client/ringcard.ts `ownCard`).
+- **Stage B, next:** other players see it: the town's presence (client/townfolk.ts `Me`) and co-op's names
+  (client/coop.ts), then an online check.
+- **Small edits:** client/game.ts (deeds at `giveUp`, `crossroads`, `donate`, `finish`), client/save.ts,
+  client/keepingui.ts (mine), client/shelfui.ts (mine), client/ringcard.ts (Hero select's), shared/interiors.ts,
+  shared/town.ts, client/townui.ts.
+- **Words:** lore keeper (Odric never says the Lantern is glad; Dorcas says what it costs; each shop names only its own
+  road, no "road" on screen; NEEDS N DEEDS) and line editor (all kept, two catches: "down here", the hungry-gear
+  wording for the rule). For the bible (lore keeper): titles cosmetic, bought on either road, shown to all; THE HOLY is
+  the church's word for its best, nothing says it's true; Dorcas's coin for a title is trade, not keeping.
+- Escaped the em dashes in my own tests' checks (tests/keeping.test.ts, tests/vowed.test.ts).
+- **Checked:** the touched tests, `npm run check`, the full suite (2309 passed).

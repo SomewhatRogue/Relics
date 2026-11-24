@@ -1,12 +1,13 @@
 /**
  * The first hungry piece home (shared/wanterrands.ts; Kyle, 2026-11-23): the two quests' goal lines, Father Odric's
- * talk at the church, and Dorcas's in the Keeping Room. The titles are Kyle's own; the rest through the lore keeper
+ * talk at the church, and Dorcas's in the Keeping Room. The church's title is Kyle's own, the under one the lore keeper's
+ * (Kyle's yes, 2026-11-24); the rest through the lore keeper
  * and line editor, 2026-11-23.
  */
 export const WANTQW = {
   /** The goal line's rows (client/errandline.ts): a label, what to do, folded. Kyle's quest titles. */
   pin: { church: 'HUNGRY GEAR', under: 'A WHISPER' },
-  todo: { church: 'Talk to the church about giving it up', under: 'Talk to the under church about growing the Want' },
+  todo: { church: 'Talk to the church about giving it up', under: 'Find the woman below the sewer grate' },
   small: { church: 'TALK TO FATHER ODRIC AT THE CHURCH', under: 'FIND DORCAS BEHIND THE SEWER GRATE' },
   /** The whisper, back in town with the first red piece: it calls you down to the Keeping Room. Who speaks is never said. */
   whisperTitle: 'A WHISPER',

@@ -101,6 +101,8 @@ export interface Profile {
   want: number;
   /** AMENDS, from hungry gear given up (shared/amends.ts): kept for good, never shown as a number. None in older saves. */
   penance?: number;
+  /** Titles: deeds on each road, those bought, the one worn (shared/titles.ts). */
+  titles?: import('./titles.js').TitleRecord;
   /** The red piece's whisper has been heard (shared/wanterrands.ts). */
   whispered?: boolean;
   /** Amends steps already paid out (shared/shelf.ts). */

@@ -28,7 +28,7 @@ import { layoutPoint, layoutProps, layoutSpots, layoutTown } from './layouttown.
 export const LAYOUT = { on: false, town: false };
 
 /** What talking to someone (or using a spot) opens. */
-export type SpotId = 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
+export type SpotId = 'keeping' | 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
   | 'yard' | 'gate' | 'hew' | 'orla' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked' | 'bank' | 'merchant' | 'advocate' | 'vendor' | 'tailor'
   /** The practice board at the training yard's pen (client/practiceui.ts). */
   | 'practice'
