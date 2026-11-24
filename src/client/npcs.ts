@@ -16,6 +16,7 @@ import { COBB_SIT, drawCobbCrate, drawCobbThings } from './cobbdraw';
 import { sidePerson, tallPerson } from './npcside';
 import { backPerson } from './npcback';
 import { ALIVE, idleStance } from './alive';
+import { drawKeepGob, KEEP_GOB } from './keepgob';
 
 type Part = Parameters<typeof makeSprite>[2][number];
 export interface Look { body: string; trim: string; skin: string; hair: Part[]; apron?: string }
@@ -154,6 +155,8 @@ export function drawNpc(c: Ctx, n: Npc, x: number, y: number, near: boolean, fx 
   // Dark and gold, slice 4 (darkfoe.ts): the heroes' palette without the gold. Names and marks are on the glow layer.
   c = darkFolk(c);
   walking ||= !!n.walking;
+  // The goblin in the Keeping Room: its own body and chores (keepgob.ts).
+  if (n.look === KEEP_GOB) return drawKeepGob(c, n, x, y, fx, walking, tx, fy);
   // The gravedigger stops walking while he digs.
   if ((n.work === 'bury' || n.work === 'dig') && tx < 5) walking = false;
   const bob = n.pose ? 0 : Math.floor(c.now * (walking ? (n.sneak ? 4 : 7) : 1.5) + n.x) % 2 ? -1 : 0;

@@ -13,11 +13,22 @@
  *    8  # # # # . . . . # # # #      the cistern's lip
  *    9      # . . . . . . #          the dry arch: you come in here
  */
-import type { GameMap } from './arena.js';
+import type { GameMap, Npc } from './arena.js';
 import { b, n, room } from './townhalls.js';
 
 /** The door the grate's arch opens as (shared/interiors.ts `townInterior`). */
 export const KEEPING_DOOR = 'keeping';
+
+/**
+ * The goblin that keeps the room (Kyle, 2026-11-24; client/keepgob.ts draws it). No name over it, nothing to say, not
+ * a foe: it walks its round and works at each stop (the trough, the side shelf, the cradle, the back shelf, the
+ * brazier), with two bare points to bring it round the furniture. Nothing in the game says why it's here.
+ */
+const KEEP_GOB_NPC: Npc = {
+  ...n('KEEPGOB', 3.5, 6.3, '', 'keepgob'), mute: true, speed: 0.55,
+  path: [[3.5, 6.3], [2.1, 4.7], [3.6, 4.1], [4.8, 3.2], [6.2, 1.9], [8.5, 5.0], [6.5, 7.2]],
+  stops: [7, 6, 9, 0, 6, 8, 0],
+};
 
 /** The room: wet cistern stone, dark, the hoard on its shelves. */
 export function keepingRoom(): GameMap {
@@ -37,7 +48,7 @@ export function keepingRoom(): GameMap {
     // The dry arch's end: the iron door, its slot. The kettle on its trivet by the brazier.
     b('irondoor', 1.9, 9.3, 1.4, 0.4),
     b('kettle', 9.3, 3.5, 0.7, 0.5),
-  ], [n('DORCAS', 7.4, 4.9, KEEPING_DOOR, 'keeper')], {
+  ], [n('DORCAS', 7.4, 4.9, KEEPING_DOOR, 'keeper'), KEEP_GOB_NPC], {
     // No torches: the brazier's coals, and whatever light the hero brings.
     torches: [],
     braziers: [{ x: 8.5, y: 4.3, r: 0.4 }],

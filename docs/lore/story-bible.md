@@ -105,6 +105,11 @@ most Want among the heroes is the one the bells don't spare).
   foes are straw men in hungry kit, worked on ropes and poles by Corporal Brisk's watch, with Squire Pell
   running the board. They fight as the real thing so a hero learns it, but they're straw: they don't bleed,
   their eyes are painted on, and a downed one is a heap of straw.
+- **The one exception: the goblin in the Keeping Room** (Kyle, 2026-11-24). Under the church, where the town
+  thinks there are none, a live goblin keeps Dorcas's room: it tends the trough, the hoard, the cradle and the
+  brazier, never speaks, can't be fought, and pays heroes no mind. **Nothing ever explains it**: no line, no name,
+  and Dorcas never mentions it. Not a captive, not a pet, not a turning person on screen. Don't flag it as a
+  break of the rule above, and don't write anything that answers it.
 - **Habits.** The hungry hoard lamp oil, the way they hoard everything: more than they can use. It's
   greed, not stupidity, and it burns.
 - **The valley.** Barrowfields (Barrowby, Tollan's Farm, Lowfurrow Fields), Greyhollow (the Charcoal

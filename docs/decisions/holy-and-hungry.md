@@ -436,3 +436,15 @@ the sewer grate", in place of "Talk to the under church about growing the Want";
   clasp at the throat. The hood starts on the top row and is eight wide, so the side view keeps it square on her
   head (npcside.ts `hat`). She wears it in `shared/keepingroom.ts` in place of the stock elder.
 - **Checked:** phone 2.5D sweep (shots/sweep/keep6), the room tests, `npm run check`, the full suite.
+
+## 2026-11-24: the goblin in the Keeping Room (Claude Opus 5.5)
+
+- Kyle: the under church "HAS a goblin but no explanation". A mute townsperson in `shared/keepingroom.ts` on a
+  slow round with stops (the trough, the side shelf, the cradle, the back shelf, the brazier; two bare points bring
+  it round the furniture). `mute`: no mark, no name, nobody to talk to; a round's walkers don't block. Not a foe.
+- Drawn by my own `client/keepgob.ts`: the scrapper's body with no kit (its eyes on the glow), a low shuffle,
+  crouched at its work, up on its toes at the hoard. One line in `client/npcs.ts` drawNpc hands its look over,
+  so both views (and 2.5D's cards) draw it.
+- The bible's "no live goblin in Wickhold" gets one bullet under it: the exception, never explained, so the lore
+  keeper doesn't flag it.
+- **Checked:** phone 2.5D sweep (shots/sweep/keep7), the room tests, `npm run check`, the full suite.
