@@ -34,7 +34,8 @@ collisions don't change.
   give way to three rows of overlapping drawn trees along the top edge (front row trunks, back rows crowns only) and
   down the side edges, leaving the road gaps and side ways open.
 
-Shown to Kyle on a phone in 2.5D, before and after, before it goes anywhere else.
+Shown to Kyle on a phone in 2.5D, before and after; landed on his "Land it", 2026-11-23, for every map with grass or
+trees.
 
 ## Later, if the proof lands
 

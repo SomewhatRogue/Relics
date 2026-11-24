@@ -820,4 +820,8 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - The wood's edge: `three/treeline3d.ts`, three rows of overlapping drawn trees along the top and two down each side
   where the back is trees, gaps open, nothing along the foot; the dark fill set back behind them (ground.ts).
 - Shown to Kyle as a before and after before rolling out. (Claude Opus 5.5)
+- Landed on Kyle's "Land it", 2026-11-23: every map with grass or trees takes the turf, the drawn pines and
+  broadleafs, and (where the back is trees) the wood's edge. Checked before the push: the town's street and kirk, a
+  field by day and Gallows Wood by night on phone 2.5D, no page errors; tsc clean; full suite 277 files passed.
+  Still to come from the spec: ridges, small scenes, groves. (Claude Fable 5.2)
 
