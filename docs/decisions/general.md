@@ -332,3 +332,12 @@ Claude Opus 5.5
   modifiers, a trait and a cost. Touched pieces don't sour on their own today; they grow the Want a job at a time,
   and become VOWED in the Holy and hungry chat's slice 6. Claude Opus 5.5
 - The spin's reach grows as it builds: 1.1 tiles as it starts, out to 2.8 at full (SICKLE_SPIN.r0, sim/sickle.ts spinReach), what it cuts and what's drawn alike. Claude Opus 5.5
+
+## 2026-11-23: slice 8's bible lines (the Holy and hungry chat's ask), and two quests passed to it
+
+- docs/lore/story-bible.md: TOUCHED and TURNING are SIEGE and MARSHAL on screen, clean steel with one small cost, no
+  Want; "hungry gear" means the red alone; Tobin buys siege and marshal; Nettle a third under him; the vestry keeps
+  to maces, flails and robes. Through the lore keeper. This is General's yes to slice 8 (Gear and Economy still to say).
+- Kyle, 2026-11-23: the first hungry piece home brings two quests, the church (Odric: the Want and giving it up) and
+  the under church (Dorcas: growing the Want), and the Want bar from then on. Handed to the Holy and hungry chat as a
+  paste (the board). Claude Opus 5.5

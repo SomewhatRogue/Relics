@@ -47,6 +47,11 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **For the Holy and hungry chat (General, 2026-11-23, Kyle's ask):** the first hungry piece home brings two quests:
+  the church (Odric explains the Want and offers the give-up) and the under church (Dorcas, the Keeping Room open to a
+  hero on this quest, explains growing the Want); the Want bar shows from the first talk on. Errand pattern as
+  `nettle` (ask Town quests). Also: General's yes to slice 8, the bible lines are in (docs/decisions/general.md).
+
 - **For the Deep chat (General, 2026-11-23):** every boss of the kit now has 1.4x health at spawn (shared/fury.ts
   FURY.bossHp, sim/room.ts fromFoe), the Haulier, the Listener and the Leechman included; named hunt bosses are
   tougher, quicker, bigger and fell trees (sim/fury.ts). Re-tune your own if it's too much on top of the Deep's edge.
