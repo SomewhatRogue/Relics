@@ -175,6 +175,7 @@ import { mageTrails } from './fxmagetap';
 import { iceTrails } from './fxice';
 import { one, setData, setHidden, setHtml, setStyle, setText, setTitle, toggle } from './domset';
 import { openCrossroads } from './ripeui';
+import { BIG_AREA, loading } from './loadpage';
 import { openWhisper } from './wanterrandui';
 
 // The UI's frames and icons, drawn once before anything shows.
@@ -613,9 +614,10 @@ let still: Intent | null = null;
 let resumed = '', touchedAt = 0;
 // Following a friend's job: a press goes to the leader from the press itself, not the next frame (coop.ts).
 input.onPress = () => {
-  if (!game.remote || panel.open || title.open || chat.typing || pack.open || away()) return;
+  if (!game.remote || panel.open || title.open || chat.typing || pack.open || away() || loading.up) return;
   game.remote.send(game.own(input.read()), performance.now() / 1000);
 };
+let seenMap: unknown = null;
 function tick(t: number): void {
   // (The first frame can stamp a hair before the page clock: never step backwards.)
   const dt = Math.max(0, Math.min(0.1, (t - last) / 1000));
@@ -628,7 +630,7 @@ function tick(t: number): void {
   if (touchedIdle(live)) pokeIdle(ME), stopPet(ME, performance.now() / 1000);
   // The mouse over a hound shows its name (houndname.ts).
   pointAt(!input.touch && (live.ax || live.ay) && game.hero ? [game.hero.x + live.ax, game.hero.y + live.ay] : null);
-  if (panel.open || title.open || chat.typing || pack.open || away()) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
+  if (panel.open || title.open || chat.typing || pack.open || away() || loading.up) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
   // With the pack open the hero stands still too, but what you change in it still goes to the room.
   if (still && pack.open && !panel.open) still = { ...still, gearOp: live.gearOp, gearArg: live.gearArg, gearSeq: live.gearSeq };
@@ -743,9 +745,21 @@ function tick(t: number): void {
   if (document.hidden || away()) return;
   // Choosing a new hero round the fire (heroring.ts): the ring takes the frame, flat or 2.5D.
   if (title.ringFrame(views, scene, fx, t / 1000, dt)) return;
-  views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
-  under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
-  uncover.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
+  // The loading page (loadpage.ts): a friend's job asks for it on a big new map here (the leader's game.ts does); the
+  // first draw of a new map waits two frames, so the page is painted before the slow work, and the old picture stays.
+  const guest = !!game.remote, arrived = !guest || !!game.remote!.room?.heroes.some((x) => x.id === ME), rmap = game.room.map;
+  if (game.mode !== 'run') loading.drop();
+  else if (guest && arrived && !loading.up && rmap !== seenMap && !game.room.indoors && rmap.w * rmap.h > BIG_AREA && game.run) loading.ask(game.run.job.title || game.run.job.place.name, game.run.job.seed + game.run.index);
+  seenMap = rmap;
+  if (loading.gate(rmap, arrived)) {
+    views.render(game.room, ME, fx, t / 1000, dt, inTown ? (townfolk?.here(game.room.map.name) ?? []) : [], game.mode === 'run');
+    under?.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
+    uncover.frame(views, game.room, game.room.heroes.find((x) => x.id === ME), t / 1000);
+    if (arrived) loading.drew();
+  }
+  // Who is still coming in, and the lift; a friend tells the leader once its map is drawn (coop.ts).
+  loading.update(guest ? 'guest' : game.coop?.company ? 'lead' : 'alone', game.coop ? game.coop.coming() : (game.remote?.coming ?? []), !!game.remote?.heardWait);
+  if (game.remote && loading.ready) game.remote.tellHere();
   // The job moved to another device (a host's page went out of sight): said once, over me.
   if (game.hostNote && game.hero) {
     const [sx, sy] = toPx(game.hero.x, game.hero.y);

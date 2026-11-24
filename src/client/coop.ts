@@ -45,6 +45,7 @@ import type { DoorMark } from './jobrooms';
 import { BigSend } from './bigsend';
 import { isBig, loud, mergeBlocks } from './interest';
 import { guestMap } from '../shared/guestmap';
+import { mapSum } from '../shared/mapsum';
 import { themeUnder } from '../shared/expedsky';
 import type { ExpedState } from '../sim/exped';
 import { asGuest } from './asguest';
@@ -52,6 +53,7 @@ import { rejoinAfter } from './backoff';
 import { Playout } from './playout';
 import { OwnHero } from './ownhero';
 import { heroClocks, readBody, withClock, WIRE } from './wire2';
+import { loading, whoIsComing } from './loadpage';
 
 /** Everyone gets the whole job this often; the friend first in line every SAVE_EVERY. */
 const SAVE_ALL = 8;
@@ -81,6 +83,8 @@ export interface Friend {
   name: string; profile: Profile | null; intent: Intent; heard: number; fresh: boolean; gone: boolean;
   /** Their clock on the newest input used (handed back, so they can time the trip). */
   at?: number;
+  /** The room (its key) they last said they were in, drawn (loadpage.ts). */
+  here?: number;
   /** How far behind this room their screen is when their input gets here (sim/lagcomp.ts): this room's time less their `vt`, smoothed. */
   lag?: number;
   /** A press of theirs came at this tick of their room: once a tick has used it, their patch goes at once. */
@@ -121,8 +125,12 @@ export class CoopHost {
   private evs = new Map<ArenaRoom, FightEvent[]>();
   /** The room each friend was last sent whole (a different one now: they get the whole of it). */
   private sentKey = new Map<string, number>();
+  /** The fingerprint of each big room's map as its seed made it, by room key (mapsum.ts): not cheap, made once. */
+  private seedSums = new Map<number, number>();
   private sentAt = -9;
   private now = 0;
+  /** The last send said who was still coming (so the empty list goes out once: loadpage.ts). */
+  private waitWas = false;
   /** Big rooms (an expedition): each friend their own, near only (bigsend.ts). */
   private big = new BigSend();
 
@@ -154,6 +162,10 @@ export class CoopHost {
     if (!f || !d) return;
     f.heard = this.now;
     // A friend headed home: out of the fight now, not in a minute.
+    const need = (d as { needmap?: unknown }).needmap;
+    if (typeof need === 'number') return this.sendMap(m.from, need);
+    const here = (d as { here?: unknown }).here;
+    if (typeof here === 'number') return void (f.here = here);
     if (d.t === 'bye') return void (f.gone || ((f.gone = true), this.game.dropFriend(m.from)));
     if (d.t === 'hello' && d.profile && typeof d.profile === 'object') {
       const first = !f.profile || f.gone;
@@ -168,6 +180,28 @@ export class CoopHost {
       if (buttons(i) !== buttons(f.intent)) f.pressTick = r.tick;
       (f.intent = i), (f.at = typeof (d as { at?: unknown }).at === 'number' ? (d as { at: number }).at : f.at);
     }
+  }
+
+  /** The fingerprint of room `k`'s map as its run's seed makes it (the map play has changed since is not it). */
+  private seedSum(k: number, run: Run | null): number | undefined {
+    if (!run) return undefined;
+    let s = this.seedSums.get(k);
+    if (s === undefined) this.seedSums.set(k, (s = mapSum(guestMap(run))));
+    return s;
+  }
+
+  /** Who has not yet said they are in, while my loading page is up: friends not gone whose room is not the one they last said they were in. */
+  coming(): string[] {
+    if (!loading.up) return [];
+    const g = this.game;
+    return whoIsComing([...this.friends].map(([id, f]) => ({ name: f.name, gone: f.gone, here: f.here, key: g.keyOf(g.roomOf(id) ?? g.room) })));
+  }
+
+  /** A friend's map for this room differs from the leader's: send it that one, whole, as the seed made it. */
+  private sendMap(id: string, k: number): void {
+    const g = this.game, room = g.roomOf(id) ?? g.room;
+    if (!g.run || !isBig(room) || g.keyOf(room) !== k) return;
+    this.sock.send(id, { map: guestMap(g.run), mapk: k });
   }
 
   /** Send this room whole next time (its map changed under it: a house set alight with someone inside). */
@@ -222,13 +256,18 @@ export class CoopHost {
     const acks: Record<string, number> = {};
     for (const [id, f] of this.friends) (names[id] = f.name), f.at !== undefined && (acks[id] = f.at);
     const hc = g.houses(), dm = g.doorMarks(), goal = g.goalText();
+    // Who is still coming in, sent while there is anyone, and the empty list once (the pages that wait on it lift: loadpage.ts).
+    const pend = this.coming(), wait = pend.length || this.waitWas ? { wait: pend } : {};
+    this.waitWas = pend.length > 0;
     for (const [room, ids] of groups) {
       if (isBig(room)) {
         // A big room: each friend only what's near them, the map from its seed (bigsend.ts).
         const k = g.keyOf(room), out = !room.indoors;
-        const common = { k, t: room.time, w: sentClock(now), x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, acks };
+        const common = { k, t: room.time, w: sentClock(now), x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, acks, ...wait };
         for (const id of ids) {
-          const f = this.friends.get(id)!, m = this.big.msg(room, id, now, f.fresh || this.sentKey.get(id) !== k, common, this.evs.get(room) ?? [], wire(f));
+          // (A whole room says the fingerprint of its map as the seed made it, for a friend to check its own against; never a patch.)
+          const f = this.friends.get(id)!, whole = f.fresh || this.sentKey.get(id) !== k, sum = whole ? this.seedSum(k, g.run) : undefined;
+          const m = this.big.msg(room, id, now, whole, sum === undefined ? common : { ...common, sum }, this.evs.get(room) ?? [], wire(f));
           this.sock.send(id, m.d);
           if (m.full) this.sentKey.set(id, k), (f.fresh = false);
         }
@@ -240,7 +279,7 @@ export class CoopHost {
       const whole = ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
       // (One message for the room: the second wire format only if everyone it goes to speaks it, wire2.ts.)
       const v = Math.min(...ids.map((id) => wire(this.friends.get(id)!)));
-      const { d, full } = this.sending.msg(room, now, whole, { k, w: sentClock(now), slow: { hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names }, ev: this.evs.get(room) ?? [], acks }, v);
+      const { d, full } = this.sending.msg(room, now, whole, { k, w: sentClock(now), slow: { hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, ...wait }, ev: this.evs.get(room) ?? [], acks }, v);
       // Everyone in the one room: one message for them all; else each their own.
       if (groups.size === 1) this.sock.send('*', d);
       else for (const id of ids) this.sock.send(id, d);
@@ -307,12 +346,17 @@ export class CoopHost {
 }
 
 /** A patch from the leader, as a friend reads it (ids swapped: theirs `@lead`, mine `me`). */
-type Body = { p: Patch; f: number; k: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; /** The leader's clock as it sent this (s). */ w?: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; acks?: Record<string, number> };
+type Body = { p: Patch; f: number; k: number; /** The leader's fingerprint of this room's map as its seed made it (whole big rooms only: mapsum.ts). */ sum?: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; /** The leader's clock as it sent this (s). */ w?: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; wait?: string[]; acks?: Record<string, number> };
 
 export class CoopGuest {
   room: ArenaRoom | null = null;
   run: Run | null = null;
   goal = '';
+  /** Who the leader last said is still coming in, and for which room (loadpage.ts). */
+  private waitNames: string[] | null = null;
+  private waitK = -1;
+  /** The room key I last told the leader I am in. */
+  private hereSent = -1;
   /** The leader's count of the caged and freed in this room's houses. */
   houses: { x: number; y: number; caged: number; waiting: number }[] = [];
   /** Out in the street: who's indoors, over which door. */
@@ -367,6 +411,12 @@ export class CoopGuest {
     this.sock.onMessage = (m) => this.heard(m);
   }
 
+  /** What a big room's map is built with from the run (a test hands in another). */
+  mapFor: (run: { job: Job; index: number; way?: number }) => ArenaRoom['map'] = guestMap;
+  /** A room whose map I built differently from the leader's: its key, and when I last asked for theirs. Rooms whose map is the leader's. */
+  private wrong: { k: number; at: number } | null = null;
+  private theirs = new Set<number>();
+
   private hello(): void {
     this.helloAt = this.now;
     this.sock.send(this.lead, { t: 'hello', profile: this.profile(), v: WIRE });
@@ -395,6 +445,8 @@ export class CoopGuest {
     if (this.rejoins) (this.rejoins = 0), (this.rejoinWait = -1);
     const d = m.d as { s?: string; b?: unknown; end?: { won: boolean; run: Run }; save?: string; bye?: number; stay?: number; to?: unknown };
     if (!d || typeof d !== 'object') return;
+    const mk = (d as { map?: ArenaRoom['map']; mapk?: unknown });
+    if (mk.map && typeof mk.mapk === 'number') return this.takeMap(mk.map, mk.mapk);
     // The leader's headed home and left the job to us: as good as gone, so whoever's first takes it
     // on in a moment (once their goodbye has freed the room).
     // (`stay`: their page only went out of sight. They hand it to the friend they name, keep their hero
@@ -422,6 +474,35 @@ export class CoopGuest {
     this.playout.push(body, Number(body.w ?? body.t) || 0, body.k, performance.now() / 1000);
   }
 
+  /** My map for a big room against the leader's fingerprint of theirs: if they differ, play on mine for now and ask for theirs. */
+  private checkMap(body: Body, map: ArenaRoom['map']): void {
+    if (body.map || typeof body.sum !== 'number' || this.theirs.has(body.k)) return;
+    const mine = mapSum(map);
+    if (mine === body.sum) return void (this.wrong = null);
+    console.warn(`map differs from the leader's in room ${body.k}: mine ${mine}, theirs ${body.sum}; asking for theirs`);
+    this.wrong = { k: body.k, at: -9 };
+  }
+
+  /** Say again, at most every 3 s, that I need the leader's map for the room I'm in. */
+  private askMap(now: number): void {
+    const w = this.wrong;
+    if (!w || !this.room || w.k !== this.key || now - w.at < 3) return;
+    w.at = now;
+    this.sock.send(this.lead, { needmap: w.k });
+  }
+
+  /** The leader's map for the room I'm in: rebuild on it as a first build does, and have the room sent whole onto it. */
+  private takeMap(map: ArenaRoom['map'], k: number): void {
+    if (this.wrong?.k !== k || k !== this.key || !map || typeof map.w !== 'number' || !Array.isArray(map.blocks) || !Array.isArray(map.rounds)) return;
+    this.room = new ArenaRoom(1, { map });
+    this.base = map.blocks;
+    this.known = new Map();
+    this.own.reset();
+    this.theirs.add(k);
+    this.wrong = null;
+    this.hello();
+  }
+
   /** A patch from the leader, its turn come: into my copy of their room. */
   private apply(body: Body): void {
     // (Only a whole room to start from: a new leader's changes mean nothing without it.)
@@ -432,7 +513,8 @@ export class CoopGuest {
     if (body.f && (body.k !== this.key || !this.room) && (body.map || (body.ms && body.run))) {
       // A big room's map is built here from the run, never sent (shared/guestmap.ts: an Instance's area or an
       // expedition's); its buildings come near only.
-      const map = body.map ?? guestMap(body.run!);
+      const map = body.map ?? this.mapFor(body.run!);
+      this.checkMap(body, map);
       this.room = new ArenaRoom(1, { map });
       this.base = body.ms ? map.blocks : null;
       this.known = new Map();
@@ -487,9 +569,27 @@ export class CoopGuest {
     if ('dm' in body) this.doorMarks = body.dm ?? [];
     if ('run' in body) this.run = body.run;
     if ('goal' in body) this.goal = body.goal;
+    if (Array.isArray(body.wait)) (this.waitNames = body.wait), (this.waitK = body.k);
     this.events.push(...this.notMine(body.ev));
     this.gap = Math.min(0.3, Math.max(SEND_EVERY, this.now - this.lastAt));
     this.lastAt = this.now;
+  }
+
+  /** The names the leader last said are still coming in, for the room I am in. */
+  get coming(): string[] {
+    return this.waitK === this.key && this.waitNames ? this.waitNames : [];
+  }
+
+  /** The leader has said who is coming for the room I am in (even if no one). */
+  get heardWait(): boolean {
+    return this.waitK === this.key && this.waitNames !== null;
+  }
+
+  /** My room's map is drawn and the page could lift: say so to the leader, once for each room I am in. */
+  tellHere(): void {
+    if (!this.room || this.key < 0 || this.hereSent === this.key) return;
+    this.hereSent = this.key;
+    this.sock.send(this.lead, { here: this.key });
   }
 
   /** Each frame: send my input (when it changes, and now and then), and draw between patches. */
@@ -497,6 +597,7 @@ export class CoopGuest {
     this.now = now;
     for (const b of this.playout.due(now)) this.apply(b);
     this.send(intent, now);
+    this.askMap(now);
     // No room yet, or no hero of mine in it (away over a minute, a locked phone): keep saying hello
     // (the leader may still be getting there, or let my hero go and will bring it back).
     if ((!this.room || this.missing) && now - this.helloAt > 2) this.hello();
@@ -581,6 +682,8 @@ export class CoopGuest {
     this.playout.clear();
     this.dec = new Decoder();
     this.key = -1;
+    this.hereSent = -1;
+    this.waitNames = null;
     this.own.reset();
     // A new leader: give them their own time before anyone thinks them gone too.
     this.heardLead = clock();

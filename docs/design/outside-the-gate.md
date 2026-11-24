@@ -82,6 +82,17 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
   nest. What the watch fells pays nothing (no experience, coin, drop or kill), even if you had hurt it first, so the
   camp is a refuge and not a way to farm.
 
+- **Friends on one map** (Kyle, 2026-11-24: "map never being sent might cause issues with seeing your friend morph
+  through trees ... let's make sure we avoid those bugs"). A big map is built on each screen from the seed and
+  never sent. Now the leader says its map's fingerprint (shared/mapsum.ts: everything that decides where a body can
+  stand) with each whole room; a friend whose own differs asks, the leader sends its map once, and the friend
+  rebuilds on it (client/coop.ts). An honest pair sends nothing more than the one number.
+- **The loading page** (Kyle: "fine having a bit longer on initial load and we have a 'lore' page that says people
+  are still loading in"; client/loadpage.ts): the place's name and one thing heard in Wickhold (the approved
+  rumours), up before the map is built, the fight held still under it, lifted when the map is drawn and a second
+  and a half has gone; in a party it names who is still coming and everyone's lifts together (or after 15 seconds).
+  At a job's start, and whenever a run moves on to a big map.
+
 Not yet: the view off the east side; saying on screen that you rested or have a get-up left; the keeper's wares;
 travel between shelters; bounties, materials, quests; the wood beyond the far end.
 

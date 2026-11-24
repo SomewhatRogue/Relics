@@ -20,6 +20,7 @@ import { townInterior } from '../shared/interiors';
 import { board, STORY_PARTY, type Job } from '../shared/jobs';
 import { deepFloor, deepSeedOf, isDeep } from '../shared/deep';
 import { endDeep, markHere, setOut } from '../shared/deepkit';
+import { BIG_AREA, loading } from './loadpage';
 import { DEEP_WORDS } from './deepwords';
 import { expedition, fenmere, hangmansWood } from '../shared/expedjob';
 import { openCut } from '../shared/instances';
@@ -456,6 +457,12 @@ export class Game {
     if (fresh) for (const x of room.heroes) if (x.id !== 'squire') x.safeT = ARRIVE_SAFE;
   }
 
+  /** A new room with a big map (not indoors) gets the loading page (loadpage.ts). */
+  private bigPage(): void {
+    const m = this.room.map, job = this.run?.job;
+    if (job && !this.room.indoors && m.w * m.h > BIG_AREA) loading.ask(job.title || job.place.name, job.seed + this.run!.index);
+  }
+
   /** A friend's hero, next to yours in this room (dressed from their own profile). */
   private bring(id: string, f: Friend, keep?: Hero, was = this.room.time): void {
     const me = this.hero;
@@ -810,6 +817,7 @@ export class Game {
     const marks = new Map(this.room.heroes.map((h) => [h.id, h.marks]));
     this.place(runRoom(run), undefined, this.hero);
     this.rooms.reset(this.room);
+    this.bigPage();
     for (const h of this.room.heroes) if (marks.get(h.id)?.length) (h.marks = [...marks.get(h.id)!]), refreshHealth(h);
     // A blessing of a relic use back each floor.
     relicBack(this.room.heroes);
@@ -841,6 +849,8 @@ export class Game {
     this.jobKey = soloJob();
     this.place(runRoom(this.run));
     this.rooms.reset(this.room);
+    // The page over the map while it is built, and the party gets in (loadpage.ts).
+    loading.ask(job.title || job.place.name, job.seed + this.run.index);
     // A coin in the well: you set out blessed.
     if (this.profile.wish) (this.hero.blessedUntil = 20), (this.profile.wish = false), store(this.save);
   }
@@ -861,6 +871,8 @@ export class Game {
     intent = this.own(intent);
     // Back to lead after a reload: the room waits for a friend to answer (nobody does: the job's gone).
     if (this.holdUntil && this.waiting()) return [];
+    // Under the loading page nothing runs: the hero stands where they came in (loadpage.ts).
+    if (loading.holding()) return [];
     const h = this.hero;
     // The wood holds the world still for a lesson's card, a freeze-frame, a word of praise.
     if (this.mode === 'wood' && this.wood?.hold && this.holding(intent, dt)) return [];
@@ -967,6 +979,7 @@ export class Game {
             this.run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
             this.place(runRoom(this.run), undefined, h);
             this.rooms.reset(this.room);
+            this.bigPage();
           }
         }
       }
@@ -1126,6 +1139,7 @@ export class Game {
     g.onEnd = (e) => bankEnd(this.profile.id, g.code, e);
     // Until the leader's room arrives: the job as it was posted.
     this.run = newRun(g.job);
+    loading.ask(g.job.title || g.job.place.name, g.job.seed + this.run.index);
     keepSession({ code: g.code, lead: g.lead, job: g.job, hero: this.profile.id });
   }
 

@@ -53,6 +53,10 @@ The Deep chat, until it finishes (then the general chat).
   with `roam`: Territories' shared/territory.ts, sim/run.ts and sim/enemies.ts; shared/arena.ts (`stations`,
   `grounds`), shared/jobs.ts (`roam`); sim/party.ts, room.ts, landroom.ts, checkpoint.ts (two exports), types.ts;
   client/game.ts, main.ts, townui.ts, wayfind.ts. Say if any of that sits badly with yours.
+  Also, for the Performance sweep (2026-11-24): client/coop.ts now says a big room's map fingerprint (`sum`, on whole
+  rooms only; shared/mapsum.ts) and answers `needmap` with the map; and `here` and `wait` for the loading page
+  (client/loadpage.ts). bigsend.ts, snap.ts and interest.ts are untouched and the wire parity tests pass as they
+  were. scripts/exped-online.cjs fails at the board on main too (no Barrowfields posting).
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

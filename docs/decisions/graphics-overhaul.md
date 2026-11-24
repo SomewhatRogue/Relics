@@ -1107,3 +1107,29 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - In a browser: three goblins set at the camp's edge were dead in about three seconds; experience, kills and coin
   stayed at nothing. (Claude Fable 5.2)
 
+## 2026-11-24: friends on one map, and a loading page with a bit of lore
+
+- Kyle asked how the big maps are kept fast, alone and with friends. Told him what holds (far goblins doze; each
+  friend is sent only what is within 20 tiles; the map is built from the seed on each screen; the performance
+  sweep's numbers) and what does not yet (the ground is one picture and the trees one mesh, so all of a map is
+  drawn every frame; no frame time measured on a real phone). Timed in Node: the north fields with everything
+  dozing, 0.04 ms a tick, against 0.13 for an ordinary room of ten goblins awake.
+- Kyle: the map never being sent could have a friend "morph through trees"; avoid it; a longer load is fine with a
+  lore page that says who is still loading in. Two Sonnet builders, one after the other (both in client/coop.ts).
+- Builder 1: shared/mapsum.ts and the exchange in coop.ts (`sum` on whole big rooms, `needmap`, `map` and `mapk`).
+  bigsend.ts, snap.ts and interest.ts untouched; the wire parity tests pass unchanged. Both ends tested together
+  in Node with one tree moved on the friend's side (tests/mapsum.test.ts).
+- Builder 2: client/loadpage.ts and loadpage.css; game.ts asks for the page and holds the step under it; main.ts
+  paints it two frames before a new map's first draw; coop.ts `here` and `wait`.
+- Review, in a browser alone: the page is up 0.16 s after GO OUT and before the map is built; the room's clock
+  stays at nothing under it; it lifts after. On my slow test browser the north fields took about two seconds to
+  build, which is what the page now covers.
+- Two players, scripts/party-online.cjs: setting out, being pulled in, the same goblins, walking, a reload,
+  handing the job over and the end all pass. It reports failures too, and so does the code before these changes
+  (the feel checks that need a fast frame, and "room 2: Kyle moves on"); the one new failure is "Sam's hero moves
+  the moment he presses", because the script presses under the new page, where input is ignored on purpose.
+  scripts/exped-online.cjs stops at the board (the Barrowfields posting is not there), so the fingerprint exchange
+  was not seen between two real pages on a big map: only in the Node test.
+- Other chats' files: the Performance sweep's client/coop.ts (the two handshakes; nothing an honest pair sends
+  changes but `sum`, and `wait` while someone is loading). On the board. (Claude Fable 5.2)
+
