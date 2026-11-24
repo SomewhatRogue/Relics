@@ -53,3 +53,9 @@ export function strew(m: GameMap, rect: Rect, bare: (x: number, y: number) => bo
     rows.forEach((row, j) => [...row].forEach((ch, c) => C[ch] && rect(x0 + c, y0 + j, 1, 1, C[ch])));
   }
 }
+
+/** One thing of a kind, variant `v`, its foot's middle at floor pixel (px, py): the pattern book's drifts and rings. */
+export function stamp(rect: Rect, k: ScatterKind, v: number, px: number, py: number): void {
+  const rows = ART[k][v % ART[k].length], x0 = px - (rows[0].length >> 1), y0 = py - rows.length + 1;
+  rows.forEach((row, j) => [...row].forEach((ch, c) => C[ch] && rect(x0 + c, y0 + j, 1, 1, C[ch])));
+}

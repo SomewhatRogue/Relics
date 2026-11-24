@@ -19,6 +19,7 @@ import { paintWater } from '../waterpaint';
 import { groveFloors } from '../tilelitter';
 import { strew } from '../tilestrew';
 import { paintScenes } from '../tilescenes';
+import { paintDrifts, paintZones } from '../tilemotifs';
 import { paintMarks } from '../marks';
 import { paintGrim } from '../grimpaint';
 import { stacked } from '../levelpaint';
@@ -65,10 +66,14 @@ export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   softEdges(m, rect, KX, KZ);
   // (Ground laid with intent: a grove's floor of needle litter and roots under the trees, tilelitter.ts; and what
   // lies about, thick round things and thin in the open, drawn the tile way, tilestrew.ts.)
+  // (The pattern book's zones for this map's look, looks.ts: a hollow, a worn patch, tall grass, a burn.)
+  paintZones(m, rect);
   groveFloors(m, rect);
   paintWater(m, R, r2, toPx, PX);
   const laid = new Set(['earth', 'swept', 'flags', 'furrow', 'crop', 'straw', 'ash', 'wet', 'mud']);
   strew(m, rect, (x, y) => !!m.soil?.length && laid.has(soilAt(m, x, y)));
+  // (The look's drifts and mushroom rings, over whatever is strewn.)
+  paintDrifts(m, rect);
   // (The small scenes' part in the floor: a grave's mound, a dead fire's ring, a stain: tilescenes.ts.)
   paintScenes(m, rect);
   // (A hall's sawdust and rushes, hallfloor.ts, are a tenth of the floor in pale flecks: on drawn planks that reads

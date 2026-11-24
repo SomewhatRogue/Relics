@@ -66,8 +66,30 @@ a shallow grave with a leaning marker and pale flowers; a cairn with a skull and
 its spit; a ring of bones round an old bloodstain, candles guttering. Mostly in the floor, one low thing standing;
 paint only, never collided. A candle throws a small warm pool: the only light they have.
 
+## The pattern book (2026-11-23, in)
+
+Kyle: "I want these to be patterns and aesthetics that we can shuffle and use for real looks that seem intentional."
+So the ground's composition is a book of named pieces, shuffled (`looks.ts`; a line there adds a look):
+
+- **Motifs** (drawn by `tilemotifs.ts`, each with an edge that swells and pinches its own way): `hollow` (a dip of dark
+  moss, its near bank in shadow), `pool` (a hollow with still water), `bald` (a worn patch of bare earth under a turf
+  lip), `tallgrass` (a stand of longer blades, tufts standing thick in it), `burn` (a black heart, ash, scorched
+  turf, charred ends), `ring` (red-capped mushrooms in a ring), and `drift:` leaves, bones, stones, pale flowers or
+  blood-red ones, lying in a lens along the wind.
+- **Scenes** (`tilescenes.ts`): grave, a row of graves, cairn, dead campfire, ring of bones, a skull on a stake.
+- **Looks**: a named recipe of motifs (how many a room) and the scenes that may appear. Wood: gallows, mossy, charcoal.
+  Fen: drowned, reedmoor. Fields and villages: fallow, poppy, raided. Bare yards: spoil, warcamp.
+
+A map draws one look of its country from its own name (`lookOf`), lays the motifs on open ground off the paths
+(`motifsOf`), and takes its scenes from the look. Same map, same picture on every screen; paint only.
+`window.__lookOf(map)`, `__motifsOf(map)`, `__scenesOf(map)` for scripts. tests/looks.test.ts.
+
+Also: a dirt floor is the same rippled earth as a path now, a shade warmer; its tone shifts in soft swells, not blocks.
+
 ## Later
 
 - Ridges: drawn earth lips where the land rises (the height levels we have).
 - Groves inside maps: trees placed in clumps rather than one by one (the map generators, Territories' files).
 - Mist banks at the edges and drifting motes (living world L4).
+- Water drawn the tile way (today a flat grey band); more looks and motifs as places ask for them; a look chosen by
+  the place's story, not only its name.

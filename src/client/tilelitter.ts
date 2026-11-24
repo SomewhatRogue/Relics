@@ -30,16 +30,20 @@ export function litterAt(x: number, y: number): string {
   return LITTER[lv < 0.34 ? 0 : lv < 0.56 ? 1 : 2];
 }
 
+/** Is this floor pixel turf or the floor's own earth (not a path, a patch, water or anything laid)? */
+export function openPx(m: GameMap): (px: number, py: number) => boolean {
+  const wet = (x: number, y: number) => !!m.water?.some((w) => x >= w.x - 0.2 && x <= w.x + w.w + 0.2 && y >= w.y - 0.2 && y <= w.y + w.h + 0.2);
+  return (px, py) => {
+    const x = px / KX, y = py / KZ, s = m.soil?.length ? soilAt(m, x, y) : 'cobble';
+    return (s === 'cobble' || s === 'grass' || s === 'shade') && !wet(x, y);
+  };
+}
+
 export function groveFloors(m: GameMap, rect: Rect): void {
   const floor = m.theme.floor as string;
   if (floor !== 'grass' && floor !== 'dirt' && floor !== 'mud') return;
   const W = m.w * KX, H = m.h * KZ;
-  const wet = (x: number, y: number) => !!m.water?.some((w) => x >= w.x - 0.2 && x <= w.x + w.w + 0.2 && y >= w.y - 0.2 && y <= w.y + w.h + 0.2);
-  // Laid over the turf or the floor's own earth only.
-  const open = (px: number, py: number) => {
-    const x = px / KX, y = py / KZ, s = m.soil?.length ? soilAt(m, x, y) : 'cobble';
-    return (s === 'cobble' || s === 'grass' || s === 'shade') && !wet(x, y);
-  };
+  const open = openPx(m);
   const list: Round[] = [...m.rounds, ...scatterOf(m).stand].filter((r) => REACH[r.kind]);
   for (const r of list) {
     const [reach] = REACH[r.kind], k = reach * Math.min(1.3, Math.max(0.8, r.r / 0.5));

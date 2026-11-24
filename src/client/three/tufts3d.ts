@@ -8,6 +8,7 @@ import type { GameMap } from '../../shared/arena';
 import { groundLv } from '../../shared/heights';
 import { nearby } from '../../shared/mapgrid';
 import { stacked } from '../levelpaint';
+import { motifsOf } from '../looks';
 import { blocked } from '../ratspots';
 import { soilAt } from '../soil';
 import { tuftCut } from '../tiletufts';
@@ -52,6 +53,7 @@ export function tuftMesh(m: GameMap, ledge: number): THREE.Mesh | null {
   const S = new CardSheet();
   S.push = true;
   S.edge = false;
+  const stands = motifsOf(m).filter((o) => o.kind === 'tallgrass');
   const lift = stacked(m), water = (x: number, y: number) => !!m.water?.some((w) => x >= w.x && x <= w.x + w.w && y >= w.y && y <= w.y + w.h);
   for (let ty = 0; ty < m.h; ty++) for (let tx = 0; tx < m.w; tx++) {
     const k = growth(m, tx + 0.5, ty + 0.5);
@@ -60,7 +62,9 @@ export function tuftMesh(m: GameMap, ledge: number): THREE.Mesh | null {
     // loose patch in the open (a slow field over the map); the open ground otherwise calm. Wheat a clump or two a tile.
     const patch = 0.6 * h01(Math.floor(tx / 4), Math.floor(ty / 3), 1) + 0.4 * h01(Math.floor(tx / 3), Math.floor(ty / 4), 2);
     const by = k === 'grass' && near(m, tx + 0.5, ty + 0.5);
-    const n = k === 'wheat' ? 1 + (h01(tx, ty, 3) < 0.5 ? 1 : 0) : by ? (h01(tx, ty, 4) < 0.5 ? 1 + (h01(tx, ty, 5) < 0.3 ? 1 : 0) : 0) : patch > 0.74 && h01(tx, ty, 4) < 0.4 ? 1 : 0;
+    // (A stand of tall grass, the pattern book's: tufts thick in it.)
+    const tall = k === 'grass' && stands.some((o) => Math.hypot((tx + 0.5 - o.x) / o.rx, (ty + 0.5 - o.y) / o.ry) < 0.9);
+    const n = k === 'wheat' ? 1 + (h01(tx, ty, 3) < 0.5 ? 1 : 0) : tall ? 2 : by ? (h01(tx, ty, 4) < 0.5 ? 1 + (h01(tx, ty, 5) < 0.3 ? 1 : 0) : 0) : patch > 0.74 && h01(tx, ty, 4) < 0.4 ? 1 : 0;
     for (let i = 0; i < n; i++) {
       const x = tx + 0.15 + h01(tx, ty, 6 + i) * 0.7, y = ty + 0.2 + h01(tx, ty, 9 + i) * 0.7;
       if (blocked(m, x, y) || water(x, y)) continue;

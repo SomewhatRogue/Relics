@@ -861,3 +861,14 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Checked on phone 2.5D: Gallows Wood by day and night, Sallow Carr by night, each scene close up; no page errors.
   (Claude Fable 5.2)
 
+## 2026-11-23: the pattern book: motifs, scenes, looks
+
+- Kyle: "Continue and work hard", then "I want these to be patterns and aesthetics that we can shuffle and use for
+  real looks that seem intentional". The four live jobs seen on a phone and whole: open ground one even texture.
+- looks.ts (the book: ten looks over four countries, a map's look from its name, motifs laid on open ground),
+  tilemotifs.ts (the painters), tilescenes.ts (scenes from the look; a stake and a row of graves added),
+  tufts3d.ts (tufts thick in tall grass), redrawfloor.ts (zones under the groves' floors, drifts over the strewn).
+- The dirt stamp is earthAt now (the Copperdeep's yard was the old blotched brown); earthAt's slow tone in swells.
+- Checked: whole-map floors of Gallows Wood (mossy), Lowfurrow (fallow), Sallow Carr (charcoal), Barrowby (raided),
+  the Copperdeep's yard (warcamp); each motif and scene on phone 2.5D; no page errors. (Claude Fable 5.2)
+

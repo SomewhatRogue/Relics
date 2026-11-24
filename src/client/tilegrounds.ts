@@ -94,7 +94,10 @@ export function earthAt(x: number, y: number, cols: string[] = EARTH): string {
   const row = Math.floor((y + 1.6 * Math.sin(x * 0.27 + Math.floor(y / 5) * 1.9)) / 5), band = Math.floor(y + 1.6 * Math.sin(x * 0.27 + Math.floor(y / 5) * 1.9)) - row * 5;
   // Short runs: about half of each row's length carries a ripple.
   if (band <= 1 && cell(x + row * 7, row, 11, 1, 71) < 0.42) return cols[band === 0 ? 3 : 0];
-  return cols[cell(x, y, 34, 20, 72) + cell(x + 17, y + 10, 26, 16, 73) > 1.15 ? 2 : 1];
+  // A broad, slow shift of tone in soft-edged swells (no blocks: a big dirt floor showed them as a checker), its edge
+  // taken along the ripples' own rows.
+  const yy = y + 1.6 * Math.sin(x * 0.27 + Math.floor(y / 5) * 1.9);
+  return cols[Math.sin(x * 0.043 + Math.sin(yy * 0.071) * 1.8) + Math.sin(yy * 0.097 + x * 0.019) > 0.95 ? 2 : 1];
 }
 
 function grass(rect: Rect, rng: Rng, x: number, y: number): void {
@@ -115,13 +118,19 @@ function grass(rect: Rect, rng: Rng, x: number, y: number): void {
   }
 }
 
+/** A dirt floor: the same trodden earth as a path (earthAt), a shade warmer; the odd stone. */
+const DIRT_E = [DIRT[0], '#322820', '#392e24', '#43372a'];
 function dirt(rect: Rect, rng: Rng, x: number, y: number): void {
-  paintField(rect, x, y, DIRT, (wx, wy) => {
-    if (cell(wx + 7 * Math.floor(wy / 3), wy, 14, 3, 57) < 0.16) return 0;
-    const v = patch(wx, wy, 21);
-    return v < 0.22 ? 0 : v < 0.8 ? 1 : 2;
-  });
-  if (rng.next() < 0.2) {
+  for (let j = 0; j < KZ; j++) {
+    for (let i = 0; i < KX; ) {
+      const c = earthAt(x + i, y + j, DIRT_E);
+      let n = 1;
+      while (i + n < KX && earthAt(x + i + n, y + j, DIRT_E) === c) n++;
+      rect(x + i, y + j, n, 1, c);
+      i += n;
+    }
+  }
+  if (rng.next() < 0.08) {
     // A small stone: pale on the top left, a dark foot under it.
     const sx = x + 1 + rng.int(14), sy = y + 1 + rng.int(7);
     sprite(rect, sx, sy, rng.next() < 0.5 ? ['pp.', 'bbb', '.dd'] : ['pb', 'bd'], { p: DIRT[3], b: '#43372a', d: DIRT[0] });
