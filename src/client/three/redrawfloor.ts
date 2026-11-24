@@ -16,6 +16,7 @@ import { ledge, OX, OY, PX, toPx } from '../world';
 import { paintSoil, soilAt } from '../soil';
 import { softEdges } from '../tileedges';
 import { paintWater } from '../waterpaint';
+import { DEEP, softBanks, waterField } from '../waterfield';
 import { groveFloors } from '../tilelitter';
 import { strew } from '../tilestrew';
 import { paintScenes } from '../tilescenes';
@@ -44,6 +45,38 @@ function strewn(rect: Rect, rng: Rng, k: { kind: string; x: number; y: number; w
   }
 }
 
+/**
+ * The water's painting under the redraw's rounded banks (../waterfield.ts `soften`): `paint` lays today's water (its
+ * rectangles, a ford's stones, boards); then the ground comes back wherever the rounded bank says dry, the bed's
+ * colour goes wherever it says wet outside a rectangle, and the bank is drawn as tile art draws it: the far bank's
+ * turf hanging dark over the water, the near bank's edge lit, blades standing on it.
+ */
+function softWater(m: GameMap, c: HTMLCanvasElement, g: CanvasRenderingContext2D, paint: () => void): void {
+  const f = waterField(m);
+  if (!f || !softBanks(m)) return paint();
+  const W = c.width, H = c.height, before = g.getImageData(0, 0, W, H);
+  paint();
+  const after = g.getImageData(0, 0, W, H), a = after.data, b = before.data;
+  const lv = (px: number, py: number) => (px < 0 || py < 0 || px >= W || py >= H ? -1 : f.level[Math.min(f.rows - 1, Math.floor((py / KZ) * f.n)) * f.cols + Math.min(f.cols - 1, Math.floor((px / KX) * f.n))]);
+  const set = (o: number, r: number, gg: number, bb: number) => ((a[o] = r), (a[o + 1] = gg), (a[o + 2] = bb), (a[o + 3] = 255));
+  const grassy = (m.theme.floor as string) === 'grass', lip = grassy ? [11, 17, 12] : [22, 17, 13], lit = grassy ? [51, 70, 43] : [74, 63, 53];
+  for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) {
+    const o = (py * W + px) * 4, v = lv(px, py);
+    if (v > 0) {
+      // Wet outside the rectangles (a notch filled): the bed's own colour.
+      if (a[o] === b[o] && a[o + 1] === b[o + 1] && a[o + 2] === b[o + 2]) v === DEEP ? set(o, 18, 32, 54) : set(o, 62, 90, 98);
+      continue;
+    }
+    // Dry: the ground as it was before the water's rectangles; then the bank's edge.
+    (a[o] = b[o]), (a[o + 1] = b[o + 1]), (a[o + 2] = b[o + 2]), (a[o + 3] = b[o + 3]);
+    if (lv(px, py + 1) > 0 || lv(px + 1, py) > 0) set(o, lip[0], lip[1], lip[2]);
+    else if (lv(px, py + 2) > 0) set(o, lip[0] + 6, lip[1] + 8, lip[2] + 6);
+    else if (lv(px, py - 1) > 0 || lv(px - 1, py) > 0) set(o, lit[0], lit[1], lit[2]);
+    else if (lv(px, py - 2) > 0 && (px * 7 + py * 3) % 5 < 2) set(o, lit[0], lit[1], lit[2]);
+  }
+  g.putImageData(after, 0, 0);
+}
+
 export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   // A village (a stone floor anywhere but the town, whose back is stone: shared/terrain.ts, a job's trees or palisade
   // behind) lies on trodden earth, not one cobble pattern under its ploughland and all (graphics-overhaul.md slice 5,
@@ -69,7 +102,7 @@ export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   // (The pattern book's zones for this map's look, looks.ts: a hollow, a worn patch, tall grass, a burn.)
   paintZones(m, rect);
   groveFloors(m, rect);
-  paintWater(m, R, r2, toPx, PX);
+  softWater(m, c, g, () => paintWater(m, R, r2, toPx, PX));
   const laid = new Set(['earth', 'swept', 'flags', 'furrow', 'crop', 'straw', 'ash', 'wet', 'mud']);
   strew(m, rect, (x, y) => !!m.soil?.length && laid.has(soilAt(m, x, y)));
   // (The look's drifts and mushroom rings, over whatever is strewn.)

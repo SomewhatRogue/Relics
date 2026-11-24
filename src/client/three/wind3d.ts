@@ -10,6 +10,7 @@
  * One set of uniforms shared by every material it touches; view3d.ts moves the time on each frame.
  */
 import * as THREE from 'three';
+import { REDRAW } from '../tilelook';
 import type { GameMap } from '../../shared/arena';
 import { ALIVE, WIND } from '../alive';
 import { VCOL } from './mats';
@@ -181,13 +182,18 @@ if (uLife > 0.5) {
   if (rf.r > 0.5 && bz < (deep ? 0.8 : 0.55)) col = mix(col, rf.g > 0.5 ? vec3(0.10, 0.17, 0.12) : vec3(0.11, 0.09, 0.07), deep ? 0.68 : 0.42);
   float shore = W.g * 255.0 / 4.0;
   float reach = 1.6 + 1.4 * (0.5 + 0.5 * sin(uLifeT * 1.3 + dot(P, vec2(1.7, 2.3))));
-  if (shore < reach && bz < 0.75) col = mix(col, vec3(0.80, 0.87, 0.86), 0.7);
+  ${REDRAW.on ? `// (The tile redraw: a still pool has no foam, only the bank's shadow lying on it; a river's is dim.)
+  if (fl > 60.0) {
+    if (shore < reach && bz < 0.6) col = mix(col, vec3(0.36, 0.44, 0.44), 0.5);
+    float roll = abs(shore - (2.5 + 3.5 * fract(uLifeT * 0.28 + lifeHash(floor(P * 0.5)) * 0.3)));
+    if (roll < 0.45 && bz > 0.3 && shore < 7.0) col = mix(col, vec3(0.26, 0.34, 0.36), 0.5);
+  } else if (shore < 2.2) col *= 0.72;` : `if (shore < reach && bz < 0.75) col = mix(col, vec3(0.80, 0.87, 0.86), 0.7);
   float roll = abs(shore - (2.5 + 3.5 * fract(uLifeT * 0.28 + lifeHash(floor(P * 0.5)) * 0.3)));
-  if (roll < 0.45 && bz > 0.3 && shore < 7.0) col = mix(col, vec3(0.64, 0.76, 0.78), 0.55);
+  if (roll < 0.45 && bz > 0.3 && shore < 7.0) col = mix(col, vec3(0.64, 0.76, 0.78), 0.55);`}
   // Glints: a surface pixel here and there catching the light for a moment, brighter on a ripple's crest.
   vec2 cell = floor(P * 16.0);
   float h = lifeHash(cell), tw = fract(h * 7.0 + uLifeT * (0.35 + h * 0.6));
-  if (h > 0.985 - max(0.0, n) * 0.01 && tw < 0.12) col = mix(col, vec3(0.92, 0.95, 0.88), 0.55);
+  if (h > 0.985 - max(0.0, n) * 0.01 && tw < 0.12) col = mix(col, vec3(0.92, 0.95, 0.88), ${REDRAW.on ? '0.3' : '0.55'});
 }
 `;
 

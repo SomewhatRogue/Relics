@@ -16,7 +16,7 @@ import type { Ctx } from '../draw';
 import { PX } from '../world';
 import { cardMaterial } from './figmat';
 import { swayCards } from './wind3d';
-import { oakCut, pineCut } from '../tiletrees';
+import { oakCut, pineCut, reedCut } from '../tiletrees';
 import { PITCH } from './camera3d';
 import { KX, KZ } from '../tilekit';
 import { FURN, furnCut } from '../tilefurn';
@@ -126,6 +126,12 @@ export const roundCut = (r: Round): Cut | null => {
     const v = Math.floor(Math.abs(Math.sin(r.x * 12.9898 + r.y * 78.233) * 43758.5453) % 4), key = r.kind + v;
     let c = TREES.get(key);
     if (!c) TREES.set(key, (c = r.kind === 'pine' ? pineCut(v) : oakCut(v)));
+    return c;
+  }
+  if (r.kind === 'reed') {
+    const v = Math.floor(Math.abs(Math.sin(r.x * 12.9898 + r.y * 78.233) * 43758.5453) % 5), key = 'reed' + v;
+    let c = TREES.get(key);
+    if (!c) TREES.set(key, (c = reedCut(v)));
     return c;
   }
   return cut((c, x, y) => drawRound(c, r, x, y), 160, 200, 80, 150);

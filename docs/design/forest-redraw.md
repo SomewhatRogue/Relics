@@ -86,13 +86,34 @@ A map draws one look of its country from its own name (`lookOf`), lays the motif
 
 Also: a dirt floor is the same rippled earth as a path now, a shade warmer; its tone shifts in soft swells, not blocks.
 
+## Water (2026-11-23, in)
+
+A pool was a hard rectangle that the floor's grade turned grey (Sallow Carr's read as stone slabs). Now, on a job's
+earth or turf (not masonry: a quay's water keeps its straight edge; not the town):
+
+- **Banks** (`waterfield.ts` `soften`): each cell of the water's picture takes the vote of the cells a third of a tile
+  round it against a bar that wanders, so corners round off and straight banks waver. Paint only: the room still
+  wades the rectangles.
+- **The bank's edge** (`three/redrawfloor.ts` `softWater`): the far bank's turf hangs dark over the water, the near
+  bank's edge is lit, blades on it.
+- **The surface** (`three/water3d.ts` DARK): its colour its own. Deep water near black, deeper toward the middle;
+  shallows the bed at half its light under a murk, so a ford still reads as the way over and nothing glows.
+- **Foam** (`three/wind3d.ts`): none on a still pool, only the bank's shadow; dim on a river.
+- **Reeds** (`tiletrees.ts` `reedCut`): thin drawn blades with dark heads, as cards.
+
+## Where the book reaches (2026-11-23)
+
+Every room of every job on 14 days of the board, 252 rooms: fen 74, bare yards 62, wood 31, fields 28 had a look;
+wheat fields 26, rock floors (mines, caves) 17 and cobbled villages 14 had none. Added: `crop` (harvest, burnt) and
+`cave` (rubble, lair); a village on cobbles (earth in the redraw) is a yard. Left: 6 rooms of paved street with stone
+behind, the town, rooms indoors, the Deep's halls.
+
 ## Later
 
 - Ridges: drawn earth lips where the land rises (the height levels we have).
 - Groves inside maps: trees placed in clumps rather than one by one (the map generators, Territories' files).
 - Mist banks at the edges and drifting motes (living world L4).
-- Water drawn the tile way. Today a pool is a hard rectangle that the floor's grade turns grey; with its own colours
-  back it is a pale glassy slab with dashed foam (tried and backed out, 2026-11-23). Wanted: rounded banks, dark still
-  water with a few glints, a turf lip over it, reeds as drawn cards. The pattern book's `pool` motif is the model.
-- More looks and motifs as places ask for them; a look chosen by the place's story, not only its name.
+- A lower camera: `?pitch=30` in the address shows it (look only). The floor's art would want drawing at that angle
+  (a tile 10 deep, not 12) to stay crisp. Kyle to call from the side by side.
+- Looks for a paved street, the town's edges, the Deep. More looks and motifs as places ask for them; a look chosen by the place's story, not only its name.
 - Groves that move a map's trees (the generators; changes fights).

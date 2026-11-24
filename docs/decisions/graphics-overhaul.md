@@ -886,3 +886,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   Sallow Carr's pools are pale glassy rectangles with dashed foam. Water needs its own slice: rounded banks, dark
   still water, a turf lip. In forest-redraw.md, "Later". (Claude Fable 5.2)
 
+## 2026-11-23: water, the book on every ground, a camera angle to look at
+
+- Kyle: "Kk go", then "And all these upgrades are in missions and all maps too? I want these worlds beautiful and
+  maybe we need the map lower or the camera i mean".
+- Water (forest-redraw.md, "Water"): banks softened in waterfield.ts (REDRAW, a job's earth or turf only), the bank's
+  edge painted in redrawfloor.ts, the surface's own dark colours in water3d.ts (the old colours kept for
+  `?redraw=0`), foam only on running water in wind3d.ts, reeds drawn in tiletrees.ts. Node's tests build the old
+  water (REDRAW is a page's).
+- Coverage, counted over 252 rooms (the board's first 14 days): 77% had a look. looks.ts now has `crop` and `cave`
+  countries and takes a cobbled village as a yard; tilescenes.ts places scenes wherever there is a look; tufts stand
+  out of pools, worn patches and burns. Left out: 6 rooms of paved street, the town, indoors, the Deep.
+- Camera: `?pitch=NN` (tilelook.ts, 15 to 60, address only) to look at another angle; a side by side at 37, 30 and 25
+  sent to Kyle. Not changed: the redraw's art is drawn for 36.87. (Claude Fable 5.2)
+

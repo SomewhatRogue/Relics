@@ -7,6 +7,8 @@
  * it (wetfx.ts).
  */
 import type { GameMap } from '../shared/arena';
+import { scattered } from '../shared/scatter';
+import { REDRAW } from './tilelook';
 
 export const DRY = 0, SHALLOW = 1, DEEP = 2;
 /** Which way water runs: still, east (along x), or down the room (along y). */
@@ -38,6 +40,8 @@ function build(m: GameMap): WaterField | null {
         if (x > w.x && x < w.x + w.w && y > w.y && y < w.y + w.h && (!level[j * cols + i] || v === SHALLOW)) level[j * cols + i] = v;
       }
   }
+  // (The tile redraw, a job's ground: banks rounded off and made to wander, below.)
+  if (softBanks(m)) soften(level, cols, rows, n);
   // How far in from the nearest dry ground (cells, a two-pass chamfer), capped at 255.
   const d = new Float32Array(N);
   for (let k = 0; k < N; k++) d[k] = level[k] ? 1e6 : 0;
@@ -58,6 +62,35 @@ function build(m: GameMap): WaterField | null {
   for (let k = 0; k < N; k++) far[k] = Math.min(255, Math.round(d[k]));
   runs(level, flow, cols, rows, n);
   return { n, cols, rows, level, far, flow };
+}
+
+/** Whether this map's banks are earth or turf, drawn rounded under the redraw: a job's ground, not masonry (a stone
+ *  quay's water keeps its straight edge), not the town. */
+export const softBanks = (m: GameMap) => REDRAW.on && scattered(m) && ['grass', 'dirt', 'mud'].includes(m.theme.floor as string);
+
+/**
+ * The redraw's banks (docs/design/forest-redraw.md, "Water"): the room's water is rectangles, and drawn so a pool is
+ * a slab. Here each cell takes the vote of the cells about a third of a tile round it, against a bar that wanders
+ * slowly over the map: corners round off, notches fill, and a straight bank wavers. Paint only: the room still wades
+ * the rectangles (a hand's width of turf may be wet underfoot, or of water dry). The map's edge is not a bank.
+ */
+function soften(level: Uint8Array, cols: number, rows: number, n: number): void {
+  const R = Math.max(2, Math.round(n * 0.36)), W1 = cols + 1, wet = new Int32Array(W1 * (rows + 1)), deep = new Int32Array(W1 * (rows + 1));
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const v = level[j * cols + i], k = (j + 1) * W1 + i + 1;
+    wet[k] = (v ? 1 : 0) + wet[k - 1] + wet[k - W1] - wet[k - W1 - 1];
+    deep[k] = (v === DEEP ? 1 : 0) + deep[k - 1] + deep[k - W1] - deep[k - W1 - 1];
+  }
+  const box = (t: Int32Array, i0: number, j0: number, i1: number, j1: number) => t[(j1 + 1) * W1 + i1 + 1] - t[j0 * W1 + i1 + 1] - t[(j1 + 1) * W1 + i0] + t[j0 * W1 + i0];
+  const out = new Uint8Array(level.length);
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const i0 = Math.max(0, i - R), i1 = Math.min(cols - 1, i + R), j0 = Math.max(0, j - R), j1 = Math.min(rows - 1, j + R);
+    const w = box(wet, i0, j0, i1, j1), x = i / n, y = j / n;
+    const bar = 0.5 + 0.17 * Math.sin(x * 1.9 + Math.sin(y * 1.3) * 1.7) * Math.sin(y * 1.6 + x * 0.7);
+    if (w / ((i1 - i0 + 1) * (j1 - j0 + 1)) <= bar) continue;
+    out[j * cols + i] = level[j * cols + i] || (box(deep, i0, j0, i1, j1) * 2 > w ? DEEP : SHALLOW);
+  }
+  level.set(out);
 }
 
 /** Each joined body of water: a river if it's long and thin (runs along its length), else still. */

@@ -54,6 +54,8 @@ export function tuftMesh(m: GameMap, ledge: number): THREE.Mesh | null {
   S.push = true;
   S.edge = false;
   const stands = motifsOf(m).filter((o) => o.kind === 'tallgrass');
+  // (Nothing stands in water, on a worn patch or in a burn.)
+  const bare = motifsOf(m).filter((o) => o.kind === 'pool' || o.kind === 'bald' || o.kind === 'burn');
   const lift = stacked(m), water = (x: number, y: number) => !!m.water?.some((w) => x >= w.x && x <= w.x + w.w && y >= w.y && y <= w.y + w.h);
   for (let ty = 0; ty < m.h; ty++) for (let tx = 0; tx < m.w; tx++) {
     const k = growth(m, tx + 0.5, ty + 0.5);
@@ -67,7 +69,7 @@ export function tuftMesh(m: GameMap, ledge: number): THREE.Mesh | null {
     const n = k === 'wheat' ? 1 + (h01(tx, ty, 3) < 0.5 ? 1 : 0) : tall ? 2 : by ? (h01(tx, ty, 4) < 0.5 ? 1 + (h01(tx, ty, 5) < 0.3 ? 1 : 0) : 0) : patch > 0.74 && h01(tx, ty, 4) < 0.4 ? 1 : 0;
     for (let i = 0; i < n; i++) {
       const x = tx + 0.15 + h01(tx, ty, 6 + i) * 0.7, y = ty + 0.2 + h01(tx, ty, 9 + i) * 0.7;
-      if (blocked(m, x, y) || water(x, y)) continue;
+      if (blocked(m, x, y) || water(x, y) || bare.some((o) => Math.hypot((x - o.x) / o.rx, (y - o.y) / o.ry) < 0.95)) continue;
       const up = lift ? groundLv(m, x, y) * ledge : 0;
       S.add(cutOf(k, Math.floor(h01(tx, ty, 12 + i) * VARIANTS)), x, y, up, 1);
     }

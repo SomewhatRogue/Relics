@@ -122,3 +122,20 @@ export function oakCut(v: number): Cut {
   G.outline(0);
   return G.cut([...LEAF, ...BARK], Math.round(cx), foot);
 }
+
+const REED = ['#0d110a', '#20261a', '#333a22', '#484c2a'], REED_HEAD = '#3d2a1b';
+
+/** A clump of reeds, variant `v`: thin blades of uneven height leaning a little, the tall ones with a dark head. */
+export function reedCut(v: number): Cut {
+  const W = 13, H = 20, G = new Grid(W, H), foot = H - 1, n = 5 + Math.floor(hash(v, 1, 31) * 3);
+  for (let i = 0; i < n; i++) {
+    const x0 = 2 + Math.round((i / (n - 1)) * (W - 5) + (hash(v, i, 32) - 0.5) * 2), tall = 8 + Math.floor(hash(v, i, 33) * 11), lean = (hash(v, i, 34) - 0.4) * 0.22;
+    for (let t = 0; t <= tall; t++) {
+      const x = x0 + Math.round(lean * t), y = foot - t;
+      // Lit on the left blades and toward the tips; the foot dark.
+      G.set(x, y, t < 2 ? 0 : x0 < W / 2 ? (t > tall * 0.6 ? 3 : 2) : t > tall * 0.7 ? 2 : 1);
+    }
+    if (tall > 13) for (let t = 0; t < 3; t++) G.set(x0 + Math.round(lean * (tall - t)), foot - tall + t, 4);
+  }
+  return G.cut([...REED, REED_HEAD], W >> 1, foot);
+}

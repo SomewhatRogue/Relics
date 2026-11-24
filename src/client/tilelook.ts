@@ -39,5 +39,8 @@ const tilesRaw = read('tiles'), redrawRaw = read('redraw');
 export const TILES = { on: tilesRaw === null || on(tilesRaw), even: typeof location !== 'undefined' && on(new URLSearchParams(location.search).get('even')) };
 // (On by default in a page only: Node's tests build today's 3D, which `?redraw=0` still shows.)
 export const REDRAW = { on: redrawRaw === null ? typeof location !== 'undefined' : on(redrawRaw) };
+/** `?pitch=30` in the address: another camera angle, to look at only (the redraw's art is drawn for its own angle,
+ *  where a floor tile is a whole 12 pixels deep and a wall a whole 16 high; at any other the floor is squeezed). */
+const pitchRaw = typeof location === 'undefined' ? NaN : parseFloat(new URLSearchParams(location.search).get('pitch') ?? '');
 /** The 2.5D camera's pitch in degrees. */
-export const PITCH_DEG = REDRAW.on ? PITCH_REDRAW : PITCH_TODAY;
+export const PITCH_DEG = pitchRaw >= 15 && pitchRaw <= 60 ? pitchRaw : REDRAW.on ? PITCH_REDRAW : PITCH_TODAY;

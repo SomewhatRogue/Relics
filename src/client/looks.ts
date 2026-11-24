@@ -17,7 +17,7 @@ import { soilAt } from './soil';
 
 export type MotifKind = 'hollow' | 'pool' | 'bald' | 'tallgrass' | 'burn' | 'ring' | 'drift:leaves' | 'drift:bones' | 'drift:stones' | 'drift:pale' | 'drift:red';
 export type SceneKind = 'grave' | 'graves' | 'cairn' | 'campfire' | 'circle' | 'stake';
-export type Country = 'wood' | 'fen' | 'fields' | 'yard';
+export type Country = 'wood' | 'fen' | 'fields' | 'yard' | 'crop' | 'cave';
 /** A motif laid on a map: its middle and half sizes (tiles), a drift's heading (radians), a variant. */
 export interface Motif { kind: MotifKind; x: number; y: number; rx: number; ry: number; a: number; v: number }
 export interface Look { name: string; country: Country; motifs: [MotifKind, number][]; scenes: SceneKind[] }
@@ -34,6 +34,10 @@ export const LOOKS: Look[] = [
   { name: 'raided', country: 'fields', motifs: [['burn', 2], ['drift:bones', 2], ['bald', 2], ['drift:leaves', 1]], scenes: ['stake', 'circle', 'campfire'] },
   { name: 'spoil', country: 'yard', motifs: [['drift:stones', 4], ['pool', 2], ['burn', 1]], scenes: ['campfire', 'cairn'] },
   { name: 'warcamp', country: 'yard', motifs: [['burn', 2], ['drift:bones', 2], ['drift:stones', 2], ['pool', 1]], scenes: ['stake', 'campfire', 'circle'] },
+  { name: 'harvest', country: 'crop', motifs: [['bald', 3], ['drift:stones', 2], ['drift:pale', 1]], scenes: ['cairn', 'grave'] },
+  { name: 'burnt', country: 'crop', motifs: [['burn', 3], ['bald', 1], ['drift:bones', 2]], scenes: ['stake', 'circle'] },
+  { name: 'rubble', country: 'cave', motifs: [['drift:stones', 4], ['pool', 2], ['drift:bones', 1]], scenes: ['cairn', 'campfire'] },
+  { name: 'lair', country: 'cave', motifs: [['drift:bones', 3], ['burn', 2], ['pool', 1], ['drift:stones', 1]], scenes: ['stake', 'circle', 'campfire'] },
 ];
 
 /** Half sizes each motif may take (tiles across; `ry` is that times `flat`). */
@@ -44,13 +48,22 @@ const SIZE: Record<MotifKind, [number, number, number]> = {
 
 const seedOf = (m: GameMap, k: number) => [...m.name].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) % 1000003, m.w * 131 + m.h * 977 + k);
 
-/** What country a map's ground is, from its floor and what stands behind it; null where nothing here applies. */
+/**
+ * What country a map's ground is, from its floor and what stands behind it; null where nothing here applies (the
+ * town, a room indoors, a paved street with stone behind it).
+ */
 export function countryOf(m: GameMap): Country | null {
-  const floor = m.theme.floor as string;
-  if (!scattered(m) || (floor !== 'grass' && floor !== 'dirt' && floor !== 'mud')) return null;
+  const floor = m.theme.floor as string, back = m.theme.back as string;
+  if (m.name === 'WICKHOLD' || back === 'plaster') return null;
+  // (A village on cobbles lies on trodden earth in the redraw, three/redrawfloor.ts: a yard.)
+  if (floor === 'cobble') return back !== 'stone' ? 'yard' : null;
+  if (!scattered(m)) return null;
+  if (floor === 'rock') return 'cave';
+  if (floor === 'wheat') return 'crop';
   if (floor === 'dirt') return 'yard';
+  if (floor !== 'grass' && floor !== 'mud') return null;
   const wet = (m.water ?? []).reduce((s, w) => s + w.w * w.h, 0) / (m.w * m.h);
-  if (m.theme.back === 'trees') return floor === 'mud' || wet > 0.06 ? 'fen' : 'wood';
+  if (back === 'trees') return floor === 'mud' || wet > 0.06 ? 'fen' : 'wood';
   return 'fields';
 }
 

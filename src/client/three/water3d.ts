@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import type { GameMap } from '../../shared/arena';
 import { DEEP, DRY, SHALLOW, waterField } from '../waterfield';
 import { cloudStrength, ringStrength, WET, type Wet } from '../wetfx';
+import { REDRAW } from '../tilelook';
 import { VCOL } from './mats';
 import { toonize } from './post';
 import { LIFE, LIFE_GLSL, WATER_LIFE, useReflections } from './wind3d';
@@ -19,6 +20,26 @@ import { LIFE, LIFE_GLSL, WATER_LIFE, useReflections } from './wind3d';
 export const SINK = { [SHALLOW]: 0.07, [DEEP]: 0.22 } as Record<number, number>;
 
 export interface Water3 { meshes: THREE.Object3D[]; update(wet: Wet, now: number): void; dispose(): void }
+
+/**
+ * The tile redraw's water (docs/design/forest-redraw.md, "Water"): dark and still, its colour its own (the redraw's
+ * floor grade turns the painted bed grey, so the bed only says where something floats or a stone stands). Deep water
+ * near black, a shade deeper toward the middle; shallows a murky green over the bed; the ripples' lights dim.
+ */
+const DARK = /* glsl */ `
+if (deep) {
+  // (What's painted on it, boards or a beam, floats: warmer than any water.)
+  float k = band < 0.5 ? 1.25 : band < 1.5 ? 1.0 : band < 2.5 ? 0.82 : 0.66;
+  col = bed.r > bed.b + 0.03 ? bed.rgb : vec3(0.042, 0.066, 0.094) * k;
+  col = mix(col, vec3(0.075, 0.118, 0.160), lo);
+  col = mix(col, vec3(0.130, 0.196, 0.250), hi * 0.8);
+} else {
+  // (One rule: the bed at half its light under the murk, so a ford's pale bed and its stones still read as the way
+  // over, lighter than a pool, and nothing glows.)
+  col = mix(bed.rgb * 0.5, vec3(0.070, 0.105, 0.098), 0.45) * (1.0 - band * 0.08);
+  col = mix(col, vec3(0.130, 0.180, 0.172), lo * 0.7);
+  col = mix(col, vec3(0.215, 0.280, 0.270), hi * 0.8);
+}`;
 
 const SURFACE = /* glsl */ `
 {
@@ -38,7 +59,7 @@ float hi = step(0.86 + bz * 0.12, n), lo = step(0.68 + bz * 0.24, n) * (1.0 - hi
 vec4 bed = texture2D(map, vMapUv);
 float band = clamp(floor(W.g * 255.0 / 36.0 + (bz - 0.5) * 0.9), 0.0, 3.0);
 vec3 col;
-if (deep) {
+${REDRAW.on ? DARK : `if (deep) {
   // The painting's dark water, stepped darker toward the middle; what's painted on it (boards, a beam) floats.
   float k = band < 0.5 ? 1.18 : band < 1.5 ? 1.0 : band < 2.5 ? 0.82 : 0.68;
   bool floats = bed.r > bed.b + 0.03 && bed.r < bed.g * 1.6;
@@ -50,7 +71,7 @@ if (deep) {
   col = mix(bed.rgb, vec3(0.33, 0.48, 0.49), 0.15) * (1.0 - band * 0.05);
   col = mix(col, vec3(0.478, 0.635, 0.643), lo * 0.8);
   col = mix(col, vec3(0.659, 0.8, 0.8), hi);
-}
+}`}
 // (The living world, wind3d.ts: foam at the bank, a line rolling in, glints.)
 ${WATER_LIFE}
 // Blood clouding in the water, billowing as it goes.

@@ -20,6 +20,7 @@ import { openPx } from './tilelitter';
 import { stamp } from './tilestrew';
 
 const MOSS = ['#0b130f', '#111c15', '#17251a', '#1f3021'], MIRE = ['#14110d', '#1c1812', '#251f18', '#2f271e'];
+const SLATE = ['#111014', '#18161b', '#201e24', '#2a282f'];
 const TALL = ['#121b15', '#1f2e1f', '#2a3e27', '#384f2c'], ASH = ['#0b0a0a', '#131214', '#1c1b1e', '#28272b'];
 const WATER = '#0d1317', DEEP = '#070b0e', GLINT = '#26323b', LIP = '#0b110c', SHADOW = '#1c1611', SCORCH = ['#12160f', '#191e14'];
 
@@ -50,12 +51,14 @@ function zone(o: Motif, open: (px: number, py: number) => boolean, W: number, H:
 
 /** The zones: laid before the groves' floors, the water and whatever is strewn. */
 export function paintZones(m: GameMap, rect: Rect): void {
-  const open = openPx(m), W = m.w * KX, H = m.h * KZ, earthy = (m.theme.floor as string) !== 'grass';
+  const open = openPx(m), W = m.w * KX, H = m.h * KZ, floor = m.theme.floor as string;
+  // (A hollow is moss in turf, wet slate in rock, mire in bare earth.)
+  const dip = floor === 'grass' ? MOSS : floor === 'rock' ? SLATE : MIRE;
   for (const o of motifsOf(m)) {
     if (o.kind.startsWith('drift')) continue;
     const z = zone(o, open, W, H);
     if (o.kind === 'hollow' || o.kind === 'pool') {
-      const pal = earthy ? MIRE : MOSS;
+      const pal = dip;
       z.each((px, py, d) => {
         const lv = 0.5 + clumpLight(px, py, 6, 4, 91) * 0.8;
         let i = lv < 0.34 ? 0 : lv < 0.56 ? 1 : 2;

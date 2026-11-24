@@ -8,7 +8,6 @@
  */
 import type { GameMap } from '../shared/arena';
 import { Rng } from '../shared/rng';
-import { scattered } from '../shared/scatter';
 import { lookOf, type SceneKind } from './looks';
 import { blocked } from './ratspots';
 import { soilAt } from './soil';
@@ -19,14 +18,12 @@ export interface Scene { kind: SceneKind; x: number; y: number }
 
 const cache = new WeakMap<GameMap, Scene[]>();
 
-/** The map's scenes. Not the town, not indoors, not a floor that isn't open ground. */
+/** The map's scenes: wherever the pattern book has a look for the map (looks.ts `countryOf`). */
 export function scenesOf(m: GameMap): Scene[] {
   const hit = cache.get(m);
   if (hit) return hit;
   const out: Scene[] = [];
   cache.set(m, out);
-  const floor = m.theme.floor as string;
-  if (!scattered(m) || (floor !== 'grass' && floor !== 'dirt' && floor !== 'mud')) return out;
   const rng = new Rng([...m.name].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) % 1000003, m.w * 131 + m.h * 977 + 17));
   // Which scenes: the map's look says (looks.ts), each once before any comes round again.
   const pool = lookOf(m)?.scenes ?? [];

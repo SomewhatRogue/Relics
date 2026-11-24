@@ -14,7 +14,7 @@ const maps = () => Array.from({ length: 6 }, (_, d) => board(d + 1)).flat().flat
 describe('the pattern book', () => {
   it('every look names motifs and scenes, and every country has more than one look', () => {
     for (const l of LOOKS) expect(l.motifs.length > 0 && l.scenes.length > 0).toBe(true);
-    for (const c of ['wood', 'fen', 'fields', 'yard'] as const) expect(LOOKS.filter((l) => l.country === c).length).toBeGreaterThan(1);
+    for (const c of new Set(LOOKS.map((l) => l.country))) expect(LOOKS.filter((l) => l.country === c).length).toBeGreaterThan(1);
   });
 
   it('a map has one look of its own country, the same every time, with its motifs on open ground', () => {
