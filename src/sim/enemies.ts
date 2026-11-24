@@ -461,11 +461,15 @@ function noisy(others: Enemy[], now: number): Enemy[] {
 function wander(e: Enemy, rng: Rng, now: number, dt: number): void {
   const k = Math.floor(now / 2.2 + e.id * 0.37);
   if (Math.sin(k * 12.9898 + e.id * 78.233) > ALERT.wander - 1.4) {
-    const a = Math.sin(k * 3.7 + e.id) * Math.PI, hx = e.home.x - e.x, hy = e.home.y - e.y, far = Math.hypot(hx, hy) > 1.5;
+    const a = Math.sin(k * 3.7 + e.id) * Math.PI, hx = e.home.x - e.x, hy = e.home.y - e.y, hd = Math.hypot(hx, hy);
+    // Well off its patch (knocked or lured away): back home. At the patch's edge and meaning to go further out: it
+    // stands and looks that way. (It used to turn for home the tick it crossed the edge and back out the next, a step
+    // each way with its facing flipping every tick: Kyle, "goblins just sort of glitch out while walking", 2026-11-23.)
+    const far = hd > 2.2, out = !far && hd > 1.5 && Math.cos(a) * hx + Math.sin(a) * hy < 0;
     const mx = far ? hx : Math.cos(a), my = far ? hy : Math.sin(a), ml = Math.hypot(mx, my) || 1;
     e.fx = mx / ml;
     e.fy = my / ml;
-    walk(e, mx, my, ALERT.wanderSpeed, dt);
+    if (!out) walk(e, mx, my, ALERT.wanderSpeed, dt);
   }
   void rng;
 }

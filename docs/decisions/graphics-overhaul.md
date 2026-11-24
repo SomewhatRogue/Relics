@@ -825,3 +825,17 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   field by day and Gallows Wood by night on phone 2.5D, no page errors; tsc clean; full suite 277 files passed.
   Still to come from the spec: ridges, small scenes, groves. (Claude Fable 5.2)
 
+## 2026-11-23: goblins at rest no longer shake at the edge of their patch (Kyle's aside in this chat)
+
+- Kyle: "sometimes goblins just sort of glitch out while walking". Measured in a running wood: unaware goblins flipped
+  their facing 80 to 146 times in 20 s and stepped back and forth; alerted ones never did. Cause, sim/enemies.ts
+  `wander`: past 1.5 tiles from home it turned for home, and inside it turned back out, a tick each way for the rest of
+  the 2.2 s stroll.
+- Fix: at the patch's edge and meaning to go further out, it stands and looks that way; only well off its patch (past
+  2.2) does it walk home. After: 1 to 7 turns in 20 s, no reversals. tests/wander.test.ts (1,721 about-turns a minute
+  before, under 60 now).
+- A rule changed on purpose, so: tests/perfparity.sim.golden.json recorded again (its header's own way); and in
+  tests/threat.test.ts the shelf room's limit goes 240 to 270 s and the wand-to-staff ratio 1.8 to 1.9, with a dated
+  note: the wand bot there takes 253 s where it took 233 (it was 7 s from the limit), the other nine rooms as before
+  or faster. For the General chat to weigh. Full suite otherwise as it was. (Claude Fable 5.2)
+
