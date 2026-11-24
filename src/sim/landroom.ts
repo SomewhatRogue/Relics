@@ -22,6 +22,7 @@ export function landRoom(run: Run): ArenaRoom {
   });
   room.sleepAt = { wake: TERR.wake, doze: TERR.doze };
   room.pace = { index: 2 };
+  if (job.roam) room.roam = true;
   const past = n - 1;
   // (Kept on the room: goblins a mini quest wakes later are as tough: sim/minis.ts.)
   if (past > 0) room.tough = { hp: 1 + TERR.more.hp * past, harm: 1 + TERR.more.harm * past };

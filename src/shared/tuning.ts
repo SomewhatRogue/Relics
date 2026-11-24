@@ -558,3 +558,10 @@ export const PETTING = { calm: 5 };
  * Kyle, 2026-11-06: "You can only make a statue of yourself after you donate enough to the town."
  */
 export const STATUE_GIVEN = 1000;
+
+/**
+ * Falling and resting on the land (docs/design/outside-the-gate.md, "Falling, and way stations"; sim/landrules.ts): `rest` seconds
+ * inside a station's ring to have rested there; `giveUp` seconds a goblin presses at a hero on safe ground before it turns for
+ * home; `homeSpeed` tiles a second it walks back.
+ */
+export const LAND = { rest: 2, giveUp: 1, homeSpeed: 2.2 };

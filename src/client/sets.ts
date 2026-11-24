@@ -7,7 +7,7 @@
  * oak blocks as it did. The fen's and the fields' landmarks need ground of their own and come with slice 2.
  */
 import type { GameMap, Round } from '../shared/arena';
-import { countryOf } from './looks';
+import { countryOf, lookAt, partsOf } from './looks';
 import type { Cut } from './three/propcards';
 import { OAK_KINDS, greatOakCut, ropeCut, type OakKind } from './tilelandmarks';
 import { hash } from './tiletrees';
@@ -27,11 +27,14 @@ const CUTS = new Map<string, Cut>();
 export function landmarkOf(m: GameMap): Landmark | null {
   if (LAND.has(m)) return LAND.get(m)!;
   let out: Landmark | null = null;
-  if (setOf(m) === 'gallows') {
+  // (The wood's ground: the whole map, or on the land the stretch that is wood: looks.ts partsOf.)
+  const wood = setOf(m) === 'gallows' ? { x0: 0, y0: 0, x1: m.w, y1: m.h } : m.grounds?.length ? partsOf(m, 0, 0).find((p) => p.look.country === 'wood') : undefined;
+  if (wood) {
     // (Northmost, so its crown rises over the back of the map and hides the least of the fight; in the middle
     // half across, clear of the hero's way in.)
-    const oaks = m.rounds.filter((r) => r.kind === 'tree' && r.y > 3 && r.y < m.h * 0.5 && Math.hypot(r.x - m.hero.x, r.y - m.hero.y) > 6);
-    const mid = oaks.filter((r) => r.x > m.w * 0.25 && r.x < m.w * 0.75);
+    const w = wood.x1 - wood.x0, h = wood.y1 - wood.y0;
+    const oaks = m.rounds.filter((r) => r.kind === 'tree' && r.y > wood.y0 + 3 && r.y < wood.y0 + h * 0.5 && r.x > wood.x0 && r.x < wood.x1 && Math.hypot(r.x - m.hero.x, r.y - m.hero.y) > 6);
+    const mid = oaks.filter((r) => r.x > wood.x0 + w * 0.25 && r.x < wood.x0 + w * 0.75);
     const round = (mid.length ? mid : oaks).sort((a, b) => a.y - b.y)[0];
     if (round) {
       // (A place's name says what hangs there, where it says anything; elsewhere the name's own roll.)
@@ -54,7 +57,7 @@ export function landmarkCut(l: Landmark): Cut {
 const ROPES = new Map<number, Cut>();
 /** The set's echoes on one of the map's rounds: cards to stand by it (tiles from it: dx across, dz toward the camera). */
 export function echoesOf(m: GameMap, r: Round): { cut: Cut; dx: number; dz: number }[] {
-  if (setOf(m) !== 'gallows' || r.kind !== 'tree' || landmarkOf(m)?.round === r) return [];
+  if (r.kind !== 'tree' || lookAt(m, r.x, r.y)?.country !== 'wood' || landmarkOf(m)?.round === r) return [];
   const h = hash(Math.round(r.x * 16), Math.round(r.y * 16), 83);
   if (h > 0.3) return [];
   const v = Math.floor(h * 1000) % 15;

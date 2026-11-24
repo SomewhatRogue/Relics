@@ -52,6 +52,7 @@ import { Lobby } from './lobby';
 import { session, touchSession } from './session';
 import { MAX_DOWNS } from '../sim/run';
 import { WayWatch, wayTarget } from './wayfind';
+import { GateWalk, zoneAt } from './gatewalk';
 import { targets } from '../sim/targets';
 import type { Npc } from '../shared/arena';
 import { knows, type Hero, type Intent } from '../sim/types';
@@ -385,14 +386,17 @@ document.addEventListener('pointerdown', (e) => {
 $('#legendbtn').addEventListener('click', () => (pack.toggle(false), void legend(game, panel, input.touch)));
 $('#kitbtn').addEventListener('click', () => (pack.toggle(false), weaponsAbout(game, panel)));
 // Leave the job early, for town (game.leaveJob says what that means alone, following or leading).
-$('#leave').addEventListener('click', () => {
+// Out in the land (a roam job) it is a plain walk back in: no warning, nothing lost.
+const goBack = () => {
   if (game.mode !== 'run' || panel.open) return;
-  const party = !!(game.remote || game.coop?.company);
-  panel.show('BACK TO WICKHOLD?', `<p>${isDeep(game.run?.job) ? DEEP_WORDS.leaveWarn : party ? LEAVE_PARTY : LEAVE_SOLO}</p>`, [
-    { label: 'LEAVE', act: () => (panel.hide(), game.leaveJob()) },
-    { label: 'STAY', primary: true, act: () => panel.hide() },
+  const party = !!(game.remote || game.coop?.company), roam = !!game.run?.job.roam;
+  panel.show('BACK TO WICKHOLD?', roam ? '' : `<p>${isDeep(game.run?.job) ? DEEP_WORDS.leaveWarn : party ? LEAVE_PARTY : LEAVE_SOLO}</p>`, [
+    { label: roam ? 'GO IN' : 'LEAVE', act: () => (panel.hide(), game.leaveJob()) },
+    { label: roam ? 'STAY OUT' : 'STAY', primary: true, act: () => panel.hide() },
   ]);
-});
+};
+$('#leave').addEventListener('click', goBack);
+const gateWalk = new GateWalk();
 $('#skipcut').addEventListener('click', () => game.skipCut());
 $('#skipcut').addEventListener('touchstart', (e) => (e.preventDefault(), game.skipCut()), { passive: false });
 $('.tb.use').addEventListener('touchstart', (e) => (e.preventDefault(), use()), { passive: false });
@@ -518,8 +522,10 @@ function hud(now: number): void {
     // (The hearts, the get-ups left, are under the health bar: unitframe.ts.)
     // Folded: the objective and the room diamonds; an expedition's, how many jobs are left. Open: the lot,
     // and on an expedition every pinned job and side job, done or what to do (bannerfold.ts, tracker.ts).
-    const x = game.fightRoom.exped, rooms = x ? '' : roomsHtml(run.index, run.job.rooms), left = x ? x.goals.filter((q) => !q.done).length : 0;
-    const full = objFlash.show(`<b>${titleCase(run.job.place.name)}${rooms}</b> ${x && !me.out && x.phase === 'shut' ? expedRows(x, goalWords(run.job), run.job.boss ?? '') : `<div class="obj">${g.text}</div>`}<span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
+    const roam = !!run.job.roam, zone = roam && game.hero ? zoneAt(run.job, run.index, game.hero) : null;
+    if (roam && !me.out) g.text = zone ? titleCase(zone) : '';
+    const x = game.fightRoom.exped, rooms = x || roam ? '' : roomsHtml(run.index, run.job.rooms), left = x ? x.goals.filter((q) => !q.done).length : 0;
+    const full = objFlash.show(`<b>${titleCase(roam ? run.job.title : run.job.place.name)}${rooms}</b> ${x && !me.out && x.phase === 'shut' ? expedRows(x, goalWords(run.job), run.job.boss ?? '') : `<div class="obj">${g.text}</div>`}<span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
     const small = smallLine(x && !me.out && x.phase === 'shut' ? TRACKW.jobsLeft(left, x.goals.length) : g.text, rooms);
     // (On an expedition the named butcher's bar shows only once you're near it.)
     // (A boss of the kit: its plate, sim/bossplate.ts. While it's up the tracker stays tucked to its line under it.)
@@ -717,6 +723,7 @@ function tick(t: number): void {
     fx.say(sx, sy - 52, s, col, 3);
   }, game.run?.job.boss);
   // The way on just opened: say which way, over you.
+  if (gateWalk.check(game)) goBack();
   const opened = ways.check(game);
   if (opened) objFlash.done(t / 1000);
   if (opened && game.hero) {

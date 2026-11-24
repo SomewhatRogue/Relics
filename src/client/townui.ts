@@ -20,6 +20,9 @@ import { ORLA } from '../shared/orla';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { openBoard } from './boardui';
+import { landJob } from '../shared/territory';
+import { BOARDW } from './boardwords';
+import { postedToast } from './partytoast';
 import { CLASS_NAME } from '../shared/classes';
 
 import { SPEAKER, townSays } from '../shared/townsays';
@@ -167,7 +170,12 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const said = SPEAKER[arg] ? townSays(w, SPEAKER[arg], dusk() > 0.5) : null;
     panel.show(who.name, say(who.name.split(' ').slice(-1)[0], said ?? who.line) + (arg === 0 ? say('Wenna', RUMOURS[w.day % RUMOURS.length]) : ''));
   } else {
-    panel.show('THE NORTH GATE', p('Oak and iron, and the hungry on the other side of it. The gate opens for a job, not before: the board is in the square.'));
+    // The way out into the land (docs/design/outside-the-gate.md): alone, or a party gathered as the board does it.
+    const out = landJob('gatefields', w.day), pt = g.parties;
+    panel.show('THE NORTH GATE', p('Oak and iron, and the hungry on the other side of it. The guard will let you out into the north fields, and back in again. Jobs are on the board in the square.'), [
+      { label: 'GO OUT', primary: true, act: () => (panel.hide(), pt?.quit(), g.startJob(out)) },
+      ...(pt ? [{ label: BOARDW.gather, act: () => (pt.gather(out), panel.hide(), postedToast()) }] : []),
+    ]);
   }
 }
 

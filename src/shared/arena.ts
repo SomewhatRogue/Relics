@@ -343,6 +343,10 @@ export interface GameMap {
   sealed?: { x: number; w: number };
   /** An instance's stretches on one map, in order (sim/stretches.ts; docs/design/open-cut-map.md). */
   stretches?: Stretch[];
+  /** Way stations on the land (docs/design/outside-the-gate.md): safe ground, a keeper, a fire. */
+  stations?: { name: string; x: number; y: number; r: number }[];
+  /** The land's ground by stretch (docs/design/biome-sets.md, "Biodiversity"): boxes naming the pattern book's look there (client/looks.ts), so one long map crosses several kinds of country. Drawing only. */
+  grounds?: { look: string; x: number; y: number; w: number; h: number }[];
   /** THE BRAKESMAN's incline (sim/brake.ts): lanes of rail down it at these x, from `y0` by its brake to `y1` at the foot. */
   incline?: { lanes: number[]; y0: number; y1: number };
   /** THE LAMPMAN's lamps on their posts (sim/lampman.ts; which are lit is on the Lampman). */

@@ -55,6 +55,7 @@ import { keeperPause, stepKeeper } from './doorkeepers';
 import { bossStun } from './poise';
 import { markSum } from '../shared/deepmarks';
 import { hunted, seenBy } from './bites';
+import { stepHoming } from './homing';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
@@ -304,6 +305,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   // Lying in Fenmere's reeds till it's sprung, then standing up out of them (sim/lurk.ts).
   if (e.task?.k === 'lurk' && stepLurk(e, heroes, others, now, ev)) return;
   if (e.task && stepTask(e, heroes, now, dt, ev, () => notice(e, heroes, others, now, ev))) return;
+  // Gave up at a way station's edge and walking home (sim/homing.ts).
+  if (e.homing && stepHoming(e, dt)) return;
   if (e.alert === false && e.feeding) {
     if (!notice(e, heroes, others, now, ev)) return;
     e.feeding = false;

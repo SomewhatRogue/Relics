@@ -42,7 +42,8 @@ export function openPx(m: GameMap): (px: number, py: number) => boolean {
 
 export function groveFloors(m: GameMap, rect: Rect): void {
   const floor = m.theme.floor as string;
-  if (floor !== 'grass' && floor !== 'dirt' && floor !== 'mud') return;
+  // (And a field's floor, where trees stand on its grass: the land's wood's edge.)
+  if (floor !== 'grass' && floor !== 'dirt' && floor !== 'mud' && floor !== 'wheat') return;
   const W = m.w * KX, H = m.h * KZ;
   const open = openPx(m);
   const list: Round[] = [...m.rounds, ...scatterOf(m).stand].filter((r) => REACH[r.kind]);

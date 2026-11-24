@@ -230,6 +230,8 @@ export class ArenaRoom {
   sleepFar = false;
   /** How near a hero wakes them and how far lets them doze again, if not a big map's (an instance's area: shared/instancetune.ts). */
   sleepAt?: { wake: number; doze: number };
+  /** A roaming land (sim/landrules.ts): nobody is lost by lying down; the party's own rules for getting up are the land's. */
+  roam?: boolean;
   /** Mini quests (sim/minis.ts): each of the map's, offered, taken or done. */
   minis: MiniState[] = [];
   /** How much tougher and harder hitting this room's goblins are for the party (a territory: sim/landroom.ts); goblins made later take it too. */
@@ -443,7 +445,7 @@ export class ArenaRoom {
     this.late = stepLate(this.late, this.heroes, this.allEnemies, this.intents, this.time, this.events);
     useLate(this.late);
     // A party: bleeding, picking each other up, going out.
-    stepParty(this.heroes, TICK, this.events);
+    stepParty(this.heroes, TICK, this.events, this.roam);
     // A Cleric raising a friend who is out (sim/raise.ts).
     stepRise(this.heroes, this.enemies, this.time, this.events);
     // A Mage who has just blinked leaves a trap of their element where they stood (sim/blinktrap.ts).

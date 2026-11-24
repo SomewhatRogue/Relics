@@ -1071,3 +1071,28 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   limit), way stations as safe ground you travel between and to and from town, a keeper at each (potions, a relic's
   recharge at some). Still open: what falling alone with the revive spent costs. (Claude Fable 5.2)
 
+## 2026-11-24: the land's first map, built here by builders and reviewed
+
+- Kyle: "build it here but use subagents ... and be the ultimate reviewer". Three Sonnet builders, one narrow
+  slice each, at most two at once on files that did not overlap; the lore keeper once and the line editor once
+  for the words. What each did and what the review changed is in docs/design/outside-the-gate.md, "Built so far".
+- Builder 1, the map (shared/gatefields.ts, gatefieldsland.ts, gatefieldsfoes.ts, gatefieldsdetail.ts,
+  gatefieldscamp.ts; tests/gatefields.test.ts), three passes. Review 1: too empty, a hard pond, no keeper: sent back
+  for something hand placed in every screenful. Review 2, the lore keeper's: it is the north fields; refugees camp
+  outside the gate, so no goblins there and none on the near strips; the strips are unploughed.
+- Builder 2, out and back (client/townui.ts, gatewalk.ts, wayfind.ts; small edits in game.ts and main.ts). Review:
+  its zone lookup made a deep copy of the map's plan every frame (kept once a map now); LEAVE and STAY reworded
+  GO IN and STAY OUT for a walk; the gate's words rewritten, since "the gate opens for a job, not before" was no
+  longer true.
+- Builder 3, falling and resting (sim/landrules.ts, homing.ts; small edits in run.ts, party.ts, room.ts,
+  landroom.ts, enemies.ts, checkpoint.ts's exports, types.ts, tuning.ts LAND). Only a job with `roam` runs any of
+  it; the parity record is untouched. Review: it counted rest and give-up by calls, and a screen calls it a frame
+  at a time, so resting took four times as long in a slow browser: by the room's clock now.
+- Mine: `map.grounds` (shared/arena.ts) and looks.ts `partsOf` and `lookAt`, so motifs, scenes, the landmark and
+  the echoes are laid a stretch at a time on one map; grove floors on a field's grass; client/tiletents.ts, the
+  camp's tents drawn the tile way (they stood as striped pallets); Job.roam.
+- Other chats' files touched, each small: Territories' shared/territory.ts (a land, its work), sim/run.ts,
+  sim/enemies.ts; shared/arena.ts and jobs.ts (three optional fields); client/game.ts and main.ts. On the board.
+- Checked on phone 2.5D: the whole trip (the gate, out, away, back, in), every stretch with its enemies, resting at
+  the barn with a goblin held at nine tiles; no page errors. (Claude Fable 5.2)
+

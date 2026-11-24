@@ -954,7 +954,7 @@ export class Game {
         if (isDeep(this.run.job)) {
           this.deepEdge();
           if (this.deepVote === this.run.job.floor && !this.deepWaiting()) this.descend();
-        } else if (road || (!forkOf(this.room.map) && this.together(this.room.map.exit))) {
+        } else if (!this.run.job.roam && (road || (!forkOf(this.room.map) && this.together(this.room.map.exit)))) {
           if (isFinal(this.run)) this.finish('won');
           else {
             this.run.index++;
@@ -1315,7 +1315,7 @@ export class Game {
     const deep = deepEnd && p.deep ? { end: deepEnd, ...endDeep(p.deep, p, deepEnd, run.gold) } : undefined;
     if (isDeep(run.job)) (p.deep = undefined), (this.deepAsk = this.deepThere = this.deepUp = false), (this.deepVote = 0);
     // Driven back (or gone home from a job alone): half the gold. Gone early from a party: what was picked up while with them.
-    const half = !deep && !won && !(withParty && (how === 'left' || how === 'dropped'));
+    const half = !deep && !won && !(run.job.roam && how === 'left') && !(withParty && (how === 'left' || how === 'dropped'));
     // Driven back in the Ransom Coat: all of it, not half.
     const ransom = half && p.armor?.hungry === 'ransom';
     // A bigger party: more pay and a better treasure; experience shared out so it's a little more, not a multiple (shared/pace.ts).
@@ -1360,6 +1360,8 @@ export class Game {
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
     this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, relics, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, netlost: run.netlost ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap, deep: deep && { end: deep.end, floor: deep.floor, lost: deep.lost } };
+    // A trip out of the gate is a plain return: no result screen, no penalty (docs/design/outside-the-gate.md).
+    if (run.job.roam && how === 'left') this.result = null;
     this.run = null;
     // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
     if (key) p.paid = [...(p.paid ?? []), key].slice(-12);
@@ -1375,7 +1377,7 @@ export class Game {
     this.questEnd({ job: run.job, won, rescued, dens: run.dens ?? 0 });
     unbank(p.id);
     if (ONLINE && key && !key.startsWith('solo-')) dropOwed(p.id, key);
-    this.enterTown(this.boardFront());
+    this.enterTown(run.job.roam && how === 'left' ? this.gateSpot() : this.boardFront());
   }
 
   /** The nearest thing to use where the hero stands: a person, a door, a spot in the open. */

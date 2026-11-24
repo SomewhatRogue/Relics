@@ -90,6 +90,8 @@ export interface Job {
   instance?: import('./instances.js').InstanceId;
   /** A territory (shared/territory.ts; docs/design/territories.md): one hand-laid map of zones, scapes and gates. */
   land?: import('./territory.js').LandId;
+  /** The land outside the gate (docs/design/outside-the-gate.md): no posting and no objective; you walk out, and walk back in. */
+  roam?: boolean;
   /** A hero's own posting for their quest in hand (shared/heroquests.ts): on their board only. */
   quest?: import('./heroquests.js').QuestId;
 }

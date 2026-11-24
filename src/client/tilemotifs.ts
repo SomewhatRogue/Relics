@@ -57,7 +57,7 @@ function zone(o: Motif, open: (px: number, py: number) => boolean, W: number, H:
 export function paintZones(m: GameMap, rect: Rect): void {
   const open = openPx(m), W = m.w * KX, H = m.h * KZ, floor = m.theme.floor as string;
   // (A hollow is moss in turf, wet slate in rock, mire in bare earth.)
-  const dip = floor === 'grass' ? MOSS : floor === 'rock' ? SLATE : MIRE;
+  const dip = floor === 'grass' || floor === 'wheat' ? MOSS : floor === 'rock' ? SLATE : MIRE;
   const paved = (px: number, py: number) => pavedAt(m, px / KX, py / KZ);
   for (const o of motifsOf(m)) {
     if (o.kind.startsWith('drift') || o.kind === 'ridge') continue;

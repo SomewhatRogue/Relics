@@ -15,6 +15,8 @@ import { PIECE_BLOCKS, PIECE_ROUNDS } from '../pieces';
 import type { Ctx } from '../draw';
 import { PX } from '../world';
 import { cardMaterial } from './figmat';
+import { tentCut } from '../tiletents';
+import { REDRAW } from '../tilelook';
 import { swayCards } from './wind3d';
 import { oakCut, pineCut, reedCut } from '../tiletrees';
 import { bushCut, rockCut, snagCut } from '../tileflora';
@@ -152,6 +154,8 @@ export const roundCut = (r: Round): Cut | null => {
 /** A block as the flat view paints it (lamps lit by `lit`), anchored at its front edge's middle. */
 export function blockCut(b: Block, lit: boolean): Cut | null {
   if (FURN.has(b.kind)) return furnCut(b);
+  // (A tent drawn the tile way: ../tiletents.ts.)
+  if (b.kind === 'tent' && REDRAW.on) return tentCut(b);
   const w = Math.round(b.w * PX), d = Math.round(b.h * PX), tall = LOOK[b.kind]?.tall ?? 16, m = 24;
   return cut((c, x, y) => drawBlock(c, b, x - w / 2, y - d, lit), w + m * 2, d + tall + m * 2, m + w / 2, m + tall + d);
 }

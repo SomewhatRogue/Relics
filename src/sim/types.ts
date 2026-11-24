@@ -313,6 +313,9 @@ export interface Hero extends Body {
   /** Seconds left of the grace on coming into a new room: nothing hurts this hero till it's gone. */
   safeT?: number;
   selfUp?: boolean;
+  /** A roaming land (sim/landrules.ts): the room time they stepped onto safe ground, to have rested after LAND.rest. */
+  restT?: number;
+  restAt?: string;
   /** RAISE (sim/raise.ts): out, the Cleric kneeling to raise this hero and the room time they began
    *  ('' and -9 when none; the progress is worked out from it, so nothing goes out a tick); the share of the most health taken
    *  off by being raised this job, and the Clerics who have raised them; on a Cleric, when they may again. */
@@ -616,6 +619,9 @@ export interface Enemy extends Body {
   jolted?: number;
   /** Too far from every hero to think or move this tick (sim/sleep.ts, on a big map). */
   dozing?: boolean;
+  /** A roaming land (sim/landrules.ts): the room time it began pressing at a hero on safe ground, to give up after LAND.giveUp. */
+  giveT?: number;
+  homing?: boolean;
   /** Near a standing banner this tick (sim/banner.ts); routed until; a fallen banner whose rout is done. */
   heart?: boolean;
   routUntil?: number;
@@ -921,6 +927,8 @@ export type FightEvent =
   | { k: 'stolen'; x: number; y: number; id: string; n: number; potion?: PotionId }
   /** A hero down (`by`: the teammate whose blow did it), or picked up (`by`: who picked them up). */
   | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
+  /** On the land (sim/landrules.ts): a hero has rested at a way station (its name), and has their own get-up back. */
+  | { k: 'rested'; x: number; y: number; id: string; station: string }
   /** RAISE (sim/raise.ts): a Cleric (`by`) begins raising a friend who is out (`id`), is broken off, or has raised them (`n`: the cut, in %). */
   | { k: 'rising' | 'risebroke' | 'risen'; x: number; y: number; id: string; by: string; n?: number }
   /** A press that did nothing, said to that hero: GRAB with nothing to take hold of, ATTACK held on an empty crossbow. */

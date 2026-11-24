@@ -53,6 +53,31 @@ sells healing potions or a relic recharge."
 - **Drawn as the biome's.** A station is one of its set's echoes grown up (biome-sets.md): a charcoal burner's
   hut in the wood, an eel catcher's staithe in the fen, a field barn.
 
+## Built so far (2026-11-24)
+
+Kyle: "build it here but use subagents to accomplish it and be the ultimate reviewer making sure we're using
+appropriate art, scenes, and enemy types to keep it varied and fun and interesting but on theme."
+
+- **The name.** The lore keeper: this ground is already "the north fields" in the story (Bram's line, the vote).
+  The map is THE NORTH FIELDS; its parts keep their names (the Gate Road, the Common Strips, the Field Barn, the
+  Rough Pasture, the Wood's Edge). The files keep `gatefields`.
+- **On screen a way station is a "shelter"**, never a "way station" (the lore keeper: a road word, and nothing comes
+  into Wickhold by road). Why nothing follows you in stays unsaid.
+- **The map** (shared/gatefields*.ts, 56 by 96, no gates): the refugees' camp under their carts outside the wall
+  (people, tents, fires, no goblins); the strips gone back, thin barley coming up on its own; the Field Barn; the
+  pasture; the wood's edge. Nothing hostile till the far end of the strips. Enemy kinds by stretch: goblins with
+  farm tools, a thief and an archer in the crop; a wolf-keeper and wolves, and a den four break out of; a spider
+  nest, a snarer and a netter. Each stretch draws its own country (`map.grounds`; biome-sets.md).
+- **Out and back** (client/townui.ts, gatewalk.ts): GO OUT at the North Gate, alone or with a party gathered as the
+  board does it; the banner shows the place and the part you stand in, no objective; GO IN or STAY OUT when you walk
+  back to the gate; in is a plain return, nothing lost, standing at the gate.
+- **Falling and resting** (sim/landrules.ts): one self revive a trip; friends lift without limit; with nobody left
+  the party wakes at the last shelter rested at, or the gate; two seconds in a shelter is a rest; no goblin enters
+  one, and one pressing at you there gives up and walks home.
+
+Not yet: the view off the east side; saying on screen that you rested or have a get-up left; the keeper's wares;
+travel between shelters; bounties, materials, quests; the wood beyond the far end.
+
 ## Order
 
 1. The Gate Fields, walkable from the gate and back, enemies by stretch, the set and the seam drawn; one way

@@ -80,6 +80,25 @@ export function lookOf(m: GameMap): Look | null {
   return mine[new Rng(seedOf(m, 5)).int(mine.length)];
 }
 
+/**
+ * A map's country in parts: the whole map under its one look, or, where the map says its ground by stretch
+ * (`grounds`: the land, docs/design/biome-sets.md "Biodiversity"), each box under the look it names. The box is kept
+ * a step or two in from the map's edge.
+ */
+export interface Part { look: Look; x0: number; y0: number; x1: number; y1: number; i: number }
+export function partsOf(m: GameMap, inX = 1.5, inY = 2): Part[] {
+  if (m.grounds?.length)
+    return m.grounds.flatMap((g, i) => {
+      const look = LOOKS.find((l) => l.name === g.look);
+      return look ? [{ look, x0: Math.max(inX, g.x), y0: Math.max(inY, g.y), x1: Math.min(m.w - inX, g.x + g.w), y1: Math.min(m.h - inY, g.y + g.h), i }] : [];
+    });
+  const look = lookOf(m);
+  return look ? [{ look, x0: inX, y0: inY, x1: m.w - inX, y1: m.h - inY, i: 0 }] : [];
+}
+/** The look of the ground at a spot. */
+export const lookAt = (m: GameMap, x: number, y: number): Look | null =>
+  m.grounds?.length ? (partsOf(m, 0, 0).find((p) => x >= p.x0 && x < p.x1 && y >= p.y0 && y < p.y1)?.look ?? null) : lookOf(m);
+
 const cache = new WeakMap<GameMap, Motif[]>();
 
 /** Is (x, y) open ground: nothing solid, no path or patch, no water near? */
@@ -99,14 +118,19 @@ export function motifsOf(m: GameMap): Motif[] {
   if (hit) return hit;
   const out: Motif[] = [];
   cache.set(m, out);
-  const look = lookOf(m);
-  if (!look) return out;
-  const rng = new Rng(seedOf(m, 9)), scale = Math.min(6, (m.w * m.h) / 672), town = look.country === 'town';
+  for (const part of partsOf(m)) lay(m, part, out);
+  return out;
+}
+
+/** One part's motifs, on its own roll. */
+function lay(m: GameMap, part: Part, out: Motif[]): void {
+  const { look, x0, y0, x1, y1 } = part, bw = x1 - x0, bh = y1 - y0;
+  const rng = new Rng(seedOf(m, 9 + part.i * 7)), scale = Math.min(6, ((bw + 3) * (bh + 4)) / 672), town = look.country === 'town';
   for (const [kind, per] of look.motifs) {
     const want = Math.max(1, Math.round(per * scale)), [lo, hi, flat] = SIZE[kind], drift = kind.startsWith('drift');
     let got = 0;
     for (let i = 0; i < want * 40 && got < want; i++) {
-      const rx = lo + rng.next() * (hi - lo), ry = rx * flat, x = 1.5 + rx + rng.next() * (m.w - 3 - 2 * rx), y = 2 + ry + rng.next() * (m.h - 4 - 2 * ry);
+      const rx = lo + rng.next() * (hi - lo), ry = rx * flat, x = x0 + rx + rng.next() * (bw - 2 * rx), y = y0 + ry + rng.next() * (bh - 2 * ry);
       // (The wind lies a little north of east: a drift lies along it.)
       const a = -0.25 + (rng.next() - 0.5) * 0.7, v = rng.int(1000);
       if (!openAt(m, x, y) || Math.hypot(m.hero.x - x, m.hero.y - y) < 2.5 || (town && !pavedAt(m, x, y))) continue;
@@ -119,7 +143,6 @@ export function motifsOf(m: GameMap): Motif[] {
       out.push({ kind, x, y, rx, ry, a, v }), got++;
     }
   }
-  return out;
 }
 
 // Test hooks (scripts and screenshots): window.__lookOf(map), window.__motifsOf(map).

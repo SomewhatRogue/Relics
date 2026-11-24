@@ -47,9 +47,12 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
-- **The land outside the gate (Graphics sweep, 2026-11-24, Kyle's ask):** docs/design/outside-the-gate.md: walk out
-  of the North Gate into a map with no board and no gates, grown a map at a time; kills, materials and quests out
-  there. Spec only, no chat yet. Its look is docs/design/biome-sets.md (the Graphics sweep's).
+- **The land outside the gate (Graphics sweep, 2026-11-24, Kyle's ask; being built in the Graphics sweep chat, his
+  call):** docs/design/outside-the-gate.md. Its first map is in: GO OUT at the North Gate into THE NORTH FIELDS
+  (shared/gatefields*.ts, sim/landrules.ts, client/gatewalk.ts). It touched, each a few lines and only for a job
+  with `roam`: Territories' shared/territory.ts, sim/run.ts and sim/enemies.ts; shared/arena.ts (`stations`,
+  `grounds`), shared/jobs.ts (`roam`); sim/party.ts, room.ts, landroom.ts, checkpoint.ts (two exports), types.ts;
+  client/game.ts, main.ts, townui.ts, wayfind.ts. Say if any of that sits badly with yours.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

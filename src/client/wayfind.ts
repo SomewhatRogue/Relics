@@ -31,7 +31,7 @@ import { cellAt } from '../shared/puzzle';
 
 export function wayTarget(game: Game): P | null {
   const room = game.room, me = game.hero;
-  if (game.mode !== 'run' || !game.run || !me) return null;
+  if (game.mode !== 'run' || !game.run || !me || game.run.job.roam) return null;
   // One map in stretches: this stretch's nearest named one, then its gate (sim/stretches.ts).
   const st = stretchOf(game.run, room.map);
   if (st && !lastStretch(game.run, room.map)) {
@@ -66,7 +66,7 @@ export class WayWatch {
     const room = game.room, was = this.room === room ? this.open : true;
     this.room = room;
     this.open = room.exitOpen;
-    if (game.mode !== 'run' || !game.run || room.indoors || was || !room.exitOpen) return null;
+    if (game.mode !== 'run' || !game.run || room.indoors || was || !room.exitOpen || game.run.job.roam) return null;
     if (room.map.roads) return 'PICK A ROAD';
     const last = game.run.index === game.run.job.rooms - 1;
     return `${last ? 'WAY HOME' : 'WAY ON'}: ${wayDir(room.map).toUpperCase()}`;

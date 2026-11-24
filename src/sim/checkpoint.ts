@@ -27,7 +27,7 @@ export function gateSpot(room: ArenaRoom, i: number, n: number, run?: Run): { x:
 }
 
 /** Up at the gate: whole, rested, a moment nothing hurts. */
-function upAtGate(room: ArenaRoom, h: Hero, at: { x: number; y: number }, ev: FightEvent[]): void {
+export function upAtGate(room: ArenaRoom, h: Hero, at: { x: number; y: number }, ev: FightEvent[]): void {
   Object.assign(h, {
     ...at, z: 0, act: 'idle', actT: 0, actDur: 0, hp: h.maxHp, stamina: HERO.stamina, kvx: 0, kvy: 0,
     bleeding: false, out: false, selfUp: false, pickT: 0, raiser: undefined, safeT: INSTANCE.safe,
@@ -37,7 +37,7 @@ function upAtGate(room: ArenaRoom, h: Hero, at: { x: number; y: number }, ev: Fi
 }
 
 /** A goblin still standing back where it was put, whole and calm (it hasn't seen you yet). */
-function settle(room: ArenaRoom, e: Enemy): void {
+export function settle(room: ArenaRoom, e: Enemy): void {
   Object.assign(e, { x: e.home.x, y: e.home.y, hp: e.maxHp, alert: false, act: 'idle', actT: 0, attack: null, kvx: 0, kvy: 0 });
   room.prev.set('e:' + e.id, [e.x, e.y]);
 }

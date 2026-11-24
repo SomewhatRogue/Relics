@@ -22,6 +22,7 @@ import { arenaRoom } from './arenaroom';
 import { instanceParty, instanceRoom } from './instanceroom';
 import { landRoom } from './landroom';
 import { stepCheckpoint } from './checkpoint';
+import { stepLand } from './landrules';
 import { stepStretches } from './stretches';
 import { stepFork } from './fork';
 import { bandOf } from '../shared/deepbands';
@@ -73,6 +74,8 @@ export interface Run {
   relicsWon?: RelicWon[];
   /** An instance (sim/checkpoint.ts): the room time the party wiped, lying there till they're up at the gate. */
   wipeAt?: number;
+  /** A roaming land (sim/landrules.ts): where the party wakes after a wipe, the last way station rested at (none: the way in). */
+  rest?: { x: number; y: number };
   /** An instance on one map (sim/stretches.ts): the stretch the party's in, from 0, and where the fallen get up. */
   stretch?: number;
   check?: { x: number; y: number };
@@ -191,7 +194,8 @@ export function tally(run: Run, room: ArenaRoom, events: FightEvent[], me: strin
   // An instance: a wipe is back to the area's gate, the third since the last gate loses it (sim/checkpoint.ts).
   if (run.job.instance) stepStretches(run, room, events), stepFork(run, room, events), stepCheckpoint(run, room, events);
   // A territory's gates and checkpoints are the same (docs/design/territories.md): no fork.
-  else if (run.job.land) stepStretches(run, room, events), stepCheckpoint(run, room, events);
+  // A roaming land has no wipes to count: its own rules for falling and resting (sim/landrules.ts).
+  else if (run.job.land) stepStretches(run, room, events), run.job.roam ? stepLand(run, room, events) : stepCheckpoint(run, room, events);
   else if (run.downs >= MAX_DOWNS || allOut(room.heroes)) run.failed = true;
   board(run, room);
 }

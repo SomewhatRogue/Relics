@@ -8,7 +8,7 @@
  */
 import type { GameMap } from '../shared/arena';
 import { Rng } from '../shared/rng';
-import { lookOf, pavedAt, type SceneKind } from './looks';
+import { partsOf, pavedAt, type Part as Ground, type SceneKind } from './looks';
 import { blocked } from './ratspots';
 import { soilAt } from './soil';
 import { KX, KZ, type Rect } from './tilekit';
@@ -24,19 +24,26 @@ export function scenesOf(m: GameMap): Scene[] {
   if (hit) return hit;
   const out: Scene[] = [];
   cache.set(m, out);
-  const rng = new Rng([...m.name].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) % 1000003, m.w * 131 + m.h * 977 + 17));
-  // Which scenes: the map's look says (looks.ts), each once before any comes round again.
-  const pool = lookOf(m)?.scenes ?? [], town = lookOf(m)?.country === 'town';
-  if (!pool.length) return out;
+  // (A part of the map at a time: the whole of it, or each stretch of the land under its own look: looks.ts partsOf.)
+  for (const part of partsOf(m, 2, 2.5)) place(m, part, out);
+  return out;
+}
+
+function place(m: GameMap, part: Ground, out: Scene[]): void {
+  const { x0, y0, x1, y1 } = part, n0 = out.length;
+  const rng = new Rng([...m.name].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) % 1000003, m.w * 131 + m.h * 977 + 17 + part.i * 29));
+  // Which scenes: the look says (looks.ts), each once before any comes round again.
+  const pool = part.look.scenes, town = part.look.country === 'town';
+  if (!pool.length) return;
   let kinds: SceneKind[] = [];
-  const want = Math.min(4, Math.max(1, Math.round((m.w * m.h) / 400)));
+  const want = Math.min(4, Math.max(1, Math.round(((x1 - x0 + 4) * (y1 - y0 + 5)) / 400)));
   const wet = (x: number, y: number) => !!m.water?.some((w) => x > w.x - 1 && x < w.x + w.w + 1 && y > w.y - 1 && y < w.y + w.h + 1);
   const bare = (x: number, y: number) => {
     const s = m.soil?.length ? soilAt(m, x, y) : 'cobble';
     return s !== 'cobble' && s !== 'grass' && s !== 'shade';
   };
-  for (let i = 0; i < 240 && out.length < want; i++) {
-    const x = 2 + rng.next() * (m.w - 4), y = 2.5 + rng.next() * (m.h - 5);
+  for (let i = 0; i < 240 && out.length - n0 < want; i++) {
+    const x = x0 + rng.next() * (x1 - x0), y = y0 + rng.next() * (y1 - y0);
     // Open ground a step wide, off every path and patch, not at a door or where anyone starts.
     if (!kinds.length) kinds = [...pool];
     const ki = rng.int(kinds.length), wide = kinds[ki] === 'graves' ? 1.9 : kinds[ki] === 'log' ? 1.4 : 0.9;
@@ -47,7 +54,6 @@ export function scenesOf(m: GameMap): Scene[] {
     if (d < 0.7 || (!town && d > 3.2) || (town && !pavedAt(m, x, y)) || out.some((s) => Math.hypot(s.x - x, s.y - y) < 9)) continue;
     out.push({ kind: kinds.splice(ki, 1)[0], x, y });
   }
-  return out;
 }
 
 const C: Record<string, string> = {

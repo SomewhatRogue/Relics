@@ -75,7 +75,7 @@ export const raisable = (h: Hero, heroes: Hero[]) =>
 const up = (h: Hero) => Object.assign(h, { act: 'idle', actT: 0, actDur: 0, hp: Math.round(h.maxHp * PARTY.upHp), bleeding: false, pickT: 0, raiser: undefined });
 
 /** Lying there, being got up, getting up, and going out, once a tick. */
-export function stepParty(heroes: Hero[], dt: number, ev: FightEvent[]): void {
+export function stepParty(heroes: Hero[], dt: number, ev: FightEvent[], roam = false): void {
   const ps = players(heroes);
   if (ps.length < 2) {
     // Alone again (the rest gone home): the old way, up in a moment.
@@ -98,7 +98,8 @@ export function stepParty(heroes: Hero[], dt: number, ev: FightEvent[]): void {
       continue;
     }
     if (h.raiser) Object.assign(h, { raiser: undefined, pickT: 0 });
-    if (h.actT < PARTY.bleed) continue;
+    // (On a roaming land the get-up and the lying down are the land's: sim/landrules.ts.)
+    if (roam || h.actT < PARTY.bleed) continue;
     // Nobody came: your one get-up of the job, or you're out.
     if (!h.selfUp) {
       h.selfUp = true;
