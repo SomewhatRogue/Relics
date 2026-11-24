@@ -265,3 +265,17 @@ Claude Opus 5.5
   kill speed on the AoE, a lot worse single target"): taps 7, 7, 10 at 1x head on (about 19 a second, the daggers'
   head on), behind about 33; the full spin's cut 7, so a turn is about 10 with the bleed. Four goblins in the spin
   die about as fast as one behind the daggers. The guard test says so. Claude Opus 5.5
+
+## 2026-11-23: the Ranger talk, first changes (Kyle)
+
+- Every class skill waits 1.5x as long (shared/magic.ts SKILL_WAIT, on the 15 trainer skills only; found relics and
+  the class's own button keep theirs): "pretty big hits", and so the recharge drill, knacks and QUICK RETURN matter.
+  Vanish 27 s, Knife Fan 18, Smoke 24, Net 30, Volley 27, Shield Charge 15, and so on.
+- The bows reordered: shortbow least (draw 0.4 to 0.5, 22 to 13, recover 0.22 to 0.28: about 15 a second), crossbow a
+  lot more (60 to 66 a bolt: about 30), longbow a little more again (55 to 75 full: about 34). tests/bows.test.ts.
+- Sic (Send the Hound) to go; its replacement still to pick.
+- A paper table of every weapon's damage a second (scratch script, not kept) showed the Warrior's and Cleric's taps
+  (29 to 34 a second, over an arc) well above the Rogue's head on (19, one goblin) and the Mage's wand (15): for the
+  class-by-class talk.
+
+Claude Opus 5.5

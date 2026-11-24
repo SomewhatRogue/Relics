@@ -237,18 +237,21 @@ export const WEAPONS: Record<KitId, Weapon> = {
     name: 'LONGBOW',
     cls: 'RANGER',
     combo: RANGER_BLADE,
-    heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 18, dmgFull: 55, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true, blinds: true },
+    heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 24, dmgFull: 75, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true, blinds: true },
     draw: 1.7, // A longer draw to the flash (Kyle, 2026-11-08), but let go early it still flies, weaker.
     blockSpeed: 0.4, chargeSpeed: 0.3, guardArc: 100, guardCost: 1.6, speed: 1.1,
     dodge: RANGER_JUMP,
   },
-  /** Quick draws, light arrows, and you can walk while drawing: the kiting bow. */
+  /** Quick draws, light arrows, and you can walk while drawing: the kiting bow, the least damage of the three
+   *  (Kyle, 2026-11-23: "the shortbow doing most is not great, it should be a speed hit and run weapon"; the
+   *  crossbow "a LOT more than the shortbow and a little less than the longbow"). Per second on one goblin,
+   *  every shot full: shortbow about 15, crossbow about 30, longbow about 34 (tests/bows.test.ts). */
   shortbow: {
     name: 'SHORTBOW',
     cls: 'RANGER',
     combo: RANGER_BLADE,
-    heavy: { windup: 0.03, active: 0.04, recover: 0.22, dmg: 10, dmgFull: 22, range: 9, arc: 0, lunge: 0, knock: 2, knockFull: 6, shot: 'arrow', speed: 26 },
-    draw: 0.4, early: 'full', // Quick to full and to the flash; let go early it's still a full shot.
+    heavy: { windup: 0.03, active: 0.04, recover: 0.28, dmg: 7, dmgFull: 13, range: 9, arc: 0, lunge: 0, knock: 2, knockFull: 6, shot: 'arrow', speed: 26 },
+    draw: 0.5, early: 'full', // Quick to full and to the flash; let go early it's still a full shot.
     blockSpeed: 0.45, chargeSpeed: 0.7, guardArc: 100, guardCost: 1.7, speed: 1.1,
     dodge: RANGER_LONG_JUMP,
   },
@@ -258,7 +261,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     name: 'CROSSBOW',
     cls: 'RANGER',
     combo: RANGER_BLADE,
-    heavy: { windup: 0.06, active: 0.04, recover: 0.35, dmg: 60, dmgFull: 60, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36, pierce: true },
+    heavy: { windup: 0.06, active: 0.04, recover: 0.35, dmg: 66, dmgFull: 66, range: 13, arc: 0, lunge: -0.2, knock: 12, knockFull: 12, shot: 'bolt', speed: 36, pierce: true },
     draw: 0.72, early: 'fizzle', // The aim has to settle: let go sooner and no bolt goes. (0.6 to 0.72, Kyle 2026-11-13.)
     blockSpeed: 0.4, chargeSpeed: 0.4, guardArc: 110, guardCost: 1.5, speed: 1.1, reloads: true,
     dodge: RANGER_JUMP,

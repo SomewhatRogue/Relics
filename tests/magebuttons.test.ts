@@ -1,6 +1,6 @@
 /** The Mage's ELEMENT button (sim/channel.ts), its class skill GRASP (sim/grasp.ts), and old saves (Kyle, 2026-11-04). */
 import { describe, expect, it } from 'vitest';
-import { CHANNEL, CLASS_SKILL, GRASP, HERO, SKILL_CHOICES, abilitiesOf } from '../src/shared/tuning';
+import { CHANNEL, CLASS_SKILL, GRASP, HERO, RELICS, SKILL_CHOICES, abilitiesOf } from '../src/shared/tuning';
 import { fromJson } from '../src/client/save';
 import { newProfile } from '../src/shared/progress';
 import { newWorld } from '../src/shared/story';
@@ -62,7 +62,7 @@ describe('GRASP', () => {
     // (Those two only walked toward you, as goblins do.)
     expect(a.es[2].y).toBeGreaterThan(10.5);
     expect(a.es[3].x).toBeGreaterThan(12);
-    expect(a.h.relicReady.grasp - a.room.time).toBeGreaterThan(GRASP.cooldown - 1);
+    expect(a.h.relicReady.grasp - a.room.time).toBeGreaterThan(RELICS.grasp.cooldown - 1);
   });
 
   it('a butcher or a shield-bearer barely moves', () => {

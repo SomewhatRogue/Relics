@@ -97,31 +97,37 @@ export const HORN = { cooldown: 18, windup: 0.25, recover: 0.3, radius: 9, time:
  *  barrels burst; a wall stops it. */
 export const BASH = { cooldown: 10, windup: 0.12, recover: 0.2, distance: 5, time: 0.4, reach: 0.25, dmg: 14, knock: 10, stun: 1.2, stagger: 0.45, propDmg: 40 };
 
+/** Every class skill's wait is its own number times this (Kyle, 2026-11-23: "increase the cooldown on skills in
+ *  general because they're pretty big hits... to encourage abilities that cool the skill down": the skill drill,
+ *  the recharge knacks, QUICK RETURN). Found relics and the class's own button keep theirs. */
+export const SKILL_WAIT = 1.5;
+const wait = (s: number) => Math.round(s * SKILL_WAIT);
+
 /** `range` is how far the phone's auto-aim looks; `cls` who may carry it. */
 export const RELICS = {
   javelin: { name: 'RELIC JAVELIN', short: 'JAVELIN', cooldown: JAVELIN.cooldown, windup: JAVELIN.windup, recover: JAVELIN.recover, range: JAVELIN.range * 0.8 },
   hook: { name: 'GRAPPLING HOOK', short: 'HOOK', cooldown: HOOK.cooldown, windup: HOOK.windup, recover: HOOK.recover, range: HOOK.range },
-  net: { name: "HUNTER'S NET", short: 'NET', cooldown: NET.cooldown, windup: NET.windup, recover: NET.recover, range: NET.range },
+  net: { name: "HUNTER'S NET", short: 'NET', cooldown: wait(NET.cooldown), windup: NET.windup, recover: NET.recover, range: NET.range },
   shadow: { name: 'SHADOWSTEP', short: 'SHADOW', cooldown: SHADOWSTEP.cooldown, windup: SHADOWSTEP.windup, recover: SHADOWSTEP.recover, range: SHADOWSTEP.range },
   channel: { name: 'ELEMENT', short: 'ELEMENT', cooldown: CHANNEL.cooldown, windup: CHANNEL.windup, recover: CHANNEL.recover, range: 0 },
-  grasp: { name: 'ROUND UP', short: 'ROUND UP', cooldown: GRASP.cooldown, windup: GRASP.windup, recover: GRASP.recover, range: GRASP.range },
+  grasp: { name: 'ROUND UP', short: 'ROUND UP', cooldown: wait(GRASP.cooldown), windup: GRASP.windup, recover: GRASP.recover, range: GRASP.range },
   lodestone: { name: 'LODESTONE', short: 'LODESTONE', cooldown: LODESTONE.cooldown, windup: LODESTONE.windup, recover: LODESTONE.recover, range: LODESTONE.range },
-  horn: { name: 'WAR CRY', short: 'WAR CRY', cooldown: HORN.cooldown, windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
-  bash: { name: 'SHIELD CHARGE', short: 'SHIELD', cooldown: BASH.cooldown, windup: BASH.windup, recover: BASH.recover, range: BASH.distance },
+  horn: { name: 'WAR CRY', short: 'WAR CRY', cooldown: wait(HORN.cooldown), windup: HORN.windup, recover: HORN.recover, range: HORN.radius },
+  bash: { name: 'SHIELD CHARGE', short: 'SHIELD', cooldown: wait(BASH.cooldown), windup: BASH.windup, recover: BASH.recover, range: BASH.distance },
   blessing: { name: 'BLESSED GROUND', short: 'BLESS', cooldown: BLESSING.cooldown, windup: BLESSING.windup, recover: BLESSING.recover, range: BLESSING.range },
   ward: { name: 'WARD', short: 'WARD', cooldown: WARD.cooldown, windup: WARD.windup, recover: WARD.recover, range: WARD.range },
-  sanctuary: { name: 'SANCTUARY', short: 'SANCTUARY', cooldown: SANCTUARY.cooldown, windup: SANCTUARY.windup, recover: SANCTUARY.recover, range: WARD.range },
+  sanctuary: { name: 'SANCTUARY', short: 'SANCTUARY', cooldown: wait(SANCTUARY.cooldown), windup: SANCTUARY.windup, recover: SANCTUARY.recover, range: WARD.range },
   // The skills taught after the first (shared/skillkit.ts).
-  stamp: { name: 'SHIELD STAMP', short: 'STAMP', cooldown: STAMP.cooldown, windup: STAMP.windup, recover: STAMP.recover, range: STAMP.radius },
-  volley: { name: 'VOLLEY', short: 'VOLLEY', cooldown: VOLLEY.cooldown, windup: VOLLEY.windup, recover: VOLLEY.recover, range: VOLLEY.range },
-  sic: { name: 'SEND THE HOUND', short: 'HOUND', cooldown: SIC.cooldown, windup: SIC.windup, recover: SIC.recover, range: SIC.range },
-  vanish: { name: 'VANISH', short: 'VANISH', cooldown: VANISH.cooldown, windup: VANISH.windup, recover: VANISH.recover, range: 0 },
-  knives: { name: 'KNIFE FAN', short: 'KNIVES', cooldown: KNIVES.cooldown, windup: KNIVES.windup, recover: KNIVES.recover, range: KNIVES.range },
-  smoke: { name: 'SMOKE BOMB', short: 'SMOKE', cooldown: SMOKEBOMB.cooldown, windup: SMOKEBOMB.windup, recover: SMOKEBOMB.recover, range: SMOKEBOMB.range },
-  firering: { name: 'FIRE RING', short: 'RING', cooldown: FIRE_RING.cooldown, windup: FIRE_RING.windup, recover: FIRE_RING.recover, range: FIRE_RING.radius },
-  tether: { name: 'STORM TETHER', short: 'TETHER', cooldown: TETHER.cooldown, windup: TETHER.windup, recover: TETHER.recover, range: TETHER.range },
-  chain: { name: 'CENSER CHAIN', short: 'CHAIN', cooldown: CHAIN.cooldown, windup: CHAIN.windup, recover: CHAIN.recover, range: CHAIN.range },
-  light: { name: 'CENSER LIGHT', short: 'LIGHT', cooldown: LIGHT.cooldown, windup: LIGHT.windup, recover: LIGHT.recover, range: LIGHT.radius },
+  stamp: { name: 'SHIELD STAMP', short: 'STAMP', cooldown: wait(STAMP.cooldown), windup: STAMP.windup, recover: STAMP.recover, range: STAMP.radius },
+  volley: { name: 'VOLLEY', short: 'VOLLEY', cooldown: wait(VOLLEY.cooldown), windup: VOLLEY.windup, recover: VOLLEY.recover, range: VOLLEY.range },
+  sic: { name: 'SEND THE HOUND', short: 'HOUND', cooldown: wait(SIC.cooldown), windup: SIC.windup, recover: SIC.recover, range: SIC.range },
+  vanish: { name: 'VANISH', short: 'VANISH', cooldown: wait(VANISH.cooldown), windup: VANISH.windup, recover: VANISH.recover, range: 0 },
+  knives: { name: 'KNIFE FAN', short: 'KNIVES', cooldown: wait(KNIVES.cooldown), windup: KNIVES.windup, recover: KNIVES.recover, range: KNIVES.range },
+  smoke: { name: 'SMOKE BOMB', short: 'SMOKE', cooldown: wait(SMOKEBOMB.cooldown), windup: SMOKEBOMB.windup, recover: SMOKEBOMB.recover, range: SMOKEBOMB.range },
+  firering: { name: 'FIRE RING', short: 'RING', cooldown: wait(FIRE_RING.cooldown), windup: FIRE_RING.windup, recover: FIRE_RING.recover, range: FIRE_RING.radius },
+  tether: { name: 'STORM TETHER', short: 'TETHER', cooldown: wait(TETHER.cooldown), windup: TETHER.windup, recover: TETHER.recover, range: TETHER.range },
+  chain: { name: 'CENSER CHAIN', short: 'CHAIN', cooldown: wait(CHAIN.cooldown), windup: CHAIN.windup, recover: CHAIN.recover, range: CHAIN.range },
+  light: { name: 'CENSER LIGHT', short: 'LIGHT', cooldown: wait(LIGHT.cooldown), windup: LIGHT.windup, recover: LIGHT.recover, range: LIGHT.radius },
   // The found relics beyond the javelin, hook and lodestone (shared/relickit.ts).
   bomb: { name: 'GALL BOMB', short: 'BOMB', cooldown: BOMB.cooldown, windup: BOMB.windup, recover: BOMB.recover, range: BOMB.range },
   sentry: { name: 'WIND-UP BOW', short: 'WIND-UP', cooldown: SENTRY.cooldown, windup: SENTRY.windup, recover: SENTRY.recover, range: 0 },
