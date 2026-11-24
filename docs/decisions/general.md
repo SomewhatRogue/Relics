@@ -377,3 +377,9 @@ another quest that's on the job board and say you need to do work and build up r
 - Small edits in the Town quests chat's files (idle): `client/errandwords.ts` (firstVisit trimmed, firstWork,
   fresh) and one line in `client/townui.ts` (the first meeting calls firstMeeting). tests/firstmeet.test.ts.
 - Lines through the lore keeper and the line editor. Left out: the line editor's biting lodge dog (new lore). Claude Opus 5.5
+
+## 2026-11-24: the runner goes round the millpond
+
+Kyle: "The orphan from the Drowned Rat runs over the pond." The runner's way (client/runnerpath.ts, Town quests'
+file, a small edit) only went round buildings; deep water now counts too, so Tam goes round the millpond. Only the
+Rogue's runner crossed it. tests/runnerpond.test.ts checks every class's way from its hall to the hero. Claude Opus 5.5

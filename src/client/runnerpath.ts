@@ -8,10 +8,12 @@ import { doorAt, inRamp, levelAt, type GameMap } from '../shared/arena';
 type P = { x: number; y: number };
 const CELL = 0.5, MARGIN = 0.35;
 
-/** Inside a building (with a little room), or off the map. */
+const near = (a: { x: number; y: number; w: number; h: number }, x: number, y: number) => x > a.x - MARGIN && x < a.x + a.w + MARGIN && y > a.y - MARGIN && y < a.y + a.h + MARGIN;
+
+/** Inside a building or deep water (the millpond: General, 2026-11-24, Tam ran over it), with a little room, or off the map. */
 export function blocked(map: GameMap, x: number, y: number): boolean {
   if (x < 0.6 || y < 0.6 || x > map.w - 0.6 || y > map.h - 0.6) return true;
-  return map.blocks.some((b) => x > b.x - MARGIN && x < b.x + b.w + MARGIN && y > b.y - MARGIN && y < b.y + b.h + MARGIN);
+  return map.blocks.some((b) => near(b, x, y)) || !!map.water?.some((w) => w.deep && !w.span && near(w, x, y));
 }
 
 /** From one point to the next beside it: the same level, or on the steps between two. */
