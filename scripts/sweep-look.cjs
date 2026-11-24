@@ -21,6 +21,8 @@ const SCENES = {
   woodnight: { q: 'hero=WARRIOR', note: 'A wood at night', job: { time: 'night', place: WOOD, objective: 'hunt', rooms: 1, seed: 11 }, mid: true },
   cut: { q: 'hero=WARRIOR&cut=1', note: 'The Open Cut' },
   rat: { q: 'hero=WARRIOR&day=0.9', note: 'The Drowned Rat', door: 'tavern' },
+  // (Under the church, in by the grate; no town door, so the sweep makes one.)
+  keeping: { q: 'hero=WARRIOR&day=0.9', note: 'The Keeping Room', door: 'keeping' },
   spells: { q: 'hero=MAGE', note: 'A Mage in a fight', job: { time: 'dusk', place: WOOD, objective: 'hunt', rooms: 1, seed: 11 }, mid: true, fight: true },
 };
 const DEVICES = { phone: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }, laptop: { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 2 } };
@@ -36,7 +38,7 @@ function stage(s) {
     if (s.job) g.startJob({ ...g.jobs()[1], twist: 'none', ...s.job });
     // In town: a new hero's arrival scene (client/runner.ts) ends when they leave the street, so in a door and out again.
     if (s.at) (g.enter(g.room.map.blocks.find((b) => b.door === 'tavern')), await wait(300), g.leave());
-    if (s.door) (g.outside && g.leave(), g.enter(g.room.map.blocks.find((b) => b.door === s.door)));
+    if (s.door) (g.outside && g.leave(), g.enter(g.room.map.blocks.find((b) => b.door === s.door) || { kind: 'wall', x: 30, y: 30, w: 1, h: 1, door: s.door }));
     await wait(400);
     const h = g.hero, m = g.room.map;
     if (s.mid) Object.assign(h, { x: m.w / 2, y: m.h / 2 });

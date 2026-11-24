@@ -31,6 +31,8 @@ export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | '
 export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
+  // The Keeping Room's own (shared/keepingroom.ts, client/tilefurnkeep.ts).
+  | 'trough' | 'cradle' | 'hoard' | 'lip'
   // A cottage's inner wall, a weaver's loom, a stall in a barn.
   | 'partition' | 'loom' | 'pen'
   // Wickhold's other buildings and things in the street.

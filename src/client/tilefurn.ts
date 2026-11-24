@@ -10,6 +10,7 @@ import { LOOK } from './blocklook';
 import { KX, KZ, type Rect } from './tilekit';
 import { caskTall, casks, cart, sacks, tub } from './tilefurn2';
 import { DRAW3 } from './tilefurn3';
+import { DRAWK } from './tilefurnkeep';
 import { CLOTH, IRON, paint, planks, ROCK, slab, TIM, toCut } from './tilefurnkit';
 import type { Cut } from './three/propcards';
 
@@ -103,7 +104,7 @@ const anvil: Draw = (r, W, D, T) => {
 const DRAW: Record<string, Draw> = {
   bench: (r, W, D, T) => bench(r, W, D, T), table: table('table'), maptable: table('maptable'), dicetable: table('dicetable'),
   armtable: table('armtable'), skinbench: table('skinbench'), desk, counter: solid(false), pew: solid(true), bed, altar, anvil,
-  sacks, cart, casks, tub, ...DRAW3,
+  sacks, cart, casks, tub, ...DRAW3, ...DRAWK,
 };
 
 /** The kinds drawn here. */

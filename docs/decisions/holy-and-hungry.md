@@ -402,3 +402,18 @@ the sewer grate", in place of "Talk to the under church about growing the Want";
   the church's word for its best, nothing says it's true; Dorcas's coin for a title is trade, not keeping.
 - Escaped the em dashes in my own tests' checks (tests/keeping.test.ts, tests/vowed.test.ts).
 - **Checked:** the touched tests, `npm run check`, the full suite (2309 passed).
+
+## 2026-11-24: the Keeping Room's own furniture, the tile way (slice 2 of keeping-room.md) (Claude Opus 5.5)
+
+- Four new furniture kinds, drawn in the kit as cards in my own `src/client/tilefurnkeep.ts`: `trough` (a stone
+  basin, dark water, the drip's ring), `cradle` (empty, hooded, on rockers), `hoard` (the shelves: pewter jugs,
+  stacked plate, rings, lit tallow stubs, mixed by a seeded hash so no two boards match) and `lip` (the cistern's low
+  stone kerb, black water at its back edge). Small edits in shared files: the kinds in `shared/arena.ts`, their looks
+  in `client/blocklook.ts`, one spread in `client/tilefurn.ts` DRAW.
+- The room swaps its stand-ins for them. The tall partitions at the lip hid the trough and the cot; the low lip
+  shows the whole room now and still blocks the cistern.
+- `scripts/sweep-look.cjs` gains a `keeping` scene, and a door with no town block gets a made-up one, so any
+  interior can be shot.
+- Not yet: the iron door in the dry arch and Dorcas's own look (she wears the stock elder). The brazier is the
+  stock one; a kettle on it would be a card of its own.
+- **Checked:** phone 2.5D sweep (shots/sweep/keep3), the room and furniture tests, `npm run check`, the full suite.

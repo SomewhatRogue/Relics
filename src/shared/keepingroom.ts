@@ -1,9 +1,8 @@
 /**
  * The Keeping Room, walkable (docs/design/keeping-room.md; Kyle, 2026-11-23: "claim walkable room here, map it out").
  * A town interior entered from the sewer grate's bricked arch (client/keepingui.ts), walked out of at the bottom,
- * back up at the grate. Slice 1: the room and Dorcas, with the town's furniture standing in for its own (the trough,
- * the cradle, the brazier and its kettle, the iron door come with the art, the tile way). No light but yours, the
- * brazier's coals and the tallow stubs.
+ * back up at the grate. Its own furniture drawn the tile way (client/tilefurnkeep.ts: the trough, the cradle, the
+ * hoard's shelves). No light but yours, the brazier's coals and the tallow stubs.
  *
  *       0 1 2 3 4 5 6 7 8 9 0 1
  *    0  # # # # # # # # # # # #      shelves all along the back and down both sides
@@ -25,16 +24,16 @@ export function keepingRoom(): GameMap {
   const W = 12, H = 11;
   return room('THE KEEPING ROOM', W, H, { floor: 'flagstone', back: 'stone', ambient: [0.1, 0.1, 0.13], moon: 0 }, [
     // The shelves: along the back, down both sides.
-    b('shelf', 1, 0.5, 10, 1),
-    b('shelf', 0.6, 1.8, 0.9, 4),
-    b('shelf', 10.5, 1.8, 0.9, 5.2),
-    // The cradle among the hoard (stand-in), the cot, the trough (stand-in) under its drip.
-    b('bench', 3, 2.9, 1.2, 0.7),
+    b('hoard', 1, 0.5, 10, 1),
+    b('hoard', 0.6, 1.8, 0.9, 4),
+    b('hoard', 10.5, 1.8, 0.9, 5.2),
+    // The cradle among the hoard, the cot, the trough under its drip.
+    b('cradle', 3, 2.9, 1.2, 0.7),
     b('bed', 8.6, 5.8, 1.6, 1),
-    b('counter', 1.2, 5.9, 1.8, 0.9),
+    b('trough', 1.2, 5.9, 1.8, 0.9),
     // The cistern's lip, either side of the steps down from the arch.
-    b('partition', 0, 8, 4, 0.6),
-    b('partition', 8, 8, 4, 0.6),
+    b('lip', 0, 8, 4, 0.6),
+    b('lip', 8, 8, 4, 0.6),
   ], [n('DORCAS', 7.4, 4.9, KEEPING_DOOR, 'elder')], {
     // No torches: the brazier's coals, and whatever light the hero brings.
     torches: [],

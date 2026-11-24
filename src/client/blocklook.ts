@@ -24,6 +24,11 @@ export const LOOK: Record<Block['kind'], Look> = {
   counter: { tall: 10, roof: '#6b4a2b', ridge: '#7a5a34', wall: '#4a3420', windows: false, furniture: true },
   bed: { tall: 6, roof: '#7a6a8a', ridge: '#d8d0bc', wall: '#4a3420', windows: false, furniture: true },
   shelf: { tall: 20, roof: '#4a3420', ridge: '#4a3420', wall: '#5a3d22', windows: false, furniture: true },
+  // The Keeping Room's own (client/tilefurnkeep.ts draws them in 2.5D): a stone trough, a cradle, the hoard's shelves.
+  trough: { tall: 8, roof: '#3c3c3c', ridge: '#16282a', wall: '#2c2c2c', windows: false, furniture: true },
+  cradle: { tall: 8, roof: '#3a2a1e', ridge: '#4e3826', wall: '#24180f', windows: false, furniture: true },
+  lip: { tall: 5, roof: '#4f4f4f', ridge: '#070c0c', wall: '#2c2c2c', windows: false, furniture: true },
+  hoard: { tall: 20, roof: '#3a2a1e', ridge: '#5e6872', wall: '#24180f', windows: false, furniture: true },
   anvil: { tall: 8, roof: '#6a6470', ridge: '#8a8494', wall: '#34313a', windows: false, furniture: true },
   altar: { tall: 11, roof: '#d8d0bc', ridge: '#e8e0c8', wall: '#6a6470', windows: false, furniture: true },
   pew: { tall: 7, roof: '#5a3d22', ridge: '#6b4a2b', wall: '#3a2a1a', windows: false, furniture: true },
