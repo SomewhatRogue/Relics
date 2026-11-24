@@ -8,7 +8,7 @@
  */
 import type { GameMap } from '../shared/arena';
 import { Rng } from '../shared/rng';
-import { lookOf, type SceneKind } from './looks';
+import { lookOf, pavedAt, type SceneKind } from './looks';
 import { blocked } from './ratspots';
 import { soilAt } from './soil';
 import { KX, KZ, type Rect } from './tilekit';
@@ -26,7 +26,7 @@ export function scenesOf(m: GameMap): Scene[] {
   cache.set(m, out);
   const rng = new Rng([...m.name].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) % 1000003, m.w * 131 + m.h * 977 + 17));
   // Which scenes: the map's look says (looks.ts), each once before any comes round again.
-  const pool = lookOf(m)?.scenes ?? [];
+  const pool = lookOf(m)?.scenes ?? [], town = lookOf(m)?.country === 'town';
   if (!pool.length) return out;
   let kinds: SceneKind[] = [];
   const want = Math.min(4, Math.max(1, Math.round((m.w * m.h) / 400)));
@@ -44,7 +44,7 @@ export function scenesOf(m: GameMap): Scene[] {
     if (Math.hypot(m.hero.x - x, m.hero.y - y) < 4 || (m.exit && Math.hypot(m.exit.x + m.exit.w / 2 - x, m.exit.y + m.exit.h / 2 - y) < 3)) continue;
     // By a tree or a rock (company), never on top of one; apart from the other scenes.
     const d = Math.min(...m.rounds.map((r) => Math.hypot(r.x - x, r.y - y) - r.r), 99);
-    if (d < 0.7 || d > 3.2 || out.some((s) => Math.hypot(s.x - x, s.y - y) < 9)) continue;
+    if (d < 0.7 || (!town && d > 3.2) || (town && !pavedAt(m, x, y)) || out.some((s) => Math.hypot(s.x - x, s.y - y) < 9)) continue;
     out.push({ kind: kinds.splice(ki, 1)[0], x, y });
   }
   return out;
@@ -70,6 +70,8 @@ const FLOOR: Record<Exclude<SceneKind, 'graves'>, string[]> = {
   stake: ['...eeeeee...', '.eeWeeeeeee.', '.eeeeeewEee.', '..EEeeeeEE..', '....EEEE....'],
   // The dark it lies in, moss creeping out from under it.
   log: ['...EEEEEEEEEEEEEEEEEEEEE....', '.EEEgEEEEEEEEEEEEEEEgEEEEE..', '...EEEEEEEEEEEEEEEEEEEEE....'],
+  // An iron grate set in a kerb of dressed stone, black under the bars.
+  drain: ['.KKKKKKKKKKKKK.', 'KpspspspspspspK', 'KsohohohohohosK', 'KsohohohohohosK', 'KsohohohohohosK', 'KsKKKKKKKKKKKsK', '.KKKKKKKKKKKKK.'],
   // Bones laid in a ring round an old stain.
   circle: ['.....W..w..W.....', '..w....rrrr....W.', '.W...rrRRRRrr...w', '....rRRrRRRRRr...', '.w...rrRRRrrr...W', '..W....rrr.....w.', '.....w..W..w.....'],
 };
@@ -101,6 +103,8 @@ const UP: Record<Exclude<SceneKind, 'graves'>, { rows: string[]; glow?: [number,
   stake: [{ dx: 0, dy: 0, rows: ['.oWWo.', 'oWoWoo', 'oWWWwo', '.owwo.', '.RbtR.', '.RbtRR', '..bt.R', '..bt..', '..bt..', '..bt..', '..bt..', '..bt..', '.Ebte.'] }],
   // A fallen trunk: its cut end pale, its top lit, moss along it and a red cap grown on it.
   log: [{ dx: 0, dy: 0.05, rows: ['..........mm......c.......', '...oooommmmmmooooccoooo...', '..oYyottttmmttttttttttto..', '.oYyYobbbbbbbbbbbbbbbbbbo.', '.oyYyobbbbbBbbbbbbbBbbbbo.', '.oYyYoBBBBBBBBBBBBBBBBBBo.', '..oyyoBBBBBBBBBBBBBBBBBo..', '...ooooooooooooooooooooo..'] }],
+  // (A drain is all in the floor.)
+  drain: [],
   // Three candle stubs among the bones.
   circle: [
     { dx: -0.3, dy: -0.12, rows: ['.o.', '.o.', 'oxo', 'KxK'], glow: [[1, 0], [1, 1]] },

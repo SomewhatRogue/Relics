@@ -123,6 +123,10 @@ wheat fields 26, rock floors (mines, caves) 17 and cobbled villages 14 had none.
 `cave` (rubble, lair); a village on cobbles (earth in the redraw) is a yard. Left: 6 rooms of paved street with stone
 behind, the town, rooms indoors, the Deep's halls.
 
+2026-11-24: the paved streets and Wickhold are in, as a seventh country, `town` (rainwet, mossed): puddles and moss
+on the paving only, and a drain as its scene. The Deep's halls on rock already draw the cave's looks. Left: rooms
+indoors.
+
 ## Later
 
 - Ridges: drawn earth lips where the land rises (the height levels we have).

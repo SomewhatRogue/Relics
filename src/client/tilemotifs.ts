@@ -7,13 +7,14 @@
  * - tallgrass: a stand of longer, paler blades (three/tufts3d.ts stands tufts thick in it);
  * - burn: a black heart, ash round it, scorched turf at the edge, charred ends lying in it;
  * - ring: a ring of red-capped mushrooms on darker turf;
+ * - puddle, moss (a town's): rain lying in the low stones with the courses showing through the wet; moss in the damp;
  * - drift: small things lying along the wind in a lens: dead leaves, bones, stones, pale flowers, blood-red ones.
  * Zones go under the groves' floors; drifts and rings go on top of everything strewn.
  */
 import type { GameMap } from '../shared/arena';
 import { Rng } from '../shared/rng';
 import type { ScatterKind } from '../shared/scatter';
-import { motifsOf, type Motif } from './looks';
+import { motifsOf, pavedAt, type Motif } from './looks';
 import { EARTH, clumpLight, earthAt } from './tilegrounds';
 import { KX, KZ, type Rect } from './tilekit';
 import { openPx } from './tilelitter';
@@ -22,6 +23,9 @@ import { stamp } from './tilestrew';
 const MOSS = ['#0b130f', '#111c15', '#17251a', '#1f3021'], MIRE = ['#14110d', '#1c1812', '#251f18', '#2f271e'];
 const SLATE = ['#111014', '#18161b', '#201e24', '#2a282f'];
 const TALL = ['#121b15', '#1f2e1f', '#2a3e27', '#384f2c'], ASH = ['#0b0a0a', '#131214', '#1c1b1e', '#28272b'];
+const WET = 'rgba(4, 7, 12, 0.5)', DAMP = 'rgba(4, 7, 12, 0.26)', STAIN = 'rgba(10, 26, 14, 0.42)';
+/** A puddle: still water, the sky in its far half, the lit lip of its far edge, a glint. */
+const STILL = '#17222c', SKY = '#22313d', RIM = '#34444f', SHINE = '#566a78';
 const WATER = '#0d1317', DEEP = '#070b0e', GLINT = '#26323b', LIP = '#0b110c', SHADOW = '#1c1611', SCORCH = ['#12160f', '#191e14'];
 
 const h01 = (a: number, b: number, s: number) => {
@@ -54,6 +58,7 @@ export function paintZones(m: GameMap, rect: Rect): void {
   const open = openPx(m), W = m.w * KX, H = m.h * KZ, floor = m.theme.floor as string;
   // (A hollow is moss in turf, wet slate in rock, mire in bare earth.)
   const dip = floor === 'grass' ? MOSS : floor === 'rock' ? SLATE : MIRE;
+  const paved = (px: number, py: number) => pavedAt(m, px / KX, py / KZ);
   for (const o of motifsOf(m)) {
     if (o.kind.startsWith('drift')) continue;
     const z = zone(o, open, W, H);
@@ -95,6 +100,25 @@ export function paintZones(m: GameMap, rect: Rect): void {
         const x = z.cx + Math.round((r.next() - 0.5) * z.rx), y = z.cy + Math.round((r.next() - 0.5) * z.ry), n = 3 + r.int(4), up = r.next() < 0.5 ? -1 : 1;
         for (let t = 0; t < n; t++) if (open(x + t, y + Math.round(t * 0.4 * up))) rect(x + t, y + Math.round(t * 0.4 * up), 1, 1, t === n - 1 ? '#3a1a14' : '#050505');
       }
+    } else if (o.kind === 'puddle') {
+      // Rain lying in the low stones: the courses show through the wet round it; still water in the middle, the
+      // bank nearer the light dark, the far edge lit, the sky in its far half, a glint or two.
+      z.each((px, py, d) => {
+        if (!paved(px, py)) return;
+        const w = d + clumpLight(px, py, 7, 4, 93) * 0.3;
+        if (w > 0.64) return rect(px, py, 1, 1, w > 0.86 ? DAMP : WET);
+        if (w > 0.55) return rect(px, py, 1, 1, py < z.cy ? DEEP : RIM);
+        rect(px, py, 1, 1, py % 3 === 0 && h01(px >> 2, py, 3) < 0.25 ? SHINE : py > z.cy ? SKY : STILL);
+      });
+    } else if (o.kind === 'moss') {
+      // Moss in the damp: thick clumps in the middle, thinning to a stain in the seams at the edge.
+      z.each((px, py, d) => {
+        if (!paved(px, py)) return;
+        const lv = clumpLight(px, py, 5, 3, 97) + (1 - d) * 0.3;
+        if (lv > 0.24) rect(px, py, 1, 1, MOSS[lv > 0.38 ? 3 : 2]);
+        else if (lv > 0.1) rect(px, py, 1, 1, MOSS[1]);
+        else if (lv > -0.05) rect(px, py, 1, 1, STAIN);
+      });
     } else if (o.kind === 'ring') {
       z.each((px, py, d) => d < 0.8 && clumpLight(px, py, 6, 4, 61) < 0.02 && rect(px, py, 1, 1, MOSS[d < 0.4 ? 1 : 2]));
     }

@@ -15,9 +15,9 @@ import { scattered } from '../shared/scatter';
 import { blocked } from './ratspots';
 import { soilAt } from './soil';
 
-export type MotifKind = 'hollow' | 'pool' | 'bald' | 'tallgrass' | 'burn' | 'ring' | 'drift:leaves' | 'drift:bones' | 'drift:stones' | 'drift:pale' | 'drift:red';
-export type SceneKind = 'grave' | 'graves' | 'cairn' | 'campfire' | 'circle' | 'stake' | 'log';
-export type Country = 'wood' | 'fen' | 'fields' | 'yard' | 'crop' | 'cave';
+export type MotifKind = 'hollow' | 'pool' | 'bald' | 'tallgrass' | 'burn' | 'ring' | 'puddle' | 'moss' | 'drift:leaves' | 'drift:bones' | 'drift:stones' | 'drift:pale' | 'drift:red';
+export type SceneKind = 'grave' | 'graves' | 'cairn' | 'campfire' | 'circle' | 'stake' | 'log' | 'drain';
+export type Country = 'wood' | 'fen' | 'fields' | 'yard' | 'crop' | 'cave' | 'town';
 /** A motif laid on a map: its middle and half sizes (tiles), a drift's heading (radians), a variant. */
 export interface Motif { kind: MotifKind; x: number; y: number; rx: number; ry: number; a: number; v: number }
 export interface Look { name: string; country: Country; motifs: [MotifKind, number][]; scenes: SceneKind[] }
@@ -38,10 +38,14 @@ export const LOOKS: Look[] = [
   { name: 'burnt', country: 'crop', motifs: [['burn', 3], ['bald', 1], ['drift:bones', 2]], scenes: ['stake', 'circle'] },
   { name: 'rubble', country: 'cave', motifs: [['drift:stones', 4], ['pool', 2], ['drift:bones', 1]], scenes: ['cairn', 'campfire'] },
   { name: 'lair', country: 'cave', motifs: [['drift:bones', 3], ['burn', 2], ['pool', 1], ['drift:stones', 1]], scenes: ['stake', 'circle', 'campfire'] },
+  // (Paved places: Wickhold and a job's stone streets. Rain lying in the low flags, moss in the damp, a drain.)
+  { name: 'rainwet', country: 'town', motifs: [['puddle', 3], ['moss', 1], ['drift:leaves', 1]], scenes: ['drain'] },
+  { name: 'mossed', country: 'town', motifs: [['moss', 3], ['puddle', 1], ['drift:leaves', 2]], scenes: ['drain'] },
 ];
 
 /** Half sizes each motif may take (tiles across; `ry` is that times `flat`). */
 const SIZE: Record<MotifKind, [number, number, number]> = {
+  puddle: [0.7, 1.5, 0.55], moss: [1.1, 2.4, 0.6],
   hollow: [1.6, 2.6, 0.6], pool: [1.3, 2.1, 0.55], bald: [1.2, 2.0, 0.6], tallgrass: [2.6, 4.2, 0.7], burn: [1.2, 1.9, 0.6], ring: [0.8, 1.2, 0.85],
   'drift:leaves': [2.2, 3.6, 0.3], 'drift:bones': [1.6, 2.4, 0.3], 'drift:stones': [1.8, 3.0, 0.3], 'drift:pale': [2.2, 3.8, 0.3], 'drift:red': [2.4, 4.0, 0.32],
 };
@@ -49,15 +53,16 @@ const SIZE: Record<MotifKind, [number, number, number]> = {
 const seedOf = (m: GameMap, k: number) => [...m.name].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) % 1000003, m.w * 131 + m.h * 977 + k);
 
 /**
- * What country a map's ground is, from its floor and what stands behind it; null where nothing here applies (the
- * town, a room indoors, a paved street with stone behind it).
+ * What country a map's ground is, from its floor and what stands behind it; null where nothing here applies (a room
+ * indoors).
  */
 export function countryOf(m: GameMap): Country | null {
   const floor = m.theme.floor as string, back = m.theme.back as string;
-  if (m.name === 'WICKHOLD' || back === 'plaster') return null;
-  // (A village on cobbles lies on trodden earth in the redraw, three/redrawfloor.ts: a yard.)
-  if (floor === 'cobble') return back !== 'stone' ? 'yard' : null;
+  if (back === 'plaster') return null;
+  // (A village on cobbles lies on trodden earth in the redraw, three/redrawfloor.ts: a yard. Stone behind: a town.)
+  if (floor === 'cobble') return back !== 'stone' ? 'yard' : 'town';
   if (!scattered(m)) return null;
+  if (floor === 'flagstone') return 'town';
   if (floor === 'rock') return 'cave';
   if (floor === 'wheat') return 'crop';
   if (floor === 'dirt') return 'yard';
@@ -85,6 +90,9 @@ export function openAt(m: GameMap, x: number, y: number): boolean {
   return !m.water?.some((w) => x > w.x - 0.4 && x < w.x + w.w + 0.4 && y > w.y - 0.4 && y < w.y + w.h + 0.4);
 }
 
+/** Is (x, y) the paved floor itself (a town's motifs lie on its stones, not on its greens and lanes)? */
+export const pavedAt = (m: GameMap, x: number, y: number) => !m.soil?.length || soilAt(m, x, y) === 'cobble';
+
 /** The look's motifs laid on this map. */
 export function motifsOf(m: GameMap): Motif[] {
   const hit = cache.get(m);
@@ -93,7 +101,7 @@ export function motifsOf(m: GameMap): Motif[] {
   cache.set(m, out);
   const look = lookOf(m);
   if (!look) return out;
-  const rng = new Rng(seedOf(m, 9)), scale = Math.min(6, (m.w * m.h) / 672);
+  const rng = new Rng(seedOf(m, 9)), scale = Math.min(6, (m.w * m.h) / 672), town = look.country === 'town';
   for (const [kind, per] of look.motifs) {
     const want = Math.max(1, Math.round(per * scale)), [lo, hi, flat] = SIZE[kind], drift = kind.startsWith('drift');
     let got = 0;
@@ -101,7 +109,7 @@ export function motifsOf(m: GameMap): Motif[] {
       const rx = lo + rng.next() * (hi - lo), ry = rx * flat, x = 1.5 + rx + rng.next() * (m.w - 3 - 2 * rx), y = 2 + ry + rng.next() * (m.h - 4 - 2 * ry);
       // (The wind lies a little north of east: a drift lies along it.)
       const a = -0.25 + (rng.next() - 0.5) * 0.7, v = rng.int(1000);
-      if (!openAt(m, x, y) || Math.hypot(m.hero.x - x, m.hero.y - y) < 2.5) continue;
+      if (!openAt(m, x, y) || Math.hypot(m.hero.x - x, m.hero.y - y) < 2.5 || (town && !pavedAt(m, x, y))) continue;
       // A zone wants most of its ground open; a drift or a stand of grass only its middle (it parts round things).
       const rim = [0, 1, 2, 3, 4, 5].map((q) => openAt(m, x + Math.cos(q * 1.047) * rx * 0.8, y + Math.sin(q * 1.047) * ry * 0.8)).filter(Boolean).length;
       if (rim < (drift || kind === 'tallgrass' ? 3 : 5)) continue;

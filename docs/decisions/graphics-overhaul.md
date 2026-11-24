@@ -938,3 +938,16 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - tilestrew.ts `fern`, tilelitter.ts: ferns at the edges of the grove floors. looks.ts, tilescenes.ts: a fallen log,
   mossy with a pale cut end, in the gallows and mossy woods' scene pools. Paint and a card, never collided.
 - Checked on phone 2.5D: Gallows Wood by day and night, Sallow Carr at night; no page errors. (Claude Fable 5.2)
+
+## 2026-11-24: the town has a look: puddles, moss, a drain
+
+- The pattern book stopped at Wickhold's wall and at a job's paved streets (the coverage gap in forest-redraw.md).
+- looks.ts: a seventh country, `town` (a cobbled floor with stone behind it, Wickhold included; a flagstone floor),
+  with two looks, `rainwet` and `mossed`. New motifs `puddle` (rain lying in the low stones: the courses show through
+  the wet round it, still water in the middle with the far edge lit) and `moss` (clumps in the damp, thinning to a
+  stain in the seams); a new scene, `drain` (an iron grate in a stone kerb, all in the floor). `pavedAt`: a town's
+  motifs and scenes lie on its paving only, never on its greens or lanes. Paint only, nothing collided, the map
+  files untouched.
+- tests/looks.test.ts: the town's country, and that its puddles, moss and drains are on paving.
+- Checked on phone 2.5D round Wickhold's square; no page errors. (Claude Fable 5.2)
+

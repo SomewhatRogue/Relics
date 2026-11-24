@@ -55,7 +55,7 @@ export function tuftMesh(m: GameMap, ledge: number): THREE.Mesh | null {
   S.edge = false;
   const stands = motifsOf(m).filter((o) => o.kind === 'tallgrass');
   // (Nothing stands in water, on a worn patch or in a burn.)
-  const bare = motifsOf(m).filter((o) => o.kind === 'pool' || o.kind === 'bald' || o.kind === 'burn');
+  const bare = motifsOf(m).filter((o) => o.kind === 'pool' || o.kind === 'puddle' || o.kind === 'bald' || o.kind === 'burn');
   const lift = stacked(m), water = (x: number, y: number) => !!m.water?.some((w) => x >= w.x && x <= w.x + w.w && y >= w.y && y <= w.y + w.h);
   for (let ty = 0; ty < m.h; ty++) for (let tx = 0; tx < m.w; tx++) {
     const k = growth(m, tx + 0.5, ty + 0.5);

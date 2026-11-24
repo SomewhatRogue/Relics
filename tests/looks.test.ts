@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { newRun, runRoom } from '../src/sim/run';
 import { board } from '../src/shared/jobs';
-import { LOOKS, countryOf, lookOf, motifsOf, openAt } from '../src/client/looks';
+import { LOOKS, countryOf, lookOf, motifsOf, openAt, pavedAt } from '../src/client/looks';
+import { townMap } from '../src/shared/town';
+import { newWorld } from '../src/shared/story';
 import { scenesOf } from '../src/client/tilescenes';
 
 /**
@@ -39,5 +41,14 @@ describe('the pattern book', () => {
     }
     expect(laid).toBeGreaterThan(10);
     expect(seen.size).toBeGreaterThan(2);
+  });
+
+  it('the town has a look of its own: puddles and moss on its paving, never on its greens or lanes', () => {
+    const m = townMap(newWorld());
+    expect(countryOf(m)).toBe('town');
+    const laid = motifsOf(m).filter((o) => o.kind === 'puddle' || o.kind === 'moss');
+    expect(laid.length).toBeGreaterThan(4);
+    for (const o of laid) expect(pavedAt(m, o.x, o.y)).toBe(true);
+    for (const s of scenesOf(m)) expect(pavedAt(m, s.x, s.y)).toBe(true);
   });
 });
