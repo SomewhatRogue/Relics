@@ -900,3 +900,16 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Camera: `?pitch=NN` (tilelook.ts, 15 to 60, address only) to look at another angle; a side by side at 37, 30 and 25
   sent to Kyle. Not changed: the redraw's art is drawn for 36.87. (Claude Fable 5.2)
 
+## 2026-11-23: ANGLE, the camera's angle as an option
+
+- Kyle, of the side by side at 37, 30 and 25 degrees: "Give me the ability to toggle it in game. And keep working on
+  making the game beautiful".
+- tilelook.ts: ANGLE: HIGH (the redraw's 36.87), LOW (30), LOWEST (asin 0.4, about 24), a button under CAMERA in the
+  options box; saved on the device (`relic.angle`), saves and reloads as the tile buttons did; `?pitch=low` or a
+  number in the address wins. Each is an angle where a floor tile is a whole number of pixels deep.
+- tilekit.ts: KZ and KY follow the angle (12 and 16; 10 and 17; 8 and 18), so the floor, the fronts and everything
+  placed by them are drawn at the size the camera shows, not squeezed; the cobble stamp's courses are half of KZ.
+  Node and `?redraw=0` get 12 and 16 as before.
+- Checked at all three: Wickhold's street, a village, a wood, Sallow Carr's pools on phone 2.5D; no page errors; full
+  suite 280 files passed. main.ts: `angleButton()` after `camButton()`. (Claude Fable 5.2)
+

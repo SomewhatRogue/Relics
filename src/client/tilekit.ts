@@ -8,10 +8,14 @@
  */
 import type { Rng } from '../shared/rng';
 import { gradeCanvas, MOSS } from './darkgold';
+import { PITCH_DEG } from './tilelook';
 
 export type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
 /** Render pixels a tile across, a floor tile deep, and a wall a tile high. */
-export const KX = 20, KZ = 12, KY = 16;
+// (At the redraw's own angle, 12 and 16; at the lower angles a player may pick, tilelook.ts ANGLE, 10 and 17 or 8 and 18:
+// the ground is drawn at the depth the camera shows it, so it is never squeezed.)
+const RAD = (PITCH_DEG * Math.PI) / 180;
+export const KX = 20, KZ = Math.round(KX * Math.sin(RAD)), KY = Math.round(KX * Math.cos(RAD));
 
 const MORTAR = '#141414', STONE = ['#2c2c2c', '#3c3c3c', '#4f4f4f'], LIGHT = ['#3c3c3c', '#4f4f4f', '#6b6b6b'];
 // (Daub is drawn grey, so it takes the house's own wall colour with the stone: tint below.)
@@ -25,13 +29,16 @@ function stone(rect: Rect, x: number, y: number, w: number, h: number, i: number
 }
 
 /** One floor tile of a stone street or flags at (x, y): 20 by 12, four cobbles, two half slabs or one slab. */
+/** Half a floor tile's depth: a stone's course. */
+const HALF = KZ / 2;
+
 export function floorStamp(rect: Rect, rng: Rng, x: number, y: number, slabs: boolean): void {
   rect(x, y, KX, KZ, MORTAR);
   // (Mostly the darker stone: the ground stays a step under the walls, the quietest tier.)
   const v = rng.next(), lit = () => (rng.next() < 0.7 ? 0 : 1);
   if (v < (slabs ? 0.45 : 0.08)) stone(rect, x, y, KX - 1, KZ - 1, lit());
-  else if (v < (slabs ? 0.85 : 0.28)) stone(rect, x, y, KX - 1, 5, lit()), stone(rect, x, y + 6, KX - 1, 5, lit());
-  else for (const [i, j] of [[0, 0], [10, 0], [0, 6], [10, 6]]) stone(rect, x + i, y + j, 9, 5, lit());
+  else if (v < (slabs ? 0.85 : 0.28)) stone(rect, x, y, KX - 1, HALF - 1, lit()), stone(rect, x, y + HALF, KX - 1, HALF - 1, lit());
+  else for (const [i, j] of [[0, 0], [10, 0], [0, HALF], [10, HALF]]) stone(rect, x + i, y + j, 9, HALF - 1, lit());
   if (rng.next() < 0.14) rect(x + rng.int(12), y + KZ - 1, 3 + rng.int(4), 1, MOSS[rng.int(3)]);
 }
 

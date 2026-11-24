@@ -113,7 +113,6 @@ behind, the town, rooms indoors, the Deep's halls.
 - Ridges: drawn earth lips where the land rises (the height levels we have).
 - Groves inside maps: trees placed in clumps rather than one by one (the map generators, Territories' files).
 - Mist banks at the edges and drifting motes (living world L4).
-- A lower camera: `?pitch=30` in the address shows it (look only). The floor's art would want drawing at that angle
-  (a tile 10 deep, not 12) to stay crisp. Kyle to call from the side by side.
+- (In, 2026-11-23: ANGLE in the options, HIGH, LOW or LOWEST, the ground drawn at each: tilelook.ts, tilekit.ts.)
 - Looks for a paved street, the town's edges, the Deep. More looks and motifs as places ask for them; a look chosen by the place's story, not only its name.
 - Groves that move a map's trees (the generators; changes fights).

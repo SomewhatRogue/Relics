@@ -39,8 +39,58 @@ const tilesRaw = read('tiles'), redrawRaw = read('redraw');
 export const TILES = { on: tilesRaw === null || on(tilesRaw), even: typeof location !== 'undefined' && on(new URLSearchParams(location.search).get('even')) };
 // (On by default in a page only: Node's tests build today's 3D, which `?redraw=0` still shows.)
 export const REDRAW = { on: redrawRaw === null ? typeof location !== 'undefined' : on(redrawRaw) };
-/** `?pitch=30` in the address: another camera angle, to look at only (the redraw's art is drawn for its own angle,
- *  where a floor tile is a whole 12 pixels deep and a wall a whole 16 high; at any other the floor is squeezed). */
-const pitchRaw = typeof location === 'undefined' ? NaN : parseFloat(new URLSearchParams(location.search).get('pitch') ?? '');
+/**
+ * The camera's angle, a player's choice (Kyle, 2026-11-23: "give me the ability to toggle it in game"): HIGH, the
+ * redraw's own; LOW, 30 degrees; LOWEST, about 24. Each is an angle where a floor tile is a whole number of render
+ * pixels deep (12, 10, 8 of its 20 across), so the ground is drawn at that size (tilekit.ts KZ) and stays crisp; a
+ * wall's height rounds to the nearest pixel (16, 17, 18). Lower looks further across the map and stands the trees
+ * and walls taller against the ground. The ANGLE button in the options box steps through them; it saves and reloads
+ * (the angle is drawn into the floor, the fronts and every card). `?pitch=low` or `?pitch=30` in the address wins.
+ */
+const ANGLE_KEY = 'relic.angle';
+export type Angle = 'high' | 'low' | 'lowest';
+const ANGLES: Record<Angle, number> = { high: PITCH_REDRAW, low: 30, lowest: (Math.asin(0.4) * 180) / Math.PI };
+const isAngle = (v: string | null): v is Angle => v === 'high' || v === 'low' || v === 'lowest';
+function startAngle(): { name: Angle | null; deg: number } {
+  if (typeof location === 'undefined') return { name: 'high', deg: PITCH_REDRAW };
+  const u = new URLSearchParams(location.search).get('pitch'), n = parseFloat(u ?? '');
+  if (isAngle(u)) return { name: u, deg: ANGLES[u] };
+  if (n >= 15 && n <= 60) return { name: null, deg: n };
+  try {
+    const sv = localStorage.getItem(ANGLE_KEY);
+    if (isAngle(sv)) return { name: sv, deg: ANGLES[sv] };
+  } catch {
+    /* nothing remembered */
+  }
+  return { name: 'high', deg: PITCH_REDRAW };
+}
+const angle = startAngle();
+/** Which angle the camera is at (null: one given by number in the address). */
+export const ANGLE = angle.name;
 /** The 2.5D camera's pitch in degrees. */
-export const PITCH_DEG = pitchRaw >= 15 && pitchRaw <= 60 ? pitchRaw : REDRAW.on ? PITCH_REDRAW : PITCH_TODAY;
+export const PITCH_DEG = REDRAW.on ? angle.deg : PITCH_TODAY;
+
+/** The ANGLE button, under CAMERA in the options box: HIGH, LOW, LOWEST, round again. Saves and reloads. */
+export function angleButton(): void {
+  const box = document.getElementById('options');
+  if (!box || !REDRAW.on) return;
+  const b = document.createElement('button'), order: Angle[] = ['high', 'low', 'lowest'];
+  b.id = 'anglebtn';
+  b.textContent = `ANGLE: ${(ANGLE ?? 'high').toUpperCase()}`;
+  b.setAttribute('aria-label', 'How low the camera looks across the map');
+  b.classList.toggle('on', ANGLE !== 'high');
+  b.addEventListener('click', () => {
+    try {
+      localStorage.setItem(ANGLE_KEY, order[(order.indexOf(ANGLE ?? 'high') + 1) % order.length]);
+    } catch {
+      /* this session only */
+    }
+    // The address may be holding an angle: take it off so the saved one counts.
+    const u = new URL(location.href);
+    u.searchParams.delete('pitch');
+    location.replace(u.toString());
+  });
+  const after = document.getElementById('camerabtn') ?? document.getElementById('viewbtn');
+  if (after) after.after(b);
+  else box.prepend(b);
+}

@@ -111,6 +111,7 @@ import { Scene } from './scene';
 import { Views } from './three/views';
 import { options } from './options';
 import { camButton } from './camwide';
+import { angleButton } from './tilelook';
 import { setMusic, setMuted } from './sfx';
 import { Music } from './music';
 import { heroVoices, primeSpot, townVoice, voiceClock } from './voiceplay';
@@ -859,6 +860,8 @@ $('#tips').addEventListener('click', () => tipsOn(!document.body.classList.conta
 options();
 // CAMERA: CLOSE or WIDE, the wider camera to try (camwide.ts).
 camButton();
+// ANGLE: how low the camera looks across the map (tilelook.ts).
+angleButton();
 ironUi();
 if (input.touch) document.body.classList.add('touch');
 
