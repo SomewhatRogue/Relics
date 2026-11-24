@@ -365,3 +365,15 @@ Claude Opus 5.5
 - More on the field: a party's budget 1, 1.3, 1.6, 1.9 (was up to 1.45) and on-screen threat 10, 13, 16, 19 (was
   up to 16), meaty 1, 2, 3, 3; and by level (shared/threat.ts LEVEL_CROWD): from level 3 each level adds 8% more small
   ones a pack (up to 60%) and 1 more on-screen threat (up to 6). Claude Opus 5.5
+
+## 2026-11-24: the first meeting with your trainer, two beats and a quest
+
+Kyle: "When you get a quest to talk to the trainer when you first get into town they should say stuff then give you
+another quest that's on the job board and say you need to do work and build up reputation."
+- The first meeting is two beats now (client/firstmeet.ts, mine): what they'll teach you in time (each line trimmed),
+  GO ON, then nobody here knows you yet, work the board in the square, there's a job up for you (`ERRANDW.firstWork`).
+  Under it, gold, "NEW QUEST: Do your first job off the board" (q1, which talkedTo already took), the old level 3
+  note, and a NEW QUEST toast. The town knowing your name is the idea; nobody says "reputation".
+- Small edits in the Town quests chat's files (idle): `client/errandwords.ts` (firstVisit trimmed, firstWork,
+  fresh) and one line in `client/townui.ts` (the first meeting calls firstMeeting). tests/firstmeet.test.ts.
+- Lines through the lore keeper and the line editor. Left out: the line editor's biting lodge dog (new lore). Claude Opus 5.5

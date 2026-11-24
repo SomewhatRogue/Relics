@@ -43,6 +43,7 @@ import { churchVowed } from './shelfui';
 import { openKeeping } from './keepingui';
 import { wantOpen, wantTalked } from '../shared/wanterrands';
 import { WANTQW } from './wanterrandwords';
+import { firstMeeting } from './firstmeet';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -101,7 +102,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const relit = pr.cls === 'HEALER' && pr.cold;
     if (relit) (pr.cold = false), g.keep(), (g.hero.cold = false);
     const lit = relit ? p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') : '';
-    if (first) return talk(ERRANDW.firstVisit[pr.cls], lit, `<p class="dim">${ERRANDW.firstNote}</p>`);
+    if (first) return firstMeeting(g, panel, head, (s) => say(name, s), lit, { label: 'TRAINING', act: () => openTrainer(g, panel, head, name, '') });
     if (relit) return panel.show(head, lit + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }], true);
     if (back && pr.level < 3) return talk(ERRANDW.back[pr.cls]);
     // A hero quest handed over just now (shared/heroquests.ts): the trainer's one line for it.

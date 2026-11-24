@@ -33,15 +33,26 @@ export const ERRANDW = {
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
   freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",
-  /** Each trainer's first meeting (a talk, not the training screen): there's plenty they'll teach you, and you start
-   *  at the board in the square (Kyle's playtest, 2026-11-13, and again 2026-11-17; lore keeper and line editor). */
+  /** Each trainer's first meeting (a talk, not the training screen), in two beats: there's plenty they'll teach you,
+   *  in time; then nobody here knows you yet, so work the board in the square, where a job's up for you (Kyle's
+   *  playtests, 2026-11-13, 2026-11-17 and 2026-11-24: "say you need to do work and build up reputation"; the town
+   *  knowing your name, never said as a word). Lore keeper and line editor, 2026-11-24. */
   firstVisit: {
-    WARRIOR: "So you're the new one. I'll teach you plenty, once you've some fight in you. Board's in the square, take a job or two.",
-    RANGER: "Found my note, then. I've plenty to show you, in time, only I don't teach anyone I haven't seen work, so take a job or two off the board in the square first. And mind the dog bowls on your way out.",
-    ROGUE: "There you are. Sit, sit. I've things to sell you that'll keep you alive, but not to a stranger, so get yourself some work off the board in the square first, and then we'll talk.",
-    MAGE: "Ah. Yes. You. Mind the circle, it's chalk. There's a great deal I can teach you, only not yet, not really, so start with the board in the square, take a job or two, and come back after, and I'll have something worked out.",
-    HEALER: "Stand there where I can see you. Hm. You'll do, you great calf. There's plenty I can teach you, in time. First get an honest job or two off the board in the square, then come back to me.",
+    WARRIOR: "So you're the new one. I'll teach you plenty, once you've some fight in you.",
+    RANGER: "Found my note, then. I'll show you plenty, in time, only I don't teach anyone I haven't seen work, so don't take it personal. And mind the dog bowls on your way out.",
+    ROGUE: "There you are. Sit, sit. I've things to sell you that'll keep you alive, or near enough, only not to a stranger, you understand, not yet.",
+    MAGE: "Ah. Yes. You. Mind the circle, it's chalk. There's a great deal I can teach you, only not yet, not really.",
+    HEALER: "Stand there where I can see you. Hm. You'll do, you great calf. There's plenty I can teach you, in time, mind, not today.",
   } as Record<HeroClass, string>,
+  firstWork: {
+    WARRIOR: "Nobody here knows your name yet. Board's in the square. Take a job and do it right.",
+    RANGER: "Town doesn't know you from a hole in a hedge. Work the board in the square till it does, there's one up there that ought to suit you.",
+    ROGUE: "Nobody pays a face they've never seen, so go and let them have a look at yours. There's a job on the board in the square, it'll do for a start, I'd think.",
+    MAGE: "Nobody here knows who you are, which is, well, the trouble. Work mends that, mostly. There's a job on the board in the square, it's yours, and do come back after.",
+    HEALER: "Folk here don't know you from the next face, and they'll not hand a stranger their dying. There's a job on the board in the square. Go and do it, and mind you come back with the same number of arms.",
+  } as Record<HeroClass, string>,
+  /** The quest they've just handed over, shown under the second beat and in a toast. */
+  fresh: 'NEW QUEST',
   /** Under that first talk, the game's own plain word (Kyle, 2026-11-17: make it clear there are things to learn,
    *  and to start at the board). */
   firstNote: 'Your trainer teaches a new skill as you level up, the first at level 3. Start with a job from the board in the square.',
