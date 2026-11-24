@@ -60,7 +60,7 @@ export function paintZones(m: GameMap, rect: Rect): void {
   const dip = floor === 'grass' ? MOSS : floor === 'rock' ? SLATE : MIRE;
   const paved = (px: number, py: number) => pavedAt(m, px / KX, py / KZ);
   for (const o of motifsOf(m)) {
-    if (o.kind.startsWith('drift')) continue;
+    if (o.kind.startsWith('drift') || o.kind === 'ridge') continue;
     const z = zone(o, open, W, H);
     if (o.kind === 'hollow' || o.kind === 'pool') {
       const pal = dip;

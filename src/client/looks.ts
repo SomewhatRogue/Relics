@@ -15,7 +15,7 @@ import { scattered } from '../shared/scatter';
 import { blocked } from './ratspots';
 import { soilAt } from './soil';
 
-export type MotifKind = 'hollow' | 'pool' | 'bald' | 'tallgrass' | 'burn' | 'ring' | 'puddle' | 'moss' | 'drift:leaves' | 'drift:bones' | 'drift:stones' | 'drift:pale' | 'drift:red';
+export type MotifKind = 'hollow' | 'pool' | 'bald' | 'tallgrass' | 'burn' | 'ring' | 'puddle' | 'moss' | 'ridge' | 'drift:leaves' | 'drift:bones' | 'drift:stones' | 'drift:pale' | 'drift:red';
 export type SceneKind = 'grave' | 'graves' | 'cairn' | 'campfire' | 'circle' | 'stake' | 'log' | 'drain';
 export type Country = 'wood' | 'fen' | 'fields' | 'yard' | 'crop' | 'cave' | 'town';
 /** A motif laid on a map: its middle and half sizes (tiles), a drift's heading (radians), a variant. */
@@ -24,18 +24,18 @@ export interface Look { name: string; country: Country; motifs: [MotifKind, numb
 
 /** The looks. A count is for a room of 28 by 24 tiles; bigger maps get more in proportion. */
 export const LOOKS: Look[] = [
-  { name: 'gallows', country: 'wood', motifs: [['drift:leaves', 3], ['drift:bones', 1], ['hollow', 2], ['bald', 1]], scenes: ['grave', 'circle', 'stake', 'log'] },
-  { name: 'mossy', country: 'wood', motifs: [['hollow', 2], ['pool', 1], ['ring', 2], ['drift:pale', 2], ['tallgrass', 1]], scenes: ['log', 'cairn', 'campfire', 'grave'] },
+  { name: 'gallows', country: 'wood', motifs: [['drift:leaves', 3], ['drift:bones', 1], ['hollow', 2], ['bald', 1], ['ridge', 1]], scenes: ['grave', 'circle', 'stake', 'log'] },
+  { name: 'mossy', country: 'wood', motifs: [['hollow', 2], ['pool', 1], ['ring', 2], ['drift:pale', 2], ['tallgrass', 1], ['ridge', 1]], scenes: ['log', 'cairn', 'campfire', 'grave'] },
   { name: 'charcoal', country: 'wood', motifs: [['burn', 2], ['bald', 2], ['drift:stones', 2], ['drift:leaves', 1]], scenes: ['campfire', 'cairn', 'stake'] },
   { name: 'drowned', country: 'fen', motifs: [['pool', 4], ['drift:stones', 2], ['tallgrass', 2]], scenes: ['cairn', 'circle'] },
   { name: 'reedmoor', country: 'fen', motifs: [['tallgrass', 4], ['pool', 2], ['drift:pale', 2]], scenes: ['grave', 'stake'] },
-  { name: 'fallow', country: 'fields', motifs: [['tallgrass', 3], ['drift:pale', 2], ['bald', 1], ['hollow', 1]], scenes: ['grave', 'cairn'] },
-  { name: 'poppy', country: 'fields', motifs: [['drift:red', 4], ['tallgrass', 2], ['ring', 1]], scenes: ['graves', 'cairn'] },
-  { name: 'raided', country: 'fields', motifs: [['burn', 2], ['drift:bones', 2], ['bald', 2], ['drift:leaves', 1]], scenes: ['stake', 'circle', 'campfire'] },
+  { name: 'fallow', country: 'fields', motifs: [['tallgrass', 3], ['drift:pale', 2], ['bald', 1], ['hollow', 1], ['ridge', 1.5]], scenes: ['grave', 'cairn'] },
+  { name: 'poppy', country: 'fields', motifs: [['drift:red', 4], ['tallgrass', 2], ['ring', 1], ['ridge', 1]], scenes: ['graves', 'cairn'] },
+  { name: 'raided', country: 'fields', motifs: [['burn', 2], ['drift:bones', 2], ['bald', 2], ['drift:leaves', 1], ['ridge', 1]], scenes: ['stake', 'circle', 'campfire'] },
   { name: 'spoil', country: 'yard', motifs: [['drift:stones', 4], ['pool', 2], ['burn', 1]], scenes: ['campfire', 'cairn'] },
   { name: 'warcamp', country: 'yard', motifs: [['burn', 2], ['drift:bones', 2], ['drift:stones', 2], ['pool', 1]], scenes: ['stake', 'campfire', 'circle'] },
-  { name: 'harvest', country: 'crop', motifs: [['bald', 3], ['drift:stones', 2], ['drift:pale', 1]], scenes: ['cairn', 'grave'] },
-  { name: 'burnt', country: 'crop', motifs: [['burn', 3], ['bald', 1], ['drift:bones', 2]], scenes: ['stake', 'circle'] },
+  { name: 'harvest', country: 'crop', motifs: [['bald', 3], ['drift:stones', 2], ['drift:pale', 1], ['ridge', 2]], scenes: ['cairn', 'grave'] },
+  { name: 'burnt', country: 'crop', motifs: [['burn', 3], ['bald', 1], ['drift:bones', 2], ['ridge', 1]], scenes: ['stake', 'circle'] },
   { name: 'rubble', country: 'cave', motifs: [['drift:stones', 4], ['pool', 2], ['drift:bones', 1]], scenes: ['cairn', 'campfire'] },
   { name: 'lair', country: 'cave', motifs: [['drift:bones', 3], ['burn', 2], ['pool', 1], ['drift:stones', 1]], scenes: ['stake', 'circle', 'campfire'] },
   // (Paved places: Wickhold and a job's stone streets. Rain lying in the low flags, moss in the damp, a drain.)
@@ -45,7 +45,7 @@ export const LOOKS: Look[] = [
 
 /** Half sizes each motif may take (tiles across; `ry` is that times `flat`). */
 const SIZE: Record<MotifKind, [number, number, number]> = {
-  puddle: [0.7, 1.5, 0.55], moss: [1.1, 2.4, 0.6],
+  puddle: [0.7, 1.5, 0.55], moss: [1.1, 2.4, 0.6], ridge: [2.5, 5, 0.15],
   hollow: [1.6, 2.6, 0.6], pool: [1.3, 2.1, 0.55], bald: [1.2, 2.0, 0.6], tallgrass: [2.6, 4.2, 0.7], burn: [1.2, 1.9, 0.6], ring: [0.8, 1.2, 0.85],
   'drift:leaves': [2.2, 3.6, 0.3], 'drift:bones': [1.6, 2.4, 0.3], 'drift:stones': [1.8, 3.0, 0.3], 'drift:pale': [2.2, 3.8, 0.3], 'drift:red': [2.4, 4.0, 0.32],
 };
@@ -114,7 +114,8 @@ export function motifsOf(m: GameMap): Motif[] {
       const rim = [0, 1, 2, 3, 4, 5].map((q) => openAt(m, x + Math.cos(q * 1.047) * rx * 0.8, y + Math.sin(q * 1.047) * ry * 0.8)).filter(Boolean).length;
       if (rim < (drift || kind === 'tallgrass' ? 3 : 5)) continue;
       // Zones keep apart from each other; drifts may lie anywhere.
-      if (!drift && out.some((o) => !o.kind.startsWith('drift') && Math.hypot(o.x - x, (o.y - y) * 1.4) < o.rx + rx + 0.8)) continue;
+      // (A ridge is a line: it keeps clear of other ridges only, and the zones are laid over it.)
+      if (kind === 'ridge' ? out.some((o) => o.kind === 'ridge' && Math.hypot(o.x - x, (o.y - y) * 2.5) < o.rx + rx) : !drift && out.some((o) => !o.kind.startsWith('drift') && o.kind !== 'ridge' && Math.hypot(o.x - x, (o.y - y) * 1.4) < o.rx + rx + 0.8)) continue;
       out.push({ kind, x, y, rx, ry, a, v }), got++;
     }
   }

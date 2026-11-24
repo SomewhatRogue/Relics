@@ -21,6 +21,7 @@ import { groveFloors } from '../tilelitter';
 import { strew } from '../tilestrew';
 import { paintScenes } from '../tilescenes';
 import { paintDrifts, paintZones } from '../tilemotifs';
+import { paintRidges } from '../tileridges';
 import { paintMarks } from '../marks';
 import { TILED_MARKS, tileMark } from '../tilemarks';
 import { paintGrim } from '../grimpaint';
@@ -101,6 +102,8 @@ export function redrawFloor(m: GameMap): HTMLCanvasElement | null {
   // (Ground laid with intent: a grove's floor of needle litter and roots under the trees, tilelitter.ts; and what
   // lies about, thick round things and thin in the open, drawn the tile way, tilestrew.ts.)
   // (The pattern book's zones for this map's look, looks.ts: a hollow, a worn patch, tall grass, a burn.)
+  // (The book's ridges first, tileridges.ts: a zone may lie over a bank's end.)
+  paintRidges(m, rect);
   paintZones(m, rect);
   groveFloors(m, rect);
   softWater(m, c, g, () => paintWater(m, R, r2, toPx, PX));

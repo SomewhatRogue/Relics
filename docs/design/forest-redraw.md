@@ -109,6 +109,13 @@ sizes of bush and boulder by the map's own radius): a bush a mound of leafy lobe
 old blood; a boulder with a lit top plane, a darker face, cracks, moss on some; a dead tree a bare trunk forking into
 black limbs, a crow on some, a length of old rope on others. Stumps keep their painting.
 
+## Ridges (2026-11-24, in)
+
+Flat ground is drawn stepping down toward you here and there: a low bank, a lit lip of turf over a short face of
+earth and a shadow at its foot, bowing and dying into the ground at each end (tileridges.ts; the `ridge` motif of the
+wood's, the fields' and the crop's looks). Paint only: you walk over it. A rise that stops you is the room's own
+(ledges, three/landledges.ts).
+
 ## The laid soils (2026-11-24, in)
 
 A hand-laid map's own ground is drawn as the floor round it is: mud is the path's ripples gone dark and cold with
@@ -138,7 +145,7 @@ indoors.
 
 ## Later
 
-- Ridges: drawn earth lips where the land rises (the height levels we have).
+- Ridges on real height: the book's ridges are in (above); the earth banks of a map's own levels are the Territories chat's (three/landledges.ts), asked on the board to go darker.
 - Groves inside maps: trees placed in clumps rather than one by one (the map generators, Territories' files).
 - Mist banks at the edges and drifting motes (living world L4).
 - (In, 2026-11-23: ANGLE in the options, HIGH, LOW or LOWEST, the ground drawn at each: tilelook.ts, tilekit.ts.)

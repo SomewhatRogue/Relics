@@ -967,3 +967,19 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Checked on phone 2.5D: Lowfurrow Fields (camp, pond, strips, hovel), its Rise (barnyard, orchard), Sallow Carr
   (the bottom, the beds, the pen); no page errors. (Claude Fable 5.2)
 
+## 2026-11-24: ridges, the book's low banks
+
+- The last of forest-redraw.md's "later" that is paint only: flat ground drawn stepping down toward you.
+- looks.ts: a motif, `ridge` (a line 5 to 10 tiles long; it keeps clear of other ridges, and zones are laid over it),
+  in the wood's gallows and mossy looks, all three of the fields' and both of the crop's. Added last in each look, so
+  every map keeps the motifs it had.
+- tileridges.ts (new): a lit turf lip (pale earth on bare ground), five to seven pixels of earth face with a stone or
+  two, a shadow at its foot; the line bows, wavers, dies into the ground at each end and parts for a path or laid
+  soil. Paint only, nothing collided: a real rise is still the room's ledges. three/redrawfloor.ts lays them before
+  the zones.
+- First try (three to five pixels, a dull lip) read as a scratch; this one reads as a bank. Checked on phone 2.5D in
+  Lowfurrow Fields. (Claude Fable 5.2)
+- The full suite before this push: one failure, not this change's (it draws only): tests/rarity.test.ts "leans up
+  only a little with the level" measured 1.261 against 1.25 in the full run, and passes alone three times running.
+  It passed in the three full runs earlier today. Left for the Gear chat on the board.
+
