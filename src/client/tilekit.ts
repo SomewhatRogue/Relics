@@ -12,7 +12,7 @@ import { PITCH_DEG } from './tilelook';
 
 export type Rect = (x: number, y: number, w: number, h: number, col: string) => void;
 /** Render pixels a tile across, a floor tile deep, and a wall a tile high. */
-// (At the redraw's own angle, 12 and 16; at the lower angles a player may pick, tilelook.ts ANGLE, 10 and 17 or 8 and 18:
+// (At the redraw's own angle, 12 and 16; at the lower angles a player may pick, tilelook.ts ANGLE, 8 and 18 or 6 and 19:
 // the ground is drawn at the depth the camera shows it, so it is never squeezed.)
 const RAD = (PITCH_DEG * Math.PI) / 180;
 export const KX = 20, KZ = Math.round(KX * Math.sin(RAD)), KY = Math.round(KX * Math.cos(RAD));

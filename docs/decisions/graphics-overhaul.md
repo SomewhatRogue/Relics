@@ -922,4 +922,7 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   be all outline).
 - Checked on phone 2.5D: Barrowby's hedges, the Copperdeep's yard, Sallow Carr, Gallows Wood; no page errors.
   (Claude Fable 5.2)
+- The same night, Kyle: "I notice almost no difference between the camera angles in town at all should i". The steps
+  were 37, 30 and 24 degrees; now 37, 24 and 17.5 (asin 0.4 and asin 0.3: a floor tile 8 and 6 pixels deep). Clicked
+  through in a browser: the camera reads 36.9, 23.6, 17.5 degrees and the choice is saved. (Claude Fable 5.2)
 

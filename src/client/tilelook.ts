@@ -41,15 +41,16 @@ export const TILES = { on: tilesRaw === null || on(tilesRaw), even: typeof locat
 export const REDRAW = { on: redrawRaw === null ? typeof location !== 'undefined' : on(redrawRaw) };
 /**
  * The camera's angle, a player's choice (Kyle, 2026-11-23: "give me the ability to toggle it in game"): HIGH, the
- * redraw's own; LOW, 30 degrees; LOWEST, about 24. Each is an angle where a floor tile is a whole number of render
- * pixels deep (12, 10, 8 of its 20 across), so the ground is drawn at that size (tilekit.ts KZ) and stays crisp; a
- * wall's height rounds to the nearest pixel (16, 17, 18). Lower looks further across the map and stands the trees
+ * redraw's own; LOW, about 24 degrees; LOWEST, about 17 (30 and 24 at first: Kyle saw "almost no difference" in
+ * town, so the steps are bolder). Each is an angle where a floor tile is a whole number of render pixels deep (12, 8,
+ * 6 of its 20 across), so the ground is drawn at that size (tilekit.ts KZ) and stays crisp; a wall's height rounds
+ * to the nearest pixel (16, 18, 19). Lower looks further across the map and stands the trees
  * and walls taller against the ground. The ANGLE button in the options box steps through them; it saves and reloads
  * (the angle is drawn into the floor, the fronts and every card). `?pitch=low` or `?pitch=30` in the address wins.
  */
 const ANGLE_KEY = 'relic.angle';
 export type Angle = 'high' | 'low' | 'lowest';
-const ANGLES: Record<Angle, number> = { high: PITCH_REDRAW, low: 30, lowest: (Math.asin(0.4) * 180) / Math.PI };
+const ANGLES: Record<Angle, number> = { high: PITCH_REDRAW, low: (Math.asin(0.4) * 180) / Math.PI, lowest: (Math.asin(0.3) * 180) / Math.PI };
 const isAngle = (v: string | null): v is Angle => v === 'high' || v === 'low' || v === 'lowest';
 function startAngle(): { name: Angle | null; deg: number } {
   if (typeof location === 'undefined') return { name: 'high', deg: PITCH_REDRAW };
