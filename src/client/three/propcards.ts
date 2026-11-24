@@ -122,7 +122,11 @@ export class CardSheet {
 /** A round's picture: pines and broadleafs drawn the tile way (tiletrees.ts, docs/design/forest-redraw.md), each
  *  picture shared by every tree of its variant; everything else the flat view's own painting. */
 const TREES = new Map<string, Cut>();
+/** A round that stands as something of its own (a biome set's landmark, ../sets.ts): its picture, set before the cards are made. */
+export const SPECIAL = new WeakMap<Round, Cut>();
 export const roundCut = (r: Round): Cut | null => {
+  const own = SPECIAL.get(r);
+  if (own) return own;
   if (r.kind === 'pine' || r.kind === 'tree') {
     const v = Math.floor(Math.abs(Math.sin(r.x * 12.9898 + r.y * 78.233) * 43758.5453) % 4), key = r.kind + v;
     let c = TREES.get(key);

@@ -1027,3 +1027,23 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - Checked on phone 2.5D in Gallows Wood: two goblins behind crowns, their eyes showing; no page errors.
   (Claude Fable 5.2)
 
+## 2026-11-24: biome sets, slice 1: the wood's great hanging oak
+
+- Kyle on making places look hand placed while the worlds get huge: "I like having a big landmark and then mutations
+  on that theme so you know that you're in x or y biome ... let's do it all." Spec: docs/design/biome-sets.md (a set
+  a biome: one landmark a map, its mutations, echoes of it through the rest; six slices; what exists already that
+  it builds on).
+- client/sets.ts: a map's set from its country (wood: gallows; fen: chapel; fields and crop: mill). `landmarkOf`:
+  in a wood, the northmost of the map's own oaks in the middle half stands as the landmark, so its crown rises over
+  the back of the map and hides little of the fight. The name says the mutation where it can (HANG or GALLOW: the
+  hanged; GIBBET or CAGE: a cage; CROW, ROOK or RAVEN: nooses and crows), else the name's roll.
+- client/tilelandmarks.ts: `greatOakCut` (124 by 152 pixels, a wide trunk with a hollow, two dead boughs, a crown
+  in four rows; the hanged in sacking hoods, a gibbet cage with what is left in it, or nooses and crows) and
+  `ropeCut` (an old rope in about three oaks in ten).
+- propcards.ts `SPECIAL` (a round with a picture of its own); three/ground.ts sets it before the trees' cards are
+  made, widens the shade, hangs the ropes. Drawing only: no round moves or grows, so no fight changes.
+- Not yet: the fen's and the fields' landmarks (they need blocks and a clearing: slice 2), real echoes, bigger
+  rooms. Each of those is asked of the generators' owners first.
+- tests/looks.test.ts: the wood's landmark is one of the map's oaks in its back half; no other set has one.
+- Checked on phone 2.5D: Gallows Wood (the hanged), Hangman's Wood (the cage), Rook Wood (crows). (Claude Fable 5.2)
+

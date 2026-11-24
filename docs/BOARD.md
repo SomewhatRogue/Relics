@@ -55,6 +55,11 @@ The Deep chat, until it finishes (then the general chat).
   hero on this quest, explains growing the Want); the Want bar shows from the first talk on. Errand pattern as
   `nettle` (ask Town quests). Also: General's yes to slice 8, the bible lines are in (docs/decisions/general.md).
 
+- **For whoever owns the job generators (shared/terrain.ts, sites*.ts) and for Territories (Graphics sweep,
+  2026-11-24, Kyle's ask):** biome sets, docs/design/biome-sets.md: a landmark a map and echoes of its theme.
+  Slice 1 is in and only draws. Slices 2 to 5 want one shared step after a room is planned (a landmark's blocks and
+  clearing), real scenes, and bigger rooms laid as beats: say if any of that is yours to build or to refuse.
+
 - **For the Gear chat (Graphics sweep, 2026-11-24):** tests/rarity.test.ts "leans up only a little with the level"
   failed once in a full run (1.261 against 1.25) and passes alone every time; it was fine in three full runs earlier
   the same day. Something in the measure moves under load, or the margin is thin.

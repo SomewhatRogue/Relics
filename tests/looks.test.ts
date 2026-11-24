@@ -5,6 +5,7 @@ import { LOOKS, countryOf, lookOf, motifsOf, openAt, pavedAt } from '../src/clie
 import { townMap } from '../src/shared/town';
 import { newWorld } from '../src/shared/story';
 import { scenesOf } from '../src/client/tilescenes';
+import { echoesOf, landmarkOf, setOf } from '../src/client/sets';
 
 /**
  * The pattern book (docs/design/forest-redraw.md): a map draws one look from its own name, lays that look's motifs on
@@ -50,5 +51,23 @@ describe('the pattern book', () => {
     expect(laid.length).toBeGreaterThan(4);
     for (const o of laid) expect(pavedAt(m, o.x, o.y)).toBe(true);
     for (const s of scenesOf(m)) expect(pavedAt(m, s.x, s.y)).toBe(true);
+  });
+
+  it("the wood's set: one of the map's own oaks, toward the back, stands as the landmark; no other set has one yet", () => {
+    let woods = 0;
+    for (const m of maps()) {
+      const land = landmarkOf(m);
+      if (setOf(m) !== 'gallows') {
+        expect(land).toBeNull();
+        continue;
+      }
+      woods++;
+      if (!land) continue;
+      expect(m.rounds).toContain(land.round);
+      expect(land.round.kind).toBe('tree');
+      expect(land.round.y).toBeLessThan(m.h * 0.5);
+      expect(echoesOf(m, land.round)).toEqual([]);
+    }
+    expect(woods).toBeGreaterThan(0);
   });
 });

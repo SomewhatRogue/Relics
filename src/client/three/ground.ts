@@ -14,8 +14,9 @@ import { torchIn } from '../daytime';
 import type { Fx } from '../fx';
 import { OX, OY, PX } from '../world';
 import { REDRAW } from '../tilelook';
+import { echoesOf, landmarkCut, landmarkOf } from '../sets';
 import { redrawFloor, redrawPx } from './redrawfloor';
-import { CardSheet, isCardRound } from './propcards';
+import { CardSheet, SPECIAL, isCardRound } from './propcards';
 import { tuftMesh } from './tufts3d';
 import { treeLine } from './treeline3d';
 import { sceneCards, scenesOf } from '../tilescenes';
@@ -173,6 +174,9 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // The map's own trees and stumps stand in a mesh of their own, so that when one is felled (sim/felling.ts) they
   // alone are rebuilt, not the whole ground. (Not the new look's town, whose trees are the kit's.)
   const own = new Set(STREET && m.name === 'WICKHOLD' ? [] : m.rounds.filter(woody));
+  // (The biome set's landmark, ../sets.ts: one of the map's own rounds drawn as it, with a wider shade under it.)
+  const land = REDRAW.on ? landmarkOf(m) : null;
+  if (land) SPECIAL.set(land.round, landmarkCut(land));
   let wood: THREE.Mesh | null = null, woodCards: THREE.Mesh | null = null, shade: THREE.Mesh | null = null, felled = -1;
   const trees = () => {
     syncFelled(m);
@@ -186,7 +190,12 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     for (const o of own) {
       if (levelAt(wf, o.x, o.y) === DEEP) T.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
       const k = T.mark(), up = stacked(m) ? groundLv(m, o.x, o.y) * LEDGE_H : 0;
-      if (REDRAW.on && isCardRound(o)) S.addRound(o, up), shaded.push({ x: o.x, y: o.y, r: o.r, kind: o.kind, up });
+      if (REDRAW.on && isCardRound(o)) {
+        S.addRound(o, up), shaded.push({ x: o.x, y: o.y, r: o.r, kind: o.kind, up });
+        if (land?.round === o) for (const dx of [-1.6, 1.6]) shaded.push({ x: o.x + dx, y: o.y + 0.3, r: 0.63, kind: o.kind, up });
+        // (The set's echoes by it: an old rope in an oak, swaying a pixel.)
+        for (const e of echoesOf(m, o)) S.add(e.cut, o.x + e.dx, o.y + e.dz, up, 1);
+      }
       else addRound(T, o, none, new Seed(Math.round(o.x * 31 + o.y * 17)));
       if (up) T.raise(k, up);
     }
