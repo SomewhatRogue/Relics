@@ -343,7 +343,9 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
       if (h.actT - dt < s.windup) acts.loose(h, s);
       // The greatsword's overhead loosed on the white flash: a shockwave (sim/warrior.ts).
       if (h.actT - dt < s.windup && h.heavy && h.perfect && s.quake) quake(h, enemies, now, ev);
-      if (!s.shot && !s.spell) {
+      // (A chain's throw, the spear's or the sickle's, lands only through its hook: sim/hook.ts. Till 2026-11-23 it also
+      // hit as a melee blow out to its whole range, so a full throw landed twice.)
+      if (!s.shot && !s.spell && !s.chain) {
         // A Rogue's knives find one goblin a blow (the nearest in reach), a rapier's lunge two; everything else cuts through all.
         const most = s.hits ?? (w.single ? 1 : 0), near = most ? [...enemies].sort((a, b) => Math.hypot(a.x - h.x, a.y - h.y) - Math.hypot(b.x - h.x, b.y - h.y)) : enemies;
         for (const e of near) {

@@ -322,3 +322,12 @@ Claude Opus 5.5
   displacement weapon"): taps 5, 5, 7 (about 13 a second head on), backstab 1.2x (about 16 from behind; the one Rogue
   kit under the old 1.75 floor, tests/rogue-back.test.ts says so). The spin and the pull unchanged: those are its job.
 - Hempen is made as a named butcher, so it gets the full fury (1.6x health, quicker, bigger, smashing), not just 1.4x: tests/hempen.test.ts updated. Claude Opus 5.5
+
+## 2026-11-23: a chain throw landed twice (Kyle: "my charged sickle blade does like 100 at range", on touched gear)
+
+- Not the touched piece: a full chain throw (the sickle's and the spear's) hit once through its hook AND again as a
+  melee blow down its whole reach (the heavy swing's range, 6), so a full throw did 36, not 18, and perfects, crits
+  and traits doubled with it. sim/hero.ts now skips the melee pass for a swing with `chain`. tests/sickle.test.ts
+  guards it. Measured: a low-level touched sickle's damage line is the same +9% as forged; its pull is three
+  modifiers, a trait and a cost. Touched pieces don't sour on their own today; they grow the Want a job at a time,
+  and become VOWED in the Holy and hungry chat's slice 6. Claude Opus 5.5

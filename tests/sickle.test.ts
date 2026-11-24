@@ -138,6 +138,14 @@ describe('the chain sickle', () => {
     expect(h.y).toBeLessThan(5);
   });
 
+  it('a full throw lands once, through its hook, not again as a blow down its whole reach', () => {
+    const { e, loose } = arena([5]);
+    e.weight = 3;
+    loose(WEAPONS.rapier.draw! + 0.4, 1.2);
+    expect(lost(e)).toBeGreaterThan(0);
+    expect(lost(e)).toBeLessThanOrEqual(WEAPONS.rapier.heavy.dmgFull! + 1);
+  });
+
   it('on the white flash, what it snags bleeds', () => {
     const { e, loose } = arena([3.5], true);
     Object.assign(e, { act: 'stunned', actDur: WEAPONS.rapier.draw! });
