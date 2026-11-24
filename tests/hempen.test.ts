@@ -8,7 +8,7 @@ import { hangmansWood } from '../src/shared/expedjob';
 import { expedPlan } from '../src/shared/expedmap';
 import { SPINE } from '../src/shared/hangwood';
 import { FOUND_RELICS } from '../src/shared/magic';
-import { BOSS, HEMPEN, HEMPEN_BOSS, HERO, POISE_KIT, TICK, WEAPONS, type HempenMove, type WeaponId } from '../src/shared/tuning';
+import { BOSS, FURY, HEMPEN, HEMPEN_BOSS, HERO, POISE_KIT, TICK, WEAPONS, type HempenMove, type WeaponId } from '../src/shared/tuning';
 import { Decoder, Encoder, stateOf } from '../src/client/snap';
 import { clocked, useBook } from '../src/sim/bosskit';
 import { bossRoll } from '../src/sim/bosschest';
@@ -290,7 +290,8 @@ describe('party scaling, as the Doorkeepers do it', () => {
     for (const [n, hp, poise, adds] of [[1, 1, 1, 0], [2, 1.4, 1.3, 0], [3, 1.8, 1.6, 3], [4, 2.2, 1.9, 4]] as const) {
       const kits = Array.from({ length: n }, () => 'sword' as WeaponId);
       const g = ground(kits, kits.map((_, i) => [i - 1, 2] as [number, number]));
-      expect(g.hm.maxHp).toBe(Math.round(HEMPEN.hp * hp));
+      // (Hempen is a named butcher when the room makes it, so it's in its fury since 2026-11-23: shared/fury.ts.)
+      expect(Math.abs(g.hm.maxHp - HEMPEN.hp * FURY.hp * hp)).toBeLessThanOrEqual(1);
       expect(g.hm.boss!.poiseMax).toBe(Math.round(POISE_KIT.bar * poise));
       expect(g.room.enemies.filter((e) => !e.boss).length).toBe(adds);
       expect(hempenRotation(1, n, 0).length).toBe(n >= 4 ? 6 : 5);

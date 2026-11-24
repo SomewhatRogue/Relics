@@ -430,6 +430,9 @@ export const isRound = (k: AttackKind) => k === 'slam' || k === 'hex' || k === '
 
 export interface EnemyAttack {
   kind: AttackKind;
+  /** A fury boss's blow (sim/fury.ts): the props it has smashed, and whether it has felled its tree. */
+  smashed?: number[];
+  felled?: boolean;
   /** Who it was swung at (a striped blow stepped out of counts as a dodge for them). */
   aimed?: string;
   /** (A charge) its run is over: a hero with no dodge who wasn't on its line has stepped out. */
@@ -577,6 +580,8 @@ export interface Enemy extends Body {
   openUntil?: number;
   /** An instance's goblin (INSTANCE.fierce): quicker wind-ups and rests (sim/elite.ts). */
   fierce?: boolean;
+  /** A named boss made scarier (shared/fury.ts): quicker, tougher, bigger, and it smashes and fells (sim/fury.ts). */
+  fury?: boolean;
   /** THE BRAKESMAN (sim/brake.ts): it works the brake at the top of the rail; when it lets the next cart go, and its brake out of use until. */
   /** THE LAMPMAN's lamps (map.lamps): which are lit, when it next goes for one, the one it's going for and how long it's been at it (sim/lampman.ts). */
   lamps?: { lit: boolean[]; next: number; at?: number; since?: number; snuffT?: number; told?: number };

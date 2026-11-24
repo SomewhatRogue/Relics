@@ -42,6 +42,9 @@ daggers' from behind on one; on one goblin, a quarter.
 - The spin never shoves or staggers. The throw goes out only fully spun; let go short, "TOO SLOW" and nothing.
 - The time to full is the weapon's draw, so anything that draws faster (QUICK DRAW, gear) spins it up faster.
 
+- Then: taps 5, 5, 7 and only 1.2x from behind. It's the crowd and pulling weapon, not a one-on-one one: about 13 a
+  second head on, 16 behind (the daggers 19 and 78); a full spin still about 10 a turn to everything in reach.
+
 ## In the code
 
 - The weapon id stays `rapier` (saves, loot tables, gear looks and stores all carry it); only its name and

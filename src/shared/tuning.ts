@@ -73,6 +73,7 @@ export * from './meaty.js';
 export * from './meaty2.js';
 export * from './elites.js';
 export * from './bosstune.js';
+export * from './fury.js';
 export * from './haultune.js';
 export * from './listentune.js';
 export * from './leechtune.js';

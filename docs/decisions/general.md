@@ -305,3 +305,20 @@ Claude Opus 5.5
 - The sickle's point now leads: in the spin it hooks forward round the turn, and on a cut it points the way the swing goes (the swings alternate with the combo). Claude Opus 5.5
 - The spin no longer shoves (no stagger); the throw goes out only fully spun (short of it, TOO SLOW and nothing, in sim/hero.ts's release); the spin-up time is the weapon's draw, so QUICK DRAW and draw gear speed it. Claude Opus 5.5
 - The spin's start shows one blade: no trail till it's moving, and no second chain drawn from the fist; it winds up smoothly from slow (1.5 a second) to fast (9), summed over the spin so it never jumps (client/sicklespin.ts spinAngle, also the hand's pose). Claude Opus 5.5
+
+## 2026-11-23: bosses scarier (Kyle: "bosses, even mission bosses, much scarier: faster, more health, bigger, more destructive, destroying trees")
+
+- shared/fury.ts FURY, sim/fury.ts. A named boss (a hunt's, a story's, a camp's: a butcher with a name, not a boss of
+  the kit) in its fury: 1.6x health, hits 1.25x, wind-ups 0.85x and rests 0.8x (through Enemy.edge, as the Deep's
+  edge goes), walks 1.3x, 1.25x as broad, drawn 1.3x as big (client/foes.ts, one branch). Its landed blows and its
+  charge smash props under them (80 a blow) and fell any fellable tree they reach (sim/felling.ts fell, as a
+  Warrior's heavy does: the trunk goes over, lands on whatever's under, lies there, burns).
+- A boss of the kit (the Doorkeepers, Hempen, the Haulier, the Listener, the Leechman) 1.4x health (sim/room.ts
+  fromFoe). Their own moves untouched: those live in their files.
+- (Named "fury" because shared/tuning.ts already has DREAD, the corruption dread: I first wrote sim/dread.ts over it
+  and put it back.)
+- tests/fury.test.ts; parity recorded again. Checked the size on the phone in 2.5D. Claude Opus 5.5
+- Then (Kyle: the sickle "still too OP... slash damage high, backstabs great; it should be a pseudo-AoE and a
+  displacement weapon"): taps 5, 5, 7 (about 13 a second head on), backstab 1.2x (about 16 from behind; the one Rogue
+  kit under the old 1.75 floor, tests/rogue-back.test.ts says so). The spin and the pull unchanged: those are its job.
+- Hempen is made as a named butcher, so it gets the full fury (1.6x health, quicker, bigger, smashing), not just 1.4x: tests/hempen.test.ts updated. Claude Opus 5.5

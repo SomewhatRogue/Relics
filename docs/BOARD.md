@@ -47,6 +47,10 @@ The Deep chat, until it finishes (then the general chat).
 
 ## Waiting (specs ready, no chat yet)
 
+- **For the Deep chat (General, 2026-11-23):** every boss of the kit now has 1.4x health at spawn (shared/fury.ts
+  FURY.bossHp, sim/room.ts fromFoe), the Haulier, the Listener and the Leechman included; named hunt bosses are
+  tougher, quicker, bigger and fell trees (sim/fury.ts). Re-tune your own if it's too much on top of the Deep's edge.
+
 
 - **Element augments** (docs/design/element-augments.md, drafted 2026-11-20 with Kyle): elemental traits off random weapons (stripped from old ones), an element put on your weapon for 5 jobs by a townsperson with an arcane corner from level 5 (Old Merren, to confirm), 20s, first of each free, not for the Mage. A few drafts and the person's name wait on Kyle.
 

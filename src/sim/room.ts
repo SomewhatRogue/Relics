@@ -11,7 +11,7 @@ import { ARENA, useMap, type GameMap } from '../shared/arena';
 import type { Foe } from '../shared/terrain';
 import type { PropKind } from '../shared/props';
 import { Rng } from '../shared/rng';
-import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, EXPED_COINS, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS, SNARER, SHORTBOW, BRAKE } from '../shared/tuning';
+import { BLESSING, GUARD, SLEEP, HEAL_RADIUS, HEIGHT, HERO, EXPED_COINS, LODESTONE, MACE, TICK, TRAIT, WEAPONS, type Swing, VARIANTS, SNARER, SHORTBOW, BRAKE, FURY } from '../shared/tuning';
 import { separate } from './bodies';
 import { lobLodestone, shoot, smite, stepBolt, throwNet } from './bolts';
 import { afflict, stepElements, type World } from './elements';
@@ -40,6 +40,7 @@ import { looksDown } from './highrange';
 import { newMinis, stepMinis, talkMini, type MiniState } from './minis';
 import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
+import { furyOn, stepFury } from './fury';
 import { startRaise, stepParty, sweepAllies } from './party';
 import { startRise, stepRise } from './raise';
 import { stepSurvivors } from './survivors';
@@ -479,6 +480,7 @@ export class ArenaRoom {
     stepCalls(w, (x, y) => this.spawn('scrapper', x, y));
     this.slicks = afterFoes(w, this.pickups, this.slicks, this.crows, TICK);
     propImpacts(w);
+    stepFury(this.enemies, this.props, w);
     this.props = w.props = stepProps(w, TICK);
     stepBuildings(w, TICK, (x, y) => void this.spawn('scrapper', x, y), (x, y) => this.nearHero(x, y));
     stepFelling(this.map, this.time, this.enemies, this.heroes, this.events);
@@ -572,6 +574,9 @@ export class ArenaRoom {
     if (f.lamps) e.lamps = { lit: (this.map.lamps ?? []).map(() => true), next: 0 };
     if (f.pair) e.pair = f.pair;
     if (f.boss) e.boss = newBoss(f.boss, 1);
+    // Bosses scarier (shared/fury.ts): a named one tougher, quicker, broader and destructive; a boss of the kit tougher.
+    if (f.name && f.kind === 'butcher' && !f.boss) furyOn(e);
+    else if (f.boss) e.hp = e.maxHp = Math.round(e.maxHp * FURY.bossHp);
     if (f.task) e.task = structuredClone(f.task);
     if (f.haul) e.haul = { ...f.haul };
     if (f.wave) e.wave = f.wave;

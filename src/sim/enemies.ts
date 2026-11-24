@@ -6,7 +6,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, HEIGHT, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
+import { FURY, FRIENDLY, DECOY, ALERT, ARCHER, HEIGHT, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
@@ -330,7 +330,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   const want = Math.atan2(uy, ux), have = Math.atan2(e.fy, e.fx);
   let diff = want - have;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-  const slow = (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1) * (e.fed ? MEAL.fed.pace : 1) * quickPace(e);
+  // (A boss in its FURY walks faster: shared/fury.ts.)
+  const slow = (e.fury ? FURY.pace : 1) * (e.chillUntil > now ? FROST.slow : 1) * (e.snareUntil > now ? NET.slow : 1) * (e.roused ? DRUMMER.rouse.pace : 1) * ((e.hobbleUntil ?? -9) > now ? HOBBLE.slow : 1) * ((e.caltropUntil ?? -9) > now ? CALTROPS.slow : 1) * (e.fed ? MEAL.fed.pace : 1) * quickPace(e);
   // (A Planker and a shield-bearer turn their boards slowly: get round them.)
   const rate = e.variant === 'log' ? LOGS.turn : e.variant === 'planker' ? PLANKER.turn : e.variant === 'shield' ? VARIANTS.shield.turn : spec.turn, turn = Math.max(-rate * slow * dt, Math.min(rate * slow * dt, diff)), na = have + turn;
   e.fx = Math.cos(na);
