@@ -249,3 +249,14 @@ Claude Opus 5.5
 - Checked on the phone in 2.5D: at rest and spinning.
 
 Claude Opus 5.5
+
+## 2026-11-23: the chain sickle tuned down (Kyle: "way too good... better in a one v one than daggers from behind")
+
+- Taps 8, 8, 12 to 6, 6, 9, a little slower; head on 0.85x to 0.75x. Per second on one goblin:
+  head on about 12 (daggers about 19), behind about 29 (daggers about 78). (Behind stays 1.75x: every Rogue kit's
+  floor, tests/rogue-back.test.ts.)
+- Spin every 0.3 s to 0.5 s, 3 to 6 down to 2 to 4, the bleed only once the spin is full, full at 1.5 s (was 1.1);
+  walk 0.5 while spinning. Drawn turning slower too. Throw 10/24 to 8/18.
+- tests/sickle.test.ts guards it under the daggers from behind and head on.
+
+Claude Opus 5.5

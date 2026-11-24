@@ -16,7 +16,8 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
   /**
    * The chain sickle (Kyle, 2026-11-23; docs/design/chain-sickle.md), in the rapier's place, its id kept so
    * saves and loot carry over. Quick cuts up close, two or three goblins a swing. Held, the chain whirls round
-   * you (sim/sickle.ts): little cuts and bleeds all round, and you walk slow. Let go, it flies on its chain;
+   * you (sim/sickle.ts): little cuts all round, bleeding once it's fully going, and you walk slow (tuned down
+   * 2026-11-23, Kyle: "way too good... better in a one v one than daggers from behind"). Let go, it flies on its chain;
    * fully spun it snags a wall (you're pulled to it), a big goblin (you're pulled round behind it) or a small
    * one (yanked to you); on the white flash the snagged goblin bleeds. Weakness: up against a wall the
    * chain catches and the spin cuts nothing.
@@ -25,13 +26,13 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     name: 'CHAIN SICKLE',
     cls: 'ROGUE',
     combo: [
-      { windup: 0.07, active: 0.07, recover: 0.16, dmg: 8, range: 1.5, arc: 120, lunge: 0.3, knock: 2, hits: 2 },
-      { windup: 0.07, active: 0.07, recover: 0.16, dmg: 8, range: 1.5, arc: 120, lunge: 0.3, knock: 2, hits: 2 },
-      { windup: 0.12, active: 0.08, recover: 0.3, dmg: 12, range: 1.6, arc: 160, lunge: 0.4, knock: 4, hits: 3 },
+      { windup: 0.09, active: 0.07, recover: 0.2, dmg: 6, range: 1.5, arc: 120, lunge: 0.3, knock: 2, hits: 2 },
+      { windup: 0.09, active: 0.07, recover: 0.2, dmg: 6, range: 1.5, arc: 120, lunge: 0.3, knock: 2, hits: 2 },
+      { windup: 0.14, active: 0.08, recover: 0.34, dmg: 9, range: 1.6, arc: 160, lunge: 0.4, knock: 4, hits: 3 },
     ],
-    heavy: { windup: 0.05, active: 0.05, recover: 0.35, dmg: 10, dmgFull: 24, range: 6, arc: 0, lunge: 0, knock: 3, knockFull: 6, chain: true, sickle: true },
-    draw: 1.1,
-    blockSpeed: 0.6, chargeSpeed: 0.55, backstab: 1.75, front: 0.85, guardArc: 100, guardCost: 1.8, speed: 1.1,
+    heavy: { windup: 0.05, active: 0.05, recover: 0.35, dmg: 8, dmgFull: 18, range: 6, arc: 0, lunge: 0, knock: 3, knockFull: 6, chain: true, sickle: true },
+    draw: 1.5,
+    blockSpeed: 0.6, chargeSpeed: 0.5, backstab: 1.75, front: 0.75, guardArc: 100, guardCost: 1.8, speed: 1.1,
     dodge: { ...DASH, distance: 3.8, cooldown: 0.45 },
   },
   /**

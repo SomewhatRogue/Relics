@@ -37,13 +37,25 @@ describe('the chain sickle', () => {
 
   it('held, the spin cuts and bleeds everything round you a little, and nothing out of reach', () => {
     const { es, hold } = arena([9 - 2, 9 + 2.2, 9 - SICKLE_SPIN.r - 1.5]);
-    hold(1);
+    hold(WEAPONS.rapier.draw! + 0.6);
     expect(lost(es[0])).toBeGreaterThan(0);
     expect(lost(es[1])).toBeGreaterThan(0);
     expect(es[0].bleedUntil).toBeGreaterThan(0);
     expect(lost(es[2])).toBe(0);
-    // Not a TON: a second of spin is under one full throw.
+    // Not a TON: two seconds of spin is under one full throw.
     expect(lost(es[0])).toBeLessThan(WEAPONS.rapier.heavy.dmgFull!);
+  });
+
+  it('one on one it falls short of daggers from behind, taps and spin alike (Kyle, 2026-11-23)', () => {
+    const per = (w: 'rapier' | 'daggers', mult: number) => {
+      const c = WEAPONS[w].combo, t = c.reduce((a, s) => a + s.windup + s.active + s.recover, 0);
+      return (c.reduce((a, s) => a + s.dmg, 0) * mult) / t;
+    };
+    const daggersBehind = per('daggers', WEAPONS.daggers.backstab!);
+    expect(per('rapier', WEAPONS.rapier.backstab!)).toBeLessThan(daggersBehind * 0.5);
+    expect(per('rapier', WEAPONS.rapier.front!)).toBeLessThan(per('daggers', WEAPONS.daggers.front!));
+    const spin = SICKLE_SPIN.top / SICKLE_SPIN.every + 3 / 0.5;
+    expect(spin).toBeLessThan(daggersBehind * 0.25);
   });
 
   it('you walk slow while it spins', () => {
@@ -69,7 +81,7 @@ describe('the chain sickle', () => {
 
   it('fully spun, a small goblin is yanked to your feet', () => {
     const { e, loose } = arena([5], true);
-    const ev = loose(1.3, 1.2);
+    const ev = loose(WEAPONS.rapier.draw! + 0.3, 1.2);
     expect(ev.some((x) => x.k === 'yank')).toBe(true);
     expect(e.y).toBeGreaterThan(7.5);
   });
@@ -77,7 +89,7 @@ describe('the chain sickle', () => {
   it('fully spun, a big goblin pulls you round behind it', () => {
     const { h, e, loose } = arena([5]);
     e.weight = 3;
-    loose(1.3, 1.2);
+    loose(WEAPONS.rapier.draw! + 0.3, 1.2);
     expect(h.y).toBeLessThan(5);
   });
 

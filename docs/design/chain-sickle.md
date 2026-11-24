@@ -21,6 +21,14 @@ more range / AoE, and you're a bit slower." Written by Claude Opus 5.5 with Kyle
     - a small goblin: it yanks it to your feet, knocked down.
   - On the white flash, the goblin it snags bleeds (3 s).
 
+## Tuned down (2026-11-23)
+
+Kyle: "way too good, it can do as much with quick hits close, needs to spin a bit slower and do less damage in
+general; it's better in a one v one than daggers from behind." Now: taps 6, 6, 9 and a touch slower, 0.75x head on
+and 1.75x behind (the floor every Rogue kit keeps; about a third of the daggers' from behind, a little under theirs head on); the spin cuts every 0.5 s
+for 2 to 4, bleeds only once fully going, and takes 1.5 s to get going; the throw 8 to 18. tests/sickle.test.ts
+holds it under the daggers.
+
 ## In the code
 
 - The weapon id stays `rapier` (saves, loot tables, gear looks and stores all carry it); only its name and

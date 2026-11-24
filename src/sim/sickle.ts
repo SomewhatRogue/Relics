@@ -42,14 +42,15 @@ export function stepSpins(heroes: Hero[], w: World): void {
       w.ev.push({ k: 'chainsnag', x: h.x, y: h.y });
       continue;
     }
-    const n = Math.round(SICKLE_SPIN.dmg + (SICKLE_SPIN.top - SICKLE_SPIN.dmg) * spinBuild(h));
+    const k = spinBuild(h), full = k >= 0.999, n = Math.round(SICKLE_SPIN.dmg + (SICKLE_SPIN.top - SICKLE_SPIN.dmg) * k);
     w.ev.push({ k: 'chainspin', x: h.x, y: h.y, r: SICKLE_SPIN.r });
     for (const e of w.enemies) {
       if (isDead(e) || e.act === 'carried') continue;
       const d = Math.hypot(e.x - h.x, e.y - h.y);
       if (d > SICKLE_SPIN.r + e.radius) continue;
       e.lastBy = h.id;
-      if (e.kind !== 'nest') {
+      // The bleed only once the spin is fully going (Kyle, 2026-11-23: it was too strong).
+      if (full && e.kind !== 'nest') {
         if ((e.bleedUntil ?? 0) <= w.now) e.bleedNext = w.now + SKEWER.every;
         e.bleedUntil = Math.max(e.bleedUntil ?? 0, w.now + SICKLE_SPIN.bleed);
       }

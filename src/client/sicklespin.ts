@@ -22,7 +22,7 @@ export function drawSpins(g: CanvasRenderingContext2D, room: ArenaRoom, P: Proj,
   for (const h of room.heroes) {
     if (!spinning(h)) continue;
     const [x, y] = at ? at('h:' + h.id, h.x, h.y) : [h.x, h.y], k = spinBuild(h), r = SICKLE_SPIN.r;
-    const turn = room.time * (6 + 10 * k), dir = 1;
+    const turn = room.time * (3.5 + 6 * k), dir = 1;
     // The ring it cuts, faint on the floor, firmer as it builds.
     const n = Math.max(24, Math.round(r * 2 * Math.PI * ppu * 0.5));
     for (let i = 0; i < n; i += 3) {
