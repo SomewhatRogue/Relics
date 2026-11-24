@@ -321,7 +321,7 @@ Claude Opus 5.5
 - Then (Kyle: the sickle "still too OP... slash damage high, backstabs great; it should be a pseudo-AoE and a
   displacement weapon"): taps 5, 5, 7 (about 13 a second head on), backstab 1.2x (about 16 from behind; the one Rogue
   kit under the old 1.75 floor, tests/rogue-back.test.ts says so). The spin and the pull unchanged: those are its job.
-- Hempen is made as a named butcher, so it gets the full fury (1.6x health, quicker, bigger, smashing), not just 1.4x: tests/hempen.test.ts updated. Claude Opus 5.5
+- (Hempen was briefly in a fury: he is made as a named butcher. Fixed the same night: the noosed one gets the kit bosses' 1.4x, as he is one; a solo staff Mage at danger 4 could no longer clear him.) Earlier note: tests/hempen.test.ts updated. Claude Opus 5.5
 
 ## 2026-11-23: a chain throw landed twice (Kyle: "my charged sickle blade does like 100 at range", on touched gear)
 
@@ -341,3 +341,12 @@ Claude Opus 5.5
 - Kyle, 2026-11-23: the first hungry piece home brings two quests, the church (Odric: the Want and giving it up) and
   the under church (Dorcas: growing the Want), and the Want bar from then on. Handed to the Holy and hungry chat as a
   paste (the board). Claude Opus 5.5
+
+## 2026-11-23: bosses bigger again, and big ones and shield goblins grow at high levels (Kyle)
+
+- A named boss in its fury drawn 1.7x (was 1.3) and 1.45x as broad (was 1.25): "room for bosses to be EVEN BIGGER".
+- shared/fury.ts HIGH_GROWTH, sim/fury.ts growOn (at spawn, sim/room.ts fromFoe after levelOn): from level 5, each
+  level more a BIG ONE or a shield goblin is 5% bigger (body and drawing, Enemy.scale) up to 1.3x (the old boss size)
+  and 4% quicker (Enemy.stride, sim/enemies.ts) up to 1.25x. Drawn through client/pacedraw.ts and strawman.ts (one
+  line each, the Art chat's). tests/fury.test.ts. Checked the boss's size on the phone (the yard draws straw men, so
+  the grown goblins weren't seen there). Claude Opus 5.5

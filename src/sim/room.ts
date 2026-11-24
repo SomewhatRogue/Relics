@@ -40,7 +40,7 @@ import { looksDown } from './highrange';
 import { newMinis, stepMinis, talkMini, type MiniState } from './minis';
 import { startBash, stepBash } from './bash';
 import { dropProp, newProp, propImpacts, roomProps, stepLift, stepProps, sweepProps, tryLift } from './props';
-import { furyOn, stepFury } from './fury';
+import { furyOn, growOn, stepFury } from './fury';
 import { startRaise, stepParty, sweepAllies } from './party';
 import { startRise, stepRise } from './raise';
 import { stepSurvivors } from './survivors';
@@ -566,6 +566,7 @@ export class ArenaRoom {
     packOnto(e, f);
     shapeFoe(e);
     levelOn(e, this.level);
+    growOn(e, this.level);
     Object.assign(e, { respawns: false, name: f.name, bow: f.bow, z: f.z ?? 0, alert: f.awake ?? false, feeding: f.feeding });
     if (f.noose) e.noose = true;
     if (f.zoned) e.zoned = true;
@@ -575,8 +576,9 @@ export class ArenaRoom {
     if (f.pair) e.pair = f.pair;
     if (f.boss) e.boss = newBoss(f.boss, 1);
     // Bosses scarier (shared/fury.ts): a named one tougher, quicker, broader and destructive; a boss of the kit tougher.
-    if (f.name && f.kind === 'butcher' && !f.boss) furyOn(e);
-    else if (f.boss) e.hp = e.maxHp = Math.round(e.maxHp * FURY.bossHp);
+    // (Hempen, the noosed one, is made a boss of the kit later, sim/hempenbook.ts: he's one of those, not in a fury.)
+    if (f.name && f.kind === 'butcher' && !f.boss && !f.noose) furyOn(e);
+    else if (f.boss || (f.noose && f.name)) e.hp = e.maxHp = Math.round(e.maxHp * FURY.bossHp);
     if (f.task) e.task = structuredClone(f.task);
     if (f.haul) e.haul = { ...f.haul };
     if (f.wave) e.wave = f.wave;

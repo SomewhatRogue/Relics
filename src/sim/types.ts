@@ -582,6 +582,9 @@ export interface Enemy extends Body {
   fierce?: boolean;
   /** A named boss made scarier (shared/fury.ts): quicker, tougher, bigger, and it smashes and fells (sim/fury.ts). */
   fury?: boolean;
+  /** Grown at a high level (sim/fury.ts growOn): drawn this much bigger, and walking `stride` times as fast. */
+  scale?: number;
+  stride?: number;
   /** THE BRAKESMAN (sim/brake.ts): it works the brake at the top of the rail; when it lets the next cart go, and its brake out of use until. */
   /** THE LAMPMAN's lamps (map.lamps): which are lit, when it next goes for one, the one it's going for and how long it's been at it (sim/lampman.ts). */
   lamps?: { lit: boolean[]; next: number; at?: number; since?: number; snuffT?: number; told?: number };

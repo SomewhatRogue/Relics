@@ -4,7 +4,7 @@
  * (sim/felling.ts: the trunk goes over away from it, lands on whatever's under, and lies there). Stepped by the room
  * after the goblins.
  */
-import { FURY } from '../shared/tuning';
+import { FURY, HIGH_GROWTH } from '../shared/tuning';
 import { isDead } from './damage';
 import { currentMap } from '../shared/arena';
 import { fell, fellable } from './felling';
@@ -18,6 +18,17 @@ const inArc = (e: Enemy, p: Prop, range: number, arc: number) => {
   if (d < 1e-6 || arc >= 359) return true;
   return (dx * e.fx + dy * e.fy) / d >= Math.cos(((arc / 2) * Math.PI) / 180) - p.radius / Math.max(d, 0.5);
 };
+
+/** At a high level, a BIG ONE or a shield goblin grows and gets about more (shared/fury.ts HIGH_GROWTH). */
+export function growOn(e: Enemy, lv: number): void {
+  if (!(e.big || e.variant === 'shield') || e.name || e.boss) return;
+  const n = Math.max(0, lv - HIGH_GROWTH.from), G = HIGH_GROWTH;
+  if (!n) return;
+  const k = Math.min(G.sizeMost, 1 + G.size * n);
+  e.scale = +k.toFixed(3);
+  e.radius = +(e.radius * k).toFixed(3);
+  e.stride = +Math.min(G.paceMost, 1 + G.pace * n).toFixed(3);
+}
 
 /** Made a fury boss: tougher, harder-hitting, quicker to wind up and rest, broader (its pace: sim/enemies.ts). */
 export function furyOn(e: Enemy): void {

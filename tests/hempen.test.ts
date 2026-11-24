@@ -290,8 +290,8 @@ describe('party scaling, as the Doorkeepers do it', () => {
     for (const [n, hp, poise, adds] of [[1, 1, 1, 0], [2, 1.4, 1.3, 0], [3, 1.8, 1.6, 3], [4, 2.2, 1.9, 4]] as const) {
       const kits = Array.from({ length: n }, () => 'sword' as WeaponId);
       const g = ground(kits, kits.map((_, i) => [i - 1, 2] as [number, number]));
-      // (Hempen is a named butcher when the room makes it, so it's in its fury since 2026-11-23: shared/fury.ts.)
-      expect(Math.abs(g.hm.maxHp - HEMPEN.hp * FURY.hp * hp)).toBeLessThanOrEqual(1);
+      // (A boss of the kit, 1.4x health since 2026-11-23: shared/fury.ts.)
+      expect(Math.abs(g.hm.maxHp - HEMPEN.hp * FURY.bossHp * hp)).toBeLessThanOrEqual(1);
       expect(g.hm.boss!.poiseMax).toBe(Math.round(POISE_KIT.bar * poise));
       expect(g.room.enemies.filter((e) => !e.boss).length).toBe(adds);
       expect(hempenRotation(1, n, 0).length).toBe(n >= 4 ? 6 : 5);

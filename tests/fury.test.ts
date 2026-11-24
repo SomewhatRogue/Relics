@@ -1,9 +1,9 @@
 /** Bosses scarier (shared/fury.ts; Kyle, 2026-11-23): a named boss tougher, quicker, broader, and destructive. */
 import { describe, expect, it } from 'vitest';
 import { landJob } from '../src/shared/territory';
-import { BUTCHER, FURY, TICK } from '../src/shared/tuning';
+import { BUTCHER, FURY, HIGH_GROWTH, TICK } from '../src/shared/tuning';
 import { newEnemy } from '../src/sim/enemies';
-import { furyOn, stepFury } from '../src/sim/fury';
+import { furyOn, growOn, stepFury } from '../src/sim/fury';
 import { newProp } from '../src/sim/props';
 import { newRun, runRoom } from '../src/sim/run';
 import { NO_INTENT } from '../src/sim/types';
@@ -53,5 +53,26 @@ describe('a named boss in its fury', () => {
     stepFury([e], room.props, { now: room.time, ev: room.events, enemies: room.enemies, heroes: room.heroes, props: room.props } as never);
     expect(crate.hp < newProp('crate', 0, 0).hp || crate.broken).toBe(true);
     expect(room.map.rounds[i].kind).toBe('stump');
+  });
+
+  it('at high levels a shield goblin or a BIG ONE grows toward the old boss size and gets about more; low, no', () => {
+    const at = (lv: number, big: boolean) => {
+      const e = newEnemy(5, 'scrapper', 5, 5);
+      if (big) e.big = true;
+      else e.variant = 'shield';
+      const r0 = e.radius;
+      growOn(e, lv);
+      return { k: e.scale ?? 1, stride: e.stride ?? 1, wider: e.radius / r0 };
+    };
+    expect(at(HIGH_GROWTH.from, false)).toEqual({ k: 1, stride: 1, wider: 1 });
+    const hi = at(10, false), top = at(30, true);
+    expect(hi.k).toBeGreaterThan(1.2);
+    expect(hi.stride).toBeGreaterThan(1.15);
+    expect(top.k).toBe(HIGH_GROWTH.sizeMost);
+    expect(top.stride).toBe(HIGH_GROWTH.paceMost);
+    // A plain goblin doesn't grow.
+    const plain = newEnemy(6, 'scrapper', 5, 5);
+    growOn(plain, 10);
+    expect(plain.scale).toBeUndefined();
   });
 });

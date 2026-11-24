@@ -17,7 +17,8 @@ export const BIG_TAG = 'BIG ONE';
 
 /** Where to draw the body this frame, and how big: a jeer's hop, a sprint's lean. */
 export function paceOffset(c: Ctx, e: Enemy): { dx: number; dy: number; k: number } {
-  const t = c.t ?? c.now, k = e.big ? BIG.size : 1;
+  // (Grown at a high level as well, sim/fury.ts growOn.)
+  const t = c.t ?? c.now, k = (e.big ? BIG.size : 1) * (e.scale ?? 1);
   if (e.act === 'dead') return { dx: 0, dy: 0, k };
   if (e.held) return { dx: 0, dy: -Math.abs(Math.round(Math.sin(c.now * 7 + e.id) * 2)), k };
   const s = t - (e.sprintAt ?? -99);

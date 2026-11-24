@@ -59,7 +59,7 @@ function paced(c: Ctx, e: Enemy, x: number, y: number, sleeping: boolean): void 
   // A boss of the kit: a Doorkeeper behind its door (doordraw.ts). (Hempen is drawn as the butcher it is.)
   if (e.boss && e.boss.who !== 'hempen' && e.boss.who !== 'haulier' && e.boss.who !== 'listener' && e.boss.who !== 'leechman') return drawKeeper(c, e, x, y, sleeping);
   const meat = meatySort(e);
-  if (!e.held && !e.big && !e.sprintAt && !e.elite && !meat) return drawEnemy(c, e, x, y, sleeping);
+  if (!e.held && !e.big && !e.scale && !e.sprintAt && !e.elite && !meat) return drawEnemy(c, e, x, y, sleeping);
   // A Pouncer in the air rides up an arc (its leap's own clock); a Gorger is as big as it has grown (shared/meaty2.ts).
   const o = paceOffset(c, e), bx = x + o.dx, by = y + o.dy - hopOf(e), k = o.k * (meat ? MEATY_DRAW * grownBy(e.grown ?? 0) : 1);
   if (k === 1) drawEnemy(c, e, bx, by, sleeping), drawElite(c, e, bx, by);
