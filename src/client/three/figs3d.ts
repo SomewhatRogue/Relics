@@ -42,7 +42,7 @@ export class Figs {
   private mat = cardMaterial(this.litTex, this.glowTex);
   private xLit = { value: this.litTex as THREE.Texture | null };
   private xmat = xrayMaterial(this.xLit);
-  private xfoe = xrayMaterial(this.xLit, [1, 0.42, 0.36]);
+  private xfoe = xrayMaterial(this.xLit, [1, 0.84, 0.8]);
   private slots = new Map<string, Slot>();
   private byIndex: Slot[] = [];
   private free: number[] = [];

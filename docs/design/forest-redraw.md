@@ -114,7 +114,8 @@ black limbs, a crow on some, a length of old rope on others. Stumps keep their p
 Nobody is lost behind a tree, and nobody looks stood in front of one. A hero hidden by a tree, a wall or a roof is
 seen through it: themselves, in their own colours, on every other pixel, the thing in front on the rest
 (three/figmat.ts `xrayMaterial`). Kyle chose it from four (the old pale ghost, a window cut in the canopy, the hero
-solid and in shadow, and this): "See-Through is cool".
+solid and in shadow, and this): "See-Through is cool". A goblin behind a tree is seen the same way, and only behind a tree
+(three/behindtree.ts): a wall still hides whoever waits behind it.
 
 ## Ridges (2026-11-24, in)
 

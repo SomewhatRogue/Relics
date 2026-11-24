@@ -1014,3 +1014,16 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
 - A foe behind a tree is not shown (only the window showed them). Foes have no silhouette pass of their own on a
   job (three/cards3d.ts is Art's); to raise with Kyle.
 - Checked on phone 2.5D in Gallows Wood; no page errors. (Claude Fable 5.2)
+
+## 2026-11-24: a goblin behind a tree is seen through it too
+
+- Kyle: "yes" to showing goblins behind trees see-through as a hero is.
+- three/behindtree.ts (new): whether a body stands behind a tree card's crown (the map's trees and the scatter's,
+  34 pixels tall or more; north of the trunk, within the card's width, no further back than it is tall).
+- One line in Art's three/cards3d.ts: a live foe that is not lurking takes the see-through pass when it stands
+  behind a tree (it already did under `?street`). Only behind a tree: a foe behind a wall, and nothing else, stays
+  hidden, so an ambush is still an ambush. figs3d.ts: the foe's see-through keeps its own colours, a touch red (it
+  was a flat red shape).
+- Checked on phone 2.5D in Gallows Wood: two goblins behind crowns, their eyes showing; no page errors.
+  (Claude Fable 5.2)
+
