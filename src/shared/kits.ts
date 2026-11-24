@@ -26,13 +26,13 @@ export const MORE_KITS: Record<MoreKitId, Weapon> = {
     name: 'CHAIN SICKLE',
     cls: 'ROGUE',
     combo: [
-      { windup: 0.09, active: 0.07, recover: 0.2, dmg: 6, range: 1.5, arc: 120, lunge: 0.3, knock: 2, hits: 2 },
-      { windup: 0.09, active: 0.07, recover: 0.2, dmg: 6, range: 1.5, arc: 120, lunge: 0.3, knock: 2, hits: 2 },
-      { windup: 0.14, active: 0.08, recover: 0.34, dmg: 9, range: 1.6, arc: 160, lunge: 0.4, knock: 4, hits: 3 },
+      { windup: 0.09, active: 0.07, recover: 0.2, dmg: 7, range: 1.5, arc: 120, lunge: 0.3, knock: 2, hits: 2 },
+      { windup: 0.09, active: 0.07, recover: 0.2, dmg: 7, range: 1.5, arc: 120, lunge: 0.3, knock: 2, hits: 2 },
+      { windup: 0.14, active: 0.08, recover: 0.34, dmg: 10, range: 1.6, arc: 160, lunge: 0.4, knock: 4, hits: 3 },
     ],
     heavy: { windup: 0.05, active: 0.05, recover: 0.35, dmg: 8, dmgFull: 18, range: 6, arc: 0, lunge: 0, knock: 3, knockFull: 6, chain: true, sickle: true },
     draw: 1.5,
-    blockSpeed: 0.6, chargeSpeed: 0.5, backstab: 1.75, front: 0.75, guardArc: 100, guardCost: 1.8, speed: 1.1,
+    blockSpeed: 0.6, chargeSpeed: 0.5, backstab: 1.75, front: 1, guardArc: 100, guardCost: 1.8, speed: 1.1,
     dodge: { ...DASH, distance: 3.8, cooldown: 0.45 },
   },
   /**

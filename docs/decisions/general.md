@@ -260,3 +260,8 @@ Claude Opus 5.5
 - tests/sickle.test.ts guards it under the daggers from behind and head on.
 
 Claude Opus 5.5
+
+- Then (Kyle: "dagger straight on was pretty weak, it can be equivalent... closer to 10 per rotate... about the same
+  kill speed on the AoE, a lot worse single target"): taps 7, 7, 10 at 1x head on (about 19 a second, the daggers'
+  head on), behind about 33; the full spin's cut 7, so a turn is about 10 with the bleed. Four goblins in the spin
+  die about as fast as one behind the daggers. The guard test says so. Claude Opus 5.5

@@ -1,6 +1,6 @@
 /** The chain sickle (docs/design/chain-sickle.md): the spin, the throw and its snags. */
 import { describe, expect, it } from 'vitest';
-import { TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
+import { SKEWER, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { SICKLE_SPIN, SICKLE_THROW } from '../src/shared/sickle';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
@@ -53,9 +53,12 @@ describe('the chain sickle', () => {
     };
     const daggersBehind = per('daggers', WEAPONS.daggers.backstab!);
     expect(per('rapier', WEAPONS.rapier.backstab!)).toBeLessThan(daggersBehind * 0.5);
-    expect(per('rapier', WEAPONS.rapier.front!)).toBeLessThan(per('daggers', WEAPONS.daggers.front!));
-    const spin = SICKLE_SPIN.top / SICKLE_SPIN.every + 3 / 0.5;
-    expect(spin).toBeLessThan(daggersBehind * 0.25);
+    // Head on, about the daggers' head on (Kyle: "dagger straight on was pretty weak, it can be equivalent").
+    expect(per('rapier', WEAPONS.rapier.front!)).toBeLessThanOrEqual(per('daggers', WEAPONS.daggers.front!) * 1.05);
+    // A full spin, about 10 a turn, on four goblins kills about as fast as daggers from behind on one; on one, a quarter.
+    const spin = (SICKLE_SPIN.top + SKEWER.dmg) / SICKLE_SPIN.every;
+    expect(spin * 4).toBeGreaterThan(daggersBehind * 0.8);
+    expect(spin * 4).toBeLessThan(daggersBehind * 1.3);
   });
 
   it('you walk slow while it spins', () => {

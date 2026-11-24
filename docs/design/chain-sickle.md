@@ -29,6 +29,12 @@ and 1.75x behind (the floor every Rogue kit keeps; about a third of the daggers'
 for 2 to 4, bleeds only once fully going, and takes 1.5 s to get going; the throw 8 to 18. tests/sickle.test.ts
 holds it under the daggers.
 
+Then (Kyle, same day): "dagger straight on was pretty weak, it can be equivalent to that... the bleed being closer to
+10 per rotate feels about right; I want classes to be able to kill things about the same if you do the more AoE
+effect, but the trade-off is a lot worse at single target." So: taps 7, 7, 10 at 1x head on (the daggers' head on);
+a full spin cuts for 7 plus the bleed's 3, about 10 a turn to everything in reach. On four goblins that's about the
+daggers' from behind on one; on one goblin, a quarter.
+
 ## In the code
 
 - The weapon id stays `rapier` (saves, loot tables, gear looks and stores all carry it); only its name and

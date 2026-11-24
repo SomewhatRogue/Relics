@@ -5,5 +5,5 @@
  * chain and the spin cuts nothing. THROW: let go, it flies `range` tiles (`big` on the white flash); fully
  * spun it snags (sim/hook.ts), and on the flash the goblin it snags bleeds `bleed` s.
  */
-export const SICKLE_SPIN = { every: 0.5, r: 2.8, dmg: 2, top: 4, bleed: 2, catch: 1.2, knock: 1 };
+export const SICKLE_SPIN = { every: 0.5, r: 2.8, dmg: 2, top: 7, bleed: 2, catch: 1.2, knock: 1 };
 export const SICKLE_THROW = { range: 6, big: 8, bleed: 3 };
