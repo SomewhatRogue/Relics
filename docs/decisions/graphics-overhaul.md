@@ -792,3 +792,18 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   hold with none looses nothing and says NO DARTS. Five small green pips over the hero while the pouch isn't full
   (client/dartmark.ts), none when it is. tests/darts.test.ts. (Claude Opus 5.5)
 
+## 2026-11-23: trees grounded, their own wind, no room shake
+
+- Kyle: "Trees are weirdly flat and the wind seems to move through big groups of trees at different times?", and
+  "walking through places such as the drowned rat up and down sometimes makes the entire screen shake weirdly".
+- Flat: drawn trees stood on the floor with nothing under them. Now a pool of shade under each tree, pine, dead tree and
+  bush, the SNES way (three/treeshade.ts): a solid oval in whole floor pixels, about the crown's width, toward the
+  lower right, the floor under it multiplied to half (a see-through black was lost in post.ts's alpha). Rebuilt with
+  the trees, so a felled one takes its shade; the scatter's standing trees get it too.
+- Wind: every card rocks on its own moment (an `aPhase` from where it stands, propcards.ts), the gust only leaning
+  it a little further (wind3d.ts), so no clump of trees jumps together; tufts the same.
+- Shake: the camera is your hero's whole pixel plus its lag rounded apart (2026-11-20); as frame lengths wobbled the
+  two roundings took turns and the whole room stepped a pixel back and forth. Now the snapped camera never steps against
+  the way it is moving, nor while it stands still, and rounds plainly where a room's edge holds it (camera3d.ts).
+  Measured walking up the Drowned Rat: 28 reversals in 120 frames before, 0 after. (Claude Opus 5.5)
+

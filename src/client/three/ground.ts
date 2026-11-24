@@ -17,6 +17,7 @@ import { REDRAW } from '../tilelook';
 import { redrawFloor, redrawPx } from './redrawfloor';
 import { CardSheet, isCardRound } from './propcards';
 import { tuftMesh } from './tufts3d';
+import { type Shaded, treeShade } from './treeshade';
 import { Boxes, Seed, jit } from './boxes';
 import type { Lamp3 } from './lamps3d';
 import type { L3 } from './lights3d';
@@ -161,25 +162,29 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // The map's own trees and stumps stand in a mesh of their own, so that when one is felled (sim/felling.ts) they
   // alone are rebuilt, not the whole ground. (Not the new look's town, whose trees are the kit's.)
   const own = new Set(STREET && m.name === 'WICKHOLD' ? [] : m.rounds.filter(woody));
-  let wood: THREE.Mesh | null = null, woodCards: THREE.Mesh | null = null, felled = -1;
+  let wood: THREE.Mesh | null = null, woodCards: THREE.Mesh | null = null, shade: THREE.Mesh | null = null, felled = -1;
   const trees = () => {
     syncFelled(m);
     if (felled === (felled = felledCount(m))) return;
     if (wood) group.remove(wood), wood.geometry.dispose();
     if (woodCards) group.remove(woodCards), woodCards.geometry.dispose();
+    if (shade) group.remove(shade), shade.geometry.dispose();
+    const shaded: Shaded[] = [];
     // (The tile redraw, `?redraw=1`: trees and stumps as the flat view's own pictures, stood up: propcards.ts.)
     const T = new Boxes(), none: Spot[] = [], S = new CardSheet();
     for (const o of own) {
       if (levelAt(wf, o.x, o.y) === DEEP) T.b(o.x, -SINK[DEEP], o.y, Math.min(0.24, o.r), SINK[DEEP], Math.min(0.24, o.r), 0x2a3424);
       const k = T.mark(), up = stacked(m) ? groundLv(m, o.x, o.y) * LEDGE_H : 0;
-      if (REDRAW.on && isCardRound(o)) S.addRound(o, up);
+      if (REDRAW.on && isCardRound(o)) S.addRound(o, up), shaded.push({ x: o.x, y: o.y, r: o.r, kind: o.kind, up });
       else addRound(T, o, none, new Seed(Math.round(o.x * 31 + o.y * 17)));
       if (up) T.raise(k, up);
     }
     if ((wood = T.mesh(VCOL))) group.add(wood);
     if ((woodCards = S.mesh())) group.add(woodCards);
+    // (A pool of shade under each drawn tree: treeshade.ts.)
+    if ((shade = treeShade(shaded))) group.add(shade);
   };
-  const cards = new CardSheet();
+  const cards = new CardSheet(), standShade: Shaded[] = [];
   for (const o of [...m.rounds, ...scatterOf(m).stand]) {
     if (own.has(o)) continue;
     const n = fires.length;
@@ -194,6 +199,7 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
     }
     if (REDRAW.on && isCardRound(o)) {
       cards.addRound(o, up);
+      standShade.push({ x: o.x, y: o.y, r: o.r, kind: o.kind, up });
       continue;
     }
     addRound(B, o, fires, r);
@@ -203,6 +209,8 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   // (Grass and wheat standing up off the redraw's floor, parting round whoever walks through: tufts3d.ts.)
   const tm = REDRAW.on ? tuftMesh(m, LEDGE_H) : null;
   if (tm) group.add(tm);
+  const sm = treeShade(standShade);
+  if (sm) group.add(sm);
   const cm = cards.mesh();
   if (cm) group.add(cm);
   for (const t of m.torches) {

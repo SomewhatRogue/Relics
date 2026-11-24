@@ -63,6 +63,10 @@ export class Cam {
    * feet must stay in, over the room's edge if need be (phoneband.ts). `ins`: low-res pixels a boss's plate
    * covers under the top HUD; the view looks that much higher and the room's top may come down under it.
    */
+  private lastR = NaN;
+  private lastU = NaN;
+  private rawR = 0;
+  private rawU = 0;
   follow(map: GameMap, x: number, z: number, dt: number, shake: number, keep?: { z: number; top: number; bottom: number }, ins = 0, anchor?: [number, number, number]): void {
     if (this.cam instanceof THREE.PerspectiveCamera) return this.chase(map, x, z, dt);
     const k = this.ready ? Math.min(1, dt * 7) : 1, up = ins / (Math.sin(PITCH) * this.ppu);
@@ -72,6 +76,7 @@ export class Cam {
     this.ready = true;
     const hw = this.W / this.ppu / 2, hd = this.H / this.ppu / 2 / Math.sin(PITCH);
     const clamp = (v: number, lo: number, hi: number) => (lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, v)));
+    const fx = this.at.x, fz = this.at.z;
     this.at.x = clamp(this.at.x, hw - 1, map.w + 1 - hw);
     // (Upright, the view may run past the room's foot, a short room needn't sit centred, so the hero stays above the touch buttons.)
     const foot = upright(this.W, this.H) ? hd * 0.44 : 0, zlo = hd - 1 - (WALL_H / Math.tan(PITCH)) * 0.8, zhi = map.h + 1 - hd;
@@ -82,6 +87,8 @@ export class Cam {
       const per = Math.sin(PITCH) * this.ppu;
       this.at.z = Math.max(keep.z - (keep.bottom - this.H / 2) / per, Math.min(keep.z - (keep.top - this.H / 2) / per, this.at.z));
     }
+    // Held by the room's edge on an axis (a short room's ends, a narrow one's sides), the camera stands still there.
+    const heldX = Math.abs(this.at.x - fx) > 1e-6, heldZ = Math.abs(this.at.z - fz) > 1e-6;
     let r = this.at.dot(this.right), u = this.at.dot(this.up);
     const b = this.at.dot(this.back);
     // Snapped so the world's pixel grid lands on whole screen pixels: with an odd width or height the screen's middle
@@ -93,12 +100,25 @@ export class Cam {
       // own, so as they walk they hold their pixel on screen and the world steps past a pixel at a time. Rounded apart,
       // camera and hero stepped on different frames and the hero shook a pixel to and fro (Kyle, 2026-11-20).
       const a = new THREE.Vector3(...anchor), ar = a.dot(this.right), au = a.dot(this.up);
-      r = (Math.round(ar * P - ox) + ox + Math.round((r - ar) * P)) / P;
-      u = (Math.round(au * P - oy) + oy + Math.round((u - au) * P)) / P;
+      // Held still by the room's edge, though, it rounds on its own: the hero's rounding and the lag's would take turns
+      // and shake the whole room a pixel as they walked (Kyle, the Drowned Rat, 2026-11-23).
+      r = heldX ? (Math.round(r * P - ox) + ox) / P : (Math.round(ar * P - ox) + ox + Math.round((r - ar) * P)) / P;
+      u = heldZ ? (Math.round(u * P - oy) + oy) / P : (Math.round(au * P - oy) + oy + Math.round((u - au) * P)) / P;
     } else {
       r = (Math.round(r * P - ox) + ox) / P;
       u = (Math.round(u * P - oy) + oy) / P;
     }
+    // Never a step against the way the camera is going (nor any while it stands still): the hero's rounding and its
+    // lag's take turns as the frames' lengths wobble, and the whole room rocked a pixel back and forth as you walked
+    // (Kyle, the Drowned Rat, 2026-11-23). A whole new spot (a door, a cut) is let straight through.
+    const rr = this.at.dot(this.right), ru = this.at.dot(this.up), hold = (snap: number, raw: number, ls: number, lr: number) => {
+      if (Math.abs(snap - ls) > 4 / P || Number.isNaN(ls)) return snap;
+      const dir = raw - lr;
+      return Math.abs(dir) < 1e-7 || (snap - ls) * dir < 0 ? ls : snap;
+    };
+    r = hold(r, rr, this.lastR, this.rawR);
+    u = hold(u, ru, this.lastU, this.rawU);
+    (this.lastR = r), (this.lastU = u), (this.rawR = rr), (this.rawU = ru);
     if (shake > 0.2) r += Math.round((Math.random() - 0.5) * shake) / this.ppu, (u += Math.round((Math.random() - 0.5) * shake) / this.ppu);
     this.cam.position.copy(this.right).multiplyScalar(r).addScaledVector(this.up, u).addScaledVector(this.back, b + DIST);
     this.cam.updateMatrixWorld();

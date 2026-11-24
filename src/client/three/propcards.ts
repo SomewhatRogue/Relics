@@ -88,7 +88,7 @@ export class CardSheet {
     }
     const H = sy + row + 1, mk = () => Object.assign(document.createElement('canvas'), { width: W, height: H });
     const lit = mk(), glow = mk(), lg = lit.getContext('2d')!, gg = glow.getContext('2d')!;
-    const pos: number[] = [], uv: number[] = [], sw: number[] = [];
+    const pos: number[] = [], uv: number[] = [], sw: number[] = [], ph: number[] = [];
     this.cuts.forEach(({ c, x, z, up, sway }, i) => {
       const [px, py] = at[i];
       lg.drawImage(c.lit, px, py), gg.drawImage(c.glow, px, py);
@@ -99,12 +99,16 @@ export class CardSheet {
       pos.push(l, b, fz, r, b, fz, r, t, fz, l, b, fz, r, t, fz, l, t, fz);
       uv.push(u0, v0, u1, v0, u1, v1, u0, v0, u1, v1, u0, v1);
       sw.push(0, 0, sway, 0, sway, sway);
+      // Each card its own moment in the wind (wind3d.ts), from where it stands.
+      const p = ((Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1 + 1) % 1 * Math.PI * 2;
+      ph.push(p, p, p, p, p, p);
     });
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     g.computeVertexNormals();
     g.setAttribute('aSway', new THREE.Float32BufferAttribute(sw, 1));
+    g.setAttribute('aPhase', new THREE.Float32BufferAttribute(ph, 1));
     const tex = (cv: HTMLCanvasElement) => Object.assign(new THREE.CanvasTexture(cv), { magFilter: THREE.NearestFilter, minFilter: THREE.NearestFilter, generateMipmaps: false });
     const mat = cardMaterial(tex(lit), tex(glow), this.edge);
     if (sw.some((v) => v > 0)) swayCards(mat, this.push);

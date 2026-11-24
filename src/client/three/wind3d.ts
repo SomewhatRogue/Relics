@@ -113,7 +113,7 @@ const shadows = (sh: THREE.WebGLProgramParametersWithUniforms, after: string) =>
 export function windify(m: THREE.Material): void {
   chain(m, (sh) => {
     shadows(sh, '#include <color_fragment>');
-    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + 'attribute float aSway;\nvoid main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
+    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + 'attribute float aSway;\nattribute float aPhase;\nvoid main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
 if (uLife > 0.5 && aSway > 0.5) {
   // Only a tree's leaves (rounds3d.ts marks them, boxes.ts \`sway\`): the higher, the more they bend, and flutter.
   vec4 wp = modelMatrix * vec4(transformed, 1.0);
@@ -142,11 +142,13 @@ export function swayCards(m: THREE.Material, push = false): void {
     float L = length(d);
     if (L < 0.8) lean += (d.x < 0.0 ? -1.0 : 1.0) * (1.0 - L / 0.8) * 2.4;
   }` : '';
-    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + decl + 'attribute float aSway;\nvoid main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
+    sh.vertexShader = sh.vertexShader.replace('void main() {', LIFE_GLSL + decl + 'attribute float aSway;\nattribute float aPhase;\nvoid main() {').replace('#include <begin_vertex>', `#include <begin_vertex>
 if (uLife > 0.5 && aSway > 0.0) {
   vec4 wp = modelMatrix * vec4(transformed, 1.0);
-  float g = lifeGust(wp.xz, uLifeT), rock = 0.35 * sin(uLifeT * 1.3 + wp.x * 0.9 + wp.z * 1.7);
-  float lean = ${dx}.0 * clamp(g * 1.1 + rock, -0.5, 1.0) * aSway;${parted}
+  // Each its own slow rock (aPhase, from where it stands), the gust only leaning it a little further: no clump
+  // of trees jumps together (Kyle, 2026-11-23).
+  float g = lifeGust(wp.xz, uLifeT), rock = sin(uLifeT * (0.9 + 0.25 * fract(aPhase)) + aPhase);
+  float lean = ${dx}.0 * clamp(0.55 * rock + 0.45 + 0.35 * g, -0.4, 1.0) * aSway;${parted}
   transformed.x += floor(clamp(lean, -2.5, 2.5) + 0.5) / 20.0;
 }`);
   }, push ? '|cardpush' : '|cardsway');
