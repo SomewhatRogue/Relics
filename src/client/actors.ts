@@ -1,4 +1,5 @@
 /** Drawing a hero: the class's body, the weapon in hand, the dodge, charge and stun. */
+import { headName } from '../shared/titles';
 import { shieldSprite } from './shieldart';
 import { CHARGE, NETTER, WARD, WEAPONS, WANT } from '../shared/tuning';
 import { drawNetOn } from './foedraw';
@@ -127,7 +128,7 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   else if (me === false) {
     ring(c, x, y, hs(7), '#5ad07a', h.hp / 100, '#1a3a22');
     // (On a 2.5D card the name goes over the head instead, three/overlay3d.ts.)
-    const name = (h.tag ?? h.id).toUpperCase();
+    const name = headName(h);
     if (!BARE.on) drawText(c.glow, name, Math.round(x - (textWidth(name) + 1) / 2), Math.round(y + 6), '#9ad8a8');
   }
   // Knocked flat by the hound (the Ranger's rare idle): lying there laughing, the gear set down.

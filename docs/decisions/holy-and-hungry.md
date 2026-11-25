@@ -487,3 +487,21 @@ the sewer grate", in place of "Talk to the under church about growing the Want";
   `yard`, so after a reload the yard's errand vanished and the trainer's board quest opened early. It keeps 1, 2, 3
   now. `tests/errandpay.test.ts`: the chain survives a save.
 - **Checked:** the errand tests, `npm run check`, the full suite (2377 passed).
+
+## 2026-11-24: titles, stage B: everyone sees them (Claude Opus 5.5)
+
+- Kyle's call (titles.md): titles are shown to all. A hero's `titleOf` (sim/types.ts, display only), and
+  `asTitle`/`headName` in my `shared/titles.ts`: a heard title is checked, and the name over a head is titled.
+  Both views draw `headName` (client/actors.ts, client/three/overlay3d.ts; one line each).
+- Town: the presence carries the worn title (`ti`, client/townpresence.ts), in the gist so wearing one is told at
+  once (client/townfolk.ts), checked when heard. Co-op: the host has every profile, so it sends a titles map
+  beside the names (`ti`, client/coop.ts), slow, sent when it changes (client/bigsend.ts); the ids swap like the
+  names' (wire2.ts). Only while anyone wears one, and the empty map once after (like `wait`), so a room with no
+  titles sends what it sent before, byte for byte (wire2host, swarmsend, mapsum tests). The host's own view of a friend is titled at `bring` (client/game.ts). The `__town` hook
+  gains `head`.
+- **Checked:** `tests/titles.test.ts` (heard, drawn, the presence), `npm run check`, the full suite, and online:
+  town-online ("Sam sees KYLE THE GIVEN over Kyle") and party-online ("Sam sees the leader's title"), both pass.
+- **Not mine, seen failing:** town-online's Sam walking, the statue steps and the parked word counts fail on main
+  without this change too (the counts move run to run); party-online's block, creep and stab-cap timings fail
+  (lag feel: on main without this change the block and creep fail too; the stab-cap step lands within a few ms of
+  its own line, run to run). Party-online's title step passed all three runs. For whoever owns the town and the netcode.

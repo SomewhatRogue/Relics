@@ -81,6 +81,12 @@ export function titled(name: string, t: TitleId | undefined): string {
   return TITLES[t].before ? `${TITLES[t].word} ${name}` : `${name} ${TITLES[t].word}`;
 }
 
+/** A title heard from another browser, checked: one of ours, or none. */
+export const asTitle = (v: unknown): TitleId | undefined => (typeof v === 'string' && v in TITLES ? (v as TitleId) : undefined);
+
+/** The name over another hero's head, with the title they wear (stage B: everyone sees it). Both views draw this. */
+export const headName = (h: { tag?: string; id: string; titleOf?: string }): string => titled((h.tag ?? h.id).toUpperCase(), asTitle(h.titleOf));
+
 /** Fill in a saved record (none: nothing yet; a broken one made sound). */
 export function fitTitles(o: unknown): TitleRecord | undefined {
   if (!o || typeof o !== 'object') return undefined;

@@ -21,6 +21,7 @@
  * you came or went (and what you offer), and the moment someone walks in you tell everyone where you
  * stand. Out of Wickhold altogether (the yard, the wood: townpresence.ts) the socket isn't open.
  */
+import { asTitle } from '../shared/titles';
 import type { RunnerWord } from './runner';
 import type { HeardRunner } from './runnerecho';
 import { newHero } from '../sim/hero';
@@ -59,7 +60,7 @@ export const AWAY = { hidden: hook('hide', 60), idle: hook('idle', 180), parked:
 export const idleLimit = (parked: boolean, party: boolean) => (party ? Infinity : parked ? AWAY.parked : AWAY.idle);
 
 /** One player about themselves: name, weapon, the place they're in, and x, y, facing, moving. */
-export interface Me { n: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; /** A Warrior's shield: shape, field, device, trim (shared/shieldlook.ts). */ sh?: PackedShield; /** The cloth worn: dye, edge, cut (shared/clothlook.ts). */ cl?: PackedCloth; /** The weapon in hand's look: tier, element, Hungry id (shared/gearlook.ts). */ gw?: string; /** Body and legs worn: weight and tier (shared/gearlook.ts). */ ga?: string; gl?: string; /** The ring that shows (tier, name). */ gr?: string; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number]; /** Parked at a pastime (fishing, the butts): said once, then nothing till it's over (shared/pastimes.ts). */ g?: PastimeId; /** A new hero's runner out (runner.ts), for the others in the street to see (runnerecho.ts). */ r?: RunnerWord }
+export interface Me { n: string; /** The title worn, if any (shared/titles.ts). */ ti?: string; w: string; l?: number; /** A Ranger's hound: breed, coat, white, name (shared/houndlook.ts). */ d?: PackedHound; /** A Warrior's shield: shape, field, device, trim (shared/shieldlook.ts). */ sh?: PackedShield; /** The cloth worn: dye, edge, cut (shared/clothlook.ts). */ cl?: PackedCloth; /** The weapon in hand's look: tier, element, Hungry id (shared/gearlook.ts). */ gw?: string; /** Body and legs worn: weight and tier (shared/gearlook.ts). */ ga?: string; gl?: string; /** The ring that shows (tier, name). */ gr?: string; at: string; p: [number, number, number, number, number]; pt?: unknown; /** Velocity, tiles a second. */ v?: [number, number]; /** Parked at a pastime (fishing, the butts): said once, then nothing till it's over (shared/pastimes.ts). */ g?: PastimeId; /** A new hero's runner out (runner.ts), for the others in the street to see (runnerecho.ts). */ r?: RunnerWord }
 type Said = Me & { k: 'me' | 'hi' };
 interface Folk { hero: Hero; to: [number, number]; v: [number, number]; at: string; heard: number; pt?: unknown; run?: { w: RunnerWord; heard: number } }
 
@@ -227,7 +228,7 @@ export class Townfolk {
   private gist(place = false): string {
     const m = this.me;
     // (A runner's word, but for how long into its phase: told at its start and at each change.)
-    return m ? JSON.stringify([m.n, m.w, m.l, m.d, m.cl, m.at, place ? 0 : m.p[4], m.pt, m.g ?? 0, place ? 0 : m.r?.slice(0, 4) ?? 0]) : '';
+    return m ? JSON.stringify([m.n, m.ti ?? 0, m.w, m.l, m.d, m.cl, m.at, place ? 0 : m.p[4], m.pt, m.g ?? 0, place ? 0 : m.r?.slice(0, 4) ?? 0]) : '';
   }
 
   /** Anyone else in the place I'm in (only they see me walk). */
@@ -260,6 +261,8 @@ export class Townfolk {
     f.run = Array.isArray(r) && r.length === 5 && r.every((v) => typeof v === 'number' && isFinite(v)) && r[0] >= 0 && r[0] < 5 && r[3] >= 0 && r[3] <= 2 && r[4] >= 0 && r[4] < 120 ? { w: r as RunnerWord, heard: this.now } : undefined;
     // Parked at a pastime, drawn there at it (parked.ts); a word without it, back.
     setPark(f.hero, isPastime(d.g) ? d.g : null);
+    // The title they wear, checked (a broken one: none).
+    f.hero.titleOf = asTitle(d.ti);
     Object.assign(f.hero, { weapon, look: typeof d.l === 'number' ? Math.max(0, Math.min(2, Math.floor(d.l))) : 0, fx, fy, moving: !!moving, tag: String(d.n ?? '').toUpperCase().replace(NAME, '').slice(0, 14) || 'STRANGER', houndLook: d.d === undefined ? f.hero.houndLook : unpackHound(d.d, m.from), shieldLook: d.sh === undefined ? f.hero.shieldLook : unpackShield(d.sh), clothLook: d.cl === undefined ? f.hero.clothLook : unpackCloth(d.cl), gearLook: d.gw === undefined ? f.hero.gearLook : { w: unpackLook(d.gw), a: unpackArmour(d.ga), l: unpackArmour(d.gl), r: unpackRing(d.gr) } });
     // Someone new: tell them where you are, just them. (Someone I hadn't heard of, too: their `hi` never
     // got here, so they haven't heard of me either.)

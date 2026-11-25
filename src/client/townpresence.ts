@@ -16,6 +16,7 @@ import { packShield } from '../shared/shieldlook';
 import { packCloth } from '../shared/clothlook';
 import { heldLook, legsLook, packArmour, packLook, packRing, ringLook, wornLook } from '../shared/gearlook';
 import { runner } from './runner';
+import { shownTitle } from '../shared/titles';
 
 /** Is this a place others can be in with you? */
 export const sharedPlace = (g: Game): boolean => g.mode === 'town';
@@ -27,10 +28,12 @@ export function presence(g: Game, name: string): Me | null {
   const parked = g.mode === 'pastime' && g.pastime ? g.pastime : null;
   const h = sharedPlace(g) || parked ? g.hero : null;
   if (!h) return null;
-  if (parked) return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), ...(h.shieldLook ? { sh: packShield(h.shieldLook) } : {}), ...(h.clothLook ? { cl: packCloth(h.clothLook) } : {}), gw: packLook(heldLook(h)), ga: packArmour(wornLook(h)), gl: packArmour(legsLook(h)), gr: packRing(ringLook(h)), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, 0], g: parked };
+  // The title worn goes with the name, for others to see over your head (shared/titles.ts).
+  const ti = shownTitle(g.profile), tt = ti ? { ti } : {};
+  if (parked) return { n: name, ...tt, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), ...(h.shieldLook ? { sh: packShield(h.shieldLook) } : {}), ...(h.clothLook ? { cl: packCloth(h.clothLook) } : {}), gw: packLook(heldLook(h)), ga: packArmour(wornLook(h)), gl: packArmour(legsLook(h)), gr: packRing(ringLook(h)), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, 0], g: parked };
   // A Ranger's hound goes with the look, packed small (shared/houndlook.ts); it's in what others heard
   // last (townfolk.ts `gist`), so it goes again only when it's changed, never with each step.
   // A new hero's runner, out in the street: the others there see them come and go (runnerecho.ts).
   const r = runner.word(performance.now() / 1000);
-  return { n: name, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), ...(h.shieldLook ? { sh: packShield(h.shieldLook) } : {}), ...(h.clothLook ? { cl: packCloth(h.clothLook) } : {}), gw: packLook(heldLook(h)), ga: packArmour(wornLook(h)), gl: packArmour(legsLook(h)), gr: packRing(ringLook(h)), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0], ...(r ? { r } : {}) };
+  return { n: name, ...tt, w: h.weapon, l: h.look ?? 0, ...(h.houndLook ? { d: packHound(h.houndLook) } : {}), ...(h.shieldLook ? { sh: packShield(h.shieldLook) } : {}), ...(h.clothLook ? { cl: packCloth(h.clothLook) } : {}), gw: packLook(heldLook(h)), ga: packArmour(wornLook(h)), gl: packArmour(legsLook(h)), gr: packRing(ringLook(h)), at: g.room.map.name, p: [h.x, h.y, h.fx, h.fy, h.moving ? 1 : 0], ...(r ? { r } : {}) };
 }

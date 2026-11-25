@@ -1,11 +1,13 @@
 // Titles (docs/design/titles.md): earned by deeds on a road, bought, worn only on their own road.
 import { describe, expect, it } from 'vitest';
-import { STEPS, TITLES, deed, deedsOn, earned, fitTitles, own, owns, roadTitles, shownTitle, titlePrice, titled, wear } from '../src/shared/titles';
+import { STEPS, TITLES, asTitle, deed, headName, deedsOn, earned, fitTitles, own, owns, roadTitles, shownTitle, titlePrice, titled, wear } from '../src/shared/titles';
 import { AMENDS_STEPS } from '../src/shared/amends';
 import { newProfile } from '../src/shared/progress';
 import { rollHungry } from '../src/shared/hungry';
 import { Rng } from '../src/shared/rng';
 import { TITLEW } from '../src/client/titlewords';
+import { Game } from '../src/client/game';
+import { presence } from '../src/client/townpresence';
 
 const hero = () => newProfile('MAGE', 'TESS', 't');
 
@@ -62,5 +64,22 @@ describe('titles', () => {
       const s = typeof v === 'function' ? (v as (...a: unknown[]) => string)(true, 2) : v;
       expect(s).not.toMatch(/\bthe want\b|\broad\b|\u2014/i);
     }
+  });
+
+  it('stage B: a title heard is checked, and goes over the head with the name; the town presence carries it', () => {
+    expect(asTitle('vowed')).toBe('vowed');
+    expect(asTitle('KING')).toBeUndefined();
+    expect(asTitle(7)).toBeUndefined();
+    expect(headName({ id: 'x', tag: 'tess', titleOf: 'vowed' })).toBe('VOWED TESS');
+    expect(headName({ id: 'x', tag: 'TESS', titleOf: 'given' })).toBe('TESS THE GIVEN');
+    expect(headName({ id: 'x', tag: 'TESS', titleOf: 'bogus' })).toBe('TESS');
+    expect(headName({ id: 'sam' })).toBe('SAM');
+    const g = new Game();
+    g.create('MAGE', 'TESS');
+    if (g.mode === 'wood') g.skipWood();
+    expect(g.mode).toBe('town');
+    expect(presence(g, 'TESS')?.ti).toBeUndefined();
+    g.profile.titles = { deeds: { church: 1, under: 0 }, owned: ['given'], worn: 'given' };
+    expect(presence(g, 'TESS')?.ti).toBe('given');
   });
 });

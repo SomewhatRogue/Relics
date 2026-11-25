@@ -171,6 +171,9 @@ async function guestFeel(kyle, sam, step) {
     step("Sam is pulled into Kyle's job", await until(sam, () => window.__game.mode === 'run' && window.__game.room.heroes.some((h) => h.id === 'me') && window.__game.room.heroes.some((h) => h.id === '@lead'), null, 12000));
     step("Kyle's room has Sam's hero in it", await until(kyle, () => window.__game.room.heroes.length >= 2));
     step('names right on both screens', await until(sam, () => window.__game.room.heroes.find((h) => h.id === '@lead')?.tag === 'KYLE') && await until(kyle, () => window.__game.room.heroes.some((h) => h.tag === 'SAM')));
+    // A title (docs/design/titles.md, stage B): the leader puts one on mid-job, and Sam sees it over his head.
+    await kyle.page.evaluate(() => { window.__game.profile.titles = { deeds: { church: 1, under: 0 }, owned: ['given'], worn: 'given' }; });
+    step("Sam sees the leader's title", await until(sam, () => window.__game.room.heroes.find((h) => h.id === '@lead')?.titleOf === 'given'));
     const sameGoblins = await Promise.all([kyle, sam].map((p) => p.page.evaluate(() => window.__game.room.enemies.map((e) => e.id).join(','))));
     step(`same goblins on both screens (${sameGoblins[0].split(',').length})`, sameGoblins[0] && sameGoblins[0] === sameGoblins[1]);
     // Sam's own hero answers the stick at once, lag or no lag.

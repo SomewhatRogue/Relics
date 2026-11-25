@@ -4,6 +4,7 @@
  * to go in; taking a job starts a run (room after room until the job is done or you're driven back);
  * the results come home to the hero and the shared world, and the town changes with them.
  */
+import { shownTitle } from '../shared/titles';
 import { deepSkillFor, learnDeepSkill, reachFloor } from '../shared/deepskill';
 import { gateOf, isOpen, questCount, questJob, type QuestDef, type QuestFacts } from '../shared/heroquests';
 import { QUESTW } from './questwords';
@@ -477,7 +478,7 @@ export class Game {
     const n = this.room.heroes.indexOf(h);
     // Beside you, as far as the ground allows (never into a wall you're standing against).
     useMap(this.room.map), (h.x = me.x), (h.y = me.y), travel(h, n % 2 ? 0.8 : -0.8, 0.3 * n, HERO.radius);
-    Object.assign(h, { fx: me.fx, fy: me.fy, kvx: 0, kvy: 0, act: h.act === 'down' ? 'down' : 'idle', actT: h.act === 'down' ? h.actT : 0, tag: f.name });
+    Object.assign(h, { fx: me.fx, fy: me.fy, kvx: 0, kvy: 0, act: h.act === 'down' ? 'down' : 'idle', actT: h.act === 'down' ? h.actT : 0, tag: f.name, titleOf: f.profile ? shownTitle(f.profile) : undefined });
     this.room.prev.set('h:' + id, [h.x, h.y]);
   }
 

@@ -34,6 +34,9 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const sam = await open('SAM', 'WARRIOR', { viewport: { width: 1280, height: 800 } });
     step('Kyle sees Sam', await sees(kyle, 'SAM'));
     step('Sam sees Kyle', await sees(sam, 'KYLE'));
+    // A title (docs/design/titles.md, stage B): Kyle puts one on, and Sam sees it over his head.
+    await kyle.page.evaluate(() => { window.__game.profile.titles = { deeds: { church: 1, under: 0 }, owned: ['given'], worn: 'given' }; });
+    step('Sam sees KYLE THE GIVEN over Kyle', await sam.page.waitForFunction(() => window.__town().here.some((h) => h.head === 'KYLE THE GIVEN'), null, { timeout: 6000 }).then(() => true, () => false));
     // Sam walks: Kyle should see Sam move.
     const before = await kyle.page.evaluate(() => window.__town().here.find((h) => h.name === 'SAM'));
     await sam.page.keyboard.down('d');

@@ -28,6 +28,7 @@
  *   leader's gone), and back in sight it follows them. "The leader" here is whoever hosts the room: the
  *   member with the best link at setting out (shared/hostpick.ts), the party's leader unless beaten.
  */
+import { asTitle, shownTitle } from '../shared/titles';
 import type { Job } from '../shared/jobs';
 import type { Profile } from '../shared/progress';
 import { LAGCOMP, TICK } from '../shared/tuning';
@@ -114,6 +115,8 @@ export interface HostGame {
   doorMarks(): DoorMark[];
   /** The street and its houses, to hand the job on. */
   jobSave(): { room: Record<string, unknown>; houses: unknown };
+  /** The leader's own hero record (their title goes out with the names). */
+  profile?: Profile;
 }
 
 export class CoopHost {
@@ -131,6 +134,8 @@ export class CoopHost {
   private now = 0;
   /** The last send said who was still coming (so the empty list goes out once: loadpage.ts). */
   private waitWas = false;
+  /** Titles were worn last send (the empty map goes once when the last comes off). */
+  private tiWas = false;
   /** Big rooms (an expedition): each friend their own, near only (bigsend.ts). */
   private big = new BigSend();
 
@@ -255,6 +260,16 @@ export class CoopHost {
     const names: Record<string, string> = { me: this.myName };
     const acks: Record<string, number> = {};
     for (const [id, f] of this.friends) (names[id] = f.name), f.at !== undefined && (acks[id] = f.at);
+    // The titles worn, beside the names (shared/titles.ts; the host has every profile): sent when they change (bigsend.ts).
+    // Only while anyone wears one, and the empty map once after (as `wait` below), so the rest of the time nothing changes.
+    const worn: Record<string, string> = {}, mine = g.profile ? shownTitle(g.profile) : undefined;
+    if (mine) worn.me = mine;
+    for (const [id, f] of this.friends) {
+      const t = f.profile ? shownTitle(f.profile) : undefined;
+      if (t) worn[id] = t;
+    }
+    const anyWorn = Object.keys(worn).length > 0, ti = anyWorn || this.tiWas ? { ti: worn } : {};
+    this.tiWas = anyWorn;
     const hc = g.houses(), dm = g.doorMarks(), goal = g.goalText();
     // Who is still coming in, sent while there is anyone, and the empty list once (the pages that wait on it lift: loadpage.ts).
     const pend = this.coming(), wait = pend.length || this.waitWas ? { wait: pend } : {};
@@ -263,7 +278,7 @@ export class CoopHost {
       if (isBig(room)) {
         // A big room: each friend only what's near them, the map from its seed (bigsend.ts).
         const k = g.keyOf(room), out = !room.indoors;
-        const common = { k, t: room.time, w: sentClock(now), x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, acks, ...wait };
+        const common = { k, t: room.time, w: sentClock(now), x: room.exitOpen ? 1 : 0, in: room.indoors ? 1 : 0, hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, ...ti, acks, ...wait };
         for (const id of ids) {
           // (A whole room says the fingerprint of its map as the seed made it, for a friend to check its own against; never a patch.)
           const f = this.friends.get(id)!, whole = f.fresh || this.sentKey.get(id) !== k, sum = whole ? this.seedSum(k, g.run) : undefined;
@@ -279,7 +294,7 @@ export class CoopHost {
       const whole = ids.some((id) => this.friends.get(id)!.fresh || this.sentKey.get(id) !== k);
       // (One message for the room: the second wire format only if everyone it goes to speaks it, wire2.ts.)
       const v = Math.min(...ids.map((id) => wire(this.friends.get(id)!)));
-      const { d, full } = this.sending.msg(room, now, whole, { k, w: sentClock(now), slow: { hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, ...wait }, ev: this.evs.get(room) ?? [], acks }, v);
+      const { d, full } = this.sending.msg(room, now, whole, { k, w: sentClock(now), slow: { hc: out ? hc : [], dm: out ? dm : [], run: lean(g.run), goal, names, ...ti, ...wait }, ev: this.evs.get(room) ?? [], acks }, v);
       // Everyone in the one room: one message for them all; else each their own.
       if (groups.size === 1) this.sock.send('*', d);
       else for (const id of ids) this.sock.send(id, d);
@@ -346,7 +361,7 @@ export class CoopHost {
 }
 
 /** A patch from the leader, as a friend reads it (ids swapped: theirs `@lead`, mine `me`). */
-type Body = { p: Patch; f: number; k: number; /** The leader's fingerprint of this room's map as its seed made it (whole big rooms only: mapsum.ts). */ sum?: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; /** The leader's clock as it sent this (s). */ w?: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; wait?: string[]; acks?: Record<string, number> };
+type Body = { p: Patch; f: number; k: number; /** The leader's fingerprint of this room's map as its seed made it (whole big rooms only: mapsum.ts). */ sum?: number; map?: ArenaRoom['map']; ms?: number; blaze?: ArenaRoom['map']['blaze']; xs?: ExpedState; t: number; /** The leader's clock as it sent this (s). */ w?: number; x: number; in?: number; hc?: CoopGuest['houses']; dm?: DoorMark[]; run: Run | null; goal: string; ev: FightEvent[]; names: Record<string, string>; /** The titles worn, by the names' ids (shared/titles.ts). */ ti?: Record<string, unknown>; wait?: string[]; acks?: Record<string, number> };
 
 export class CoopGuest {
   room: ArenaRoom | null = null;
@@ -384,6 +399,8 @@ export class CoopGuest {
   /** Online play went off (the month's budget is used up): take the job on here, alone, from the last whole job heard. */
   cut = false;
   private names: Record<string, string> = {};
+  /** The titles they wear, by the same ids as the names (shared/titles.ts). */
+  private titles: Record<string, unknown> = {};
   private helloAt = -9;
   private now = 0;
   private firstAt = -1;
@@ -558,7 +575,8 @@ export class CoopGuest {
     // (The names came through the same swap: the leader's under '@lead', mine under 'me'.)
     // A big room's run, banner, names and houses come only when they change (bigsend.ts): keep the last.
     if (body.names) this.names = body.names;
-    for (const h of room.heroes) h.tag = this.names[h.id] ?? h.tag;
+    if (body.ti) this.titles = body.ti;
+    for (const h of room.heroes) (h.tag = this.names[h.id] ?? h.tag), (h.titleOf = asTitle(this.titles[h.id]));
     room.time = body.t;
     (this.prevT = this.curT), (this.curT = body.t);
     // An expedition's weather as it stands (it may have turned): the same call as the leader's (shared/expedsky.ts).
@@ -693,6 +711,7 @@ export class CoopGuest {
     this.mine = null;
     // (Their names come with their first whole room: not the old leader's under '@lead' meanwhile.)
     this.names = {};
+    this.titles = {};
   }
 
   /** How long the leader has been quiet. */

@@ -5,6 +5,7 @@
  * backstab arcs, and the 2D
  * effects themselves (sparks, rings, lightning, gore, words), each placed where the room says it is.
  */
+import { headName } from '../../shared/titles';
 import type { ArenaRoom } from '../../sim/room';
 import type { Target } from '../../sim/targets';
 import type { DoorMark } from '../jobrooms';
@@ -125,7 +126,7 @@ export class Overlay {
         const left = h.bleeding ? PARTY.bleed - h.actT : h.actDur - h.actT, s = String(Math.max(0, Math.ceil(left)));
         drawText(g, s, Math.round(x - textWidth(s) / 2), Math.round(y - 2), h.bleeding && !h.selfUp ? '#ffd27a' : '#ff6a5a');
       } else if (h.id !== meId && h.id !== 'squire') {
-        const name = (h.tag ?? h.id).toUpperCase();
+        const name = headName(h);
         drawText(g, name, Math.round(x - textWidth(name) / 2), Math.round(y - 6), '#9ad8a8');
       }
     }

@@ -288,6 +288,8 @@ export interface Hero extends Body {
   tauntUntil?: number;
   /** The name shown under someone else's hero (another player in town); their id otherwise. */
   tag?: string;
+  /** The title another player wears, for the name over their head (shared/titles.ts headName; never decides a thing). */
+  titleOf?: string;
   /** Which of its class's three looks it wears (drawing only). */
   look?: number;
   /** A Ranger's hound as its player chose it with Maeve (shared/houndlook.ts): breed, coat, white, name.

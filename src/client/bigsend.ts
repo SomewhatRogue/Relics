@@ -20,7 +20,7 @@ const FULL_EVERY = 4;
  */
 const FULL_GAP = 1;
 /** What's sent only when it changes. */
-const SLOW = new Set(['run', 'goal', 'names', 'hc', 'dm']);
+const SLOW = new Set(['run', 'goal', 'names', 'ti', 'hc', 'dm']);
 /** `v`: the wire format this friend's encoder was fed (a change sends their room whole: wire2.ts). */
 interface Per { enc: Encoder; fullAt: number; room: ArenaRoom | null; xs: string; said: Record<string, string>; v: number }
 

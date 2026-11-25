@@ -1,4 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { headName } from '../shared/titles';
 import { aimOnGround } from '../shared/heights';
 import { canTalk } from '../sim/minis';
 import { deepTestHero } from './deeptest';
@@ -900,7 +901,7 @@ if (input.touch) document.body.classList.add('touch');
 // Test hooks: read the fight as data, never as pixels.
 const w = window as unknown as Record<string, unknown>;
 w.__fullForTest = fullForTest;
-w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, rtt: townfolk?.rtt ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, x: h.x, y: h.y, park: parkOf(h), pet: petFrame(h, performance.now() / 1000)?.r ?? null })) ?? [], sends: townfolk?.sends ?? 0 });
+w.__town = () => ({ dozing: !!townfolk?.dozing, open: !!townfolk?.open, count: townfolk?.count ?? 0, rtt: townfolk?.rtt ?? 0, here: townfolk?.here(game.room.map.name).map((h) => ({ name: h.tag, head: headName(h), x: h.x, y: h.y, park: parkOf(h), pet: petFrame(h, performance.now() / 1000)?.r ?? null })) ?? [], sends: townfolk?.sends ?? 0 });
 w.__GAME_STATE__ = () => ({ mode: game.mode, wood: game.wood ? { wake: game.wood.wake, said: game.wood.said, stage: game.wood.stage, hold: game.wood.hold } : null, inside: game.outside ? game.room.map.name : null, title: title.open, time: game.room.time, hero: { ...game.hero }, enemies: game.room.enemies.map((e) => ({ ...e })), guards, run: game.run, profile: game.profile, world: game.world });
 w.render_game_to_text = () => `${game.mode} t=${game.room.time.toFixed(1)} hero ${game.hero.act} hp ${game.hero.hp} st ${Math.round(game.hero.stamina)} | ` + game.room.enemies.map((e) => `${e.kind} ${e.act} hp ${e.hp}${e.attack ? ' ' + e.attack.kind + ' ' + e.attack.t.toFixed(2) : ''}`).join(' | ');
 Object.defineProperty(w, '__room', { get: () => game.room });
