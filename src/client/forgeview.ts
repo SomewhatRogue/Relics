@@ -4,6 +4,7 @@
  * screen's pattern, upgradeview.ts and upgrades.css), the changed ones lit, and the price. The numbers come
  * from shared/plusrows.ts, worked out by gearStats, so they are what the room fights with. HTML only.
  */
+import { matsText } from './matwords';
 import { PLUS, PLUS_CAP, plusCost, plusOf, slotOf, type HeroClass, type Item } from '../shared/tuning';
 import { plusRows, plusStep, type PlusRow } from '../shared/plusrows';
 import { barWords } from '../shared/barword';
@@ -52,5 +53,5 @@ export function forgeBody(it: Item, cls?: HeroClass): string {
   const changed = (i: number) => plusFmt(step.now[i]) !== plusFmt(step.after[i]);
   return head + `<div class="up-na fp"><div><span>${UPW.now} +${lv}</span>${box(step.now, cls, () => false)}</div>` +
     `<i class="up-arrow"></i><div class="after"><span>${UPW.after} +${lv + 1}</span>${box(step.after, cls, changed)}</div></div>` +
-    `<p class="fp-price">${FORGE.price(lv + 1, cost.gold, cost.steel)}</p><p class="dim">${FORGE.offer}</p>`;
+    `<p class="fp-price">${FORGE.price(lv + 1, cost.gold, cost.steel, matsText(cost.mats))}</p>${matsText(cost.mats) ? `<p class="dim">${FORGE.short}</p>` : ''}<p class="dim">${FORGE.offer}</p>`;
 }

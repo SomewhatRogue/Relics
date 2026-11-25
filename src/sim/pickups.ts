@@ -9,12 +9,13 @@ import type { Enemy, FightEvent, Hero } from './types';
 import { HUNGRY_FX, wears } from './hungry';
 import { relicName, type RelicItem } from '../shared/relicitems';
 import { goldKeep } from './bites';
+import type { MatId } from '../shared/materials';
 
-export interface Pickup { id: number; x: number; y: number; life: number; gold?: number; potion?: PotionId; relic?: RelicItem }
+export interface Pickup { id: number; x: number; y: number; life: number; gold?: number; potion?: PotionId; relic?: RelicItem; mat?: MatId }
 let nextId = 1;
 /** A new pickup's id: past any still lying in the room, so a host who took over (its own count lower) never
  *  gives a second one the same id. */
-const pid = (ps: Pickup[]): number => (nextId = Math.max(nextId, ...ps.map((p) => p.id + 1))) && nextId++;
+export const pid = (ps: Pickup[]): number => (nextId = Math.max(nextId, ...ps.map((p) => p.id + 1))) && nextId++;
 
 const kindOf = (e: Enemy) => (e.name ? 'named' : e.kind === 'butcher' ? 'butcher' : e.bow ? 'archer' : 'scrapper');
 
@@ -74,6 +75,8 @@ export function stepPickups(pickups: Pickup[], heroes: Hero[], ev: FightEvent[],
       }
       return false;
     }
+    // A material is the party's, as the coin pot is: the event says who walked over it, and everyone adds one.
+    if (h && p.mat) return ev.push({ k: 'mat', id: h.id, x: h.x, y: h.y, what: p.mat, n: 1 }), false;
     if (h && p.relic) return takeRelic(h, p.relic, ev), false;
     if (h && p.potion) {
       h.belt.push(p.potion);

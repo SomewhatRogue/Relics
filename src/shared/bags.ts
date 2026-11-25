@@ -7,6 +7,7 @@
  * Pure rules on the saved hero; the town UI calls them and keeps the save (client/stores.ts).
  */
 import { STEEL, nextLevel } from './gear.js';
+import { hasMats, spendMats, type Mats } from './materials.js';
 import { sellValue } from './prices.js';
 import { carriesHungry, tobinWont, type Carrier } from './fence.js';
 import type { Item } from './loot.js';
@@ -22,7 +23,7 @@ export const BUYBACK = { keep: 8 };
 /** One piece sold to Tobin: what he paid, and the job count it was sold at (it's his once that moves on). */
 export interface Pawn { item: Item; price: number; runs: number }
 /** The saved hero's side of it (a Profile has all of these). */
-export interface Stores { bag: Item[]; gold: number; steel: number; runs: number; bagSize?: number; stash?: Item[]; stashSize?: number; buyback?: Pawn[] }
+export interface Stores { bag: Item[]; gold: number; steel: number; mats?: Mats; runs: number; bagSize?: number; stash?: Item[]; stashSize?: number; buyback?: Pawn[] }
 
 export const bagSize = (p: { bagSize?: number }) => p.bagSize || BAG.start;
 export const vaultSize = (p: { stashSize?: number }) => p.stashSize || VAULT.start;
@@ -105,9 +106,10 @@ export function melt(p: Stores, i: number): number {
 /** One level up, priced by nextLevel (null for hungry gear and at a tier's cap). Returns the new piece. */
 export function upgraded(p: Stores, it: Item): Item | null {
   const cost = nextLevel(it);
-  if (!cost || hungry(it) || p.gold < cost.gold || p.steel < cost.steel) return null;
+  if (!cost || hungry(it) || p.gold < cost.gold || p.steel < cost.steel || !hasMats(p.mats, cost.mats)) return null;
   p.gold -= cost.gold;
   p.steel -= cost.steel;
+  spendMats((p.mats ??= {}), cost.mats);
   return { ...it, level: (it.level ?? 0) + 1 };
 }
 

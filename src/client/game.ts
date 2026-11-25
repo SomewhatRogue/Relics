@@ -30,6 +30,8 @@ import { forkOf } from '../sim/fork';
 import { barnHunt, barnPosted } from '../shared/bossjobs';
 import { WORKS, workDone, workOpen, workProgress, WORK_ORDER, type WorkId } from '../shared/works';
 import { contribute, type Contribution } from '../shared/worldsync';
+import { hasMats, spendMats } from '../shared/materials';
+import { addMat } from '../shared/materials';
 import { HERO_SLOTS, SHOP, canMake, gainXp, newProfile, perkFx, perkOffer, resetPerks, takePerk, type PerkId, type Profile } from '../shared/progress';
 import { dueLevels, jobXp } from '../shared/pace';
 import { Rng } from '../shared/rng';
@@ -863,6 +865,10 @@ export class Game {
   /** My hero rested at the Field Barn (leading, alone, or a guest of a friend's job): the trainer's errand done, and paid. */
   private heardBarn(ev: FightEvent[]): void {
     if (this.mode !== 'run') return;
+    // A material taken up on the land is the whole party's: everyone adds one, and it is kept (shared/materials.ts).
+    let took = false;
+    for (const e of ev) if (e.k === 'mat') (addMat((this.profile.mats ??= {}), e.what, e.n), (took = true));
+    if (took) this.keep();
     // Every shelter rested at is found for good: the keeper's road and the gate's offer.
     if (this.run?.job.roam) for (const e of ev) if (e.k === 'rested' && e.id === ME && !(this.profile.shelters ??= []).includes(e.station)) (this.profile.shelters.push(e.station), this.keep());
     // A death on the north fields counts toward every bounty held, whoever struck (shared/bounties.ts).
@@ -1633,9 +1639,10 @@ export class Game {
    */
   levelUp(it: Item): Item | null {
     const p = this.profile, cost = nextLevel(it);
-    if (!cost || p.gold < cost.gold || p.steel < cost.steel) return null;
+    if (!cost || p.gold < cost.gold || p.steel < cost.steel || !hasMats(p.mats, cost.mats)) return null;
     p.gold -= cost.gold;
     p.steel -= cost.steel;
+    spendMats((p.mats ??= {}), cost.mats);
     const next = { ...it, level: (it.level ?? 0) + 1 };
     this.replace(it, next);
     return next;

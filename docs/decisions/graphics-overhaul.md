@@ -1217,3 +1217,18 @@ short spec there first ("Bounties: the first slice"), then one Sonnet builder (8
   the Field Barn paying 50c and 80 XP. Not seen: a guest's count. Materials wait on Kyle: what are they for?
   (Claude Opus 5.5)
 
+## 2026-11-24: materials from the land, and Halvard's pluses asking for them
+
+Kyle: "lower levels, all that takes is steel, but higher levels, it takes steel plus hide or plus more rare
+ingredients further up ... I also want to be able to get some materials that's necessary for adding elements onto
+your weapons ... Let's add this into that system."
+
+- Spec first: docs/design/materials.md (four slices). Wrote shared/materials.ts and client/matwords.ts myself so a
+  builder and I could work at once without sharing files; one Sonnet builder (24 steps) did slice 1, I did slice 2.
+- The forge: +1 and +2 as before; +3 3 hide; +4 6 hide and 4 silk; +5 8 hide, 6 silk and 1 brood silk. Coin and
+  steel unchanged. Economy's forgeplus.ts and bags.ts, Gear's stores.ts and forgeview.ts, storewords.ts: small edits.
+- Lines: one lore-keeper call (NEST HEART became BROOD SILK; the forge's hint reworded); the line editor not
+  needed (labels reusing approved words, and one plain line the keeper wrote).
+- The element corner (element-augments.md) is still only a draft; its fire will take charcoal. It waits on Kyle's
+  yes for the person (Old Merren) and for this chat to build it. (Claude Opus 5.5)
+

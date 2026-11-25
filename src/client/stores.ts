@@ -14,6 +14,8 @@ import { coinsHtml } from '../shared/coins';
 import { carriesHungry, tobinWont } from '../shared/fence';
 import { bagSize, growBag, growVault, nextBag, nextVault, pawn, pawns, redeem, stow, unstow, vaultSize } from '../shared/bags';
 import { itemCol } from './uniquelook';
+import { hasMats } from '../shared/materials';
+import { matsText } from './matwords';
 import { STEEL, itemName, nextLevel, plusOf, sellValue, type Item } from '../shared/tuning';
 import type { SpotId } from '../shared/town';
 import type { Game } from './game';
@@ -139,12 +141,12 @@ function forge(g: Game, panel: Panel): void {
     if (s === 'bag') return piece(g, it, [{ label: FORGE.melt(STEEL[it.quality]), primary: true, act: () => void (g.melt(it) && sfxTown.anvil()) }], again);
     // The only way up a plus is to strike it yourself (Kyle, 2026-11-06): pay, the plus is made and saved
     // (Game.levelUp), then the anvil (anvilmode.ts) adds a little more for a good strike.
-    const next = nextLevel(it), poor = !next || pr.gold < next.gold || pr.steel < next.steel, to = plusOf(it) + 1;
+    const next = nextLevel(it), poor = !next || pr.gold < next.gold || pr.steel < next.steel || !hasMats(pr.mats, next.mats), to = plusOf(it) + 1;
     const strike = () => {
       const up = g.levelUp(it);
       if (up) void import('./anvilmode').then((m) => (panel.hide(), m.openAnvil(g, panel, up, again)));
     };
-    forgePop(g, it, next ? [{ label: FORGE.strike(to, next.gold, next.steel), primary: true, disabled: poor, act: strike }] : [], again);
+    forgePop(g, it, next ? [{ label: FORGE.strike(to, next.gold, next.steel, matsText(next.mats)), primary: true, disabled: poor, act: strike }] : [], again);
   };
   show(panel, PLACES.forge.name, shopHead(PLACES.forge, says('Halvard', SMITH.anvil)) + p(`<span class="dim">${FORGE.purse(pr.gold, pr.steel)}</span>`) +
     h3(FORGE.upHead) + `<div class="cells">${worn.map((x, k) => cell(x, 'worn:' + k)).join('')}</div>` +

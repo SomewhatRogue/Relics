@@ -1020,6 +1020,7 @@ export type FightEvent =
   | { k: 'relic' | 'loot'; x: number; y: number; name: string }
   | { k: 'coal'; x: number; y: number; n: number }
   | { k: 'gold'; id: string; x: number; y: number; n: number }
+  | { k: 'mat'; id: string; x: number; y: number; what: import('../shared/materials').MatId; n: 1 }
   | { k: 'potion' | 'drink'; x: number; y: number; kind: PotionId }
   | { k: 'smoke'; x: number; y: number }
   | { k: 'chest'; x: number; y: number; tier: Tier; state: 'opening' | 'shut' | 'open' }

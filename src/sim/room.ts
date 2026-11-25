@@ -29,6 +29,7 @@ import { damage, isDead } from './damage';
 import { HUNGRY_FX, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
+import { dropMats } from './matdrops';
 import { dropPickups, stepPickups, type Pickup } from './pickups';
 import { bossRelics } from './relicboss';
 import { dropCoal, stepCoals, type Coal } from './lantern';
@@ -552,6 +553,7 @@ export class ArenaRoom {
     for (const e of this.enemies) if (isDead(e) && alive.has(e.id) && !e.escaped) {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);
+      dropMats(e, this.pickups, this.lootRng, this.roam);
       const by = this.heroes.find((x) => x.id === e.lastBy);
       if (by) onKill(by, this.time, this.events);
     }

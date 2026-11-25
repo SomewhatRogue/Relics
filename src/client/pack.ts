@@ -157,13 +157,13 @@ export class PackView {
   }
 
   /** Each frame: redraw only the parts whose contents have changed (and never mid-drag). */
-  update(hero: Hero): void {
+  update(hero: Hero, satchel = ''): void {
     // (A friend's hero is the leader's word on it, patched in: any list not there yet reads as empty.)
     const h: Hero = { ...hero, found: hero.found ?? [], bag: hero.bag ?? [], belt: hero.belt ?? [], rings: hero.rings ?? [], arms: hero.arms ?? {}, augments: hero.augments ?? {} };
     this.h = h;
     if (!this.open || this.el.querySelector('.dragging')) return;
     const town = this.town(), fresh = this.tree.fresh?.() ?? [], gear = JSON.stringify([h.weapon, h.arms[h.weapon], h.bag, h.bagSize, h.relics, h.relicItem, h.found, h.augments, h.belt, h.armor, h.rings, town, fresh]);
-    const keys = [gear + this.sel + this.tree.picks(), gear + this.sel + this.hover, JSON.stringify([h.glow, h.weapon, h.armor, h.rings, h.arms[h.weapon], h.wantSeen ? h.want : -1])];
+    const keys = [gear + this.sel + this.tree.picks(), gear + this.sel + this.hover, JSON.stringify([h.glow, h.weapon, h.armor, h.rings, h.arms[h.weapon], h.wantSeen ? h.want : -1, satchel])];
     const [head, top, detail, foot] = this.parts;
     if (keys[0] !== this.keys[0]) {
       const size = h.bagSize || 8, isFull = full(h);
@@ -178,6 +178,8 @@ export class PackView {
     if (keys[2] !== this.keys[2]) {
       const open = (foot.querySelector('details') as HTMLDetailsElement | null)?.open ?? false;
       foot.innerHTML = (WEAPONS[h.weapon].cls === 'HEALER' ? `<h3>${COAL.name} <i>${h.glow} / ${LANTERN.max}</i></h3><div class="none">${COAL.line}</div>` : '') +
+        // The satchel (shared/materials.ts): what the land gave, when any is held.
+        (satchel ? `<div class="none">${satchel}</div>` : '') +
         // The Want's bar, from the first talk about it (client/wantbar.ts, the Holy and hungry chat).
         (h.wantSeen ? wantBar(h) : '') +
         `<details${open ? ' open' : ''}><summary>${COPY.stats}</summary>${heroSheet(h)}</details>`;

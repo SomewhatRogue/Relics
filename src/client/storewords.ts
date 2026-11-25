@@ -65,9 +65,11 @@ export const FORGE = {
   meltHead: 'MELT DOWN FROM YOUR PACK',
   purse: (gold: number, steel: number) => `You have ${coinsHtml(gold)} and ${steel} steel.`,
   /** The forge's only way up a plus: you strike it yourself (Kyle, 2026-11-06). The price is on the button. */
-  strike: (lv: number, gold: number, steel: number) => `STRIKE IT TO +${lv} (${coinsHtml(gold)}, ${steel} STEEL)`,
+  strike: (lv: number, gold: number, steel: number, mats = '') => `STRIKE IT TO +${lv} (${coinsHtml(gold)}, ${steel} STEEL${mats ? ', ' + mats : ''})`,
   /** Under them: the price, and how a clean strike helps. */
-  price: (lv: number, gold: number, steel: number) => `+${lv} costs ${coinsHtml(gold)} and ${steel} steel.`,
+  price: (lv: number, gold: number, steel: number, mats = '') => mats ? `+${lv} costs ${coinsHtml(gold)}, ${steel} steel and ${mats.toLowerCase()}.` : `+${lv} costs ${coinsHtml(gold)} and ${steel} steel.`,
+  /** Under the price when the land's materials are short (docs/design/materials.md). */
+  short: 'You find hide and silk in the fields past the North Gate.',
   offer: "You pay Halvard, then strike it yourself. A cold strike still takes the plus, and clean strikes make it count for up to 20% more.",
   top: "It's at +5, and that's as far as it goes.",
   /** What a plus adds, on the card. */

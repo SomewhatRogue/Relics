@@ -74,6 +74,12 @@ The Deep chat, until it finishes (then the general chat).
   Also (2026-11-24), for Economy and Town quests: bounties for the north fields (shared/bounties.ts, posted at the North
   Gate, paid by the watch in copper and xp at the gate or a shelter); `Profile.bounties` in shared/progress.ts and
   client/save.ts; a few lines in Town quests' townui.ts; the count in the land's banner (main.ts).
+  Also (2026-11-24), for Economy and Gear: materials from the land (docs/design/materials.md): Halvard's +3 to +5 now
+  ask hide, silk and brood silk too (`PLUS_MATS` in forgeplus.ts; checked in game.ts levelUp, bags.ts upgraded,
+  stores.ts; shown in forgeview.ts and storewords.ts). `Profile.mats` (progress.ts, save.ts); drops in sim/matdrops.ts
+  called from sim/room.ts. For the element corner when it is built: fire takes CHARCOAL (element-augments.md).
+  For the Armor chat (2026-11-24): `npx tsc --noEmit` fails on main in tests/plate.test.ts (lines 18 to 21: `variant:
+  'archer'` is not a `FoeVariant` in shared/terrain.ts). Not touched by me.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

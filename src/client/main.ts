@@ -1,4 +1,5 @@
 /** Relic: Wickhold, the Training Yard and runs. The rooms run here in the browser (solo is a party of one). */
+import { matsText } from './matwords';
 import { headName } from '../shared/titles';
 import { aimOnGround } from '../shared/heights';
 import { canTalk } from '../sim/minis';
@@ -457,7 +458,7 @@ function hud(now: number): void {
   const kit = (mageEl ? (input.touch ? '' : 'X ') + mageEl.toUpperCase() + '  ' : '') + kitLine(me.weapon, mageEl) + (WEAPONS[me.weapon].reloads ? (input.touch ? '  HOLD RELOAD TO WIND' : '  HOLD C TO RELOAD') : '');
   setText(one('.kit'), item ? item.traits.map((t) => TRAITS[t].name).join(' + ') + '  ' + kit : kit);
   card.update(room, me, !input.touch);
-  pack.update(me);
+  pack.update(me, matsText(game.profile.mats ?? {}));
   lesson.update();
   toggle(one('#packbtn'), 'on', pack.open);
   knackCues(game, panel.open, one('#packbtn'), (x, y, s) => fx.say(toPx(x, y)[0], toPx(x, y)[1] + 14, s, '#ffd27a', 3.2));

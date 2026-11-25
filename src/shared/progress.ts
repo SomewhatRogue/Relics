@@ -105,6 +105,8 @@ export interface Profile {
   shelters?: string[];
   /** Bounties in hand, at most two, and how many each has counted (shared/bounties.ts). */
   bounties?: { id: string; day: number; got: number }[];
+  /** The satchel: what the land gave (shared/materials.ts). */
+  mats?: import('./materials').Mats;
   /** Titles: deeds on each road, those bought, the one worn (shared/titles.ts). */
   titles?: import('./titles.js').TitleRecord;
   /** The red piece's whisper has been heard (shared/wanterrands.ts). */

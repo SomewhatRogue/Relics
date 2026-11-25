@@ -1,4 +1,5 @@
 /** Effects for magic and the new relics: bursts, gusts, lightning, steam, ice, blessings. Cosmetic only. */
+import { MAT_NAME } from './matwords';
 import { CAMP_GUARD } from '../shared/tuning';
 import { COAL } from './copy';
 import { POTIONS, TIERS, TIER_ORDER } from '../shared/tuning';
@@ -135,6 +136,9 @@ export function magicFx(fx: Fx, ev: FightEvent, x: number, y: number): void {
       break;
     case 'gold':
       if (ev.id === 'me') fx.say(x, y - 26, `+${coins(ev.n)}`, coinCol(ev.n));
+      break;
+    case 'mat':
+      fx.say(x, y - 26, `+1 ${MAT_NAME[ev.what]}`, '#d8c8a0');
       break;
     case 'potion':
       fx.say(x, y - 30, POTIONS[ev.kind].short, POTIONS[ev.kind].col);

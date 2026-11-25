@@ -4,6 +4,7 @@
  * by all of them. (The shared world moves to the server, api/world.ts, when the group plays online.)
  */
 import { fitBounties } from '../shared/bounties';
+import { fitMats } from '../shared/materials';
 import { fitDeepBest } from '../shared/deepskill';
 import { deepTest } from './deeptest';
 import type { Pending } from '../shared/trade';
@@ -67,6 +68,10 @@ const hero = (old: Partial<Profile>): Profile => {
   const bo = fitBounties(p.bounties);
   if (bo) out.bounties = bo;
   else delete out.bounties;
+  // The satchel (shared/materials.ts): known materials only, whole counts.
+  const ma = fitMats(p.mats);
+  if (Object.keys(ma).length) out.mats = ma;
+  else delete out.mats;
   // A Ranger's hound (shared/houndlook.ts): heroes from before the choice get the wolfhound and a name.
   if (cls === 'RANGER') out.hound = fitHound(p.hound, out.id);
   else delete out.hound;

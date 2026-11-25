@@ -30,6 +30,7 @@ import { caveLook } from '../cavedraw';
 import { blastShape } from '../../sim/blastshape';
 import { shakeProp } from './prophit3d';
 import { makeChest, makeCoal, makeHole, makePickup, makeProp, poseChest, type ChestFig } from './props3d';
+import { makeMatCard } from './matcards';
 import { makeBottle, makeCoins, makeLoot } from './loot3d';
 import { itemCol } from '../uniquelook';
 import { boltLook, makeBolt, makeExit, makeJavelin, makeRing, placeBolt, placeJavelin } from './shots3d';
@@ -153,7 +154,7 @@ export class Actors {
       o.position.set(d.x, bodyLv(room.map, d.x, d.y, levelAt(room.map, d.x, d.y)) * LEDGE_H, d.y);
       o.userData.tick?.(now);
     }
-    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: p.gold ? makeCoins(p.gold) : p.potion ? makeBottle(p.potion) : makePickup(false, undefined, p.relic && relicCol(p.relic)) })).root.position.set(p.x, bodyLv(room.map, p.x, p.y, levelAt(room.map, p.x, p.y)) * LEDGE_H, p.y);
+    for (const p of room.pickups) this.things.get('k' + p.id, '', () => ({ root: p.gold ? makeCoins(p.gold) : p.mat ? makeMatCard(p.mat) : p.potion ? makeBottle(p.potion) : makePickup(false, undefined, p.relic && relicCol(p.relic)) })).root.position.set(p.x, bodyLv(room.map, p.x, p.y, levelAt(room.map, p.x, p.y)) * LEDGE_H, p.y);
     // (On a land everything in the air or on the floor is at the ground's height there; a shot flies from the level it
     // was loosed at: shared/heights.ts shotLv. It was all drawn at level 0, under a hero stood on a height.)
     const gl = (x: number, y: number) => groundLv(room.map, x, y) * LEDGE_H;

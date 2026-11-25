@@ -87,7 +87,7 @@ describe('the forge', () => {
     const spear = g.buy('fine', 'spear')!, junk = g.buy('fine', 'greatsword')!;
     expect(g.melt(junk)).toBe(true);
     expect(g.profile.steel).toBe(3);
-    Object.assign(g.profile, { gold: 30000, steel: 100 });
+    Object.assign(g.profile, { gold: 30000, steel: 100, mats: { hide: 20, silk: 10, brood: 1 } });
     for (let i = 0; i < 7; i++) g.levelUp(g.profile.bag[0]);
     expect(g.profile.bag[0].level).toBe(5);
     expect(g.profile.bag[0].kit).toBe('spear');

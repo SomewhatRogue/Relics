@@ -27,6 +27,13 @@ moves off the loot roll and becomes a choice you make, paid for, before a job.
 - **Not for the Mage** (Kyle): a Mage channels his own elements (shared/magic.ts), so the corner has nothing for
   him; it says so kindly.
 
+## Materials (Kyle, 2026-11-24)
+
+Kyle: "I also want to be able to get some materials that's necessary for adding elements onto your weapons ... Let's
+add this into that system." Each element after a hero's free first takes one material besides the 20s: fire takes
+CHARCOAL (from the Charcoal Hut's keeper on the north fields); frost and storm take materials from lands still to
+come (docs/design/materials.md).
+
 ## Drafts, for Kyle's yes
 
 - **On the card:** the weapon's element and the jobs left ("FIRE: 3 jobs left"), and a small mark beside the

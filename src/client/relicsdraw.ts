@@ -12,6 +12,7 @@ import { blit, line, shadow, type Ctx } from './draw';
 import { makeSprite, type Part } from './sprites';
 import { EL_COL } from './palette';
 import { drawSpell } from './spelldraw';
+import { drawMat } from './tilemats';
 import { drawBottle, drawGear, drawGold } from './lootart';
 import { weaponLookOf } from '../shared/gearlook';
 
@@ -167,6 +168,7 @@ export function drawPickup(c: Ctx, p: Pickup, x: number, y: number): void {
   c.lit.globalAlpha = c.glow.globalAlpha = fade;
   // (Coins and bottles drawn as things since the loot pass, lootart.ts.)
   if (p.gold) drawGold(c, p.gold, x, y, p.id);
+  else if (p.mat) drawMat(c, p.mat, x, y, p.id);
   else if (p.relic) {
     // A relic: a small gold stone stood upright, glowing, with a ring of light under it.
     const col = relicCol(p.relic), bob = Math.round(Math.sin(c.now * 2.5 + p.id) * 1.5);

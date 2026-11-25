@@ -104,11 +104,24 @@ describe('at the forge', () => {
 
   it('levels to +5 and no further, nothing taken at the top', () => {
     const g = fresh();
+    g.profile.mats = { hide: 99, silk: 99, brood: 9 };
     for (let i = 0; i < 5; i++) expect(g.levelUp(g.profile.armor!)).not.toBeNull();
+    expect(g.profile.mats).toEqual({ hide: 99 - 17, silk: 99 - 10, brood: 8 });
     expect(g.profile.armor!.level).toBe(5);
     const gold = g.profile.gold;
     expect(g.levelUp(g.profile.armor!)).toBeNull();
     expect(g.profile.gold).toBe(gold);
+  });
+
+  it('no +3 without the hide, and nothing taken', () => {
+    const g = fresh(), a = g.profile.armor!;
+    g.levelUp(a); g.levelUp(g.profile.armor!);
+    const gold = g.profile.gold, steel = g.profile.steel;
+    expect(g.levelUp(g.profile.armor!)).toBeNull();
+    expect([g.profile.gold, g.profile.steel]).toEqual([gold, steel]);
+    g.profile.mats = { hide: 3 };
+    expect(g.levelUp(g.profile.armor!)).not.toBeNull();
+    expect(g.profile.mats.hide).toBe(0);
   });
 
   it('a quit or a refresh at the anvil keeps the plain plus, paid', () => {
@@ -134,5 +147,11 @@ describe('old saves', () => {
     // Up to +5 is left as it was.
     const ok = fromJson(JSON.parse(JSON.stringify({ heroes: [{ ...p, armor: plate(3) }], current: 0, world: newWorld() })))!.heroes[0];
     expect(ok.armor!.level).toBe(3);
+  });
+});
+
+describe("the land's materials from +3 (docs/design/materials.md)", () => {
+  it('+1 and +2 ask steel only; +3 hide; +4 hide and silk; +5 a nest heart too', () => {
+    expect([0, 1, 2, 3, 4].map((l) => plusCost(sword('forged', l))!.mats)).toEqual([{}, {}, { hide: 3 }, { hide: 6, silk: 4 }, { hide: 8, silk: 6, brood: 1 }]);
   });
 });
