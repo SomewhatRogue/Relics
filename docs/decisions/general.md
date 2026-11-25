@@ -422,3 +422,5 @@ haulier and worldfx moved to plate stripped; parity re-recorded. Board note to D
 - Slice 3, drawn (no art chat took it): `plateShare` (sim/ironhide.ts, reads and never fills); a grey plate ring
   outside the red in client/foes.ts (Art's, three lines), a grey bar over the red in client/three/overlay3d.ts
   (Graphics', eight lines). Off for good keeps ARMOR BROKEN. Not screenshot-checked: a two-colour ring. Claude Opus 5.5
+- Plate by level in the open land and the territories too (sim/expedroom.ts, sim/landroom.ts, one line each).
+  Ambushes have no brutes; instances are hand-tuned and tougher already, left as they are. Claude Opus 5.5

@@ -15,10 +15,11 @@ import { newExped } from './exped';
 import { scalePacks } from './packs';
 import { scaleBosses } from './party';
 import { ArenaRoom } from './room';
+import { plateByLevel } from '../shared/plate';
 import { hempenOnto } from './hempenbook';
 
 export function expedRoom(job: Job, party = 1, level = 1): ArenaRoom {
-  const plan = expedPlan(job), foes = scalePacks(plan.foes, party, job.seed * 17 + 2, EXPED_PACKS.party);
+  const plan = expedPlan(job), foes = plateByLevel(scalePacks(plan.foes, party, job.seed * 17 + 2, EXPED_PACKS.party), level, job.seed * 13 + 5);
   const room = new ArenaRoom(job.seed, { map: plan.map, foes, furniture: plan.props, chests: plan.chests, danger: 1, sleep: true, level });
   // The pacing rules as a job's later rooms (sim/pacing.ts): packs held back over the caps, waves at the holds too.
   room.pace = { index: 2 };

@@ -12,13 +12,15 @@ import { TERR, territoryPlan } from '../shared/territory';
 import { dreadFor } from './dreadplace';
 import { scaleBosses } from './party';
 import { ArenaRoom } from './room';
+import { plateByLevel } from '../shared/plate';
 import type { Run } from './run';
 import { ringSpot } from './travel';
 
 export function landRoom(run: Run): ArenaRoom {
   const job = run.job, plan = territoryPlan(job, run.index), n = Math.max(1, run.party ?? 1);
   const room = new ArenaRoom(job.seed + run.index, {
-    map: plan.map, foes: plan.foes, furniture: plan.props, chests: plan.chests,
+    // (Some big ones in plate by level, as a job's rooms: shared/plate.ts.)
+    map: plan.map, foes: plateByLevel(plan.foes, run.level ?? 1, job.seed * 13 + run.index), furniture: plan.props, chests: plan.chests,
     danger: job.place.ruin >= 3 ? 1 : 0, level: run.level ?? 1, sleep: true,
   });
   room.sleepAt = { wake: TERR.wake, doze: TERR.doze };
