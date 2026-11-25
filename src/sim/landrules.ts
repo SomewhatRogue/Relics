@@ -20,8 +20,11 @@ import type { Run } from './run';
 import { stepGuards } from './campguard';
 import type { FightEvent, Hero } from './types';
 
-type Station = { name: string; x: number; y: number; r: number };
+export type Station = { name: string; x: number; y: number; r: number };
 const inside = (s: Station, b: { x: number; y: number }) => Math.hypot(b.x - s.x, b.y - s.y) <= s.r;
+
+/** Standing inside a way station's ring (a shop and a bed: sim/pack.ts GEAR.buy). */
+export const inStation = (stations: Station[] | undefined, b: { x: number; y: number }) => !!stations?.some((s) => inside(s, b));
 
 /** Where hero `i` of `n` wakes: a short row across the rest point (or the way in). */
 export function wakeSpot(room: ArenaRoom, run: Run, i: number, n: number): { x: number; y: number } {

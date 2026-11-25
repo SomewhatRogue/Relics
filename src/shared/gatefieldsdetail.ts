@@ -5,7 +5,7 @@
 import { block, claim, mark, patch, round, type Kit } from './expedkit.js';
 import { BARN } from './gatefieldsland.js';
 
-/** The person at the barn's fire: a mute keeper, her talk `station:fieldbarn`. */
+/** The person at the barn's fire: a keeper you can talk to, her talk `station:fieldbarn`. */
 export const KEEPER = { x: BARN.x - 1.4, y: BARN.y + 1.4 };
 
 /** The gate road: the way back to town, a cross and a milestone by it, a second cut strip fenced on its north side. */

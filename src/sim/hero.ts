@@ -105,6 +105,8 @@ function walk(h: Hero, inp: Intent, k: number, dt: number, now: number, ev: Figh
 export interface HeroActs {
   fire: (h: Hero) => void;
   loose: (h: Hero, s: Swing) => void;
+  /** Standing at a way station on a roaming land: the keeper's goods can be had (sim/pack.ts GEAR.buy, GEAR.refill). */
+  shelter?: (h: Hero) => boolean;
   /** A melee blow landed for `n` (forged elements, REAPER). */
   struck: (h: Hero, e: Enemy, n: number) => void;
   /** A melee swing's active frames also smash props. */
@@ -125,10 +127,10 @@ export interface HeroActs {
 /** A relic's name and its element; the Mage's channel shows just the element its spells are in now. */
 export const relicLabel = (h: Hero, r = h.relic) => r === 'channel' ? ELEMENT_NAME[(h.augments.channel || 'fire') as keyof typeof ELEMENT_NAME] : RELICS[r].short + (h.augments[r] ? ' ' + ELEMENT_NAME[h.augments[r] as keyof typeof ELEMENT_NAME] : '');
 
-function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
+function gear(h: Hero, inp: Intent, ev: FightEvent[], acts: HeroActs): void {
   turnBelt(h, inp, ev);
   // A change from the pack waits until your hands are free (never lost, never mid-swing).
-  if (inp.gearSeq !== h.seen.gear && (h.act === 'idle' || inp.gearOp === 2 || inp.gearOp >= 4)) (h.seen.gear = inp.gearSeq), applyGear(h, inp.gearOp, inp.gearArg, ev);
+  if (inp.gearSeq !== h.seen.gear && (h.act === 'idle' || inp.gearOp === 2 || inp.gearOp >= 4)) (h.seen.gear = inp.gearSeq), applyGear(h, inp.gearOp, inp.gearArg, ev, !!acts.shelter?.(h));
   if (inp.augmentSeq !== h.seen.augment) {
     h.seen.augment = inp.augmentSeq;
     if (h.relic === h.relics[1] && h.relicItem) return;
@@ -141,7 +143,7 @@ function gear(h: Hero, inp: Intent, ev: FightEvent[]): void {
 export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h ? 1 - statsOf(h).draw : 1);
 
 export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], acts: HeroActs): void {
-  gear(h, inp, ev);
+  gear(h, inp, ev, acts);
   refillDarts(h, now);
   if (inp.relicSeq !== h.seen.relic) (h.seen.relic = inp.relicSeq), (h.relicQueuedAt = now);
   // (The old relic swap is gone, docs/design/relics.md: the relic carried is chosen in town. relicSwapSeq is still

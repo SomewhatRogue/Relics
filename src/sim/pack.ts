@@ -3,7 +3,11 @@
  * intent (sim/types.ts gearOp) and the room applies them, so a friend's pack works the same online.
  * The world doesn't stop while you rummage.
  */
-import { relicName } from '../shared/relicitems';
+import { canRecharge, rechargeCost } from '../shared/church';
+import { POTION } from '../shared/potions';
+import { relicMax, relicName } from '../shared/relicitems';
+import { SHELTER } from '../shared/shelter';
+import { carriedItem } from './charge';
 import { CLASS_KITS, RELICS, WEAPONS, abilitiesOf, itemName, slotOf, type Item } from '../shared/tuning';
 import { refreshHealth } from './gearstats';
 import { BAG } from '../shared/bags';
@@ -14,7 +18,7 @@ import type { FightEvent, Hero, Intent } from './types';
 export const PACK = BAG.start;
 /** No room left in this hero's pack. */
 export const full = (h: Hero) => h.bag.length >= (h.bagSize || BAG.start);
-export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6, unarm: 7, unlegs: 8 } as const;
+export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6, unarm: 7, unlegs: 8, buy: 9, refill: 10 } as const;
 
 /** Put on armor or legs (the old goes in the pack) or a ring (a third pushes out the older). */
 function wear(h: Hero, i: number, it: Item, ev: FightEvent[]): void {
@@ -38,8 +42,20 @@ function wear(h: Hero, i: number, it: Item, ev: FightEvent[]): void {
   ev.push({ k: 'weapon', x: h.x, y: h.y, name: itemName(it) });
 }
 
-export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[]): void {
+/** The keeper's goods (client/shelterui.ts), only at a way station on a roaming land: a Bitter on the belt, the carried relic full. */
+function shelterGoods(h: Hero, op: number, ev: FightEvent[]): void {
+  const it = op === GEAR.refill ? carriedItem(h) : undefined, price = op === GEAR.buy ? SHELTER.bitter : it && !it.el && canRecharge(it) ? rechargeCost(it) : -1;
+  // (An element's relic is Ivo's to fill, as at the church: client/churchrelics.ts.)
+  if (price < 0 || h.purse < price || (op === GEAR.buy && h.belt.length >= POTION.belt)) return;
+  h.purse -= price;
+  if (it) it.charge = relicMax(it);
+  else h.belt.push('bitter');
+  ev.push({ k: 'bought', id: h.id, x: h.x, y: h.y, n: price, what: it ? 'refill' : 'bitter' });
+}
+
+export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[], sheltered = false): void {
   const cls = WEAPONS[h.weapon].cls;
+  if (op === GEAR.buy || op === GEAR.refill) return sheltered && h.act !== 'down' ? shelterGoods(h, op, ev) : undefined;
   if (op === GEAR.equip) {
     const it = arg >= 0 ? h.bag[arg] : undefined;
     if ((arg >= 0 && !it) || (arg < 0 && h.arms[h.weapon] && full(h))) return;

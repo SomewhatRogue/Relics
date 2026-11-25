@@ -13,6 +13,7 @@ import { device, type Game } from './game';
 import { line } from './speech';
 import { openStore } from './stores';
 import { openShop } from './shops';
+import { openShelter } from './shelterui';
 import { openVendor } from './vendorui';
 import { CHURCH, COAL, TALLY } from './copy';
 import { LINES } from '../shared/wood';
@@ -60,6 +61,8 @@ const itemLine = (i: Item) => `<b>${itemName(i)}</b>: ${i.traits.map((t) => `${T
 
 export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): void {
   const pr = g.profile, w = g.world, again = () => openSpot(id, g, panel, arg, key);
+  // A way station's keeper on a roaming land (shelterui.ts).
+  if ((id as string).startsWith('station:')) return openShelter(g, panel, id.slice(8), () => g.leaveJob());
   if (openSquare(id, g, panel, arg, key)) return;
   if (openStore(id, g, panel) || openShop(id, g, panel)) return;
   if (id === 'tailor') return openTailor(g, panel);

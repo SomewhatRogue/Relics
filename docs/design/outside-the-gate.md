@@ -104,8 +104,16 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
   point at the gate for good. A friend under 3 gathered into a party may still go. The lore keeper: nobody says
   this is a first time outside the walls, since jobs went out the north gate before it.
 
-Not yet: the view off the east side; saying on screen that you rested or have a get-up left; the keeper's wares;
-travel between shelters; bounties, materials, quests; the wood beyond the far end.
+- **The shelter's keeper** (Kyle, 2026-11-24: "a merchant or someone who sells healing potions or a relic recharge").
+  At the Field Barn's fire: TALK: KEEPER, and her panel sells Sister's Bitter at the town's price, recharges the relic
+  you carry at the church's (not an element's: those are Ivo's, as at the church), and HOME TO WICKHOLD takes you
+  straight in. The room does the buying (sim/pack.ts `GEAR.buy`, `GEAR.refill`, only inside a station's ring on a
+  roaming land; the `bought` event takes the coin off the save, a guest's too). On the HUD a lone hero on the land
+  now has one heart, not three, and RESTED floats over you when you rest. For the lore keeper's bible: she is a
+  second place to recharge a relic (the bible has the church only) and a second seller of the Bitter (Agne only);
+  what she does stays unsaid, as for Isolde.
+
+Not yet: the view off the east side; travel between shelters; bounties, materials, quests; the wood beyond the far end.
 
 ## Order
 

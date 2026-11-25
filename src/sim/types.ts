@@ -931,6 +931,8 @@ export type FightEvent =
   | { k: 'down' | 'pickedup' | 'raising' | 'gotup'; x: number; y: number; id?: string; by?: string }
   /** On the land (sim/landrules.ts): a hero has rested at a way station (its name), and has their own get-up back. */
   | { k: 'rested'; x: number; y: number; id: string; station: string }
+  /** At a way station's keeper (sim/pack.ts GEAR.buy, GEAR.refill): `n` copper spent by `id` on a Bitter or a relic's refill. */
+  | { k: 'bought'; id: string; x: number; y: number; n: number; what: 'bitter' | 'refill' }
   /** RAISE (sim/raise.ts): a Cleric (`by`) begins raising a friend who is out (`id`), is broken off, or has raised them (`n`: the cut, in %). */
   | { k: 'rising' | 'risebroke' | 'risen'; x: number; y: number; id: string; by: string; n?: number }
   /** A press that did nothing, said to that hero: GRAB with nothing to take hold of, ATTACK held on an empty crossbow. */

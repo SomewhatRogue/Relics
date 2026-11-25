@@ -92,7 +92,8 @@ describe('the Gate Fields', () => {
     expect(m.grounds!.map((g) => [g.look, g.y, g.h])).toEqual([['harvest', 58, 38], ['fallow', 28, 30], ['mossy', 0, 28]]);
     for (const g of m.grounds!) expect([g.x, g.w]).toEqual([0, 56]);
     const kp = m.npcs!.find((n) => n.talk === 'station:fieldbarn')!;
-    expect(kp.name).toBe('');
+    expect(kp.name).toBe('KEEPER');
+    expect(kp.mute).toBeFalsy();
     expect(Math.hypot(kp.x - s.x, kp.y - s.y)).toBeLessThan(s.r);
   });
 

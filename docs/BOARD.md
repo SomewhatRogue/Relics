@@ -63,6 +63,10 @@ The Deep chat, until it finishes (then the general chat).
   client/errandwords.ts, townui.ts, main.ts (the gate's prompt) and
   shared/errandpay.ts (`fields: 40`). One for Town quests: `fitErrands` does not keep `yard`, so a reload mid-yard
   loses it; left as it is.
+  Also (2026-11-24): the Field Barn's keeper sells the Bitter and recharges relics through two new gear ops in
+  sim/pack.ts (`GEAR.buy` 9, `GEAR.refill` 10), let through by `HeroActs.shelter` (sim/hero.ts, room.ts) and a
+  `bought` event (sim/types.ts); main.ts lets gear presses through under her panel; unitframe.ts shows one heart
+  for a lone hero on the land. Small edits, each only for a roaming land.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

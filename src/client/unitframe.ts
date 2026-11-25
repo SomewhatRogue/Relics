@@ -92,7 +92,8 @@ export class UnitFrame {
     let full = 0, spent = 0;
     if (run) {
       const solo = game.room.heroes.filter((x) => x.id !== 'squire').length < 2;
-      [full, spent] = solo ? [Math.max(0, MAX_DOWNS - run.downs), Math.min(MAX_DOWNS, run.downs)] : me.selfUp ? [0, 1] : [1, 0];
+      // (Out on the land, alone too, it's the one get-up a trip: sim/landrules.ts.)
+      [full, spent] = solo && !run.job.roam ? [Math.max(0, MAX_DOWNS - run.downs), Math.min(MAX_DOWNS, run.downs)] : me.selfUp ? [0, 1] : [1, 0];
     }
     const key = run ? `${full}/${spent}` : '';
     if (key !== this.upsKey) {

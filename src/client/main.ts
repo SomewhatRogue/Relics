@@ -60,6 +60,7 @@ import { isCleric } from '../sim/mercy';
 import { Game, ME } from './game';
 import { Panel } from './panels';
 import { openSpot } from './townui';
+import { shelterLink, shelterTick, shelterUp } from './shelterui';
 import { showResult } from './recap';
 import { showCheckpoint, refreshVotes } from './deepui';
 import { DEEP_WORDS } from './deepwords';
@@ -228,6 +229,7 @@ const trades = new Trades(game, panel);
 panel.onHide = () => void townVoice.close(voiceClock());
 // (The mouse's aim is read on the hero's own level, then put on the ground the pointer is over: shared/heights.ts.)
 const input = new Input(() => views.heroScreen(), (ax, ay) => (game.hero && game.room ? aimOnGround(game.room.map, game.hero, ax, ay, views.levelShift) : [ax, ay]));
+shelterLink.gear = (op, arg) => input.gear(op, arg);
 const lobby = new Lobby(game, panel, input.touch, () => pack.toggle(false));
 const $ = (s: string) => document.querySelector(s) as HTMLElement;
 const card = new LootCard((id) => input.take(id));
@@ -634,7 +636,8 @@ function tick(t: number): void {
   if (panel.open || title.open || chat.typing || pack.open || away() || loading.up) still ??= { ...live, mx: 0, my: 0, attack: false, block: false };
   else still = null;
   // With the pack open the hero stands still too, but what you change in it still goes to the room.
-  if (still && pack.open && !panel.open) still = { ...still, gearOp: live.gearOp, gearArg: live.gearArg, gearSeq: live.gearSeq };
+  // (So does what you buy at a shelter's keeper, her panel up: shelterui.ts.)
+  if (still && ((pack.open && !panel.open) || (panel.open && shelterUp()))) still = { ...still, gearOp: live.gearOp, gearArg: live.gearArg, gearSeq: live.gearSeq };
   // Whoever you're talking to stops their round till you're done (the world doesn't: it's shared).
   if (talking && !panel.open) (talking.lag = (talking.lag ?? 0) + game.room.time - (talking.heldAt ?? game.room.time)), (talking.heldAt = undefined), (talking = null);
   // Back after a reload in the middle of a job with friends: straight back in (once, once a hero's chosen).
@@ -661,7 +664,12 @@ function tick(t: number): void {
     ownCue(ev, game.hero.id, fx, t / 1000);
     // My own get-ups in a party: how many are left, when I go down and when I get up.
     const party = game.room.heroes.filter((x) => x.id !== 'squire').length > 1;
-    if (party && game.mode === 'run' && (ev.k === 'down' || ev.k === 'gotup' || ev.k === 'pickedup') && (ev as { id?: string }).id === game.hero.id) {
+    // Rested at a shelter on the land (sim/landrules.ts): said once over my own hero, the get-up back.
+    if (ev.k === 'rested' && ev.id === game.hero.id) {
+      const [sx, sy] = toPx(ev.x, ev.y);
+      fx.say(sx, sy - 34, 'RESTED', '#ffd27a', 2.6);
+    }
+    if ((party || game.run?.job.roam) && game.mode === 'run' && (ev.k === 'down' || ev.k === 'gotup' || ev.k === 'pickedup') && (ev as { id?: string }).id === game.hero.id) {
       const [sx, sy] = toPx(ev.x, ev.y);
       fx.say(sx, sy - 34, game.hero.selfUp ? 'NO GET-UPS LEFT' : '1 GET-UP LEFT', game.hero.selfUp ? '#ff6a7a' : '#ffd27a', 2.6);
     }
@@ -727,6 +735,7 @@ function tick(t: number): void {
   }, game.run?.job.boss);
   // The way on just opened: say which way, over you.
   if (gateWalk.check(game)) goBack();
+  shelterTick(game, panel, game.mode === 'run');
   const opened = ways.check(game);
   if (opened) objFlash.done(t / 1000);
   if (opened && game.hero) {

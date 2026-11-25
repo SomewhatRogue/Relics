@@ -876,6 +876,7 @@ export class Game {
     if (this.remote) {
       this.noteMet();
       const got = this.stepRemote();
+      for (const e of got) if (e.k === 'bought' && e.id === ME) this.spend(e.n);
       return this.heardBarn(got), this.checkNote(), got;
     }
     intent = this.own(intent);
@@ -950,7 +951,7 @@ export class Game {
     this.noteMet();
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
-    for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);
+    for (const e of ev) if ((e.k === 'spend' || e.k === 'bought') && e.id === ME) this.spend(e.n);
     this.heardBarn(ev);
     // Walk up into a door (or into a side way, its way) to go in; out by the way you came in to come back out.
     const door = this.near()?.door;

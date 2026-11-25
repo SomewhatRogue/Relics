@@ -1160,3 +1160,25 @@ stops you) and you get a quets at 3 from your main trainer to go out and get a t
   client/errandwords.ts, client/townui.ts, client/main.ts (the prompt, one line); Holy and hungry's
   shared/errandpay.ts (`fields: 40`). For Town quests: `fitErrands` does not keep `yard`, so a hero who reloads
   mid-yard loses that errand. Not touched. (Claude Fable 5.2)
+
+## 2026-11-24: the Field Barn's keeper, and the land's one get-up on the HUD
+
+Kyle: "kk - whats remaining? continue". Took the first open item: shelters that do something.
+
+- One Sonnet builder (19 steps), then my review. New: shared/shelter.ts, client/shelterui.ts, shelterwords.ts,
+  tests/shelter.test.ts (six). The keeper talks (`name: 'KEEPER'`); her panel: BUY SISTER'S BITTER (25c), RECHARGE
+  at the church's price, HOME TO WICKHOLD (the same `leaveJob` as GO IN at the gate), CLOSE; it shuts when you walk
+  out of the ring.
+- The room buys: `GEAR.buy` 9 and `GEAR.refill` 10 in sim/pack.ts, allowed only by a new `HeroActs.shelter` (roam
+  room, inside a station's ring; sim/hero.ts, room.ts), and a `bought` event that client/game.ts spends like
+  `spend`, leading or as a guest.
+- Fixed in review: a relic with an element is not refilled (the church leaves those to Ivo); and the room never got
+  the presses, because a panel freezes the intent: main.ts now lets gear presses through while the keeper's panel
+  is up, as it did for the pack.
+- Mine: the hearts show the land's one get-up for a lone hero too (client/unitframe.ts, one line), and RESTED floats
+  over your hero on resting (main.ts). The get-up words ("1 GET-UP LEFT") now show alone on the land too.
+- Lines: one lore-keeper call (her first line promised things free: Wickhold asks the price), one line-editor call.
+  Her line: "Sit by the fire a while, if you like. Anything off the shelf *costs*, mind, same as in town."
+- Seen in a phone-sized browser: talk at her fire, buy, recharge, home, and the coin, the Bitter and the charge kept
+  in the save. Not seen: a guest buying. Parity golden untouched. (Claude Opus 5.5)
+
