@@ -6,17 +6,18 @@
  * `cracked` once it's off. It walks at a middling pace and swings one heavy, readable blow to block or dodge.
  */
 import { IRONHIDE } from '../shared/tuning';
-import { PLATE } from '../shared/plate';
+import { PLATE, PLATE_WEAR } from '../shared/plate';
 import { begin, walk } from './enemies';
 import type { Enemy, FightEvent, Hero } from './types';
 import { hasAffix } from './elite';
 
 /** In plates: an ironhide, or a Plated elite (shared/elites.ts: the ironhide rule). */
 /** (The Haulier's plate comes off for good in phase 2: boss.bare, sim/haulbook.ts.) */
-export const armoured = (e: Enemy) => !e.boss?.bare && (e.variant === 'ironhide' || hasAffix(e, 'plated'));
+/** (And a hunt's named boss in a fury wears some: PLATE_WEAR.boss, Kyle 2026-11-24.) */
+export const armoured = (e: Enemy) => !e.boss?.bare && (e.variant === 'ironhide' || hasAffix(e, 'plated') || !!e.fury);
 const iron = armoured;
 /** Its plate when full: a share of its health, as it is when first struck (after its level and party). */
-const fullPlate = (e: Enemy) => Math.round(e.maxHp * PLATE.share);
+const fullPlate = (e: Enemy) => Math.round(e.maxHp * (e.fury ? PLATE_WEAR.boss : PLATE.share));
 /** What's left of its plate (filled the first time it's asked). */
 export const plateOf = (e: Enemy) => e.plate ?? (e.plate = fullPlate(e));
 /** Its plates are off, for good (`now` kept for the callers' sake). */

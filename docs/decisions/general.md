@@ -414,3 +414,8 @@ whole blow off the plate; a heavy blow lands in full and strips double; lightnin
 rod, column or cart strips 40%; at none, off for good). sim/ironhide.ts rewritten (crackWatch gone); sim/damage.ts and
 sim/combat.ts pass crits, THROUGH_SRC (bleed, poison, bolt, smite) and storm. Tests: ironhide, elites (Plated),
 haulier and worldfx moved to plate stripped; parity re-recorded. Board note to Deep, Art and Graphics. Claude Opus 5.5
+- Slice 2, who wears it (shared/plate.ts PLATE_WEAR, plateByLevel; sim/run.ts, sim/room.ts fromFoe,
+  shared/eliteroll.ts, sim/ironhide.ts): from level 3 some brutes and butchers plated (15%, +5% a level, at most 50%),
+  each a small one fewer in its pack; Plated leads 40% of rolled elites; plated goblins 1.25x health; fury bosses wear
+  30% of their health in plate. tests/plate.test.ts; layout 3 pin and parity re-recorded. Only job rooms (run.ts)
+  plate by level; ambushes and instances don't yet. Claude Opus 5.5

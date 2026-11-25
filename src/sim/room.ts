@@ -3,6 +3,8 @@
  * sockets or screens. Solo, it runs in this browser; online, it runs in the party leader's browser
  * (the Come Bye host model) and friends send it Intents.
  */
+import { armoured } from './ironhide';
+import { PLATE_WEAR } from '../shared/plate';
 import { stepStreaks } from './streak';
 import { fireSign } from './signature';
 import { stepCuts } from './samuraicut';
@@ -585,6 +587,8 @@ export class ArenaRoom {
     // (Hempen, the noosed one, is made a boss of the kit later, sim/hempenbook.ts: he's one of those, not in a fury.)
     if (f.name && f.kind === 'butcher' && !f.boss && !f.noose) furyOn(e);
     else if (f.boss || (f.noose && f.name)) e.hp = e.maxHp = Math.round(e.maxHp * FURY.bossHp);
+    // In plate: a quarter tougher (shared/plate.ts PLATE_WEAR; Kyle 2026-11-24).
+    if (armoured(e) && !e.fury) e.hp = e.maxHp = Math.round(e.maxHp * PLATE_WEAR.hp);
     if (f.task) e.task = structuredClone(f.task);
     if (f.haul) e.haul = { ...f.haul };
     if (f.wave) e.wave = f.wave;

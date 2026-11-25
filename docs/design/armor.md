@@ -41,6 +41,9 @@ Not through: backstabs, frost shatter, burns, ordinary arrows and taps.
 
 1. **Rules** (done 2026-11-24): shared/plate.ts for the numbers; the plate bar in sim/ironhide.ts; sim/damage.ts lets the through list
    past. Tests. No drawing yet: the clank and the old crack look carry it.
-2. **Who wears it:** level share, elites, budget cost, boss plate. Tests and re-pinned layouts.
+2. **Who wears it** (done 2026-11-24; shared/plate.ts PLATE_WEAR): from level 3, 15% of the brutes and unnamed
+   butchers come plated (5% more a level, at most half), each taking a small one from its pack (sim/run.ts); a rolled
+   elite leads with Plated 40% of the time; plated goblins a quarter tougher; a hunt's named boss in a fury wears a
+   third of its health in plate. A brute plated by level is a Plated elite, so it drops as one.
 3. **Drawing:** the grey bar, plates falling off, a PLATES OFF word, in both views. Asked of the Art and Graphics chats
    on the board, or drawn here if they're idle.

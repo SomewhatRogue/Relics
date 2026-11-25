@@ -10,6 +10,7 @@ import { Rng } from './rng.js';
 import { SCREEN, THREAT, THREAT_TIER, threatOf } from './threat.js';
 import { weighOf } from './roombudget.js';
 import { bandOf } from './deepbands.js';
+import { PLATE_WEAR } from './plate.js';
 
 /** Band `band`'s `nth` goblin of role `role` is an elite with `affixes`. */
 export interface EliteRoll { band: number; role: Role; nth: number; affixes: Affix[] }
@@ -43,7 +44,9 @@ export function eliteRoller(job: Job, index: number): (t: Template, band: number
       // A Deep floor's band: at least its count of affixes (shared/deepbands.ts).
       if (job.floor) n = Math.max(n, bandOf(job.floor).affixes);
       // (An ironhide is plated already; a Kegman has its keg, a Gorger eats already: shared/elites.ts affixPool.)
-      const affixes = rng.shuffle(affixPool(role)).slice(0, n);
+      // Plated first PLATE_WEAR.elite of the time (Kyle, 2026-11-24: more of them).
+      const pool = rng.shuffle(affixPool(role)), lean = pool.includes('plated') && rng.next() < PLATE_WEAR.elite;
+      const affixes = (lean ? ['plated' as Affix, ...pool.filter((a) => a !== 'plated')] : pool).slice(0, n);
       const extra = eliteThreat(threatOf(role), affixes) - threatOf(role);
       if (extra > room) return;
       room -= extra;

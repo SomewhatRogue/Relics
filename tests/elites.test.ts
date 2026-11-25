@@ -106,7 +106,7 @@ describe('each affix and its counter', () => {
     damage(plain, 50, 0, []);
     const full = VARIANTS.heavy.hp - plain.hp, plate = Math.round(e.maxHp * PLATE.share);
     damage(e, 50, room.time, room.events);
-    expect(e.hp).toBe(VARIANTS.heavy.hp - Math.round(full * PLATE.through));
+    expect(e.hp).toBe(e.maxHp - Math.round(full * PLATE.through));
     expect(e.plate).toBe(plate - full);
     jolt(e, room.time, room.events);
     expect(e.plate).toBe(Math.max(0, plate - full - Math.round(plate * PLATE.crack)));
