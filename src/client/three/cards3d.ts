@@ -115,7 +115,7 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
     }
     const pz = pulledAt(room, e), [x, y] = pz ?? lerp('e:' + e.id, e.x, e.y), dead = e.act === 'dead', big = e.kind === 'butcher' || e.kind === 'brood';
     const roof = (e.z ?? 0) >= 2 && !isLand(map), eup = bodyLv(map, x, y, Math.max(0, e.z ?? 0)) * LEDGE_H, [ex, ey, eh] = roof ? [x, y, ROOF_UP3] : hopAt('e' + e.id, x, y, eup, e.x, e.y);
-    f.put('e' + e.id, ex, eh, ey, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0, xray: (STREET || behindTree(map, ex, ey)) && !dead && !lurking(e) ? 'foe' : undefined });
+    f.put('e' + e.id, ex, eh, ey, (c, px, py) => (drawFoe(c, e, px, py, asleep(map, e), map === ARENA), drawStatus(c, e, px, py, t)), { pool: dead || e.kind === 'nest' || lurking(e) ? 0 : big ? 0.55 : 0.28, bias: dead ? -0.3 : 0, xray: (STREET || behindTree(map, ex, ey)) && !dead && !lurking(e) ? 'foe' : undefined, wide: (e.scale ?? 1) > 1.02 });
   }
   // A keg about to go, its fuse spitting; a Smouldering one's embers coming up through it (../blastdraw.ts).
   for (const e of room.enemies) {

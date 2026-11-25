@@ -451,3 +451,13 @@ training errand "saying they checked it twice to make sure the relic lights don'
   story-bible.md's relic line updated.
 - The five first-gift lines just send you to the yard with the weapon and the javelin; none says it won't dim there.
 - Lore keeper and line editor; Whisper's line kept as Kyle had it but the dim clause. Claude Opus 5.5
+
+## 2026-11-25: lag on a mission: the 2.5D figure atlas back to its size
+
+Kyle: "the game felt sort of laggy on a mission." The sim isn't slower (scripts/perf/simprof.ts: 0.34 ms a tick in a
+job room, 1.7 in a swarm, level 1 or 6, the same as before 11-23). But on 11-23 I'd grown every 2.5D figure cell from
+96x96 to 128x144 for the 3x bosses (client/three/figs3d.ts), and the whole atlas goes up to the GPU every frame
+anything moves: twice the pixels for every goblin and hero. Now cells are 96x96 again, and only a figure drawn bigger
+than normal (`e.scale` > 1.02: a fury boss, a grown goblin; cards3d.ts `wide`) goes in a second atlas of 128x144 cells,
+four across, sent up only on frames one's drawn. scripts/perf/browser.cjs (software GPU, so only the comparison
+counts): the 2.5D fight 209 to 181 ms a frame. Graphics' files, small logged edits. Claude Opus 5.5

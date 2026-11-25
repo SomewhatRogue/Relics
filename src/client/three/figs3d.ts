@@ -17,9 +17,12 @@ import type { Proj } from './overlay3d';
 import { castFigures } from './sun3d';
 
 /** A cell of the atlas (sprite pixels), and where the feet go in it. */
-// (96 by 96 with the feet at 64 till 2026-11-23: a boss in its fury can stand three times a butcher's height now, shared/fury.ts.)
-export const CELL = { w: 128, h: 144, fx: 64, fy: 112 };
-const COLS = 10, SIN = Math.sin(PITCH), COS = Math.cos(PITCH);
+export const CELL = { w: 96, h: 96, fx: 48, fy: 64 };
+/** A big figure's cell (a boss in its fury, a goblin grown with level: shared/fury.ts), in an atlas of its own (`Opts.wide`).
+ *  (Every cell was this size 2026-11-23 to 25, which doubled the atlas sent up each frame and lagged the phone: General.) */
+const BIG_CELL = { w: 128, h: 144, fx: 64, fy: 112 };
+type Cell = typeof CELL;
+const SIN = Math.sin(PITCH), COS = Math.cos(PITCH);
 /** Which way a card's light-facing normal points (world): mostly at the camera, a little up, as the floor is lit. */
 const FACE = new THREE.Vector3(0, 0.75, 0.66).normalize();
 const BACK = new THREE.Vector3(0, SIN, COS);
@@ -27,7 +30,7 @@ const DISC = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 
 export type Draw = (c: Ctx, x: number, y: number) => void;
 /** `xray`: shown as a silhouette behind walls (a hero, or 'foe' in a foe's colour); `pool`: the shadow's radius (tiles); `bias`: nearer the camera (tiles), to sit over another at the same spot; `ground`: where the shadow lies (x, height, z) when the figure is in the air over it (a leap off a height: hop.ts). */
-export interface Opts { xray?: boolean | 'foe'; pool?: number; bias?: number; ground?: [number, number, number] }
+export interface Opts { xray?: boolean | 'foe'; pool?: number; bias?: number; ground?: [number, number, number]; wide?: boolean }
 
 interface Slot { i: number; card: THREE.Mesh; pool: THREE.Mesh; seen: number; hero: boolean | 'foe' }
 
@@ -59,8 +62,12 @@ export class Figs {
   ms = 0;
   private t0 = 0;
 
-  constructor() {
+  /** The big figures' atlas (none inside it: it is one). */
+  private wide?: Figs;
+
+  constructor(private cell: Cell = CELL, private cols = 10, nested = false) {
     this.grow(2);
+    if (!nested) (this.wide = new Figs(BIG_CELL, 4, true)), this.group.add(this.wide.group);
   }
 
   private texture(cv: HTMLCanvasElement): THREE.CanvasTexture {
@@ -78,6 +85,7 @@ export class Figs {
     Object.assign(this, { ppu, P, W, H, k: Math.max(1, Math.round((ppu * COS) / 16)) });
     this.c.now = now;
     this.c.t = t;
+    this.wide?.begin(ppu, P, W, H, now, t);
   }
 
   /** The wall clock the figures are drawn by this frame. */
@@ -87,6 +95,8 @@ export class Figs {
 
   /** A figure with its feet at (x, z) on the floor, `h` up (a ledge), drawn by `draw` at (x, y) in its cell. */
   put(key: string, x: number, h: number, z: number, draw: Draw, o: Opts = {}): void {
+    if (o.wide && this.wide) return this.wide.put(key, x, h, z, draw, o);
+    const CELL = this.cell, COLS = this.cols;
     const [sx, sy] = this.P(x, h, z), k = this.k, mx = CELL.w * k, my = CELL.h * k;
     if (sx < -mx || sy < -my || sx > this.W + mx || sy > this.H + my) return;
     const s = this.slot(key);
@@ -121,6 +131,7 @@ export class Figs {
 
   /** Hide whoever wasn't drawn this frame and send the atlas up if anything was. */
   end(): void {
+    this.wide?.end();
     for (const [key, s] of this.slots) if (s.seen !== this.frame) {
       s.card.visible = s.pool.visible = false;
       this.slots.delete(key);
@@ -135,14 +146,16 @@ export class Figs {
 
   /** The heroes' cards as their silhouette (for the pass that shows them behind walls), or back. */
   xray(on: boolean): void {
+    this.wide?.xray(on);
     for (const s of this.slots.values()) if (s.hero) s.card.material = on ? (s.hero === 'foe' ? this.xfoe : this.xmat) : this.mat;
   }
 
   get count(): number {
-    return this.slots.size;
+    return this.slots.size + (this.wide?.count ?? 0);
   }
 
   private slot(key: string): Slot {
+    const CELL = this.cell, COLS = this.cols;
     let s = this.slots.get(key);
     if (s) return s;
     const i = this.free.length ? this.free.pop()! : this.byIndex.length;
@@ -162,6 +175,7 @@ export class Figs {
 
   /** The folded card for cell i, in sprite pixels: upright above the feet, flat on the floor below them. */
   private fold(i: number): THREE.BufferGeometry {
+    const CELL = this.cell, COLS = this.cols;
     const g = new THREE.BufferGeometry(), { w, fx, fy, h } = CELL, l = -fx, r = w - fx;
     g.setAttribute('position', new THREE.Float32BufferAttribute([l, fy, 0, r, fy, 0, l, 0, 0, r, 0, 0, l, 0, h - fy, r, 0, h - fy], 3));
     // The normal as it will come out after the card's uneven scale, so the light lands as FACE says.
@@ -174,6 +188,7 @@ export class Figs {
   }
 
   private mapUv(g: THREE.BufferGeometry, i: number): void {
+    const CELL = this.cell, COLS = this.cols;
     const W = COLS * CELL.w, H = this.rows * CELL.h || CELL.h, x0 = (i % COLS) * CELL.w, y0 = Math.floor(i / COLS) * CELL.h;
     const u0 = x0 / W, u1 = (x0 + CELL.w) / W, v0 = y0 / H, vf = (y0 + CELL.fy) / H, v1 = (y0 + CELL.h) / H;
     const uv = g.getAttribute('uv') as THREE.BufferAttribute;
@@ -183,6 +198,7 @@ export class Figs {
 
   /** More rows in the atlas: new canvases' worth of texture, every card's corners moved to match. */
   private grow(rows: number): void {
+    const CELL = this.cell, COLS = this.cols;
     // Resizing a canvas wipes it: keep the cells already drawn this frame (a hero drawn before a new
     // goblin needed the room went blank for a frame whenever the atlas grew).
     const keep = [this.litC, this.glowC].map((cv) => {
