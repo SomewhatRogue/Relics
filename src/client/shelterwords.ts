@@ -1,9 +1,12 @@
+import { FENW } from './fenroamwords';
+
 /** The keeper at a way station's fire (client/shelterui.ts). */
 export const SHELTERW = {
   /** What each keeper says, by the station's name (the barn's is the fallback). */
   lines: {
     'THE FIELD BARN': 'Sit by the fire a while, if you like. Anything off the shelf *costs*, mind, same as in town.',
     'THE CHARCOAL HUT': "Stand upwind of the clamp, unless you want your eyes running the whole time. Anything off me is town price, and I'm not one for haggling.",
+    'THE EEL STAITHE': FENW.keeper,
   } as Record<string, string>,
   home: 'HOME TO WICKHOLD',
   /** A sack of charcoal, at the Charcoal Hut only: the price comes after, as a coin string. */

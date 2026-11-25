@@ -92,6 +92,13 @@ The Deep chat, until it finishes (then the general chat).
   weapon's range (docs/design/damage-ranges.md; shared/dmgrange.ts, `Hero.dmgSeed`; sim/combat.ts, bolts.ts, sickle.ts,
   frostholds.ts). tests/perfparity.sim.golden.json was re-recorded once for it. A test that pins an exact hit number
   needs a range now; client/card.ts shows the ranges.
+  Also (2026-11-25), for the Performance sweep and Art: client/three/texpatch.ts sends only a texture's changed
+  rectangles; the floor's blood (ground.ts) and the figures' atlas (figs3d.ts) use it. A canvas texture that changes
+  a little each frame should too (measured: the floor alone was 360 MB in four seconds of a fight).
+  Also (2026-11-25), for Territories, Town quests and Art: THE FEN, the land's second map (docs/design/the-fen.md;
+  shared/fenroam*.ts, landlinks.ts; `fenroam` in territory.ts; `chapel` and `awash` in arena.ts's BlockKind with cards
+  in propcards.ts; small edits in jobs.ts, bounties.ts, sim/landroom.ts, gatewalk.ts, main.ts, townui.ts). Fenmere
+  itself untouched.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

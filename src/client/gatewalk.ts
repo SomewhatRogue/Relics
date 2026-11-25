@@ -1,9 +1,11 @@
 /**
  * Out in the land (a roam job, docs/design/outside-the-gate.md): when to offer the way back in, and the zone
  * the hero stands in. Back is offered within IN tiles of where you came in, once you have been more than OUT
- * tiles from it, and asked again only after you have walked off and come back.
+ * tiles from it, and asked again only after you have walked off and come back. On into the next land the same, at
+ * the map's far end (shared/landlinks.ts ONWARD).
  */
 import { territoryPlan } from '../shared/territory';
+import { ONWARD } from '../shared/landlinks';
 import type { Job } from '../shared/jobs';
 import type { Game } from './game';
 
@@ -41,14 +43,23 @@ export function gateOf(job: Job, index: number): P {
 
 export class GateWalk {
   private far = false;
+  private farOn = false;
   private run: unknown = null;
 
-  /** True the moment the way back in should be offered. */
-  check(game: Game): boolean {
-    if (game.mode !== 'run' || !game.run?.job.roam || !game.hero) return ((this.far = false), (this.run = null), false);
-    if (this.run !== game.run) (this.run = game.run), (this.far = false);
+  /** 'in' the moment the way back in should be offered, 'on' the way on into the next land; else null. */
+  check(game: Game): 'in' | 'on' | null {
+    if (game.mode !== 'run' || !game.run?.job.roam || !game.hero) return ((this.far = this.farOn = false), (this.run = null), null);
+    // (A new run, or the same run moved onto the next land: crossLand changes its job.)
+    const key = game.run.job.id;
+    if (this.run !== key) (this.run = key), (this.far = this.farOn = false);
     const w = watchBack(this.far, game.hero, gateOf(game.run.job, game.run.index));
     this.far = w.far;
-    return w.ask;
+    const on = game.run.job.land ? ONWARD[game.run.job.land] : undefined;
+    if (on) {
+      const v = watchBack(this.farOn, game.hero, on.from);
+      this.farOn = v.far;
+      if (v.ask) return 'on';
+    }
+    return w.ask ? 'in' : null;
   }
 }

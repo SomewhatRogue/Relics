@@ -55,6 +55,7 @@ import { session, touchSession } from './session';
 import { MAX_DOWNS } from '../sim/run';
 import { WayWatch, wayTarget } from './wayfind';
 import { GateWalk, zoneAt } from './gatewalk';
+import { walkOff } from './landwayui';
 import { targets } from '../sim/targets';
 import type { Npc } from '../shared/arena';
 import { knows, type Hero, type Intent } from '../sim/types';
@@ -739,7 +740,8 @@ function tick(t: number): void {
     fx.say(sx, sy - 52, s, col, 3);
   }, game.run?.job.boss);
   // The way on just opened: say which way, over you.
-  if (gateWalk.check(game)) goBack();
+  const walked = gateWalk.check(game);
+  if (walked) walkOff(game, panel, walked, goBack);
   shelterTick(game, panel, game.mode === 'run');
   const opened = ways.check(game);
   if (opened) objFlash.done(t / 1000);

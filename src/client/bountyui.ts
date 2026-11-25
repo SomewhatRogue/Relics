@@ -1,6 +1,6 @@
 /** The bounties' panel parts, for the North Gate and the keepers (shared/bounties.ts): the html, and the buttons. */
 import { coins } from '../shared/coins';
-import { bountyOf, canTake, handIn, held, isDone, postedOn, take, type Bounty } from '../shared/bounties';
+import { bountyOf, canTake, handIn, held, isDone, postedFor, take, type Bounty } from '../shared/bounties';
 import type { Profile } from '../shared/progress';
 import { BOUNTYW } from './bountywords';
 import { paidToast } from './errandpaid';
@@ -13,14 +13,14 @@ const row = (b: Bounty, tail: string) => `<p><b>${BOUNTYW.title[b.id]}</b> ${tai
 /** The section: the day's two (at the gate) and what is held, with its count. */
 export function bountyHtml(p: Profile, o: Opts): string {
   const mine = held(p).flatMap((h) => (bountyOf(h.id) ? [{ h, b: bountyOf(h.id)! }] : []));
-  const out = (o.posted ? postedOn(o.day).filter((b) => !mine.some((m) => m.b.id === b.id)).map((b) => row(b, '')) : []).concat(mine.map(({ h, b }) => row(b, BOUNTYW.count(h.got, b.n))));
+  const out = (o.posted ? postedFor(o.day, p.level).filter((b) => !mine.some((m) => m.b.id === b.id)).map((b) => row(b, '')) : []).concat(mine.map(({ h, b }) => row(b, BOUNTYW.count(h.got, b.n))));
   const said = o.posted ? `<p class="dim">${BOUNTYW.posted.replace(/\*(.+?)\*/g, '<em>$1</em>')}</p>` : '';
   return out.length ? `<h4>${BOUNTYW.heading}</h4>${said}${out.join('')}${o.posted && held(p).length >= 2 ? `<p>${BOUNTYW.full}</p>` : ''}` : '';
 }
 
 /** TAKE for each posted (at the gate), HAND IN for each done. `after` redraws the panel. */
 export function bountyButtons(p: Profile, o: Opts, after: () => void, saved: () => void): Button[] {
-  const takes = o.posted ? postedOn(o.day).filter((b) => !held(p).some((h) => h.id === b.id)).map((b) => ({ label: `${BOUNTYW.take}: ${BOUNTYW.title[b.id]}`, disabled: !canTake(p, b.id), act: () => (take(p, b.id, o.day), saved(), after()) })) : [];
+  const takes = o.posted ? postedFor(o.day, p.level).filter((b) => !held(p).some((h) => h.id === b.id)).map((b) => ({ label: `${BOUNTYW.take}: ${BOUNTYW.title[b.id]}`, disabled: !canTake(p, b.id), act: () => (take(p, b.id, o.day), saved(), after()) })) : [];
   return [...takes, ...handButtons(p, after, saved)];
 }
 

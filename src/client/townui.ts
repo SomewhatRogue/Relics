@@ -195,7 +195,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     panel.show('THE NORTH GATE', p(gateText + 'The guard will let you out into the north fields, and back in again. Jobs are on the board in the square.') + bountyHtml(pr, bo), [
       { label: 'GO OUT', primary: true, act: () => (panel.hide(), pt?.quit(), g.startJob(out)) },
       // A shelter found by resting there: straight out to it, alone (a gathered party goes out the plain way).
-      ...(territoryPlan(out).map.stations ?? []).filter((s) => pr.shelters?.includes(s.name)).map((s) => ({ label: SHELTERW.outTo(s.name), act: () => (panel.hide(), pt?.quit(), g.startJob({ ...out, at: s.name })) })),
+      // (The fen's too, walked on into off the north fields' far end: shared/landlinks.ts.)
+      ...[out, landJob('fenroam', w.day)].flatMap((j) => (territoryPlan(j).map.stations ?? []).filter((s) => pr.shelters?.includes(s.name)).map((s) => ({ label: SHELTERW.outTo(s.name), act: () => (panel.hide(), pt?.quit(), g.startJob({ ...j, at: s.name })) }))),
       ...(pt ? [{ label: BOARDW.gather, act: () => (pt.gather(out), panel.hide(), postedToast()) }] : []),
       ...bountyButtons(pr, bo, again, () => g.keep()),
     ]);

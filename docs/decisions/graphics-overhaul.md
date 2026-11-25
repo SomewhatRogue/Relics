@@ -1281,3 +1281,37 @@ rangerkit.test.ts and warrior.test.ts now compare against ranges. (Claude Opus 5
   a hero joins (sim/room.ts `join`, `dmgSeedOf`) and travel in the room's save; the sample fight re-recorded again. Ten
   test files of other rules that pin exact hits now turn the spread off while they run (tests/nospread.ts `noSpread`).
 
+## 2026-11-25: big maps smooth on the phone: only the changed patch of a texture is sent
+
+Kyle: "Go one first and have a full sub agent spin on it and do two yourself" (the fen to an agent; the drawing to me).
+Measured before changing anything (the view's ?perf=1, a CPU profile, and every WebGL upload logged during four
+seconds of fighting on the north fields): drawing was cheap (83 calls, 12k triangles, fewer than town's 201), but
+texture uploads were not: the figures' atlas (1280 by 576) and its glow sent whole every frame (228 sends, about
+670 MB), and the whole floor (1120 by 1152 on the north fields) sent again for every splash of blood (70 sends, about
+360 MB). The floor's cost grows with the map.
+- New: client/three/texpatch.ts (`patchTexture`: sends the changed rectangles straight through WebGL with three's own
+  unpack settings, falling back to a whole send when the texture is not on the card yet or a whole send is due;
+  `patchWith` from view3d.ts). The floor sends only the pixels blood fell on (ground.ts); the atlas only the rows of
+  cells drawn this frame (figs3d.ts).
+- After: the floor's sends are 1 by 1; the atlas's bands about 2.5 times smaller a frame. Seen: blood where the fight
+  is, every figure right. Not done: skipping a figure's redraw when its pose has not changed (the next saving), and a
+  frame time on a real phone. (Claude Opus 5.5)
+
+## 2026-11-25: THE FEN, the land's second map
+
+Kyle: "Go one first and have a full sub agent spin on it". One Opus builder took it end to end (91 steps): a short
+spec (docs/design/the-fen.md), then the map (60 by 100, from the seed alone, land `fenroam`: THE BOG EDGE, THE
+CAUSEWAYS, THE EEL STAITHE, THE WIDE REEDS, THE DROWNED CHAPEL, THE PEAT CUTS; eleven packs of Fenmere's kinds; black
+peat at the cuts after the larder dies), the drowned chapel drawn the tile way as its landmark (client/tilechapel.ts)
+with grave slabs, crosses and pews awash (tileawash.ts), the seam between the two lands both ways (shared/landlinks.ts,
+`Game.crossLand`, client/landwayui.ts: ON INTO THE FEN? at the north fields' far end, BACK TO THE NORTH FIELDS? at the
+fen's way in; the party moves together), the staithe as a shelter with OUT TO from the gate, and three fen bounties
+from level 6.
+- My review: one lore-keeper call and one line-editor call. Changed: THE REED BEDS is THE WIDE REEDS (the Deep has a
+  Reed Beds); the belfry stands empty (bells are the town's hope, kept for later: no bell drawn, none spoken of); the
+  staithe's keeper has her own line; the causeway bounty names the two past the ford. For the bible (the lore
+  keeper): THE FEN is the town's word for Fenmere's near edge; the Eel Staithe is not Withy Staithe; the chapel is
+  nobody's, no saint, no names on the slabs.
+- For Kyle: crosses as the valley's grave marker are new; the fen's way in comes out of fields, not the north fields'
+  wood (the doc could say why); the chapel's stone reads a little light in the day. (Claude Opus 5.5)
+

@@ -92,7 +92,7 @@ export interface Job {
   land?: import('./territory.js').LandId;
   /** The land outside the gate (docs/design/outside-the-gate.md): no posting and no objective; you walk out, and walk back in. */
   roam?: boolean;
-  /** On a roaming land: the name of a way station to start at (a found one, from the gate), not at the way in. */
+  /** On a roaming land: the name of a way station to start at (a found one, from the gate), or of a way (shared/landlinks.ts WAYS: walked back into from the next land), not at the way in. */
   at?: string;
   /** A hero's own posting for their quest in hand (shared/heroquests.ts): on their board only. */
   quest?: import('./heroquests.js').QuestId;

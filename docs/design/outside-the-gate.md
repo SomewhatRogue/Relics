@@ -123,6 +123,9 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
 
 Not yet: the view off the east side; bounties, materials, quests; the wood beyond the far end.
 
+**The second map, THE FEN** (2026-11-25): walked on into off the north fields' far end, back out its south edge to
+that far end; its own shelter, THE EEL STAITHE, its own bounties from level 6. See docs/design/the-fen.md.
+
 ## Bounties: the first slice (2026-11-24)
 
 - **Posted at the North Gate**, from level 3: two a day out of a short list for the north fields, picked by the day

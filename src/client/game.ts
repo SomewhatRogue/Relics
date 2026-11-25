@@ -69,6 +69,7 @@ import { refreshHealth, statsOf } from '../sim/gearstats';
 import { houseCaptives, sum } from '../sim/goal';
 import { HouseIndoors } from './houseindoors';
 import { goal, isFinal, mine, newRun, runRoom, tally, type Run } from '../sim/run';
+import { landJob, type LandId } from '../shared/territory';
 import { NO_INTENT, knows, type FightEvent, type Hero, type Intent, type Learned } from '../sim/types';
 import { players } from '../sim/party';
 import { load, store, type Save } from './save';
@@ -1069,6 +1070,22 @@ export class Game {
     const c = this.coop, party = !!c?.company;
     if (party) (c!.handOver(), (this.coop = null));
     this.finish('left', false, party);
+  }
+
+  /**
+   * Out of one roaming land into the next (shared/landlinks.ts): leading or alone, the run takes the other land's job
+   * and its first map, the party with it (each friend is brought into the new room, as through a territory's gate), the
+   * loading page over it. `at`: a named way or shelter to arrive at; none is the way in. A friend's leader chooses.
+   */
+  crossLand(land: LandId, at?: string): void {
+    const run = this.run;
+    if (this.mode !== 'run' || !run?.job.roam || this.remote || this.result) return;
+    const h = this.hero;
+    Object.assign(run, { job: { ...landJob(land, this.world.day), at }, index: 0, rest: undefined, downs: 0, wipeAt: undefined, stretch: 0, check: undefined });
+    run.party = 1 + [...(this.coop?.friends.values() ?? [])].filter((f) => f.profile && !f.gone).length;
+    this.place(runRoom(run), undefined, h);
+    this.rooms.reset(this.room);
+    this.bigPage();
   }
 
   /** Test hook (scripts/deep-online.cjs): this room's way out opens now, as if its goal were done; till the room changes. */

@@ -16,6 +16,7 @@ import { ArenaRoom } from './room';
 import { plateByLevel } from '../shared/plate';
 import type { Run } from './run';
 import { ringSpot } from './travel';
+import { wayOf } from '../shared/landlinks';
 
 export function landRoom(run: Run): ArenaRoom {
   const job = run.job, plan = territoryPlan(job, run.index), n = Math.max(1, run.party ?? 1);
@@ -30,6 +31,9 @@ export function landRoom(run: Run): ArenaRoom {
   // Out from the gate to a found shelter: the party starts in its ring, and a fall wakes them there (sim/travel.ts).
   const start = job.roam ? room.map.stations?.find((s) => s.name === job.at) : undefined;
   if (start) (room.map.hero = ringSpot(room, start)), (run.rest = { ...room.map.hero });
+  // Walked back in from the next land: at the far end you left by (shared/landlinks.ts), a fall waking you there too.
+  const way = job.roam && !start ? wayOf(job.land, job.at) : undefined;
+  if (way) room.map.hero = { ...way };
   const past = n - 1;
   // (Kept on the room: goblins a mini quest wakes later are as tough: sim/minis.ts.)
   if (past > 0) room.tough = { hp: 1 + TERR.more.hp * past, harm: 1 + TERR.more.harm * past };

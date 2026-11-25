@@ -1,6 +1,6 @@
 /**
  * Bounties on the north fields (docs/design/outside-the-gate.md, "Bounties: the first slice"): two posted a day at
- * the North Gate out of five, each a pack (and kind) of what lives out there. A death of one counts for every hero in
+ * the North Gate out of five (and the fen's, below), each a pack (and kind) of what lives out there. A death of one counts for every hero in
  * the room, struck by whoever; the count is kept across trips; done, one is handed in at the gate or a keeper for
  * copper and experience. Pure, on the profile. `n` is what the map places (tests/bounties.test.ts keeps it so).
  */
@@ -9,7 +9,7 @@ import { seedOf } from './fishing.js';
 import { gainXp, type Profile } from './progress.js';
 import { Rng } from './rng.js';
 
-export interface Bounty { id: string; land: 'gatefields'; packs: number[]; kinds?: EnemyKind[]; n: number; pay: number; xp: number }
+export interface Bounty { id: string; land: 'gatefields' | 'fenroam'; packs: number[]; kinds?: EnemyKind[]; n: number; pay: number; xp: number }
 export type Held = { id: string; day: number; got: number };
 
 export const HELD_MAX = 2;
@@ -22,7 +22,16 @@ export const BOUNTIES: Bounty[] = [
   { id: 'snarers', land: 'gatefields', packs: [408], n: 4, pay: 40, xp: 60 },
 ];
 
-export const bountyOf = (id: string): Bounty | undefined => BOUNTIES.find((b) => b.id === id);
+/** THE FEN's (docs/design/the-fen.md), one posted a day beside the north fields' two, from FEN_LEVEL: the Peat Cuts'
+ *  larder (460), the bands in the reeds (455, 456), the causeway's shield line, skimmer and ford (452 to 454). */
+export const FEN_BOUNTIES: Bounty[] = [
+  { id: 'larder', land: 'fenroam', packs: [460], n: 7, pay: 130, xp: 220 },
+  { id: 'lurkers', land: 'fenroam', packs: [455, 456], n: 6, pay: 90, xp: 150 },
+  { id: 'causeway', land: 'fenroam', packs: [452, 453, 454], n: 9, pay: 110, xp: 180 },
+];
+export const FEN_LEVEL = 6;
+
+export const bountyOf = (id: string): Bounty | undefined => BOUNTIES.find((b) => b.id === id) ?? FEN_BOUNTIES.find((b) => b.id === id);
 
 /** The two posted on a day: seeded by the day, never the same one twice. */
 export function postedOn(day: number): Bounty[] {
@@ -31,13 +40,18 @@ export function postedOn(day: number): Bounty[] {
   return [BOUNTIES[a], BOUNTIES[b]];
 }
 
+/** What the gate posts on a day for a hero of `level`: the north fields' two, and from FEN_LEVEL the fen's one, seeded by the day. */
+export function postedFor(day: number, level: number): Bounty[] {
+  return level >= FEN_LEVEL ? [...postedOn(day), FEN_BOUNTIES[new Rng(seedOf('fenbounty', day)).int(FEN_BOUNTIES.length)]] : postedOn(day);
+}
+
 export const held = (p: Pick<Profile, 'bounties'>): Held[] => p.bounties ?? [];
 export const isHeld = (p: Pick<Profile, 'bounties'>, id: string): boolean => held(p).some((h) => h.id === id);
 export const canTake = (p: Pick<Profile, 'bounties'>, id: string): boolean => !!bountyOf(id) && !isHeld(p, id) && held(p).length < HELD_MAX;
 
 /** Take one posted on `day` into hand: at most two, never one already held. */
 export function take(p: Profile, id: string, day: number): boolean {
-  if (!canTake(p, id) || !postedOn(day).some((b) => b.id === id)) return false;
+  if (!canTake(p, id) || !postedFor(day, p.level).some((b) => b.id === id)) return false;
   (p.bounties ??= []).push({ id, day, got: 0 });
   return true;
 }

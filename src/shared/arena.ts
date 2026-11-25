@@ -58,6 +58,8 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   | 'oak'
   // The great barn's hay stacks (shared/barnarena.ts): they stop a charge, and burn.
   | 'haystack'
+  // The Fen (shared/fenroam.ts): the drowned chapel, its landmark, and its echoes awash (`look` 0 a grave slab, 1 a cross, 2 a pew).
+  | 'chapel' | 'awash'
   // Fenmere (shared/fen.ts): boards over deep water you walk on (a deck), reeds standing in the shallows you walk through (soft).
   | 'boards' | 'reeds';
 export interface Round extends Circle {
