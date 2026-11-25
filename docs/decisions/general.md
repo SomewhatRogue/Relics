@@ -430,3 +430,13 @@ haulier and worldfx moved to plate stripped; parity re-recorded. Board note to D
 Kyle: "We made them a ton bigger, let's make them like thirty percent smaller unless the gimmick of one is that he's
 huge." shared/fury.ts BUILDS: brute 1.8 to 1.26, fat 2.4 to 1.68, quick 1.25 to 0.88 (size and body together; reach
 follows); the hulk (Old Knuckles, Gutchain) kept at 3. Health, harm and pace unchanged. Parity re-recorded. Claude Opus 5.5
+
+## 2026-11-25: town haste, and no empty stall
+
+Kyle: "Let's give everyone a 20 percent movement speed buff in town and an icon that just says town buff haste.
+Walking in town shouldn't be a chore. Also remove the empty vendor stall."
+- shared/town.ts TOWN_HASTE = 1.2 on the town map (`GameMap.haste`, shared/arena.ts mapHaste), multiplied into
+  sim/walkspeed.ts, so the room and your own screen agree. A TOWN HASTE word in the HUD's buff row in town
+  (client/index.html, main.ts, hud.css), its tooltip "Town buff: haste. You walk 20% faster in town."
+- The trader's stall is only put up once the market's open (shared/town.ts); before that, no EMPTY stall. The
+  MARKET ROW spot there stays. Claude Opus 5.5

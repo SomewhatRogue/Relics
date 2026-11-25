@@ -489,6 +489,8 @@ function hud(now: number): void {
   setHtml(one('.rcd'), relic ? (input.touch ? '' : 'R ') + (it && isDark(it) ? RELICS[relic].short + ' ' + RELICW.dark : tag(relic)) + (it ? chargePips(it) : '') : '');
   toggle(one('.rcd'), 'wait', !!relic && (left(relic) > 0 || (!!it && isDark(it))));
   setHidden(one('.litbadge'), !me.lit);
+  // The town's haste (shared/town.ts TOWN_HASTE): a word in the buff row while you're in town.
+  setHidden(one('.hastebadge'), game.mode !== 'town');
   game.settleCouncil();
   setVotes(game.world);
   // The belt: the potion that's next (Q, POTION) and how many more.

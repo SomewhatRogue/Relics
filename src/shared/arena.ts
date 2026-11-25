@@ -339,6 +339,8 @@ export interface GameMap {
   mud?: { x: number; y: number; r: number; until: number }[];
   /** The windlass has drained the shallows (sim/leechwind.ts): the shallow water is mud to walk, not wading; deep water stays deep. */
   drained?: boolean;
+  /** Walking here is this much quicker (the town's haste, shared/town.ts TOWN_HASTE; Kyle 2026-11-25). */
+  haste?: number;
   /** The Doorkeepers' ground in the Deep (shared/sealarena.ts): the sealed door in the back wall, drawn only (client/sealdraw.ts). */
   sealed?: { x: number; w: number };
   /** An instance's stretches on one map, in order (sim/stretches.ts; docs/design/open-cut-map.md). */
@@ -437,6 +439,8 @@ const inWater = (x: number, y: number) => !!(nearby(MAP, x, y)?.water ?? MAP.wat
 export const inShallows = (x: number, y: number) => !MAP.drained && inWater(x, y);
 /** Mud laid on the ground (THE LEECHMAN's peat bank) slows a body to this, whatever else is under it. */
 export const MUD_SLOW = 0.55;
+/** How much quicker walking is on this map (1 but in town). */
+export const mapHaste = () => MAP.haste ?? 1;
 export const wadeAt = (x: number, y: number) => (inShallows(x, y) ? WADE : MAP.drained && inWater(x, y) ? MUD_SLOW : 1) * (MAP.mud?.some((c) => Math.hypot(c.x - x, c.y - y) <= c.r) ? MUD_SLOW : 1);
 
 const over = (l: Ledge, x: number, y: number) => x > l.x && x < l.x + l.w && y > l.y && y < l.y + l.h;

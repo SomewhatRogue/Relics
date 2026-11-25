@@ -25,6 +25,9 @@ import { layoutPoint, layoutProps, layoutSpots, layoutTown } from './layouttown.
 /** Set before the town is built. `town`: the new town (docs/design/town-layout.md), its map, spots, props and seats
  *  (`?layout`, or with the street look). `on`: the parked street look is on too (the insides read it: bighalls.ts,
  *  inside.ts, interiors.ts). */
+
+/** Everyone walks this much quicker in town: walking it shouldn't be a chore (Kyle, 2026-11-25). The HUD says TOWN HASTE. */
+export const TOWN_HASTE = 1.2;
 export const LAYOUT = { on: false, town: false };
 
 /** What talking to someone (or using a spot) opens. */
@@ -109,7 +112,8 @@ export function oldTown(w: WorldState): GameMap {
     { x: 1.5, y: 13, w: 8, h: 4, kind: 'hall', label: 'BARRACKS', door: 'hall' },
     { x: 10.2, y: 13.6, w: 0.5, h: 2.2, kind: 'rack' },
     { x: 45, y: 13, w: 6, h: 3.5, kind: 'house', label: "HUNTERS' LODGE", door: 'lodge' },
-    { x: 37, y: 11.5, w: 3, h: 2, kind: 'stall', label: marketIn(w) ? 'TRADER' : 'EMPTY' },
+    // (The trader's stall, put up only once the market's open: no empty stall standing about. Kyle, 2026-11-25.)
+    ...(marketIn(w) ? [{ x: 37, y: 11.5, w: 3, h: 2, kind: 'stall' as const, label: 'TRADER' }] : []),
     { x: 37, y: 15.5, w: 3, h: 2, kind: 'stall', label: 'PAWN' },
     // Hester the tailor's (shared/clothlook.ts): her own stall, the other side of the hall's door in the new town.
     { x: 37.4, y: 19.6, w: 3, h: 2, kind: 'stall', label: 'TAILOR' },
@@ -178,7 +182,7 @@ export function oldTown(w: WorldState): GameMap {
   for (const b of blocks) if (worn && b.label && WORN.includes(b.label)) b.worn = true;
   blocks.push(...m.blocks, ...sg.blocks), rounds.push(...m.rounds, ...sg.rounds), npcs.push(...m.npcs, ...sg.npcs);
   return {
-    name: 'WICKHOLD', w: W, h: H, wallFace: 3, rounds, blocks, npcs, life: TOWN_LIFE, soil: townSoil(w), marks: [...townGround(w), ...m.marks], breach: m.breach,
+    name: 'WICKHOLD', w: W, h: H, haste: TOWN_HASTE, wallFace: 3, rounds, blocks, npcs, life: TOWN_LIFE, soil: townSoil(w), marks: [...townGround(w), ...m.marks], breach: m.breach,
     braziers: [{ x: 25, y: 15, r: 0.35 }, { x: 31, y: 15, r: 0.35 }, ...sg.braziers],
     torches: [6, 14, 22, 34, 40, 46, 58].map((x) => ({ x, y: -1.6 })),
     // The millpond under the east wall, where the mill stream comes in (shared/pastimes.ts).

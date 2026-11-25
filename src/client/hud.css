@@ -51,6 +51,9 @@ body.touch #hud .st { display: none; }
 #hud .buffs canvas { width: calc(11 * var(--px)); height: auto; image-rendering: pixelated; }
 #hud .litbadge { pointer-events: auto; cursor: help; width: calc(11 * var(--px)); height: calc(11 * var(--px)); font-size: 0; color: transparent; background: var(--ic-lit) center / 100% 100% no-repeat; image-rendering: pixelated; }
 #hud .litbadge[hidden] { display: none; }
+/* The town's haste (General, 2026-11-25): a small word, iron and ember like the HUD's bars. */
+#hud .hastebadge { align-self: center; font-size: var(--fs-s); letter-spacing: 0.12em; color: #ffd27a; background: #1a141088; border: 1px solid #7a5a2a; padding: 0 4px; white-space: nowrap; pointer-events: auto; cursor: help; }
+#hud .hastebadge[hidden] { display: none; }
 /* The weapon, kit, skill, relic and belt lines: on a tap of the face (a laptop keeps the skill, relic and belt). */
 #hud .sheet { display: none; margin-top: 6px; max-width: min(300px, 80vw); padding: 4px 8px; font-size: var(--fs-text); line-height: 1.35; color: var(--bone-dim);
   border: var(--edge) solid transparent; border-image: var(--f-stone) 4 / var(--edge) stretch; background: var(--stone-800); background-clip: padding-box; }
