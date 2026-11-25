@@ -11,15 +11,17 @@
  */
 export type BuildId = 'brute' | 'hulk' | 'fat' | 'quick';
 export interface Build { size: number; radius: number; hp: number; harm: number; pace: number; windup: number; pause: number }
+/** (Kyle, 2026-11-24: "make them like thirty percent smaller unless the gimmick of one is that he's huge": brute,
+ *  fat and quick at 0.7 of what they were, body and drawing; the hulk, the huge one, kept at three times.) */
 export const BUILDS: Record<BuildId, Build> = {
   /** Big and quick to it: the all-rounder. */
-  brute: { size: 1.8, radius: 1.45, hp: 1.6, harm: 1.25, pace: 1.3, windup: 0.85, pause: 0.8 },
+  brute: { size: 1.26, radius: 1.0, hp: 1.6, harm: 1.25, pace: 1.3, windup: 0.85, pause: 0.8 },
   /** Three times the size: the slowest to move, the hardest to stop, the hardest hitting. */
   hulk: { size: 3, radius: 2, hp: 2.2, harm: 1.5, pace: 1.05, windup: 1, pause: 0.9 },
   /** Wide and deep: the most health, hits like a brute, slow on its feet. */
-  fat: { size: 2.4, radius: 2.1, hp: 2.6, harm: 1.15, pace: 0.9, windup: 0.95, pause: 1 },
-  /** Hardly bigger than a butcher, quick and hard to kill: on you before you're ready. */
-  quick: { size: 1.25, radius: 1.1, hp: 1.8, harm: 1.1, pace: 1.75, windup: 0.75, pause: 0.65 },
+  fat: { size: 1.68, radius: 1.47, hp: 2.6, harm: 1.15, pace: 0.9, windup: 0.95, pause: 1 },
+  /** A touch smaller than a butcher, quick and hard to kill: on you before you're ready. */
+  quick: { size: 0.88, radius: 0.77, hp: 1.8, harm: 1.1, pace: 1.75, windup: 0.75, pause: 0.65 },
 };
 /** The board's named butchers (shared/jobs.ts BOSSES), each its own build. */
 export const BUILD_OF: Record<string, BuildId> = { MAWL: 'fat', SKARN: 'quick', 'OLD KNUCKLES': 'hulk', 'OLD SPOON': 'brute', GUTCHAIN: 'hulk', 'MOTHER RUST': 'fat' };

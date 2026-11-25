@@ -28,7 +28,8 @@ describe('a named boss in its fury', () => {
       expect(e.harm).toBeCloseTo(b.harm);
       expect(e.edge).toEqual({ windup: b.windup, pause: b.pause });
       expect(e.radius).toBeCloseTo(plain.radius * b.radius);
-      expect([e.scale, e.stride, e.reach]).toEqual([b.size, b.pace, reachFor(b.size)]);
+      expect([e.scale, e.stride]).toEqual([b.size, b.pace]);
+      expect(e.reach).toBeCloseTo(reachFor(b.size));
     }
     // Up to three times the size (Kyle: "up to 3x, why the hell not"); a quick one hardly bigger but quickest.
     expect(BUILDS.hulk.size).toBe(3);

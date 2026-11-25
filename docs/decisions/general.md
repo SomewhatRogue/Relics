@@ -424,3 +424,9 @@ haulier and worldfx moved to plate stripped; parity re-recorded. Board note to D
   (Graphics', eight lines). Off for good keeps ARMOR BROKEN. Not screenshot-checked: a two-colour ring. Claude Opus 5.5
 - Plate by level in the open land and the territories too (sim/expedroom.ts, sim/landroom.ts, one line each).
   Ambushes have no brutes; instances are hand-tuned and tougher already, left as they are. Claude Opus 5.5
+
+## 2026-11-24: bosses 30% smaller, but the hulk
+
+Kyle: "We made them a ton bigger, let's make them like thirty percent smaller unless the gimmick of one is that he's
+huge." shared/fury.ts BUILDS: brute 1.8 to 1.26, fat 2.4 to 1.68, quick 1.25 to 0.88 (size and body together; reach
+follows); the hulk (Old Knuckles, Gutchain) kept at 3. Health, harm and pace unchanged. Parity re-recorded. Claude Opus 5.5
