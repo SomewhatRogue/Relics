@@ -9,6 +9,7 @@
  */
 import * as THREE from 'three';
 import { patchTexture } from './texpatch';
+import { Abort, newRec, play, recorder, watchCanvases } from './figrec';
 import { BARE, type Ctx } from '../draw';
 import { XRAY_LAYER } from './actors3d';
 import { PITCH } from './camera3d';
@@ -33,7 +34,8 @@ export type Draw = (c: Ctx, x: number, y: number) => void;
 /** `xray`: shown as a silhouette behind walls (a hero, or 'foe' in a foe's colour); `pool`: the shadow's radius (tiles); `bias`: nearer the camera (tiles), to sit over another at the same spot; `ground`: where the shadow lies (x, height, z) when the figure is in the air over it (a leap off a height: hop.ts). */
 export interface Opts { xray?: boolean | 'foe'; pool?: number; bias?: number; ground?: [number, number, number]; wide?: boolean }
 
-interface Slot { i: number; card: THREE.Mesh; pool: THREE.Mesh; seen: number; hero: boolean | 'foe' }
+/** `h1`, `h2`: the hash of what was last drawn in its cell (figrec.ts), NaN when it must be drawn. */
+interface Slot { i: number; card: THREE.Mesh; pool: THREE.Mesh; seen: number; hero: boolean | 'foe'; h1: number; h2: number }
 
 export class Figs {
   readonly group = new THREE.Group();
@@ -69,6 +71,7 @@ export class Figs {
   private wide?: Figs;
 
   constructor(private cell: Cell = CELL, private cols = 10, nested = false) {
+    watchCanvases();
     this.grow(2);
     if (!nested) (this.wide = new Figs(BIG_CELL, 4, true)), this.group.add(this.wide.group);
   }
@@ -106,17 +109,34 @@ export class Figs {
     s.seen = this.frame;
     s.hero = o.xray === 'foe' ? 'foe' : !!o.xray;
     const ox = (s.i % COLS) * CELL.w, oy = Math.floor(s.i / COLS) * CELL.h;
-    for (const g of [this.lit, this.glow]) g.save(), g.clearRect(ox, oy, CELL.w, CELL.h), g.beginPath(), g.rect(ox, oy, CELL.w, CELL.h), g.clip();
+    // Drawn first as a list (figrec.ts): the same list as this cell's last means the same picture, so the cell is
+    // left as it is and not sent again. A drawing the list can't take is drawn as before.
+    const rec = newRec();
+    let listed = true;
     BARE.on = true;
     try {
-      draw(this.c, ox + CELL.fx, oy + CELL.fy);
+      draw({ ...this.c, lit: recorder(this.lit, rec, 0), glow: recorder(this.glow, rec, 1) }, ox + CELL.fx, oy + CELL.fy);
+    } catch (e) {
+      if (!(e instanceof Abort)) throw e;
+      listed = false;
     } finally {
       BARE.on = false;
-      this.lit.restore();
-      this.glow.restore();
     }
-    this.drawn = true;
-    this.dirty.push(s.i);
+    if (!listed || s.h1 !== rec.h1 || s.h2 !== rec.h2) {
+      for (const g of [this.lit, this.glow]) g.save(), g.clearRect(ox, oy, CELL.w, CELL.h), g.beginPath(), g.rect(ox, oy, CELL.w, CELL.h), g.clip();
+      BARE.on = true;
+      try {
+        if (listed) play(rec, this.lit, this.glow);
+        else draw(this.c, ox + CELL.fx, oy + CELL.fy);
+      } finally {
+        BARE.on = false;
+        this.lit.restore();
+        this.glow.restore();
+      }
+      (s.h1 = listed ? rec.h1 : NaN), (s.h2 = listed ? rec.h2 : NaN);
+      this.drawn = true;
+      this.dirty.push(s.i);
+    }
     // Snapped so the card's pixels fall on the view's: across by x, down the screen by z.
     // (A hair's bias so a figure exactly between two pixels always goes the same way, not by the float's noise.)
     const rx = Math.round(sx + 1e-3), ry = Math.round(sy + 1e-3);
@@ -180,10 +200,12 @@ export class Figs {
       card.receiveShadow = true;
       card.frustumCulled = pool.frustumCulled = false;
       this.group.add(card, pool);
-      this.byIndex[i] = s = { i, card, pool, seen: 0, hero: false };
+      this.byIndex[i] = s = { i, card, pool, seen: 0, hero: false, h1: NaN, h2: NaN };
       if (Math.ceil((i + 1) / COLS) > this.rows) this.grow(this.rows + 2);
     }
     s.card.material = this.mat;
+    // A cell given to someone new holds the last one's picture: draw it whatever.
+    (s.h1 = NaN), (s.h2 = NaN);
     this.slots.set(key, s);
     return s;
   }
