@@ -133,6 +133,13 @@ The Deep chat, until it finishes (then the general chat).
   from General (done): more plated goblins with level, boss plate, and the plate drawn: a grey ring outside the red one
   (client/foes.ts) and a grey bar over the red on box figures (client/three/overlay3d.ts), small logged edits in your
   files. Restyle them as you like; `plateShare(e)` in sim/ironhide.ts is what to read.
+- **For the Art and Graphics chats (General, 2026-11-25): the dev server crashes on load.** `npx vite` (not the
+  build) throws "ReferenceError: Cannot access 'OY' before initialization" at client/hangs.ts line 13
+  (`const LOW = OY - 8`): hangs.ts imports OX, OY, PX from world.ts, and world.ts (through what it imports) reaches
+  hangs.ts again, so in dev's module order OY isn't set yet. The built game loads fine, so it isn't live, but any
+  script or check run against `npx vite` hangs at a blank page. A fix: work LOW out inside paintHangs, or move OX,
+  OY, PX to a small module of their own that imports nothing. Whoever owns hangs.ts, please take it; General hasn't
+  touched it.
 ## Collisions to settle
 
 - **Forests that feel like a place (Graphics sweep asks Territories and whoever lays a map's trees), 2026-11-23.**
