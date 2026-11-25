@@ -47,7 +47,7 @@ export function layNooks(k: Kit): void {
   round(k, 'sacks', 78.8, 105.2, 0.34), round(k, 'post', 77.2, 101.4, 0.16), round(k, 'post', 77.2, 104.4, 0.16);
   prop(k, 'tub', 82.6, 107.4), prop(k, 'barrel', 83.2, 106);
   // THE DROWNED CART: behind the reeds in the west; a cart gone into the water, its load about it, a chest under it.
-  B(k, 'cart', 6.4, 74.4, 2.4, 1.2), prop(k, 'crate', 10.8, 73.8), prop(k, 'barrel', 11.6, 76.6);
+  B(k, 'drownedcart', 6.4, 74.4, 2.4, 1.2), prop(k, 'crate', 10.8, 73.8), prop(k, 'barrel', 11.6, 76.6);
   k.grim.push({ kind: 'strewn', x: 9, y: 77.2, k: 2 }), mark(k, 'debris', 6.6, 76.4, 3, 0.6);
   k.chests.push({ x: 7.6, y: 77.4 });
   // THE PEAT-CUTTER'S SHELTER: the cuts' far west strip; a shack, cut peat stacked to dry, a fire, the block.
