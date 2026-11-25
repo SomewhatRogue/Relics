@@ -107,6 +107,8 @@ export interface Profile {
   bounties?: { id: string; day: number; got: number }[];
   /** The satchel: what the land gave (shared/materials.ts). */
   mats?: import('./materials').Mats;
+  /** The elements whose first edge from Old Merren this hero has had, free (edges.ts). */
+  edgeFree?: import('./edges.js').EdgeEl[];
   /** Titles: deeds on each road, those bought, the one worn (shared/titles.ts). */
   titles?: import('./titles.js').TitleRecord;
   /** The red piece's whisper has been heard (shared/wanterrands.ts). */

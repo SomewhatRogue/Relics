@@ -80,6 +80,11 @@ The Deep chat, until it finishes (then the general chat).
   called from sim/room.ts. For the element corner when it is built: fire takes CHARCOAL (element-augments.md).
   For the Armor chat (2026-11-24): `npx tsc --noEmit` fails on main in tests/plate.test.ts (lines 18 to 21: `variant:
   'archer'` is not a `FoeVariant` in shared/terrain.ts). Not touched by me.
+  Also (2026-11-24), for Gear, Town quests, Economy and Holy and hungry: element augments are built (element-augments.md
+  "Built"): forged weapons no longer roll an element (shared/gear.ts) and old ones are stripped on load (save.ts),
+  uniques kept; sim/traits.ts reads `Item.edge`; card.ts shows it; Old Merren has a panel and stands by the rubble
+  till the Old Quarter clears (town.ts, layoutmove.ts, layouttown.ts); the errand `merren` (errands.ts, runner.ts);
+  `GEAR.coal` 12 (sim/pack.ts). The price (20s) is waiting on Kyle.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

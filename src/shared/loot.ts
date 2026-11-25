@@ -5,6 +5,7 @@
  */
 import { CLASS_DODGES, CLASS_GUARD, WEAPONS, type HeroClass, type WeaponId } from './weapons.js';
 import { barWords } from './barword.js';
+import { elementTraitOf } from './edges.js';
 import { HUNGRY, type HungryId } from './hungry.js';
 import { UNIQUE_NAMES } from './uniquenames.js';
 
@@ -63,6 +64,8 @@ export interface Item {
   armor?: 'light' | 'medium' | 'heavy';
   quality: Tier;
   traits: TraitId[];
+  /** An element put on a weapon by Old Merren, for some jobs (edges.ts). */
+  edge?: import('./edges.js').Edge;
   /** Modifiers on base stats (gear.ts). */
   mods?: { id: 'damage' | 'quick' | 'reach' | 'draw' | 'guard' | 'knock' | 'health' | 'tough' | 'breath' | 'foot' | 'dodge' | 'focus' | 'mending'
     | 'arc' | 'crit' | 'backstab' | 'finisher' | 'spell' | 'thrift'; v: number }[];
@@ -89,7 +92,7 @@ const ARMOR_NAME = { light: 'LEATHERS', medium: 'MAIL SHIRT', heavy: 'PLATE' };
 export const LEGS_NAME = { light: 'LEATHER TROUSERS', medium: 'MAIL SKIRT', heavy: 'GREAVES' };
 /** "STORMFORGED SPEAR +2": an element if it has one, the base, its level. */
 export function itemName(i: Item): string {
-  const el = i.traits.find((t) => ELEMENT_TRAITS.includes(t));
+  const el = elementTraitOf(i);
   if (i.hungry) return HUNGRY[i.hungry as HungryId].name;
   if (i.unique && UNIQUE_NAMES[i.unique]) return UNIQUE_NAMES[i.unique];
   const base = i.slot === 'armor' ? ARMOR_NAME[i.armor ?? 'light'] : i.slot === 'legs' ? LEGS_NAME[i.armor ?? 'light'] : i.slot === 'ring' ? 'RING' : WEAPONS[i.kit ?? 'sword'].name;

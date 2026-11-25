@@ -54,6 +54,7 @@ import { firstMeeting, workBeat } from './firstmeet';
 import { ERRAND_PAY, trainerGift } from '../shared/errandpay';
 import { paidToast } from './errandpaid';
 import { backFromYard } from '../shared/errands';
+import { openMerren } from './merrenui';
 
 
 const p = (s: string) => `<p>${s}</p>`;
@@ -177,6 +178,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   } else if (id === 'home') {
     const f = FAMILIES[arg % FAMILIES.length];
     panel.show(f.name, say(title(f.adult), RUMOURS[(arg * 3 + w.day) % RUMOURS.length]) + say(f.child, CHILD[arg % CHILD.length]));
+  } else if (id === 'merren') {
+    // Old Merren dresses your weapon with an element (merrenui.ts); his chapel line stays under the buttons.
+    openMerren(g, panel, CHAT[9].line);
   } else if (id === 'chat') {
     const who = CHAT[arg] ?? { name: PATIENTS[arg - 10] ?? 'A STRANGER', line: SURVIVOR[(arg + w.day) % SURVIVOR.length] };
     // How the town's coming on (or what the hungry pulled down) comes first, when they've a mind to.

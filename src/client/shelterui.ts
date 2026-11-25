@@ -6,7 +6,7 @@
 import { coinsHtml } from '../shared/coins';
 import { canRecharge, rechargeCost } from '../shared/church';
 import { POTION, POTIONS } from '../shared/potions';
-import { SHELTER } from '../shared/shelter';
+import { COAL_STATION, SHELTER } from '../shared/shelter';
 import { GEAR } from '../sim/pack';
 import { carriedItem } from '../sim/charge';
 import { inStation } from '../sim/landrules';
@@ -42,6 +42,7 @@ export function openShelter(g: Game, panel: Panel, name: string, leave: () => vo
   const belt = h.belt.length >= POTION.belt, poor = h.purse < SHELTER.bitter;
   panel.show(st.name, '<i id="shelter"></i>' + says('Keeper', lineAt(st.name)) + `<p>You have ${coinsHtml(h.purse)}.</p>` + bountyHtml(g.profile, { posted: false, day: 0 }), [
     { label: `${SHOPW.buy} ${POTIONS.bitter.name} (${coinsHtml(SHELTER.bitter)})`, disabled: belt || poor, act: () => ask(GEAR.buy) },
+    ...(st.name === COAL_STATION ? [{ label: `${SHELTERW.coal} (${coinsHtml(SHELTER.charcoal)})`, disabled: h.purse < SHELTER.charcoal, act: () => ask(GEAR.coal) }] : []),
     ...(it ? [{ label: canRecharge(it) ? RELICW.recharge(cost) : RELICW.full, disabled: !canRecharge(it) || h.purse < cost, act: () => ask(GEAR.refill) }] : []),
     // The other shelters found: the keeper's road to each, by its place in the map's list (sim/travel.ts).
     ...(g.room.map.stations ?? []).flatMap((s, i) => (s.name !== st.name && g.profile.shelters?.includes(s.name) ? [{ label: SHELTERW.to(s.name), act: () => (shelterLink.gear(GEAR.travel, i), panel.hide()) }] : [])),

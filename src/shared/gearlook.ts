@@ -6,7 +6,8 @@
  * (`Hero.arms`, `Hero.keep`), so a swap mid-fight shows at once; a friend in town has no kit, so their look comes in
  * the town's `me` word (townpresence.ts), packed small, onto `Hero.gearLook`.
  */
-import { ELEMENT_TRAITS, type Item, type Tier, type TraitId } from './loot.js';
+import { elementTraitOf } from './edges.js';
+import { type Item, type Tier, type TraitId } from './loot.js';
 import { TIER_ORDER } from './gear.js';
 import { shownItem, type Looks } from './keptlook.js';
 import { UNIQUES } from './uniques.js';
@@ -26,7 +27,7 @@ const EL: Partial<Record<TraitId, GearEl>> = { ember: 'fire', rime: 'frost', sto
 /** A weapon's look from the piece itself; no piece is a plain one (the class's own weapon). */
 export function weaponLookOf(it: Item | null | undefined): WeaponLook {
   if (!it) return { tier: 'plain' };
-  const t = it.traits?.find((x) => ELEMENT_TRAITS.includes(x)), el = t ? EL[t] : undefined;
+  const t = elementTraitOf(it), el = t ? EL[t] : undefined;
   return { tier: TIER_ORDER.includes(it.quality) ? it.quality : 'plain', ...(el ? { el } : {}), ...(it.hungry || it.unique ? { named: it.hungry ?? it.unique } : {}) };
 }
 

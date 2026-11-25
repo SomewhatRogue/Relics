@@ -1,0 +1,96 @@
+/** Elements put on a weapon (shared/edges.ts): the rules, the countdown, the load, and the fight reading them. */
+import { describe, expect, it } from 'vitest';
+import { EDGE, fitEdge, fitEdges, putEdge, tickEdges, type Edge } from '../src/shared/edges';
+import { ELEMENT_TRAITS, type Item } from '../src/shared/loot';
+import { rollGear } from '../src/shared/gear';
+import { Rng } from '../src/shared/rng';
+import { forgedElement, has, traitsOf } from '../src/sim/traits';
+import { ArenaRoom } from '../src/sim/room';
+
+const hero = (o: object = {}) => ({ cls: 'WARRIOR', level: 5, gold: 10000, mats: { charcoal: 3 }, edgeFree: [] as never[], ...o }) as Parameters<typeof putEdge>[0];
+const sword = (o: Partial<Item> = {}): Item => ({ slot: 'weapon', kit: 'sword', quality: 'fine', traits: [], mods: [], level: 0, ilvl: 1, ...o }) as Item;
+
+describe('putEdge', () => {
+  it('refuses a Mage, a low level and a ring', () => {
+    expect(putEdge(hero({ cls: 'MAGE' }), sword(), 'fire')).toBeNull();
+    expect(putEdge(hero({ level: 4 }), sword(), 'fire')).toBeNull();
+    expect(putEdge(hero(), sword({ slot: 'ring' }), 'fire')).toBeNull();
+  });
+  it('the first of each element is free and recorded', () => {
+    const p = hero(), w = sword();
+    for (const el of ['fire', 'frost', 'storm'] as const) expect(putEdge(p, w, el)?.free).toBe(true);
+    expect(p.gold).toBe(10000);
+    expect(p.edgeFree).toEqual(['fire', 'frost', 'storm']);
+  });
+  it('the second fire costs 2000 and a charcoal; refused when short of either', () => {
+    const p = hero({ edgeFree: ['fire'] }), w = sword();
+    expect(putEdge(hero({ edgeFree: ['fire'], gold: 1999 }), sword(), 'fire')).toBeNull();
+    expect(putEdge(hero({ edgeFree: ['fire'], mats: {} }), sword(), 'fire')).toBeNull();
+    expect(putEdge(p, w, 'fire')).not.toBeNull();
+    expect(p.gold).toBe(10000 - EDGE.price);
+    expect(p.mats?.charcoal).toBe(2);
+  });
+  it('a new edge replaces the old', () => {
+    const w = sword();
+    putEdge(hero(), w, 'fire');
+    putEdge(hero(), w, 'frost');
+    expect(w.edge).toEqual({ el: 'frost', jobs: EDGE.jobs });
+  });
+});
+
+describe('tickEdges and fitEdge', () => {
+  it('counts down, removes at 0 and says which ran out', () => {
+    const w = sword({ edge: { el: 'storm', jobs: 2 } }), x = sword();
+    expect(tickEdges([w, x, undefined])).toEqual([]);
+    expect(w.edge?.jobs).toBe(1);
+    expect(tickEdges([w])).toEqual(['storm']);
+    expect(w.edge).toBeUndefined();
+  });
+  it('keeps a good edge and drops junk', () => {
+    expect(fitEdge({ el: 'fire', jobs: 3 })).toEqual({ el: 'fire', jobs: 3 });
+    expect(fitEdge({ el: 'fire', jobs: 99 })).toEqual({ el: 'fire', jobs: EDGE.jobs });
+    for (const bad of [null, 'x', { el: 'acid', jobs: 3 }, { el: 'fire', jobs: 0 }, { el: 'fire', jobs: 'a' }]) expect(fitEdge(bad)).toBeUndefined();
+  });
+});
+
+describe('no element on random weapons', () => {
+  it('a forged weapon never rolls one', () => {
+    const rng = new Rng(7);
+    for (let i = 0; i < 400; i++) {
+      const it = rollGear(rng, 'WARRIOR', 'forged', 'weapon');
+      expect(it.traits.some((t) => ELEMENT_TRAITS.includes(t))).toBe(false);
+      expect(it.mods?.length).toBe(2);
+    }
+  });
+});
+
+describe('the fight reads the edge', () => {
+  it('traitsOf has the old trait for a live edge, and not without', () => {
+    const room = new ArenaRoom(1), h = room.join('me');
+    h.arms[h.weapon] = sword({ kit: h.weapon });
+    expect(has(h, 'ember')).toBe(false);
+    expect(forgedElement(h)).toBe('');
+    h.arms[h.weapon]!.edge = { el: 'fire', jobs: 3 } as Edge;
+    expect(traitsOf(h)).toContain('ember');
+    expect(forgedElement(h)).toBe('fire');
+  });
+});
+
+describe('the load', () => {
+  it('strips an old element, keeps a named piece\'s own, keeps a good edge, fits edgeFree', () => {
+    const p = {
+      arms: { sword: sword({ traits: ['ember'], edge: { el: 'frost', jobs: 2 } }) },
+      bag: [sword({ traits: ['rime', 'tempo'], edge: { el: 'bad', jobs: 2 } as never }), sword({ traits: ['ember'], unique: 'spoonladle' })],
+      rings: [], edgeFree: ['fire', 'fire', 'acid'] as never[],
+    };
+    fitEdges(p);
+    expect(p.arms.sword.traits).toEqual([]);
+    expect(p.arms.sword.edge).toEqual({ el: 'frost', jobs: 2 });
+    expect(p.bag[0].traits).toEqual(['tempo']);
+    expect(p.bag[0].edge).toBeUndefined();
+    expect(p.bag[1].traits).toEqual(['ember']);
+    expect(p.edgeFree).toEqual(['fire']);
+    fitEdges(p);
+    expect(p.arms.sword.edge).toEqual({ el: 'frost', jobs: 2 });
+  });
+});

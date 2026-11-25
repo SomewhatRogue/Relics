@@ -92,6 +92,8 @@ export const ROUNDS: Record<string, { path: [number, number][]; stops?: number[]
   'A WASHERWOMAN': { path: [[32.8, 44.5], [36, 46], [38, 50.2], [47.95, 50.5], [50.2, 50.15], [38, 50.6], [36, 46.4]], stops: [4, 0, 0, 8, 5, 0, 0] },
   'A DIGGER': { path: [[54.3, 21.2], [53, 22.6], [51.6, 21.4]], stops: [7, 0, 3] },
   'OLD MERREN': { path: [[58.6, 27]] },
+  // Before the quarter is cleared: on the street side of the rubble (shared/town.ts MERREN_WAITS), the same spot in the new town.
+  'OLD MERREN (RUBBLE)': { path: [[52, 22.2]] },
   'RECRUIT WAT': { path: [[24.4, 33.1]] },
   'DESSA THE TRADER': { path: [[43.5, 21.7]] },
   'TOBIN THE PAWNBROKER': { path: [[39.8, 21.7]] },

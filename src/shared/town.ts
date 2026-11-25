@@ -28,7 +28,7 @@ import { layoutPoint, layoutProps, layoutSpots, layoutTown } from './layouttown.
 export const LAYOUT = { on: false, town: false };
 
 /** What talking to someone (or using a spot) opens. */
-export type SpotId = 'keeping' | 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat'
+export type SpotId = 'keeping' | 'board' | 'council' | 'church' | 'smith' | 'wright' | 'trainer' | 'market' | 'infirmary' | 'granary' | 'home' | 'chat' | 'merren'
   | 'yard' | 'gate' | 'hew' | 'orla' | 'works' | 'roll' | 'well' | 'bard' | 'dice' | 'tavern' | 'sewer' | 'locked' | 'bank' | 'merchant' | 'advocate' | 'vendor' | 'tailor'
   /** The practice board at the training yard's pen (client/practiceui.ts). */
   | 'practice'
@@ -56,6 +56,8 @@ export const SPOTS: Spot[] = [
   { id: 'locked', x: 51.6, y: 18, label: 'RUBBLE', key: 'oldquarter' },
 ];
 /** The Last Lantern's dais in the middle of Lantern Square: its centre and how far its lower step reaches (tiles). */
+/** Where Old Merren stands before the Old Quarter is cleared: the street side of the rubble. */
+export const MERREN_WAITS: [number, number] = [52, 22.2];
 export const DAIS = { x: 28, y: 18.6, r: 2.2 };
 /** How close you must stand to use a spot or talk to someone. */
 export const SPOT_REACH = 1.6;
@@ -163,7 +165,8 @@ export function oldTown(w: WorldState): GameMap {
   npcs.push(n('HESTER THE TAILOR', 38.9, 22.2, 'tailor', 'tailor'));
   // The town's pastimes (shared/pastimes.ts): Old Pennock lends rods at the millpond, Abel keeps the butts.
   npcs.push(n('OLD PENNOCK', MILLPOND.npc[0], MILLPOND.npc[1], 'fish', 'elder'), n('ABEL', BUTTS.npc[0], BUTTS.npc[1], 'range', 'ranger'));
-  if (quarter) npcs.push(n('OLD MERREN', 57, 18, 'chat', 'elder', 9));
+  // Old Merren (shared/edges.ts): on this side of the rubble till the Old Quarter is cleared, past the wall after.
+  npcs.push(quarter ? n('OLD MERREN', 57, 18, 'merren', 'elder', 9) : n('OLD MERREN', MERREN_WAITS[0], MERREN_WAITS[1], 'merren', 'elder', 9));
   // Cobb the gravedigger at the top of the Deep's ladder, once the grate's open (docs/design/the-deep.md; Kyle,
   // 2026-11-11: "we say Cobb sits by the sewer grate but he doesn't"). Talking to him is the grate's own panel.
   if (workDone(w, 'sewers')) npcs.push({ ...n('COBB', 25.1, 35.7, 'sewer', 'digger'), work: 'ladder' });

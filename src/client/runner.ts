@@ -12,7 +12,9 @@
  * two errands are the hero's (shared/errands.ts); leaving before that, they come again next time.
  */
 import type { GameMap, Npc } from '../shared/arena';
-import { TRAINER_DOOR, runnerDue, told } from '../shared/errands';
+import { TRAINER_DOOR, giveMerren, runnerDue, told } from '../shared/errands';
+import { MERRENW } from './merrenwords';
+import { toast } from './partytoast';
 import type { Profile } from '../shared/progress';
 import { RUNNERS } from './errandwords';
 import { runnerWay, standBy } from './runnerpath';
@@ -84,6 +86,8 @@ export class Runner {
     // Out of the street (a hall, a job): whoever was running is back where they were; if they never said it, they come again next time.
     if (r && (w.street !== r.map || !w.hero)) return this.end();
     if (!r) {
+      // Level 5 and not a Mage: Old Merren wants you (shared/errands.ts giveMerren); his word comes as a note, not a scene.
+      if (w.street && w.hero && !w.busy && giveMerren(w.profile)) (w.keep(), toast(MERRENW.runner, { kind: 'quest' }));
       if (w.street && w.hero && !w.busy && runnerDue(w.profile)) this.start(w, now);
       return;
     }

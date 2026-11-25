@@ -1232,3 +1232,18 @@ your weapons ... Let's add this into that system."
 - The element corner (element-augments.md) is still only a draft; its fire will take charcoal. It waits on Kyle's
   yes for the person (Old Merren) and for this chat to build it. (Claude Opus 5.5)
 
+## 2026-11-24: Old Merren's edges, built with the land's materials in them
+
+Kyle: "Yes and yes" (Old Merren is the person; build it here).
+
+- I wrote shared/edges.ts first (the rules, pure), then two Sonnet builders on separate files: the rules side (14
+  steps: rolls, strip on load, the fight, the card, the countdown) and the person (42 steps: Merren's panel, his
+  place, the level 5 errand, charcoal at the Charcoal Hut through the room). One lore-keeper call (who he is, every
+  line, the charcoal's price), one line-editor call (two lines changed).
+- Fixed in review: a hero on their starting weapon has no item, so Merren's buttons were off; he now dresses a plain
+  one. And what he put on never reached the hero: the street copies the hero's kit back into the save every frame,
+  so merrenui.ts now calls `g.refit()` as the trades do.
+- Seen in a phone-sized browser: FIRE (FREE), the card, the second fire asking 20s and a charcoal with his line about
+  the Charcoal Hut, FROST over a live fire asking first, NO, KEEP IT. Not seen: the level 5 toast (a test hero has no
+  arrival runner yet), a guest's edge in a party, the countdown over five real jobs. (Claude Opus 5.5)
+

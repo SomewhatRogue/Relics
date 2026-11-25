@@ -3,6 +3,7 @@
  * own class (for life), level, gold and kit; the world (the town, the chapter, the council) is shared
  * by all of them. (The shared world moves to the server, api/world.ts, when the group plays online.)
  */
+import { fitEdges } from '../shared/edges';
 import { fitBounties } from '../shared/bounties';
 import { fitMats } from '../shared/materials';
 import { fitDeepBest } from '../shared/deepskill';
@@ -98,6 +99,8 @@ const hero = (old: Partial<Profile>): Profile => {
   fitStores(out);
   // Pluses stop at +5 (shared/forgeplus.ts, 2026-11-06): anything over comes down to +5, its temper kept.
   fitAllPlus(out);
+  // The old random elements come off (a named piece keeps its own); an edge is fitted or dropped (shared/edges.ts).
+  fitEdges(out);
   // PARRY is gone (2026-11-05): any piece with it has BLOCK or DODGE instead, worth the same (shared/oldparry.ts).
   fitNoParry(out);
   // The town's pastimes (shared/fishing.ts, shared/range.ts): only once played, and made sound.

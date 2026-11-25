@@ -40,7 +40,7 @@ export function layoutProps(props: { kind: PropKind; x: number; y: number }[]): 
 }
 
 function moveNpc(n: Npc): Npc | null {
-  const r = ROUNDS[n.name];
+  const r = ROUNDS[n.name === 'OLD MERREN' && n.x < 54 ? 'OLD MERREN (RUBBLE)' : n.name];
   if (r && r.path.length === 1) return { ...n, x: r.path[0][0], y: r.path[0][1], path: undefined, stops: undefined };
   if (r) return { ...n, x: r.path[0][0], y: r.path[0][1], path: r.path, stops: r.stops ?? (n.stops ? r.path.map(() => 0) : undefined) };
   const at = movePoint(n.x, n.y);

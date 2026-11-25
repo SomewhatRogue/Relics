@@ -51,6 +51,7 @@ import { stepFalse } from './falsecage';
 import { ambush } from './ambush';
 import { levelOn, packOnto } from './packs';
 import { inStation } from './landrules';
+import { COAL_STATION } from '../shared/shelter';
 import { asleep, stepPacing } from './pacing';
 import { flankers } from './chase';
 import { afterFoes, beforeFoes, beforeHeroes, shapeFoe } from './ownfoes';
@@ -397,6 +398,7 @@ export class ArenaRoom {
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
     const acts: HeroActs = {
       shelter: (h) => !!this.roam && inStation(this.map.stations, h),
+      hut: (h) => !!this.roam && inStation(this.map.stations?.filter((s) => s.name === COAL_STATION), h),
       travel: (h, to, ev) => travelTo(this, h, to, ev),
       fire: (h) => this.fire(h, w),
       loose: (h, s) => this.loose(h, s, w),

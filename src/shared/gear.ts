@@ -8,7 +8,7 @@
  */
 import { leanOdds } from './lootlevel.js';
 import type { Rng } from './rng.js';
-import { ELEMENT_TRAITS, traitsFor, type Item, type Tier } from './loot.js';
+import { traitsFor, type Item, type Tier } from './loot.js';
 import { CLASS_KITS, type HeroClass, type WeaponId } from './weapons.js';
 import { CAPS, MODS, MOD_COUNT, PER_MOD, modFits, modPool, modValue, rollMods, type ArmorKind, type ModId, type Slot } from './mods.js';
 import { ARMOR, budget } from './budget.js';
@@ -77,11 +77,8 @@ export function rollGear(rng: Rng, cls: HeroClass | null, tier: Tier, slot: Slot
   if (slot === 'weapon') out.kit = kit ?? rng.pick(CLASS_KITS[cls ?? 'WARRIOR']);
   if (slot === 'armor' || slot === 'legs') out.armor = armor ?? rng.pick(['light', 'medium', 'heavy'] as ArmorKind[]);
   const pool = modPool(slot, slot === 'weapon' ? null : cls, out.kit, out.armor);
-  // Forged: half the time one modifier and an element instead of two.
-  const element = slot === 'weapon' && t === 'forged' && rng.next() < 0.5;
   // A weapon's modifiers each take a tier's share; armor and rings spread the whole budget (light's lift too).
-  out.mods = slot === 'weapon' ? rollMods(rng, pool, n - (element ? 1 : 0), PER_MOD[t] * (n - (element ? 1 : 0)), lean) : rollMods(rng, pool, n, budget(t, slot, out.armor), lean);
-  if (element) out.traits.push(rng.pick(ELEMENT_TRAITS));
+  out.mods = slot === 'weapon' ? rollMods(rng, pool, n, PER_MOD[t] * n, lean) : rollMods(rng, pool, n, budget(t, slot, out.armor), lean);
   if (slot === 'weapon' && (t === 'tolmouth' || t === 'touched' || t === 'turning')) out.traits.push(rng.pick(traitsFor(out.kit!)));
   const cost = rollCost(rng, t);
   // Legs carry half a chest piece's points, so half its cost.

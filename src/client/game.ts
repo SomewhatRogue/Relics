@@ -52,6 +52,9 @@ import { heardBarn } from '../shared/gatefieldsquest';
 import { countDeath } from '../shared/bounties';
 import { fieldsDone } from '../shared/errands';
 import { paidToast } from './errandpaid';
+import { tickEdges } from '../shared/edges';
+import { EDGEW } from './edgewords';
+import { toast } from './partytoast';
 import { DEED, deed } from '../shared/titles';
 import { wearsHungry } from '../shared/corrupt';
 import { FALL, fallWith, giveRipe } from '../shared/crossroads';
@@ -893,7 +896,7 @@ export class Game {
     if (this.remote) {
       this.noteMet();
       const got = this.stepRemote();
-      for (const e of got) if (e.k === 'bought' && e.id === ME) this.spend(e.n);
+      for (const e of got) if (e.k === 'bought' && e.id === ME) this.spent(e);
       return this.heardBarn(got), this.checkNote(), got;
     }
     intent = this.own(intent);
@@ -968,7 +971,7 @@ export class Game {
     this.noteMet();
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
-    for (const e of ev) if ((e.k === 'spend' || e.k === 'bought') && e.id === ME) this.spend(e.n);
+    for (const e of ev) if ((e.k === 'spend' || e.k === 'bought') && e.id === ME) this.spent(e);
     this.heardBarn(ev);
     // Walk up into a door (or into a side way, its way) to go in; out by the way you came in to come back out.
     const door = this.near()?.door;
@@ -1385,6 +1388,8 @@ export class Game {
     const xp = jobXp(run.xp, won, crowd), rescued = won ? run.rescued : 0;
     p.gold += gold;
     p.runs++;
+    // Each job finished wears an element on the weapons in hand down by one (shared/edges.ts).
+    const spent = tickEdges(Object.values(p.arms));
     // The recap's counts, before the deep relic and the treasure go in the pack (recaptally.ts).
     const recap = recapOf(run, this.mode === 'run' ? this.fightRoom : null, p, this.startKit, won, ME);
     this.startKit = null;
@@ -1416,6 +1421,7 @@ export class Game {
       // The longest streak this job, for its board (shared/streak.ts).
       ...((run.board?.[ME]?.streak ?? 0) > 0 ? { streak: run.board![ME].streak } : {}),
     });
+    for (const el of spent) toast(EDGEW.gone(el), { kind: 'quest' });
     // The quest in hand counts this job, whoever's it was (a run joined counts: Kyle, 2026-11-13).
     this.questEnd({ job: run.job, won, rescued, dens: run.dens ?? 0 });
     unbank(p.id);
@@ -1489,6 +1495,12 @@ export class Game {
   }
 
   /** Hungry gear spends gold in a fight: the job's first, then the purse at home. */
+  /** A purchase the room made for me: the coin gone, and a sack of charcoal into the satchel (sim/pack.ts GEAR.coal). */
+  private spent(e: { n: number; what?: string }): void {
+    if (e.what === 'charcoal') addMat((this.profile.mats ??= {}), 'charcoal');
+    this.spend(e.n);
+  }
+
   private spend(n: number): void {
     const run = this.run, p = this.profile, fromRun = Math.min(n, run?.gold ?? 0);
     if (run) run.gold -= fromRun;

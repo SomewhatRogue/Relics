@@ -6,6 +6,8 @@ export const SHELTERW = {
     'THE CHARCOAL HUT': "Stand upwind of the clamp, unless you want your eyes running the whole time. Anything off me is town price, and I'm not one for haggling.",
   } as Record<string, string>,
   home: 'HOME TO WICKHOLD',
+  /** A sack of charcoal, at the Charcoal Hut only: the price comes after, as a coin string. */
+  coal: 'BUY CHARCOAL',
   /** The road to another found shelter, from a keeper; and out to one from the North Gate. */
   to: (name: string) => 'TO ' + name,
   outTo: (name: string) => 'OUT TO ' + name,

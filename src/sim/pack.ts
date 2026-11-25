@@ -18,7 +18,7 @@ import type { FightEvent, Hero, Intent } from './types';
 export const PACK = BAG.start;
 /** No room left in this hero's pack. */
 export const full = (h: Hero) => h.bag.length >= (h.bagSize || BAG.start);
-export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6, unarm: 7, unlegs: 8, buy: 9, refill: 10, travel: 11 } as const;
+export const GEAR = { equip: 1, drop: 2, carry: 3, front: 4, pour: 5, off: 6, unarm: 7, unlegs: 8, buy: 9, refill: 10, travel: 11, coal: 12 } as const;
 
 /** Put on armor or legs (the old goes in the pack) or a ring (a third pushes out the older). */
 function wear(h: Hero, i: number, it: Item, ev: FightEvent[]): void {
@@ -53,10 +53,18 @@ function shelterGoods(h: Hero, op: number, ev: FightEvent[]): void {
   ev.push({ k: 'bought', id: h.id, x: h.x, y: h.y, n: price, what: it ? 'refill' : 'bitter' });
 }
 
+/** A sack of charcoal at THE CHARCOAL HUT (client/shelterui.ts): for Old Merren's fire edge (shared/edges.ts). */
+function charcoalGoods(h: Hero, ev: FightEvent[]): void {
+  if (h.purse < SHELTER.charcoal) return;
+  h.purse -= SHELTER.charcoal;
+  ev.push({ k: 'bought', id: h.id, x: h.x, y: h.y, n: SHELTER.charcoal, what: 'charcoal' });
+}
+
 /** `travel`: the room's move to another station (sim/travel.ts), asked only while sheltered, up, and carrying no one. */
-export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[], sheltered = false, travel?: (h: Hero, to: number, ev: FightEvent[]) => void): void {
+export function applyGear(h: Hero, op: number, arg: number, ev: FightEvent[], sheltered = false, travel?: (h: Hero, to: number, ev: FightEvent[]) => void, hut = false): void {
   const cls = WEAPONS[h.weapon].cls;
   if (op === GEAR.buy || op === GEAR.refill) return sheltered && h.act !== 'down' ? shelterGoods(h, op, ev) : undefined;
+  if (op === GEAR.coal) return hut && h.act !== 'down' ? charcoalGoods(h, ev) : undefined;
   if (op === GEAR.travel) return sheltered && h.act !== 'down' && !h.carrying && !h.lifting ? travel?.(h, arg, ev) : undefined;
   if (op === GEAR.equip) {
     const it = arg >= 0 ? h.bag[arg] : undefined;

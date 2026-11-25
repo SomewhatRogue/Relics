@@ -3,6 +3,7 @@
  * line's rows, the church's free first recharge, and each trainer's line the first time you come in on
  * the errand. Lore keeper and line editor, 2026-11-12 (docs/decisions/town-quests.md).
  */
+import { MERRENW } from './merrenwords';
 import type { ErrandId } from '../shared/errands';
 import { TRAINERS } from '../shared/town';
 import type { HeroClass } from '../shared/weapons';
@@ -24,12 +25,12 @@ const trainer = (cls: HeroClass) => title(TRAINERS[cls].name);
 
 export const ERRANDW = {
   /** The tracker's rows: a label and what to do. */
-  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR', yard: 'THE YARD', fields: 'THE NORTH FIELDS', fieldsback: 'THE NORTH FIELDS', ...WANTQW.pin } as Record<ErrandId, string>,
+  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR', yard: 'THE YARD', fields: 'THE NORTH FIELDS', fieldsback: 'THE NORTH FIELDS', merren: MERRENW.pin, ...WANTQW.pin } as Record<ErrandId, string>,
   todo: (id: ErrandId, cls: HeroClass) =>
-    id === 'church' || id === 'under' ? WANTQW.todo[id] : id === 'fields' ? 'Go out the North Gate and rest at the Field Barn' : id === 'fieldsback' ? `Tell ${trainer(cls)} how you got on` : id === 'yard' ? 'Ask Squire Pell for a straw man in the yard behind the barracks' : id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
+    id === 'merren' ? MERRENW.goalLong : id === 'church' || id === 'under' ? WANTQW.todo[id] : id === 'fields' ? 'Go out the North Gate and rest at the Field Barn' : id === 'fieldsback' ? `Tell ${trainer(cls)} how you got on` : id === 'yard' ? 'Ask Squire Pell for a straw man in the yard behind the barracks' : id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
   /** Folded, one line. */
   small: (id: ErrandId, cls: HeroClass) =>
-    id === 'church' || id === 'under' ? WANTQW.small[id] : id === 'fields' ? 'REST AT THE FIELD BARN, OUT THE NORTH GATE' : id === 'fieldsback' ? `TELL ${TRAINERS[cls].name} ABOUT THE NORTH FIELDS` : id === 'yard' ? 'TRY YOUR KIT IN THE YARD' : id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
+    id === 'merren' ? MERRENW.goal : id === 'church' || id === 'under' ? WANTQW.small[id] : id === 'fields' ? 'REST AT THE FIELD BARN, OUT THE NORTH GATE' : id === 'fieldsback' ? `TELL ${TRAINERS[cls].name} ABOUT THE NORTH FIELDS` : id === 'yard' ? 'TRY YOUR KIT IN THE YARD' : id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
   freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",

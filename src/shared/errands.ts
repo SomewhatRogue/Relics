@@ -15,11 +15,12 @@ import { questBack, questDue, questHeld, reported, takeQuest } from './heroquest
 import { deepSkillOpen } from './deepskill.js';
 import { payErrand } from './errandpay.js';
 import { GATE_LEVEL } from './gatefieldsquest.js';
+import { EDGE } from './edges.js';
 
 /** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do; `back`: one done, to tell them of (shared/heroquests.ts).
  *  `nettle`: Tobin, frightened of your hungry gear, sent you to Nettle. `church` and `under`: your first hungry piece
  *  home, the church and the Keeping Room each have a word for you (shared/wanterrands.ts, the Holy and hungry chat). */
-export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle' | 'church' | 'under' | 'yard' | 'fields' | 'fieldsback';
+export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle' | 'church' | 'under' | 'yard' | 'fields' | 'fieldsback' | 'merren';
 export interface Errands {
   /** The runner has found you and said their line (the first two are yours from then). */
   told: boolean;
@@ -42,6 +43,8 @@ export interface Errands {
   /** Out the North Gate (Kyle, 2026-11-24): from level 3 the trainer sends you to rest at the Field Barn. 1 to go, 2 done
    *  (paid), 3 the trainer's heard (shared/gatefieldsquest.ts). */
   fields?: number;
+  /** From level 5, not a Mage (Kyle, 2026-11-24): Old Merren by the Old Quarter will put an element on your weapon (docs/design/element-augments.md). 1 to go, 2 seen. */
+  merren?: number;
 }
 
 export const newErrands = (): Errands => ({ told: false, relic: false, trainer: false, seen: 1 });
@@ -52,7 +55,7 @@ export const doneErrands = (level: number): Errands => ({ told: true, relic: tru
 export function fitErrands(e: unknown, level: number): Errands {
   if (!e || typeof e !== 'object') return doneErrands(level);
   const o = e as Partial<Errands>;
-  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}), ...(o.church === 1 || o.church === 2 ? { church: o.church } : {}), ...(o.under === 1 || o.under === 2 ? { under: o.under } : {}), ...(o.fields === 1 || o.fields === 2 || o.fields === 3 ? { fields: o.fields } : {}), ...(o.yard === 1 || o.yard === 2 || o.yard === 3 ? { yard: o.yard } : {}) };
+  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}), ...(o.church === 1 || o.church === 2 ? { church: o.church } : {}), ...(o.under === 1 || o.under === 2 ? { under: o.under } : {}), ...(o.fields === 1 || o.fields === 2 || o.fields === 3 ? { fields: o.fields } : {}), ...(o.merren === 1 || o.merren === 2 ? { merren: o.merren } : {}), ...(o.yard === 1 || o.yard === 2 || o.yard === 3 ? { yard: o.yard } : {}) };
 }
 
 /** Where each class's trainer is (the hall's door in town, shared/town.ts). */
@@ -92,6 +95,7 @@ export function openErrands(p: Profile): ErrandId[] {
   if (e.under === 1) out.push('under');
   if (e.fields === 1) out.push('fields');
   if (e.fields === 2) out.push('fieldsback');
+  if (e.merren === 1) out.push('merren');
   return out;
 }
 
@@ -123,6 +127,8 @@ export function errandWho(p: Profile, id: ErrandId): { door: string; talk: strin
   if (id === 'relic') return { door: 'church', talk: 'church' };
   // Squire Pell, in the barracks, takes you through to the yard.
   if (id === 'yard') return { door: 'hall', talk: 'yard' };
+  // Old Merren, by the Old Quarter's wall (shared/town.ts).
+  if (id === 'merren') return { door: '', talk: 'merren' };
   // The way out is the North Gate's spot in the street.
   if (id === 'fields') return { door: '', talk: 'gate', spot: 'gate' };
   if (id === 'nettle') return { door: 'tavern', talk: 'vendor', arg: CLASS_ORDER.indexOf('ROGUE') };
@@ -195,4 +201,21 @@ export function fieldsDone(p: Profile): number {
   if (p.errands?.fields !== 1) return 0;
   p.errands.fields = 2;
   return payErrand(p, 'fields');
+}
+
+/** Old Merren has a word for this hero, not yet given: level 5, not a Mage, the runner's been (Kyle, 2026-11-24). */
+export const merrenDue = (p: Profile): boolean => !!p.errands?.told && p.errands.merren === undefined && p.cls !== 'MAGE' && p.level >= EDGE.level;
+
+/** Given: SEE OLD MERREN (once). True if that was news. */
+export function giveMerren(p: Profile): boolean {
+  if (!merrenDue(p)) return false;
+  p.errands!.merren = 1;
+  return true;
+}
+
+/** His panel opened: that errand is done. True if it was open. */
+export function merrenSeen(p: Profile): boolean {
+  if (p.errands?.merren !== 1) return false;
+  p.errands.merren = 2;
+  return true;
 }

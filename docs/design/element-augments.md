@@ -1,7 +1,7 @@
 # Element augments: an element put on your weapon, for five jobs
 
-Draft, 2026-11-20 (Claude Opus 5.5, from a talk with Kyle in the Holy and hungry chat). Kyle's own calls are marked;
-the rest are drafts for his yes. A system of its own, apart from holy and hungry gear.
+Draft, 2026-11-20 (Claude Opus 5.5, from a talk with Kyle in the Holy and hungry chat). Kyle said yes to all of it,
+Old Merren too, on 2026-11-24 ("Yes and yes"), and the land's chat built it the same day (see "Built" below). A system of its own, apart from holy and hungry gear.
 
 ## Why
 
@@ -50,3 +50,22 @@ come (docs/design/materials.md).
 Gear (`loot.ts`, `gear.ts`: the traits stop rolling; the strip on load with save.ts), Town quests (the runner),
 Economy (the price), Art and the town's map (the arcane corner), the lore keeper (who he is). A new chat of its
 own, with a board row, builds it.
+
+## Built (2026-11-24)
+
+- **Rules** (shared/edges.ts, called an "edge" in code so it never meets the relics' `augments`): `Item.edge` {el,
+  jobs}; `Profile.edgeFree`; `putEdge`, `tickEdges`, `edgeCost` (20s and the element's material after the free
+  first; fire's is one CHARCOAL, frost and storm coin only until their lands exist). Forged weapons no longer roll
+  an element (shared/gear.ts); old ones are stripped on every load (client/save.ts `fitEdges`), except the three
+  uniques that carry one (OLD SPOON'S LADLE, GUTCHAIN'S CHAIN BOW, MOTHER RUST'S SHEARS). The fight reads the edge as
+  the old trait (sim/traits.ts `traitsOf`). The card shows FIRE: 3 JOBS LEFT; each job finished counts one down
+  (client/game.ts `finish`), with a toast when it wears off.
+- **Merren** (client/merrenui.ts, merrenwords.ts): stands on the street side of the rubble until the Old Quarter is
+  cleared, then past the wall. Who he is (the lore keeper): the Old Quarter's grinder before the siege, who keeps the
+  valley grinders' old dressings (fire is charcoal ground fine in tallow); it comes off in the wiping down after a
+  job; a Mage's Channel burns it off a focus. Never shard-stuff. A hero still on their starting weapon gets a plain
+  one dressed. The errand `merren` (shared/errands.ts) fetches a non-Mage at level 5, the runner's words as a toast.
+- **Charcoal**: 40c a sack at the Charcoal Hut, bought through the room (`GEAR.coal`, only in that station's ring).
+- **For Kyle**: the price. 20s is about 13 medium jobs' pay for 5 jobs of an element (and a +3 at Halvard is 7s 50c):
+  the lore keeper thinks "20s" may be an older "20 gold" never converted.
+

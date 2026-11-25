@@ -4,7 +4,8 @@
  * reads as steel and not a white smudge (Kyle, 2026-11-13). The cell's border carries its tier's colour; a
  * weapon's picture is in its tier's stuff too (docs/design/gear-looks.md).
  */
-import { ELEMENT_TRAITS, POTIONS, slotOf, type Item, type PotionId } from '../shared/tuning';
+import { elementTraitOf } from '../shared/edges';
+import { POTIONS, slotOf, type Item, type PotionId } from '../shared/tuning';
 import { lookKey, weaponLookOf } from '../shared/gearlook';
 import { elCol, tintPixel } from './weaponlook';
 import { NAMED_ICON } from './namedart';
@@ -92,7 +93,7 @@ export function draw(key: string, paint: Paint): string {
 /** The picture for a piece of gear: a weapon in its tier's stuff (weaponlook.ts), its element a spark at the tip. */
 export function itemIcon(it: Item): string {
   const s = slotOf(it), key = s === 'weapon' ? it.kit ?? 'sword' : s === 'armor' ? it.armor ?? 'light' : s === 'legs' ? 'legs-' + (it.armor ?? 'light') : 'ring';
-  const el = it.traits.find((t) => ELEMENT_TRAITS.includes(t)), look = s === 'weapon' ? weaponLookOf(it) : null, tint = look && tintPixel(look);
+  const el = elementTraitOf(it), look = s === 'weapon' ? weaponLookOf(it) : null, tint = look && tintPixel(look);
   // A named body piece in its own cloth or metal, with its marks (namedarmourart.ts).
   const na = s === 'armor' && (it.unique || it.hungry) ? NAMED_ARMOUR_ART[(it.unique ?? it.hungry)!] : undefined;
   if (na) return draw('armor/' + (it.unique ?? it.hungry), (px, line) => (tunic(px, line, na.main, na.dark), na.bag.forEach(([x, y, col]) => px(x, y, col))));
