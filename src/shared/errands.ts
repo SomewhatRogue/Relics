@@ -52,7 +52,7 @@ export const doneErrands = (level: number): Errands => ({ told: true, relic: tru
 export function fitErrands(e: unknown, level: number): Errands {
   if (!e || typeof e !== 'object') return doneErrands(level);
   const o = e as Partial<Errands>;
-  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}), ...(o.church === 1 || o.church === 2 ? { church: o.church } : {}), ...(o.under === 1 || o.under === 2 ? { under: o.under } : {}), ...(o.fields === 1 || o.fields === 2 || o.fields === 3 ? { fields: o.fields } : {}) };
+  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}), ...(o.church === 1 || o.church === 2 ? { church: o.church } : {}), ...(o.under === 1 || o.under === 2 ? { under: o.under } : {}), ...(o.fields === 1 || o.fields === 2 || o.fields === 3 ? { fields: o.fields } : {}), ...(o.yard === 1 || o.yard === 2 || o.yard === 3 ? { yard: o.yard } : {}) };
 }
 
 /** Where each class's trainer is (the hall's door in town, shared/town.ts). */

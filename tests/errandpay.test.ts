@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { newProfile } from '../src/shared/progress';
 import { ERRAND_PAY, newKit, trainerGift } from '../src/shared/errandpay';
-import { metNettle, relicDone, sendToNettle, talkedTo, told, yardDone } from '../src/shared/errands';
+import { metNettle, openErrands, relicDone, sendToNettle, talkedTo, told, yardDone } from '../src/shared/errands';
+import { fromJson } from '../src/client/save';
+import { newWorld } from '../src/shared/story';
 import { CLASS_KITS, CLASS_ORDER } from '../src/shared/weapons';
 import { ERRANDW } from '../src/client/errandwords';
 
@@ -61,5 +63,13 @@ describe('small quests pay (Kyle, 2026-11-24)', () => {
       expect(ERRANDW.firstGift[c]).not.toMatch(/\bbow\b|sword|spear|dagger|rapier|wand|staff|mace|flail|censer|—/i);
     }
     expect(ERRANDW.giftNote + ERRANDW.todo('yard', 'WARRIOR')).not.toMatch(/—/);
+  });
+
+  it('the yard\'s place in the chain survives a save', () => {
+    const p = fresh();
+    told(p), relicDone(p), talkedTo(p, 'trainer', 0);
+    const back = fromJson(JSON.parse(JSON.stringify({ heroes: [p], current: 0, world: newWorld() })))!.heroes[0];
+    expect(back.errands?.yard).toBe(1);
+    expect(openErrands(back)).toEqual(['yard']);
   });
 });

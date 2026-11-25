@@ -480,3 +480,10 @@ the sewer grate", in place of "Talk to the under church about growing the Want";
 - Words: lore keeper (cut "bow" from Maeve's, no reason for the yard, ever) and line editor (Vell's run-on and
   his *twice*, Whisper's ~house~). The bible records the yard's light, no reason.
 - **Checked:** the quest and yard tests (60), `npm run check`, the full suite.
+
+## 2026-11-24: fix, the yard's place in the chain survives a save (Claude Opus 5.5)
+
+- `fitErrands` (shared/errands.ts, a one-line edit beside the North Gate's `fields`) rebuilt the record without
+  `yard`, so after a reload the yard's errand vanished and the trainer's board quest opened early. It keeps 1, 2, 3
+  now. `tests/errandpay.test.ts`: the chain survives a save.
+- **Checked:** the errand tests, `npm run check`, the full suite (2377 passed).
