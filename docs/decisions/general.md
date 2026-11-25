@@ -383,3 +383,13 @@ another quest that's on the job board and say you need to do work and build up r
 Kyle: "The orphan from the Drowned Rat runs over the pond." The runner's way (client/runnerpath.ts, Town quests'
 file, a small edit) only went round buildings; deep water now counts too, so Tam goes round the millpond. Only the
 Rogue's runner crossed it. tests/runnerpond.test.ts checks every class's way from its hall to the hero. Claude Opus 5.5
+
+## 2026-11-24: the longbow's draw, eased and tiring
+
+Kyle: "Longbow even not fully pulled back is doing like 60 to 75 at level 1... It should pull back to a maximum
+damage then start decreasing after a few seconds held." The draw went straight from 24 to 75, so 1.2 s of 1.7 already
+hit 60. Now (shared/weapons.ts `ease`, `tire`; sim/hero.ts `tiredBy`): a part draw's share is squared (half a draw
+37, nine tenths 65, the flash 75); held past the flash it stays full for 2 s, then shakes (client/held.ts, Art's,
+three lines) and falls over 2 s to 60% (54). 75 kept: by the second it's already the slowest of the hard hitters
+(greatsword 90 in 0.9 s, staff 56 with a burst in 0.9 s, mace 70 with a stun in 1.2 s), paid for by range 15 and
+pierce, and a flash release is a sure crit (112). tests/bows.test.ts; tests/rangerkit.test.ts bound moved. Claude Opus 5.5

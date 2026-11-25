@@ -139,6 +139,12 @@ export interface Weapon {
   speed: number;
   /** Seconds to a full draw or charge (CHARGE.full if not set). */
   draw?: number;
+  /** Let go early, the draw's share is raised to this power before it sets the damage: 2 makes a half draw a
+   *  quarter of the way from the least to the most (the longbow, Kyle 2026-11-24: part draws hit too hard). */
+  ease?: number;
+  /** Held past the flash: steady for `after` s, then it shakes and weakens over `over` s down to `least` of a
+   *  full draw (the longbow, Kyle 2026-11-24: "pull back to a maximum, then start decreasing after a few seconds"). */
+  tire?: { after: number; over: number; least: number };
   /** No charging: a press looses at once (the crossbow, then a long reload). */
   noCharge?: boolean;
   /** Goblins it kills burst (a mace, a flail). */
@@ -243,6 +249,7 @@ export const WEAPONS: Record<KitId, Weapon> = {
     combo: RANGER_BLADE,
     heavy: { windup: 0.04, active: 0.05, recover: 0.45, dmg: 24, dmgFull: 75, range: 15, arc: 0, lunge: -0.3, knock: 4, knockFull: 15, shot: 'arrow', speed: 34, pierce: true, blinds: true },
     draw: 1.7, // A longer draw to the flash (Kyle, 2026-11-08), but let go early it still flies, weaker.
+    ease: 2, tire: { after: 2, over: 2, least: 0.6 },
     blockSpeed: 0.4, chargeSpeed: 0.3, guardArc: 100, guardCost: 1.6, speed: 1.1,
     dodge: RANGER_JUMP,
   },

@@ -42,8 +42,9 @@ export function pose(h: Hero, now: number): Pose {
   // HEARTSEEKER's aim (sim/heartseeker.ts): the bow drawn along the aim through the skill's wind-up (General chat, 2026-11-23).
   if (h.act === 'throw' && h.relic === 'sic' && ranged(h)) return { a: fa, ext: 0, reach: 0, pull: Math.min(1, h.actT / RELICS.sic.windup) };
   if (h.act === 'charge') {
-    // (Held past the flash a draw stays full and steady: Kyle, 2026-11-08.)
-    const over = 0;
+    // (Held past the flash a draw stays full and steady (Kyle, 2026-11-08), till a longbow tires and shakes: 2026-11-24.)
+    const tire = WEAPONS[h.weapon].tire, past = h.actT + CHARGE.start - chargeFull(WEAPONS[h.weapon], h);
+    const over = tire && past > tire.after ? Math.sin(now * 38) * 0.05 * Math.min(1, (past - tire.after) / tire.over + 0.4) : 0;
     // The staff is raised high while its spell gathers.
     if (ranged(h) || h.weapon === 'staff') return { a: (h.weapon === 'staff' ? -Math.PI / 2 + side * 0.25 : fa) + over, ext: 0, reach: 0, pull: charge };
     // The healer lifts the mace to call down a smite.

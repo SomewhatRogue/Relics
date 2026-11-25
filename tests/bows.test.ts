@@ -21,3 +21,19 @@ describe('the bows', () => {
     expect(perSecond('shortbow')).toBeLessThan((d.combo.reduce((a, s) => a + s.dmg, 0) * d.front!) / t);
   });
 });
+
+import { tiredBy } from '../src/sim/hero';
+
+describe('the longbow draw (Kyle, 2026-11-24: part draws hit too hard; held long it should weaken)', () => {
+  const w = WEAPONS.longbow, h = w.heavy, at = (k: number) => Math.round(h.dmg + (h.dmgFull! - h.dmg) * k);
+  it('a half draw is well under a full one; only the flash gets the most', () => {
+    expect(at(0.5 ** w.ease!)).toBeLessThan(40);
+    expect(at(0.9 ** w.ease!)).toBeLessThan(h.dmgFull! - 8);
+  });
+  it('held past the flash: steady for two seconds, then it tires down to 60% of the full draw', () => {
+    expect(tiredBy(w, 1.9)).toBe(1);
+    expect(tiredBy(w, 3)).toBeCloseTo(0.8);
+    expect(tiredBy(w, 9)).toBe(0.6);
+    expect(tiredBy(WEAPONS.shortbow, 9)).toBe(1);
+  });
+});

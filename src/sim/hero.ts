@@ -140,6 +140,12 @@ function gear(h: Hero, inp: Intent, ev: FightEvent[], acts: HeroActs): void {
 }
 
 /** Seconds to a full draw or charge for this kit. */
+/** A draw held `past` seconds beyond full: 1, or less once it tires (shared/weapons.ts `tire`). */
+export function tiredBy(w: Weapon, past: number): number {
+  const t = w.tire;
+  if (!t || past <= t.after) return 1;
+  return Math.max(t.least, 1 - ((1 - t.least) * (past - t.after)) / t.over);
+}
 export const chargeFull = (w: Weapon, h?: Hero) => (w.draw ?? CHARGE.full) * (h ? 1 - statsOf(h).draw : 1);
 
 export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt: number, ev: FightEvent[], acts: HeroActs): void {
@@ -310,7 +316,7 @@ export function stepHero(h: Hero, inp: Intent, enemies: Enemy[], now: number, dt
         ev.push({ k: 'early', x: h.x, y: h.y });
         return void Object.assign(h, { act: 'idle', actT: 0, perfect: false, power: 0 });
       }
-      h.power = short && w.early !== 'full' ? held / full : 1;
+      h.power = short && w.early !== 'full' ? (held / full) ** (w.ease ?? 1) : tiredBy(w, held - full);
       // Every kit's perfect is its own hold let go on the flash (Kyle, 2026-11-04): the rapier skewers, a
       // Cleric shields friends, the sword's bash stuns a crowd, the spear pins, a Mage's spell is the bigger one.
       h.perfect = held >= full && held <= full + releaseWindow(h);

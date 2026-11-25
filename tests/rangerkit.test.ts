@@ -177,8 +177,8 @@ describe('let go before the full draw (Kyle, 2026-11-08)', () => {
     expect(s.h.power).toBe(1);
     const l = arena('longbow', [6]);
     l.loose(0.8, 0.4);
-    expect(l.h.power).toBeGreaterThan(0.3);
-    expect(l.h.power).toBeLessThan(0.6);
+    expect(l.h.power).toBeGreaterThan(0.1); // (Eased, Kyle 2026-11-24: a part draw weaker than its share.)
+    expect(l.h.power).toBeLessThan(0.35);
     for (const w of ['wand', 'staff', 'spellblade', 'mace', 'flail', 'censer'] as const) expect(WEAPONS[w].early).toBe('fizzle');
     const f = arena('flail', [7]), fe = f.loose(0.5, 0.4);
     expect(fe.some((e) => e.k === 'early')).toBe(true);
