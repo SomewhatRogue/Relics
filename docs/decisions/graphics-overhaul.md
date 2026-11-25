@@ -1314,4 +1314,8 @@ from level 6.
   nobody's, no saint, no names on the slabs.
 - For Kyle: crosses as the valley's grave marker are new; the fen's way in comes out of fields, not the north fields'
   wood (the doc could say why); the chapel's stone reads a little light in the day. (Claude Opus 5.5)
+- A slip, fixed within minutes: the figures' atlas took its own cell size and column count in a change that landed
+  under mine (another chat's), and my push went up with the compile failing, because my push line ran the compile
+  check without stopping on it. Fixed (e1c1348) and checked in town, the north fields and the fen. My push line now
+  stops on a failed compile.
 
