@@ -9,6 +9,7 @@ import { collide, useMap, type GameMap } from '../src/shared/arena';
 import { FENROAM, STAITHE_NAME } from '../src/shared/fenroam';
 import { fenRoamAt } from '../src/shared/fenroamground';
 import { LARDER, MAIN, WAY_IN } from '../src/shared/fenroamland';
+import { NOOKS, NOOK_PACKS } from '../src/shared/fenroamnooks';
 import { knownLand, landJob, territoryPlan, type TerrPlan } from '../src/shared/territory';
 import { BOUNTIES, FEN_BOUNTIES, FEN_LEVEL, bountyOf, postedFor, take } from '../src/shared/bounties';
 import { BACKWARD, ONWARD, wayOf } from '../src/shared/landlinks';
@@ -49,7 +50,7 @@ describe('the Fen', () => {
     expect(landJob('fenroam', 3).title).toBe('The Fen');
   });
 
-  it('is 60 by 100, one stretch, no gate, six parts south to north, the staithe its shelter', () => {
+  it('is 90 by 150, one stretch, no gate, six parts south to north, the staithe its shelter', () => {
     const p = plan(), m = p.map;
     expect([m.w, m.h]).toEqual([FENROAM.w, FENROAM.h]);
     expect(m.name).toBe('THE FEN');
@@ -80,12 +81,30 @@ describe('the Fen', () => {
       expect(fenRoamAt(f.x, f.y), at).not.toBe(2);
       expect(Math.hypot(f.x - s.x, f.y - s.y), at).toBeGreaterThan(9);
       expect(Math.hypot(f.x - m.hero.x, f.y - m.hero.y), at).toBeGreaterThan(10);
-      expect(f.y, at).toBeLessThan(88);
+      expect(f.y, at).toBeLessThan(132);
       const q = { x: f.x, y: f.y };
       collide(q, 0.4);
       expect(Math.hypot(q.x - f.x, q.y - f.y), at).toBeLessThan(0.05);
     }
-    expect(new Set(p.foes.map((f) => f.pack)).size).toBe(11);
+    expect(new Set(p.foes.map((f) => f.pack)).size).toBe(20);
+    expect([...new Set(p.foes.map((f) => f.pack!))].sort()).toEqual([...p.map.stretches![0].packs!].sort());
+  });
+
+  it('has five nooks off the ways, each reached from the way in, two with a mini boss that starts inside it over a chained chest', () => {
+    const p = plan(), m = p.map, can = walkable(m, m.hero), s = m.stations![0];
+    expect(NOOKS).toHaveLength(5);
+    for (const n of NOOKS) {
+      expect(can(n), n.id).toBe(true);
+      expect(Math.hypot(n.x - s.x, n.y - s.y), n.id).toBeGreaterThan(s.r + n.r);
+      if (n.boss === undefined) continue;
+      const pack = p.foes.filter((f) => f.pack === n.boss), boss = pack.filter((f) => f.kind === 'butcher' && f.elite?.length && f.big);
+      expect(boss, n.id).toHaveLength(1);
+      expect(pack.length, n.id).toBeGreaterThanOrEqual(2);
+      for (const f of pack) expect(Math.hypot(f.x - n.x, f.y - n.y), `${n.id} ${f.kind}`).toBeLessThan(n.r);
+      expect(p.chests.some((c) => c.chained && Math.hypot(c.x - n.x, c.y - n.y) < n.r), n.id).toBe(true);
+      expect(boss[0].name, n.id).toBeUndefined();
+    }
+    for (const b of FEN_BOUNTIES) for (const id of NOOK_PACKS) expect(b.packs).not.toContain(id);
   });
 
   it('has the staithe\'s keeper, fire and smokehouse in its ring, open at its centre', () => {
@@ -104,7 +123,7 @@ describe('the Fen', () => {
       const m = plan(d).map, ch = m.blocks.filter((b) => b.kind === 'chapel');
       expect(ch).toHaveLength(1);
       const c = ch[0], mid = { x: c.x + c.w / 2, y: c.y + c.h / 2 };
-      expect(mid.y).toBeLessThan(30);
+      expect(mid.y).toBeLessThan(45);
       expect(c.w).toBeGreaterThanOrEqual(6);
       expect(fenRoamAt(c.x - 0.5, mid.y)).toBe(1);
       useMap(m);
@@ -120,8 +139,8 @@ describe('the Fen', () => {
   it('lays black peat on the cuts after the larder, clay and mint at the water', () => {
     const g = plan().map.gathers!;
     expect(g.filter((x) => x.mat === 'peat').map((x) => x.after ?? x.chance)).toEqual([460, 0.15]);
-    expect(g.filter((x) => x.mat === 'clay')).toHaveLength(2);
-    expect(g.filter((x) => x.mat === 'mint')).toHaveLength(2);
+    expect(g.filter((x) => x.mat === 'clay')).toHaveLength(4);
+    expect(g.filter((x) => x.mat === 'mint')).toHaveLength(4);
   });
 
   it('posts the fen\'s bounties from level 6, each n what the map places', () => {

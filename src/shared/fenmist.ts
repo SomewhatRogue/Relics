@@ -17,9 +17,9 @@ export interface Bank { x: number; y: number; r: number; a: number; b: number; p
 const HOMES: [number, number][] = [[30, 27], [41, 24.5], [25, 21], [45, 30], [35, 17], [53, 10], [64, 8], [18, 39], [38, 41]];
 
 /** Banks laid at homes `[x, y, strength?]` by a seed's stream (strength 1 by default; under 1 is thin mist). */
-function lay(rng: Rng, homes: [number, number, number?][]): Bank[] {
+function lay(rng: Rng, homes: [number, number, number?][], grow = 1): Bank[] {
   return homes.map(([x, y, s]) => ({
-    x: x + rng.range(-1.5, 1.5), y: y + rng.range(-1, 1), r: rng.range(MIST.r[0], MIST.r[1]),
+    x: x + rng.range(-1.5, 1.5), y: y + rng.range(-1, 1), r: rng.range(MIST.r[0], MIST.r[1]) * grow,
     a: rng.range(0, Math.PI * 2), b: rng.range(0, Math.PI * 2), pa: rng.range(MIST.period[0], MIST.period[1]), pb: rng.range(MIST.breathe[0], MIST.breathe[1]), ph: rng.next(),
     ...(s === undefined ? {} : { s }),
   }));
@@ -29,9 +29,10 @@ function lay(rng: Rng, homes: [number, number, number?][]): Bank[] {
 export const layBanks = (seed: number): Bank[] => lay(new Rng(seed * 613 + 7), HOMES.slice(0, MIST.banks));
 
 /** THE FEN's homes (shared/fenroam.ts): round the drowned chapel, over the wide reeds, thin over the causeways. */
-const FEN_HOMES: [number, number, number?][] = [[19, 24], [28, 20], [44, 28], [14, 40], [26, 45], [46, 42], [22, 66, 0.55], [36, 78, 0.5]];
-/** The banks for THE FEN's seed (own stream, so Fenmere's stay as they were). */
-export const layFenBanks = (seed: number): Bank[] => lay(new Rng(seed * 719 + 13), FEN_HOMES);
+const FEN_HOMES: [number, number, number?][] = [[28.5, 36], [42, 30], [66, 42], [21, 60], [39, 67.5], [69, 63], [33, 99, 0.55], [54, 117, 0.5]];
+/** The banks for THE FEN's seed (own stream, so Fenmere's stay as they were): half again as wide as Fenmere's, as the
+ * map grew, and no more of them (the drawer shows at most MIST_MAX, client/fenmistdraw.ts). */
+export const layFenBanks = (seed: number): Bank[] => lay(new Rng(seed * 719 + 13), FEN_HOMES, 1.5);
 
 /** The banks a map carries: Fenmere's, or a land's own. */
 export const banksOf = (m: Pick<GameMap, 'fen' | 'mist'>): Bank[] | undefined => m.fen?.mist ?? m.mist;

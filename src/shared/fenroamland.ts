@@ -5,29 +5,32 @@
  */
 import { claim, mark, patch, path, round, unclaimed, type Kit, type Line, type P } from './expedkit.js';
 import { wall } from './terrkit.js';
-import { fenRoamAt, FENROAM, REEDBEDS } from './fenroamground.js';
+import { fenRoamAt, FENROAM, ISLES, REEDBEDS } from './fenroamground.js';
 import type { Block } from './arena.js';
 
 /** The shelter: the eel staithe's island at the causeway's north end (its centre, and how far its safe ground reaches). */
-export const STAITHE = { x: 44, y: 56.5, r: 4.5 };
+export const STAITHE = { x: 66, y: 84.8, r: 4.5 };
 /** The keeper at the staithe's fire, her talk `station:staithe`. */
-export const STAITHE_KEEPER = { x: 42.6, y: 57.9 };
+export const STAITHE_KEEPER = { x: 64.6, y: 86.2 };
 /** The landmark: the drowned chapel, its belfry and broken gable standing in the flooded nave (biome-sets.md rule 1). */
-export const CHAPEL = { x: 18, y: 18.6, w: 7, h: 2.4 };
+export const CHAPEL = { x: 28.8, y: 28.5, w: 7, h: 2.4 };
 /** Where you come in from the north fields, and the larder on the Peat Cuts' drying ground. */
-export const WAY_IN: P = { x: 28.5, y: 97.6 };
-export const LARDER: P = { x: 31, y: 8.2 };
+export const WAY_IN: P = { x: 42.8, y: 146.4 };
+export const LARDER: P = { x: 46.5, y: 12.3 };
 
 /** The track: in from the fields, the causeways, the staithe, through the reeds by their boards, past the chapel, to the cuts. */
 export const MAIN: Line = [
-  WAY_IN, { x: 28.6, y: 88 }, { x: 28.6, y: 75 }, { x: 44.6, y: 75 }, { x: 44.6, y: 62 }, { x: STAITHE.x, y: STAITHE.y }, { x: 44, y: 52.6 },
-  { x: 41.7, y: 47 }, { x: 41.7, y: 44.8 }, { x: 36, y: 41.4 }, { x: 30.7, y: 40.4 }, { x: 30.7, y: 38.8 }, { x: 30.8, y: 34 },
-  { x: 30.8, y: 24.5 }, { x: 39.6, y: 24.5 }, { x: 39.6, y: 15 }, { x: 34, y: 11 }, LARDER,
+  WAY_IN, { x: 42.9, y: 132 }, { x: 42.9, y: 112.5 }, { x: 66.9, y: 112.5 }, { x: 66.9, y: 93 }, { x: STAITHE.x, y: STAITHE.y }, { x: 66, y: 78.9 },
+  { x: 62.6, y: 70.5 }, { x: 62.6, y: 67.2 }, { x: 54, y: 62.1 }, { x: 46.1, y: 60.6 }, { x: 46.1, y: 58.2 }, { x: 46.2, y: 51 },
+  { x: 46.2, y: 36.8 }, { x: 59.4, y: 36.8 }, { x: 59.4, y: 22.5 }, { x: 51, y: 16.5 }, LARDER,
 ];
-/** Off the track: the boardwalk west to the island, the boards to the skimmer's islet, the jetty, the far board over the reeds. */
+/** Off the track: the boardwalk west to the island and the causeway winding on to the far islet, the boards to the
+ * skimmer's islet, the winding boards east, the jetty, the far board over the reeds, the bank to the sexton's isle. */
 export const SIDES: Line[] = [
-  [{ x: 28.6, y: 78.7 }, { x: 9, y: 78.7 }], [{ x: 34.7, y: 74.6 }, { x: 34.7, y: 70.2 }], [{ x: 40, y: 56.7 }, { x: 30, y: 56.7 }],
-  [{ x: 24, y: 47 }, { x: 20.7, y: 44.8 }, { x: 22, y: 41.4 }], [{ x: 39.6, y: 19 }, { x: 45, y: 19 }],
+  [{ x: 42.9, y: 118.1 }, { x: 13.2, y: 118.1 }, { x: 13.2, y: 105.2 }, { x: 22.8, y: 105.2 }, { x: 22.8, y: 94 }, { x: 20.4, y: 91.4 }],
+  [{ x: 52.1, y: 111.9 }, { x: 52.1, y: 105.3 }], [{ x: 66.9, y: 97.1 }, { x: 73.9, y: 97.1 }, { x: 73.9, y: 102.9 }, { x: 79.6, y: 102.9 }],
+  [{ x: 60, y: 85.1 }, { x: 45, y: 85.1 }], [{ x: 36, y: 70.5 }, { x: 31.1, y: 67.2 }, { x: 33, y: 62.1 }], [{ x: 59.4, y: 28.5 }, { x: 67.5, y: 28.5 }],
+  [{ x: 46.2, y: 35.8 }, { x: 10.9, y: 35.8 }, { x: 10.9, y: 44.4 }],
 ];
 const LINES = [MAIN, ...SIDES];
 const off = (x: number, y: number, d: number) => LINES.every((l) => near(l, x, y) >= d);
@@ -48,12 +51,12 @@ function room(k: Kit, x: number, y: number, r: number, kind: number, way = 1.6):
 
 /** The track trodden, the ground's soils, the south hedge with its gap where you came in. */
 export function layTrack(k: Kit): void {
-  patch(k, 'grass', 3, 82, 54, 18, false), patch(k, 'mud', 3, 2, 54, 14, false), patch(k, 'grass', 36, 52, 16, 9.4, false), patch(k, 'grass', 41.2, 16, 8.8, 6, false);
+  patch(k, 'grass', 4.5, 123, 81, 27, false), patch(k, 'mud', 4.5, 3, 81, 21, false), patch(k, 'grass', 54, 78, 24, 14.2, false), patch(k, 'grass', 61.8, 24, 13.2, 9, false);
   for (const l of LINES) path(k, 'earth', l, 0.7);
   k.roads.push(...LINES);
-  wall(k, { x: 3.4, y: 99.4 }, { x: 26.2, y: 99.4 }), wall(k, { x: 30.8, y: 99.4 }, { x: 56.6, y: 99.4 });
-  claim(k, WAY_IN.x, WAY_IN.y, 4), claim(k, STAITHE.x, STAITHE.y, 6), claim(k, LARDER.x, LARDER.y, 2.6);
-  for (const [x, y, w, h] of [[26.4, 81.6, 4.4, 1], [42.6, 60.6, 4, 0.8], [29, 33.6, 3.6, 1], [37.6, 13.6, 4, 1]]) mark(k, 'mud', x, y, w, h);
+  wall(k, { x: 5.1, y: 149.1 }, { x: 39.3, y: 149.1 }), wall(k, { x: 46.2, y: 149.1 }, { x: 84.9, y: 149.1 });
+  claim(k, WAY_IN.x, WAY_IN.y, 6), claim(k, STAITHE.x, STAITHE.y, 6), claim(k, LARDER.x, LARDER.y, 2.6);
+  for (const [x, y, w, h] of [[40.7, 122.6, 4.4, 1], [64.9, 91.1, 4, 0.8], [44.4, 50.6, 3.6, 1], [57.4, 20.6, 4, 1]]) mark(k, 'mud', x, y, w, h);
 }
 
 /** The eel staithe: the smokehouse, two drying racks and a net hung up, a punt drawn up, the fire, the jetty's posts. */
@@ -63,11 +66,12 @@ export function layStaithe(k: Kit): void {
   B('hungnet', S.x - 3.4, S.y - 3.4, 2, 0.4), B('log', S.x - 6, S.y + 2.4, 2.6, 0.6);
   k.braziers.push({ x: S.x - 2.2, y: S.y + 0.7, r: 0.35, wild: true });
   for (const [x, y] of [[S.x - 3.8, S.y - 1.9], [S.x + 5.4, S.y + 3.1]]) round(k, 'sacks', x, y, 0.34);
-  for (const x of [31, 33.4, 35.6]) for (const y of [55.7, 57.8]) round(k, 'post', x, y, 0.16);
+  for (const x of [46.5, 50.1, 53.4]) for (const y of [83.7, 86.5]) round(k, 'post', x, y, 0.16);
   claim(k, S.x, S.y, 6);
 }
 
-/** The drowned chapel (the landmark), its pews in the mud, and its echoes scattered by the seed: slabs and crosses awash. */
+/** The drowned chapel (the landmark), its pews in the mud, and its echoes scattered by the seed: slabs and crosses awash,
+ * thickest round the chapel and the graveyard, thinning out over the reeds and the bog. */
 export function layChapel(k: Kit): void {
   const C = CHAPEL;
   k.blocks.push({ kind: 'chapel', x: C.x, y: C.y, w: C.w, h: C.h });
@@ -80,12 +84,14 @@ export function layChapel(k: Kit): void {
       k.blocks.push({ kind: 'awash', x, y, w, h, look }), claim(k, x + w / 2, y + h / 2, w / 2 + 0.3), i++;
     }
   };
-  put(2, 12.6, 21, 27, 22.4, 1, 2), put(2, 12.6, 15.6, 17, 18, 1, 1);
-  put(0, 42.4, 26.6, 51, 31, 1, 3), put(1, 42.4, 26.6, 51, 31, 1, 2);
-  put(0, 5, 35, 55, 51.6, 1, 3), put(1, 5, 35, 55, 51.6, 1, 2), put(1, 4, 84, 56, 98, 0, 1), put(2, 25, 12, 37, 14.6, 0, 1);
+  put(2, 18.9, 31.5, 40.5, 33.6, 1, 4), put(2, 18.9, 23.4, 25.5, 27, 1, 2), put(0, 18.9, 23.4, 41, 34, 1, 3), put(1, 22, 24, 38, 33, 1, 2);
+  put(0, 63.6, 39.9, 76.5, 46.5, 1, 5), put(1, 63.6, 39.9, 76.5, 46.5, 1, 4);
+  put(0, 7.5, 51.4, 82.5, 57, 1, 3), put(1, 7.5, 51.4, 82.5, 57, 1, 2), put(0, 7.5, 57, 82.5, 77.4, 1, 3), put(1, 7.5, 57, 82.5, 77.4, 1, 2);
+  put(1, 6, 126, 84, 147, 0, 2), put(2, 37.5, 18, 55.5, 21.9, 0, 2);
 }
 
-/** Reeds standing in the reed beds' shallows, clumps you walk through, lanes left along the ways; reed tufts round the pools. */
+/** Reeds standing in the reed beds' shallows, clumps you walk through, lanes left along the ways; reed tufts in the deep
+ * round the causeways' edges and the isles, and round the bog edge's pools. */
 export function layReeds(k: Kit): void {
   const [x0, y0, x1, y1] = REEDBEDS;
   for (let y = y0 + 0.7; y < y1 - 0.6; y += 1.4) for (let x = x0 + 0.6; x < x1 - 0.8; x += 1.6) {
@@ -94,28 +100,35 @@ export function layReeds(k: Kit): void {
     if ([[0, 0], [w, 0], [0, h], [w, h]].some(([dx, dy]) => fenRoamAt(cx - w / 2 + dx, cy - h / 2 + dy) !== 1)) continue;
     k.blocks.push({ kind: 'reeds', soft: true, x: cx - w / 2, y: cy - h / 2, w, h, look: k.rng.int(1000) } as Block);
   }
-  // Tufts in the deep at the causeways' edges and round the bog edge's pools.
-  for (let x = 27.6; x < 45; x += k.rng.range(0.9, 1.6)) for (const y of [73.2, 76.8]) if (fenRoamAt(x, y) === 2 && k.rng.next() < 0.55) round(k, 'reed', x, y + k.rng.range(-0.15, 0.15), 0.3);
-  for (let i = 0; i < 26; i++) {
-    const x = k.rng.range(4, 56), y = k.rng.range(82.4, 92);
+  const tuft = (x: number, y: number) => fenRoamAt(x, y) === 2 && k.rng.next() < 0.55 && round(k, 'reed', x, y + k.rng.range(-0.15, 0.15), 0.3);
+  for (let x = 41.4; x < 67.5; x += k.rng.range(0.9, 1.6)) for (const y of [109.8, 115.2]) tuft(x, y);
+  for (const [ix0, iy0, ix1, iy1] of ISLES) {
+    for (let x = ix0; x < ix1; x += k.rng.range(0.9, 1.6)) tuft(x, iy0 - 0.6), tuft(x, iy1 + 0.6);
+    for (let y = iy0; y < iy1; y += k.rng.range(0.9, 1.6)) tuft(ix0 - 0.6, y), tuft(ix1 + 0.6, y);
+  }
+  for (let i = 0; i < 60; i++) {
+    const x = k.rng.range(6, 84), y = k.rng.range(123.6, 144);
     if (fenRoamAt(x, y) === 1 && off(x, y, 1.2) && unclaimed(k, x, y, 0.3)) round(k, 'reed', x, y, 0.3);
   }
 }
 
 /** Willows and dead trees on the dry ground, off the ways; the bog edge's drowned sheep, its fence gone over, the cuts' peat. */
 export function layCountry(k: Kit): void {
-  const boxes: [number, number, number, number, number][] = [[3, 84, 57, 98, 46], [6, 75, 12.4, 81.6, 5], [36, 52, 52, 61.4, 5], [41.2, 16, 50, 22, 4], [3, 2.4, 57, 16, 30]];
+  const boxes: [number, number, number, number, number][] = [
+    [4.5, 126, 85.5, 147, 104], [9, 112.5, 18.6, 122.4, 11], [54, 78, 78, 92.2, 11], [61.8, 24, 75, 33, 9], [4.5, 3.6, 85.5, 24, 68],
+    [16, 88, 28, 95, 5], [77.4, 99, 84, 108.4, 4], [5, 42, 16, 48.4, 4], [21, 34.6, 42, 39, 3],
+  ];
   for (const [x0, y0, x1, y1, n] of boxes) for (let i = 0, t = 0; i < n && t < n * 12; t++) {
     const r = k.rng.range(0.42, 0.7), x = k.rng.range(x0, x1), y = k.rng.range(y0, y1);
     if (room(k, x, y, r, 0, 1.4)) round(k, k.rng.pick(['tree', 'deadtree', 'deadtree', 'bush', 'tree']), x, y, r), i++;
   }
   wood(k);
-  mark(k, 'blood', 35.4, 86.2, 2.4, 1), mark(k, 'drag', 33, 86.6, 2.6, 0.5);
-  k.grim.push({ kind: 'remains', x: 36.4, y: 86.8, k: 1 });
-  for (const [x, y] of [[34.6, 85.6], [37.8, 86.4]]) round(k, 'crows', x, y, 0.15);
-  k.blocks.push({ kind: 'fence', x: 8, y: 92.4, w: 6, h: 0.35, ruined: true }, { kind: 'fence', x: 44, y: 94, w: 5, h: 0.35, ruined: true });
-  round(k, 'stone', 25, 93, 0.4);
-  for (const [x, y] of [[27, 5.4], [35.6, 12.6], [12.9, 14.6], [50.2, 14.4]]) round(k, 'peat', x, y, 0.45);
+  mark(k, 'blood', 53.7, 129.5, 2.4, 1), mark(k, 'drag', 50.2, 130, 2.6, 0.5);
+  k.grim.push({ kind: 'remains', x: 54.6, y: 130.2, k: 1 });
+  for (const [x, y] of [[51.9, 128.4], [56.7, 129.6]]) round(k, 'crows', x, y, 0.15);
+  k.blocks.push({ kind: 'fence', x: 13.5, y: 138.7, w: 6, h: 0.35, ruined: true }, { kind: 'fence', x: 67.2, y: 141.1, w: 5, h: 0.35, ruined: true });
+  round(k, 'stone', 37.5, 139.5, 0.4);
+  for (const [x, y] of [[40.5, 8.1], [53.4, 18.9], [19.4, 21.9], [75.3, 21.6], [28.9, 4.4], [84, 17.6]]) round(k, 'peat', x, y, 0.45);
   // The larder on the drying ground: the pot on its fire, one hung beside it.
   k.braziers.push({ x: LARDER.x, y: LARDER.y, r: 0.35, wild: true });
   k.grim.push({ kind: 'pot', x: LARDER.x, y: LARDER.y + 0.1, k: k.rng.int(4) }, { kind: 'hung', x: LARDER.x + 2.6, y: LARDER.y - 2, k: k.rng.int(4) });
@@ -124,8 +137,8 @@ export function layCountry(k: Kit): void {
 
 /** The way in is the last of the wood going to bog: pines and stumps by the hedge, thinning to dead trees and then reeds northward. */
 function wood(k: Kit): void {
-  for (let i = 0, t = 0; i < 26 && t < 400; t++) {
-    const u = k.rng.next(), y = 98 - 15 * u * u, r = k.rng.range(0.5, 0.8), x = k.rng.range(4, 56), up = (98 - y) / 15;
+  for (let i = 0, t = 0; i < 58 && t < 900; t++) {
+    const u = k.rng.next(), y = 147 - 22.5 * u * u, r = k.rng.range(0.5, 0.8), x = k.rng.range(6, 84), up = (147 - y) / 22.5;
     if (!room(k, x, y, r, 0, 1.6)) continue;
     const roll = k.rng.next();
     round(k, roll < 0.6 - up * 0.5 ? 'pine' : roll < 0.8 ? 'deadtree' : roll < 0.92 ? 'stump' : 'tree', x, y, r), i++;

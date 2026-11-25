@@ -34,14 +34,14 @@ const hurt = (w: World) => w.log.some((v) => v.k === 'hit' && v.on === 'enemy');
 
 describe('the camp guards', () => {
   it('lays three posts with a guard standing at each', () => {
-    const m = camp(28, 88).room.map;
+    const m = camp(42, 132).room.map;
     expect(m.guards).toHaveLength(3);
     for (const p of m.guards!) expect(m.npcs!.some((n) => n.x === p.x && n.y === p.y && n.look === 'guard' && n.mute)).toBe(true);
   });
 
   for (const every of [1, 4]) {
     it(`fell a goblin in the middle of the camp within 6 seconds, tallied every ${every === 1 ? 'tick' : 'fourth tick'}`, () => {
-      const w = camp(28, 88);
+      const w = camp(42, 132);
       stepFor(w, 6, every);
       expect(w.e.act).toBe('dead');
       expect(w.log.some((v) => v.k === 'shoot' && v.kind === 'bolt')).toBe(true);
@@ -49,7 +49,7 @@ describe('the camp guards', () => {
   }
 
   it('pays the party nothing for it', () => {
-    const w = camp(28, 88);
+    const w = camp(42, 132);
     stepFor(w, 6);
     expect(w.e.act).toBe('dead');
     expect(w.run.xp).toBe(0);
@@ -62,8 +62,8 @@ describe('the camp guards', () => {
   });
 
   it('leave a goblin far from every post alone', () => {
-    const w = camp(28, 60);
-    Object.assign(w.room.heroes[0], { x: 28, y: 40 });
+    const w = camp(42, 90);
+    Object.assign(w.room.heroes[0], { x: 42, y: 60 });
     stepFor(w, 10);
     expect(hurt(w)).toBe(false);
     expect(w.e.hp).toBe(w.e.maxHp);
@@ -71,7 +71,7 @@ describe('the camp guards', () => {
 
   it('never shoot a boss or a nest', () => {
     for (const how of [{ boss: true }, { kind: 'nest' as const }]) {
-      const w = camp(28, 88);
+      const w = camp(42, 132);
       Object.assign(w.e, how, { act: 'idle', alert: false });
       stepFor(w, 6);
       expect(w.e.unpaid).toBeFalsy();

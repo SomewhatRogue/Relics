@@ -8,7 +8,7 @@ shelters, travel and bounties) and docs/design/biome-sets.md (one landmark a map
 ## What it is
 
 THE FEN: the near edge of Fenmere, north of THE NORTH FIELDS, where the fields go to bog. A roaming land of its own
-(`fenroam` in shared/territory.ts, `roam: true`), 60 by 100, always by day, no gates: the pace is distance, deep
+(`fenroam` in shared/territory.ts, `roam: true`), 90 by 150 (grown half again each way on 2026-11-25, with five nooks: shared/fenroamnooks.ts), always by day, no gates: the pace is distance, deep
 water and which foes hold each stretch. Not Fenmere the expedition (shared/fen.ts), which stays as it is; this map
 copies its ways of laying ground (a fine grid painted in layers, merged to boxes) and its foes.
 

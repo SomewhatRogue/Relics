@@ -6,42 +6,52 @@
  * body, shallow slows it, dry is ground. Every edge is on the 0.2 tile grid. Pure.
  *
  * South to north: the bog edge (dry, pools); the causeways over deep water (a dog-leg, a ford, an islet, a boardwalk
- * west to an island); the staithe's island; the reed beds (shallows, two channels with boards); the drowned chapel's
- * mere (a path, the old churchyard wall's line, the flooded nave, a graveyard awash, a dry rise); the Peat Cuts.
+ * west to an island and a causeway winding on to a far islet, boards winding east to an island); the staithe's
+ * island; the reed beds (shallows, three channels with boards, two pools); the drowned chapel's mere (a path, the old
+ * churchyard wall's line, a bank to the sexton's isle, the flooded nave, a graveyard awash, a dry rise); the Peat Cuts.
  */
 import type { Block, Water } from './arena.js';
 
 type R = [number, number, number, number];
-export const FENROAM = { w: 60, h: 100 };
+export const FENROAM = { w: 90, h: 150 };
 const DRY = 0, SHALLOW = 1, DEEP = 2, G = 0.2;
 
 /** Deep: the meres either side and north, the water the causeways cross, the chapel's mere. */
-const DEEPS: R[] = [[0, 0, 3, 100], [57, 0, 60, 100], [0, 0, 60, 2], [0, 52, 60, 82], [3, 16, 57, 34]];
+const DEEPS: R[] = [[0, 0, 4.6, 150], [85.6, 0, 90, 150], [0, 0, 90, 3], [0, 78, 90, 123], [4.6, 24, 85.6, 51]];
 /** Dry ground standing out of it. */
 export const DRIES: R[] = [
   // The causeways: north from the bog edge, east, the dog-leg north to the staithe's island.
-  [27, 74, 30.2, 82.4], [27, 73.6, 46, 76.4], [43.2, 61, 46, 76.4], [36, 52, 52, 61.4],
-  // The skimmer's islet and the west island.
-  [32.6, 68.6, 36.4, 71.4], [6, 75, 12.4, 81.6],
+  [40.6, 111, 45.4, 123.6], [40.6, 110.4, 69, 114.6], [64.8, 91.6, 69, 114.6], [54, 78, 78, 92.2],
+  // The skimmer's islet and the west island; the causeway winding north off the west island to the far islet (a dead end).
+  [49, 103, 54.6, 107.2], [9, 112.6, 18.6, 122.4], [12, 104, 14.4, 112.8], [12, 104, 24, 106.4], [21.6, 95, 24, 106.4], [16, 88, 28, 95],
+  // The east island, at the end of the boards off the dog-leg.
+  [77.4, 99, 84, 108.4],
   // The chapel's mere: the path up from the reeds, the churchyard wall's line, the path north, the dry rise.
-  [29, 26, 32.6, 34.4], [14, 23, 46, 26], [38, 14, 41.2, 26], [41.2, 16, 50, 22],
+  [43.6, 39, 49, 51.6], [21, 34.6, 69, 39], [57, 21, 61.8, 39], [61.8, 24, 75, 33],
+  // Off the wall's west end, a bank west and south to the sexton's isle (a dead end).
+  [11.2, 34.6, 21.2, 37], [9.6, 34.6, 12.2, 43], [5, 42, 16, 48.4],
 ];
 /** Shallow: the bog edge's pools and its wet line, the ford, the reed beds, the flooded nave, the graveyard awash. */
 const SHALLOWS: R[] = [
-  [6, 86, 12, 89.6], [40, 88, 47, 91.6], [17, 83, 23.6, 85.6], [46, 82.4, 53, 85.4], [3, 82, 26, 83.2], [31.2, 82, 57, 83.2],
-  [43.2, 69, 46, 71.4], [3, 34, 57, 52.4], [12, 15, 28, 23], [42, 26, 52, 31.6],
+  [9, 129, 18, 134.4], [60, 132, 70.6, 137.4], [25.6, 124.6, 35.4, 128.4], [69, 123.6, 79.6, 128.2], [72, 138, 80, 142.4], [14, 139.4, 20.6, 143],
+  [4.6, 123, 39, 124.8], [46.8, 123, 85.6, 124.8],
+  [64.8, 103.6, 69, 107.2], [4.6, 51, 85.6, 78.6], [18, 22.6, 42, 34.6], [63, 39, 78, 47.4],
 ];
 /** The Peat Cuts: old diggings gone to deep water, baulks of dry ground between. */
-export const CUTS: R[] = [[8, 4, 11.4, 13], [14.4, 4, 17.8, 13], [20.8, 4, 24.2, 13], [39, 4, 42.4, 13], [45.4, 4, 48.8, 13], [51.6, 4, 55, 13]];
-/** Deep again, inside the shallows: the reed beds' two channels and a pool, and the cuts. */
-const CHANNELS: R[] = [[3, 44, 57, 45.6], [10, 38, 57, 39.6], [8, 40, 14, 43], ...CUTS];
-/** Boards over deep water: over the reed channels, west to the island, to the islet, the staithe's jetty, across each cut. */
+export const CUTS: R[] = [[12, 6, 17.2, 19.6], [21.6, 6, 26.8, 19.6], [31.2, 6, 36.4, 19.6], [58.6, 6, 63.6, 19.6], [68.2, 6, 73.2, 19.6], [77.4, 6, 82.6, 19.6]];
+/** Deep again, inside the shallows: the reed beds' three channels, a pool west and one east, and the cuts. */
+const CHANNELS: R[] = [[4.6, 66, 85.6, 68.4], [15, 57, 85.6, 59.4], [34, 53.2, 85.6, 54.8], [12, 60, 21, 64.6], [74, 69.6, 81, 75.6], ...CUTS];
+/** Boards over deep water: over the reed channels, west to the island, to the islet, the staithe's jetty, the winding
+ * boards east off the dog-leg to the east island, across each cut. */
 export const BOARDWALKS: R[] = [
-  [20, 44, 21.4, 45.6], [41, 44, 42.4, 45.6], [30, 38, 31.4, 39.6], [12.4, 78, 27, 79.4], [34, 71.4, 35.4, 73.6], [29, 56, 36, 57.4],
-  ...CUTS.map(([x0, , x1]): R => [x0, 8, x1, 9.4]),
+  [30, 66, 32.2, 68.4], [61.6, 66, 63.6, 68.4], [45, 57, 47.2, 59.4], [45, 53.2, 47.2, 54.8], [18.6, 117, 40.6, 119.2], [51, 107.2, 53.2, 110.4],
+  [43.6, 84, 54, 86.2], [69, 96, 75, 98.2], [72.8, 96, 75, 104], [72.8, 101.8, 77.4, 104],
+  ...CUTS.map(([x0, , x1]): R => [x0, 12, x1, 14.2]),
 ];
 /** The reed beds' shallows, where the reeds stand. */
-export const REEDBEDS: R = [3, 34, 57, 52.4];
+export const REEDBEDS: R = [4.6, 51, 85.6, 78.6];
+/** The islands and isles out in the deep, for the reeds round their edges (shared/fenroamland.ts). */
+export const ISLES: R[] = [[9, 112.6, 18.6, 122.4], [16, 88, 28, 95], [77.4, 99, 84, 108.4], [49, 103, 54.6, 107.2], [5, 42, 16, 48.4]];
 
 const inR = (x: number, y: number) => (r: R) => x >= r[0] && x < r[2] && y >= r[1] && y < r[3];
 /** What lies at (x, y): 0 dry, 1 shallow, 2 deep (boards count dry). */

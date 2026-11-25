@@ -13,9 +13,9 @@ export interface Onward { from: P; to: LandId }
 /** Going back: from this map's way in to the land before, arriving at its named way (`WAYS`). */
 export interface Backward { to: LandId; at: string }
 
-export const ONWARD: Partial<Record<LandId, Onward>> = { gatefields: { from: { x: 26.5, y: 0.8 }, to: 'fenroam' } };
+export const ONWARD: Partial<Record<LandId, Onward>> = { gatefields: { from: { x: 40, y: 0.8 }, to: 'fenroam' } };
 export const BACKWARD: Partial<Record<LandId, Backward>> = { fenroam: { to: 'gatefields', at: 'NORTH END' } };
 
 /** Arrival points that are not shelters (a job's `at` may name one): the north fields' far end, under the wood. */
-export const WAYS: Partial<Record<LandId, Record<string, P>>> = { gatefields: { 'NORTH END': { x: 26.8, y: 2.8 } } };
+export const WAYS: Partial<Record<LandId, Record<string, P>>> = { gatefields: { 'NORTH END': { x: 40.3, y: 2.8 } } };
 export const wayOf = (land: LandId | undefined, name: string | undefined): P | undefined => (land && name ? WAYS[land]?.[name] : undefined);

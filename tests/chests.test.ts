@@ -60,6 +60,20 @@ describe('chests', () => {
     expect(room.drops.includes(d)).toBe(true);
   });
 
+  it("a nook's chest stays shut while its guard pack lives, and opens once it is dead (Kyle, 2026-11-25)", () => {
+    const room = new ArenaRoom(1, { scrappers: false, chests: [{ x: 9, y: 6, chained: true, guard: 77 }], foes: [{ kind: 'scrapper', x: 20, y: 14, pack: 77 }] });
+    const a = room.join('me'), c = room.chests[0];
+    Object.assign(a, { x: 9, y: 7 });
+    room.setIntent('me', intent({ openSeq: 1, open: c.id }));
+    const ev = run(room, 0.4);
+    expect(c.state).toBe('shut');
+    expect(ev.some((e) => e.k === 'chained')).toBe(true);
+    for (const e of room.allEnemies) if (e.pack === 77) Object.assign(e, { act: 'dead', hp: 0 });
+    room.setIntent('me', intent({ openSeq: 2, open: c.id }));
+    run(room, 0.4);
+    expect(c.state).not.toBe('shut');
+  });
+
   it('a chained chest stays shut while the named butcher lives', () => {
     const { room, c } = withChest(true);
     const boss = room.enemies.find((e) => e.kind === 'butcher')!;

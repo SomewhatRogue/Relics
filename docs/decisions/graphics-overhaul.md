@@ -1346,3 +1346,22 @@ you back to town".
   lore keeper: the fee is trade; who carries you stays unsaid). Enemies come back every trip (they always did).
   (Claude Opus 5.5)
 
+## 2026-11-25: both lands half again bigger each way, with nooks and hidden mini bosses
+
+Kyle, after playing: "I think each zone can be even bigger. It was really fun though, beautiful done", then "And again
+little nooks to explore with little scenes or themes. Maybe even mini bosses that drop better loot but you have to
+find". Two Opus builders, one a land, on separate files (63 and 39 steps); the second ask sent to both mid-slice.
+- THE NORTH FIELDS 84 by 144 (was 56 by 96): every zone 1.5 times each way, the road 15 bends, field paths to the barn,
+  the hut and a scarecrow, twice the wood, the broken mill's echoes in the strips; packs 409 to 413; five nooks
+  (shared/gatefieldsnooks.ts: a shepherd's lean-to, a burial cairn, a goblin cache, a poacher's hide, a boundary
+  stone), mini bosses in two (an elite wolf-keeper; a BIG ONE brute).
+- THE FEN 90 by 150 (was 60 by 100): winding causeways to islands and dead ends, a third channel, a bank to the
+  sexton's isle; packs 462 to 470; five nooks (shared/fenroamnooks.ts: the reed-cutter's landing, the sexton's isle,
+  the eel-trap store, a drowned cart, a peat-cutter's shelter), mini bosses (elite butchers) in two.
+- Packs 401 to 408 and 451 to 461 unchanged in size and kind (the bounties count them); gathers kept and a few added.
+- Fixed in review: a mini boss's chained chest opened while it lived (a chained chest only waited for a named foe).
+  A chest can now name its guard pack (`guard`, sim/chests.ts) and stays shut while any of it stands, checked against
+  every enemy including the sleeping (`allEnemies`). tests/chests.test.ts.
+- The floors 1680 by 1728 and 1800 by 1800, under 4096; draw time unchanged (2.6 to 8 ms). For later: the Common
+  Strips' new ground reads open (grass between hedges). (Claude Opus 5.5)
+

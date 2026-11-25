@@ -69,7 +69,7 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
   Rough Pasture, the Wood's Edge). The files keep `gatefields`.
 - **On screen a way station is a "shelter"**, never a "way station" (the lore keeper: a road word, and nothing comes
   into Wickhold by road). Why nothing follows you in stays unsaid.
-- **The map** (shared/gatefields*.ts, 56 by 96, no gates): the refugees' camp under their carts outside the wall
+- **The map** (shared/gatefields*.ts, 84 by 144 since 2026-11-25, every zone half again each way; no gates; five nooks off the paths, two with a mini boss, in gatefieldsnooks.ts): the refugees' camp under their carts outside the wall
   (people, tents, fires, no goblins); the strips gone back, thin barley coming up on its own; the Field Barn; the
   pasture; the wood's edge. Nothing hostile till the far end of the strips. Enemy kinds by stretch: goblins with
   farm tools, a thief and an archer in the crop; a wolf-keeper and wolves, and a den four break out of; a spider

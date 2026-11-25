@@ -16,7 +16,7 @@ export const NODE = 24, COLS = 4, ROWS = 3, MW = NODE * COLS, MH = NODE * ROWS;
 export interface Kit {
   rng: Rng;
   blocks: Block[]; rounds: Round[]; braziers: (Circle & { wild?: boolean })[]; soil: Soil[]; marks: Mark[];
-  water: Water[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean }[];
+  water: Water[]; props: { kind: PropKind; x: number; y: number }[]; chests: { x: number; y: number; chained?: boolean; guard?: number }[];
   foes: Foe[]; dead: Npc[]; grim: Grim[]; sleepers: P[];
   /** Roads (kept clear), and what's been claimed (cells of 4 tiles, so a check looks only near). */
   roads: Line[]; claims: Map<number, (P & { r: number })[]>;

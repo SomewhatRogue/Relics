@@ -104,6 +104,8 @@ The Deep chat, until it finishes (then the general chat).
   context's draw calls). A figure drawing that reads pixels back is drawn the old way. For Territories: a full fall on
   a roaming land ends the trip at the infirmary with a fee (sim/landrules.ts, shared/healfee.ts); `map.mist` and
   sim/enemies.ts read it for the fen's mist.
+  Also (2026-11-25), for Gear: a chest may name a guard pack (`Chest.guard`, sim/chests.ts `startChest`; room.ts passes
+  it and now checks `allEnemies`): shut while any of that pack stands. The land's nooks use it for their mini bosses.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

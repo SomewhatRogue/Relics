@@ -23,7 +23,7 @@ const lying = (r: ReturnType<typeof room>, mat?: string) => r.pickups.filter((p)
 describe('the north fields gathers', () => {
   it('has the spots the lore keeper placed', () => {
     const n = (m: string) => GATHERS.filter((g) => g.mat === m).length;
-    expect([n('charcoal'), n('fatwood'), n('saltpetre'), n('clay'), n('mint'), n('struck'), n('amber')]).toEqual([2, 3, 1, 1, 2, 1, 2]);
+    expect([n('charcoal'), n('fatwood'), n('saltpetre'), n('clay'), n('mint'), n('struck'), n('amber')]).toEqual([2, 5, 1, 1, 3, 1, 3]);
     expect(GATHERS.find((g) => g.mat === 'saltpetre')!.after).toBe(406);
   });
 
@@ -61,7 +61,7 @@ describe('the north fields gathers', () => {
       expect(tally[mat] ?? 0, mat).toBeGreaterThan(exp * 0.7);
       expect(tally[mat] ?? 0, mat).toBeLessThan(exp * 1.3);
     };
-    near('charcoal', 2, 0.6), near('fatwood', 3, 0.5), near('clay', 1, 0.7), near('mint', 2, 0.5), near('struck', 1, 0.8), near('amber', 2, 0.35);
+    near('charcoal', 2, 0.6), near('fatwood', 5, 0.5), near('clay', 1, 0.7), near('mint', 3, 0.5), near('struck', 1, 0.8), near('amber', 3, 0.35);
     const a = lying(room(7)).map((p) => [p.mat, p.x, p.y]), b = lying(room(7)).map((p) => [p.mat, p.x, p.y]);
     expect(a).toEqual(b);
   });

@@ -11,7 +11,9 @@ import type { Drop, Enemy, FightEvent, Hero } from './types';
 import type { Pickup } from './pickups';
 
 /** `boss`: a boss's sure chest, its seed (sim/bosschest.ts), and the relics in it, by hero. */
-export interface Chest { id: number; x: number; y: number; state: 'shut' | 'opening' | 'open'; t: number; by: string; tier: Tier; chained: boolean; rolls: Record<string, Item[]>; boss?: number; relics?: Record<string, import('../shared/relicitems').RelicItem>; sure?: 'hempen' }
+export interface Chest { id: number; x: number; y: number; state: 'shut' | 'opening' | 'open'; t: number; by: string; tier: Tier; chained: boolean; rolls: Record<string, Item[]>; boss?: number;
+  /** The pack that guards it (a land's nook, its mini boss): shut while any of them stands. */
+  guard?: number; relics?: Record<string, import('../shared/relicitems').RelicItem>; sure?: 'hempen' }
 export const CHEST = { open: 1.2, reach: 1.3, leave: 1.8, alert: 6 };
 /** A plain chest's copper, half the time (economy.md slice 2: copper, the job's pay is the most of it). */
 export const CHEST_COPPER = [4, 12] as const;
@@ -19,13 +21,15 @@ import { lift } from './loot';
 import { openBossChest, rollBossChest } from './bosschest';
 let nextId = 1, dropId = 50000;
 
-export const newChest = (x: number, y: number, chained = false, boss?: number): Chest => ({ id: nextId++, x, y, state: 'shut', t: 0, by: '', tier: 'plain', chained, rolls: {}, ...(boss !== undefined ? { boss } : {}) });
+export const newChest = (x: number, y: number, chained = false, boss?: number, guard?: number): Chest => ({ id: nextId++, x, y, state: 'shut', t: 0, by: '', tier: 'plain', chained, rolls: {}, ...(boss !== undefined ? { boss } : {}), ...(guard !== undefined ? { guard } : {}) });
 const players = (heroes: Hero[]) => heroes.filter((h) => h.id !== 'squire');
 
 /** Start opening: roll for every player now (so the light is true), best of the opener's sets the colour. */
 export function startChest(c: Chest, h: Hero, heroes: Hero[], enemies: Enemy[], rng: Rng, shift: number, ev: FightEvent[], lv = 1, floor = 0): void {
   if (c.state !== 'shut' || Math.hypot(h.x - c.x, h.y - c.y) > CHEST.reach || h.act === 'down') return;
   if (c.chained && enemies.some((e) => e.name && !isDead(e))) return void ev.push({ k: 'chained', x: c.x, y: c.y });
+  // A nook's chest waits for its mini boss's pack (Kyle, 2026-11-25: "mini bosses that drop better loot but you have to find").
+  if (c.guard !== undefined && enemies.some((e) => e.pack === c.guard && !isDead(e))) return void ev.push({ k: 'chained', x: c.x, y: c.y });
   if (c.boss !== undefined) rollBossChest(c, players(heroes), lv);
   else for (const p of players(heroes)) {
     if (c.rolls[p.id]) continue;

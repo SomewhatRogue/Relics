@@ -262,10 +262,10 @@ export class ArenaRoom {
    * The training room by default. A run room passes its `map`, `foes` and `props` (its goblins stay
    * dead and its furniture doesn't come back). `squire`: a training partner to heal and bless.
    */
-  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number; lean?: { x: number; y: number } }[]; chests?: { x: number; y: number; chained?: boolean; boss?: number }[]; danger?: number; sleep?: boolean; level?: number } = {}) {
+  constructor(seed = 1, opts: { scrappers?: boolean; squire?: boolean; props?: boolean; map?: GameMap; foes?: Foe[]; furniture?: { kind: PropKind; x: number; y: number; lean?: { x: number; y: number } }[]; chests?: { x: number; y: number; chained?: boolean; boss?: number; guard?: number }[]; danger?: number; sleep?: boolean; level?: number } = {}) {
     this.sleepFar = !!opts.sleep;
     this.level = opts.level ?? 1;
-    this.chests = (opts.chests ?? []).map((c) => newChest(c.x, c.y, c.chained, c.boss));
+    this.chests = (opts.chests ?? []).map((c) => newChest(c.x, c.y, c.chained, c.boss, c.guard));
     this.danger = opts.danger ?? 0;
     this.rng = new Rng(seed);
     this.lootRng = new Rng(seed * 7919 + 13);
@@ -438,7 +438,7 @@ export class ArenaRoom {
       const inp = this.intents.get(h.id) ?? NO_INTENT, c = this.chests.find((x) => x.id === inp.open);
       if (inp.openSeq === h.seen.open) continue;
       h.seen.open = inp.openSeq;
-      if (c) startChest(c, h, this.heroes, this.enemies, this.lootRng, this.danger, this.events, this.level, this.floor);
+      if (c) startChest(c, h, this.heroes, this.allEnemies, this.lootRng, this.danger, this.events, this.level, this.floor);
     }
     stepChests(this.chests, this.heroes, this.drops, this.pickups, this.lootRng, this.events, TICK);
     for (const h of this.heroes) if (h.safeT) h.safeT = Math.max(0, h.safeT - TICK);
