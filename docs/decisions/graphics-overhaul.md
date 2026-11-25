@@ -1325,3 +1325,24 @@ Kyle: "lets make it so you can go out the gate at lvl 1 so i can test it please"
 shared/gatefieldsquest.ts (`canGoOut`); the trainer's quest still comes at level 3 (`GATE_LEVEL`). To close it again,
 set `GATE_OPEN` back to `GATE_LEVEL`. (Claude Opus 5.5)
 
+## 2026-11-25: figures not redrawn when unchanged; the fen polished; a full fall on the land ends in town
+
+Kyle: "Do number 2 make sure it works for multiplayer and get a sub agent on the fen polish. Enemies come back on next
+trip. If you fall fully you res in the main town sorry and lose a decent amount of money it costs to heal you and pull
+you back to town".
+- Mine: client/three/figrec.ts. Each figure draws first into a recording stand-in for the two canvases, hashed as it
+  goes (calls, settings, images by identity and by how often anything has drawn into them, `watchCanvases`); the same
+  hash as its cell's last means the same picture, so the cell is left and not sent. A drawing that reads back
+  (getImageData and the like) is drawn as before. figs3d.ts uses it. Measured on the north fields (the same script,
+  a build with skipping forced off against one with it on): a fight 1712 to 923 KB sent a frame; standing in the camp
+  1258 to 112. Seen: figures swing, step and flash as before. Two players (scripts/party-online.cjs): the same four
+  failing steps with and without the change (two held-block timings on this slow machine, and room 2's moving on).
+- Fen polish (one Sonnet builder, 13 steps): the chapel's stone darker and wet; the fen's own mist (`map.mist`,
+  `layFenBanks` in shared/fenmist.ts, drawn by Fenmere's drawer, and in the fight by Fenmere's rules: sim/enemies.ts
+  reads `fen || mist`); the way in from the wood turning to bog.
+- A full fall (one Sonnet builder, 11 steps): sim/landrules.ts ends the trip as beaten when the party is down and
+  spent; game.ts brings a roam job's beaten hero to the infirmary's door, keeps the trip's coin, and takes a quarter
+  of the coin they hold (shared/healfee.ts); toasts "You were carried home and healed." and "INFIRMARY: 3s 20c" (the
+  lore keeper: the fee is trade; who carries you stays unsaid). Enemies come back every trip (they always did).
+  (Claude Opus 5.5)
+

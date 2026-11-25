@@ -11,7 +11,7 @@ import type { Cut } from './three/propcards';
 import { KX } from './tilekit';
 import { Grid } from './tiletrees';
 
-const COLS = ['#0b0a0d', '#24262b', '#35373d', '#474950', '#5d5e63', '#111115', '#26301f', '#3a4a2c', '#6a5a34', '#1a2a2c', '#3a5654', '#4c4030'];
+const COLS = ['#0b0a0d', '#171c1f', '#232a2c', '#303738', '#3e4647', '#111115', '#26301f', '#3a4a2c', '#6a5a34', '#1a2a2c', '#3a5654', '#4c4030'];
 const OUT = 0, ST_D = 1, ST = 2, ST_M = 3, ST_L = 4, DARK = 5, MOSS_D = 6, MOSS = 7, BELL = 8, WATER = 9, RIPPLE = 10, BELL_D = 11;
 
 /** Stone at column `x` of a wall running x0 to x1, row `y`: lit from the left, a mortar course every five rows. */

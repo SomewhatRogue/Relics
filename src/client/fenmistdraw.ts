@@ -5,7 +5,7 @@
  * over the glowing one: telegraphs, eyes and fire show through it whole. Your own hero's ground stays clear.
  */
 import type { GameMap } from '../shared/arena';
-import { bankAt } from '../shared/fenmist';
+import { bankAt, banksOf } from '../shared/fenmist';
 import { MIST } from '../shared/tuning';
 
 export const MIST_MAX = 8;
@@ -41,7 +41,7 @@ float mistK(vec2 px, float bz){
  * `squash` how much the screen squashes the ground's depth (1 flat, the camera's tilt in 2.5D).
  */
 export function mistFrame(m: GameMap, t: number, at: (x: number, y: number) => [number, number], ppu: number, squash: number, me: [number, number] | null, view: [number, number]): MistU | null {
-  const banks = m.fen?.mist;
+  const banks = banksOf(m);
   if (!banks?.length) return null;
   const cx = view[0] / 2, cy = view[1] / 2;
   const qs = banks.map((b) => bankAt(b, t)).map((q) => ({ q, s: at(q.x, q.y) }));

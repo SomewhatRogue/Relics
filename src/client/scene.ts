@@ -752,7 +752,7 @@ export class Scene {
       lights.push({ x: x - cx, y: y - cy - 14, r: h.primed ? 30 : 22, i: h.primed ? 0.55 : 0.4, c: WEAPONS[h.weapon].cls === 'HEALER' ? [1, 0.75, 0.4] : EL_LIGHT[heldEl(h)] });
     }
     // (Fenmere's mist is its banks, below: no dawn bands over the glowing layer there.)
-    drawMist(glow, map.fen ? { ...map.theme, mist: 0 } : map.theme, this.vw, this.vh, cx, cy, now);
+    drawMist(glow, map.fen || map.mist ? { ...map.theme, mist: 0 } : map.theme, this.vw, this.vh, cx, cy, now);
     fx.drawGlow(glow, lit, cx, cy);
     // The cave gone dark: every hero keeps a good light round themselves (cavedraw.ts).
     if (CAVE.dark > 0.02) for (const h of room.heroes) { const [hx, hy] = lerp('h:' + h.id, h.x, h.y); lights.push({ x: hx - cx, y: hy - cy - 10, r: 86, i: 0.75 * CAVE.dark, c: [0.95, 0.85, 0.7] }); }
@@ -762,7 +762,7 @@ export class Scene {
     // A lightning flash lifts the whole scene's light a beat; fog thickens away from your hero (skyfx.ts).
     const fl = fogLook(map.theme), fog = fl && this.heroAt ? { x: this.heroAt[0] - cx, y: this.heroAt[1] - cy - 6, k: fl.k, px: PX, c: fl.c } : null;
     // Fenmere's mist banks, over the lit layer only (fenmistdraw.ts).
-    const mist = map.fen ? mistFrame(map, room.time, (x, y) => [OX + x * PX - cx, OY + y * PX - cy], PX, 1, this.heroAt ? [this.heroAt[0] - cx, this.heroAt[1] - cy - 6] : null, [this.vw, this.vh]) : null;
+    const mist = map.fen || map.mist ? mistFrame(map, room.time, (x, y) => [OX + x * PX - cx, OY + y * PX - cy], PX, 1, this.heroAt ? [this.heroAt[0] - cx, this.heroAt[1] - cy - 6] : null, [this.vw, this.vh]) : null;
     this.lighting.render(this.base, this.glowC, seen, flashAmb(map.theme.ambient, Math.max(flashOf(room.strikes, room.time), skyFlash(room))), fog, mist);
   }
 

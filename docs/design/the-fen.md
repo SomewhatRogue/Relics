@@ -24,7 +24,7 @@ copies its ways of laying ground (a fine grid painted in layers, merged to boxes
 
 ## Its parts, south to north
 
-1. **THE BOG EDGE** (y 82 to 100): the last of the fields going to bog, rushes and shallow pools, dead willows, a
+1. **THE BOG EDGE** (y 82 to 100): the last of the wood going to bog (pines, stumps and dead trees by the way in, thinning north into rushes and shallow pools, its ground the wood's `mossy` look to y 90, then `reedmoor`), dead willows, a
    drowned sheep with three at it. Nothing hostile within ten tiles of the way in.
 2. **THE CAUSEWAYS** (y 52 to 82): deep water crossed by one raised causeway with a dog-leg; a shield line across it
    with an archer behind; a skimmer on its islet pouring oil on the causeway's edge; a ford where a gaffer and a
@@ -62,11 +62,15 @@ unchanged, and the two-in-hand rule holds across both.
 ## The look
 
 The fen's country (`reedmoor`, `drowned`), the marsh light by day. The chapel is one block (`chapel`) drawn the tile
-way as a card (client/tilechapel.ts): grey stone in four shades, light from the upper left, a dark outline, the
+way as a card (client/tilechapel.ts): dark, wet, mossy grey stone in four shades (the lightest thing about it, never pale), light from the upper left, a dark outline, the
 water line across its foot. Its echoes are small cards (`awash`, client/tileawash.ts): a grave slab, a cross, a pew,
 scattered by the seed in the reeds, the churchyard and the bog edge.
 
+## Mist
+
+Eight banks laid by the seed (`layFenBanks`, shared/fenmist.ts, carried as `map.mist`): three round the chapel, three over the wide reeds, two thin ones over the causeways. Drawn by Fenmere's drawer and ruled the same way (a goblin notices you from less far, an archer reaches less far, read from the map and the room's clock in sim/enemies.ts).
+
 ## Not in this
 
-A third land; the deeper wood; the fen's mist (Fenmere's banks are laid for its own map); quests out here; named
+A third land; the deeper wood; quests out here; named
 beasts; a view drawn off the map's edges.

@@ -109,6 +109,7 @@ export function layCountry(k: Kit): void {
     const r = k.rng.range(0.42, 0.7), x = k.rng.range(x0, x1), y = k.rng.range(y0, y1);
     if (room(k, x, y, r, 0, 1.4)) round(k, k.rng.pick(['tree', 'deadtree', 'deadtree', 'bush', 'tree']), x, y, r), i++;
   }
+  wood(k);
   mark(k, 'blood', 35.4, 86.2, 2.4, 1), mark(k, 'drag', 33, 86.6, 2.6, 0.5);
   k.grim.push({ kind: 'remains', x: 36.4, y: 86.8, k: 1 });
   for (const [x, y] of [[34.6, 85.6], [37.8, 86.4]]) round(k, 'crows', x, y, 0.15);
@@ -119,4 +120,14 @@ export function layCountry(k: Kit): void {
   k.braziers.push({ x: LARDER.x, y: LARDER.y, r: 0.35, wild: true });
   k.grim.push({ kind: 'pot', x: LARDER.x, y: LARDER.y + 0.1, k: k.rng.int(4) }, { kind: 'hung', x: LARDER.x + 2.6, y: LARDER.y - 2, k: k.rng.int(4) });
   mark(k, 'debris', LARDER.x - 2, LARDER.y + 1.4, 3, 0.7);
+}
+
+/** The way in is the last of the wood going to bog: pines and stumps by the hedge, thinning to dead trees and then reeds northward. */
+function wood(k: Kit): void {
+  for (let i = 0, t = 0; i < 26 && t < 400; t++) {
+    const u = k.rng.next(), y = 98 - 15 * u * u, r = k.rng.range(0.5, 0.8), x = k.rng.range(4, 56), up = (98 - y) / 15;
+    if (!room(k, x, y, r, 0, 1.6)) continue;
+    const roll = k.rng.next();
+    round(k, roll < 0.6 - up * 0.5 ? 'pine' : roll < 0.8 ? 'deadtree' : roll < 0.92 ? 'stump' : 'tree', x, y, r), i++;
+  }
 }

@@ -336,7 +336,7 @@ export class View3D {
     } else u.uFog.value.z = 0;
     // Fenmere's mist banks (../fenmistdraw.ts), in the post pass's pixels (y up).
     const V = this.view, mat = (x: number, y: number): [number, number] => { const [sx, sy] = V.px(x, 0, y); return [sx, V.H - sy]; };
-    const mist = map.fen ? mistFrame(map, room.time, mat, V.ppu, Math.sin(PITCH), this.heroAt ? mat(this.heroAt[0], this.heroAt[1]) : null, [V.W, V.H]) : null;
+    const mist = map.fen || map.mist ? mistFrame(map, room.time, mat, V.ppu, Math.sin(PITCH), this.heroAt ? mat(this.heroAt[0], this.heroAt[1]) : null, [V.W, V.H]) : null;
     u.uMN.value = mist?.n ?? 0;
     if (mist) {
       (u.uMist.value as THREE.Vector4[]).forEach((v, i) => v.fromArray(mist.banks, i * 4));

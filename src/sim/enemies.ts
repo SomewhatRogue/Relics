@@ -353,7 +353,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     // In fog it shoots, keeps off and comes in at a shorter reach, its telegraph as short (shared/sky.ts).
     // And in Fenmere's mist, the thicker it lies where you stand (shared/fenmist.ts).
     // From a lip above you it reaches further; from below, each level you stand above it is more to cover (sim/highrange.ts).
-    const cm = currentMap(), fr = reachFor(cm.theme) * (cm.fen ? mistReach(cm, t.x, t.y, now) : 1), tz = t.z ?? 0;
+    const cm = currentMap(), fr = reachFor(cm.theme) * (cm.fen || cm.mist ? mistReach(cm, t.x, t.y, now) : 1), tz = t.z ?? 0;
     const lift = reachShift(cm, e, ux, uy, tz), reach = Math.max(Math.min(HEIGHT.least, ARCHER.reach * fr), ARCHER.reach * fr + lift);
     if (d <= reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', fr < 1 || lift ? { ...ARCHER.shot, range: Math.max(reach, (ARCHER.shot.range ?? ARCHER.reach) * fr + lift) } : ARCHER.shot, t, ev);
     // Runs from you when you get close on its level (along its perch, up high); comes in if you're far on the ground.
@@ -425,7 +425,7 @@ function notice(e: Enemy, heroes: Hero[], others: Enemy[], now: number, ev: Figh
     const sight = e.variant === 'looter' ? 1.6 : e.feeding ? far * 0.5 : ahead ? far : ALERT.behind;
     // Rain covers your feet and fog hides you: noticed from less far (shared/sky.ts).
     // Fenmere's mist hides you too, the thicker it lies where you stand (shared/fenmist.ts).
-    const mist = m.fen ? mistSight(m, h.x, h.y, now) : 1;
+    const mist = m.fen || m.mist ? mistSight(m, h.x, h.y, now) : 1;
     // (Cursed in the Deep to be seen sooner: shared/deepmarks.ts.)
     // (No marks sum to 0, so 1 + it is 1: skipped without making an empty list each time.)
     if (d < sight * noticeFor(theme) * mist * (h.sneaking && h.act !== 'roll' ? sneakSight(h) : 1) * (h.marks?.length ? 1 + markSum(h.marks, 'seen') : 1) * seenBy(h) + seenFrom(h) * glowIn(theme)) seen = true;

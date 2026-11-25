@@ -20,6 +20,7 @@ import { Rng } from './rng.js';
 import { THEMES } from './terrain.js';
 import type { TerrPlan, TerrZone } from './territory.js';
 import { lightFor } from './timeofday.js';
+import { layFenBanks } from './fenmist.js';
 import { FENROAM, fenRoamGround } from './fenroamground.js';
 import { STAITHE, STAITHE_KEEPER, WAY_IN, layChapel, layCountry, layReeds, layStaithe, layTrack } from './fenroamland.js';
 import { FEN_PACKS, layFenFoes } from './fenroamfoes.js';
@@ -51,8 +52,8 @@ export function fenRoamPlan(job: Job): TerrPlan {
     name: FEN_ROAM, w: FENROAM.w, h: FENROAM.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
     // (No way on yet: the exit is a speck out in the east mere, where nobody stands and no way out is drawn.)
     hero: { ...WAY_IN }, exit: { x: 58, y: 50, w: 0.5, h: 0.5 }, theme: { ...lightFor(THEMES.marsh, 'marsh', 'day'), floor: 'grass', back: 'trees' },
-    water: k.water, soil: k.soil, marks: k.marks, stretches: [s0], grim: k.grim,
-    grounds: [{ look: 'reedmoor', x: 0, y: 82, w: 60, h: 18 }, { look: 'drowned', x: 0, y: 52, w: 60, h: 30 }, { look: 'reedmoor', x: 0, y: 34, w: 60, h: 18 }, { look: 'drowned', x: 0, y: 16, w: 60, h: 18 }, { look: 'reedmoor', x: 0, y: 0, w: 60, h: 16 }],
+    mist: layFenBanks(job.seed), water: k.water, soil: k.soil, marks: k.marks, stretches: [s0], grim: k.grim,
+    grounds: [{ look: 'mossy', x: 0, y: 90, w: 60, h: 10 }, { look: 'reedmoor', x: 0, y: 82, w: 60, h: 8 }, { look: 'drowned', x: 0, y: 52, w: 60, h: 30 }, { look: 'reedmoor', x: 0, y: 34, w: 60, h: 18 }, { look: 'drowned', x: 0, y: 16, w: 60, h: 18 }, { look: 'reedmoor', x: 0, y: 0, w: 60, h: 16 }],
     npcs: [{ ...STAITHE_KEEPER, name: 'KEEPER', talk: 'station:staithe', look: 'villager' }],
     stations: [{ name: STAITHE_NAME, ...STAITHE }], gathers: FEN_GATHERS.map((g) => ({ ...g })),
   };

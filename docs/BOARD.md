@@ -99,6 +99,11 @@ The Deep chat, until it finishes (then the general chat).
   shared/fenroam*.ts, landlinks.ts; `fenroam` in territory.ts; `chapel` and `awash` in arena.ts's BlockKind with cards
   in propcards.ts; small edits in jobs.ts, bounties.ts, sim/landroom.ts, gatewalk.ts, main.ts, townui.ts). Fenmere
   itself untouched.
+  Also (2026-11-25), for Art and the Performance sweep: figs3d.ts now draws each figure as a recorded list first
+  (client/three/figrec.ts) and skips an unchanged cell; it counts drawing into every 2D canvas (a wrapper on the
+  context's draw calls). A figure drawing that reads pixels back is drawn the old way. For Territories: a full fall on
+  a roaming land ends the trip at the infirmary with a fee (sim/landrules.ts, shared/healfee.ts); `map.mist` and
+  sim/enemies.ts read it for the fen's mist.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

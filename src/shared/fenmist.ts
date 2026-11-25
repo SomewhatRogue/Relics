@@ -12,28 +12,39 @@ import { MIST } from './fentune.js';
 import { Rng } from './rng.js';
 
 /** A bank as laid: its home, size, and its own phases. */
-export interface Bank { x: number; y: number; r: number; a: number; b: number; pa: number; pb: number; ph: number }
+export interface Bank { x: number; y: number; r: number; a: number; b: number; pa: number; pb: number; ph: number; s?: number }
 /** Where the banks lie by default: over the reeds, the carr's edge by the river, the fire's rise, the cuts. */
 const HOMES: [number, number][] = [[30, 27], [41, 24.5], [25, 21], [45, 30], [35, 17], [53, 10], [64, 8], [18, 39], [38, 41]];
 
-/** The banks for a map's seed. */
-export function layBanks(seed: number): Bank[] {
-  const rng = new Rng(seed * 613 + 7);
-  return HOMES.slice(0, MIST.banks).map(([x, y]) => ({
+/** Banks laid at homes `[x, y, strength?]` by a seed's stream (strength 1 by default; under 1 is thin mist). */
+function lay(rng: Rng, homes: [number, number, number?][]): Bank[] {
+  return homes.map(([x, y, s]) => ({
     x: x + rng.range(-1.5, 1.5), y: y + rng.range(-1, 1), r: rng.range(MIST.r[0], MIST.r[1]),
     a: rng.range(0, Math.PI * 2), b: rng.range(0, Math.PI * 2), pa: rng.range(MIST.period[0], MIST.period[1]), pb: rng.range(MIST.breathe[0], MIST.breathe[1]), ph: rng.next(),
+    ...(s === undefined ? {} : { s }),
   }));
 }
+
+/** The banks for a map's seed. */
+export const layBanks = (seed: number): Bank[] => lay(new Rng(seed * 613 + 7), HOMES.slice(0, MIST.banks));
+
+/** THE FEN's homes (shared/fenroam.ts): round the drowned chapel, over the wide reeds, thin over the causeways. */
+const FEN_HOMES: [number, number, number?][] = [[19, 24], [28, 20], [44, 28], [14, 40], [26, 45], [46, 42], [22, 66, 0.55], [36, 78, 0.5]];
+/** The banks for THE FEN's seed (own stream, so Fenmere's stay as they were). */
+export const layFenBanks = (seed: number): Bank[] => lay(new Rng(seed * 719 + 13), FEN_HOMES);
+
+/** The banks a map carries: Fenmere's, or a land's own. */
+export const banksOf = (m: Pick<GameMap, 'fen' | 'mist'>): Bank[] | undefined => m.fen?.mist ?? m.mist;
 
 /** A bank at room time `t`: where its middle is, how wide, and how thick (0 to MIST.thick). */
 export function bankAt(b: Bank, t: number): { x: number; y: number; r: number; k: number } {
   const u = (t / b.pa) * Math.PI * 2 + b.a, v = (t / b.pb) * Math.PI * 2 + b.b;
-  return { x: b.x + Math.cos(u) * MIST.drift, y: b.y + Math.sin(u * 2) * MIST.drift * 0.4, r: b.r * (0.85 + 0.15 * Math.sin(v * 0.5)), k: MIST.thick * (0.55 + 0.45 * Math.sin(v + b.ph * 6)) };
+  return { x: b.x + Math.cos(u) * MIST.drift, y: b.y + Math.sin(u * 2) * MIST.drift * 0.4, r: b.r * (0.85 + 0.15 * Math.sin(v * 0.5)), k: MIST.thick * (b.s ?? 1) * (0.55 + 0.45 * Math.sin(v + b.ph * 6)) };
 }
 
 /** How thick the mist lies at (x, y) at room time `t` (0 to 1): the thickest bank there. */
-export function mistAt(m: Pick<GameMap, 'fen'>, x: number, y: number, t: number): number {
-  const banks = m.fen?.mist;
+export function mistAt(m: Pick<GameMap, 'fen' | 'mist'>, x: number, y: number, t: number): number {
+  const banks = banksOf(m);
   if (!banks) return 0;
   let best = 0;
   for (const b of banks) {
@@ -44,6 +55,6 @@ export function mistAt(m: Pick<GameMap, 'fen'>, x: number, y: number, t: number)
 }
 
 /** How far a goblin notices you standing at (x, y), as a share (1 out of the mist). */
-export const mistSight = (m: Pick<GameMap, 'fen'>, x: number, y: number, t: number) => 1 - MIST.sight * mistAt(m, x, y, t);
+export const mistSight = (m: Pick<GameMap, 'fen' | 'mist'>, x: number, y: number, t: number) => 1 - MIST.sight * mistAt(m, x, y, t);
 /** How far an archer reaches you there, as a share. */
-export const mistReach = (m: Pick<GameMap, 'fen'>, x: number, y: number, t: number) => 1 - MIST.reach * mistAt(m, x, y, t);
+export const mistReach = (m: Pick<GameMap, 'fen' | 'mist'>, x: number, y: number, t: number) => 1 - MIST.reach * mistAt(m, x, y, t);

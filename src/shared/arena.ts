@@ -410,6 +410,8 @@ export interface GameMap {
   hang?: import('./hangwood.js').HangMap;
   /** Fenmere (shared/fen.ts): its fire, the beats and the mist's banks, what a friend's screen draws from the map alone. */
   fen?: import('./fen.js').FenMap;
+  /** Banks of mist on a land that is not Fenmere (shared/fenmist.ts `layFenBanks`): read like Fenmere's, from the map alone. */
+  mist?: import('./fenmist.js').Bank[];
 }
 /** `span`: a gap a laid log crosses (deep water stops you there unless you're on the log). */
 /** `onlyLog`: of a `span` gap, only what is under a laid log is crossed by goblins on their way (the Staithe's log fills its gap). */
