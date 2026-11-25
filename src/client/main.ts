@@ -153,6 +153,7 @@ import { errandTargets, yardTargets } from './errandmarks';
 import { runner } from './runner';
 import { toast } from './partytoast';
 import { QUESTW } from './questwords';
+import { canGoOut } from '../shared/gatefieldsquest';
 import { echoes } from './runnerecho';
 import { LAYOUT, townSpots } from '../shared/town';
 import { STREET } from './three/streetkit';
@@ -561,7 +562,7 @@ function hud(now: number): void {
   // (While you're petting the hound, its prompt steps aside so you can see it. Your own hound, always at
   // heel, never puts up a prompt: it covered the view (Kyle's friend, 2026-11-12); USE still pets it.)
   setHidden(one('#prompt'), !spot || busy || (!!spot.pet && (spot.pet === 'own' || !!petFrame(game.hero, now))));
-  if (spot) setText(one('#prompt'), (input.touch ? '' : spot?.chest || (spot?.pet && game.mode === 'run') ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || NOT_PEOPLE.has(spot.talk) ? spot.label : 'TALK: ' + spot.label));
+  if (spot) setText(one('#prompt'), (input.touch ? '' : spot?.chest || (spot?.pet && game.mode === 'run') ? 'F  ' : game.mode === 'run' ? '' : 'E  ') + (spot.door || spot.pet || !spot.talk || NOT_PEOPLE.has(spot.talk) ? spot.label + (spot.talk === 'gate' && canGoOut(game.profile.level) ? ': GO OUT' : '') : 'TALK: ' + spot.label));
   // A drop at your feet, its card shut: the key that opens it (a phone has LOOK in the context slot).
   else if (!busy && !input.touch && game.mode === 'run' && card.near >= 0 && card.current < 0) setHidden(one('#prompt'), false), setText(one('#prompt'), 'F  LOOK');
   // A friend down at your feet: the key that gets them up.

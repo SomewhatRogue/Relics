@@ -1136,3 +1136,27 @@ This chat's log for docs/design/graphics-overhaul.md. Plan first; nothing is bui
   a `document` and no `window`): the loading page reached for `window`. Guarded; the suite is green. Nothing had
   been pushed. (Claude Fable 5.2)
 
+## 2026-11-24: the guard at the North Gate, and the trainer's word to go out
+
+Kyle: "i'd like it to be marked that you CAN go out there - dont let people out until lvl 3 maybe (guard gate
+stops you) and you get a quets at 3 from your main trainer to go out and get a thing or go to a spot".
+
+- One Sonnet builder (16 steps), then my review. New: shared/gatefieldsquest.ts (`GATE_LEVEL` 3, `canGoOut`,
+  `heardBarn`), tests/fieldsquest.test.ts (nine tests).
+- Under level 3 the gate's panel has only its words; from 3, GO OUT as before. The trainer gives the errand `fields`
+  the first visit at level 3 or over with the first chain done (an old hero too): 1 go out and rest at the Field
+  Barn, 2 rested (paid 40 copper there and then, by the `rested` event for your own hero, leading, alone or as a
+  friend's guest), 3 the trainer has heard.
+- Changed in review: the builder's standing gold mark on the gate is out (gold in town is for someone with
+  something for you, and the edge arrow would point at the gate for ever); the gate's prompt says GO OUT instead.
+  The trainer's door is marked while the word waits (`fieldsDue`, shown as the `quest` errand), or a hero with
+  nothing else due would never hear of it. A hero quest handed over on the same visit (q3 is, at level 3) is named
+  under the new one in the panel.
+- Lines: one lore-keeper call, one line-editor call. The keeper caught a fact: heroes go out the north gate on jobs
+  from level 1, so no line may call this a first time outside, and the guard stops you "without a job".
+- Seen in a phone-sized browser: the level 2 panel, the trainer's panel and toast at 3, GO OUT, and the pay at the
+  barn. Not seen: the mark over the gate itself, a guest being paid, the trainer hearing of it.
+- Other chats' files (small, on the yard's pattern; on the board): Town quests' shared/errands.ts,
+  client/errandwords.ts, client/townui.ts, client/main.ts (the prompt, one line); Holy and hungry's
+  shared/errandpay.ts (`fields: 40`). For Town quests: `fitErrands` does not keep `yard`, so a hero who reloads
+  mid-yard loses that errand. Not touched. (Claude Fable 5.2)

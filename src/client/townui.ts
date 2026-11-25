@@ -22,7 +22,8 @@ import { RUMOURS } from './rumours';
 import { openBoard } from './boardui';
 import { landJob } from '../shared/territory';
 import { BOARDW } from './boardwords';
-import { postedToast } from './partytoast';
+import { postedToast, toast } from './partytoast';
+import { canGoOut } from '../shared/gatefieldsquest';
 import { CLASS_NAME } from '../shared/classes';
 
 import { SPEAKER, townSays } from '../shared/townsays';
@@ -100,7 +101,7 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     }
     // Your own trainer: the first errand's done, and they've heard you've a new skill open (shared/errands.ts).
     // (The first meeting waits for the church; back from the yard, the board's word: shared/errands.ts.)
-    const first = !!pr.errands?.told && !!pr.errands.relic && !pr.errands.trainer, had = questHeld(pr)?.q.id, back = !!questBack(pr), work = pr.errands?.yard === 2;
+    const fieldsWas = pr.errands?.fields, first = !!pr.errands?.told && !!pr.errands.relic && !pr.errands.trainer, had = questHeld(pr)?.q.id, back = !!questBack(pr), work = pr.errands?.yard === 2;
     if (talkedTo(pr, 'trainer', arg)) g.keep();
     // The first meeting, and the word after your first job, are a talk, not the training screen (Kyle's
     // playtest, 2026-11-13): there's nothing to buy at level 1, so what they say is the point.
@@ -117,6 +118,13 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
       return firstMeeting(g, panel, head, (s) => say(name, s), lit, training, gift);
     }
     if (work && backFromYard(pr)) return g.keep(), workBeat(g, panel, head, (s) => say(name, s), training);
+    // Level 3: out the North Gate to rest at the Field Barn; and their word when you're back (shared/gatefieldsquest.ts).
+    // (A hero quest handed over on the same visit, as at level 3, is named under it: both are in the goal line.)
+    if (fieldsWas === undefined && pr.errands?.fields === 1) {
+      const held = questHeld(pr), fresh = (s: string) => `<p><b style="color: var(--kc, #d4a537)">${ERRANDW.fresh}:</b> ${s}</p>`;
+      return talk(ERRANDW.fieldsGive[pr.cls], '', fresh(ERRANDW.todo('fields', pr.cls)) + (held && held.q.id !== had ? fresh(QUESTW.goal(held.q, held.n)) : '')), toast(`${ERRANDW.fresh}: ${ERRANDW.small('fields', pr.cls)}`, { kind: 'quest' });
+    }
+    if (fieldsWas === 2 && pr.errands?.fields === 3) return talk(ERRANDW.fieldsHeard[pr.cls]);
     if (relit) return panel.show(head, lit + say(name, TALLY.isolde), [{ label: 'CLOSE', act: again }], true);
     if (back && pr.level < 3) return talk(ERRANDW.back[pr.cls]);
     // A hero quest handed over just now (shared/heroquests.ts): the trainer's one line for it.
@@ -172,7 +180,9 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
   } else {
     // The way out into the land (docs/design/outside-the-gate.md): alone, or a party gathered as the board does it.
     const out = landJob('gatefields', w.day), pt = g.parties;
-    panel.show('THE NORTH GATE', p('Oak and iron, and the hungry on the other side of it. The guard will let you out into the north fields, and back in again. Jobs are on the board in the square.'), [
+    const gateText = 'Oak and iron, and the hungry on the other side of it. ';
+    if (!canGoOut(pr.level)) return panel.show('THE NORTH GATE', p(gateText + ERRANDW.gateShut));
+    panel.show('THE NORTH GATE', p(gateText + 'The guard will let you out into the north fields, and back in again. Jobs are on the board in the square.'), [
       { label: 'GO OUT', primary: true, act: () => (panel.hide(), pt?.quit(), g.startJob(out)) },
       ...(pt ? [{ label: BOARDW.gather, act: () => (pt.gather(out), panel.hide(), postedToast()) }] : []),
     ]);

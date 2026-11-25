@@ -45,6 +45,9 @@ import { isVowed, rollVowed, wearsVowed } from '../shared/vowed';
 import { amendsOf, stepCrossed } from '../shared/amends';
 import { growKit } from '../shared/vowgrow';
 import { hungryHome, wantShown } from '../shared/wanterrands';
+import { heardBarn } from '../shared/gatefieldsquest';
+import { fieldsDone } from '../shared/errands';
+import { paidToast } from './errandpaid';
 import { DEED, deed } from '../shared/titles';
 import { wearsHungry } from '../shared/corrupt';
 import { FALL, fallWith, giveRipe } from '../shared/crossroads';
@@ -855,6 +858,13 @@ export class Game {
     if (this.profile.wish) (this.hero.blessedUntil = 20), (this.profile.wish = false), store(this.save);
   }
 
+  /** My hero rested at the Field Barn (leading, alone, or a guest of a friend's job): the trainer's errand done, and paid. */
+  private heardBarn(ev: FightEvent[]): void {
+    if (this.mode !== 'run' || !heardBarn(ev, ME, !!this.run?.job.roam)) return;
+    const paid = fieldsDone(this.profile);
+    if (paid) (this.keep(), paidToast(paid));
+  }
+
   /** Advance with this frame's intent; returns the events (for effects and sound). */
   step(dt: number, intent: Intent): FightEvent[] {
     // Following a friend's job: their room is drawn here; nothing runs in this browser.
@@ -866,7 +876,7 @@ export class Game {
     if (this.remote) {
       this.noteMet();
       const got = this.stepRemote();
-      return this.checkNote(), got;
+      return this.heardBarn(got), this.checkNote(), got;
     }
     intent = this.own(intent);
     // Back to lead after a reload: the room waits for a friend to answer (nobody does: the job's gone).
@@ -941,6 +951,7 @@ export class Game {
     if (this.mode === 'wood' && this.wood) return this.stepWoodFrame(h, ev, dt);
     this.keepGear(h);
     for (const e of ev) if (e.k === 'spend' && e.id === ME) this.spend(e.n);
+    this.heardBarn(ev);
     // Walk up into a door (or into a side way, its way) to go in; out by the way you came in to come back out.
     const door = this.near()?.door;
     if (door && pushingInto(door, h, intent)) this.enter(door);

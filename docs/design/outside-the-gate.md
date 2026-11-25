@@ -93,6 +93,17 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
   and a half has gone; in a party it names who is still coming and everyone's lifts together (or after 15 seconds).
   At a job's start, and whenever a run moves on to a big map.
 
+- **The guard, and the trainer's word** (Kyle, 2026-11-24: "marked that you CAN go out there, don't let people out
+  until level 3 maybe (guard at the gate stops you) and you get a quest at 3 from your main trainer to go out and
+  get a thing or go to a spot"). Under level 3 the gate's panel has no GO OUT: the guard will not let you out
+  without a job (`GATE_LEVEL`, `canGoOut`, shared/gatefieldsquest.ts). From 3 your own trainer has a quest waiting
+  (their door is marked): go out the North Gate and rest at the Field Barn. The gate carries the gold mark while it
+  is in hand, resting at the barn pays 40 copper on the spot, and the trainer hears of it after (the errand
+  `fields` in shared/errands.ts, on the yard's pattern). After that the gate's prompt reads NORTH GATE: GO OUT;
+  there is no standing gold mark, since gold in town means someone has something for you and the edge arrow would
+  point at the gate for good. A friend under 3 gathered into a party may still go. The lore keeper: nobody says
+  this is a first time outside the walls, since jobs went out the north gate before it.
+
 Not yet: the view off the east side; saying on screen that you rested or have a get-up left; the keeper's wares;
 travel between shelters; bounties, materials, quests; the wood beyond the far end.
 

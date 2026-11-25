@@ -57,6 +57,12 @@ The Deep chat, until it finishes (then the general chat).
   rooms only; shared/mapsum.ts) and answers `needmap` with the map; and `here` and `wait` for the loading page
   (client/loadpage.ts). bigsend.ts, snap.ts and interest.ts are untouched and the wire parity tests pass as they
   were. scripts/exped-online.cjs fails at the board on main too (no Barrowfields posting).
+  Also, for Town quests and Holy and hungry (2026-11-24): the guard keeps a hero in at the North Gate until level 3,
+  and the trainer then gives a new errand, `fields` (out the gate, rest at the Field Barn; `fieldsback` to tell them):
+  small edits on the yard's pattern in shared/errands.ts (`fieldsDue`, `fieldsDone`, `fitErrands`, `openErrands`),
+  client/errandwords.ts, townui.ts, main.ts (the gate's prompt) and
+  shared/errandpay.ts (`fields: 40`). One for Town quests: `fitErrands` does not keep `yard`, so a reload mid-yard
+  loses it; left as it is.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

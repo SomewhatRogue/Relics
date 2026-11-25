@@ -14,11 +14,12 @@ import { carriesHungry } from './fence.js';
 import { questBack, questDue, questHeld, reported, takeQuest } from './heroquests.js';
 import { deepSkillOpen } from './deepskill.js';
 import { payErrand } from './errandpay.js';
+import { GATE_LEVEL } from './gatefieldsquest.js';
 
 /** `quest`: your trainer has a hero quest for you; `job`: one in hand, to do; `back`: one done, to tell them of (shared/heroquests.ts).
  *  `nettle`: Tobin, frightened of your hungry gear, sent you to Nettle. `church` and `under`: your first hungry piece
  *  home, the church and the Keeping Room each have a word for you (shared/wanterrands.ts, the Holy and hungry chat). */
-export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle' | 'church' | 'under' | 'yard';
+export type ErrandId = 'relic' | 'trainer' | 'skill' | 'quest' | 'job' | 'back' | 'nettle' | 'church' | 'under' | 'yard' | 'fields' | 'fieldsback';
 export interface Errands {
   /** The runner has found you and said their line (the first two are yours from then). */
   told: boolean;
@@ -38,6 +39,9 @@ export interface Errands {
   /** The first chain (Kyle, 2026-11-24): church, then the trainer, who sends you to the yard to try your kit; then back
    *  to the trainer for the board's first quest. 1 to go, 2 done (shared/errandpay.ts pays it), 3 the trainer's heard. */
   yard?: number;
+  /** Out the North Gate (Kyle, 2026-11-24): from level 3 the trainer sends you to rest at the Field Barn. 1 to go, 2 done
+   *  (paid), 3 the trainer's heard (shared/gatefieldsquest.ts). */
+  fields?: number;
 }
 
 export const newErrands = (): Errands => ({ told: false, relic: false, trainer: false, seen: 1 });
@@ -48,7 +52,7 @@ export const doneErrands = (level: number): Errands => ({ told: true, relic: tru
 export function fitErrands(e: unknown, level: number): Errands {
   if (!e || typeof e !== 'object') return doneErrands(level);
   const o = e as Partial<Errands>;
-  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}), ...(o.church === 1 || o.church === 2 ? { church: o.church } : {}), ...(o.under === 1 || o.under === 2 ? { under: o.under } : {}) };
+  return { told: !!o.told, relic: !!o.relic, trainer: !!o.trainer, seen: Math.max(1, Math.floor(Number(o.seen) || 1)), ...(o.deep ? { deep: true } : {}), ...(o.nettle === 1 || o.nettle === 2 ? { nettle: o.nettle } : {}), ...(o.church === 1 || o.church === 2 ? { church: o.church } : {}), ...(o.under === 1 || o.under === 2 ? { under: o.under } : {}), ...(o.fields === 1 || o.fields === 2 || o.fields === 3 ? { fields: o.fields } : {}) };
 }
 
 /** Where each class's trainer is (the hall's door in town, shared/town.ts). */
@@ -77,7 +81,8 @@ export function openErrands(p: Profile): ErrandId[] {
   // (Not before the runner's been: the first is handed over at the first meeting.)
   if (e.yard === 1) out.push('yard');
   // (After the yard, if the trainer sent you there.)
-  if (questDue(p) && e.told && e.trainer && e.yard !== 1) out.push('quest');
+  // (Or the word to go out by the North Gate, waiting with them from level 3: `fieldsDue`.)
+  if ((questDue(p) && e.told && e.trainer && e.yard !== 1) || fieldsDue(p)) out.push('quest');
   if (questHeld(p)) out.push('job');
   if (questBack(p)) out.push('back');
   // (Only while there's still something hungry on you to sell him.)
@@ -85,6 +90,8 @@ export function openErrands(p: Profile): ErrandId[] {
   // Your first hungry piece home: the church, and the Keeping Room under the town (shared/wanterrands.ts).
   if (e.church === 1) out.push('church');
   if (e.under === 1) out.push('under');
+  if (e.fields === 1) out.push('fields');
+  if (e.fields === 2) out.push('fieldsback');
   return out;
 }
 
@@ -116,6 +123,8 @@ export function errandWho(p: Profile, id: ErrandId): { door: string; talk: strin
   if (id === 'relic') return { door: 'church', talk: 'church' };
   // Squire Pell, in the barracks, takes you through to the yard.
   if (id === 'yard') return { door: 'hall', talk: 'yard' };
+  // The way out is the North Gate's spot in the street.
+  if (id === 'fields') return { door: '', talk: 'gate', spot: 'gate' };
   if (id === 'nettle') return { door: 'tavern', talk: 'vendor', arg: CLASS_ORDER.indexOf('ROGUE') };
   if (id === 'church') return { door: 'church', talk: 'church' };
   // The Keeping Room is behind the sewer grate's bricked arch.
@@ -132,6 +141,9 @@ export function talkedTo(p: Profile, talk: string, arg?: number): boolean {
   const was = JSON.stringify(e);
   // (Not before the church: the first meeting waits for it. Then the yard, before any quest.)
   if (e.told && e.relic && !e.trainer) (e.trainer = true), (e.yard = 1);
+  // From level 3, with the first chain done (the yard told back, or never given): out to the fields. And their word on your return.
+  if (fieldsDue(p)) e.fields = 1;
+  else if (e.fields === 2) e.fields = 3;
   e.seen = Math.max(e.seen, p.level);
   if (deepSkillOpen(p)) e.deep = true;
   // Hears of the one you've done, and hands over the quest they have for you (the first at the first meeting).
@@ -170,4 +182,17 @@ export function backFromYard(p: Profile): boolean {
   if (p.errands?.yard !== 2) return false;
   p.errands.yard = 3;
   return true;
+}
+
+/** The trainer has the word to go out waiting for you: level 3, the first chain done, and not yet told. */
+export function fieldsDue(p: Profile): boolean {
+  const e = p.errands;
+  return !!e && e.told && e.relic && e.trainer && p.level >= GATE_LEVEL && e.fields === undefined && (e.yard === undefined || e.yard === 3);
+}
+
+/** Rested at the Field Barn on the trainer's word: the north fields' errand done, and paid. The copper paid (0: not open). */
+export function fieldsDone(p: Profile): number {
+  if (p.errands?.fields !== 1) return 0;
+  p.errands.fields = 2;
+  return payErrand(p, 'fields');
 }

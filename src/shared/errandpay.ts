@@ -13,7 +13,7 @@ import { Rng } from './rng.js';
 import { CLASS_KITS, type WeaponId } from './weapons.js';
 
 /** Copper for each errand done: the church's refill, the yard, and the talks about hungry gear. */
-export const ERRAND_PAY = { relic: 20, yard: 40, nettle: 20, church: 30, under: 30 } as const;
+export const ERRAND_PAY = { relic: 20, yard: 40, nettle: 20, church: 30, under: 30, fields: 40 } as const;
 export type PaidErrand = keyof typeof ERRAND_PAY;
 
 /** Pays an errand into the purse (and the COIN EARNED tally). The copper paid. */

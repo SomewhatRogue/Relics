@@ -24,12 +24,12 @@ const trainer = (cls: HeroClass) => title(TRAINERS[cls].name);
 
 export const ERRANDW = {
   /** The tracker's rows: a label and what to do. */
-  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR', yard: 'THE YARD', ...WANTQW.pin } as Record<ErrandId, string>,
+  pin: { relic: 'YOUR JAVELIN', trainer: 'YOUR TRAINER', skill: 'A NEW SKILL', nettle: 'HUNGRY GEAR', yard: 'THE YARD', fields: 'THE NORTH FIELDS', fieldsback: 'THE NORTH FIELDS', ...WANTQW.pin } as Record<ErrandId, string>,
   todo: (id: ErrandId, cls: HeroClass) =>
-    id === 'church' || id === 'under' ? WANTQW.todo[id] : id === 'yard' ? 'Ask Squire Pell for a straw man in the yard behind the barracks' : id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
+    id === 'church' || id === 'under' ? WANTQW.todo[id] : id === 'fields' ? 'Go out the North Gate and rest at the Field Barn' : id === 'fieldsback' ? `Tell ${trainer(cls)} how you got on` : id === 'yard' ? 'Ask Squire Pell for a straw man in the yard behind the barracks' : id === 'nettle' ? 'Sell it to Nettle, at the back of the Drowned Rat' : id === 'relic' ? 'Recharge it at the church' : id === 'trainer' ? `${trainer(cls)}, ${PLACE[cls]}` : cls === 'ROGUE' ? 'Whisper has one to show you' : `${trainer(cls)} has one to teach you`,
   /** Folded, one line. */
   small: (id: ErrandId, cls: HeroClass) =>
-    id === 'church' || id === 'under' ? WANTQW.small[id] : id === 'yard' ? 'TRY YOUR KIT IN THE YARD' : id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
+    id === 'church' || id === 'under' ? WANTQW.small[id] : id === 'fields' ? 'REST AT THE FIELD BARN, OUT THE NORTH GATE' : id === 'fieldsback' ? `TELL ${TRAINERS[cls].name} ABOUT THE NORTH FIELDS` : id === 'yard' ? 'TRY YOUR KIT IN THE YARD' : id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
   freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",
@@ -60,6 +60,24 @@ export const ERRANDW = {
     ROGUE: 'A little something, on the ~house~, the only thing that will be. Take it round the back of the barracks, the javelin too, it doesn\'t go dark there.',
     MAGE: 'This is for you, plain, I know, but do try it in the yard behind the barracks, and the javelin as well, because it won\'t dim there, I checked, *twice*.',
     HEALER: 'Take this, and the javelin too, it won\'t dim in the yard behind the barracks, so go and swing it about there before you hurt anyone that matters.',
+  } as Record<HeroClass, string>,
+  /** The North Gate (Kyle, 2026-11-24): what its panel says to a hero the guard won't let out yet (under level 3). */
+  gateShut: 'The guard will not let you out without a job yet. Your trainer will say when.',
+  /** The trainer's quest at level 3: out the gate to rest at the Field Barn (their word to send you, and to hear of it).
+   *  (Never a first time outside the walls: jobs went out the north gate before this. Lore keeper, 2026-11-24.) */
+  fieldsGive: {
+    WARRIOR: "You're ready for the north fields. Out the North Gate and rest at the Field Barn, then come and tell me.",
+    RANGER: "You'll do for the north fields now. Go out the North Gate and rest at the Field Barn, and come back and tell me what you saw.",
+    ROGUE: "Time you went out on your own account, I'd say. Go out the North Gate and have a rest at the Field Barn, and a word to me after, that's all it is. Easy money.",
+    MAGE: 'The north fields, yes, you may go now, I think. Go out the North Gate and rest at the Field Barn, and come back and report. Do *try* to report.',
+    HEALER: 'The guard will let you out without a job now, so go through the North Gate and rest at the Field Barn, and mind you come back and tell me you did.',
+  } as Record<HeroClass, string>,
+  fieldsHeard: {
+    WARRIOR: 'Good. You know where the barn is now, so use it.',
+    RANGER: "Well, the dog looks pleased with itself, so it can't have gone badly. Go out again when you like.",
+    ROGUE: "There you are, and rested, which is more than I've managed this week. The guard won't stop you now, so go out when it suits you.",
+    MAGE: "Yes, good, noted. You may go out to the north fields when you like now, only don't tell me beforehand, I'd rather not know.",
+    HEALER: 'There, and nobody had to carry you home. Go out when you like now, and sit down at that barn before your legs decide it for you.',
   } as Record<HeroClass, string>,
   /** Under the gift, the game's plain word, and the gift's own label. */
   giftNote: 'Your new weapon is in your pack. Equip it from there, then try it in the yard.',
