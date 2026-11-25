@@ -145,7 +145,7 @@ export class Figs {
     // Only the cells drawn this frame go to the card, a band a row (texpatch.ts): the whole atlas, and its glow, every
     // frame was most of what a fight sent.
     if (this.drawn) {
-      const rows = new Map<number, [number, number]>();
+      const CELL = this.cell, COLS = this.cols, rows = new Map<number, [number, number]>();
       for (const i of this.dirty) {
         const r = Math.floor(i / COLS), c = i % COLS, b = rows.get(r);
         rows.set(r, b ? [Math.min(b[0], c), Math.max(b[1], c)] : [c, c]);
