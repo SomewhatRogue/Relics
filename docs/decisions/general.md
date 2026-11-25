@@ -400,3 +400,7 @@ Kyle, after the longbow talk: "Should be more shielded enemies where you have to
 goblin (shared/raiders.ts IRONHIDE: a fifth of any blow till a charged hit, a perfect or a crit knocks its plates
 askew for 3 s). It led about 1 room in 19; now about 1 in 9 (shared/encounters.ts: iron 1.5 to 3.5, ironback 1 to
 2). Layout pins and the parity golden re-recorded for it. Claude Opus 5.5
+- Fix the same day: the full run found a room half a point over its budget (a Quick elite brute, then an ironhide).
+  Each band kept back a small one only for itself and those to come, not those before it, which fill() pays for last
+  (shared/encounter.ts): now every band's. Pins re-pinned again. (I pushed the first commit with those two tests
+  red; this one mends it.)

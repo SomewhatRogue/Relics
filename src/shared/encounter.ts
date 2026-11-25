@@ -203,20 +203,19 @@ export function composeRoom(c: Compose): Template[] {
   // First each band's template, by its beat and its share of what's left; then the small ones to the budget.
   let spend = budget - (big ? reserve : 0);
   const roll = eliteRoller(job, c.index), elites: EliteRoll[] = [];
-  const staged = c.foes.some(stagedSort);
   bandsOf.forEach((_, i) => {
     const beat = beats[i], wantBig = big && beat === 'closer' && i === beats.length - 1;
     const rest = beats.slice(i).reduce((s, b, k) => s + (big && i + k === beats.length - 1 ? 0 : BUDGET.share[b]), 0) || 1;
     const share = wantBig ? Math.max(0, spend) + reserve : Math.max(0, spend) * (BUDGET.share[beat] / rest);
-    // (Leaving room for a small one in each band still to come, this one's too.)
-    // (A room with a new sort staged in it is tight: every band's small one is kept back, not just those to come.)
-    let ts = fits(c, Math.max(0, left), used, c.index === 0 && i === 0, beat, share, wantBig, spend - THREAT.chaff * (staged ? beats.length : beats.length - i));
+    // (Leaving room for a small one in every band: the ones before this have chosen but not yet paid for theirs, which
+    // fill() lays last. Only those to come was kept back till 2026-11-24, which let a room run half a point over.)
+    let ts = fits(c, Math.max(0, left), used, c.index === 0 && i === 0, beat, share, wantBig, spend - THREAT.chaff * beats.length);
     if (wantBig && !ts.length) ts = fits(c, Math.max(0, left), used, false, beat, share, false, spend + reserve);
     if (!roofs.length) ts = ts.filter((t) => !t.roofs);
     const t = ts.length ? pick(rng, ts, c) : TEMPLATES[0];
     used.add(t.id), chose.push(t);
     // Elites (shared/eliteroll.ts, their own stream): planned with the template, so the rest of the room pays for them.
-    const el = roll(t, i, spend - weighOf(t).threat - THREAT.chaff * (beats.length - i));
+    const el = roll(t, i, spend - weighOf(t).threat - THREAT.chaff * beats.length);
     elites.push(...el), (spend -= eliteExtra(el));
     left -= cost(t);
     spend -= weighOf(t).threat - (wantBig && t.big ? reserve : 0);
