@@ -264,6 +264,8 @@ export interface Hero extends Body {
   /** Drills paid for at the trainer (shared/drills.ts), and a crit's own dice (seeded by the hero). */
   drills?: import('../shared/drills').Drills;
   critSeed?: number;
+  /** A hit's damage roll's own dice (shared/dmgrange.ts), apart from the crit's. */
+  dmgSeed?: number;
   /** The movement ladder (shared/ladder.ts, sim/ladder*.ts): a JUMP SHOT spent this jump; a blink's own
    *  reach (BLINK THROUGH) and the goblin it went through; the last PERFECT hold (PERFECT BLINK); the
    *  next CALTROPS; THROUGH THE LEGS until then, and the goblin it was spent on; fireproof (SHAKE IT OFF)

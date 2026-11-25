@@ -5,6 +5,10 @@ import { dropPickups, stepPickups } from '../src/sim/pickups';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { NO_INTENT, type FightEvent, type Intent } from '../src/sim/types';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 const intent = (o: Partial<Intent> = {}): Intent => ({ ...NO_INTENT, ...o });
 const run = (room: ArenaRoom, s: number) => {

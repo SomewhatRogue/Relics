@@ -3,6 +3,10 @@ import { ArenaRoom } from '../src/sim/room';
 import { BUTCHER, CHARGE, CLASS_DODGES, GUARD, HERO, ROLL, TICK, WEAPONS } from '../src/shared/tuning';
 import { NO_INTENT, type Hero, type Intent } from '../src/sim/types';
 import type { RelicId } from '../src/shared/magic';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 /** Hand a hero a found relic and ready it (nobody starts with one). */
 const arm = (h: Hero, r: RelicId) => ((h.relics = [h.relics[0], r]), (h.relic = r));

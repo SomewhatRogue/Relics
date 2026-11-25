@@ -16,6 +16,8 @@ import { kitRows } from './kitlines';
 import { areas } from './guardarea';
 import { barWord, barWords } from '../shared/barword';
 import { shown as bigNum } from '../shared/shown';
+import { rangeOf } from '../shared/dmgrange';
+import { ILVL, fitLevel } from '../shared/itemlevel';
 
 /** How a weapon fights, as three short labelled rows (TAP, HOLD, PERFECT, and ALSO where there's a
  *  bonus; kitlines.ts), then its GUARD and DODGE areas (guardarea.ts). */
@@ -46,7 +48,9 @@ export const shown = (r: Row, w: WeaponId) => {
     !(r.label === 'BACKSTAB' && !k.backstab) && !((r.label === 'SPELL POWER' || r.label === 'SPELL COST') && cls !== 'MAGE');
 };
 
-export interface Row { label: string; v: number; unit: '' | 's' | '%'; low?: boolean }
+export interface Row { label: string; v: number; unit: '' | 's' | '%'; low?: boolean; /** A damage row's range (v is its middle). */ range?: [number, number] }
+/** A damage row: the number (the middle) and its range for the weapon, the hero's modifiers already in. */
+const dmgRow = (label: string, v: number, kit: WeaponId): Row => ({ label, v: bigNum(v), unit: '', range: rangeOf(v, kit).map(bigNum) as [number, number] });
 interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; legs?: Item | null; rings: Item[]; baseHp: number }
 
 /** The numbers that matter, for what's worn. */
@@ -54,8 +58,8 @@ export function sheet(w: Worn): Row[] {
   const g = gearStats(w.item, w.armor, w.rings, w.legs ?? null), k = WEAPONS[w.weapon], first = k.combo[0], last = k.combo[k.combo.length - 1], q = 1 - g.quick;
   return [
     // A Mage's tap spark is a spell, so SPELL POWER counts in it (sim/hero.ts currentSwing).
-    { label: 'HIT', v: bigNum(first.dmg * (1 + g.damage) * (1 + (k.cls === 'MAGE' && first.shot ? g.spell : 0))), unit: '' },
-    { label: 'FULL CHARGE', v: bigNum(k.heavy.dmgFull * (1 + g.damage)), unit: '' },
+    dmgRow('HIT', first.dmg * (1 + g.damage) * (1 + (k.cls === 'MAGE' && first.shot ? g.spell : 0)), w.weapon),
+    dmgRow('FULL CHARGE', k.heavy.dmgFull * (1 + g.damage), w.weapon),
     { label: 'SWING', v: (first.windup + first.active + first.recover * 1) * q, unit: 's', low: true },
     { label: 'TO FULL CHARGE', v: (k.draw ?? CHARGE.full) * (1 - g.draw), unit: 's', low: true },
     { label: 'REACH', v: k.heavy.range * (1 + g.reach), unit: '' },
@@ -69,7 +73,7 @@ export function sheet(w: Worn): Row[] {
     { label: 'SKILL RECHARGE', v: 1 - g.focus, unit: '%', low: true },
     { label: 'HEALING GIVEN', v: 1 + g.mending, unit: '%' },
     // The new modifiers' own rows (shared/mods.ts), shown only for kits they act on (`shown`).
-    { label: 'LAST BLOW', v: bigNum(last.dmg * (1 + g.damage) * (1 + g.finisher)), unit: '' },
+    dmgRow('LAST BLOW', last.dmg * (1 + g.damage) * (1 + g.finisher), w.weapon),
     { label: 'SWING ARC', v: Math.round(first.arc * (1 + g.arc)), unit: '' },
     { label: 'BACKSTAB', v: (k.backstab ?? GUARD.rearMult) * (1 + g.backstab), unit: '%' },
     { label: 'CRIT CHANCE', v: g.crit, unit: '%' },
@@ -78,7 +82,7 @@ export function sheet(w: Worn): Row[] {
   ];
 }
 
-export const fmt = (r: Row, v = r.v) => (r.unit === 's' ? v.toFixed(2) + ' s' : r.unit === '%' ? Math.round(v * 100) + '%' : String(Math.round(v * 10) / 10));
+export const fmt = (r: Row, v = r.v) => (r.range ? `${r.range[0]} TO ${r.range[1]}` : r.unit === 's' ? v.toFixed(2) + ' s' : r.unit === '%' ? Math.round(v * 100) + '%' : String(Math.round(v * 10) / 10));
 export const worn = (h: Hero): Worn => ({ weapon: h.weapon, item: h.arms[h.weapon], armor: h.armor, legs: h.legs ?? null, rings: h.rings, baseHp: h.baseHp });
 
 /** What you'd wear with `it` on instead (a third ring pushes out the older). */
@@ -116,6 +120,11 @@ export function card(it: Item, h?: Hero, brief = false): string {
   // A weapon's TAP / HOLD / PERFECT rows live in the gear's WEAPONS panel now (weaponsabout.ts; Kyle, 2026-11-05: "too cluttered").
   // Legs: modifiers only; the BODY sets the weight (docs/design/gear-levels.md section 4).
   const how = s === 'armor' ? armorHow(it.armor ?? 'light', cls) : s === 'legs' ? `<div class="kitrows armor"><div><b>LEGS</b><span>${CARDW.legs}</span></div></div>` : '';
+  // A weapon's own range, at the top: its first hit with its plus and level in (as gear.ts lifts it), before the hero's modifiers.
+  const own = s === 'weapon' && it.kit ? (() => {
+    const il = it.ilvl !== undefined ? fitLevel(it.ilvl) - 1 : 0, [lo, hi] = rangeOf(WEAPONS[it.kit].combo[0].dmg * (1 + levelOf(it) * PLUS.damage + il * ILVL.base.damage), it.kit);
+    return labelRows([['DAMAGE', `${bigNum(lo)} TO ${bigNum(hi)}`]]);
+  })() : '';
   // Whose hands it's judged in: the weapon itself, or what the wearer holds.
   const kit = s === 'weapon' ? it.kit : h?.weapon;
   // "NAME +10%: what it does" and "NAME: what it does" (Kyle's example, before parry went: "STAMINA ON PARRY: parry refills stamina").
@@ -141,7 +150,7 @@ export function card(it: Item, h?: Hero, brief = false): string {
     (uniqueLine(it) ? `<div class="uline">${uniqueLine(it)}</div>` : '') +
     // SOULBOUND: taken by another class (sim/loot.ts); it sells, it never trades.
     (it.bound ? `<div class="tr"><b>SOULBOUND:</b> ${CARDW.bound}</div>` : '') +
-    (how ? `<div class="how">${how}</div>` : '') + [...plus, ...mods, ...traits].join('') +
+    own + (how ? `<div class="how">${how}</div>` : '') + [...plus, ...mods, ...traits].join('') +
     (it.cost ? labelRows([[CARDW.cost, costText(it.cost, cls)]], 'hungry') : '') +
     (it.hungry ? hungryRows(it.hungry as HungryId, cls) : '') + (mods.length + traits.length || it.hungry ? '' : `<div class="tr">Plain. No modifiers.</div>`);
 }

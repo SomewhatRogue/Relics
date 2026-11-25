@@ -13,6 +13,9 @@ export const TICK = 1 / 30;
  * offers no shift and nothing in town leads up the stair; the code and its tests stay for the redo.
  * `?watch=1` in the address turns it on for a look (scripts/watch-look.cjs).
  */
+/** A weapon's damage spread either side of its base hit, by weapon id (docs/design/damage-ranges.md; shared/dmgrange.ts). */
+export const SPREAD: Record<string, number> = { default: 0.15, daggers: 0.1, wand: 0.1, staff: 0.1, greatsword: 0.25, mace: 0.25 };
+
 export const NIGHT_WATCH = { on: false };
 
 export const HERO = {

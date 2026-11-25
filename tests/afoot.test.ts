@@ -23,6 +23,10 @@ import { ArenaRoom } from '../src/sim/room';
 import { newRun, runRoom } from '../src/sim/run';
 import { stepStorm } from '../src/sim/storm';
 import { NO_INTENT, type Bolt, type Enemy, type FightEvent, type Hero, type Snare } from '../src/sim/types';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 /** The proving hill's room, its goblins cleared away. */
 function land() {

@@ -30,6 +30,7 @@ import { HUNGRY_FX, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
 import { dropMats, layAfter } from './matdrops';
+import { dmgSeedOf } from '../shared/dmgrange';
 import { dropPickups, stepPickups, type Pickup } from './pickups';
 import { bossRelics } from './relicboss';
 import { dropCoal, stepCoals, type Coal } from './lantern';
@@ -325,6 +326,7 @@ export class ArenaRoom {
       // Spread along the way in: across it at the bottom, down it at a side (layout 3's ways in by a side wall).
       const s = this.map.hero, k = this.heroes.length, aside = s.x < 3 || s.x > this.map.w - 3;
       h = aside ? newHero(id, s.x, s.y + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.9) : newHero(id, s.x + k * 0.9, s.y);
+      h.dmgSeed = dmgSeedOf(id);
       this.heroes.push(h);
       // The squire turns up with the first player (after them, so the room's first hero is a player).
       if (this.squire && !this.heroes.some((x) => x.id === 'squire')) {

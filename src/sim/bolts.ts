@@ -5,6 +5,7 @@
  * lands, takes every goblin near and draws them in, then bursts. A relic's blast throws every goblin
  * as hard whatever it weighs and knocks it down (sim/stuns.ts relicStun), and never touches a friend.
  */
+import { rollDmg } from '../shared/dmgrange';
 import { shotKeg } from './blast';
 import { shotAtDoor } from './doorwall';
 import { addPoise } from './poise';
@@ -89,6 +90,7 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
   blastBlocks(w, x, y, b.burst, b.dmg, b.el, b.potion === 'oil');
   // A relic's blast spares the freed and every friend (they're told so).
   if (b.kind !== 'smite' && !b.relic) blastSurvivors(w, x, y, b.burst, b.dmg, b.owner, b.el);
+  const hero = w.heroes.find((h) => h.id === b.owner);
   for (const e of w.enemies) {
     const d = Math.hypot(e.x - x, e.y - y);
     if (isDead(e) || e.act === 'carried' || d > b.burst + e.radius) continue;
@@ -99,7 +101,7 @@ export function blast(w: World, b: Bolt, x: number, y: number): void {
     }
     const wasFrozen = frozen(e, w.now), winding = !!b.interrupts && windingUp(e);
     e.lastBy = b.owner;
-    if (damage(e, b.hz === undefined ? b.dmg : Math.round(b.dmg * highShot(b, e)), w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el, charged: b.charged })) continue;
+    if (damage(e, Math.round(b.dmg * (hero && !b.potion && !b.relic ? rollDmg(hero) : 1) * (b.hz === undefined ? 1 : highShot(b, e))), w.now, w.ev, { heavy: true, flinch: 0.5, mult: true, brutal: b.traits.includes('brutal'), how: 'burst', dx: e.x - x, dy: e.y - y, src: b.kind, el: b.el, charged: b.charged })) continue;
     // A smite on a frozen small one sends it skidding off from where it fell (sim/iceslide.ts).
     if (wasFrozen && b.kind === 'smite' && fling(e, b.owner, d > 0.05 ? e.x - x : b.dx, d > 0.05 ? e.y - y : b.dy, true, w.now, w.ev)) continue;
     // A relic's blast throws a butcher as far as a scrapper (one that can't be moved stays put).
@@ -150,7 +152,7 @@ function strike(w: World, b: Bolt, e: Enemy): boolean {
   // A boss of the kit: a shot into a shut door cuts its straps; a perfect, a full draw or one in its back fills its POISE (sim/doorwall.ts, poise.ts).
   if (e.boss) bossShot(e, b, back, w);
   // (A dart doesn't flinch what it hits, small or big: it poisons, it never staggers one out of a blow. Kyle, 2026-11-23.)
-  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * boardMult(board) * highShot(b, e)), w.now, w.ev, { heavy: b.knock >= 8 || crit, crit, flinch: b.kind === 'dart' ? 0 : FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back, charged: b.charged });
+  const dead = damage(e, Math.round(b.dmg * rear * (crit ? CRIT : 1) * (by ? rollDmg(by) : 1) * boardMult(board) * highShot(b, e)), w.now, w.ev, { heavy: b.knock >= 8 || crit, crit, flinch: b.kind === 'dart' ? 0 : FLINCH, mult: true, brutal: b.traits.includes('brutal'), dx: b.dx, dy: b.dy, src: b.kind, el: b.el, backstab: back, charged: b.charged });
   // (A board tuned to let a little of a plain shot by still stops it there.)
   if (board === 'blocked') w.ev.push({ k: 'deflect', x: e.x, y: e.y });
   // A Rogue's techniques on a backstab (sim/techrogue.ts).

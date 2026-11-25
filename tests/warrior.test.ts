@@ -1,4 +1,5 @@
 /** The Warrior's rework (shared/warrior.ts, sim/warrior.ts): no dodge, the shield bash, the counter after a block, the greatsword, the spear. */
+import { rangeOf } from '../src/shared/dmgrange';
 import { describe, expect, it } from 'vitest';
 import { GUARD, PIN, QUAKE, SHAFT, SHIELD_BASH, SPEAR_CHAIN, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
@@ -73,7 +74,7 @@ describe('the sword and shield', () => {
     expect(es[0].act).toBe('stunned');
     expect(es[0].actDur).toBeCloseTo(SHIELD_BASH.stunFull, 1);
     expect(es[1].act).not.toBe('stunned');
-    expect(lost(es[0])).toBeLessThanOrEqual(WEAPONS.sword.heavy.dmgFull);
+    expect(lost(es[0])).toBeLessThanOrEqual(rangeOf(WEAPONS.sword.heavy.dmgFull, 'sword')[1] + 1);
   });
   it('let go on the white flash, the bash stuns every goblin in its arc for a full second, PERFECT', () => {
     const { es, loose } = arena('sword', [7.9, 7.9, 7.9]);
@@ -201,7 +202,11 @@ describe('the spear and shield', () => {
     const near = arena('spear', [8.3]), far = arena('spear', [7.2]);
     near.tap(0.3);
     far.tap(0.3);
-    expect(lost(near.e)).toBe(Math.round(WEAPONS.spear.combo[0].dmg * SHAFT.mult));
-    expect(lost(far.e)).toBe(WEAPONS.spear.combo[0].dmg);
+    // (Each hit rolls inside the spear's spread, 2026-11-25.)
+    const [lo, hi] = rangeOf(WEAPONS.spear.combo[0].dmg, 'spear'), [nlo, nhi] = rangeOf(WEAPONS.spear.combo[0].dmg * SHAFT.mult, 'spear');
+    expect(lost(near.e)).toBeGreaterThanOrEqual(nlo - 1);
+    expect(lost(near.e)).toBeLessThanOrEqual(nhi + 1);
+    expect(lost(far.e)).toBeGreaterThanOrEqual(lo - 1);
+    expect(lost(far.e)).toBeLessThanOrEqual(hi + 1);
   });
 });

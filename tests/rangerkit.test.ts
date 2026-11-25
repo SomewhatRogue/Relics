@@ -1,4 +1,5 @@
 /** The Ranger's rework (shared/ranger.ts, sim/crossbow.ts, sim/rangershots.ts): the longbow, the shortbow, the crossbow. */
+import { rangeOf } from '../src/shared/dmgrange';
 import { describe, expect, it } from 'vitest';
 import { BLIND, CHARGE, CRIT, TICK, WEAPONS, XBOW, type WeaponId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
@@ -56,7 +57,10 @@ describe('the longbow', () => {
     const ev = a.loose(WEAPONS.longbow.draw! + 0.08, 0.6);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
     expect(ev.some((x) => x.k === 'blinded')).toBe(true);
-    expect(lost(a.e)).toBe(Math.round(WEAPONS.longbow.heavy.dmgFull * CRIT));
+    // (Each hit rolls inside the weapon's spread, 2026-11-25.)
+    const [lo, hi] = rangeOf(WEAPONS.longbow.heavy.dmgFull * CRIT, 'longbow');
+    expect(lost(a.e)).toBeGreaterThanOrEqual(lo - 1);
+    expect(lost(a.e)).toBeLessThanOrEqual(hi + 1);
     expect(a.e.blindUntil! - a.room.time).toBeGreaterThan(BLIND.time - 0.8);
     // Right next to the Ranger and free to swing, it still never starts a blow while blind.
     Object.assign(a.e, { x: 9, y: 8.2, cooldown: 0 });
@@ -118,8 +122,8 @@ describe('the crossbow', () => {
     const ev = a.loose(0.75, 0.6);
     expect(shots(ev)).toBe(1);
     expect(a.h.xbowEmpty).toBe(true);
-    expect(a.es.slice(0, XBOW.pierce).every((e) => lost(e) >= WEAPONS.crossbow.heavy.dmg)).toBe(true);
-    expect(lost(a.es[3])).toBeLessThan(WEAPONS.crossbow.heavy.dmg);
+    expect(a.es.slice(0, XBOW.pierce).every((e) => lost(e) >= rangeOf(WEAPONS.crossbow.heavy.dmg, 'crossbow')[0] - 1)).toBe(true);
+    expect(lost(a.es[3])).toBeLessThan(rangeOf(WEAPONS.crossbow.heavy.dmg, 'crossbow')[0]);
     const one = shoved(false);
     expect(one).toBeGreaterThan(0.5);
     expect(ev.some((x) => x.k === 'boltline')).toBe(false);

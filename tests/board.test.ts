@@ -6,6 +6,10 @@ import { newEnemy } from '../src/sim/enemies';
 import { type World } from '../src/sim/elements';
 import { newHero } from '../src/sim/hero';
 import type { Enemy, FightEvent, Hero } from '../src/sim/types';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 type KitId = keyof typeof WEAPONS;
 

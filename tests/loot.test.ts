@@ -134,10 +134,12 @@ describe('traits pay off on execution', () => {
     const plain = tap(room, t, 1);
     run(room, 0.4);
     h.tempoUntil = room.time + 1;
-    // (Within one for rounding: the sword's tap is odd since 2026-11-23.)
-    expect(Math.abs(tap(room, t, 2) - plain * 2)).toBeLessThanOrEqual(1);
+    // (Every hit rolls inside the sword's 15% since 2026-11-25, so a double reads 1.48 to 2.7 times a plain tap, a single 0.74 to 1.35.)
+    const dbl = tap(room, t, 2) / plain;
+    expect(dbl).toBeGreaterThan(1.45);
+    expect(dbl).toBeLessThan(2.75);
     run(room, 0.4);
-    expect(tap(room, t, 3)).toBe(plain);
+    expect(tap(room, t, 3) / plain).toBeLessThan(1.4);
   });
 
   it('a draw released on the flash is perfect; held on past it, it stays full (Kyle, 2026-11-08)', () => {

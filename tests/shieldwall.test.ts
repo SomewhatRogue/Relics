@@ -13,6 +13,10 @@ import { shadowstep } from '../src/sim/relics';
 import type { World } from '../src/sim/elements';
 import { NO_INTENT, type Enemy, type FightEvent, type Hero } from '../src/sim/types';
 import { field, run } from './foeyard';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 const S = VARIANTS.shield;
 

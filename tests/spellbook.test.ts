@@ -6,6 +6,10 @@ import { shelteredFrom } from '../src/sim/staffholds';
 import { burning, chilled } from '../src/sim/elements';
 import type { FightEvent, Zone } from '../src/sim/types';
 import { lost, mageArena } from './magearena';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 const spell = (ev: FightEvent[]) => ev.find((x): x is Extract<FightEvent, { k: 'spell' }> => x.k === 'spell');
 const zone = (z: Zone[], kind: Zone['kind']) => z.find((x) => x.kind === kind)!;

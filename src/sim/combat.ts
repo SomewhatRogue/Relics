@@ -1,4 +1,5 @@
 /** Who hits whom: a hero's swing on an enemy, and an enemy's attack on a hero (block, roll, or taken). */
+import { rollDmg } from '../shared/dmgrange';
 import { shelteredFrom } from './staffholds';
 import { dashing } from './samuraicut';
 import { wetMult } from './techmage';
@@ -99,7 +100,7 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   sayWeak(e, weak, now, ev, 'physical');
   // STAMINA ON COUNTER: a counter's first hit fills your stamina. (The spear's shaft halves a blow up close.)
   if (h.counter && has(h, 'bulwark') && h.hitIds.filter((id) => id > 0).length === 1) h.stamina = Math.max(h.stamina, HERO.stamina);
-  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * sharp * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
+  const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * rollDmg(h) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * sharp * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
   // Plates (sim/ironhide.ts): a charged blow or a perfect lands and strips them; else a fifth gets through. A crit goes
   // straight past, and a storm blade strikes through as lightning does (Kyle, 2026-11-24).
   const how: PlateHow = crit ? 'through' : storm ? 'storm' : '';

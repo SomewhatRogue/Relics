@@ -9,6 +9,10 @@ import { shoot, stepBolt } from '../src/sim/bolts';
 import { stepElements, type World } from '../src/sim/elements';
 import { newHero } from '../src/sim/hero';
 import { NO_INTENT, type Enemy, type FightEvent, type Intent } from '../src/sim/types';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 const intent = (o: Partial<Intent> = {}): Intent => ({ ...NO_INTENT, ...o });
 function run(room: ArenaRoom, s: number): FightEvent[] {

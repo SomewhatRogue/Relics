@@ -4,6 +4,7 @@
  * blow that smashes the frozen and the chilled near you). Each is one shape, judged here and drawn from
  * the same numbers (client/fxspells.ts).
  */
+import { rollDmg } from '../shared/dmgrange';
 import { afoot } from './afoot';
 import { COLD_BLAST, NOVA, SHATTER_BLOW, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
@@ -27,7 +28,7 @@ function freezeSolid(w: World, e: Enemy, n: number): void {
 function freezeHit(w: World, h: Hero, e: Enemy, n: number, knock: number, x: number, y: number, breaks: boolean): void {
   const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
   e.lastBy = h.id;
-  if (damage(e, n, w.now, w.ev, { heavy: true, flinch: 0.3, mult: true, el: 'frost', src: 'frost', dx: dx / d, dy: dy / d })) return;
+  if (damage(e, Math.max(1, Math.round(n * rollDmg(h))), w.now, w.ev, { heavy: true, flinch: 0.3, mult: true, el: 'frost', src: 'frost', dx: dx / d, dy: dy / d })) return;
   if (e.act !== 'pinned') shove(e, dx / d, dy / d, knock, e.weight);
   interrupt(e, false, breaks, h.id, w.now, w.ev);
   freezeSolid(w, e, n);
@@ -60,12 +61,13 @@ export function shatterBlow(h: Hero, s: Swing, mult: number, w: World, wide: num
     if (!open(h, e) || Math.hypot(e.x - h.x, e.y - h.y) > r + e.radius) continue;
     const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy) || 1, ice = frozen(e, w.now), cold = chilled(e, w.now);
     e.lastBy = h.id;
+    const roll = rollDmg(h);
     if (ice || cold) {
       // Brittle: it breaks, and the ice and the cold are gone.
       Object.assign(e, { frozenUntil: 0, chillUntil: 0 });
       w.ev.push({ k: 'shatter', x: e.x, y: e.y });
-      if (damage(e, Math.round((ice ? SHATTER_BLOW.frozen : SHATTER_BLOW.chilled) * mult), w.now, w.ev, { heavy: true, how: 'shatter', el: 'frost', dx: dx / d, dy: dy / d })) continue;
-    } else if (damage(e, Math.max(1, Math.round(s.dmg * SHATTER_BLOW.dmg * mult)), w.now, w.ev, { heavy: true, flinch: 0.3, mult: true, el: 'frost', dx: dx / d, dy: dy / d })) continue;
+      if (damage(e, Math.round((ice ? SHATTER_BLOW.frozen : SHATTER_BLOW.chilled) * mult * roll), w.now, w.ev, { heavy: true, how: 'shatter', el: 'frost', dx: dx / d, dy: dy / d })) continue;
+    } else if (damage(e, Math.max(1, Math.round(s.dmg * SHATTER_BLOW.dmg * mult * roll)), w.now, w.ev, { heavy: true, flinch: 0.3, mult: true, el: 'frost', dx: dx / d, dy: dy / d })) continue;
     if (e.act !== 'pinned') shove(e, dx / d, dy / d, SHATTER_BLOW.knock, e.weight);
     if (!ice && !cold) chill(w, e);
   }

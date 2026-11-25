@@ -5,6 +5,7 @@
  * (start it at a distance and walk in). Up against a wall the chain catches and cuts nothing.
  * The throw on letting go is the hook's (sim/spearchain.ts, sim/hook.ts).
  */
+import { rollDmg } from '../shared/dmgrange';
 import { collide } from '../shared/arena';
 import { CHARGE, SKEWER, WEAPONS } from '../shared/tuning';
 import { SICKLE_SPIN } from '../shared/sickle';
@@ -61,7 +62,7 @@ export function stepSpins(heroes: Hero[], w: World): void {
         e.bleedUntil = Math.max(e.bleedUntil ?? 0, w.now + SICKLE_SPIN.bleed);
       }
       // (No shove and no flinch: the spin cuts, it doesn't stagger. Kyle, 2026-11-23.)
-      damage(e, n, w.now, w.ev, { src: 'sickle' });
+      damage(e, Math.round(n * rollDmg(h)), w.now, w.ev, { src: 'sickle' });
       landed = true;
     }
     // Not yet up to speed, the chain stops on what it hits: one cut, and you start the spin again (Kyle,

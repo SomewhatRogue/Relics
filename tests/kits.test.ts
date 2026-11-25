@@ -4,6 +4,10 @@ import { Rng } from '../src/shared/rng';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { NO_INTENT, type Enemy, type FightEvent, type Hero, type Intent } from '../src/sim/types';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 const intent = (o: Partial<Intent> = {}): Intent => ({ ...NO_INTENT, ...o });
 

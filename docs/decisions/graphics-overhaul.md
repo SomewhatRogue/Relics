@@ -1267,3 +1267,17 @@ pictures, the room laying them).
 Kyle: "5s low level up to 15s plus materials. Its rare". `EDGE.price` is now by grade: 5s, 10s, 15s (shared/edges.ts),
 with the material as before; the first plain one of each element still free. Merren's short-of-coin line no longer names a
 sum ("You're short, and I don't haggle, I'm too old to enjoy it."). (Claude Opus 5.5)
+
+## 2026-11-25: damage ranges, rolled every hit
+
+Kyle: "weapons should have damage ranges shown on them that go up with level too", then "Rolls inside the range and
+then modified by str etc". Spec first (docs/design/damage-ranges.md), then one Sonnet builder (25 steps). Each hero
+hit rolls inside its weapon's spread (10, 15 or 25% either side by weapon) from a stream on the hero, then the
+modifiers apply as before; the average hit is today's. The card shows DAMAGE 9 TO 12 and ranged hit rows. The
+sample fight (tests/perfparity.sim.golden.json) re-recorded once with this alone; tests/loot.test.ts (tempo),
+rangerkit.test.ts and warrior.test.ts now compare against ranges. (Claude Opus 5.5)
+- Fixed in review: a hero's damage dice were seeded from their name on the first roll, and a handover renames the
+  heroes, so a friend who took the room mid-fight rolled differently (tests/hostpick.test.ts). The dice are now set when
+  a hero joins (sim/room.ts `join`, `dmgSeedOf`) and travel in the room's save; the sample fight re-recorded again. Ten
+  test files of other rules that pin exact hits now turn the spread off while they run (tests/nospread.ts `noSpread`).
+

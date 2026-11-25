@@ -22,6 +22,10 @@ import { blastShape } from '../src/sim/blastshape';
 import { NO_INTENT, type Enemy, type FightEvent } from '../src/sim/types';
 import type { ArenaRoom } from '../src/sim/room';
 import { field, run } from './foeyard';
+import { noSpread } from './nospread';
+
+// Exact hit numbers below: the damage roll off (docs/design/damage-ranges.md).
+noSpread();
 
 /** One of them at (15, 10), awake, and a hero with `weapon` `gap` tiles below it, facing it. */
 function yard(variant: FoeVariant, weapon: WeaponId, gap: number, more: Parameters<typeof field>[0] = []) {
