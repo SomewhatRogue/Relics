@@ -21,3 +21,18 @@ describe('the small goblin side on', () => {
     expect(gobSideOn({ id: 1, fx: 0.72, fy: 0.7 })).toBe(false); // not far enough across to turn back
   });
 });
+
+import { butcherSideParts } from '../src/client/butcherside';
+import { butcherLook } from '../src/client/butcherparts';
+
+describe('the butcher side on', () => {
+  it('every build, trophy, the Stoker and the Hempen Man inside its 27 by 33 canvas', () => {
+    const looks = [butcherLook(undefined), butcherLook(undefined, 'stoker'), butcherLook(undefined, undefined, 1), butcherLook(undefined, undefined, 2)];
+    for (const name of ['MAWL', 'SKARN', 'OLD SPOON', 'GUTCHAIN', 'MOTHER RUST', 'OLD KNUCKLES', 'A', 'B', 'C', 'D', 'E', 'F']) looks.push(butcherLook(name));
+    for (const l of looks) for (const p of butcherSideParts(l)) {
+      const [x, y] = [p[1] as number, p[2] as number];
+      expect(x, JSON.stringify(l)).toBeGreaterThanOrEqual(0), expect(y).toBeGreaterThanOrEqual(0);
+      expect(x, JSON.stringify(l)).toBeLessThan(27), expect(y).toBeLessThan(33);
+    }
+  });
+});

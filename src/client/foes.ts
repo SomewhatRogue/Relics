@@ -29,6 +29,7 @@ import { drawText } from './pixfont';
 import { GOB_PARTS, SPRITES, grow, makeSprite, type Sprite } from './sprites';
 import { butcherLook, butcherParts, type Arms } from './butcherparts';
 import { gobSide, gobSideOn, grownSide } from './gobside';
+import { butcherSideParts } from './butcherside';
 import { drawPounce, drawSpiderKind, drawSpitSign } from './spiders';
 import { SPIDER_SPRITES } from './spidersprites';
 import { isSpiderKind } from '../shared/spiders';
@@ -71,18 +72,18 @@ function cleaver(c: Ctx, x: number, y: number, a: number, arms: Arms = 'cleaver'
 }
 
 /** A named butcher's own sprites, made the first time it's seen (butcherparts.ts). */
-const BUTCHERS = new Map<string, { down: Sprite; up: Sprite; cut: typeof BUTCHER_CUT; k: number }>();
+const BUTCHERS = new Map<string, { down: Sprite; up: Sprite; side: Sprite; cut: typeof BUTCHER_CUT; k: number }>();
 const hempenOf = (e: Enemy): 1 | 2 | undefined => (e.boss?.who === 'hempen' ? (e.hp < e.maxHp * HEMPEN_BOSS.phase2 ? 2 : 1) : undefined);
 /** The Doorkeepers stand a size up: the butcher's shapes drawn again 1.15 as big (sprites.ts `grow`), never stretched. */
 const KEEPER = 1.15;
 const isKeeper = (e: Enemy) => e.boss?.who === 'latch' || e.boss?.who === 'hasp';
-function butcherSprites(e: Enemy): { down: Sprite; up: Sprite; cut: typeof BUTCHER_CUT; k: number } {
+function butcherSprites(e: Enemy): { down: Sprite; up: Sprite; side: Sprite; cut: typeof BUTCHER_CUT; k: number } {
   const l = butcherLook(e.name, e.variant, hempenOf(e)), k = Math.round((isKeeper(e) ? KEEPER : 1) * BODY.k * 20) / 20, key = `${l.build}.${l.trophy}.${l.soot}.${l.hempen ?? 0}.${l.tone ?? 0}.${k}`;
   let s = BUTCHERS.get(key);
   if (!s) {
-    const make = (up: boolean) => makeSprite(Math.round(27 * k), Math.round(33 * k), k === 1 ? butcherParts(l, up) : grow(butcherParts(l, up), k));
+    const make = (up: boolean | 'side') => { const ps = up === 'side' ? butcherSideParts(l) : butcherParts(l, up); return makeSprite(Math.round(27 * k), Math.round(33 * k), k === 1 ? ps : grow(ps, k)); };
     const C = BUTCHER_CUT, r = (v: number) => Math.round(v * k);
-    BUTCHERS.set(key, (s = { down: make(false), up: make(true), cut: { headTo: r(C.headTo), hip: r(C.hip), back: C.back.map(r) as typeof C.back, arm: C.arm.map(r) as typeof C.arm }, k }));
+    BUTCHERS.set(key, (s = { down: make(false), up: make(true), side: make('side'), cut: { headTo: r(C.headTo), hip: r(C.hip), back: C.back.map(r) as typeof C.back, arm: C.arm.map(r) as typeof C.arm }, k }));
   }
   return s;
 }
@@ -112,9 +113,12 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
   shadow(c, x, y, Math.max(hs(5), hs(10) - Math.round(pz.lift * HS / 2)));
   // The Hempen Man leans forward as if still on the gallows.
   if (hempenOf(e)) pz.lean += side;
-  const bx = x + Math.round(pz.ox * HS), by = y + Math.round((pz.oy - pz.lift) * HS), up = e.fy < -0.55, look = butcherSprites(e), arms = butcherLook(e.name, e.variant, hempenOf(e)).arms;
+  // Going mostly across the screen: in profile (butcherside.ts), walking with the side stride.
+  const sv = gobSideOn(e);
+  if (sv && pz.phase === 'rest' && e.moving) pz.step = 21 + (Math.floor(c.now * 7 + e.id * 0.37) % 4);
+  const bx = x + Math.round(pz.ox * HS), by = y + Math.round((pz.oy - pz.lift) * HS), up = !sv && e.fy < -0.55, look = butcherSprites(e), arms = butcherLook(e.name, e.variant, hempenOf(e)).arms;
   // In parts (figure.ts): the cleaver goes where the arm goes (over his head for the cleave and slam).
-  const body = jointed(up ? look.up : look.down, look.cut);
+  const body = jointed(sv ? look.side : up ? look.up : look.down, look.cut);
   layout(body, bx, by, e.fx < -0.2, pz, HS);
   const [ax, ay] = armOffset(ARM), hx = bx + side * Math.round(hs(7) * look.k) + ax, hy = by - Math.round(hs(13) * look.k) + ay;
   if (up) cleaver(c, hx, hy, arm, arms, c.now);

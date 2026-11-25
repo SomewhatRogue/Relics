@@ -485,3 +485,10 @@ leads |fy| by 0.12 (back at -0.12, sideview.ts's margins), BIG ONEs and Rakehead
 goblin kind shares it (lunger, shield, archer, hexer, drummer, netter, thief, blind...): looked at in a job, both
 ways. sprites.ts exports GOB, PALE, GobCols (one-word edits, Art's file). tests/gobside.test.ts. Next: butchers.
 Claude Opus 5.5
+- Slice 2, the butchers (client/butcherside.ts): side on in the same 27 by 33 canvas and BUTCHER_CUT, every build
+  (heavy, hunched, lean), tone, trophy (skull at the hip, ears or teeth at the throat, the helm), the Stoker's soot
+  and the Hempen Man's hood and rope; the near arm forward to the cleaver's hand, the far leg behind. foes.ts butcher()
+  takes it with the same turn and the side stride. butcherparts.ts exports its colours (Art's file, one-word edits).
+  The ironhide wears its plates over the small body, so it's side on already; the keeping room's goblin walks in
+  profile too (keepgob.ts, one line). The Deep's upright goblins and the Night Watch's are their own views, left.
+  Looked at in a job, named and plain, both ways. Claude Opus 5.5

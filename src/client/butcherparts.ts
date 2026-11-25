@@ -28,10 +28,10 @@ export function butcherLook(name: string | undefined, variant?: string, hempen?:
   return { build: BUILDS[h % 3], trophy: TROPHIES[(h >>> 4) % 4], arms: ARMS[(h >>> 8) % 3], soot: false, tone: (h >>> 12) % 3 };
 }
 
-const FOOT = '#2a3418', BONE = '#e8e0cc', DARK = '#2a1a14', EYE = '#ff4a3a';
+export const FOOT = '#2a3418', BONE = '#e8e0cc', DARK = '#2a1a14', EYE = '#ff4a3a';
 /** Hide (skin, shade, leg) and apron (cloth, strap) by tone: the plain green and leather, a yellower green and hide, a grey-green and blood-brown. */
-const HIDES = [['#5b6b2a', '#4a5a22', '#3a4a1f'], ['#6e7a2a', '#5a6622', '#454e1c'], ['#4e6236', '#3e5028', '#33421f']];
-const APRONS = [['#8a7a66', '#6a5a48'], ['#9a8a5a', '#6a5a38'], ['#6a4a40', '#4a3028']];
+export const HIDES = [['#5b6b2a', '#4a5a22', '#3a4a1f'], ['#6e7a2a', '#5a6622', '#454e1c'], ['#4e6236', '#3e5028', '#33421f']];
+export const APRONS = [['#8a7a66', '#6a5a48'], ['#9a8a5a', '#6a5a38'], ['#6a4a40', '#4a3028']];
 let SKIN = HIDES[0][0], SHADE = HIDES[0][1], LEG = HIDES[0][2];
 
 /** The body in parts, facing you or walking away (`up`). */
@@ -86,7 +86,7 @@ export function butcherParts(l: ButcherLook, up: boolean): Part[] {
   return p;
 }
 
-const ROPE = '#a89a72', KNOT = '#7a6e50', SACK = '#8a7a5a', STITCH = '#6a5a40';
+export const ROPE = '#a89a72', KNOT = '#7a6e50', SACK = '#8a7a5a', STITCH = '#6a5a40';
 /** The Hempen Man over the lean body: sacking for an apron and a hood, rope coiled across him, nooses at the belt. */
 function hempenParts(phase: 1 | 2, up: boolean, hy: number): Part[] {
   const p: Part[] = [['r', 8, 15, 11, 13, SACK], ['r', 8, 19, 11, 1, STITCH], ['r', 8, 24, 11, 1, STITCH]];

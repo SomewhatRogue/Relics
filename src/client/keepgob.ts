@@ -8,6 +8,7 @@ import type { Npc } from '../shared/arena';
 import { blitPose, shadow, type Ctx } from './draw';
 import { hs } from './heroscale';
 import { SPRITES } from './sprites';
+import { gobSide } from './gobside';
 
 /** Its look's name in the room's people (drawNpc hands it here). */
 export const KEEP_GOB = 'keepgob';
@@ -21,7 +22,8 @@ export function drawKeepGob(c: Ctx, n: Npc, x: number, y: number, fx: number, wa
   if (walking) {
     // A low, quick shuffle, the head down.
     const bob = Math.floor(t * 6) % 2 ? -1 : 0;
-    return blitPose(c, fy < -0.55 ? SPRITES.scrapperUp : SPRITES.scrapper, x, y + bob, left, 1, 0.96, 0, 0);
+    // (Going across, in profile: gobside.ts; General, 2026-11-25.)
+    return blitPose(c, Math.abs(fx) - Math.abs(fy) > 0.12 ? gobSide().gob : fy < -0.55 ? SPRITES.scrapperUp : SPRITES.scrapper, x, y + bob, left, 1, 0.96, 0, 0);
   }
   if (atHoard(tx)) {
     // Up on its toes into the shelf, now and then shifting what's on it, back down, and again.
