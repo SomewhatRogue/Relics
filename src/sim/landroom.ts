@@ -11,6 +11,7 @@
 import { TERR, territoryPlan } from '../shared/territory';
 import { dreadFor } from './dreadplace';
 import { scaleBosses } from './party';
+import { layGathers } from './matdrops';
 import { ArenaRoom } from './room';
 import { plateByLevel } from '../shared/plate';
 import type { Run } from './run';
@@ -38,6 +39,8 @@ export function landRoom(run: Run): ArenaRoom {
     e.harm = +((e.harm ?? 1) * room.tough.harm).toFixed(3);
   }
   scaleBosses(room.enemies, n);
+  // The land's dressings lie where the map says (shared/gatefieldsgather.ts): rolled now, the hard place's laid when its pack is dead.
+  layGathers(room, job.seed + run.index);
   room.board = {};
   room.dread = { by: dreadFor(job) };
   // Out in the open, a cage can hold a false prisoner (sim/falsecage.ts), as on a job.

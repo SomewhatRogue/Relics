@@ -1247,3 +1247,18 @@ Kyle: "Yes and yes" (Old Merren is the person; build it here).
   the Charcoal Hut, FROST over a live fire asking first, NO, KEEP IT. Not seen: the level 5 toast (a test hero has no
   arrival runner yet), a guest's edge in a party, the countdown over five real jobs. (Claude Opus 5.5)
 
+## 2026-11-25: grades of edge, and dressings found on the north fields
+
+Kyle: "better quality materials for higher burn etc from the wild. I like having to find the materials more than
+buying them." One lore-keeper call (the nine dressings, where each lies, STRONG and FIERCE), then I wrote the shared
+parts (materials, `gathers` on the map, `Grade`, `EDGE_MATS`, `GRADE_MUL` in edges.ts) and two Sonnet builders on
+separate files: the fight and Merren (17 steps: `afflict` takes a grade, `e.burnMul`, a bolt carries the grade,
+Merren's two-step panel) and the map (33 steps: the spots, three stumps, a struck pine drawn the tile way, the
+pictures, the room laying them).
+- Fixed in review: the den's saltpetre was laid by wrapping `room.step` in landroom.ts; it is now called on each
+  death beside `dropMats` in sim/room.ts, and its test goes through `layAfter`.
+- The parity golden unchanged (grade 1 is today's numbers).
+- Seen in a phone-sized browser: FIRE's three grades, the plain one off for want of charcoal, FIERCE FIRE put on with
+  saltpetre, his grade 3 line. Not seen: the dressings lying in a real trip, the struck pine looks thin (an art pass).
+  (Claude Opus 5.5)
+

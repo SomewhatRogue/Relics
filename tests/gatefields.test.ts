@@ -150,4 +150,15 @@ describe('the Gate Fields', () => {
     expect(m.soil!.some((q) => q.mat === 'furrow')).toBe(false);
     expect(m.soil!.filter((q) => q.mat === 'crop').length).toBeGreaterThan(8);
   });
+
+  it('has the struck pine at the wood\'s edge, solid, and three old stumps beside the clearing\'s', () => {
+    const m = plan(3).map, pine = m.blocks.find((b) => b.kind === 'struckpine')!;
+    expect(pine).toBeDefined();
+    expect(pine.y).toBeLessThan(28);
+    expect((m.rounds ?? []).filter((r) => r.kind === 'stump').length).toBeGreaterThanOrEqual(3 + 5);
+    useMap(m);
+    const p = { x: pine.x + pine.w / 2, y: pine.y + pine.h / 2 };
+    collide(p, 0.45);
+    expect(Math.hypot(p.x - pine.x - pine.w / 2, p.y - pine.y - pine.h / 2)).toBeGreaterThan(0.2);
+  });
 });

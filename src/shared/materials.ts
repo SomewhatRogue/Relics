@@ -4,8 +4,11 @@
  * corner's elements will (element-augments.md).
  */
 
-export type MatId = 'hide' | 'silk' | 'brood' | 'charcoal';
-export const MAT_IDS: MatId[] = ['hide', 'silk', 'brood', 'charcoal'];
+export type MatId =
+  | 'hide' | 'silk' | 'brood'
+  // The dressings Old Merren works into an edge, by grade (shared/edges.ts `EDGE_MATS`; the lore keeper, 2026-11-25):
+  | 'charcoal' | 'fatwood' | 'saltpetre' | 'clay' | 'mint' | 'peat' | 'struck' | 'amber' | 'thunder';
+export const MAT_IDS: MatId[] = ['hide', 'silk', 'brood', 'charcoal', 'fatwood', 'saltpetre', 'clay', 'mint', 'peat', 'struck', 'amber', 'thunder'];
 
 /** How many of each a hero holds. */
 export type Mats = Partial<Record<MatId, number>>;

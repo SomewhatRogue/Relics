@@ -6,7 +6,8 @@
  */
 import { freezeFor } from './bosshold';
 import { meatySort } from '../shared/meaty';
-import { BURN, FLARE, FROST, SHATTER, SPIDER, STEAM, STORM, STREAM, type Augment } from '../shared/tuning';
+import { BURN, FLARE, FROST, FROST_GRADE, SHATTER, SPIDER, STEAM, STORM, STREAM, type Augment } from '../shared/tuning';
+import { GRADE_MUL, type Grade } from '../shared/edges';
 import { shove } from './bodies';
 import { clearElements, damage, frozen, isDummy } from './damage';
 import type { Rng } from '../shared/rng';
@@ -48,11 +49,13 @@ const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.
 export const burning = (e: Enemy, now: number) => e.burnUntil > now;
 export const chilled = (e: Enemy, now: number) => e.chillUntil > now;
 
-function ignite(e: Enemy, now: number, ev: FightEvent[]): void {
-  if (!burning(e, now)) ev.push({ k: 'ignite', x: e.x, y: e.y }), (e.burnNext = now + BURN.every);
+function ignite(e: Enemy, now: number, ev: FightEvent[], grade: Grade = 1): void {
+  if (!burning(e, now)) ev.push({ k: 'ignite', x: e.x, y: e.y }), (e.burnNext = now + BURN.every), delete e.burnMul;
+  // A STRONG or FIERCE edge burns harder and longer (sim/traits.ts forgedGrade); a plain one leaves no mark on the goblin.
+  if (grade > 1 && GRADE_MUL[grade] > (e.burnMul ?? 1)) e.burnMul = GRADE_MUL[grade];
   // Butchers, heavies, shield-bearers and ironhides catch less (BURN.tough); in the rain it burns out sooner (shared/sky.ts).
   const tough = e.kind === 'butcher' || e.variant === 'heavy' || e.variant === 'shield' || e.variant === 'ironhide' || meatySort(e);
-  e.burnUntil = now + BURN.time * (tough ? BURN.tough : 1) * burnFor(currentMap().theme);
+  e.burnUntil = now + BURN.time * (tough ? BURN.tough : 1) * burnFor(currentMap().theme) * (e.burnMul ?? 1);
 }
 
 let casts = 0;
@@ -64,14 +67,14 @@ export const newCast = () => ++casts;
 export interface StormHow { cast?: number; jump?: number }
 
 /** An element lands on a goblin with a blow of `n` damage (storm: jumping as `how` says). */
-export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHow = {}): void {
+export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHow = {}, grade: Grade = 1): void {
   if (!el || e.act === 'dead') return;
   const { now, ev } = w;
   if (el === 'fire') {
     if (frozen(e, now) || chilled(e, now)) return steam(w, e);
     // Standing in water it goes out as it lands: a cloud of steam instead (sim/steam.ts).
     if (douse(w, e)) return;
-    ignite(e, now, ev);
+    ignite(e, now, ev, grade);
     // ATTUNED: a Mage's fire burns longer (sim/techmage.ts).
     burnLonger(w, e);
   } else if (el === 'frost') {
@@ -82,7 +85,7 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHo
     iceOn(w.fx, e, now, ev);
     if (frozen(e, now)) return;
     // A boss or BIG ONE freezes briefly, then not again for a while: chilled only (sim/bosshold.ts).
-    const hold = chilled(e, now) ? freezeFor(e, now, FROST.freeze * (e.weight <= 1 ? FROST.small : 1)) : 0;
+    const hold = chilled(e, now) ? freezeFor(e, now, FROST.freeze * FROST_GRADE[grade] * (e.weight <= 1 ? FROST.small : 1)) : 0;
     if (hold) {
       e.chillUntil = 0;
       // A small one stays frozen longer: a set-up for a heavy hit to send it skidding (sim/iceslide.ts).
@@ -91,10 +94,10 @@ export function afflict(w: World, e: Enemy, el: Augment, n: number, how: StormHo
       if (e.act === 'attack' || e.act === 'chase' || e.act === 'flinch') Object.assign(e, { act: isDummy(e) ? 'idle' : 'chase', actT: 0 });
       ev.push({ k: 'freeze', x: e.x, y: e.y });
     } else {
-      e.chillUntil = now + FROST.chill;
+      e.chillUntil = now + FROST.chill * FROST_GRADE[grade];
       ev.push({ k: 'chill', x: e.x, y: e.y });
     }
-  } else zap(w, e, n, how.cast ?? newCast(), how.jump);
+  } else zap(w, e, grade > 1 ? Math.round(n * GRADE_MUL[grade]) : n, how.cast ?? newCast(), how.jump);
 }
 
 /** Frost that only slows (a Mage's tap, never a freeze on its own): fire on the chilled is steam, as ever.
@@ -190,7 +193,7 @@ export function stepElements(w: World): void {
     if (e.ashAt) spread(w, e);
     else if (now >= e.burnNext) {
       e.burnNext = now + BURN.every;
-      damage(e, BURN.dmg, now, ev, { tick: true, el: 'fire' });
+      damage(e, e.burnMul ? Math.round(BURN.dmg * e.burnMul) : BURN.dmg, now, ev, { tick: true, el: 'fire' });
     }
   }
 }

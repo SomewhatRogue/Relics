@@ -65,3 +65,22 @@ beast's.
   North Gate." under it.
 - Not yet: charcoal's own picture and its place on the Charcoal Hut's shelf (slice 3); the corner (slice 4).
 
+## Grades, and what is gathered (2026-11-25)
+
+Kyle: "You should also be able to get better quality materials for higher burn etc from the wild. I like having to
+find the materials more than buying them." Each element of an edge has three grades, by the dressing Merren works in
+(the lore keeper's; shared/edges.ts `EDGE_MATS`); the grade multiplies the element's main number (fire: the burn's
+damage and length, 1, 1.5, 2; storm: the shock, the same; frost: the hold, 1, 1.3, 1.6, softer since a frozen foe
+can't act). The card says FIRE, STRONG FIRE, FIERCE FIRE.
+
+| Element | 1 | 2 | 3 |
+| --- | --- | --- | --- |
+| Fire | CHARCOAL (bought at the Charcoal Hut, or lumps by its clamp) | FATWOOD (old pine stumps, the Wood's Edge) | SALTPETRE (inside the Rough Pasture's den, once its pack is dead) |
+| Frost | COLD CLAY (the stepped pond's bank) | WATER MINT (the east river's edge) | BLACK PEAT (the fen, to come) |
+| Storm | STRUCK PINE (splinters at a lightning-struck pine, the Wood's Edge) | AMBER (the east river's gravel) | THUNDERSTONE (the deeper wood, to come) |
+
+Only charcoal is sold. The rest lie at their spots, rolled by the room each trip (`map.gathers`, `layGathers` in
+sim/matdrops.ts, its own seeded dice), and the den's saltpetre is laid when the last of pack 406 dies (`layAfter`,
+called beside `dropMats` in sim/room.ts). Never the Blacktongue's copper; never hemlock or nightshade (the Rogue's
+unnamed poison). For the bible: saltpetre forms on the den's walls, and no line explains why.
+

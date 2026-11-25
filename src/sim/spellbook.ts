@@ -43,6 +43,6 @@ export function tapElement(w: World, h: Hero, e: Enemy, el: Augment, n: number):
 export function shotElement(w: World, b: Bolt, e: Enemy): void {
   if (b.chills && b.el === 'frost') return chill(w, e, ICICLE_SHARE);
   const how = { cast: (b.cast ??= newCast()) };
-  afflict(w, e, b.el, b.dmg, how);
-  if (b.freeze) afflict(w, e, b.el, b.dmg, how);
+  afflict(w, e, b.el, b.dmg, how, b.grade);
+  if (b.freeze) afflict(w, e, b.el, b.dmg, how, b.grade);
 }

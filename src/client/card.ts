@@ -4,6 +4,7 @@
  * worse. Used by the loot card, chests and the pack.
  */
 import { CLASS_DODGES, CLASS_GUARD, guardOf, HUNGRY, type HungryId, LASTS, POTIONS, type PotionId, MODS, MOD_TEXT, PLUS, TIERS, TRAITS, WEAPONS, CHARGE, GUARD, RARE, SPELL, costText, gearStats, ilvlOf, itemName, levelOf, plusOf, temperOf, modFits, slotOf, traitText, type HeroClass, type Item, type Mod, type MageKit, type WeaponId } from '../shared/tuning';
+import { gradeOf } from '../shared/edges';
 import { EDGEW } from './edgewords';
 import { CARDW } from './shopwords';
 import { itemCol, isUnique, uniqueLine } from './uniquelook';
@@ -125,7 +126,7 @@ export function card(it: Item, h?: Hero, brief = false): string {
     return `<div class="tr${use ? '' : ' nouse'}"><b>${barWords(MODS[m.id]?.name ?? m.id, cls)} ${modValue(m, grow)}${MOD_TEXT[m.id] ? ':' : ''}</b> ${barWords(MOD_TEXT[m.id] ?? '', cls)}${use ? '' : ` <i>${CARDW.noUse}</i>`}</div>`;
   });
   const traits = it.traits.map((k) => `<div class="tr"><b>${barWords(TRAITS[k].name, cls)}:</b> ${traitText(k, cls)}</div>`);
-  if (it.edge && it.edge.jobs > 0) traits.push(`<div class="tr"><b>${EDGEW.card(it.edge.el, it.edge.jobs)}</b></div>`);
+  if (it.edge && it.edge.jobs > 0) traits.push(`<div class="tr"><b>${EDGEW.card(it.edge.el, it.edge.jobs, gradeOf(it))}</b></div>`);
   // Its plus as pips, and what the plus adds (forgeview.ts).
   const plus = plusOf(it) ? [`<div class="tr plus"><b>${CARDW.plus(plusOf(it))}</b> ${plusPips(plusOf(it))} ${plusLine(it)}</div>`] : [];
   // Struck well at the anvil (shared/forgestrike.ts): how much more its upgrades count for.

@@ -85,6 +85,9 @@ The Deep chat, until it finishes (then the general chat).
   uniques kept; sim/traits.ts reads `Item.edge`; card.ts shows it; Old Merren has a panel and stands by the rubble
   till the Old Quarter clears (town.ts, layoutmove.ts, layouttown.ts); the errand `merren` (errands.ts, runner.ts);
   `GEAR.coal` 12 (sim/pack.ts). The price (20s) is waiting on Kyle.
+  Also (2026-11-25): edge grades (shared/edges.ts) reach the fight: `afflict(..., grade)` in sim/elements.ts,
+  `Enemy.burnMul` and `Bolt.grade` (sim/types.ts), `FROST_GRADE` in shared/magic.ts, spellbook.ts passes a bolt's;
+  `layAfter` called in sim/room.ts; `struckpine` in arena.ts's BlockKind; nine dressings in shared/materials.ts.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

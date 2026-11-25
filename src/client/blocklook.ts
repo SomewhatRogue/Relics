@@ -16,6 +16,7 @@ export const LOOK: Record<Block['kind'], Look> = {
   // (Dark and gold: the awning's stripes bone, not cream; the grade turns its red to rust.)
   stall: { tall: 12, roof: '#7a2a2a', ridge: '#9a8c6a', wall: '#5a3d22', windows: false },
   clamp: { tall: 7, roof: '#3a4426', ridge: '#4a5630', wall: '#2a2118', windows: false },
+  struckpine: { tall: 30, roof: '#1f3020', ridge: '#2a4328', wall: '#3a2a1c', windows: false },
   tent: { tall: 14, roof: '#8a7a5a', ridge: '#a8986a', wall: '#6a5a40', windows: false },
   rockwall: { tall: 14, roof: '#45414c', ridge: '#55505e', wall: '#34313a', windows: false },
   fence: { tall: 8, roof: '#5a3d22', ridge: '#6b4a2b', wall: '#4a3420', windows: false },

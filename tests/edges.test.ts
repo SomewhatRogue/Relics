@@ -1,6 +1,6 @@
 /** Elements put on a weapon (shared/edges.ts): the rules, the countdown, the load, and the fight reading them. */
 import { describe, expect, it } from 'vitest';
-import { EDGE, fitEdge, fitEdges, putEdge, tickEdges, type Edge } from '../src/shared/edges';
+import { EDGE, edgeCost, edgeRefusal, fitEdge, fitEdges, putEdge, tickEdges, type Edge } from '../src/shared/edges';
 import { ELEMENT_TRAITS, type Item } from '../src/shared/loot';
 import { rollGear } from '../src/shared/gear';
 import { Rng } from '../src/shared/rng';
@@ -34,7 +34,28 @@ describe('putEdge', () => {
     const w = sword();
     putEdge(hero(), w, 'fire');
     putEdge(hero(), w, 'frost');
-    expect(w.edge).toEqual({ el: 'frost', jobs: EDGE.jobs });
+    expect(w.edge).toEqual({ el: 'frost', jobs: EDGE.jobs, grade: 1 });
+  });
+});
+
+describe('grades', () => {
+  it('grade 2 fire is 20s and 1 fatwood, never free; the first plain fire is free; grade 3 frost is 1 peat', () => {
+    expect(edgeCost({}, 'fire', 1).free).toBe(true);
+    expect(edgeCost({}, 'fire', 2)).toEqual({ gold: EDGE.price, mats: { fatwood: 1 }, free: false });
+    expect(edgeCost({ edgeFree: ['fire'] }, 'fire', 2).free).toBe(false);
+    expect(edgeCost({}, 'frost', 3)).toEqual({ gold: EDGE.price, mats: { peat: 1 }, free: false });
+  });
+  it('is refused for a missing material, and putEdge records the grade', () => {
+    expect(edgeRefusal(hero(), sword(), 'fire', 2)).toBe('mats');
+    const p = hero({ mats: { fatwood: 1 } }), w = sword();
+    expect(putEdge(p, w, 'fire', 2)).not.toBeNull();
+    expect(w.edge).toEqual({ el: 'fire', jobs: EDGE.jobs, grade: 2 });
+    expect(p.mats?.fatwood).toBe(0);
+  });
+  it('fitEdge keeps grade 2 and 3 and drops junk grades', () => {
+    expect(fitEdge({ el: 'fire', jobs: 3, grade: 2 })).toEqual({ el: 'fire', jobs: 3, grade: 2 });
+    expect(fitEdge({ el: 'frost', jobs: 3, grade: 3 })?.grade).toBe(3);
+    expect(fitEdge({ el: 'fire', jobs: 3, grade: 9 })).toEqual({ el: 'fire', jobs: 3 });
   });
 });
 
@@ -43,7 +64,7 @@ describe('tickEdges and fitEdge', () => {
     const w = sword({ edge: { el: 'storm', jobs: 2 } }), x = sword();
     expect(tickEdges([w, x, undefined])).toEqual([]);
     expect(w.edge?.jobs).toBe(1);
-    expect(tickEdges([w])).toEqual(['storm']);
+    expect(tickEdges([w])).toEqual([{ el: 'storm', grade: 1 }]);
     expect(w.edge).toBeUndefined();
   });
   it('keeps a good edge and drops junk', () => {

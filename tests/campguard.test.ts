@@ -56,7 +56,8 @@ describe('the camp guards', () => {
     expect(w.run.kills).toBe(0);
     expect(w.run.gold).toBe(0);
     expect(w.room.drops).toHaveLength(0);
-    expect(w.room.pickups).toHaveLength(0);
+    // (What lies at the land's gather spots is laid at the start of a trip, not by this kill.)
+    expect(w.room.pickups.filter((p) => !w.room.map.gathers?.some((g) => g.x === p.x && g.y === p.y))).toHaveLength(0);
     expect(Object.values(w.run.board ?? {}).every((s) => s.kills === 0 && s.dealt === 0)).toBe(true);
   });
 

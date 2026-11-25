@@ -26,5 +26,10 @@ export const MERRENW = {
   /** The button names. */
   el: { fire: 'FIRE', frost: 'FROST', storm: 'STORM' } as Record<EdgeEl, string>,
   free: 'FREE',
+  strong: 'STRONG',
+  fierce: 'FIERCE',
+  need: (mat: string) => `You need 1 ${mat}.`,
+  fierceDone: "Well now, I don't think I've had the like of this by my wheel since before the siege, and you've come back with *all* your fingers on, too.",
+  back: 'BACK',
   charcoal: 'CHARCOAL',
 };

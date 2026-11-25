@@ -507,6 +507,8 @@ export interface Enemy extends Body {
   /** Elements: burning until, next burn tick, chilled until, frozen solid until (room time). */
   burnUntil: number;
   burnNext: number;
+  /** How much harder a STRONG or FIERCE edge's fire ticks (sim/elements.ts); absent for a plain burn. */
+  burnMul?: number;
   chillUntil: number;
   frozenUntil: number;
   /** The Rogue's (sim/venom.ts): bleeding from a skewer until, its next tick; poison stacks, until, next
@@ -1151,6 +1153,8 @@ export interface Bolt {
   chills?: boolean;
   /** Its storm cast: a wet goblin is jumped to once a shot (sim/elements.ts). */
   cast?: number;
+  /** A STRONG (2) or FIERCE (3) edge's grade, for a forged shot's element (absent: plain). */
+  grade?: 2 | 3;
   /** A wand's: landing on a goblin mid wind-up, it breaks the blow off (sim/spells.ts). */
   interrupts?: boolean;
   /** A wand's burst loosed on the white flash: it breaks off whatever the goblin it hits is doing. */

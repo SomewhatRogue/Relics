@@ -1421,7 +1421,7 @@ export class Game {
       // The longest streak this job, for its board (shared/streak.ts).
       ...((run.board?.[ME]?.streak ?? 0) > 0 ? { streak: run.board![ME].streak } : {}),
     });
-    for (const el of spent) toast(EDGEW.gone(el), { kind: 'quest' });
+    for (const s of spent) toast(EDGEW.gone(s.el, s.grade), { kind: 'quest' });
     // The quest in hand counts this job, whoever's it was (a run joined counts: Kyle, 2026-11-13).
     this.questEnd({ job: run.job, won, rescued, dens: run.dens ?? 0 });
     unbank(p.id);

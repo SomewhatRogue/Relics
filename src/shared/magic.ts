@@ -187,6 +187,9 @@ export const BURN = { time: 3, every: 0.5, dmg: 4, spread: 0.7, tough: 0.5 };
  *  a second frost freezes them solid for `freeze` (a heavy blow then shatters them: SHATTER). A small one
  *  (weight 1 or less) stays frozen `small` times as long, a set-up for a heavy hit (FLING; Kyle, 2026-11-05). */
 export const FROST = { chill: 3, slow: 0.5, windup: 0.6, freeze: 2.2, small: 1.8 };
+/** How much longer a STRONG (2) or FIERCE (3) edge's chill and freeze last (Kyle, 2026-11-25). Softer than fire's and
+ *  storm's GRADE_MUL (shared/edges.ts): a frozen goblin cannot act at all, so length is worth more than damage. */
+export const FROST_GRADE: Record<1 | 2 | 3, number> = { 1: 1, 2: 1.3, 3: 1.6 };
 /** Storm's job, shields and water (Kyle, 2026-11-04). It ignores a shield-bearer's board, front block
  *  and all. Dry, it jumps nowhere. On a wet goblin (in water, or out in the rain: sim/wet.ts) it lands
  *  `wet` times harder and jumps to every other wet goblin within `reach`, each taking `share` of the

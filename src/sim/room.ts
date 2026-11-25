@@ -29,7 +29,7 @@ import { damage, isDead } from './damage';
 import { HUNGRY_FX, onKill, stepHungry, wears } from './hungry';
 import { newChest, startChest, stepChests, type Chest } from './chests';
 import { stepFlask, stepPotions, usePotion, type Smoke } from './flasks';
-import { dropMats } from './matdrops';
+import { dropMats, layAfter } from './matdrops';
 import { dropPickups, stepPickups, type Pickup } from './pickups';
 import { bossRelics } from './relicboss';
 import { dropCoal, stepCoals, type Coal } from './lantern';
@@ -81,7 +81,7 @@ import { stepRush } from './rush';
 import { grasp } from './grasp';
 import { bladeStruck, looseBlade } from './spellblade';
 import { fireSkill, stepSkills } from './skills';
-import { forgedElement, has, traitsOf } from './traits';
+import { forgedElement, forgedGrade, has, traitsOf } from './traits';
 import { fireHook, stepHook } from './hook';
 import { throwSpear } from './spearchain';
 import { stepDomes } from './staffholds';
@@ -556,6 +556,8 @@ export class ArenaRoom {
       dropCoal(e, this.coals);
       dropPickups(e, this.pickups, this.lootRng, this.exped ? EXPED_COINS : undefined);
       dropMats(e, this.pickups, this.lootRng, this.roam);
+      // The last of a pack dead: what lay in its lair (a den's saltpetre) is laid (map.gathers `after`).
+      layAfter(this);
       const by = this.heroes.find((x) => x.id === e.lastBy);
       if (by) onKill(by, this.time, this.events);
     }
@@ -670,7 +672,7 @@ export class ArenaRoom {
       }
       return;
     }
-    if (charged) afflict(w, e, forgedElement(h), n);
+    if (charged) afflict(w, e, forgedElement(h), n, {}, forgedGrade(h));
     // The censer's coals set alight what they strike.
     if (currentSwing(h).burn) afflict(w, e, 'fire', n);
   }
@@ -753,6 +755,8 @@ export class ArenaRoom {
     if (s.shot && land) for (const b of this.bolts.slice(bolts)) (b.hz = h.z ?? 0), (b.range += HEIGHT.reach * looksDown(this.map, h, b.dx, b.dy));
     // The Jealous Rod: a charged spell jumps to every goblin near what it hits.
     if (full && wears(h, 'jealous')) for (const b of this.bolts.slice(bolts)) b.chain = true;
+    // A STRONG or FIERCE edge's grade rides the shot to what it hits (sim/spellbook.ts shotElement).
+    if (forged && forgedGrade(h) > 1) for (const b of this.bolts.slice(bolts)) b.grade = forgedGrade(h) as 2 | 3;
     // WIDE BURST: a Mage's bursts reach further.
     for (const b of this.bolts.slice(bolts)) b.burst *= burstMult(h);
     const heal = healOf(h, s);

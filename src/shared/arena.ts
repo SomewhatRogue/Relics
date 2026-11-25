@@ -28,7 +28,7 @@ export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | '
   // crates, sacks, a handcart, a woodpile, the smith's anvil, a washtub, a clothesline, a chopping block, a hen
   // coop, flower pots by a door.
   | 'barrels' | 'crates' | 'sacks' | 'handcart' | 'woodpile' | 'anvil' | 'washtub' | 'clothesline' | 'chopblock' | 'coop' | 'pots';
-export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'clamp' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
+export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'clamp' | 'struckpine' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
   // The Keeping Room's own (shared/keepingroom.ts, client/tilefurnkeep.ts).
@@ -346,6 +346,9 @@ export interface GameMap {
   /** Way stations on the land (docs/design/outside-the-gate.md): safe ground, a keeper, a fire. */
   stations?: { name: string; x: number; y: number; r: number }[];
   /** The land's watch posts (sim/campguard.ts): a guard stands at each and shoots any goblin within `r`. */
+  /** Where the land's dressings lie (docs/design/materials.md "Gathered"): rolled by the room at the start of a trip
+   *  (`chance`, default 1), or laid only once every foe of pack `after` is dead (the hard place). */
+  gathers?: { x: number; y: number; mat: import('./materials').MatId; chance?: number; after?: number }[];
   guards?: { x: number; y: number; r: number }[];
   /** The land's ground by stretch (docs/design/biome-sets.md, "Biodiversity"): boxes naming the pattern book's look there (client/looks.ts), so one long map crosses several kinds of country. Drawing only. */
   grounds?: { look: string; x: number; y: number; w: number; h: number }[];

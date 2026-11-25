@@ -23,6 +23,7 @@ import { lightFor } from './timeofday.js';
 import { BARN, GATE_FIELDS, HUT, layBarn, layFarmland, layGate, layPasture, layRoadAndEdges, layWood } from './gatefieldsland.js';
 import { GATE_PACKS, layFoes } from './gatefieldsfoes.js';
 import { CAMP_FOLK, CAMP_POSTS, layCamp } from './gatefieldscamp.js';
+import { GATHERS, layGather } from './gatefieldsgather.js';
 import { HUT_KEEPER, KEEPER, layDetail } from './gatefieldsdetail.js';
 
 export { GATE_FIELDS };
@@ -40,7 +41,7 @@ export function gateFieldsPlan(job: Job): TerrPlan {
   const k = newKit(new Rng(job.seed * 7927 + 83));
   Object.assign(k, { mw: GATE_FIELDS.w, mh: GATE_FIELDS.h });
   const line = layRoadAndEdges(k);
-  layFoes(k), layBarn(k), layFarmland(k), layCamp(k), layDetail(k), layPasture(k), layWood(k), layGate(k, line);
+  layFoes(k), layBarn(k), layFarmland(k), layCamp(k), layDetail(k), layGather(k), layPasture(k), layWood(k), layGate(k, line);
   const s0: Stretch = { name: 'THE NORTH FIELDS', keep: [], packs: [...GATE_PACKS] };
   const map: GameMap = {
     name: 'THE NORTH FIELDS', w: GATE_FIELDS.w, h: GATE_FIELDS.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
@@ -48,7 +49,7 @@ export function gateFieldsPlan(job: Job): TerrPlan {
     water: k.water, soil: k.soil, marks: k.marks, stretches: [s0],
     grounds: [{ look: 'harvest', x: 0, y: 58, w: 56, h: 38 }, { look: 'fallow', x: 0, y: 28, w: 56, h: 30 }, { look: 'mossy', x: 0, y: 0, w: 56, h: 28 }],
     npcs: [{ ...KEEPER, name: 'KEEPER', talk: 'station:fieldbarn', look: 'villager' }, { ...HUT_KEEPER, name: 'KEEPER', talk: 'station:charcoalhut', look: 'villager' }, ...CAMP_FOLK.map((f) => ({ ...f, name: '', talk: '', mute: true })), ...CAMP_POSTS.map((p) => ({ x: p.x, y: p.y, name: '', talk: '', look: 'guard', mute: true }))],
-    stations: [{ name: 'THE FIELD BARN', x: BARN.x, y: BARN.y, r: BARN.r }, { name: 'THE CHARCOAL HUT', x: HUT.x, y: HUT.y, r: HUT.r }], guards: CAMP_POSTS.map((p) => ({ ...p })),
+    stations: [{ name: 'THE FIELD BARN', x: BARN.x, y: BARN.y, r: BARN.r }, { name: 'THE CHARCOAL HUT', x: HUT.x, y: HUT.y, r: HUT.r }], guards: CAMP_POSTS.map((p) => ({ ...p })), gathers: GATHERS.map((g) => ({ ...g })),
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: GATE_ZONES.map((z) => ({ ...z })) };
 }

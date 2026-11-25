@@ -28,6 +28,7 @@ export const held = (e: Enemy, now: number) => e.act === 'stunned' || e.act === 
 
 export function clearElements(e: Enemy): void {
   e.burnUntil = e.chillUntil = e.frozenUntil = e.snareUntil = 0;
+  delete e.burnMul;
   // The Rogue's bleeds and poison (sim/venom.ts) go with it.
   e.bleedUntil = e.venomUntil = e.pukeUntil = e.venom = 0;
   e.venomHard = false;
