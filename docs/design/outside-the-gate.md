@@ -123,6 +123,27 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
 
 Not yet: the view off the east side; bounties, materials, quests; the wood beyond the far end.
 
+## Bounties: the first slice (2026-11-24)
+
+- **Posted at the North Gate**, from level 3: two a day out of a short list for the north fields, picked by the day
+  (shared/bounties.ts). Each names something that lives out there by its pack: the wolves of the Rough Pasture
+  (405), the den's pouncers (406), the spiders' nest (407, the nest itself), the raiders in the Common Strips (402 to
+  404), the snarers at the wood's edge (408). TAKE puts it in hand; two at most.
+- **Counted on the land**: a death in a roaming room whose body was of a pack (and kind, where it says) in a bounty
+  you hold adds one, whoever struck, so a party hunts together. Across trips: what you killed stays counted. The
+  goal line shows it (3 of 4).
+- **Handed in at the gate or at any shelter's keeper** once the count is made: paid in copper and experience, then
+  gone from your hand; a new one can be taken the next day. Who posts them and what proof is asked for is the lore
+  keeper's to word.
+- **Built** (2026-11-24): shared/bounties.ts (five: the wolves 5, the den 4, the nest 1, the raiders 8, the snarers 4;
+  40 to 70 copper, 60 to 120 experience), client/bountyui.ts and bountywords.ts, `Profile.bounties`. The lore keeper:
+  the watch posts them and pays by the head, on your word (the old head wages, story-bible.md "The Night Watch");
+  never "keeper" for the one that runs the wolves. The count shows in the land's banner beside the place name. Coin
+  paid at a keeper goes to the save at once; the room's purse is taken when you set out, so it is spendable from the
+  next trip.
+- **Not yet**: named ones; materials (what they are for is Kyle's call, with Economy and Gear); bounties for other
+  maps.
+
 ## Order
 
 1. The Gate Fields, walkable from the gate and back, enemies by stretch, the set and the seam drawn; one way

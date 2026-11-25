@@ -71,6 +71,9 @@ The Deep chat, until it finishes (then the general chat).
   sim/travel.ts), `HeroActs.travel` (sim/hero.ts, room.ts), a `travelled` event, `Profile.shelters` (shared/progress.ts,
   client/save.ts), `Job.at` (shared/jobs.ts), its start in Territories' sim/landroom.ts (roam only), `clamp` in
   arena.ts's BlockKind with a card in Art's three/propcards.ts and a plain look in blocklook.ts.
+  Also (2026-11-24), for Economy and Town quests: bounties for the north fields (shared/bounties.ts, posted at the North
+  Gate, paid by the watch in copper and xp at the gate or a shelter); `Profile.bounties` in shared/progress.ts and
+  client/save.ts; a few lines in Town quests' townui.ts; the count in the land's banner (main.ts).
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

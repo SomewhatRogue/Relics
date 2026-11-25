@@ -3,6 +3,7 @@
  * own class (for life), level, gold and kit; the world (the town, the chapter, the council) is shared
  * by all of them. (The shared world moves to the server, api/world.ts, when the group plays online.)
  */
+import { fitBounties } from '../shared/bounties';
 import { fitDeepBest } from '../shared/deepskill';
 import { deepTest } from './deeptest';
 import type { Pending } from '../shared/trade';
@@ -62,6 +63,10 @@ const hero = (old: Partial<Profile>): Profile => {
   // Way stations found: a list of names, or nothing.
   if (Array.isArray(p.shelters)) out.shelters = p.shelters.filter((s) => typeof s === 'string');
   else delete out.shelters;
+  // Bounties in hand (shared/bounties.ts): known ones only, counts kept in range.
+  const bo = fitBounties(p.bounties);
+  if (bo) out.bounties = bo;
+  else delete out.bounties;
   // A Ranger's hound (shared/houndlook.ts): heroes from before the choice get the wolfhound and a name.
   if (cls === 'RANGER') out.hound = fitHound(p.hound, out.id);
   else delete out.hound;

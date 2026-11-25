@@ -47,6 +47,7 @@ import { amendsOf, stepCrossed } from '../shared/amends';
 import { growKit } from '../shared/vowgrow';
 import { hungryHome, wantShown } from '../shared/wanterrands';
 import { heardBarn } from '../shared/gatefieldsquest';
+import { countDeath } from '../shared/bounties';
 import { fieldsDone } from '../shared/errands';
 import { paidToast } from './errandpaid';
 import { DEED, deed } from '../shared/titles';
@@ -864,6 +865,12 @@ export class Game {
     if (this.mode !== 'run') return;
     // Every shelter rested at is found for good: the keeper's road and the gate's offer.
     if (this.run?.job.roam) for (const e of ev) if (e.k === 'rested' && e.id === ME && !(this.profile.shelters ??= []).includes(e.station)) (this.profile.shelters.push(e.station), this.keep());
+    // A death on the north fields counts toward every bounty held, whoever struck (shared/bounties.ts).
+    if (this.run?.job.roam) {
+      let any = false;
+      for (const e of ev) if (e.k === 'death') any = countDeath(this.profile, this.room.enemies.find((x) => Math.abs(x.x - e.x) < 0.01 && Math.abs(x.y - e.y) < 0.01)?.pack, e.kind) || any;
+      if (any) this.keep();
+    }
     if (!heardBarn(ev, ME, !!this.run?.job.roam)) return;
     const paid = fieldsDone(this.profile);
     if (paid) (this.keep(), paidToast(paid));

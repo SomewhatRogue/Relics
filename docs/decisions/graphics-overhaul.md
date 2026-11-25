@@ -1199,3 +1199,21 @@ Kyle: "Continue". The next open item: travel, which wanted a second shelter.
 - Seen in a phone-sized browser: rest at both, the hut's panel, TO THE FIELD BARN, home, OUT TO THE CHARCOAL HUT,
   and GO IN offered at the gate. Not seen: the clamp's smoke (may be faint in 2.5D), a guest travelling.
   (Claude Opus 5.5)
+
+## 2026-11-24: bounties at the North Gate
+
+Kyle: "Continue". The next open item: "Bounties and the first materials" (outside-the-gate.md "Order"). Wrote the
+short spec there first ("Bounties: the first slice"), then one Sonnet builder (8 steps), then my review.
+
+- New: shared/bounties.ts (five bounties by pack, `postedOn(day)`, `take`, `countDeath`, `handIn`, `fitBounties`),
+  client/bountyui.ts, bountywords.ts, tests/bounties.test.ts. Small edits: shared/progress.ts (`bounties?`),
+  client/save.ts (fitting), client/game.ts (each `death` on a roam job counted, body found as `tally` finds it, in
+  both the local and the guest branch), townui.ts (the gate's section), shelterui.ts (HAND IN), main.ts (banner).
+- Fixed in review: the banner's join (a stray " | " with no zone name). Kept: the wolves' 5 counts the one that runs
+  them (a death carries only `scrapper`).
+- Lines: one lore-keeper call (who posts: the watch, by the head, on your word; "keeper" kept for the shelters'),
+  one line-editor call.
+- Seen in a phone-sized browser: two posted at the gate, TAKE both, the banner count rising with kills, HAND IN at
+  the Field Barn paying 50c and 80 XP. Not seen: a guest's count. Materials wait on Kyle: what are they for?
+  (Claude Opus 5.5)
+

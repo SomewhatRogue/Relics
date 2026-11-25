@@ -151,6 +151,7 @@ import { BannerFold, calm } from './bannerfold';
 import { ObjFlash } from './objflash';
 import { GoalPulse, goalHtml } from './goalpulse';
 import { errandLine } from './errandline';
+import { bountyBanner } from './bountyui';
 import { errandTargets, yardTargets } from './errandmarks';
 import { runner } from './runner';
 import { toast } from './partytoast';
@@ -528,7 +529,7 @@ function hud(now: number): void {
     // Folded: the objective and the room diamonds; an expedition's, how many jobs are left. Open: the lot,
     // and on an expedition every pinned job and side job, done or what to do (bannerfold.ts, tracker.ts).
     const roam = !!run.job.roam, zone = roam && game.hero ? zoneAt(run.job, run.index, game.hero) : null;
-    if (roam && !me.out) g.text = zone ? titleCase(zone) : '';
+    if (roam && !me.out) g.text = [zone ? titleCase(zone) : '', bountyBanner(game.profile)].filter(Boolean).join(' | ');
     const x = game.fightRoom.exped, rooms = x || roam ? '' : roomsHtml(run.index, run.job.rooms), left = x ? x.goals.filter((q) => !q.done).length : 0;
     const full = objFlash.show(`<b>${titleCase(roam ? run.job.title : run.job.place.name)}${rooms}</b> ${x && !me.out && x.phase === 'shut' ? expedRows(x, goalWords(run.job), run.job.boss ?? '') : `<div class="obj">${g.text}</div>`}<span><i class="coin"></i>+${run.gold}${run.rescued ? `<em>SAVED ${run.rescued}</em>` : ''}</span>`, now);
     const small = smallLine(x && !me.out && x.phase === 'shut' ? TRACKW.jobsLeft(left, x.goals.length) : g.text, rooms);

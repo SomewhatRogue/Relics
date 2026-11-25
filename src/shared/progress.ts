@@ -103,6 +103,8 @@ export interface Profile {
   penance?: number;
   /** Way stations found by resting there, by name (sim/landrules.ts 'rested'): the keeper's road and the gate's offer. */
   shelters?: string[];
+  /** Bounties in hand, at most two, and how many each has counted (shared/bounties.ts). */
+  bounties?: { id: string; day: number; got: number }[];
   /** Titles: deeds on each road, those bought, the one worn (shared/titles.ts). */
   titles?: import('./titles.js').TitleRecord;
   /** The red piece's whisper has been heard (shared/wanterrands.ts). */

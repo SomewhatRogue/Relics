@@ -26,6 +26,7 @@ import { landJob, territoryPlan } from '../shared/territory';
 import { BOARDW } from './boardwords';
 import { postedToast, toast } from './partytoast';
 import { canGoOut } from '../shared/gatefieldsquest';
+import { bountyButtons, bountyHtml } from './bountyui';
 import { CLASS_NAME } from '../shared/classes';
 
 import { SPEAKER, townSays } from '../shared/townsays';
@@ -186,11 +187,13 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     const out = landJob('gatefields', w.day), pt = g.parties;
     const gateText = 'Oak and iron, and the hungry on the other side of it. ';
     if (!canGoOut(pr.level)) return panel.show('THE NORTH GATE', p(gateText + ERRANDW.gateShut));
-    panel.show('THE NORTH GATE', p(gateText + 'The guard will let you out into the north fields, and back in again. Jobs are on the board in the square.'), [
+    const bo = { posted: true, day: w.day };
+    panel.show('THE NORTH GATE', p(gateText + 'The guard will let you out into the north fields, and back in again. Jobs are on the board in the square.') + bountyHtml(pr, bo), [
       { label: 'GO OUT', primary: true, act: () => (panel.hide(), pt?.quit(), g.startJob(out)) },
       // A shelter found by resting there: straight out to it, alone (a gathered party goes out the plain way).
       ...(territoryPlan(out).map.stations ?? []).filter((s) => pr.shelters?.includes(s.name)).map((s) => ({ label: SHELTERW.outTo(s.name), act: () => (panel.hide(), pt?.quit(), g.startJob({ ...out, at: s.name })) })),
       ...(pt ? [{ label: BOARDW.gather, act: () => (pt.gather(out), panel.hide(), postedToast()) }] : []),
+      ...bountyButtons(pr, bo, again, () => g.keep()),
     ]);
   }
 }
