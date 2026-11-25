@@ -16,6 +16,7 @@ import type { Ctx } from '../draw';
 import { PX } from '../world';
 import { cardMaterial } from './figmat';
 import { tentCut } from '../tiletents';
+import { clampCut } from '../tileclamp';
 import { REDRAW } from '../tilelook';
 import { swayCards } from './wind3d';
 import { oakCut, pineCut, reedCut } from '../tiletrees';
@@ -33,7 +34,7 @@ export const CARD_ROUNDS = new Set<string>(['stump', 'tree', 'pine', 'bush', 'de
  * furniture the kit draws (tilefurn.ts; the flat view paints it as plain slabs, which stood up read as crates). Hearths,
  * shelves, racks and the like stay built.
  */
-const CARD_BLOCKS = new Set<string>(['stall', 'tent', ...FURN]);
+const CARD_BLOCKS = new Set<string>(['stall', 'tent', 'clamp', ...FURN]);
 export const isCardRound = (r: Round) => CARD_ROUNDS.has(r.kind) && !PIECE_ROUNDS.has(r.kind);
 export const isCardBlock = (b: Block) => CARD_BLOCKS.has(b.kind) && !PIECE_BLOCKS.has(b.kind) && !b.ruined && b.lands === undefined && !b.door;
 
@@ -156,6 +157,7 @@ export function blockCut(b: Block, lit: boolean): Cut | null {
   if (FURN.has(b.kind)) return furnCut(b);
   // (A tent drawn the tile way: ../tiletents.ts.)
   if (b.kind === 'tent' && REDRAW.on) return tentCut(b);
+  if (b.kind === 'clamp' && REDRAW.on) return clampCut(b);
   const w = Math.round(b.w * PX), d = Math.round(b.h * PX), tall = LOOK[b.kind]?.tall ?? 16, m = 24;
   return cut((c, x, y) => drawBlock(c, b, x - w / 2, y - d, lit), w + m * 2, d + tall + m * 2, m + w / 2, m + tall + d);
 }

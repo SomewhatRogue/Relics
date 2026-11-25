@@ -59,6 +59,9 @@ const hero = (old: Partial<Profile>): Profile => {
   // Heroes from before the longer Roll start the new tallies at nothing.
   out.stats = { ...newStats(), ...(p.stats ?? {}) };
   out.want ??= 0;
+  // Way stations found: a list of names, or nothing.
+  if (Array.isArray(p.shelters)) out.shelters = p.shelters.filter((s) => typeof s === 'string');
+  else delete out.shelters;
   // A Ranger's hound (shared/houndlook.ts): heroes from before the choice get the wolfhound and a name.
   if (cls === 'RANGER') out.hound = fitHound(p.hound, out.id);
   else delete out.hound;

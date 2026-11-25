@@ -125,6 +125,7 @@ import { stepBosses } from './bossrooms';
 import { syncMarks } from './deepmarks';
 import { landed } from './afoot';
 import { payVowed } from './vowed';
+import { travelTo } from './travel';
 
 // Where each body stood last tick, `prev`'s keys made once per id rather than every tick, the tuple
 // written in place (nothing keeps one past the frame it was read in).
@@ -393,6 +394,7 @@ export class ArenaRoom {
     const hit = (e: Enemy, el: Hero['augments']['javelin'], n: number) => afflict(w, e, el, n);
     const acts: HeroActs = {
       shelter: (h) => !!this.roam && inStation(this.map.stations, h),
+      travel: (h, to, ev) => travelTo(this, h, to, ev),
       fire: (h) => this.fire(h, w),
       loose: (h, s) => this.loose(h, s, w),
       struck: (h, e, n) => this.struck(h, e, n, w),

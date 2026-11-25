@@ -28,7 +28,7 @@ export type RoundKind = 'pillar' | 'tree' | 'pine' | 'rock' | 'hay' | 'well' | '
   // crates, sacks, a handcart, a woodpile, the smith's anvil, a washtub, a clothesline, a chopping block, a hen
   // coop, flower pots by a door.
   | 'barrels' | 'crates' | 'sacks' | 'handcart' | 'woodpile' | 'anvil' | 'washtub' | 'clothesline' | 'chopblock' | 'coop' | 'pots';
-export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
+export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall' | 'tent' | 'clamp' | 'rockwall' | 'fence' | 'granary' | 'wall' | 'den'
   // Furniture, inside buildings.
   | 'counter' | 'bed' | 'shelf' | 'anvil' | 'altar' | 'pew' | 'bench' | 'hearth' | 'sacks'
   // The Keeping Room's own (shared/keepingroom.ts, client/tilefurnkeep.ts).

@@ -860,7 +860,10 @@ export class Game {
 
   /** My hero rested at the Field Barn (leading, alone, or a guest of a friend's job): the trainer's errand done, and paid. */
   private heardBarn(ev: FightEvent[]): void {
-    if (this.mode !== 'run' || !heardBarn(ev, ME, !!this.run?.job.roam)) return;
+    if (this.mode !== 'run') return;
+    // Every shelter rested at is found for good: the keeper's road and the gate's offer.
+    if (this.run?.job.roam) for (const e of ev) if (e.k === 'rested' && e.id === ME && !(this.profile.shelters ??= []).includes(e.station)) (this.profile.shelters.push(e.station), this.keep());
+    if (!heardBarn(ev, ME, !!this.run?.job.roam)) return;
     const paid = fieldsDone(this.profile);
     if (paid) (this.keep(), paidToast(paid));
   }

@@ -3,10 +3,13 @@
  * a reason to be there, off the road and claimed so the scatter stays out. Fixed spots; the seed moves none. Pure.
  */
 import { block, claim, mark, patch, round, type Kit } from './expedkit.js';
-import { BARN } from './gatefieldsland.js';
+import { BARN, HUT } from './gatefieldsland.js';
 
 /** The person at the barn's fire: a keeper you can talk to, her talk `station:fieldbarn`. */
 export const KEEPER = { x: BARN.x - 1.4, y: BARN.y + 1.4 };
+
+/** The person at the charcoal hut's fire, her talk `station:charcoalhut`. */
+export const HUT_KEEPER = { x: HUT.x - 0.4, y: HUT.y + 1.7 };
 
 /** The gate road: the way back to town, a cross and a milestone by it, a second cut strip fenced on its north side. */
 function gateRoad(k: Kit): void {
@@ -43,4 +46,15 @@ function wood(k: Kit): void {
   round(k, 'deadtree', 9, 16.8, 0.5), round(k, 'deadtree', 15.4, 15.8, 0.5);
 }
 
-export function layDetail(k: Kit): void { gateRoad(k), strips(k), pasture(k), wood(k); }
+/** The charcoal hut: a shack, a wild fire, a woodpile, and the clamp (turf over stacked wood) smoking; ring left open to the road. */
+function hut(k: Kit): void {
+  patch(k, 'mud', HUT.x - 4.2, HUT.y - 3.2, 8.4, 6.4, true);
+  block(k, 'shack', HUT.x + 0.4, HUT.y - 3.4, 3.4, 2.2);
+  k.braziers.push({ x: HUT.x - 1.8, y: HUT.y + 0.6, r: 0.35, wild: true });
+  round(k, 'woodpile', HUT.x - 3, HUT.y - 1.6, 0.45), round(k, 'woodpile', HUT.x - 0.6, HUT.y - 2.2, 0.4);
+  block(k, 'clamp', HUT.x + 1.6, HUT.y + 0.8, 2.6, 2.2);
+  round(k, 'smoke', HUT.x + 2.9, HUT.y + 1.2, 0.15);
+  mark(k, 'debris', HUT.x + 1.2, HUT.y + 3.1, 2.4, 0.6), claim(k, HUT.x, HUT.y, 6);
+}
+
+export function layDetail(k: Kit): void { gateRoad(k), strips(k), pasture(k), wood(k), hut(k); }

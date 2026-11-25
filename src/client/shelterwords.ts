@@ -1,5 +1,14 @@
 /** The keeper at a way station's fire (client/shelterui.ts). */
 export const SHELTERW = {
-  line: 'Sit by the fire a while, if you like. Anything off the shelf *costs*, mind, same as in town.',
+  /** What each keeper says, by the station's name (the barn's is the fallback). */
+  lines: {
+    'THE FIELD BARN': 'Sit by the fire a while, if you like. Anything off the shelf *costs*, mind, same as in town.',
+    'THE CHARCOAL HUT': "Stand upwind of the clamp, unless you want your eyes running the whole time. Anything off me is town price, and I'm not one for haggling.",
+  } as Record<string, string>,
   home: 'HOME TO WICKHOLD',
+  /** The road to another found shelter, from a keeper; and out to one from the North Gate. */
+  to: (name: string) => 'TO ' + name,
+  outTo: (name: string) => 'OUT TO ' + name,
 };
+/** The keeper's line at a station. */
+export const lineAt = (name: string): string => SHELTERW.lines[name] ?? SHELTERW.lines['THE FIELD BARN'];

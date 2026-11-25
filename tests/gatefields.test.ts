@@ -42,12 +42,12 @@ describe('the Gate Fields', () => {
     expect(knownLand('gatefields')).toBe(true);
   });
 
-  it('is 56 by 96, one stretch, no gate, five zones south to north', () => {
+  it('is 56 by 96, one stretch, no gate, six zones south to north', () => {
     const m = plan().map, z = plan().zones;
     expect([m.w, m.h]).toEqual([GATE_FIELDS.w, GATE_FIELDS.h]);
     expect(m.stretches).toHaveLength(1);
     expect(m.blocks.some((b) => b.kind === 'gate') || m.stretches![0].gate !== undefined).toBe(false);
-    expect(z.map((o) => o.name)).toEqual(['THE GATE ROAD', 'THE COMMON STRIPS', 'THE FIELD BARN', 'THE ROUGH PASTURE', "THE WOOD'S EDGE"]);
+    expect(z.map((o) => o.name)).toEqual(['THE GATE ROAD', 'THE COMMON STRIPS', 'THE FIELD BARN', 'THE ROUGH PASTURE', 'THE CHARCOAL HUT', "THE WOOD'S EDGE"]);
     expect(z.map((o) => o.y)).toEqual([...z.map((o) => o.y)].sort((a, b) => b - a));
   });
 
@@ -76,6 +76,20 @@ describe('the Gate Fields', () => {
     expect(s.name).toBe('THE FIELD BARN');
     expect(p.map.braziers.some((b) => Math.hypot(b.x - s.x, b.y - s.y) < s.r && b.wild)).toBe(true);
     for (const f of p.foes) expect(Math.hypot(f.x - s.x, f.y - s.y), `${f.role ?? f.kind}`).toBeGreaterThan(9);
+  });
+
+  it('has a second shelter, the charcoal hut, with its keeper, fire and clamp, clear of foes and open at its centre', () => {
+    const p = plan(), m = p.map, st = m.stations!;
+    expect(st.map((s) => s.name)).toEqual(['THE FIELD BARN', 'THE CHARCOAL HUT']);
+    const h = st[1];
+    expect(m.npcs!.some((n) => n.talk === 'station:charcoalhut' && n.name === 'KEEPER' && !n.mute && Math.hypot(n.x - h.x, n.y - h.y) < h.r)).toBe(true);
+    expect(m.braziers.some((b) => b.wild && Math.hypot(b.x - h.x, b.y - h.y) < h.r)).toBe(true);
+    for (const k of ['shack', 'clamp']) expect(m.blocks.some((b) => b.kind === k && Math.hypot(b.x + b.w / 2 - h.x, b.y + b.h / 2 - h.y) < h.r), k).toBe(true);
+    for (const s of st) for (const f of p.foes) expect(Math.hypot(f.x - s.x, f.y - s.y), `${s.name} ${f.role ?? f.kind}`).toBeGreaterThan(s.r + 1);
+    useMap(m);
+    const c = { x: h.x, y: h.y };
+    collide(c, R);
+    expect(Math.hypot(c.x - h.x, c.y - h.y)).toBeLessThan(0.02);
   });
 
   it('leaves the east bank open between y 34 and 50, shut by deep water', () => {

@@ -29,6 +29,16 @@ export function zoneAt(job: Job, index: number, me: P): string | null {
   return z?.name ?? null;
 }
 
+/** Where the gate is on a roam job's map: the plan's way in (a job started at a shelter moves the room's `map.hero`
+ *  there, sim/landroom.ts, but the way back in is still the gate). Kept a job, as the zones are. */
+const GATES = new Map<string, P>();
+export function gateOf(job: Job, index: number): P {
+  const key = `${job.id}:${index}`;
+  let g = GATES.get(key);
+  if (!g) (GATES.size > 4 && GATES.clear()), GATES.set(key, (g = { ...territoryPlan({ ...job, at: undefined }, index).map.hero }));
+  return g;
+}
+
 export class GateWalk {
   private far = false;
   private run: unknown = null;
@@ -37,7 +47,7 @@ export class GateWalk {
   check(game: Game): boolean {
     if (game.mode !== 'run' || !game.run?.job.roam || !game.hero) return ((this.far = false), (this.run = null), false);
     if (this.run !== game.run) (this.run = game.run), (this.far = false);
-    const w = watchBack(this.far, game.hero, game.room.map.hero);
+    const w = watchBack(this.far, game.hero, gateOf(game.run.job, game.run.index));
     this.far = w.far;
     return w.ask;
   }

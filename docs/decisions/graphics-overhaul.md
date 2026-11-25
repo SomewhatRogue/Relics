@@ -1182,3 +1182,20 @@ Kyle: "kk - whats remaining? continue". Took the first open item: shelters that 
 - Seen in a phone-sized browser: talk at her fire, buy, recharge, home, and the coin, the Bitter and the charge kept
   in the save. Not seen: a guest buying. Parity golden untouched. (Claude Opus 5.5)
 
+## 2026-11-24: the Charcoal Hut, and travel between shelters
+
+Kyle: "Continue". The next open item: travel, which wanted a second shelter.
+
+- Two Sonnet builders at once on separate files (13 and 18 steps), then my review. The lore keeper named the place
+  THE CHARCOAL HUT and wrote its keeper's line ("Stand upwind of the clamp, ...").
+- The hut (shared/gatefields*.ts): `HUT` (33, 22.5, r 4.5), a shack, a wild fire, woodpiles, a smoke round, and the
+  clamp, new art drawn the tile way (client/tileclamp.ts `clampCut`, hooked as the tent is in three/propcards.ts; the
+  flat view's plain mound in blocklook.ts; `clamp` in arena.ts's BlockKind). No pack moved.
+- Travel: `Profile.shelters` (rested at = found; kept on load in client/save.ts); `GEAR.travel` 11 and sim/travel.ts
+  (`ringSpot`, `travelTo`: snaps `room.prev` so neither view slides you across the map); TO buttons at a keeper;
+  OUT TO buttons at the North Gate with `Job.at`, placed by sim/landroom.ts (`map.hero` and `run.rest` in the ring).
+- Fixed in review: starting at a shelter moved `map.hero`, which the walk back in watches, so GO IN would have been
+  offered at the shelter and never at the gate. client/gatewalk.ts now watches the plan's own way in (`gateOf`).
+- Seen in a phone-sized browser: rest at both, the hut's panel, TO THE FIELD BARN, home, OUT TO THE CHARCOAL HUT,
+  and GO IN offered at the gate. Not seen: the clamp's smoke (may be faint in 2.5D), a guest travelling.
+  (Claude Opus 5.5)

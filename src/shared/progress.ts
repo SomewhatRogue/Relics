@@ -101,6 +101,8 @@ export interface Profile {
   want: number;
   /** AMENDS, from hungry gear given up (shared/amends.ts): kept for good, never shown as a number. None in older saves. */
   penance?: number;
+  /** Way stations found by resting there, by name (sim/landrules.ts 'rested'): the keeper's road and the gate's offer. */
+  shelters?: string[];
   /** Titles: deeds on each road, those bought, the one worn (shared/titles.ts). */
   titles?: import('./titles.js').TitleRecord;
   /** The red piece's whisper has been heard (shared/wanterrands.ts). */

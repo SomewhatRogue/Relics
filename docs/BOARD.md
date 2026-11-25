@@ -67,6 +67,10 @@ The Deep chat, until it finishes (then the general chat).
   sim/pack.ts (`GEAR.buy` 9, `GEAR.refill` 10), let through by `HeroActs.shelter` (sim/hero.ts, room.ts) and a
   `bought` event (sim/types.ts); main.ts lets gear presses through under her panel; unitframe.ts shows one heart
   for a lone hero on the land. Small edits, each only for a roaming land.
+  Also (2026-11-24): travel between shelters and a second one, THE CHARCOAL HUT: `GEAR.travel` 11 (sim/pack.ts,
+  sim/travel.ts), `HeroActs.travel` (sim/hero.ts, room.ts), a `travelled` event, `Profile.shelters` (shared/progress.ts,
+  client/save.ts), `Job.at` (shared/jobs.ts), its start in Territories' sim/landroom.ts (roam only), `clamp` in
+  arena.ts's BlockKind with a card in Art's three/propcards.ts and a plain look in blocklook.ts.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

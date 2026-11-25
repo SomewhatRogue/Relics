@@ -13,7 +13,7 @@ import { inStation } from '../sim/landrules';
 import type { Game } from './game';
 import type { Panel } from './panels';
 import { RELICW } from './relicwords';
-import { SHELTERW } from './shelterwords';
+import { SHELTERW, lineAt } from './shelterwords';
 import { says } from './shopui';
 import { SHOPW } from './shopwords';
 
@@ -39,9 +39,11 @@ export function openShelter(g: Game, panel: Panel, name: string, leave: () => vo
   const ask = (op: number) => (shelterLink.gear(op, 0), again());
   const c = carriedItem(h), it = c && !c.el ? c : undefined, cost = it ? rechargeCost(it) : 0;
   const belt = h.belt.length >= POTION.belt, poor = h.purse < SHELTER.bitter;
-  panel.show(st.name, '<i id="shelter"></i>' + says('Keeper', SHELTERW.line) + `<p>You have ${coinsHtml(h.purse)}.</p>`, [
+  panel.show(st.name, '<i id="shelter"></i>' + says('Keeper', lineAt(st.name)) + `<p>You have ${coinsHtml(h.purse)}.</p>`, [
     { label: `${SHOPW.buy} ${POTIONS.bitter.name} (${coinsHtml(SHELTER.bitter)})`, disabled: belt || poor, act: () => ask(GEAR.buy) },
     ...(it ? [{ label: canRecharge(it) ? RELICW.recharge(cost) : RELICW.full, disabled: !canRecharge(it) || h.purse < cost, act: () => ask(GEAR.refill) }] : []),
+    // The other shelters found: the keeper's road to each, by its place in the map's list (sim/travel.ts).
+    ...(g.room.map.stations ?? []).flatMap((s, i) => (s.name !== st.name && g.profile.shelters?.includes(s.name) ? [{ label: SHELTERW.to(s.name), act: () => (shelterLink.gear(GEAR.travel, i), panel.hide()) }] : [])),
     { label: SHELTERW.home, primary: true, act: () => (panel.hide(), leave()) },
   ]);
 }

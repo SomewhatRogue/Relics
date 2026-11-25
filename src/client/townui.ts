@@ -21,7 +21,8 @@ import { ORLA } from '../shared/orla';
 import type { Panel } from './panels';
 import { RUMOURS } from './rumours';
 import { openBoard } from './boardui';
-import { landJob } from '../shared/territory';
+import { SHELTERW } from './shelterwords';
+import { landJob, territoryPlan } from '../shared/territory';
 import { BOARDW } from './boardwords';
 import { postedToast, toast } from './partytoast';
 import { canGoOut } from '../shared/gatefieldsquest';
@@ -187,6 +188,8 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     if (!canGoOut(pr.level)) return panel.show('THE NORTH GATE', p(gateText + ERRANDW.gateShut));
     panel.show('THE NORTH GATE', p(gateText + 'The guard will let you out into the north fields, and back in again. Jobs are on the board in the square.'), [
       { label: 'GO OUT', primary: true, act: () => (panel.hide(), pt?.quit(), g.startJob(out)) },
+      // A shelter found by resting there: straight out to it, alone (a gathered party goes out the plain way).
+      ...(territoryPlan(out).map.stations ?? []).filter((s) => pr.shelters?.includes(s.name)).map((s) => ({ label: SHELTERW.outTo(s.name), act: () => (panel.hide(), pt?.quit(), g.startJob({ ...out, at: s.name })) })),
       ...(pt ? [{ label: BOARDW.gather, act: () => (pt.gather(out), panel.hide(), postedToast()) }] : []),
     ]);
   }

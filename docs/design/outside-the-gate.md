@@ -113,7 +113,15 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
   second place to recharge a relic (the bible has the church only) and a second seller of the Bitter (Agne only);
   what she does stays unsaid, as for Isolde.
 
-Not yet: the view off the east side; travel between shelters; bounties, materials, quests; the wood beyond the far end.
+- **The second shelter, and travel** (Kyle, 2026-11-24: "teleport back to base and/or to them"). THE CHARCOAL HUT
+  at the wood's edge (33, 22.5, east of the road): a burner's hut, a fire, woodpiles, and the charcoal clamp, a
+  turf dome drawn the tile way (client/tileclamp.ts, block kind `clamp`), and its own keeper with her own line.
+  The lore keeper: this wood is not Greyhollow, and the hut is not Hew's. A shelter is found by resting in it
+  (`Profile.shelters`); a keeper offers TO each other found shelter on the map (sim/travel.ts, `GEAR.travel`: the room
+  moves you and snaps you, so you are not seen sliding), and the North Gate offers OUT TO each found one, alone
+  (`Job.at`: the run starts in its ring and a fall wakes you there). The way back in is still watched at the gate.
+
+Not yet: the view off the east side; bounties, materials, quests; the wood beyond the far end.
 
 ## Order
 

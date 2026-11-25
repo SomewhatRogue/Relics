@@ -9,6 +9,8 @@ import { layRoad, road, wall } from './terrkit.js';
 export const GATE_FIELDS = { w: 56, h: 96 };
 /** The way station: the barn's ring (its centre, and how far its safe ground reaches). */
 export const BARN = { x: 40, y: 53.5, r: 4.5 };
+/** The second shelter: the charcoal burners' clearing beside the road into the wood (east verge, a walk from the barn). */
+export const HUT = { x: 33, y: 22.5, r: 4.5 };
 /** The wolves' open country's den: the ring of bushes against the west hedge, its centre and how wide. */
 export const DEN = { x: 6.6, y: 36, r: 2.3 };
 /** The open east bank (a view is drawn there later): between these y, nothing solid, a river closes it. */

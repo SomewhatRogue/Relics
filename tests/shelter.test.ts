@@ -86,3 +86,50 @@ describe('the keeper at a way station', () => {
     expect(f.h.purse).toBe(100);
   });
 });
+
+describe('the keeper\'s road to another station', () => {
+  /** The roam room with a second shelter, far from the first, and the hero standing in the barn. */
+  function two() {
+    const w = world(), first = w.s;
+    w.room.map.stations!.push({ name: 'THE CHARCOAL HUT', x: first.x + 10, y: first.y, r: first.r });
+    let seq = 100;
+    const go = (to: number) => {
+      w.room.setIntent('me', { ...NO_INTENT, gearOp: GEAR.travel, gearArg: to, gearSeq: ++seq });
+      const before = w.room.events.length;
+      w.room.step();
+      return w.room.events.slice(before).filter((e: FightEvent) => e.k === 'travelled');
+    };
+    return { ...w, go, hut: w.room.map.stations![w.room.map.stations!.length - 1] };
+  }
+  const inRing = (h: Hero, s: { x: number; y: number; r: number }) => Math.hypot(h.x - s.x, h.y - s.y) <= s.r;
+  const idx = (w: ReturnType<typeof two>) => w.room.map.stations!.indexOf(w.hut);
+
+  it('moves the hero inside the other ring and says so', () => {
+    const w = two();
+    const got = w.go(idx(w));
+    expect(got).toEqual([expect.objectContaining({ k: 'travelled', id: 'me', station: 'THE CHARCOAL HUT' })]);
+    expect(inRing(w.h, w.hut)).toBe(true);
+    expect(w.h.y).toBeGreaterThan(w.hut.y - 0.01);
+  });
+
+  it('refuses outside a ring, when down, to the same station, to a bad index, and off a roaming land', () => {
+    const out = two();
+    Object.assign(out.h, { x: out.s.x + 5, y: out.s.y + 5 });
+    const was = { x: out.h.x, y: out.h.y };
+    expect(out.go(idx(out))).toEqual([]);
+    expect(out.h).toMatchObject(was);
+    const down = two();
+    Object.assign(down.h, { hp: 0, act: 'down', actT: 0, actDur: Infinity });
+    expect(down.go(idx(down))).toEqual([]);
+    const same = two();
+    expect(same.go(same.room.map.stations!.indexOf(same.s))).toEqual([]);
+    const bad = two();
+    expect(bad.go(9)).toEqual([]);
+    expect(bad.go(-1)).toEqual([]);
+    expect(inRing(bad.h, bad.s)).toBe(true);
+    const flat = two();
+    flat.room.roam = false;
+    expect(flat.go(idx(flat))).toEqual([]);
+    expect(inRing(flat.h, flat.s)).toBe(true);
+  });
+});
