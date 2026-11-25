@@ -25,6 +25,7 @@ import { ArenaRoom } from '../src/sim/room';
 import { goal, newRun, runRoom, tally, type Run } from '../src/sim/run';
 import { heldK, isNetted, jettyOf, logOf, onJetty, smokehouseOf } from '../src/sim/staithe';
 import { logEnd } from '../src/sim/staithebits';
+import { targets } from '../src/sim/targets';
 import { stepDrift } from '../src/sim/drift';
 import { NO_INTENT, type Enemy, type FightEvent } from '../src/sim/types';
 
@@ -148,6 +149,21 @@ describe('the Staithe: its three jobs', () => {
     const h = room.heroes[0];
     expect(inArea(g, h.x, h.y) || inArea(j, h.x, h.y)).toBe(false);
     expect(Math.hypot(h.x - end.x, h.y - end.y)).toBeLessThan(1.5);
+  });
+
+  it('a quest mark on the log while it matters: its carriers laying it, its bank end once across, none once shoved', () => {
+    const { run, room } = staithe(), g = logOf(room.map)!;
+    far(room);
+    const mark = () => targets(run, room).filter((t) => t.kind === 'log');
+    expect(mark()).toHaveLength(1);
+    quiet(room, (e) => e.variant === 'log');
+    step(room, STAITHE.lay, undefined, () => !!g.deck);
+    const end = logEnd(room.map)!;
+    expect(mark()).toEqual([{ kind: 'log', x: end.x, y: end.y }]);
+    at(room, end.x, end.y);
+    press(room, 'grabSeq');
+    step(room, 0.3);
+    expect(mark()).toHaveLength(0);
   });
 
   it('GRAB by one of the netted cuts them free; they stand and follow', () => {

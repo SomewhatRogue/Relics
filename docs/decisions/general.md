@@ -500,3 +500,7 @@ Staithe's log, shoved (sim/staithebits.ts shoveLog), put every hero on it back o
 GRAB from a step out on the log (the reach is 1.3 tiles) sank it under you, and the push out of the water could land you
 on the jetty, deep water all round. Now every hero on the log or the jetty, the shover too, lands on the bank just off
 its end. tests/staithe.test.ts (fails on the old rule). A small logged edit in the Staithe's file. Claude Opus 5.5
+- Then Kyle: "I'd like the log with a quest marker." A gold quest mark on the log while it's still to be dealt with: over
+  its carriers as they lay it, then at its bank end once it's across (where you GRAB to shove), gone once it's in the
+  river or never laid. sim/expedgoal.ts logTargets, called from sim/targets.ts on a job's way and from expedTargets on
+  the open land; TargetKind 'log' (client/questmarks.ts LIFT 16). tests/staithe.test.ts. Claude Opus 5.5

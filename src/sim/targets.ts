@@ -11,6 +11,7 @@
  *
  * Chests and plain goblins are never marked. Pure: the same on the leader's screen and a friend's.
  */
+import { logTargets } from './expedgoal';
 import type { GameMap } from '../shared/arena';
 import { isDead } from './damage';
 import type { ArenaRoom } from './room';
@@ -21,7 +22,8 @@ import { expedTargets } from './expedgoal';
 import { miniTargets } from './minis';
 
 /** `folk`: someone in town with an errand or a quest for you, `hall` the door of the hall they're in (client/errandmarks.ts). */
-export type TargetKind = 'cage' | 'door' | 'out' | 'nest' | 'larder' | 'den' | 'boss' | 'job' | 'folk' | 'hall';
+/** `log`: the Staithe's log while it's still to be dealt with (its carriers laying it, then its bank end to shove: sim/expedgoal.ts). */
+export type TargetKind = 'cage' | 'door' | 'out' | 'nest' | 'larder' | 'den' | 'boss' | 'job' | 'folk' | 'hall' | 'log';
 /** `id`: a goblin or nest's id (it moves, so it's drawn where it's drawn). */
 export interface Target { kind: TargetKind; x: number; y: number; id?: number }
 /** A house's door and who's caged or freed behind it (sim/goal.ts houseCaptives). */
@@ -43,6 +45,8 @@ export function targets(run: Run | null, room: ArenaRoom, houses: HouseAt[] = []
   if (room.exped && !room.indoors) return expedTargets(room);
   // (People on the land with a job of their own, and a taken one's ground: sim/minis.ts.)
   const out: Target[] = room.minis.length ? miniTargets(room) : [];
+  // The Staithe's log, on a job's way (sim/expedgoal.ts logTargets; Kyle, 2026-11-25).
+  if (room.map.staithe && !room.indoors) out.push(...logTargets(room));
   for (const p of room.props) if (p.kind === 'cage' && !p.broken) out.push({ kind: 'cage', x: p.x, y: p.y });
   const freed = room.survivors.some(waiting);
   if (room.indoors) {

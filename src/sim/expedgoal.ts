@@ -10,6 +10,9 @@ import { EXPED } from '../shared/tuning';
 import type { ArenaRoom } from './room';
 import type { Run } from './run';
 import type { Target } from './targets';
+import { logOf } from './staithe';
+import { logEnd } from './staithebits';
+import { isDead } from './damage';
 
 const say = (s: string, run: Run) => s.split('{boss}').join(run.job.boss ?? '');
 
@@ -28,6 +31,15 @@ export function expedGoal(run: Run, room: ArenaRoom): { text: string; done: bool
 }
 
 /** Where each job not yet done is, or the beacon once they are; a prisoner camp marks its cages. */
+/** The Staithe's log while it's still to be dealt with (a job's room or the open land): its carriers as they lay it, then its bank end. */
+export function logTargets(room: ArenaRoom): Target[] {
+  const lg = logOf(room.map), end = logEnd(room.map);
+  if (!lg || lg.ruined) return [];
+  if (lg.deck) return end ? [{ kind: 'log', x: end.x, y: end.y }] : [];
+  const carriers = room.enemies.find((e) => e.variant === 'log' && !isDead(e));
+  return carriers ? [{ kind: 'log', x: carriers.x, y: carriers.y, id: carriers.id }] : [];
+}
+
 export function expedTargets(room: ArenaRoom): Target[] {
   const x = room.exped!;
   if (x.phase !== 'shut') return x.phase === 'leave' && room.map.exit ? [{ kind: 'out', x: room.map.exit.x + room.map.exit.w / 2, y: 1 }] : [{ kind: 'job', x: x.zone.x, y: x.zone.y }];
@@ -39,6 +51,9 @@ export function expedTargets(room: ArenaRoom): Target[] {
       if (b) out.push({ kind: 'boss', x: b.x, y: b.y, id: b.id });
       else out.push({ kind: 'job', x: g.x, y: g.y });
     } else if (g.kind !== 'prisoners') out.push({ kind: 'job', x: g.x, y: g.y });
+    // The Staithe's log, while it's still to be dealt with: its carriers as they lay it, then its bank end, where you
+    // GRAB to shove it in (Kyle, 2026-11-25). Gone once it's in the river, or never laid.
+    if (g.kind === 'staithe') out.push(...logTargets(room));
   }
   return out;
 }
