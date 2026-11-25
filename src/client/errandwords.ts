@@ -11,10 +11,10 @@ import { WANTQW } from './wanterrandwords';
 
 /** Who runs up to a new hero (by class, Kyle 2026-11-12), how they're drawn, and their one line. A Ranger's is Maeve's hound with a note. */
 export const RUNNERS: Record<HeroClass, { who: string; look: string; hound?: boolean; text: string }> = {
-  WARRIOR: { who: 'WAT', look: 'guard', text: "Master Cole wants you at the barracks, only get that javelin filled at the church first, Mother Isolde does it round the back, and it's near enough empty by the look of it." },
-  HEALER: { who: 'VERGER OSWIN', look: 'priest', text: "Mother Isolde's asking after you, she's at the church, round the back, and bring that javelin, she'll fill it while you're there." },
+  WARRIOR: { who: 'WAT', look: 'guard', text: "Master Cole wants you at the barracks, but get that javelin filled at the church first. Mother Isolde prays over them at the altar, and it's near enough empty by the look of it." },
+  HEALER: { who: 'VERGER OSWIN', look: 'priest', text: "Mother Isolde's asking after you, she's at the church, and bring that javelin, she'll pray it full again while you're there." },
   ROGUE: { who: 'TAM', look: 'child', text: 'Whisper says come by the Rat, the back booth, and the church fills them javelins for nothing the first time, if you ask nice.' },
-  RANGER: { who: "MAEVE'S NOTE", look: 'hound', hound: true, text: 'Come up to the lodge, but church first, and get that javelin filled, Isolde does it round the back. M.' },
+  RANGER: { who: "MAEVE'S NOTE", look: 'hound', hound: true, text: 'Come up to the lodge, but church first, and get that javelin filled, Isolde does it at the altar. M.' },
   MAGE: { who: 'LIS', look: 'mage', text: "Magister Vell wants a word, up at the tower, only church first, he says, so the javelin's filled. Then straight up, please. He'll have counted how long you've taken." },
 };
 
@@ -33,7 +33,7 @@ export const ERRANDW = {
     id === 'merren' ? MERRENW.goal : id === 'church' || id === 'under' ? WANTQW.small[id] : id === 'fields' ? 'REST AT THE FIELD BARN, OUT THE NORTH GATE' : id === 'fieldsback' ? `TELL ${TRAINERS[cls].name} ABOUT THE NORTH FIELDS` : id === 'yard' ? 'TRY YOUR KIT IN THE YARD' : id === 'nettle' ? 'SEE NETTLE AT THE DROWNED RAT' : id === 'relic' ? 'RECHARGE YOUR JAVELIN AT THE CHURCH' : id === 'trainer' ? `SEE ${TRAINERS[cls].name} ${PLACE[cls].toUpperCase()}` : `A NEW SKILL: SEE ${TRAINERS[cls].name}`,
   /** The church's free first recharge. */
   free: 'RECHARGE: FREE',
-  freeDone: "Isolde takes it round the back and brings it out full, and says there's nothing to pay, this once.",
+  freeDone: "Isolde kneels with it at the altar a while and brings it back full, and says there's nothing to pay, this once.",
   /** Each trainer's first meeting (a talk, not the training screen), in two beats: there's plenty they'll teach you,
    *  in time; then nobody here knows you yet, so work the board in the square, where a job's up for you (Kyle's
    *  playtests, 2026-11-13, 2026-11-17 and 2026-11-24: "say you need to do work and build up reputation"; the town
@@ -53,14 +53,14 @@ export const ERRANDW = {
     HEALER: "Folk here don't know you from the next face, and they'll not hand a stranger their dying. There's a job on the board in the square. Go and do it, and mind you come back with the same number of arms.",
   } as Record<HeroClass, string>,
   /** The first meeting's second beat (Kyle, 2026-11-24): a plain weapon of a kind you've none of, and off to the yard to
-   *  try it and the javelin, which won't dim there (never why). The board's word (firstWork) waits for your return.
+   *  try it and the javelin (Kyle, 2026-11-25: no word on it not dimming there, and no "checked twice"). The board's word (firstWork) waits for your return.
    *  Lore keeper and line editor, 2026-11-24. */
   firstGift: {
-    WARRIOR: "Plain, but it's yours. Yard's round the back, and take the javelin, it won't dim out there.",
-    RANGER: "Here, you'll want something else to hand. Try it in the yard behind the barracks, the javelin too, it doesn't fade out there, and don't ask me why.",
-    ROGUE: 'A little something, on the ~house~, the only thing that will be. Take it round the back of the barracks, the javelin too, it doesn\'t go dark there.',
-    MAGE: 'This is for you, plain, I know, but do try it in the yard behind the barracks, and the javelin as well, because it won\'t dim there, I checked, *twice*.',
-    HEALER: 'Take this, and the javelin too, it won\'t dim in the yard behind the barracks, so go and swing it about there before you hurt anyone that matters.',
+    WARRIOR: "Plain, but it's yours. Yard's round the back, take the javelin with you.",
+    RANGER: "Here, you'll want something else to hand. Try it in the yard behind the barracks, the javelin too.",
+    ROGUE: 'A little something, on the ~house~, the only thing that will be. Take it round the back of the barracks and try it, the javelin too.',
+    MAGE: 'This is for you, plain, I know, but do try it in the yard behind the barracks, and the javelin as well.',
+    HEALER: 'Take this, and the javelin too, and go and swing them about in the yard behind the barracks before you hurt anyone that matters.',
   } as Record<HeroClass, string>,
   /** The North Gate (Kyle, 2026-11-24): what its panel says to a hero the guard won't let out yet (under level 3). */
   gateShut: 'The guard will not let you out without a job yet. Your trainer will say when.',

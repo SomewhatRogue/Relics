@@ -440,3 +440,14 @@ Walking in town shouldn't be a chore. Also remove the empty vendor stall."
   (client/index.html, main.ts, hud.css), its tooltip "Town buff: haste. You walk 20% faster in town."
 - The trader's stall is only put up once the market's open (shared/town.ts); before that, no EMPTY stall. The
   MARKET ROW spot there stays. Claude Opus 5.5
+
+## 2026-11-25: the church fills relics at the altar; no "checked twice"
+
+Kyle (after a wider dialogue pass, which he didn't want and which was dropped unpushed: "nvm, I liked it before"):
+the church "referring to something about being around the back and being less holy and pious", and the trainer on the
+training errand "saying they checked it twice to make sure the relic lights don't go down during training".
+- Isolde fills a relic at the altar, kneeling and praying over it (relicwords.ts churchIntro, recharged;
+  errandwords.ts Wat, Oswin, Maeve's note, freeDone). Never "blesses" (the lore keeper: that's Sanctuary's word).
+  story-bible.md's relic line updated.
+- The five first-gift lines just send you to the yard with the weapon and the javelin; none says it won't dim there.
+- Lore keeper and line editor; Whisper's line kept as Kyle had it but the dim clause. Claude Opus 5.5

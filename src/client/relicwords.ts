@@ -53,7 +53,7 @@ export const RELICW = {
   /** The church (Father Odric) and its relic panel. */
   churchButton: 'RELICS',
   churchTitle: 'THE RELIQUARY',
-  churchIntro: "Fading, is it? Mother Isolde sees to those round the back, and she'll want paying. Not the ones with fire or frost or storm in them, mind, she *won't* have those in the house.",
+  churchIntro: "Fading, is it? Mother Isolde sees to those at the altar, and she'll want paying. Not the ones with fire or frost or storm in them, mind, she *won't* have those in the house.",
   none: "No relics. Each one is won once: from a boss the first time it falls, or from Mother Isolde when she has word of one.",
   /** The reliquary (churchrelics.ts): carry one, and the ones still to win. Draft until the lore pass. */
   carryThis: 'CARRY THIS ONE',
@@ -81,7 +81,7 @@ export const RELICW = {
   questLater: 'NOT NOW',
   recharge: (n: number) => `RECHARGE (${coinsHtml(n)})`,
   full: 'FULL',
-  recharged: 'Isolde takes it round the back and brings it out warm and full. She doesn\'t say what she did.',
+  recharged: 'Isolde kneels with it at the altar a while and brings it back warm and full.',
   litNow: (n: number) => `You carry the church's light for your next ${jobs(n)}: ${LIGHT}.`,
   carry: 'CARRY IT',
   carrying: 'CARRYING',

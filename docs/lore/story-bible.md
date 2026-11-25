@@ -272,7 +272,7 @@ most Want among the heroes is the one the bells don't spare).
 - Wall Brandy (Kyle's call): doubles your damage, but halves your speed and the size of your stamina bar, for a few seconds.
 
 ## Relics fade, the step, and the church's light (recorded 2026-11-03; Kyle's call, lore keeper)
-- Relics fade with use and go dark. Isolde recharges plain ones round the back for gold, and what she does stays unsaid. The fee is trade, like her training fees; it never goes in the Lantern box and never touches the Want.
+- Relics fade with use and go dark. Isolde recharges plain ones at the church altar for gold, kneeling and praying over them (Kyle, 2026-11-25: "round the back" read less holy); why it works stays unsaid, she never "blesses" one, and the Lantern is never named. The fee is trade, like her training fees; it never goes in the Lantern box and never touches the Want.
 - Elemental relics are found that way (born with it), never set by Ivo. They hold more, the church won't touch them, and why stays off screen. LOUD is the rarest.
 - Odric takes relics at the step and they sit with the others. Leave two, take one draws from what other heroes have left; Odric brings it out and doesn't say whose it was.
 - The church's light: Isolde gives it to whoever leaves a relic with life in it. On screen it is only ever "the church's light" (LIT), never the Lantern, never "blessed". The hungry come for whoever carries it, and no line says why (the censer rule).
