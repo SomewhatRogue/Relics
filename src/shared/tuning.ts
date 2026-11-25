@@ -41,6 +41,7 @@ export * from './weapons.js';
 export * from './magic.js';
 export * from './skillkit.js';
 export * from './relickit.js';
+export * from './raidtune.js';
 export * from './loot.js';
 export * from './scenetune.js';
 export * from './props.js';

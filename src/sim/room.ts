@@ -57,6 +57,7 @@ import { asleep, stepPacing } from './pacing';
 import { flankers } from './chase';
 import { afterFoes, beforeFoes, beforeHeroes, shapeFoe } from './ownfoes';
 import { newRushes, stepRushes, type Rushes } from './packrush';
+import { newRaids, stepRaids, type Raids } from './raids';
 import { slipIntent, type Slick } from './oil';
 import { noteGuard, useLate, type LateBlow } from './latelist';
 import { stepLate } from './lagcomp';
@@ -222,6 +223,11 @@ export class ArenaRoom {
   /** Pack rushes (sim/packrush.ts): when each pack calls its next, and the ones under way; on a stream of their own. */
   rushes: Rushes = newRushes();
   private rushRng: Rng;
+  /** Raiding parties on a roaming land (sim/raids.ts): when the next forms, the ones out; on a stream of their own. Made on a
+   *  roaming land's first tick only, so no other room's save (or the parity golden) carries them; the stream's seed is kept unsaved. */
+  declare raids?: Raids;
+  declare private raidRng?: Rng;
+  declare private raidSeed: number;
   /** An outdoor job room: a cage here can hold a false prisoner (never in a house: run.ts sets this). */
   falseCages = false;
   private acc = 0;
@@ -276,6 +282,7 @@ export class ArenaRoom {
     this.purseRng = new Rng(seed * 6007 + 53);
     this.skyRng = new Rng(seed * 9173 + 61);
     this.rushRng = new Rng(seed * 4241 + 59);
+    Object.defineProperty(this, 'raidSeed', { value: seed * 5309 + 67, writable: true });
     this.map = opts.map ?? ARENA;
     this.crows = newFlocks(this.map.flocks);
     this.minis = newMinis(this.map.minis);
@@ -572,6 +579,11 @@ export class ArenaRoom {
     // A storm's lightning: the circle a second ahead, then everyone under it hurt (sim/storm.ts).
     stepStorm(this, this.skyRng);
     if (this.exped) stepExped(this, this.events, TICK);
+    if (this.roam) {
+      // (A room handed on brings its stream's state as plain data: put back in a stream.)
+      if (!(this.raidRng instanceof Rng)) this.raidRng = Object.assign(new Rng(this.raidSeed), this.raidRng ?? {});
+      stepRaids(this, (this.raids ??= newRaids()), this.raidRng, this.events, TICK);
+    }
   }
 
   /** A planned goblin made a body in this room, with this id (the room's own at its start; a mini quest's when it's taken). */

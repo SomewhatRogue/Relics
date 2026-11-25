@@ -157,6 +157,7 @@ import { bountyBanner } from './bountyui';
 import { errandTargets, yardTargets } from './errandmarks';
 import { runner } from './runner';
 import { toast } from './partytoast';
+import { raidCall } from './raidcall';
 import { QUESTW } from './questwords';
 import { canGoOut } from '../shared/gatefieldsquest';
 import { echoes } from './runnerecho';
@@ -690,6 +691,8 @@ function tick(t: number): void {
       const [sx, sy] = toPx(ev.x, ev.y);
       fx.say(sx, sy - 34, left > 0 ? `${'\u2665'.repeat(left)} LEFT` : 'DRIVEN BACK', '#ff6a7a');
     }
+    // A raiding party formed on the land (sim/raids.ts): its drum and its line, for everyone.
+    raidCall(ev, game.room.map.name);
     sounds.event(ev, game.room, t / 1000);
     if (ev.k === 'block' || ev.k === 'dodge') guards++;
   }
@@ -740,6 +743,7 @@ function tick(t: number): void {
     fx.say(sx, sy - 52, s, col, 3);
   }, game.run?.job.boss);
   // The way on just opened: say which way, over you.
+  expedUi.landFrame(game.room, game.mode === 'run' ? game.run?.job : undefined, game.run?.index ?? 0, game.profile, ME);
   const walked = gateWalk.check(game);
   if (walked) walkOff(game, panel, walked, goBack);
   shelterTick(game, panel, game.mode === 'run');

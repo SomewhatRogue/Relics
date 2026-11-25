@@ -58,6 +58,7 @@ export function fenRoamPlan(job: Job): TerrPlan {
     grounds: [{ look: 'mossy', x: 0, y: 135, w: 90, h: 15 }, { look: 'reedmoor', x: 0, y: 123, w: 90, h: 12 }, { look: 'drowned', x: 0, y: 78, w: 90, h: 45 }, { look: 'reedmoor', x: 0, y: 51, w: 90, h: 27 }, { look: 'drowned', x: 0, y: 24, w: 90, h: 27 }, { look: 'reedmoor', x: 0, y: 0, w: 90, h: 24 }],
     npcs: [{ ...STAITHE_KEEPER, name: 'KEEPER', talk: 'station:staithe', look: 'villager' }],
     stations: [{ name: STAITHE_NAME, ...STAITHE }], gathers: FEN_GATHERS.map((g) => ({ ...g })),
+    trails: k.roads.map((l) => l.map((p) => ({ x: p.x, y: p.y }))),
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: FEN_ZONES.map((z) => ({ ...z })) };
 }

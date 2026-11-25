@@ -13,7 +13,8 @@ export function awake(all: Enemy[], heroes: Hero[], at: { wake: number; doze: nu
   for (const e of all) {
     // A guard driving prisoners never dozes: the line walks only while it's driven (sim/scenes.ts), and a dozing one would read as dead.
     // (THE BRAKESMAN neither: its rail runs further than an area's wake distance: sim/brake.ts.)
-    if (e.task?.k === 'escort' || e.brakes) {
+    // (Nor a raiding party on the march: sim/raids.ts.)
+    if (e.task?.k === 'escort' || e.brakes || e.raid !== undefined) {
       e.dozing = false;
       out.push(e);
       continue;

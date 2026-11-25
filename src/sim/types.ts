@@ -627,6 +627,8 @@ export interface Enemy extends Body {
   jolted?: number;
   /** Too far from every hero to think or move this tick (sim/sleep.ts, on a big map). */
   dozing?: boolean;
+  /** Marching with a raiding party (its pack id: sim/raids.ts): never dozes. */
+  raid?: number;
   /** A roaming land (sim/landrules.ts): the room time it began pressing at a hero on safe ground, to give up after LAND.giveUp. */
   giveT?: number;
   homing?: boolean;
@@ -906,6 +908,8 @@ export type FightEvent =
   /** A pack rush winding up (`n` goblins, `id` the hero it's on, at the fan's middle);
    *  an ironhide's guard broken (sim/packrush.ts, sim/ironhide.ts). */
   | { k: 'rush'; x: number; y: number; n: number; id: string }
+  /** A raiding party formed on a roaming land, out of sight, where it formed (sim/raids.ts); every friend hears it. */
+  | { k: 'raid'; x: number; y: number }
   | { k: 'cracked'; x: number; y: number }
   /** The Haulier's working (sim/haulbook.ts, sim/haulcarts.ts; drawn client/hauldraw.ts): a cart set rolling (`by` a hero, or the Haulier's shove),
    *  hitting a hero or the Haulier (`on`), or stopping at a stop; lightning falling on the winding gear; the Haulier's plate off for good (phase 2). */

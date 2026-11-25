@@ -106,6 +106,10 @@ The Deep chat, until it finishes (then the general chat).
   sim/enemies.ts read it for the fen's mist.
   Also (2026-11-25), for Gear: a chest may name a guard pack (`Chest.guard`, sim/chests.ts `startChest`; room.ts passes
   it and now checks `allEnemies`): shut while any of that pack stands. The land's nooks use it for their mini bosses.
+  Also (2026-11-25), for everyone touching the fight and Territories: raiding parties on the roam lands (sim/raids.ts,
+  raidform.ts, raidroads.ts, shared/raidtune.ts): pack ids 900 and up are raids, never a bounty's; goblins may carry
+  `raid` (sleep.ts never dozes them); a `{k:'raid'}` event; `GameMap.trails` (arena.ts) holds a land's roads. The
+  wilds map (client/landmapui.ts) opens from the expedition MAP button on roam lands.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.

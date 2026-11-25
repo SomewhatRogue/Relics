@@ -53,6 +53,7 @@ export function gateFieldsPlan(job: Job): TerrPlan {
     grounds: [{ look: 'harvest', x: 0, y: 87, w: 84, h: 57 }, { look: 'fallow', x: 0, y: 42, w: 84, h: 45 }, { look: 'mossy', x: 0, y: 0, w: 84, h: 42 }],
     npcs: [{ ...KEEPER, name: 'KEEPER', talk: 'station:fieldbarn', look: 'villager' }, { ...HUT_KEEPER, name: 'KEEPER', talk: 'station:charcoalhut', look: 'villager' }, ...CAMP_FOLK.map((f) => ({ ...f, name: '', talk: '', mute: true })), ...CAMP_POSTS.map((p) => ({ x: p.x, y: p.y, name: '', talk: '', look: 'guard', mute: true }))],
     stations: [{ name: 'THE FIELD BARN', x: BARN.x, y: BARN.y, r: BARN.r }, { name: 'THE CHARCOAL HUT', x: HUT.x, y: HUT.y, r: HUT.r }], guards: CAMP_POSTS.map((p) => ({ ...p })), gathers: GATHERS.map((g) => ({ ...g })),
+    trails: k.roads.map((l) => l.map((p) => ({ x: p.x, y: p.y }))),
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: GATE_ZONES.map((z) => ({ ...z })) };
 }

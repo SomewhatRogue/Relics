@@ -1379,3 +1379,22 @@ climbing animation for the rogue when they're going up terrain". Two Sonnet buil
   scrabble (sfx.ts `scrabble`). Every screen draws it from the event. Not eyed closely: check the pose on the phone.
   (Claude Opus 5.5)
 
+
+## 2026-11-25: the wilds map, raiding parties, the drowned cart
+
+Kyle: "Could really do with a map on these bigger wilds maps btw. Also i want patrols of goblins every now and then
+like raiding parties etc to keep tension high sometimes", and "Draw it" (the fen's drowned cart).
+- The map (client/landmapui.ts, landmarks.ts, landseen.ts; words in shared/landmapwords.ts): the expedition MAP button
+  opens a parchment of the whole land on the roam lands, fogged where the hero has not been, with the zone names,
+  shelters found, taken bounties pinned in red, the way back and the way on. Footer: "2 OF 5 SHELTERS FOUND",
+  "1 BOUNTY TAKEN" (TAKEN to match the board's TAKE).
+- Raids (shared/raidtune.ts; sim/raids.ts, raidform.ts, raidroads.ts; client/raidcall.ts, raidwords.ts): on their
+  own seeded stream, a party of 4 to 7 forms out of sight on the roads (first at 2 to 3 min, then every 3 to 5),
+  awake, pack ids 900 up so no bounty counts them, never within 20 of a shelter's ring or the camp, and marches the
+  road at the nearest hero not on safe ground; one sighting and it fights as a pack; left alone 120 s it walks off
+  the far edge. Every friend gets the `raid` event: a war drum and THE HUNGRY ON THE ROAD (the fen: ON THE TRACK).
+  Raid state is made on a roam land's first tick, so the parity goldens are unchanged; a handed-on room keeps it.
+  Open: in the fen a party never crosses the staithe's ring (the track is cut in two there).
+- The drowned cart (client/tilecart.ts, block `drownedcart`): a tile-way card, sunk and tilted in black water, a
+  wheel under, one broken off flat, rotten grey boards with reeds, sacks on the bank, a crow on the shaft.
+(Claude Opus 5.5)
