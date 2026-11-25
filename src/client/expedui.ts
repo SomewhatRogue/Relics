@@ -11,9 +11,14 @@ import { FEN_BEATS, FEN_EXIT, FEN_GOALS } from '../shared/fenwords';
 import type { ArenaRoom } from '../sim/room';
 import type { FightEvent } from '../sim/types';
 import { ExpedMap } from './expedmapui';
+import { LandMap } from './landmapui';
+import type { Job } from '../shared/jobs';
+import type { Profile } from '../shared/progress';
 
 export class ExpedUi {
   readonly map = new ExpedMap();
+  /** The wilds' own (landmapui.ts): the same MAP button opens it on a roaming land. */
+  readonly land = new LandMap();
   private dropped: ArenaRoom | null = null;
   private btn: HTMLButtonElement | null = null;
 
@@ -22,11 +27,19 @@ export class ExpedUi {
     if (!corner) return;
     const b = (this.btn = document.createElement('button'));
     (b.id = 'mapbtn'), (b.textContent = MAP_WORDS.button), b.setAttribute('aria-label', 'Map');
-    b.addEventListener('click', () => this.map.toggle());
+    b.addEventListener('click', () => (document.body.classList.contains('roamland') ? this.land : this.map).toggle());
     corner.prepend(b);
     addEventListener('keydown', (e) => {
-      if ((e.key === 'm' || e.key === 'M') && document.body.classList.contains('exped') && !(e.target instanceof HTMLInputElement)) this.map.toggle();
+      if ((e.key === 'm' || e.key === 'M') && !(e.target instanceof HTMLInputElement)) document.body.classList.contains('exped') ? this.map.toggle() : document.body.classList.contains('roamland') && this.land.toggle();
     });
+  }
+
+  /** Each frame: on a roaming land (the North Fields, the Fen) the MAP button and the map (landmapui.ts). */
+  landFrame(room: ArenaRoom, job: Job | undefined, index: number, profile: Profile, me: string): void {
+    const on = !!job?.roam && !!job.land;
+    document.body.classList.toggle('roamland', on);
+    if (on) this.land.frame(room, job!, index, profile, me);
+    else if (this.land.open) this.land.toggle(false);
   }
 
   /**

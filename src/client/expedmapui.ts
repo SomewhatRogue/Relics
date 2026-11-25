@@ -18,7 +18,7 @@ const S = 4;
 let ground: { map: GameMap; c: HTMLCanvasElement } | null = null;
 
 /** The map's ground at S pixels a tile, drawn once a map. */
-function groundOf(m: GameMap): HTMLCanvasElement {
+export function groundOf(m: GameMap): HTMLCanvasElement {
   if (ground?.map === m || (ground && ground.map.w === m.w && ground.map.name === m.name && ground.map.rounds.length === m.rounds.length)) return ground!.c;
   const c = document.createElement('canvas');
   (c.width = m.w * S), (c.height = m.h * S);
