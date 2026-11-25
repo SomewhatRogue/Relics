@@ -492,3 +492,11 @@ Claude Opus 5.5
   The ironhide wears its plates over the small body, so it's side on already; the keeping room's goblin walks in
   profile too (keepgob.ts, one line). The Deep's upright goblins and the Night Watch's are their own views, left.
   Looked at in a job, named and plain, both ways. Claude Opus 5.5
+
+## 2026-11-25: stuck on the Staithe's jetty
+
+Kyle: "did a mission with a log I had to push, liked the story, but I got stuck on the island or something." The
+Staithe's log, shoved (sim/staithebits.ts shoveLog), put every hero on it back on the bank but the one who shoved:
+GRAB from a step out on the log (the reach is 1.3 tiles) sank it under you, and the push out of the water could land you
+on the jetty, deep water all round. Now every hero on the log or the jetty, the shover too, lands on the bank just off
+its end. tests/staithe.test.ts (fails on the old rule). A small logged edit in the Staithe's file. Claude Opus 5.5

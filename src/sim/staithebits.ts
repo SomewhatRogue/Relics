@@ -74,9 +74,11 @@ export function shoveLog(h: Hero, w: World, map: GameMap): boolean {
   if (!g?.deck || g.ruined || !end || Math.hypot(end.x - h.x, end.y - h.y) > STAITHE.shoveReach) return false;
   Object.assign(g, { deck: false, ruined: true });
   w.ev.push({ k: 'logshoved', x: g.x + g.w / 2, y: g.y + g.h / 2 });
-  // Goblins on it go in with it; a hero on it lands back on the bank.
+  // Goblins on it go in with it. Every hero on it, the one who shoved it too, and any over on the jetty, lands back on
+  // the bank just off its end: none is left on the jetty with no way back (Kyle, 2026-11-25: "I got stuck on the island").
   for (const e of w.enemies) if (!isDead(e) && inArea(g, e.x, e.y) && !(j && inArea(j, e.x, e.y))) kill(e, w.ev, 'fall');
-  for (const o of w.heroes) if (o !== h && inArea(g, o.x, o.y)) Object.assign(o, { x: end.x, y: end.y });
+  const st = map.staithe!, bank = { x: end.x - st.across[0] * 0.5, y: end.y - st.across[1] * 0.5 };
+  for (const o of w.heroes) if (inArea(g, o.x, o.y) || (j && inArea(j, o.x, o.y))) Object.assign(o, bank);
   return true;
 }
 

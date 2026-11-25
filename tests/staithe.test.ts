@@ -135,6 +135,21 @@ describe('the Staithe: its three jobs', () => {
     expect(ev.some((e) => e.k === 'logshoved')).toBe(true);
   });
 
+  it('shoved from a step out on it, the hero lands back on the bank, not stranded on the jetty (Kyle, 2026-11-25)', () => {
+    const { room } = staithe(), g = logOf(room.map)!, st = room.map.staithe!, j = jettyOf(room.map)!;
+    far(room);
+    quiet(room, (e) => e.variant === 'log');
+    step(room, STAITHE.lay, undefined, () => !!g.deck);
+    const end = logEnd(room.map)!;
+    at(room, end.x + st.across[0] * 0.9, end.y + st.across[1] * 0.9);
+    press(room, 'grabSeq');
+    step(room, 0.5);
+    expect(g.ruined).toBe(true);
+    const h = room.heroes[0];
+    expect(inArea(g, h.x, h.y) || inArea(j, h.x, h.y)).toBe(false);
+    expect(Math.hypot(h.x - end.x, h.y - end.y)).toBeLessThan(1.5);
+  });
+
   it('GRAB by one of the netted cuts them free; they stand and follow', () => {
     const { room } = staithe(), s = room.survivors.find(isNetted)!;
     quiet(room, () => false);
