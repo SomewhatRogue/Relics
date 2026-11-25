@@ -33,7 +33,7 @@ import { braced, ironHeld, ironStance, softer } from './taunt';
 import { roundGuard } from './holyguard';
 import { stormCut } from './spellbook';
 import { wet } from './wet';
-import { clanks, plated } from './ironhide';
+import { clanks, plated, type PlateHow } from './ironhide';
 import { guardFrom, rushBlocked, noteRush } from './rushguard';
 import { count, dealt } from './score';
 import { chalkTaken } from './chalker';
@@ -100,8 +100,10 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // STAMINA ON COUNTER: a counter's first hit fills your stamina. (The spear's shaft halves a blow up close.)
   if (h.counter && has(h, 'bulwark') && h.hitIds.filter((id) => id > 0).length === 1) h.stamina = Math.max(h.stamina, HERO.stamina);
   const mult = weak * soaked * (h.counter ? counter : heldFast ? held : 1) * shaftMult(h, s, e) * rearMult * blessed * tempo * (crit ? CRIT : 1) * (ambush ? STEALTH.ambush * (1 + knack(h, 'ambush')) : 1) * sharp * (door ? 0 : 1) * brandyDmg(h, now) * litMult(h) * (h.snagged ? CENSER.snag : 1) * ((e.routUntil ?? -9) > now ? BANNER.rout.hurt : 1);
-  // An ironhide's plates (sim/ironhide.ts): a charged blow or a perfect breaks its guard; else a fifth gets through.
-  const plate = clanks(e, now) && !(h.heavy || h.perfect), raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev);
+  // Plates (sim/ironhide.ts): a charged blow or a perfect lands and strips them; else a fifth gets through. A crit goes
+  // straight past, and a storm blade strikes through as lightning does (Kyle, 2026-11-24).
+  const how: PlateHow = crit ? 'through' : storm ? 'storm' : '';
+  const plate = clanks(e, now) && !(h.heavy || h.perfect) && !how, raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev, how);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n0 = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, raw) : raw;
   // A boss of the kit: what in the blow fills its POISE (door or no door), then its door (sim/poise.ts, doorwall.ts).

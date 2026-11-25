@@ -15,7 +15,7 @@
  * Affix names (proposals for the lore keeper; code and docs only, nothing on screen names them):
  * Plated, Quick, Gorging; then Oil-soaked, Hornblower, Smouldering (behind AFFIX2_ON).
  * - Plated: grey plates; the ironhide rule (shared/raiders.ts IRONHIDE): a fifth of anything till a
- *   charged blow, a perfect or storm breaks the plates for IRONHIDE.broken seconds.
+ *   charged blow, a perfect or storm strips the plates, off for good at none (shared/plate.ts).
  * - Quick: dust at its heels; `quick.pace` its pace, `quick.windup` its wind-ups, but never under the
  *   floors (`quick.red` for a blow you can block, `quick.striped` for one you can't), and never longer;
  *   `quick.pause` its rest between blows, so it swings more often too (Kyle, 2026-11-11).

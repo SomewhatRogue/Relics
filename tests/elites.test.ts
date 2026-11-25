@@ -3,6 +3,7 @@
  * how many a room may have, what each affix does and its counter, what one costs in the room's threat
  * budget, the small bump to what it drops, and that it's all on the room's seeded streams.
  */
+import { PLATE } from '../src/shared/plate';
 import { afterEach, describe, expect, it } from 'vitest';
 import { board, type Job } from '../src/shared/jobs';
 import { planRoom, type Foe } from '../src/shared/terrain';
@@ -98,22 +99,23 @@ const brute = (affixes: Foe['elite'], more: Foe[] = []) => {
 };
 
 describe('each affix and its counter', () => {
-  it('Plated: a fifth of anything, until a charged blow, a perfect or storm breaks the plates', () => {
+  it('Plated: a fifth of anything while its plate lasts; storm strips a piece; worn off, it stays off', () => {
     const { room, e } = brute(['plated']), plain = brute([]).e;
     expect(e.elite).toEqual(['plated']);
     // What the same blow does to a brute without plates (a brute shrugs off a little of anything).
     damage(plain, 50, 0, []);
-    const full = VARIANTS.heavy.hp - plain.hp;
+    const full = VARIANTS.heavy.hp - plain.hp, plate = Math.round(e.maxHp * PLATE.share);
     damage(e, 50, room.time, room.events);
-    expect(e.hp).toBe(VARIANTS.heavy.hp - Math.round(full * IRONHIDE.armour));
-    const hp = e.hp;
-    damage(e, 50, room.time, room.events, { heavy: true });
-    expect(e.cracked).toBe(true);
-    expect(hp - e.hp).toBe(full);
-    run(room, IRONHIDE.broken + 0.1);
-    expect(e.cracked).toBe(false);
+    expect(e.hp).toBe(VARIANTS.heavy.hp - Math.round(full * PLATE.through));
+    expect(e.plate).toBe(plate - full);
     jolt(e, room.time, room.events);
+    expect(e.plate).toBe(Math.max(0, plate - full - Math.round(plate * PLATE.crack)));
+    while (!e.cracked) damage(e, 10, room.time, room.events, { heavy: true });
+    run(room, 10);
     expect(e.cracked).toBe(true);
+    const hp = e.hp;
+    damage(e, 50, room.time, room.events);
+    expect(hp - e.hp).toBe(full);
   });
 
   it('Quick: wind-ups 0.85 as long but never under the floors, and 1.25 times the pace; keep a guard up', () => {

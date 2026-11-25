@@ -14,7 +14,7 @@ import { markSlick, stepOiler, stepSlicks, stepTorch, type Slick } from './oil';
 import { maybeDig, stepSappers } from './sapper';
 import { stepCrows, type Flock } from './crows';
 import { stepBlind } from './blind';
-import { crackWatch, stepIronhide } from './ironhide';
+import { stepIronhide } from './ironhide';
 import { hooked, stepGaffer } from './gaffer';
 import { leechLanded } from './leechhook';
 import { stepSkimmer } from './skimmer';
@@ -96,10 +96,9 @@ export function beforeHeroes(heroes: Hero[], intents: Map<string, Intent>, none:
   stepNets(heroes, intents, none, now, ev);
 }
 
-/** Before the goblins move: who takes heart from a banner, and a fallen banner's rout; an ironhide's guard closing again. */
+/** Before the goblins move: who takes heart from a banner, and a fallen banner's rout. */
 export function beforeFoes(enemies: Enemy[], now: number, ev: FightEvent[]): void {
   hearten(enemies, now, ev);
-  crackWatch(enemies, now);
 }
 
 /** After they've moved: logs smash, roofs throw their archers, thieves get away or drop it, keepers' wolves scatter, sappers dig on, crows go up, oil spreads and burns. */

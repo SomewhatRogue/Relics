@@ -2,8 +2,9 @@
 
 Kyle, 2026-11-24, after the longbow talk: "Should be more shielded enemies where you have to break the armor... higher
 health and/or an armor mechanic that can break, or crits just go through, could be fun and useful in general... I like
-bleed going through too and some other stuff as well." Written by Claude Opus 5.5 (General chat). Waiting on Kyle's
-picks below before building.
+bleed going through too and some other stuff as well." Written by Claude Opus 5.5 (General chat). Kyle's picks (2026-11-24):
+plates off for good; through: crits, bleed, poison, lightning, then "crossbow punches through plate too" and "holy
+ignores it" (not backstabs or frost shatter); who wears it: all four below.
 
 ## Today
 
@@ -20,15 +21,14 @@ Plated: every ironhide and any Plated elite (sim/ironhide.ts). Until cracked, an
 - Plate: about half the goblin's health. A brute in plate is roughly a brute and a half to kill with quick hits, about a
   brute with heavy ones.
 
-**Straight through the plate, in full** (Kyle's two marked, the rest proposed):
-- crits (Kyle)
-- bleed (Kyle)
-- poison (in the blood like bleed)
-- lightning: the storm wand and the sky's strikes, which also strip plate double (iron draws it)
-- backstabs (the plates are on the front)
-- the Mage's frost shatter (it breaks the ice and the iron with it)
+**Straight through the plate, in full** (Kyle's picks; shared/plate.ts THROUGH_SRC):
+- crits, bleed, poison
+- crossbow bolts
+- anything holy (a smite: the Cleric's light, blessing, censer flare, the mace's smite)
+- lightning (the storm wand, a storm blade, the sky's strikes), which strips the plate double too; a rod's strike,
+  a column or a cart takes 40% of it off at once
 
-Not through: burns (they still burn half as long on iron), ordinary arrows and taps.
+Not through: backstabs, frost shatter, burns, ordinary arrows and taps.
 
 **More of them as you level.**
 - From level 3 a share of the big goblins (brutes, hulks, the big named ones) come in plate, rising with level (the way
@@ -39,7 +39,7 @@ Not through: burns (they still burn half as long on iron), ordinary arrows and t
 
 ## Building it (in slices)
 
-1. **Rules:** shared/plate.ts for the numbers; the plate bar in sim/ironhide.ts; sim/damage.ts lets the through list
+1. **Rules** (done 2026-11-24): shared/plate.ts for the numbers; the plate bar in sim/ironhide.ts; sim/damage.ts lets the through list
    past. Tests. No drawing yet: the clank and the old crack look carry it.
 2. **Who wears it:** level share, elites, budget cost, boss plate. Tests and re-pinned layouts.
 3. **Drawing:** the grey bar, plates falling off, a PLATES OFF word, in both views. Asked of the Art and Graphics chats

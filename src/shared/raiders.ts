@@ -93,10 +93,9 @@ export const LOGS = {
 export const ROOF = { z: 2, hp: 30, reach: 9 };
 
 /**
- * The ironhide (a placeholder name for the lore pass): a goblin in scraps of iron. Until its guard is
- * broken it takes `armour` of anything that lands (at least 1). A charged blow or
- * a perfect (or any heavy hit: a burst, a crit) breaks it: for `broken` seconds it takes full damage,
- * more from behind as anything does, its plates knocked askew. Medium pace (`speed` of a small goblin's),
+ * The ironhide (a placeholder name for the lore pass): a goblin in scraps of iron. Its plate wears down and
+ * comes off for good (shared/plate.ts, sim/ironhide.ts; Kyle 2026-11-24): `armour` and `broken` are the old
+ * 3 s crack's, kept for the record. Medium pace (`speed` of a small goblin's),
  * one heavy, readable blow that can be blocked or dodged. It burns half as long, as a brute does.
  */
 export const IRONHIDE = {

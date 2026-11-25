@@ -1,4 +1,4 @@
-/** The ironhide (sim/ironhide.ts): plated until its guard breaks, then full damage for a few seconds. */
+/** The ironhide (sim/ironhide.ts): plate that wears down and comes off for good (shared/plate.ts). */
 import { describe, expect, it } from 'vitest';
 import { board } from '../src/shared/jobs';
 import { planRoom } from '../src/shared/terrain';
@@ -8,6 +8,7 @@ import { hitEnemy } from '../src/sim/combat';
 import { afflict } from '../src/sim/elements';
 import { NO_INTENT } from '../src/sim/types';
 import { field, run } from './foeyard';
+import { PLATE } from '../src/shared/plate';
 
 const iron = (x = 15, y = 4) => {
   const f = field([{ kind: 'scrapper', variant: 'ironhide', x, y }]);
@@ -15,36 +16,51 @@ const iron = (x = 15, y = 4) => {
 };
 
 describe('the ironhide', () => {
-  it('takes a fifth until its guard is broken, then full damage for the window, then a fifth again', () => {
+  it('plate wears down and comes off for good (Kyle, 2026-11-24): a fifth to health, a heavy blow in full and stripping double', () => {
     const { room, e } = iron(15, 2);
     expect(e.hp).toBe(IRONHIDE.hp);
-    damage(e, 50, room.time, room.events);
-    expect(e.hp).toBe(IRONHIDE.hp - 50 * IRONHIDE.armour);
-    // A heavy hit breaks it and lands in full; so does the next while it's broken.
-    damage(e, 20, room.time, room.events, { heavy: true });
-    expect(e.cracked).toBe(true);
-    expect(room.events).toContainEqual(expect.objectContaining({ k: 'cracked' }));
-    expect(e.hp).toBe(IRONHIDE.hp - 10 - 20);
     damage(e, 20, room.time, room.events);
-    expect(e.hp).toBe(IRONHIDE.hp - 50);
-    run(room, IRONHIDE.broken + 0.1);
-    expect(e.cracked).toBe(false);
+    expect(e.hp).toBe(IRONHIDE.hp - 20 * PLATE.through);
+    expect(e.plate).toBe(Math.round(e.maxHp * PLATE.share) - 20);
+    const p = e.plate!;
+    damage(e, 10, room.time, room.events, { heavy: true });
+    expect(e.hp).toBe(IRONHIDE.hp - 4 - 10);
+    expect(e.plate).toBe(p - 20);
+    expect(e.cracked).toBeFalsy();
+    // Worn to nothing: off, and it stays off.
+    while (!e.cracked) damage(e, 5, room.time, room.events);
+    expect(room.events).toContainEqual(expect.objectContaining({ k: 'cracked' }));
+    run(room, 10);
+    expect(e.cracked).toBe(true);
     const hp = e.hp;
     damage(e, 20, room.time, room.events);
-    expect(e.hp).toBe(hp - 20 * IRONHIDE.armour);
+    expect(e.hp).toBe(hp - 20);
   });
 
-  it('a quick blow barely marks it; a charged blow or a perfect breaks it', () => {
+  it('crits, bleed, poison, crossbow bolts, anything holy and lightning go straight through; lightning strips it', () => {
+    for (const o of [{ crit: true }, { src: 'bleed', tick: true }, { src: 'poison', tick: true }, { src: 'bolt' }, { src: 'smite' }, { el: 'storm' as const }]) {
+      const { room, e } = iron(15, 2);
+      damage(e, 20, room.time, room.events, o);
+      expect(e.hp, JSON.stringify(o)).toBe(IRONHIDE.hp - 20);
+      expect(e.plate, JSON.stringify(o)).toBe(Math.round(e.maxHp * PLATE.share) - ('el' in o ? 20 * PLATE.storm : 0));
+    }
+    // A burn doesn't: a fifth, wearing the plate.
+    const { room, e } = iron(15, 2);
+    damage(e, 10, room.time, room.events, { tick: true, el: 'fire' });
+    expect(e.hp).toBe(IRONHIDE.hp - 2);
+  });
+
+  it('a quick blow barely marks it; a charged blow or a perfect lands in full and strips double', () => {
     const { room, h, e } = iron(15, 13);
     const swing: Swing = { ...WEAPONS.sword.combo[0], range: 9, arc: 360 };
     const n = hitEnemy(h, swing, e, room.time, room.events);
-    expect(n).toBe(Math.max(1, Math.round(swing.dmg * IRONHIDE.armour)));
+    expect(n).toBe(Math.max(1, Math.round(swing.dmg * PLATE.through)));
     expect(room.events).toContainEqual(expect.objectContaining({ k: 'hit', plated: true }));
-    expect(e.cracked).toBeFalsy();
     h.hitIds = [];
     h.perfect = true;
-    hitEnemy(h, swing, e, room.time, room.events);
-    expect(e.cracked).toBe(true);
+    const p = e.plate!, n2 = hitEnemy(h, swing, e, room.time, room.events);
+    expect(n2).toBeGreaterThan(n);
+    expect(p - e.plate!).toBe(Math.min(p, 2 * n2));
   });
 
   it('a block of its blow holds, but does not break its guard (no parry: only a charged blow or a perfect does)', () => {

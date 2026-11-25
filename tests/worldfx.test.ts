@@ -2,6 +2,7 @@
  * World effects, slices 1 to 3 (Kyle, 2026-11-05; shared/worldfx.ts): rods and lightning through pools,
  * butchers eating the dead and fire turning the dead to ash, ice on the shallows and steam.
  */
+import { PLATE } from '../src/shared/plate';
 import { describe, expect, it } from 'vitest';
 import { ARENA, type GameMap } from '../src/shared/arena';
 import { BUTCHER, FLING, ICE, MEAL, POOL, ROD, STEAM_CLOUD, TICK } from '../src/shared/tuning';
@@ -32,7 +33,8 @@ function run(room: ArenaRoom, s: number): FightEvent[] {
   return out;
 }
 const iron = (e: Enemy) => Object.assign(e, { variant: 'ironhide' as const });
-const cracked = (room: ArenaRoom, e: Enemy) => (e.crackUntil ?? -9) > room.time;
+// (Plate that wears down, 2026-11-24: lightning strips a piece of it, not a 3 s crack.)
+const cracked = (_room: ArenaRoom, e: Enemy) => (e.plate ?? Infinity) < Math.round(e.maxHp * PLATE.share);
 const evs = <K extends FightEvent['k']>(ev: FightEvent[], k: K) => ev.filter((x): x is Extract<FightEvent, { k: K }> => x.k === k);
 
 describe('rods: an ironhide draws the lightning, and its guard breaks', () => {
@@ -334,7 +336,7 @@ describe('the same every time, and a guest sees the same', () => {
   };
   it('two runs agree', () => {
     const one = scene(), two = scene();
-    const key = (r: ArenaRoom) => JSON.stringify({ e: r.enemies.map((e) => [e.id, e.hp, e.x, e.y, e.crackUntil]), i: r.ices, s: r.smokes });
+    const key = (r: ArenaRoom) => JSON.stringify({ e: r.enemies.map((e) => [e.id, e.hp, e.x, e.y, e.plate]), i: r.ices, s: r.smokes });
     expect(key(one)).toBe(key(two));
     expect(one.smokes.some((s) => s.steam)).toBe(true);
   });

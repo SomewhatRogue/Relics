@@ -404,3 +404,13 @@ askew for 3 s). It led about 1 room in 19; now about 1 in 9 (shared/encounters.t
   Each band kept back a small one only for itself and those to come, not those before it, which fill() pays for last
   (shared/encounter.ts): now every band's. Pins re-pinned again. (I pushed the first commit with those two tests
   red; this one mends it.)
+
+## 2026-11-24: armor that breaks, slice 1 (the rules)
+
+Kyle: armor that "can break, or crits just go through... I like bleed going through too", then picks: plates off for
+good; through: crits, bleed, poison, lightning, "crossbow punches through plate too", "holy ignores it". Spec:
+docs/design/armor.md. Slice 1: shared/plate.ts (half its health in plate; a fifth of an ordinary blow to health, the
+whole blow off the plate; a heavy blow lands in full and strips double; lightning lands in full and strips double; a
+rod, column or cart strips 40%; at none, off for good). sim/ironhide.ts rewritten (crackWatch gone); sim/damage.ts and
+sim/combat.ts pass crits, THROUGH_SRC (bleed, poison, bolt, smite) and storm. Tests: ironhide, elites (Plated),
+haulier and worldfx moved to plate stripped; parity re-recorded. Board note to Deep, Art and Graphics. Claude Opus 5.5

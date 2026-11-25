@@ -653,10 +653,12 @@ export interface Enemy extends Body {
   /** Called into a pack rush (sim/packrush.ts): its rush, where it's making for (its place in the fan) and
    *  the hero it's for. Null once it winds up or the rush is off. */
   rushTo?: { id: number; x: number; y: number; hx: number; hy: number } | null;
-  /** An ironhide (sim/ironhide.ts): its guard broken until, when it broke, and broken now (for drawing). */
+  /** A plated goblin (sim/ironhide.ts): when its plate last took a blow, its plates off for good (for drawing), and
+   *  what's left of its plate (shared/plate.ts; filled when first struck). `crackUntil` the old 3 s crack, unused. */
   crackUntil?: number;
   crackAt?: number;
   cracked?: boolean;
+  plate?: number;
   /** Layout 4 (sim/tasks.ts): what it's busy at till it sees you, and the body it's hauling (where that lies). */
   task?: import('../shared/scenes4').FoeTask;
   haul?: { x: number; y: number; sack?: boolean };

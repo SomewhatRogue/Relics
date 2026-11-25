@@ -15,6 +15,9 @@ import { offTrack, pickTrack, trackShapes } from '../src/sim/trackshape';
 
 const floor = (n: number) => runRoom(newRun(deepFloor(n, 77, 'x')));
 
+import { PLATE } from '../src/shared/plate';
+const stripped = (e: { plate?: number; maxHp: number }) => (e.plate ?? Infinity) < Math.round(e.maxHp * PLATE.share);
+
 describe('the Haulier', () => {
   it('every fifth floor is its working: the tracks to the edges, two carts on sidings, the gear, the sump, the adit, the chained chest', () => {
     // (Boss floors take it in turns with the Doorkeepers: tests/deepdoor.test.ts. On this seed, 5 and 25 are the Haulier's; 15 is THE LEECHMAN's: tests/leechman.test.ts.)
@@ -192,7 +195,8 @@ describe('the Haulier', () => {
     const ev = run(r, 3 / TICK);
     expect(ev.find((x) => x.k === 'cart' && x.what === 'hit' && x.on === 'haulier')).toBeTruthy();
     expect(h.boss!.downUntil).toBeGreaterThan(0);
-    expect(h.cracked).toBe(true);
+    // (A piece of its plate off: plate that wears down, 2026-11-24.)
+    expect(stripped(h)).toBe(true);
     const downUntil = h.boss!.downUntil;
     // The next, soon after: a shrug, and no new knock down.
     warn(r, h, 0, 1, 0.3);
@@ -207,7 +211,7 @@ describe('the Haulier', () => {
     warn(r, h, 0, 0, 0.3);
     const ev = run(r, 3 / TICK);
     expect(ev.find((x) => x.k === 'cart' && x.what === 'hit' && x.on === 'haulier')).toBeFalsy();
-    expect(h.cracked).toBeFalsy();
+    expect(stripped(h)).toBe(false);
   });
 
   it('the next track is picked by the room\'s seeded stream, leaning to one the Haulier stands near, and not the last one twice', () => {
@@ -302,7 +306,7 @@ describe('the Haulier', () => {
       expect(Math.hypot(z.x - g.x, z.y - g.y)).toBeLessThan(0.01);
       const ev = run(r, 2 * Math.ceil((SKY_STRIKE.delay + 0.2) / TICK));
       expect(ev.find((x) => x.k === 'gear')).toMatchObject({ x: g.x, y: g.y, hit: under });
-      expect(!!h.cracked).toBe(under);
+      expect(stripped(h)).toBe(under);
     }
   });
 

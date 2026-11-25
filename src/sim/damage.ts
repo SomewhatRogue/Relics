@@ -3,7 +3,8 @@ import { fallsInstead } from './pairfall';
 import { BROOD, BUTCHER, GUARD, OVERKILL, SCRAPPER, SPIDER, STORM, SWING_DUMMY, TRAIT, WEAK_POP, weakOn, MARK, MEAL, type Hurt } from '../shared/tuning';
 import type { DeathKind, Enemy, FightEvent } from './types';
 import { wet } from './wet';
-import { clanks, plated } from './ironhide';
+import { clanks, plated, type PlateHow } from './ironhide';
+import { THROUGH_SRC } from '../shared/plate';
 import { MARK_SIGN, isMarked } from '../shared/signs';
 import { count, dealt } from './score';
 import { meatySort } from '../shared/meaty';
@@ -65,6 +66,8 @@ export interface DamageOpts {
   el?: Hurt | '';
   /** A full draw's shot (a VOWED bow's gift, sim/vowed.ts). */
   charged?: boolean;
+  /** A crit: straight through a goblin's plate (sim/ironhide.ts). */
+  crit?: boolean;
 }
 
 /** WEAK or RESIST over a foe (`m` the table's multiplier), at most one every WEAK_POP seconds. */
@@ -99,9 +102,11 @@ export function damage(e: Enemy, n: number, now: number, ev: FightEvent[], o: Da
   const marked = isMarked(e, now);
   if (marked) n = o.tick ? Math.max(1, Math.round(n * MARK_SIGN.tick)) : o.heavy ? Math.round(n * MARK_SIGN.heavy) : n + MARK_SIGN.flat;
   if (o.mult && (e.act === 'stunned' || e.act === 'pinned' || frozen(e, now) || snared(e, now))) n = Math.round(n * GUARD.stunnedMult * (o.brutal ? TRAIT.brutal : 1));
-  // An ironhide's plates: a heavy hit breaks its guard, anything else barely gets through (sim/ironhide.ts).
-  const breaks = !!o.heavy && !o.tick, clank = !o.tick && !breaks && clanks(e, now);
-  n = plated(e, n, now, breaks, ev);
+  // Plates (sim/ironhide.ts): a heavy hit lands and strips them, anything else barely gets through; crits, bleed,
+  // poison, crossbow bolts, anything holy and lightning go straight past (shared/plate.ts THROUGH_SRC).
+  const how: PlateHow = o.crit || THROUGH_SRC.includes(o.src ?? '') ? 'through' : o.el === 'storm' ? 'storm' : '';
+  const breaks = !!o.heavy && !o.tick, clank = !o.tick && !breaks && !how && clanks(e, now);
+  n = plated(e, n, now, breaks, ev, how);
   // Opened up (the Drover off its line, the Brakesman off its brake: INSTANCE.open): blows land harder.
   if (e.takes !== undefined && (e.openUntil ?? Infinity) > now && n > 0) n = Math.round(n * e.takes);
   // A butcher at a body: a heavy hit takes it off the meal (sim/meal.ts).
