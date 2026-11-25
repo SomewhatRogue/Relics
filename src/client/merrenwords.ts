@@ -20,7 +20,8 @@ export const MERRENW = {
   yes: 'YES, CHANGE IT',
   no: 'NO, KEEP IT',
   done: "There. That'll see you through five jobs, and then you know where I am.",
-  shortCoin: "You're short. Twenty silver, and I don't haggle, I'm too old to enjoy it.",
+  // (No sum said: it goes by the grade, 5s to 15s. Kyle, 2026-11-25.)
+  shortCoin: "You're short, and I don't haggle, I'm too old to enjoy it.",
   shortCoal: "Fire wants a sack of charcoal, and I've none. The woman at the Charcoal Hut sells it, out the North Gate on the north fields, and you can tell her it's for me, but she'll still charge you.",
   close: 'CLOSE',
   /** The button names. */

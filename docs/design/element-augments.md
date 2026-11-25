@@ -66,6 +66,6 @@ own, with a board row, builds it.
   job; a Mage's Channel burns it off a focus. Never shard-stuff. A hero still on their starting weapon gets a plain
   one dressed. The errand `merren` (shared/errands.ts) fetches a non-Mage at level 5, the runner's words as a toast.
 - **Charcoal**: 40c a sack at the Charcoal Hut, bought through the room (`GEAR.coal`, only in that station's ring).
-- **For Kyle**: the price. 20s is about 13 medium jobs' pay for 5 jobs of an element (and a +3 at Halvard is 7s 50c):
-  the lore keeper thinks "20s" may be an older "20 gold" never converted.
+- **The price** (Kyle, 2026-11-25: "5s low level up to 15s plus materials. Its rare"): 5s plain, 10s STRONG, 15s
+  FIERCE, each with its material; a hero's first of each element at the plain grade still free (`EDGE.price`).
 

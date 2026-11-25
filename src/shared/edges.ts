@@ -39,8 +39,9 @@ export const EDGE_TRAIT: Record<EdgeEl, TraitId> = { fire: 'ember', frost: 'rime
 export const EDGE = {
   /** Jobs an edge lasts: any job finished, however it ended (Kyle: "just 5 missions in general"). */
   jobs: 5,
-  /** Its price after a hero's free first of that element (Kyle: 20s). */
-  price: 2000,
+  /** Its price by grade, after a hero's free first of that element, besides the material (Kyle, 2026-11-25: "5s low
+   *  level up to 15s plus materials. Its rare"). */
+  price: { 1: 500, 2: 1000, 3: 1500 } as Record<Grade, number>,
   /** The level Merren will see you from, and his runner fetches you (Kyle). */
   level: 5,
 } as const;
@@ -62,7 +63,7 @@ export const edgeTrait = (it: { edge?: Edge } | undefined): TraitId | undefined 
 export interface EdgeCost { gold: number; mats: Mats; free: boolean }
 export function edgeCost(p: { edgeFree?: EdgeEl[] }, el: EdgeEl, grade: Grade = 1): EdgeCost {
   const free = grade === 1 && !(p.edgeFree ?? []).includes(el);
-  return free ? { gold: 0, mats: {}, free } : { gold: EDGE.price, mats: { [EDGE_MATS[el][grade]]: 1 }, free };
+  return free ? { gold: 0, mats: {}, free } : { gold: EDGE.price[grade], mats: { [EDGE_MATS[el][grade]]: 1 }, free };
 }
 
 export type EdgeRefusal = 'mage' | 'level' | 'weapon' | 'gold' | 'mats';

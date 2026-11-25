@@ -1262,3 +1262,8 @@ pictures, the room laying them).
   saltpetre, his grade 3 line. Not seen: the dressings lying in a real trip, the struck pine looks thin (an art pass).
   (Claude Opus 5.5)
 
+## 2026-11-25: the price of an edge, by grade
+
+Kyle: "5s low level up to 15s plus materials. Its rare". `EDGE.price` is now by grade: 5s, 10s, 15s (shared/edges.ts),
+with the material as before; the first plain one of each element still free. Merren's short-of-coin line no longer names a
+sum ("You're short, and I don't haggle, I'm too old to enjoy it."). (Claude Opus 5.5)

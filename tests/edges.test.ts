@@ -22,12 +22,12 @@ describe('putEdge', () => {
     expect(p.gold).toBe(10000);
     expect(p.edgeFree).toEqual(['fire', 'frost', 'storm']);
   });
-  it('the second fire costs 2000 and a charcoal; refused when short of either', () => {
+  it('the second fire costs 5s and a charcoal; refused when short of either', () => {
     const p = hero({ edgeFree: ['fire'] }), w = sword();
-    expect(putEdge(hero({ edgeFree: ['fire'], gold: 1999 }), sword(), 'fire')).toBeNull();
+    expect(putEdge(hero({ edgeFree: ['fire'], gold: 499 }), sword(), 'fire')).toBeNull();
     expect(putEdge(hero({ edgeFree: ['fire'], mats: {} }), sword(), 'fire')).toBeNull();
     expect(putEdge(p, w, 'fire')).not.toBeNull();
-    expect(p.gold).toBe(10000 - EDGE.price);
+    expect(p.gold).toBe(10000 - EDGE.price[1]);
     expect(p.mats?.charcoal).toBe(2);
   });
   it('a new edge replaces the old', () => {
@@ -41,9 +41,9 @@ describe('putEdge', () => {
 describe('grades', () => {
   it('grade 2 fire is 20s and 1 fatwood, never free; the first plain fire is free; grade 3 frost is 1 peat', () => {
     expect(edgeCost({}, 'fire', 1).free).toBe(true);
-    expect(edgeCost({}, 'fire', 2)).toEqual({ gold: EDGE.price, mats: { fatwood: 1 }, free: false });
+    expect(edgeCost({}, 'fire', 2)).toEqual({ gold: 1000, mats: { fatwood: 1 }, free: false });
     expect(edgeCost({ edgeFree: ['fire'] }, 'fire', 2).free).toBe(false);
-    expect(edgeCost({}, 'frost', 3)).toEqual({ gold: EDGE.price, mats: { peat: 1 }, free: false });
+    expect(edgeCost({}, 'frost', 3)).toEqual({ gold: 1500, mats: { peat: 1 }, free: false });
   });
   it('is refused for a missing material, and putEdge records the grade', () => {
     expect(edgeRefusal(hero(), sword(), 'fire', 2)).toBe('mats');
