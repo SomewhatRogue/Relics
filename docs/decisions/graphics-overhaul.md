@@ -1319,3 +1319,9 @@ from level 6.
   check without stopping on it. Fixed (e1c1348) and checked in town, the north fields and the fen. My push line now
   stops on a failed compile.
 
+## 2026-11-25: the North Gate open from level 1, for Kyle's testing
+
+Kyle: "lets make it so you can go out the gate at lvl 1 so i can test it please". `GATE_OPEN = 1` in
+shared/gatefieldsquest.ts (`canGoOut`); the trainer's quest still comes at level 3 (`GATE_LEVEL`). To close it again,
+set `GATE_OPEN` back to `GATE_LEVEL`. (Claude Opus 5.5)
+

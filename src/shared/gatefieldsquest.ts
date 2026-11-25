@@ -4,9 +4,12 @@
  * `fields` in shared/errands.ts.
  */
 
-/** The level the guard lets you out at. */
+/** The level the trainer sends you out at (their quest to rest at the Field Barn). */
 export const GATE_LEVEL = 3;
-export const canGoOut = (level: number): boolean => level >= GATE_LEVEL;
+/** The level the guard lets you out at. Open from level 1 for now, so Kyle can test the land (2026-11-25: "lets make
+ *  it so you can go out the gate at lvl 1 so i can test it"); set it back to GATE_LEVEL to close it again. */
+export const GATE_OPEN = 1;
+export const canGoOut = (level: number): boolean => level >= GATE_OPEN;
 
 /** The north fields' shelter, as the map names it (shared/territory.ts, the gatefields land). */
 export const FIELD_BARN = 'THE FIELD BARN';

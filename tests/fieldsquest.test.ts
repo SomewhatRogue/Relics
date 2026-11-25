@@ -17,8 +17,8 @@ const chained = (level: number) => {
 describe('the way out of the gate (Kyle, 2026-11-24)', () => {
   it('the guard lets you out from level 3', () => {
     expect(GATE_LEVEL).toBe(3);
-    expect(canGoOut(2)).toBe(false);
-    expect(canGoOut(3)).toBe(true);
+    // (The gate is open from level 1 while Kyle tests the land: gatefieldsquest.ts GATE_OPEN.)
+    expect(canGoOut(1)).toBe(true);
   });
 
   it('is not offered below level 3, and is at 3', () => {
