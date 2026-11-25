@@ -179,10 +179,10 @@ const dummyBase: Part[] = [
  * jagged grin. `GOB` is its colours (skin, its shade, legs, feet, jerkin, its patch, belt, mouth, teeth,
  * eyes); the pale blind hunters are the same body in bone and ash with empty sockets.
  */
-type GobCols = { S: string; s: string; L: string; F: string; B: string; b: string; K: string; m: string; T: string; E: string };
+export type GobCols = { S: string; s: string; L: string; F: string; B: string; b: string; K: string; m: string; T: string; E: string };
 // (Under ?sharp the goblins are drawn meaner: charmean.ts.)
-const GOB: GobCols = SHARP ? MEAN_GOB : { S: '#5b6b2a', s: '#4a5a22', L: '#3a4a1f', F: '#2a3418', B: '#4a3a2a', b: '#5a4836', K: '#2a2018', m: '#2a1a14', T: '#e8e0c8', E: '#ff4a3a' };
-const PALE: GobCols = { S: '#c8c2b0', s: '#a8a290', L: '#8a8478', F: '#5a5650', B: '#4a4440', b: '#5a5450', K: '#2a2420', m: '#2a2420', T: '#e8e0c8', E: '#1a1614' };
+export const GOB: GobCols = SHARP ? MEAN_GOB : { S: '#5b6b2a', s: '#4a5a22', L: '#3a4a1f', F: '#2a3418', B: '#4a3a2a', b: '#5a4836', K: '#2a2018', m: '#2a1a14', T: '#e8e0c8', E: '#ff4a3a' };
+export const PALE: GobCols = { S: '#c8c2b0', s: '#a8a290', L: '#8a8478', F: '#5a5650', B: '#4a4440', b: '#5a5450', K: '#2a2420', m: '#2a2420', T: '#e8e0c8', E: '#1a1614' };
 const gobBody = (k: GobCols): Part[] => [
   ['r', 4, 14, 3, 5, k.L], ['r', 10, 14, 3, 5, k.L], ['r', 3, 19, 4, 1, k.F], ['r', 10, 19, 4, 1, k.F],
   ['r', 3, 9, 11, 5, k.B], ['p', 5, 10, k.b], ['p', 6, 11, k.b], ['p', 11, 10, k.b], ['p', 10, 12, k.b], ['r', 3, 14, 11, 1, k.K], ['p', 8, 14, '#6a5a3a'],

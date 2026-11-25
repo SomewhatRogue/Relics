@@ -28,6 +28,7 @@ import { rest, newPose } from './motion';
 import { drawText } from './pixfont';
 import { GOB_PARTS, SPRITES, grow, makeSprite, type Sprite } from './sprites';
 import { butcherLook, butcherParts, type Arms } from './butcherparts';
+import { gobSide, gobSideOn, grownSide } from './gobside';
 import { drawPounce, drawSpiderKind, drawSpitSign } from './spiders';
 import { SPIDER_SPRITES } from './spidersprites';
 import { isSpiderKind } from '../shared/spiders';
@@ -136,7 +137,7 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
 const RAKE_K = 1.3;
 /** A small goblin's extra size this draw over its 1.5x body (1 for most). */
 const extraK = (e: Enemy) => (rakeOf(e) ? RAKE_K : 1) * BODY.k;
-type BigGob = { down: Sprite; up: Sprite; cut: typeof SCRAPPER_CUT };
+type BigGob = { down: Sprite; up: Sprite; side: Sprite; cut: typeof SCRAPPER_CUT };
 const BIG_GOBS = new Map<string, BigGob>();
 /** The goblin's shapes drawn again `k` as big, cut to match (made once a size, in steps of 0.05). */
 function bigGob(k: number, pale: boolean): BigGob {
@@ -145,7 +146,7 @@ function bigGob(k: number, pale: boolean): BigGob {
   let s = BIG_GOBS.get(key);
   if (s) return s;
   const r = (v: number) => Math.round(v * k), C = SCRAPPER_CUT, mk = (p: typeof GOB_PARTS.down) => makeSprite(r(17), r(20), grow(p, k));
-  BIG_GOBS.set(key, (s = { down: mk(pale ? GOB_PARTS.paleDown : GOB_PARTS.down), up: mk(pale ? GOB_PARTS.paleUp : GOB_PARTS.up), cut: { headTo: r(C.headTo), hip: r(C.hip), back: C.back.map(r) as typeof C.back, arm: C.arm.map(r) as typeof C.arm } }));
+  BIG_GOBS.set(key, (s = { down: mk(pale ? GOB_PARTS.paleDown : GOB_PARTS.down), up: mk(pale ? GOB_PARTS.paleUp : GOB_PARTS.up), side: grownSide(k, pale), cut: { headTo: r(C.headTo), hip: r(C.hip), back: C.back.map(r) as typeof C.back, arm: C.arm.map(r) as typeof C.arm } }));
   return s;
 }
 /** How much bigger than the old goblin a small one is drawn (1.5x, times any extra). */
@@ -163,17 +164,22 @@ function scrapper(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
     return;
   }
   const pz = scrapperPose(e, t, c.now);
-  if (pz.phase === 'rest' && e.moving) pz.oy = Math.floor(c.now * 9) % 2 ? -1 : 0;
+  // Going mostly across the screen: in profile (gobside.ts), walking with the side stride; else it bobs as it goes.
+  const sv = gobSideOn(e);
+  if (pz.phase === 'rest' && e.moving) {
+    if (sv) pz.step = 21 + (Math.floor(c.now * 9 + e.id * 0.37) % 4);
+    else pz.oy = Math.floor(c.now * 9) % 2 ? -1 : 0;
+  }
   hurtPose(pz, e, c.now);
   if (e.act === 'stunned') (pz.ox += Math.round(Math.sin(c.now * 5))), (pz.oy += 1);
   const reach = pz.phase === 'windup' ? 1 : pz.phase === 'release' || pz.phase === 'contact' ? 7 : 3;
   const K = gobK(e), rake = rakeOf(e);
   shadow(c, x, y, Math.round(5 * K));
   // The body where it's thrown (the pose's shift at its size); the kits' feet and hand in the old pixels.
-  const bx = x + Math.round(pz.ox * K), by = y + Math.round(pz.oy * K), up = e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
+  const bx = x + Math.round(pz.ox * K), by = y + Math.round(pz.oy * K), up = !sv && e.fy < -0.55, fa = Math.atan2(e.fy, e.fx);
   // In parts (figure.ts): the knife (or bow) is in the hand, wherever the arm has gone.
   const pale = e.variant === 'blind', xk = extraK(e), rk = xk !== 1 ? bigGob(xk, pale) : null;
-  const body = rk ? jointed(up ? rk.up : rk.down, rk.cut) : jointed(up ? (pale ? SPRITES.paleUp : SPRITES.scrapperUp) : pale ? SPRITES.pale : SPRITES.scrapper, SCRAPPER_CUT);
+  const side = gobSide(), body = rk ? jointed(sv ? rk.side : up ? rk.up : rk.down, rk.cut) : jointed(sv ? (pale ? side.pale : side.gob) : up ? (pale ? SPRITES.paleUp : SPRITES.scrapperUp) : pale ? SPRITES.pale : SPRITES.scrapper, SCRAPPER_CUT);
   layout(body, bx, by, e.fx < -0.2, pz, K);
   const [ax1, ay1] = armOffset(ARM), ax = ax1 / K, ay = ay1 / K, ox = x + pz.ox, oy = y + pz.oy, kx = ox + ax, ky = oy + ay;
   Object.assign(AT, { bx: pz.ox, by: pz.oy, hx: pz.ox + ax, hy: pz.oy + ay });

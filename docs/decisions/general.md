@@ -473,3 +473,15 @@ face marks. Poses on the move carry `gait` and `frame` (houndbody.ts); houndart.
 tests/houndfacing.test.ts. Looked at as a sheet, every breed and frame. Claude Opus 5.5
 - (Also: the dev server throws "Cannot access 'OY' before initialization" from client/hangs.ts importing world.ts,
   a cycle; the built game is fine. Not mine to change; noted for whoever owns hangs.ts.)
+
+## 2026-11-25: goblins in profile (slice 1: the small ones)
+
+Kyle: "lets do number 2 for all gobbos" (goblins had only front and back, so going across they walked sideways on).
+client/gobsideparts.ts (pixels and the turn) and gobside.ts (sprites): the small goblin side on, east and mirrored,
+in the same 17 by 20 canvas and SCRAPPER_CUT, far leg left and darker, near leg right, so the side stride (steps 21
+to 24) walks it; the head forward with a long nose, the ear swept back, one eye, teeth and a fang; the near arm
+reaching forward to where the kits are held. The pale hunters too, ears up. foes.ts scrapper(): side on when |fx|
+leads |fy| by 0.12 (back at -0.12, sideview.ts's margins), BIG ONEs and Rakehead's four grown to match. Every small
+goblin kind shares it (lunger, shield, archer, hexer, drummer, netter, thief, blind...): looked at in a job, both
+ways. sprites.ts exports GOB, PALE, GobCols (one-word edits, Art's file). tests/gobside.test.ts. Next: butchers.
+Claude Opus 5.5
