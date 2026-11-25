@@ -42,6 +42,12 @@ and docs/design/territories.md (the kit it stands on, and the people out on the 
 around that you can teleport back to base and/or to them, like a safe zone with maybe a merchant or someone who
 sells healing potions or a relic recharge."
 
+- **A full fall ends the trip** (Kyle, 2026-11-25: "If you fall fully you res in the main town sorry and lose a decent
+  amount of money it costs to heal you and pull you back to town"). Everyone down with no get-up left, and after a short
+  wait the trip is over as beaten: the slow fade, then Wickhold, at the infirmary's door, whole. The coin found this trip
+  is kept; the healer's fee is a quarter of the coin held then (shared/healfee.ts, floored, nothing for nothing), paid from
+  each player's own purse. Materials, gear and bounty counts are kept. Enemies come back every trip: each trip builds
+  the land fresh.
 - **One self revive a trip out.** Down once and you get yourself up; down again and only a friend can lift you.
   Friends may lift you as often as they reach you. It comes back when you rest at a way station or in town.
 - **Way stations.** A few on each map of the land, a walk apart: a fire, a palisade, somebody keeping it. Inside
@@ -72,7 +78,7 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
   board does it; the banner shows the place and the part you stand in, no objective; GO IN or STAY OUT when you walk
   back to the gate; in is a plain return, nothing lost, standing at the gate.
 - **Falling and resting** (sim/landrules.ts): one self revive a trip; friends lift without limit; with nobody left
-  the party wakes at the last shelter rested at, or the gate; two seconds in a shelter is a rest; no goblin enters
+  the trip ends as beaten and the healer in Wickhold takes her fee; two seconds in a shelter is a rest; no goblin enters
   one, and one pressing at you there gives up and walks home.
 
 - **The camp's watch** (Kyle, 2026-11-24: "maybe the camp has some guards that can wreck any goblins that have
@@ -119,7 +125,7 @@ appropriate art, scenes, and enemy types to keep it varied and fun and interesti
   The lore keeper: this wood is not Greyhollow, and the hut is not Hew's. A shelter is found by resting in it
   (`Profile.shelters`); a keeper offers TO each other found shelter on the map (sim/travel.ts, `GEAR.travel`: the room
   moves you and snaps you, so you are not seen sliding), and the North Gate offers OUT TO each found one, alone
-  (`Job.at`: the run starts in its ring and a fall wakes you there). The way back in is still watched at the gate.
+  (`Job.at`: the run starts in its ring a rest there is its rest point). The way back in is still watched at the gate.
 
 Not yet: the view off the east side; bounties, materials, quests; the wood beyond the far end.
 
@@ -163,9 +169,5 @@ seams, views).
 
 ## Open, for Kyle
 
-- What happens when the self revive is spent and you fall with nobody to lift you. Proposed: you wake at the last
-  way station you rested at (the gate if none), with what you carried, and what you had gathered since that rest is
-  left where you fell to walk back for.
 - Whether other players are seen out there as they are in town, or it is your party only. Proposed: your party
   only at first, as on a job.
-- Whether fallen enemies are back when you next walk out, or stay down for the day.

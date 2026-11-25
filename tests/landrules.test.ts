@@ -38,7 +38,7 @@ describe('falling on the land', () => {
     expect(station(w).r).toBeGreaterThan(1);
   });
 
-  it('gets a lone hero up once by themselves; the second time they stay down till the wipe wakes them at the way in', () => {
+  it('gets a lone hero up once by themselves; the second time they stay down till the trip ends as beaten', () => {
     const w = land('gatefields'), { h, run, room } = w;
     fall(h);
     stepFor(w, HERO.respawn - 0.3);
@@ -48,27 +48,21 @@ describe('falling on the land', () => {
     expect(h.hp).toBe(Math.round(h.maxHp * PARTY.upHp));
     expect(h.selfUp).toBe(true);
     expect(run.downs).toBe(0);
-    // Down again: no get-up left; the wipe's beat holds them, then they wake whole at the way in with it back.
+    // Down again: no get-up left; the wipe's beat holds them, then the trip ends as beaten (the town heals them: healfee.test.ts).
     fall(h);
     stepFor(w, INSTANCE.regroup - 0.5);
     expect(h.act).toBe('down');
-    stepFor(w, 1);
-    expect(h.act).toBe('idle');
-    expect(h.hp).toBe(h.maxHp);
-    expect(h.selfUp).toBe(false);
-    expect(Math.hypot(h.x - room.map.hero.x, h.y - room.map.hero.y)).toBeLessThan(1);
     expect(run.failed).toBe(false);
+    stepFor(w, 1);
+    expect(h.act).toBe('down');
+    expect(run.failed).toBe(true);
     expect(run.downs).toBe(0);
   });
 
-  it('never loses the trip, however many times the party wipes', () => {
+  it('does not end the trip while the self revive is unspent', () => {
     const w = land('gatefields');
-    for (let i = 0; i < 5; i++) {
-      w.h.selfUp = true;
-      fall(w.h);
-      stepFor(w, INSTANCE.regroup + 0.5);
-      expect(w.h.act).toBe('idle');
-    }
+    fall(w.h);
+    stepFor(w, INSTANCE.regroup + 0.5);
     expect(w.run.failed).toBe(false);
   });
 });
@@ -88,17 +82,16 @@ describe('resting at a way station', () => {
     expect(w.log.filter((e) => e.k === 'rested')).toEqual([{ k: 'rested', x: h.x, y: h.y, id: 'me', station: station(w).name }]);
   });
 
-  it('wakes a wipe at the station rested at', () => {
-    const w = land('gatefields'), { h, run, room } = w;
+  it('ends a full fall as beaten, even after resting at a station', () => {
+    const w = land('gatefields'), { h, run } = w;
     into(w, h);
     stepFor(w, LAND.rest + 0.5);
     expect(run.rest).toBeDefined();
     Object.assign(h, { x: 20, y: 20, selfUp: true });
     fall(h);
     stepFor(w, INSTANCE.regroup + 0.5);
-    expect(h.act).toBe('idle');
-    expect(Math.hypot(h.x - station(w).x, h.y - station(w).y)).toBeLessThanOrEqual(station(w).r);
-    expect(Math.hypot(h.x - room.map.hero.x, h.y - room.map.hero.y)).toBeGreaterThan(5);
+    expect(run.failed).toBe(true);
+    expect(h.act).toBe('down');
   });
 });
 

@@ -4,15 +4,15 @@
  *
  * - One self revive a trip: the first fall, a hero is up by themselves after HERO.respawn at PARTY.upHp of their health, and
  *   that get-up is spent (`selfUp`). Down again, they stay down till a friend lifts them (friends lift without limit).
- * - Nobody left: everyone down with no get-up left, and after INSTANCE.regroup the party is up whole at the last station
- *   rested at (`run.rest`) or the way in, their get-ups back, the goblins still standing put back whole. No count, never lost.
+ * - Nobody left: everyone down with no get-up left, and after INSTANCE.regroup the trip is over as beaten (`run.failed`,
+ *   as a job's wipe: the slow fade, then Wickhold's healer and her fee, client/game.ts finish, shared/healfee.ts). The next
+ *   trip builds the land fresh, so the goblins are back.
  * - Resting: LAND.rest seconds inside a station's ring, not down: it is the rest point, and everyone inside has their
  *   get-up back; said once (`rested`) while they stay.
  * - Safe ground: no goblin enters a ring (stopped at its edge); one pressing at a hero inside gives up after LAND.giveUp and
  *   goes home (sim/homing.ts). Shots already in the air are left alone.
  */
 import { INSTANCE, HERO, LAND, PARTY } from '../shared/tuning';
-import { settle, upAtGate } from './checkpoint';
 import { isDead } from './damage';
 import { players } from './party';
 import type { ArenaRoom } from './room';
@@ -25,12 +25,6 @@ const inside = (s: Station, b: { x: number; y: number }) => Math.hypot(b.x - s.x
 
 /** Standing inside a way station's ring (a shop and a bed: sim/pack.ts GEAR.buy). */
 export const inStation = (stations: Station[] | undefined, b: { x: number; y: number }) => !!stations?.some((s) => inside(s, b));
-
-/** Where hero `i` of `n` wakes: a short row across the rest point (or the way in). */
-export function wakeSpot(room: ArenaRoom, run: Run, i: number, n: number): { x: number; y: number } {
-  const g = run.rest ?? room.map.hero, x = g.x + (i - (n - 1) / 2) * 0.9;
-  return { x: Math.max(0.6, Math.min(room.map.w - 0.6, x)), y: g.y };
-}
 
 /** Nobody standing, and none with a get-up left. */
 export const spent = (ps: Hero[]) => ps.length > 0 && ps.every((h) => h.act === 'down' && (h.selfUp || h.out));
@@ -97,12 +91,12 @@ export function stepLand(run: Run, room: ArenaRoom, ev: FightEvent[]): void {
   const ps = players(room.heroes), stations: Station[] = room.map.stations ?? [];
   // Down, a hero stays down till they are lifted or the self revive's wait is over (not the lone stand-up's full health).
   for (const h of ps) if (h.act === 'down') h.actDur = Infinity;
+  if (run.failed) return;
   if (run.wipeAt !== undefined) {
     if (run.wipeAt > room.time) return void (run.wipeAt = undefined);
     if (room.time - run.wipeAt < INSTANCE.regroup) return;
     run.wipeAt = undefined;
-    ps.forEach((h, i) => upAtGate(room, h, wakeSpot(room, run, i, ps.length), ev));
-    for (const e of room.allEnemies) if (!isDead(e) && !e.boss) settle(room, e), Object.assign(e, { homing: false, giveT: undefined });
+    run.failed = true;
     return;
   }
   for (const h of ps) if (h.act === 'down' && !h.selfUp && !h.out && h.actT >= HERO.respawn) selfRevive(h, ev);

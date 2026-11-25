@@ -55,6 +55,8 @@ import { paidToast } from './errandpaid';
 import { tickEdges } from '../shared/edges';
 import { EDGEW } from './edgewords';
 import { toast } from './partytoast';
+import { healFee } from '../shared/healfee';
+import { healToast } from './healwords';
 import { DEED, deed } from '../shared/titles';
 import { wearsHungry } from '../shared/corrupt';
 import { FALL, fallWith, giveRipe } from '../shared/crossroads';
@@ -1378,7 +1380,7 @@ export class Game {
     const deep = deepEnd && p.deep ? { end: deepEnd, ...endDeep(p.deep, p, deepEnd, run.gold) } : undefined;
     if (isDeep(run.job)) (p.deep = undefined), (this.deepAsk = this.deepThere = this.deepUp = false), (this.deepVote = 0);
     // Driven back (or gone home from a job alone): half the gold. Gone early from a party: what was picked up while with them.
-    const half = !deep && !won && !(run.job.roam && how === 'left') && !(withParty && (how === 'left' || how === 'dropped'));
+    const half = !deep && !won && !(run.job.roam && (how === 'left' || how === 'beaten')) && !(withParty && (how === 'left' || how === 'dropped'));
     // Driven back in the Ransom Coat: all of it, not half.
     const ransom = half && p.armor?.hungry === 'ransom';
     // A bigger party: more pay and a better treasure; experience shared out so it's a little more, not a multiple (shared/pace.ts).
@@ -1424,9 +1426,12 @@ export class Game {
     const found = won && !deep ? treasure(run.job, p.cls, p.id, p.runs, crowd, (run.sides ?? 0) + (way?.treasure ?? 0), run.level ?? 1) : [], kept = found.slice(0, Math.max(0, bagSize(p) - p.bag.length)), sold = found.slice(kept.length);
     p.bag.push(...kept);
     p.gold += sold.length * TREASURE_SOLD;
+    // A full fall on the land: carried to the healer's, a quarter of the purse paid (shared/healfee.ts).
+    const carriedHome = run.job.roam && how === 'beaten', fee = carriedHome ? healFee(p.gold) : 0;
+    p.gold -= fee;
     this.result = { won, how, half, job: run.job, gold, xp, rescued, levels, relic, relics, treasure: kept, sold, lost: run.lost ?? 0, ledoff: run.ledoff ?? 0, netlost: run.netlost ?? 0, way: way ? wayLine(way) : undefined, lit: lit > 0 ? p.lit : undefined, recap, deep: deep && { end: deep.end, floor: deep.floor, lost: deep.lost } };
     // A trip out of the gate is a plain return: no result screen, no penalty (docs/design/outside-the-gate.md).
-    if (run.job.roam && how === 'left') this.result = null;
+    if (run.job.roam && (how === 'left' || how === 'beaten')) this.result = null;
     this.run = null;
     // Paid: marked so in the same store as the pay (the give below), then the tallies let go.
     if (key) p.paid = [...(p.paid ?? []), key].slice(-12);
@@ -1443,7 +1448,8 @@ export class Game {
     this.questEnd({ job: run.job, won, rescued, dens: run.dens ?? 0 });
     unbank(p.id);
     if (ONLINE && key && !key.startsWith('solo-')) dropOwed(p.id, key);
-    this.enterTown(run.job.roam && how === 'left' ? this.gateSpot() : this.boardFront());
+    this.enterTown(carriedHome ? this.doorOf('infirmary') ?? this.boardFront() : run.job.roam && how === 'left' ? this.gateSpot() : this.boardFront());
+    if (carriedHome) healToast(fee);
   }
 
   /** The nearest thing to use where the hero stands: a person, a door, a spot in the open. */
