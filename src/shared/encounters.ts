@@ -71,8 +71,8 @@ export const TEMPLATES: Template[] = [
   { id: 'roof', said: 'archers on the roofs', centre: ['roofer'], support: ['roofer'], fodder: [2, 3], roofs: true, weight: 2.5, beats: ['tactic'] },
   { id: 'wolves', said: 'a wolf-keeper and its wolves', centre: ['keeper'], fodder: [3, 4], fodderKind: 'wolf', weight: 2, places: OPEN, beats: ['tactic'] },
   { id: 'sapper', said: 'a brute in front and a sapper under', centre: ['heavy'], support: ['sapper'], fodder: [2, 3], from: 1, weight: 1.5, places: ['farm', 'field', 'forest', 'mine', 'marsh'], beats: ['tactic', 'closer'] },
-  { id: 'iron', said: 'an ironhide and the little ones', centre: ['ironhide'], fodder: [3, 4], from: 1, weight: 1.5, more: 'lunger', beats: ['tactic', 'closer'] },
-  { id: 'ironback', said: 'a brute with an ironhide at its side', centre: ['heavy'], support: ['ironhide'], fodder: [2, 3], from: 1, ruin: 1, weight: 1, beats: ['closer'] },
+  { id: 'iron', said: 'an ironhide and the little ones', centre: ['ironhide'], fodder: [3, 4], from: 1, weight: 3.5, /* 1.5 to 3.5, Kyle 2026-11-24: more goblins whose armor you break */ more: 'lunger', beats: ['tactic', 'closer'] },
+  { id: 'ironback', said: 'a brute with an ironhide at its side', centre: ['heavy'], support: ['ironhide'], fodder: [2, 3], from: 1, ruin: 1, weight: 2, /* 1 to 2: as above */ beats: ['closer'] },
   { id: 'chalk', said: 'a chalker behind a crowd, chalking one of you', support: ['chalker'], fodder: [3, 5], from: 1, weight: 1.5, more: 'lunger', debut: CHALKER.debut, beats: ['splat', 'tactic'] },
   { id: 'snare', said: 'a snarer behind a few small ones, snaring the ground in front of you', support: ['snarer'], fodder: [3, 4], from: 1, weight: 1.2, debut: SNARE_DEBUT, beats: ['tactic'] },
   // The new meaty sorts (shared/meaty.ts), each bleeding in (shared/debut.ts): a fight to think about, or a room's closer.

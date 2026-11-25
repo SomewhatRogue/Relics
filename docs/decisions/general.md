@@ -393,3 +393,10 @@ hit 60. Now (shared/weapons.ts `ease`, `tire`; sim/hero.ts `tiredBy`): a part dr
 three lines) and falls over 2 s to 60% (54). 75 kept: by the second it's already the slowest of the hard hitters
 (greatsword 90 in 0.9 s, staff 56 with a burst in 0.9 s, mace 70 with a stun in 1.2 s), paid for by range 15 and
 pierce, and a flash release is a sure crit (112). tests/bows.test.ts; tests/rangerkit.test.ts bound moved. Claude Opus 5.5
+
+## 2026-11-24: more ironhides
+
+Kyle, after the longbow talk: "Should be more shielded enemies where you have to break the armor." The ironhide is that
+goblin (shared/raiders.ts IRONHIDE: a fifth of any blow till a charged hit, a perfect or a crit knocks its plates
+askew for 3 s). It led about 1 room in 19; now about 1 in 9 (shared/encounters.ts: iron 1.5 to 3.5, ironback 1 to
+2). Layout pins and the parity golden re-recorded for it. Claude Opus 5.5
