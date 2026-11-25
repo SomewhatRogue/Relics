@@ -8,12 +8,12 @@ import { BARE } from './draw';
 import { drawHound } from './hound';
 import type { PoseName } from './houndposes';
 
-/** The hound as a PNG data URL, `w` by `h` scene pixels, feet at (w/2, h - 4); `name` drawn over it. */
-export function houndArt(look: HoundLook, pose: [PoseName, number], w = 32, h = 22, name = false): string {
+/** The hound as a PNG data URL, `w` by `h` scene pixels, feet at (w/2, h - 4); `name` drawn over it; `fy` 1 coming at you, -1 going away (a gait only: houndfacing.ts). */
+export function houndArt(look: HoundLook, pose: [PoseName, number], w = 32, h = 22, name = false, fy = 0): string {
   const lit = document.createElement('canvas'), glow = document.createElement('canvas'), out = document.createElement('canvas');
   for (const c of [lit, glow, out]) (c.width = w), (c.height = h);
   const g = { lit: lit.getContext('2d')!, glow: glow.getContext('2d')!, now: 1 };
-  const dog: Hound = { x: 0, y: 0, fx: 1, fy: 0, state: 'heel', target: 0, t: 0, next: 0, back: 0, bites: 0, moving: false };
+  const dog: Hound = { x: 0, y: 0, fx: fy ? 0 : 1, fy, state: 'heel', target: 0, t: 0, next: 0, back: 0, bites: 0, moving: false };
   BARE.on = true;
   try {
     drawHound(g, dog, Math.round(w / 2), h - 4, { look, pose, name: name ? look.name : '' });

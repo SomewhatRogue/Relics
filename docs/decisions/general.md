@@ -461,3 +461,15 @@ anything moves: twice the pixels for every goblin and hero. Now cells are 96x96 
 than normal (`e.scale` > 1.02: a fury boss, a grown goblin; cards3d.ts `wide`) goes in a second atlas of 128x144 cells,
 four across, sent up only on frames one's drawn. scripts/perf/browser.cjs (software GPU, so only the comparison
 counts): the 2.5D fight 209 to 181 ms a frame. Graphics' files, small logged edits. Claude Opus 5.5
+
+## 2026-11-25: the hound runs up and down the screen
+
+Kyle: "dog doesn't have an up and down run." It only had a side view, flipped. client/houndfacing.ts (new): seen from
+the front coming at you (chest, front legs swinging, hind legs darker between, the breed's face: eyes, muzzle, nose,
+its ears, a beard, a ruff, a blaze) and from behind going away (rump, hind legs parted by shadow, the tail carried the
+breed's way and wagging, the back of the head with its ears), in walk, trot and run, the same four frames and bob.
+hound.ts picks it when a moving hound faces more up or down than across (|fy| > 1.2 |fx|); from behind it skips the
+face marks. Poses on the move carry `gait` and `frame` (houndbody.ts); houndart.ts takes `fy` for the look sheet.
+tests/houndfacing.test.ts. Looked at as a sheet, every breed and frame. Claude Opus 5.5
+- (Also: the dev server throws "Cannot access 'OY' before initialization" from client/hangs.ts importing world.ts,
+  a cycle; the built game is fine. Not mine to change; noted for whoever owns hangs.ts.)

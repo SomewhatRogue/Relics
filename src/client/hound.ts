@@ -16,6 +16,7 @@ import { palOf } from './houndcoats';
 import { gaitFor, houndBusy, houndSelf, ownPose } from './houndidle';
 import { GAIT_FPS, poseOf, type Gait, type PoseName } from './houndposes';
 import { HOUND_BOX as BOX, SHAPES } from './houndshapes';
+import { houndFacing, type HoundView } from './houndfacing';
 import { drawText, textWidth } from './pixfont';
 import { makeSprite, type Sprite } from './sprites';
 
@@ -33,11 +34,11 @@ const PLAIN = defaultHound('');
 const sprites = new Map<string, { s: Sprite; m: HoundMap }>();
 
 /** The sprite (and where its head is) for a hound in a pose, made the first time it's wanted. */
-function spriteOf(look: HoundLook, p: Pose): { s: Sprite; m: HoundMap } {
-  const key = `${look.breed}${look.coat}${look.mark}${JSON.stringify(p)}`;
+function spriteOf(look: HoundLook, p: Pose, view?: HoundView): { s: Sprite; m: HoundMap } {
+  const key = `${look.breed}${look.coat}${look.mark}${view ?? ''}${JSON.stringify(p)}`;
   let got = sprites.get(key);
   if (!got) {
-    const m = houndMap(look, p);
+    const m = view && p.gait ? houndFacing(look, view, p.gait, p.frame ?? 0, p.wag ?? 0, p.tail === 'tuck') : houndMap(look, p);
     // Capped, oldest out (the look sheets show a few dozen at once, well under it).
     if (sprites.size >= 512) sprites.delete(sprites.keys().next().value!);
     sprites.set(key, (got = { s: makeSprite(BOX.w, BOX.h, m.parts), m }));
@@ -49,9 +50,12 @@ function spriteOf(look: HoundLook, p: Pose): { s: Sprite; m: HoundMap } {
 function choose(c: Ctx, d: Hound, o: HoundDraw, down: boolean): Pose {
   const m = o.mood, now = c.now, seed = o.seed ?? 7;
   const wag = m?.wag === undefined ? Math.round(Math.sin(now * 1.7 + seed) * 1.4) * 5 : m.wag ? 24 : -14;
-  const gaitPose = (g: Gait, tuck = false) => poseOf(g, Math.floor(now * GAIT_FPS[g]), wag, tuck);
+  const gaitPose = (g: Gait, tuck = false): Pose => ({ ...poseOf(g, Math.floor(now * GAIT_FPS[g]), wag, tuck), gait: g, frame: Math.floor(now * GAIT_FPS[g]) % 4 });
   if (m) houndBusy(d, now, seed);
-  if (o.pose) return poseOf(o.pose[0], o.pose[1], wag);
+  if (o.pose) {
+    const [n, f] = o.pose, p = poseOf(n, f, wag);
+    return n === 'walk' || n === 'trot' || n === 'run' ? { ...p, gait: n, frame: ((f % 4) + 4) % 4 } : p;
+  }
   if (down) return poseOf('down', 0, m?.wag !== undefined ? wag : 0);
   if (m?.belly) return poseOf('belly', Math.floor(now * 3), wag);
   if (d.state === 'fled') return gaitPose('run', true);
@@ -78,7 +82,10 @@ function choose(c: Ctx, d: Hound, o: HoundDraw, down: boolean): Pose {
 export function drawHound(c: Ctx, d: Hound, x: number, y: number, o: HoundDraw = {}): void {
   if (d.state === 'fled' && d.t > 2) return;
   const m = o.mood ?? {}, look = o.look ?? PLAIN, f = (o.fx ?? d.fx) >= 0 ? 1 : -1, flip = f < 0;
-  const p = choose(c, d, o, o.down ?? !!d.down), { s, m: map } = spriteOf(look, p);
+  const p = choose(c, d, o, o.down ?? !!d.down);
+  // Going mostly up or down the screen on the move: seen from the front or from behind (houndfacing.ts).
+  const fy = d.fy ?? 0, across = Math.abs(o.fx ?? d.fx), view: HoundView | undefined = p.gait && Math.abs(fy) > across * 1.2 ? (fy > 0 ? 'front' : 'back') : undefined;
+  const { s, m: map } = spriteOf(look, p, view);
   // (A mood's lean and lift in the old pixels, half as big again for the 1.5x hound.)
   const X = Math.round(x) + f * Math.round((m.lean ?? 0) * 1.5), Y = Math.round(y) - Math.round(1.5 * Math.max(0, (m.lift ?? 0) - (p.lift && (m.lift ?? 0) >= 3 ? 3 : 0)));
   shadow(c, x, y, SHAPES[look.breed].shadow);
@@ -87,6 +94,8 @@ export function drawHound(c: Ctx, d: Hound, x: number, y: number, o: HoundDraw =
   const sx = (gx: number) => (flip ? X - (gx - BOX.x) - 1 : X + (gx - BOX.x)), sy = (gy: number) => Y - 1 + (gy - BOX.ground);
   const px = (gx: number, gy: number, w: number, h: number, col: string) => ((c.lit.fillStyle = col), c.lit.fillRect(flip ? sx(gx + w - 1) : sx(gx), sy(gy), w, h));
   const { jaw, tip, eye, top } = map.at;
+  // (From behind there's no face to put anything on.)
+  if (view === 'back') return void (o.name && drawText(c.glow, o.name, Math.round(X - textWidth(o.name) / 2), sy(map.at.top) - 6, '#e8d4a0'));
   // Eyes shut a moment when it's happy.
   if (m.happy && Math.floor(c.now * 2) % 3 === 0) px(eye[0], eye[1], 1, 1, palOf(look.breed, look.coat).D);
   if (m.happy || m.lick) px(tip - 1, jaw[1], 1, m.lick ? 2 : 1, '#e87a8a');

@@ -28,6 +28,8 @@ export interface Pose {
   headUp?: boolean;
   /** Scratching: where the hind foot is (0 or 1); on its back, which pair of legs is up higher. */
   kick?: number;
+  /** On the move (hound.ts): the gait and its frame, for the end-on views (houndfacing.ts). */
+  gait?: 'walk' | 'trot' | 'run'; frame?: number;
 }
 
 export interface HoundMap { parts: Part[]; at: HeadAt; clipped: number }
@@ -128,6 +130,9 @@ function pattern(gr: Grid, look: HoundLook): void {
     if (on) gr.g[y][x] = 'S';
   }
 }
+
+/** (houndfacing.ts, the end-on views, wears the same stripes and patches.) */
+export const patternOn = pattern;
 
 /** A pose's pixels (leg shifts, stretch, lift, head moves) half as big again, for the 1.5x hound (the art pass). */
 const k15 = (v: number | undefined) => (v === undefined ? undefined : Math.sign(v) * Math.round(Math.abs(v) * 1.5));
