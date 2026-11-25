@@ -8,6 +8,7 @@
  * The 3D lights shade the lit layer (figmat.ts); the glow stays unlit and blooms. Only draws.
  */
 import * as THREE from 'three';
+import { patchTexture } from './texpatch';
 import { BARE, type Ctx } from '../draw';
 import { XRAY_LAYER } from './actors3d';
 import { PITCH } from './camera3d';
@@ -61,6 +62,8 @@ export class Figs {
   /** Milliseconds spent drawing the cells this frame (the perf readout). */
   ms = 0;
   private t0 = 0;
+  /** The cells drawn this frame (only these are sent: texpatch.ts). */
+  private dirty: number[] = [];
 
   /** The big figures' atlas (none inside it: it is one). */
   private wide?: Figs;
@@ -113,6 +116,7 @@ export class Figs {
       this.glow.restore();
     }
     this.drawn = true;
+    this.dirty.push(s.i);
     // Snapped so the card's pixels fall on the view's: across by x, down the screen by z.
     // (A hair's bias so a figure exactly between two pixels always goes the same way, not by the float's noise.)
     const rx = Math.round(sx + 1e-3), ry = Math.round(sy + 1e-3);
@@ -138,7 +142,18 @@ export class Figs {
       this.free.push(s.i);
     }
     this.free.sort((a, b) => b - a);
-    if (this.drawn) this.litTex.needsUpdate = this.glowTex.needsUpdate = true;
+    // Only the cells drawn this frame go to the card, a band a row (texpatch.ts): the whole atlas, and its glow, every
+    // frame was most of what a fight sent.
+    if (this.drawn) {
+      const rows = new Map<number, [number, number]>();
+      for (const i of this.dirty) {
+        const r = Math.floor(i / COLS), c = i % COLS, b = rows.get(r);
+        rows.set(r, b ? [Math.min(b[0], c), Math.max(b[1], c)] : [c, c]);
+      }
+      const rects = [...rows].map(([r, [a, b]]) => ({ x: a * CELL.w, y: r * CELL.h, w: (b - a + 1) * CELL.w, h: CELL.h }));
+      for (const t of [this.litTex, this.glowTex]) patchTexture(t, rects);
+    }
+    this.dirty.length = 0;
     // (The living world, sun3d.ts: each figure's shadow, thrown away from the sun.)
     castFigures(this.byIndex, this.litTex);
     this.ms = this.ms * 0.9 + (performance.now() - this.t0) * 0.1;

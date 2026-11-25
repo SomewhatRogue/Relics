@@ -16,6 +16,7 @@ import { OX, OY, PX } from '../world';
 import { REDRAW } from '../tilelook';
 import { echoesOf, landmarkCut, landmarkOf } from '../sets';
 import { redrawFloor, redrawPx } from './redrawfloor';
+import { patchTexture, unite, type Rect } from './texpatch';
 import { CardSheet, SPECIAL, isCardRound } from './propcards';
 import { tuftMesh } from './tufts3d';
 import { treeLine } from './treeline3d';
@@ -285,18 +286,20 @@ export function buildGround(m: GameMap, bg: HTMLCanvasElement): Ground {
   trees();
   // Blood spilled since the last frame goes into the floor's painting.
   const done = new WeakSet<object>();
-  let dirty = 0;
+  // (Only the patch the blood fell on goes to the card, texpatch.ts: the whole floor on every splash was the big
+  // maps' worst cost in a fight.)
+  let dirty: Rect | null = null;
   const decals = (fx: Fx) => {
     for (let i = fx.decals.length - 1; i >= 0; i--) {
       const d = fx.decals[i];
       if (done.has(d)) break;
       done.add(d);
       fg.fillStyle = d.col;
-      if (rf) fg.fillRect(...redrawPx(d.x, d.y), 1, 1);
-      else fg.fillRect(d.x - OX, d.y - OY, 1, 1);
-      dirty++;
+      const [px, py] = rf ? redrawPx(d.x, d.y) : [d.x - OX, d.y - OY];
+      fg.fillRect(px, py, 1, 1);
+      dirty = unite(dirty, px, py, 1, 1);
     }
-    if (dirty) (floorTex.needsUpdate = true), (dirty = 0);
+    if (dirty) patchTexture(floorTex, [dirty]), (dirty = null);
   };
   const dispose = () => group.traverse((o) => {
     const mm = o as THREE.Mesh;

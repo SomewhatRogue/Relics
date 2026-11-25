@@ -9,6 +9,7 @@ import { drawCuts } from '../cutdraw';
 import { mistFrame } from '../fenmistdraw';
 import { feetBand, topPush } from '../phoneband';
 import * as THREE from 'three';
+import { patchWith } from './texpatch';
 import type { ArenaRoom } from '../../sim/room';
 import type { Hero } from '../../sim/types';
 import type { GameMap } from '../../shared/arena';
@@ -111,6 +112,7 @@ export class View3D {
   constructor() {
     this.gl = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
     this.gl.setPixelRatio(1);
+    patchWith(this.gl);
     this.gl.outputColorSpace = THREE.LinearSRGBColorSpace;
     this.gl.setClearColor(0x05060a, 1);
     this.gl.shadowMap.enabled = this.q.shadow > 0;
