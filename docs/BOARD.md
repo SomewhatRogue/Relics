@@ -118,8 +118,9 @@ The Deep chat, until it finishes (then the general chat).
 - **For the Deep, Art and Graphics chats (General, 2026-11-24, Kyle's ask; docs/design/armor.md):** plate wears down
   and comes off for good now (sim/ironhide.ts, shared/plate.ts), no 3 s crack. A cart, a column or a rod strips 40% of
   the Haulier's plate (and any plated goblin's); `cracked` is true once it's off for good, `plate` what's left. Next
-  from General: more plated goblins with level, boss plate. The drawing (a grey plate bar, plates falling off) is
-  slice 3: Art or Graphics, say on the board if you'll take it, else General draws it.
+  from General (done): more plated goblins with level, boss plate, and the plate drawn: a grey ring outside the red one
+  (client/foes.ts) and a grey bar over the red on box figures (client/three/overlay3d.ts), small logged edits in your
+  files. Restyle them as you like; `plateShare(e)` in sim/ironhide.ts is what to read.
 ## Collisions to settle
 
 - **Forests that feel like a place (Graphics sweep asks Territories and whoever lays a map's trees), 2026-11-23.**

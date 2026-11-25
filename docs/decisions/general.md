@@ -419,3 +419,6 @@ haulier and worldfx moved to plate stripped; parity re-recorded. Board note to D
   each a small one fewer in its pack; Plated leads 40% of rolled elites; plated goblins 1.25x health; fury bosses wear
   30% of their health in plate. tests/plate.test.ts; layout 3 pin and parity re-recorded. Only job rooms (run.ts)
   plate by level; ambushes and instances don't yet. Claude Opus 5.5
+- Slice 3, drawn (no art chat took it): `plateShare` (sim/ironhide.ts, reads and never fills); a grey plate ring
+  outside the red in client/foes.ts (Art's, three lines), a grey bar over the red in client/three/overlay3d.ts
+  (Graphics', eight lines). Off for good keeps ARMOR BROKEN. Not screenshot-checked: a two-colour ring. Claude Opus 5.5

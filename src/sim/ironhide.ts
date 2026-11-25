@@ -53,6 +53,12 @@ export function plated(e: Enemy, n: number, now: number, breaks: boolean, ev: Fi
   return Math.max(1, Math.round(n * PLATE.through));
 }
 
+/** What's left of its plate as a share of full, for drawing (null: no plate, or off for good). Reads, never fills. */
+export function plateShare(e: Enemy): number | null {
+  if (!iron(e) || (e.plate ?? 1) <= 0) return null;
+  return e.plate === undefined ? 1 : e.plate / Math.max(1, fullPlate(e));
+}
+
 /** Still plated: the hit the room reports says so (grey sparks, a clank). */
 export const clanks = (e: Enemy, now: number) => iron(e) && !broken(e, now);
 

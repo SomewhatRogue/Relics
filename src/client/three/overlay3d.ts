@@ -5,6 +5,7 @@
  * backstab arcs, and the 2D
  * effects themselves (sparks, rings, lightning, gore, words), each placed where the room says it is.
  */
+import { plateShare } from '../../sim/ironhide';
 import { headName } from '../../shared/titles';
 import type { ArenaRoom } from '../../sim/room';
 import type { Target } from '../../sim/targets';
@@ -115,6 +116,15 @@ export class Overlay {
         g.fillRect(Math.round(x - w / 2 - 1), Math.round(y - 1), w + 2, 3);
         g.fillStyle = '#d8402a';
         g.fillRect(Math.round(x - w / 2), Math.round(y), f, 1);
+      }
+      // Its plate, a grey bar over the red, wearing down; gone once it's off (sim/ironhide.ts; General, 2026-11-24).
+      const plate = plateShare(e);
+      if (plate !== null && (e.hp < e.maxHp || room.time - e.hitAt < 3)) {
+        const w = big ? 20 : 10;
+        g.fillStyle = '#0e0a10';
+        g.fillRect(Math.round(x - w / 2 - 1), Math.round(y - 3), w + 2, 3);
+        g.fillStyle = '#b8bec8';
+        g.fillRect(Math.round(x - w / 2), Math.round(y - 2), Math.max(0, Math.round(w * plate)), 1);
       }
       if (e.attack?.unblockable && e.attack.t < e.attack.windup) drawText(g, '!', Math.round(x - 1), Math.round(y - 9 - (Math.floor(now * 6) % 2)), '#ffd040');
     }

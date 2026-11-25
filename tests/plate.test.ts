@@ -18,7 +18,7 @@ describe('who wears plate', () => {
       ...Array.from({ length: 10 }, (_, i): Foe => ({ kind: 'scrapper', variant: 'heavy', role: 'heavy', x: i, y: 1, pack: i })),
       ...Array.from({ length: 10 }, (_, i): Foe => ({ kind: 'scrapper', x: i, y: 2, pack: i })),
       { kind: 'butcher', x: 1, y: 5, name: 'MAWL' },
-      { kind: 'scrapper', variant: 'archer', x: 2, y: 5, pack: 0 },
+      { kind: 'scrapper', variant: 'shield', role: 'shield', x: 2, y: 5, pack: 0 },
     ];
     expect(plateByLevel(room(), 2, 5)).toHaveLength(22);
     const out = plateByLevel(room(), 30, 5), plated = out.filter((f) => f.elite?.includes('plated'));
@@ -36,5 +36,22 @@ describe('who wears plate', () => {
     const boss = field([{ kind: 'butcher', x: 15, y: 6, name: 'MAWL' }]).room.enemies[0];
     expect(boss.fury).toBe(true);
     expect(PLATE_WEAR.boss).toBeLessThan(PLATE.share);
+  });
+});
+
+import { plateShare } from '../src/sim/ironhide';
+import { damage } from '../src/sim/damage';
+
+describe('the plate bar (drawing reads it)', () => {
+  it('full before a blow, less after, gone once off; none on a bare goblin', () => {
+    const { room } = field([{ kind: 'scrapper', variant: 'ironhide', x: 15, y: 6 }, { kind: 'scrapper', x: 10, y: 6 }]);
+    const [e, bare] = room.enemies;
+    expect(plateShare(e)).toBe(1);
+    expect(e.plate).toBeUndefined();
+    damage(e, 10, room.time, room.events);
+    expect(plateShare(e)!).toBeLessThan(1);
+    while (!e.cracked) damage(e, 10, room.time, room.events, { heavy: true });
+    expect(plateShare(e)).toBeNull();
+    expect(plateShare(bare)).toBeNull();
   });
 });

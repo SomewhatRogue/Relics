@@ -45,5 +45,7 @@ Not through: backstabs, frost shatter, burns, ordinary arrows and taps.
    butchers come plated (5% more a level, at most half), each taking a small one from its pack (sim/run.ts); a rolled
    elite leads with Plated 40% of the time; plated goblins a quarter tougher; a hunt's named boss in a fury wears a
    third of its health in plate. A brute plated by level is a Plated elite, so it drops as one.
-3. **Drawing:** the grey bar, plates falling off, a PLATES OFF word, in both views. Asked of the Art and Graphics chats
-   on the board, or drawn here if they're idle.
+3. **Drawing** (done 2026-11-24, General, no art chat took it): a grey plate ring just outside the red health ring in
+   the flat view (client/foes.ts), a grey bar over the red on the 2.5D box figures (client/three/overlay3d.ts), both
+   emptying as the plate wears and gone once it's off (sim/ironhide.ts plateShare). Off for good: the old ARMOR
+   BROKEN word, burst and clank (client/fxrush.ts, foesounds.ts), and the cracked look.

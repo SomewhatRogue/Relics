@@ -2,6 +2,7 @@
  * Drawing goblins and dummies, with wind-ups that match their telegraphs: the butcher hauls his
  * cleaver back and chops, or leaps and comes down on the slam; scrappers pull the knife back and stab.
  */
+import { plateShare } from '../sim/ironhide';
 import type { GameMap } from '../shared/arena';
 import { GUARD, HERO, HEMPEN_BOSS } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
@@ -271,6 +272,9 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   const t = c.t ?? c.now, flash = t - e.hitAt < 0.09 ? 0.9 : 0;
   const hurt = e.hp < e.maxHp && (t - e.hitAt < 3 || e.hp < e.maxHp * 0.5);
   if ((e.kind === 'butcher' || e.kind === 'scrapper') && hurt) ring(c, x, y, hs(e.kind === 'butcher' ? 11 : 6), '#e24b4a', e.hp / e.maxHp);
+  // Its plate, a grey ring just outside, wearing down (sim/ironhide.ts; General, 2026-11-24): gone once it's off.
+  const plate = plateShare(e);
+  if (plate !== null && (e.kind === 'butcher' || e.kind === 'scrapper') && (hurt || t - e.hitAt < 3)) ring(c, x, y, hs(e.kind === 'butcher' ? 11 : 6) + 2, '#b8bec8', plate, '#2a2c32');
   // At a body, tearing at it; FED, eyes burning (remainsdraw.ts).
   if (e.kind === 'butcher') return butcher(c, e, x, y, t), drawMealing(c, e, x, y, t), drawFed(c, e, x, y, t);
   if (e.variant === 'log') return drawLogs(gobPen(c, x, y), e, x, y);
