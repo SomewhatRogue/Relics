@@ -149,7 +149,8 @@ describe('the Gate Fields', () => {
     }
     expect(m.blocks.filter((b) => b.kind === 'tent').length).toBeGreaterThanOrEqual(2);
     expect(m.braziers.filter((b) => onRoad(b.y) && b.wild).length).toBeGreaterThanOrEqual(2);
-    expect(m.soil!.some((q) => q.mat === 'furrow')).toBe(false);
+    // (Unploughed but for the one dropped plough's three furrows: gatefieldsstrips.ts.)
+    expect(m.soil!.filter((q) => q.mat === 'furrow').length).toBeLessThanOrEqual(3);
     expect(m.soil!.filter((q) => q.mat === 'crop').length).toBeGreaterThan(8);
   });
 

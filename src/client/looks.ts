@@ -15,7 +15,7 @@ import { scattered } from '../shared/scatter';
 import { blocked } from './ratspots';
 import { soilAt } from './soil';
 
-export type MotifKind = 'hollow' | 'pool' | 'bald' | 'tallgrass' | 'burn' | 'ring' | 'puddle' | 'moss' | 'ridge' | 'drift:leaves' | 'drift:bones' | 'drift:stones' | 'drift:pale' | 'drift:red';
+export type MotifKind = 'hollow' | 'pool' | 'bald' | 'tallgrass' | 'burn' | 'ring' | 'puddle' | 'moss' | 'ridge' | 'drift:leaves' | 'drift:bones' | 'drift:stones' | 'drift:pale' | 'drift:red' | 'drift:blue' | 'drift:gold';
 export type SceneKind = 'grave' | 'graves' | 'cairn' | 'campfire' | 'circle' | 'stake' | 'log' | 'drain';
 export type Country = 'wood' | 'fen' | 'fields' | 'yard' | 'crop' | 'cave' | 'town';
 /** A motif laid on a map: its middle and half sizes (tiles), a drift's heading (radians), a variant. */
@@ -34,7 +34,7 @@ export const LOOKS: Look[] = [
   { name: 'raided', country: 'fields', motifs: [['burn', 2], ['drift:bones', 2], ['bald', 2], ['drift:leaves', 1], ['ridge', 1]], scenes: ['stake', 'circle', 'campfire'] },
   { name: 'spoil', country: 'yard', motifs: [['drift:stones', 4], ['pool', 2], ['burn', 1]], scenes: ['campfire', 'cairn'] },
   { name: 'warcamp', country: 'yard', motifs: [['burn', 2], ['drift:bones', 2], ['drift:stones', 2], ['pool', 1]], scenes: ['stake', 'campfire', 'circle'] },
-  { name: 'harvest', country: 'crop', motifs: [['bald', 3], ['drift:stones', 2], ['drift:pale', 1], ['ridge', 2]], scenes: ['cairn', 'grave'] },
+  { name: 'harvest', country: 'crop', motifs: [['bald', 3], ['drift:stones', 2], ['drift:pale', 1], ['ridge', 2], ['drift:red', 2], ['drift:blue', 2], ['drift:gold', 1.5], ['tallgrass', 1.5]], scenes: ['cairn', 'grave'] },
   { name: 'burnt', country: 'crop', motifs: [['burn', 3], ['bald', 1], ['drift:bones', 2], ['ridge', 1]], scenes: ['stake', 'circle'] },
   { name: 'rubble', country: 'cave', motifs: [['drift:stones', 4], ['pool', 2], ['drift:bones', 1]], scenes: ['cairn', 'campfire'] },
   { name: 'lair', country: 'cave', motifs: [['drift:bones', 3], ['burn', 2], ['pool', 1], ['drift:stones', 1]], scenes: ['stake', 'circle', 'campfire'] },
@@ -47,7 +47,7 @@ export const LOOKS: Look[] = [
 const SIZE: Record<MotifKind, [number, number, number]> = {
   puddle: [0.7, 1.5, 0.55], moss: [1.1, 2.4, 0.6], ridge: [2.5, 5, 0.15],
   hollow: [1.6, 2.6, 0.6], pool: [1.3, 2.1, 0.55], bald: [1.2, 2.0, 0.6], tallgrass: [2.6, 4.2, 0.7], burn: [1.2, 1.9, 0.6], ring: [0.8, 1.2, 0.85],
-  'drift:leaves': [2.2, 3.6, 0.3], 'drift:bones': [1.6, 2.4, 0.3], 'drift:stones': [1.8, 3.0, 0.3], 'drift:pale': [2.2, 3.8, 0.3], 'drift:red': [2.4, 4.0, 0.32],
+  'drift:leaves': [2.2, 3.6, 0.3], 'drift:bones': [1.6, 2.4, 0.3], 'drift:stones': [1.8, 3.0, 0.3], 'drift:pale': [2.2, 3.8, 0.3], 'drift:red': [2.4, 4.0, 0.32], 'drift:blue': [2.2, 3.6, 0.32], 'drift:gold': [2.2, 3.6, 0.32],
 };
 
 const seedOf = (m: GameMap, k: number) => [...m.name].reduce((s, ch) => (s * 33 + ch.charCodeAt(0)) % 1000003, m.w * 131 + m.h * 977 + k);

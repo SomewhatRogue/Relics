@@ -35,6 +35,12 @@ export function hopAt(key: string, x: number, y: number, h: number, sx = x, sy =
   return (s.x = at[0]), (s.y = at[1]), at;
 }
 
+/** A body drawn by something else this frame (a climb, climbanim.ts): note where the rules have it, so no leap starts after. */
+export function hopQuiet(key: string, x: number, y: number, h: number): void {
+  const s = seen.get(key);
+  if (s) Object.assign(s, { h, from: h, t0: -9, x, y, ox: 0, oy: 0 });
+}
+
 /** The height alone (a body whose place is not carried). */
 export const hopHeight = (key: string, h: number, now = clock()) => hopAt(key, 0, 0, h, 0, 0, now)[2];
 

@@ -1365,3 +1365,17 @@ find". Two Opus builders, one a land, on separate files (63 and 39 steps); the s
 - The floors 1680 by 1728 and 1800 by 1800, under 4096; draw time unchanged (2.6 to 8 ms). For later: the Common
   Strips' new ground reads open (grass between hedges). (Claude Opus 5.5)
 
+## 2026-11-25: the Common Strips' stories and flowers; the Rogue's climb drawn
+
+Kyle: "We can add more stories in the common strips potentially or more flowers or something", and "we need a
+climbing animation for the rogue when they're going up terrain". Two Sonnet builders (46 and 37 steps).
+- The strips (shared/gatefieldsstrips.ts): red, cornflower and pale yellow drifts and tall grass on the harvest look
+  (client/looks.ts, new `bloom` in tilestrew.ts), thistles by the hedges, field stones; up to five of six wordless
+  stories a seed: a dropped plough with its furrows stopping short (new tile-way card, client/tileplough.ts, block
+  `plough`), scarecrows (one fallen), a meal left on the straw (it was a loud rug: changed in review), a snared hare by
+  a broken fence, a field cairn with flowers, a cart nosed into a ditch.
+- The climb (client/climbanim.ts): the room's `land` event with `how: 'climb'` starts a 0.35 s haul up the face in
+  both views (reach, pull, knee over: joint angles and new leg frames in client/figure.ts), drawing only; a grit
+  scrabble (sfx.ts `scrabble`). Every screen draws it from the event. Not eyed closely: check the pose on the phone.
+  (Claude Opus 5.5)
+

@@ -298,6 +298,12 @@ export const sfx = {
   land() {
     if (ready()) burst('lowpass', 800, 150, 0.7, 0.4, 0.12);
   },
+  /** A Rogue hauling up an earth face: grit scraped and kicked, then a soft knock at the lip (no thud). */
+  scrabble() {
+    if (!ready()) return;
+    for (let i = 0; i < 4; i++) burst('bandpass', 2600 - i * 300, 1100, 1.4, 0.22, 0.06, i * 0.08);
+    burst('lowpass', 500, 220, 0.7, 0.18, 0.08, 0.3);
+  },
   weapon() {
     if (ready()) tone('triangle', 520, 380, 0.25, 0.12), tone('triangle', 700, 500, 0.15, 0.1, 0.06);
   },

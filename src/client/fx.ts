@@ -3,6 +3,8 @@
  * rings, screen shake and short flashes of light. Cosmetic, so Math.random is fine here.
  */
 import { HOP } from './three/hop';
+import { startClimb } from './climbanim';
+import { sfx } from './sfx';
 import { cutFx } from './fxcut';
 import { RAISEW } from './raisewords';
 import { foeFx } from './fxfoes';
@@ -261,7 +263,7 @@ export class Fx {
         // Off a height, or a Rogue up a face: the body is drawn leaping (three/hop.ts), so the dust waits for its feet.
         if (ev.how) {
           const up = ev.how === 'climb';
-          if (up) this.burst(x, y, 5, DUST, 28, false);
+          if (up) (this.burst(x, y, 5, DUST, 28, false), startClimb(ev.x, ev.y, ev.dx, ev.dy), sfx.scrabble());
           // (The dust is on the ground where the feet come down: for a climb, the top it went up to.)
           const m = currentMap(), lx = ev.x + (up ? ev.dx * 1.4 : 0), ly = ev.y + (up ? ev.dy * 1.4 : 0);
           this.soon.push({ in: HOP.time * (up ? 0.2 : 1), up: groundLv(m, lx, ly), fn: () => (this.burst(x + (up ? ev.dx * 22 : 0), y + (up ? ev.dy * 22 : 0), up ? 6 : 22, DUST, up ? 30 : 70, false, 90), up || (this.shake = Math.max(this.shake, 2.4))) });

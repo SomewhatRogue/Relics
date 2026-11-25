@@ -67,7 +67,9 @@ import { RACK } from '../shared/practice';
 import { waiting } from '../sim/practice';
 import { LIFT, OX, OY, PX, paintMap, worldH, worldW } from './world';
 import { lifter, upAt } from './levelpaint';
-import { hopAt } from './three/hop';
+import { hopAt, hopQuiet } from './three/hop';
+import { groundLv } from '../shared/heights';
+import { climbOf, climbPlace, type Climb } from './climbanim';
 import { isLand, shotLv } from '../shared/heights';
 import { drawText, textWidth } from './pixfont';
 import { LOOK, blockAt, blockFoot, drawBlock, drawRound } from './blocks';
@@ -270,6 +272,12 @@ export class Scene {
       const [jx, jy, jh] = hopAt('f' + key, x / PX, y / PX, up / PX, (OX + b.x * PX) / PX, (OY + b.y * PX) / PX);
       return [Math.round(jx * PX), Math.round(jy * PX), Math.round(jh * PX)];
     };
+    /** A Rogue hauling up a face (climbanim.ts): from the foot of it to where the rules have them, in pixels. */
+    const climbFlat = (cl: Climb, x0: number, y0: number, up: number, m: typeof map, key: string): [number, number, number] => {
+      hopQuiet(key, x0 / PX, y0 / PX, up / PX);
+      const [x, y, h] = climbPlace(cl, x0, y0, OX + cl.fx * PX, OY + cl.fy * PX, groundLv(m, cl.fx, cl.fy) * LIFT, up);
+      return [Math.round(x), Math.round(y), Math.round(h)];
+    };
     if (this.painted !== map) (this.bg = paintMap(map)), (this.painted = map), (this.cam.ready = false);
     const clamp = (v: number, size: number, world: number) => (size >= world ? (world - size) / 2 : Math.max(0, Math.min(world - size, v)));
     this.cam.x = clamp(this.cam.x, this.vw, worldW(map));
@@ -370,7 +378,9 @@ export class Scene {
       items.push({ y: OY + a.y * PX, draw: () => drawHound(c, LODGE_HOUND, OX + a.x * PX - cx, OY + a.y * PX - cy, { mood: a.mood, fx: a.fx, down: a.down, look: MAEVE_HOUND }) });
     }
     for (const h of room.heroes) {
-      const [x0, y0] = lerp('h:' + h.id, h.x, h.y), [x, y, up] = hopPx('h' + h.id, x0, y0, (h.z ?? 0) * LIFT, h);
+      const [x0, y0] = lerp('h:' + h.id, h.x, h.y), cl = climbOf(h.id, h.x, h.y);
+      // (Going up a face they haul up it from the foot instead: climbanim.ts.)
+      const [x, y, up] = cl ? climbFlat(cl, x0, y0, (h.z ?? 0) * LIFT, map, 'fh' + h.id) : hopPx('h' + h.id, x0, y0, (h.z ?? 0) * LIFT, h);
       // (Heroes are drawn at 1.5x already, heroscale.ts: never stretched.)
       items.push({ y, draw: () => drawHero(c, h, x - cx, y - up - cy, h.id === meId, room.time) });
       // Leeches latched on them (THE LEECHMAN's: leechhero.ts).

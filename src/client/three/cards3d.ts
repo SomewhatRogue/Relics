@@ -17,6 +17,7 @@ import { levelAt, npcAt } from '../../shared/arena';
 import { stacked } from './layoutledges';
 import { SPOT_REACH } from '../../shared/town';
 import { drawHero } from '../actors';
+import { climbOf, climbPlace } from '../climbanim';
 import { asleep, drawHeld } from '../foes';
 import { drawFoe } from '../strawman';
 import { drawWaiting, drawWatch, rackMen } from '../rackdraw';
@@ -43,7 +44,7 @@ import type { Lerp } from './actors3d';
 import type { Figs } from './figs3d';
 import { LEDGE_H } from './ground';
 import { bodyLv, isLand } from '../../shared/heights';
-import { hopAt } from './hop';
+import { hopAt, hopQuiet } from './hop';
 import { drawTally } from '../chalkdraw';
 import { woodFigs } from '../wooddraw';
 import { noteKneels } from '../kneel';
@@ -75,7 +76,10 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
   for (const h of room.heroes) {
     const [x, y] = lerp('h:' + h.id, h.x, h.y);
     // (Off a height it is drawn leaping, its shadow staying on the ground where it will land: hop.ts.)
-    const up = bodyLv(map, x, y, h.z) * LEDGE_H, [jx, jy, jh] = hopAt('h' + h.id, x, y, up, h.x, h.y);
+    const up = bodyLv(map, x, y, h.z) * LEDGE_H;
+    // (Going up a face they haul up it from the foot instead: climbanim.ts.)
+    const cl = climbOf(h.id, h.x, h.y), [jx, jy, jh] = cl ? climbPlace(cl, x, y, cl.fx, cl.fy, bodyLv(map, cl.fx, cl.fy, levelAt(map, cl.fx, cl.fy)) * LEDGE_H, up) : hopAt('h' + h.id, x, y, up, h.x, h.y);
+    if (cl) hopQuiet('h' + h.id, x, y, up);
     f.put('h' + h.id, jx, jh, jy, (c, px, py) => drawHero(c, h, px, py, h.id === meId, t), { xray: true, pool: h.act === 'roll' || h.act === 'down' ? 0.22 : 0.3, ground: [h.x, up, h.y] });
     if (h.hound) {
       const d = h.hound, [dx, dy] = lerp('d:' + h.id, d.x, d.y);

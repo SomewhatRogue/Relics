@@ -16,6 +16,7 @@ import { heroCut, jointed } from './joints';
 import { sideJointed } from './sidejoints';
 import { OFF, SIDE_REACH, sideOn } from './sideview';
 import { heroPose } from './heropose';
+import { climbOf, climbPose } from './climbanim';
 import { drawWeapon, pose } from './held';
 import { EL_COL, heldEl } from './palette';
 import { drawLoad } from './xbowmark';
@@ -105,6 +106,9 @@ function heroBody(c: Ctx, h: Hero, x: number, y: number, me: boolean | 'bare', t
   // The walk cycle's four poses, across the screen (11 to 14) or toward and away (1 to 4): figure.ts STRIDE.
   if (pz.phase === 'rest' && h.moving) pz.step = (sv ? 21 : Math.abs(h.fx) > 0.5 ? 11 : 1) + (Math.floor(c.now * CADENCE + ph * 4) % 4);
   else if (!idl && pz.phase === 'rest' && h.act === 'idle' && !h.blocking && ((c.now + ph * BREATH.every) % BREATH.every) < BREATH.up) pz.crouch = BREATH.crouch;
+  // Hauling up an earth face (climbanim.ts): reaching, pulling, a knee over the lip.
+  const cl = pz.phase === 'rest' && !idl ? climbOf(h.id, h.x, h.y) : null;
+  if (cl) climbPose(pz, cl, sv ? 20 : Math.abs(h.fx) > 0.5 ? 10 : 0, flip);
   if (h.act === 'zip') (ox = Math.round(h.fx * 2)), (oy = Math.round(h.fy * 2) - 1);
   const dk = WEAPONS[h.weapon].dodge;
   // The mage's blink: gone, a scatter of violet light where they are.

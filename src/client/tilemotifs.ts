@@ -18,7 +18,7 @@ import { motifsOf, pavedAt, type Motif } from './looks';
 import { EARTH, clumpLight, earthAt } from './tilegrounds';
 import { KX, KZ, type Rect } from './tilekit';
 import { openPx } from './tilelitter';
-import { stamp } from './tilestrew';
+import { bloom, stamp } from './tilestrew';
 
 const MOSS = ['#0b130f', '#111c15', '#17251a', '#1f3021'], MIRE = ['#14110d', '#1c1812', '#251f18', '#2f271e'];
 const SLATE = ['#111014', '#18161b', '#201e24', '#2a282f'];
@@ -125,9 +125,10 @@ export function paintZones(m: GameMap, rect: Rect): void {
   }
 }
 
-const DRIFT: Record<string, [ScatterKind, number[]][]> = {
+const DRIFT: Record<string, [ScatterKind | 'bloom', number[]][]> = {
   'drift:leaves': [['leaf', [0, 1, 2]]], 'drift:bones': [['bone', [0, 1, 2]], ['stone', [1]]], 'drift:stones': [['stone', [0, 1, 2]], ['gravel', [0, 1, 2]]],
   'drift:pale': [['flower', [0]], ['tuft', [1]]], 'drift:red': [['flower', [1, 2]], ['flower', [2]], ['tuft', [1]]],
+  'drift:blue': [['bloom', [0, 1]], ['bloom', [1]], ['tuft', [1]]], 'drift:gold': [['bloom', [2, 3]], ['bloom', [3]], ['tuft', [1]]],
 };
 
 /** The drifts and the rings' mushrooms: laid last, on top of whatever is strewn. */
@@ -150,7 +151,7 @@ export function paintDrifts(m: GameMap, rect: Rect): void {
       const t = (r.next() + r.next() - 1) * 0.95, off = (r.next() - 0.5) * 2 * o.ry * (1 - Math.abs(t) * 0.8), al = t * o.rx;
       const px = Math.round((o.x + Math.cos(o.a) * al - Math.sin(o.a) * off) * KX), py = Math.round((o.y + Math.sin(o.a) * al * 0.6 + Math.cos(o.a) * off) * KZ);
       const [k, vs] = set[r.int(set.length)];
-      if (open(px, py)) stamp(rect, k, vs[r.int(vs.length)], px, py);
+      if (open(px, py)) (k === 'bloom' ? bloom(rect, vs[r.int(vs.length)], px, py) : stamp(rect, k, vs[r.int(vs.length)], px, py));
     }
   }
 }

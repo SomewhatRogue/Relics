@@ -16,6 +16,7 @@ export const LOOK: Record<Block['kind'], Look> = {
   // (Dark and gold: the awning's stripes bone, not cream; the grade turns its red to rust.)
   stall: { tall: 12, roof: '#7a2a2a', ridge: '#9a8c6a', wall: '#5a3d22', windows: false },
   clamp: { tall: 7, roof: '#3a4426', ridge: '#4a5630', wall: '#2a2118', windows: false },
+  plough: { tall: 6, roof: '#4a3320', ridge: '#6a4a2e', wall: '#2b1e12', windows: false },
   struckpine: { tall: 30, roof: '#1f3020', ridge: '#2a4328', wall: '#3a2a1c', windows: false },
   // The Fen's drowned chapel and its echoes (shared/fenroamland.ts; drawn the tile way in the 2.5D view: tilechapel.ts, tileawash.ts).
   chapel: { tall: 44, roof: '#3e4048', ridge: '#55585e', wall: '#5a5c62', windows: false },

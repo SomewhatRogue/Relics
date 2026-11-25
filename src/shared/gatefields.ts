@@ -26,6 +26,7 @@ import { GATE_PACKS, layFoes } from './gatefieldsfoes.js';
 import { CAMP_FOLK, CAMP_POSTS, layCamp } from './gatefieldscamp.js';
 import { GATHERS, layGather } from './gatefieldsgather.js';
 import { HUT_KEEPER, KEEPER, layDetail } from './gatefieldsdetail.js';
+import { layStrips } from './gatefieldsstrips.js';
 import { NOOK_PACKS, layNooks } from './gatefieldsnooks.js';
 
 export { GATE_FIELDS };
@@ -43,7 +44,7 @@ export function gateFieldsPlan(job: Job): TerrPlan {
   const k = newKit(new Rng(job.seed * 7927 + 83));
   Object.assign(k, { mw: GATE_FIELDS.w, mh: GATE_FIELDS.h });
   const lines = layRoadAndEdges(k);
-  layNooks(k), layFoes(k), layBarn(k), layFarmland(k), layCamp(k), layDetail(k), layGather(k), layPasture(k), layWood(k), layGate(k, lines);
+  layNooks(k), layFoes(k), layBarn(k), layFarmland(k), layCamp(k), layDetail(k), layStrips(k), layGather(k), layPasture(k), layWood(k), layGate(k, lines);
   const s0: Stretch = { name: 'THE NORTH FIELDS', keep: [], packs: [...GATE_PACKS, ...NOOK_PACKS] };
   const map: GameMap = {
     name: 'THE NORTH FIELDS', w: GATE_FIELDS.w, h: GATE_FIELDS.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],

@@ -20,6 +20,7 @@ const C: Record<string, string> = {
   y: '#4e4d2e', z: '#646238', // reed
   q: '#12171a', // wet
   f: '#8a8894', x: '#6b1d1b', // flower: ghost-pale, or blood-red
+  B: '#3f5a98', J: '#6a8ccc', Y: '#a08c38', Q: '#d4c068', // a field's own: cornflower (body, lit), a pale yellow (body, lit)
 };
 
 const ART: Record<ScatterKind, string[][]> = {
@@ -61,6 +62,13 @@ export function stamp(rect: Rect, k: ScatterKind, v: number, px: number, py: num
 }
 
 const FERNS = [['l.....l', '.lg.gl.', '..lgl..', '.lgdgl.', '..ddd..'], ['.l...l.', 'l.lgl.l', '.lgdgl.', '..ddd..'], ['l...l', '.lgl.', 'lgdgl', '.ddd.']];
+/** Cornflower (variants 0, 1) and pale yellow (2, 3) on a stem, three pixels across (the commons' drifts: tilemotifs.ts). */
+const BLOOMS = [['.J.', 'BJB', '.g.'], ['J.B', 'gBg', '.g.'], ['.Q.', 'YQY', '.g.'], ['Q.Y', 'gYg', '.g.']];
+export function bloom(rect: Rect, v: number, px: number, py: number): void {
+  const rows = BLOOMS[v % BLOOMS.length], x0 = px - 1, y0 = py - rows.length + 1;
+  rows.forEach((row, j) => [...row].forEach((ch, c) => C[ch] && rect(x0 + c, y0 + j, 1, 1, C[ch])));
+}
+
 /** A fern at a grove's edge (tilelitter.ts), variant `v`, its foot's middle at floor pixel (px, py). */
 export function fern(rect: Rect, v: number, px: number, py: number): void {
   const rows = FERNS[v % FERNS.length], x0 = px - (rows[0].length >> 1), y0 = py - rows.length + 1;

@@ -57,6 +57,11 @@ const STRIDE: Record<number, [number, number, number, number, number, number]> =
   // apart. Contact (the far foot out in front, the near trailing), passing (the near comes through, its foot up),
   // then the other foot, a longer step than across the front.
   21: [3, 5, 0, -3, -5, 0], 22: [0, 0, 0, 0, 1, -1], 23: [-3, -5, 0, 3, 5, 0], 24: [0, 1, -1, 0, 0, 0],
+  // Climbing (climbanim.ts): reaching (a foot up on a hold), pulling (the other foot up), a knee over the lip. The same
+  // three toward the face (5 to 7), across (15 to 17) and from the side (25 to 27).
+  5: [0, 0, -2, 0, 0, 0], 6: [0, 0, 0, 0, 0, -2], 7: [0, 0, -3, 0, 0, 0],
+  15: [1, 1, -2, 0, 0, 0], 16: [0, 0, 0, 1, 1, -2], 17: [2, 1, -3, 0, 0, 0],
+  25: [1, 2, -2, 0, 0, 0], 26: [0, 0, 0, 1, 2, -2], 27: [3, 1, -3, -1, 0, 0],
 };
 /** A leg's offset at a row: [dx on screen, dy]. */
 function legAt(part: Joint, row: number): [number, number] {
