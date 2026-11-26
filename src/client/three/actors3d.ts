@@ -166,7 +166,7 @@ export class Actors {
     // (Snares, smoke and steam, poison and oil: hazards3d.ts.)
     const ex = room.map.exit;
     if (ex && ex.y < 1) this.things.get('exit', String(room.exitOpen), () => ({ root: makeExit(ex.w, room.exitOpen) })).root.position.set(ex.x, 0, ex.y - 0.4);
-    // A way out through a side wall: the same stakes (or chevrons), turned to face along it.
+    // A way out through a side wall: the same stakes (shut), turned to face along it.
     else if (ex && (ex.x < 1 || ex.x + ex.w > room.map.w - 1) && ex.w < 1.5) {
       const e = this.things.get('exit', `side${ex.x < 1 ? 'W' : 'E'}${room.exitOpen}`, () => ({ root: makeExit(ex.h, room.exitOpen) })).root, west = ex.x < 1;
       e.rotation.y = west ? Math.PI / 2 : -Math.PI / 2;

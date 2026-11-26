@@ -117,7 +117,9 @@ export function makeRing(r: number, col: number, glow: boolean, w = 0.1): THREE.
 /** The way out: stakes across the gap while it's shut; gold chevrons on the floor once it's open. */
 export function makeExit(w: number, open: boolean): THREE.Group {
   const root = new THREE.Group();
+  // Shut: stakes across it. Open: nothing here; the lit mat with its arrow out marks it (exitmat3d.ts, as the flat view's).
+  // (Open had three chevrons in the gap too, from before the mat, pointing back into the room: Kyle, 2026-11-26, "I think
+  // we just need one".)
   if (!open) for (let x = 0.15; x < w; x += 0.32) part(root, 0.1, 1.3, 0.1, M(0x4a3424), x, 0.55, 0.2, (x * 7) % 2 ? 0.25 : -0.25);
-  else for (let i = 0; i < 3; i++) for (const s of [-1, 1]) part(root, 0.5, 0.03, 0.1, G(0xffd27a, 0.15), w / 2 + s * 0.2, 0.03, 0.4 + i * 0.5, 0, s * 0.7);
   return root;
 }

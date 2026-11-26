@@ -512,3 +512,11 @@ pictures (three/houses3d.ts, propcards.ts blockCut), and the flat picture paints
 wrote the same word over them again: JOBS, WORKS, PAWN and the other stalls twice. Now tags3d skips a block drawn as
 one of those cards (REDRAW on, isCardBlock, standing and unburnt); burnt or old-look ones keep the tag. Looked at in
 town on a phone: once each. Graphics' file, a small logged edit. Claude Opus 5.5
+
+## 2026-11-26: one mark at a way out
+
+Kyle: "between pages on a map when you can go to the next page there's 2 different arrow types, one on the ground and
+one pointing away from it (looks backwards); I think we just need one." In 2.5D an open way out had the lit mat with its
+arrow out (exitmat3d.ts, the same as the flat view's) and, in the gap behind it, three glowing chevrons from before the
+mat (three/shots3d.ts makeExit, 11-03), angled back into the room. The chevrons are gone; shut, the stakes stay. Looked
+at on the north fields' far end on a phone. Graphics' file, a small logged edit. Claude Opus 5.5
