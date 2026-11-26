@@ -48,7 +48,7 @@ describe('the High Wood', () => {
     expect(landJob('highwood', 3).title).toBe('The High Wood');
   });
 
-  it('is 96 by 160, one stretch, no gate, six parts south to north, the lodge its shelter, no foes yet', () => {
+  it('is 96 by 160, one stretch, no gate, six parts south to north, the lodge its shelter', () => {
     const p = plan(), m = p.map;
     expect([m.w, m.h]).toEqual([HIGHWOOD.w, HIGHWOOD.h]);
     expect([m.w, m.h]).toEqual([96, 160]);
@@ -59,7 +59,7 @@ describe('the High Wood', () => {
     expect(p.zones.map((z) => z.y)).toEqual([...p.zones.map((z) => z.y)].sort((a, b) => b - a));
     expect(m.stations!.map((s) => s.name)).toEqual([LODGE_NAME]);
     expect(m.npcs!.find((n) => n.talk === 'station:lodge')).toBeTruthy();
-    expect(p.foes).toHaveLength(0);
+    expect(p.foes.length).toBeGreaterThan(40);
     // The sunk lanes' banks are real heights; the Coin Oak stands on its rise.
     expect(m.ledges!.filter((l) => l.kind === 'earth').length).toBeGreaterThanOrEqual(BANKS.length + 2);
     expect(levelAt(m, COIN_OAK.x, COIN_OAK.y + 2.5)).toBe(1);

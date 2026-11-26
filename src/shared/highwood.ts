@@ -10,7 +10,7 @@
  *   THE OLD TREES (zone): the oldest trees standing close, a stream in a ravine crossed by one fallen trunk.
  *   THE COIN OAK (zone): the landmark, the biggest oak there is, on its rise. The far edge is rock and thick wood.
  *
- * Slice 1, the land: no foes, gathers, nooks or bounties yet. Built from the job's seed alone on every screen (the map
+ * Slice 2 lays its foes, nooks, gathers and bounties (highwoodfoes.ts, highwoodnooks.ts, highwoodgather.ts). Built from the job's seed alone on every screen (the map
  * is never sent); the seed scatters the trees only.
  */
 import type { GameMap, Stretch } from './arena.js';
@@ -21,6 +21,9 @@ import { THEMES } from './terrain.js';
 import type { TerrPlan, TerrZone } from './territory.js';
 import { lightFor } from './timeofday.js';
 import { HIGHWOOD, highWoodGround, highWoodLedges } from './highwoodground.js';
+import { WOOD_PACKS, layWoodFoes } from './highwoodfoes.js';
+import { WOOD_GATHERS, layWoodGather } from './highwoodgather.js';
+import { WOOD_NOOK_PACKS, layWoodNooks } from './highwoodnooks.js';
 import { HILD, LODGE, WAY_IN, layEdges, layLodge, layRoads, layStruck, layTrees } from './highwoodland.js';
 
 export { HIGHWOOD };
@@ -42,9 +45,9 @@ export function highWoodPlan(job: Job): TerrPlan {
   const k = newKit(new Rng(job.seed * 7951 + 47)), ground = highWoodGround();
   Object.assign(k, { mw: HIGHWOOD.w, mh: HIGHWOOD.h });
   k.water = ground.water;
-  layRoads(k), layLodge(k), layStruck(k), layTrees(k), layEdges(k);
+  layRoads(k), layLodge(k), layStruck(k), layWoodFoes(k), layWoodGather(k), layWoodNooks(k), layTrees(k), layEdges(k);
   k.blocks.push(...ground.boards);
-  const s0: Stretch = { name: HIGH_WOOD, keep: [], packs: [] };
+  const s0: Stretch = { name: HIGH_WOOD, keep: [], packs: [...WOOD_PACKS, ...WOOD_NOOK_PACKS] };
   const map: GameMap = {
     name: HIGH_WOOD, w: HIGHWOOD.w, h: HIGHWOOD.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
     // (No way on yet: the exit is a speck out in the north rock, where nobody stands and no way out is drawn.)
@@ -53,7 +56,7 @@ export function highWoodPlan(job: Job): TerrPlan {
     // (The Coin Oak's ground first: the wood's set takes its landmark from the first part of wood, client/sets.ts.)
     grounds: [{ look: 'mossy', x: 0, y: 0, w: 96, h: 36 }, { look: 'mossy', x: 0, y: 36, w: 96, h: 34 }, { look: 'charcoal', x: 0, y: 70, w: 96, h: 27 }, { look: 'mossy', x: 0, y: 97, w: 96, h: 63 }],
     npcs: [{ ...HILD, name: 'HILD', talk: 'station:lodge', look: 'villager' }],
-    stations: [{ name: LODGE_NAME, ...LODGE }], gathers: [],
+    stations: [{ name: LODGE_NAME, ...LODGE }], gathers: WOOD_GATHERS.map((g) => ({ ...g })),
     trails: k.roads.map((l) => l.map((p) => ({ x: p.x, y: p.y }))),
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: HIGH_ZONES.map((z) => ({ ...z })) };

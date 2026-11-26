@@ -10,7 +10,7 @@ export const BOUNTYW = {
   handIn: 'HAND IN',
   full: 'You hold two bounties.',
   count: (got: number, n: number) => `${got} OF ${n}`,
-  title: { wolves: 'THE WOLVES', den: 'THE DEN', nest: 'THE NEST', raiders: 'THE RAIDERS', snarers: 'THE SNARERS', ...FENW.title } as Record<string, string>,
+  title: { wolves: 'THE WOLVES', den: 'THE DEN', nest: 'THE NEST', raiders: 'THE RAIDERS', snarers: 'THE SNARERS', ...FENW.title, ironhides: 'THE IRONHIDES', coinoak: 'THE COIN OAK', lanesnarers: 'THE SUNK LANES' } as Record<string, string>,
   line: {
     wolves: 'Kill the wolves in THE ROUGH PASTURE, and the one that runs them.',
     den: 'Kill the pouncers from the den in THE ROUGH PASTURE.',
@@ -18,5 +18,8 @@ export const BOUNTYW = {
     raiders: 'Kill the raiders in THE COMMON STRIPS.',
     snarers: "Kill the snarer, the netter and the two with them at THE WOOD'S EDGE.",
     ...FENW.line,
+    ironhides: 'Kill the ironhides and their torch bearers up on THE STRUCK OAKS.',
+    coinoak: 'Kill the band in the den under THE COIN OAK, and the ones guarding the way up.',
+    lanesnarers: 'Kill the snarers in THE SUNK LANES, and the archers in the blind above them.',
   } as Record<string, string>,
 };

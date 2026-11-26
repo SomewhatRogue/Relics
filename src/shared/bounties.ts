@@ -6,10 +6,11 @@
  */
 import type { EnemyKind } from '../sim/types.js';
 import { seedOf } from './fishing.js';
+import { COIN_PACKS, IRONHIDE_PACKS, SNARER_PACKS } from './highwoodfoes.js';
 import { gainXp, type Profile } from './progress.js';
 import { Rng } from './rng.js';
 
-export interface Bounty { id: string; land: 'gatefields' | 'fenroam'; packs: number[]; kinds?: EnemyKind[]; n: number; pay: number; xp: number }
+export interface Bounty { id: string; land: 'gatefields' | 'fenroam' | 'highwood'; packs: number[]; kinds?: EnemyKind[]; n: number; pay: number; xp: number }
 export type Held = { id: string; day: number; got: number };
 
 export const HELD_MAX = 2;
@@ -31,7 +32,16 @@ export const FEN_BOUNTIES: Bounty[] = [
 ];
 export const FEN_LEVEL = 6;
 
-export const bountyOf = (id: string): Bounty | undefined => BOUNTIES.find((b) => b.id === id) ?? FEN_BOUNTIES.find((b) => b.id === id);
+/** THE HIGH WOOD's (docs/design/the-high-wood.md), one posted a day from WOOD_LEVEL: the ironhides' two bands, the Coin Oak's
+ *  three, the snarers' three lines. Paid above the fen's. */
+export const WOOD_BOUNTIES: Bounty[] = [
+  { id: 'ironhides', land: 'highwood', packs: IRONHIDE_PACKS, n: 10, pay: 180, xp: 300 },
+  { id: 'coinoak', land: 'highwood', packs: COIN_PACKS, n: 14, pay: 220, xp: 360 },
+  { id: 'lanesnarers', land: 'highwood', packs: SNARER_PACKS, n: 9, pay: 150, xp: 260 },
+];
+export const WOOD_LEVEL = 9;
+
+export const bountyOf = (id: string): Bounty | undefined => BOUNTIES.find((b) => b.id === id) ?? FEN_BOUNTIES.find((b) => b.id === id) ?? WOOD_BOUNTIES.find((b) => b.id === id);
 
 /** The two posted on a day: seeded by the day, never the same one twice. */
 export function postedOn(day: number): Bounty[] {
@@ -40,9 +50,11 @@ export function postedOn(day: number): Bounty[] {
   return [BOUNTIES[a], BOUNTIES[b]];
 }
 
-/** What the gate posts on a day for a hero of `level`: the north fields' two, and from FEN_LEVEL the fen's one, seeded by the day. */
+/** What the gate posts on a day for a hero of `level`: the north fields' two, and from FEN_LEVEL the fen's one, and from WOOD_LEVEL the wood's one, seeded by the day. */
 export function postedFor(day: number, level: number): Bounty[] {
-  return level >= FEN_LEVEL ? [...postedOn(day), FEN_BOUNTIES[new Rng(seedOf('fenbounty', day)).int(FEN_BOUNTIES.length)]] : postedOn(day);
+  if (level < FEN_LEVEL) return postedOn(day);
+  const out = [...postedOn(day), FEN_BOUNTIES[new Rng(seedOf('fenbounty', day)).int(FEN_BOUNTIES.length)]];
+  return level >= WOOD_LEVEL ? [...out, WOOD_BOUNTIES[new Rng(seedOf('woodbounty', day)).int(WOOD_BOUNTIES.length)]] : out;
 }
 
 export const held = (p: Pick<Profile, 'bounties'>): Held[] => p.bounties ?? [];

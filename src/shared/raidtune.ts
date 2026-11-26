@@ -11,7 +11,7 @@
  * - `rosters`: by the map's name, who marches (a lead first, then the rest drawn); `wolves`: the chance of a wolf-keeper
  *   with one or two wolves among them. A map with no roster, or no roads, gets no raids.
  */
-export type RaidRole = 'fodder' | 'forker' | 'swingle' | 'thief' | 'archer' | 'lunger' | 'shield' | 'netter' | 'pouncer' | 'heavy' | 'gaffer';
+export type RaidRole = 'fodder' | 'forker' | 'swingle' | 'thief' | 'archer' | 'lunger' | 'shield' | 'netter' | 'pouncer' | 'heavy' | 'gaffer' | 'snarer' | 'torch';
 export interface Roster { lead: RaidRole[]; rest: RaidRole[]; wolves: number }
 
 export const RAID = {
@@ -21,5 +21,6 @@ export const RAID = {
   rosters: {
     'THE NORTH FIELDS': { lead: ['forker', 'swingle'], rest: ['fodder', 'fodder', 'fodder', 'forker', 'swingle', 'thief', 'archer'], wolves: 0.5 },
     'THE FEN': { lead: ['lunger', 'shield', 'gaffer'], rest: ['fodder', 'fodder', 'lunger', 'shield', 'archer', 'netter', 'pouncer', 'heavy'], wolves: 0 },
+    'THE HIGH WOOD': { lead: ['snarer', 'lunger', 'shield', 'heavy'], rest: ['fodder', 'fodder', 'lunger', 'archer', 'torch', 'snarer', 'pouncer', 'shield'], wolves: 0.5 },
   } as Record<string, Roster>,
 };
