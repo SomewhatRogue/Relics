@@ -8,7 +8,9 @@ import { POST_WORD_Y } from './posts3d';
 import type { GameMap } from '../../shared/arena';
 import { levelAt, npcAt } from '../../shared/arena';
 import { nameAt, roofNamed } from '../hallnames';
-import { TALL } from './houses3d';
+import { TALL, blockState } from './houses3d';
+import { isCardBlock } from './propcards';
+import { REDRAW } from '../tilelook';
 import { LEDGE_H } from './ground';
 import { stacked } from './layoutledges';
 import { SPOT_REACH } from '../../shared/town';
@@ -29,6 +31,9 @@ export function drawTags(g: CanvasRenderingContext2D, map: GameMap, t: number, m
       if (x > -60 && y > -10 && x < g.canvas.width + 60 && y < g.canvas.height + 10) nameAt(g, b.label, x, y);
       continue;
     }
+    // A stall or a board stood up as the flat view's own picture (propcards.ts, the tile redraw) has its name painted on
+    // it already: none over it as well (Kyle, 2026-11-25: "in town things are labelled twice").
+    if (REDRAW.on && isCardBlock(b) && blockState(b) === 0) continue;
     // (The job board's and the works' words on their fascia and top board: posts3d.ts.)
     const word = isPost(b) ? (b.label === 'PUBLIC WORKS' ? 'WORKS' : b.label) : b.label;
     const [x, y] = P(b.x + b.w / 2, POST_WORD_Y[b.label] ?? (b.kind === 'stall' ? 1.15 : 1.05), b.y + b.h / 2 + (isPost(b) ? 0.12 : b.h / 2 + 0.02)), w = textWidth(word);

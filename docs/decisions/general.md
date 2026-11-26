@@ -504,3 +504,11 @@ its end. tests/staithe.test.ts (fails on the old rule). A small logged edit in t
   its carriers as they lay it, then at its bank end once it's across (where you GRAB to shove), gone once it's in the
   river or never laid. sim/expedgoal.ts logTargets, called from sim/targets.ts on a job's way and from expedTargets on
   the open land; TargetKind 'log' (client/questmarks.ts LIFT 16). tests/staithe.test.ts. Claude Opus 5.5
+
+## 2026-11-25: town names drawn twice in 2.5D
+
+Kyle: "in town things are labelled twice." The tile redraw stands stalls and the two boards up as the flat view's own
+pictures (three/houses3d.ts, propcards.ts blockCut), and the flat picture paints the label on (blocks.ts). tags3d.ts
+wrote the same word over them again: JOBS, WORKS, PAWN and the other stalls twice. Now tags3d skips a block drawn as
+one of those cards (REDRAW on, isCardBlock, standing and unburnt); burnt or old-look ones keep the tag. Looked at in
+town on a phone: once each. Graphics' file, a small logged edit. Claude Opus 5.5
