@@ -384,6 +384,9 @@ export interface GameMap {
   roads?: Road[];
   /** A roaming land's roads and paths, as lines (raiding parties march them: sim/raidroads.ts). */
   trails?: { x: number; y: number }[][];
+  /** Under a stormy sky, where the lightning may come down (sim/stormpick.ts); none: anywhere open. The High Wood's
+   *  canopy keeps it to the Struck Oaks' ridge. */
+  strikeIn?: { x: number; y: number; w: number; h: number };
   /** Water: deep (nobody wades it; shots fly over) or shallow (everyone in it slows to WADE). */
   water?: Water[];
   /** Where goblins lie asleep (drawn curled up; they lie as still as ones at the dead till they wake). */

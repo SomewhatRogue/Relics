@@ -68,7 +68,7 @@ The storm is only weather; thunderstone is ground the strikes fused glassy, neve
 Built 2026-11-25: slices 1 to 3. Packs 471 to 484 (56 bodies), nooks 485 to 487 (mini bosses 486 and 487 over
 guarded chests), thunderstone after pack 476, bounties `ironhides`, `coinoak`, `lanesnarers` (titled THE SUNK LANES,
 not THE SNARERS, which is the north fields'). Woodward Hild's words in client/highwoodwords.ts. The trunk bridge is a
-box piece, not a card (a deck cannot be a standing card). Slice 4 (weather) is still to do.
+box piece, not a card (a deck cannot be a standing card). Slice 4 built 2026-11-26: about one day in three stormy (`stormyWood`), strikes kept to the ridge (`GameMap.strikeIn`).
 
 1. **The land.** The map (ground, roads, heights, blocks, trails for raids), the territory entry, the links on from
    the fen and back, the shelter and its keeper, the map's zone names. No foes yet. Done when you can walk from the

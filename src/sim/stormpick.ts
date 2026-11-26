@@ -41,7 +41,9 @@ function loneTrees(map: GameMap): Round[] {
 
 /** What this strike goes for, or null (nobody about, nowhere open): drawn onto an ironhide near it. */
 export function pickStrike(map: GameMap, heroes: Hero[], enemies: Enemy[], rng: Rng): Pick | null {
-  const p = pickSpot(map, heroes, enemies, rng);
+  const p = pickSpot(map, heroes, enemies, rng), z = map.strikeIn;
+  // Kept to its ground (the High Wood's ridge): elsewhere the canopy takes it and nothing comes down this time.
+  if (p && z && (p.x < z.x || p.y < z.y || p.x > z.x + z.w || p.y > z.y + z.h)) return null;
   if (!p || p.on === 'rod') return p;
   const rod = rodNear(enemies, p.x, p.y);
   return rod ? { x: rod.x, y: rod.y, on: 'rod', ox: p.x, oy: p.y, rod: rod.id } : p;

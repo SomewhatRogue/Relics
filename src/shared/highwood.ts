@@ -20,6 +20,7 @@ import { Rng } from './rng.js';
 import { THEMES } from './terrain.js';
 import type { TerrPlan, TerrZone } from './territory.js';
 import { lightFor } from './timeofday.js';
+import { skyTheme } from './sky.js';
 import { HIGHWOOD, highWoodGround, highWoodLedges } from './highwoodground.js';
 import { WOOD_PACKS, layWoodFoes } from './highwoodfoes.js';
 import { WOOD_GATHERS, layWoodGather } from './highwoodgather.js';
@@ -30,6 +31,10 @@ export { HIGHWOOD };
 /** The map's name and its shelter's, as the banner and the keeper's panel show them. */
 export const HIGH_WOOD = 'THE HIGH WOOD';
 export const LODGE_NAME = "THE WOODWARD'S LODGE";
+/** Some days a storm sits over the wood (Kyle's spec, slice 4): how likely, and where its strikes may fall. */
+export const WOOD_STORM = { chance: 0.35, strikeIn: { x: 3, y: 70, w: 90, h: 34 } };
+/** Whether the day's job brings the storm: from the seed alone, so every screen agrees. */
+export const stormyWood = (job: Job): boolean => new Rng(job.seed * 4421 + 13).next() < WOOD_STORM.chance;
 
 /** The zones and the scape, south to north. */
 export const HIGH_ZONES: TerrZone[] = [
@@ -51,13 +56,20 @@ export function highWoodPlan(job: Job): TerrPlan {
   const map: GameMap = {
     name: HIGH_WOOD, w: HIGHWOOD.w, h: HIGHWOOD.h, wallFace: 3, rounds: k.rounds, blocks: k.blocks, braziers: k.braziers, torches: [],
     // (No way on yet: the exit is a speck out in the north rock, where nobody stands and no way out is drawn.)
-    hero: { ...WAY_IN }, exit: { x: 94, y: 0.4, w: 0.5, h: 0.5 }, theme: { ...lightFor(THEMES.forest, 'forest', 'day'), floor: 'grass', back: 'trees' },
+    hero: { ...WAY_IN }, exit: { x: 94, y: 0.4, w: 0.5, h: 0.5 }, theme: woodSky(job),
     water: k.water, soil: k.soil, marks: k.marks, ledges: highWoodLedges(), stretches: [s0], grim: k.grim,
     // (The Coin Oak's ground first: the wood's set takes its landmark from the first part of wood, client/sets.ts.)
     grounds: [{ look: 'mossy', x: 0, y: 0, w: 96, h: 36 }, { look: 'mossy', x: 0, y: 36, w: 96, h: 34 }, { look: 'charcoal', x: 0, y: 70, w: 96, h: 27 }, { look: 'mossy', x: 0, y: 97, w: 96, h: 63 }],
     npcs: [{ ...HILD, name: 'HILD', talk: 'station:lodge', look: 'villager' }],
     stations: [{ name: LODGE_NAME, ...LODGE }], gathers: WOOD_GATHERS.map((g) => ({ ...g })),
     trails: k.roads.map((l) => l.map((p) => ({ x: p.x, y: p.y }))),
+    strikeIn: { ...WOOD_STORM.strikeIn },
   };
   return { map, foes: k.foes, props: k.props, chests: k.chests, zones: HIGH_ZONES.map((z) => ({ ...z })) };
+}
+
+/** The wood's light by day, under the storm on a stormy day. */
+function woodSky(job: Job) {
+  const t = { ...lightFor(THEMES.forest, 'forest', 'day'), floor: 'grass' as const, back: 'trees' as const };
+  return stormyWood(job) ? skyTheme(t, 'storm') : t;
 }

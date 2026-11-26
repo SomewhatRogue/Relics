@@ -1421,3 +1421,15 @@ Kyle: "lets get started on the third land and then go back and refine the earlie
 - Art (client/tilecoinoak.ts, tilestruckoak.ts, tilelodge.ts, tiletrunk.ts, tilebank.ts): the Coin Oak with coins only
   high in the bark and cut empty ropes; the High Wood skips the great oak's rope mutation and the rope echoes.
 (Claude Opus 5.5)
+
+## 2026-11-26: the High Wood's storm days; a thicker fen mist
+
+Kyle: "continue". Main chat, no agents.
+- The High Wood, slice 4: about one day in three (`stormyWood`, from the job's seed alone) a storm sits over the wood
+  (shared/highwood.ts theme under skyTheme 'storm': rain, wet burns, the hush). Its lightning is kept to the Struck
+  Oaks' ridge by a new `GameMap.strikeIn` (sim/stormpick.ts: a pick outside it comes to nothing, the canopy takes it).
+  tests/highwoodstorm.test.ts.
+- THE FEN's mist (shared/fenmist.ts): banks 1.8 wide (was 1.5), most at strength 1.2 to 1.25 (thickest 0.9, under 1),
+  the thin causeway ones raised, three more homes (the north cuts, the larder). The drawer still shows the nearest 8.
+- The drowned cart stays its size: about three tiles, true to a farm cart beside a hero.
+(Claude Opus 5.5)
