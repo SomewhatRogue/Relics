@@ -4,6 +4,7 @@
  * client paints). RECALL: a dodge press soon after snaps you back to where the blink began. PERFECT
  * BLINK: a blink just after a PERFECT hold costs half.
  */
+import { rollOf } from '../shared/dmgrange';
 import { WEAPONS } from '../shared/tuning';
 import { BLINK_BURST, HALF_BLINK, RECALL, knowsRung } from '../shared/ladder';
 import { castElement } from './channel';
@@ -29,7 +30,7 @@ export function blinkBurst(h: Hero, zones: Zone[], w: World): void {
   for (const e of w.enemies) {
     if (isDead(e) || isDummy(e) || e.kind === 'nest' || (e.z ?? 0) !== (h.z ?? 0) || Math.hypot(e.x - x, e.y - y) > BLINK_BURST.r + e.radius) continue;
     e.lastBy = h.id;
-    if (damage(e, BLINK_BURST.dmg, w.now, w.ev, { el, how: 'burst', dx: e.x - x, dy: e.y - y })) continue;
+    if (damage(e, Math.round(BLINK_BURST.dmg * rollOf(h)), w.now, w.ev, { el, how: 'burst', dx: e.x - x, dy: e.y - y })) continue;
     // Frost only chills (a burst is a tap's size); storm hits and stops there.
     if (el === 'frost') chill(w, e);
     else afflict(w, e, el, BLINK_BURST.dmg);

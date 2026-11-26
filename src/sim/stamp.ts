@@ -3,6 +3,7 @@
  * drawn from the same STAMP numbers while the Warrior winds it up). Everything in the ring is hit and
  * thrown outward: small goblins off their feet, big ones staggered; crates and barrels burst.
  */
+import { rollOf } from '../shared/dmgrange';
 import { STAMP, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, held, isDead } from './damage';
@@ -19,7 +20,7 @@ export function stamp(h: Hero, w: World, el: Augment): void {
     if (d > STAMP.radius + e.radius) continue;
     const ux = d > 0.05 ? dx / d : h.fx, uy = d > 0.05 ? dy / d : h.fy;
     e.lastBy = h.id;
-    if (damage(e, STAMP.dmg, w.now, w.ev, { heavy: true, dx: ux, dy: uy })) continue;
+    if (damage(e, Math.round(STAMP.dmg * rollOf(h)), w.now, w.ev, { heavy: true, dx: ux, dy: uy })) continue;
     shove(e, ux, uy, STAMP.knock, e.weight);
     afflict(w, e, el, STAMP.dmg);
     if (held(e, w.now)) continue;

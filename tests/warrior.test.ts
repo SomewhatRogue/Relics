@@ -1,11 +1,14 @@
 /** The Warrior's rework (shared/warrior.ts, sim/warrior.ts): no dodge, the shield bash, the counter after a block, the greatsword, the spear. */
 import { rangeOf } from '../src/shared/dmgrange';
 import { describe, expect, it } from 'vitest';
+import { noSpread } from './nospread';
 import { GUARD, PIN, QUAKE, SHAFT, SHIELD_BASH, SPEAR_CHAIN, TICK, WEAPONS, type WeaponId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { newEnemy } from '../src/sim/enemies';
 import { hitHero } from '../src/sim/combat';
 import { NO_INTENT, type Enemy, type EnemyAttack, type FightEvent, type Intent } from '../src/sim/types';
+
+noSpread();
 
 /** A Warrior with `weapon` at (9, 9) facing up, goblins at (9, y) for each y, kept in place unless `free`. */
 function arena(weapon: WeaponId, ys: number[] = [7.6], kind: Enemy['kind'] = 'scrapper', free = false) {

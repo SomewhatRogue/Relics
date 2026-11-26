@@ -3,6 +3,7 @@
  * friend's screen gets them too): a Ranger's volley, arrows falling on a spot after a moment, and a
  * Mage's fire ring, which bursts out from them and burns on where it stood.
  */
+import { rollOf } from '../shared/dmgrange';
 import { FIRE_RING, VOLLEY, type Augment } from '../shared/tuning';
 import { shove } from './bodies';
 import { ringCatch } from './catching';
@@ -28,7 +29,7 @@ export function fireRing(h: Hero, w: World): Zone {
     if (!inside(e, z) || (e.z ?? 0) !== (h.z ?? 0)) continue;
     const dx = e.x - h.x, dy = e.y - h.y, d = Math.hypot(dx, dy), ux = d > 0.05 ? dx / d : h.fx, uy = d > 0.05 ? dy / d : h.fy;
     e.lastBy = h.id;
-    if (damage(e, FIRE_RING.dmg, w.now, w.ev, { heavy: true, dx: ux, dy: uy, el: 'fire', how: 'burn' })) continue;
+    if (damage(e, Math.round(FIRE_RING.dmg * rollOf(h)), w.now, w.ev, { heavy: true, dx: ux, dy: uy, el: 'fire', how: 'burn' })) continue;
     shove(e, ux, uy, FIRE_RING.knock, e.weight);
     afflict(w, e, 'fire', FIRE_RING.dmg);
   }
@@ -45,7 +46,7 @@ export function stepAreas(zones: Zone[], w: World): void {
       for (const e of w.enemies) {
         if (!inside(e, z)) continue;
         e.lastBy = z.owner;
-        if (damage(e, VOLLEY.dmg, w.now, w.ev, { src: 'arrow', dx: 0, dy: 1 })) continue;
+        if (damage(e, Math.round(VOLLEY.dmg * rollOf(w.heroes.find((o) => o.id === z.owner))), w.now, w.ev, { src: 'arrow', dx: 0, dy: 1 })) continue;
         afflict(w, e, z.el, VOLLEY.dmg);
         if (e.weight <= 1 && !held(e, w.now) && !isDummy(e)) Object.assign(e, { attack: null, act: 'flinch', actT: 0, actDur: VOLLEY.flinch });
       }

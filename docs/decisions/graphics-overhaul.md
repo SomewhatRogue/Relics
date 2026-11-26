@@ -1398,3 +1398,12 @@ like raiding parties etc to keep tension high sometimes", and "Draw it" (the fen
 - The drowned cart (client/tilecart.ts, block `drownedcart`): a tile-way card, sunk and tilted in black water, a
   wheel under, one broken off flat, rotten grey boards with reeds, sacks on the bank, a crow on the shaft.
 (Claude Opus 5.5)
+
+## 2026-11-25: raids pass the staithe; skills roll
+
+Kyle: "Continue". In the main chat, no agents.
+- Raid roads (sim/raidroads.ts): a road through a shelter's ring now goes round it on an arc just outside, so the
+  fen's track is one road again and a party can pass the staithe without entering it (tests/raids.test.ts).
+- The skills' damage rolls in the hero's weapon range like the swings do (shared/dmgrange.ts `rollOf`; list in
+  docs/design/damage-ranges.md). tests/skills.test.ts and warrior.test.ts pin exact hits, so they call noSpread().
+(Claude Opus 5.5)

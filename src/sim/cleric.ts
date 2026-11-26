@@ -4,6 +4,7 @@
  * opened, its coal's light flooding out at the end of the windup (the ring is drawn from the same
  * LIGHT numbers): goblins in it scorched and thrown back, small ones blinded; friends in it mend.
  */
+import { rollOf } from '../shared/dmgrange';
 import { travel } from '../shared/sweep';
 import { collide } from '../shared/arena';
 import { CHAIN, HERO, LIGHT, type Augment } from '../shared/tuning';
@@ -42,7 +43,7 @@ export function censerChain(h: Hero, w: World, aim: Intent | undefined): void {
   if (!e) return;
   w.ev.push({ k: 'chainpull', x: h.x, y: h.y, x2: e.x, y2: e.y });
   e.lastBy = h.id;
-  if (damage(e, CHAIN.dmg, w.now, w.ev, { flinch: 0.3 }) || isDummy(e) || held(e, w.now)) return;
+  if (damage(e, Math.round(CHAIN.dmg * rollOf(h)), w.now, w.ev, { flinch: 0.3 }) || isDummy(e) || held(e, w.now)) return;
   if (e.weight <= 1) towTo(e, h, HERO.radius + e.radius + 0.3, w.now), stun(e, h.id, w.now, CHAIN.stun, w.ev);
   else if (!e.attack?.unblockable) stun(e, h.id, w.now, 0.4, w.ev, 'flinch');
 }
@@ -78,7 +79,7 @@ export function lanternLight(h: Hero, w: World, el: Augment): void {
     if (d > LIGHT.radius + e.radius) continue;
     const ux = d > 0.05 ? dx / d : h.fx, uy = d > 0.05 ? dy / d : h.fy;
     e.lastBy = h.id;
-    if (damage(e, Math.round(LIGHT.dmg * k), w.now, w.ev, { heavy: true, dx: ux, dy: uy, how: 'burn', src: 'smite' })) continue;
+    if (damage(e, Math.round(LIGHT.dmg * k * rollOf(h)), w.now, w.ev, { heavy: true, dx: ux, dy: uy, how: 'burn', src: 'smite' })) continue;
     shove(e, ux, uy, LIGHT.knock, e.weight);
     afflict(w, e, el, LIGHT.dmg);
     if (e.weight <= 1 && !held(e, w.now) && !isDummy(e) && stun(e, h.id, w.now, LIGHT.blind, w.ev)) w.ev.push({ k: 'stunned', x: e.x, y: e.y });

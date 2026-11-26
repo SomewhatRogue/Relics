@@ -1,5 +1,6 @@
 /** The skills taught after the first: each does what its trainer says, in the room, by the shared numbers. */
 import { describe, expect, it } from 'vitest';
+import { noSpread } from './nospread';
 import { CHAIN, CLASS_KITS, FIRE_RING, HEARTSEEKER, KNIVES, LIGHT, SKILL_CHOICES, STAMP, TETHER, TICK, VANISH, VOLLEY, RELICS, type HeroClass, type RelicId } from '../src/shared/tuning';
 import { ArenaRoom } from '../src/sim/room';
 import { castElement } from '../src/sim/channel';
@@ -7,6 +8,8 @@ import { fallDmg } from '../src/sim/rogue';
 import { walkSpeed } from '../src/sim/walkspeed';
 import { hitEnemy } from '../src/sim/combat';
 import { NO_INTENT, type FightEvent, type Intent } from '../src/sim/types';
+
+noSpread();
 
 const ticks = (s: number) => Math.round(s / TICK);
 function run(room: ArenaRoom, s: number): FightEvent[] {

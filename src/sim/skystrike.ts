@@ -9,6 +9,7 @@
  * room judges and the circle both views draw. An ironhide within ROD.reach of where it's aimed draws it
  * onto itself (sim/rods.ts), and the mark is called there.
  */
+import { rollOf } from '../shared/dmgrange';
 import { collide } from '../shared/arena';
 import { SKY_STRIKE, type Swing } from '../shared/tuning';
 import { damage, isDead, small } from './damage';
@@ -89,7 +90,7 @@ function fall(z: Zone, w: World): void {
   for (const e of hit) {
     e.lastBy = z.owner;
     const dx = e.x - z.x, dy = e.y - z.y;
-    if (damage(e, n, w.now, w.ev, { heavy: true, flinch: 0.4, mult: true, el: 'storm', src: 'spark', how: 'burst', dx, dy })) continue;
+    if (damage(e, Math.round(n * rollOf(by)), w.now, w.ev, { heavy: true, flinch: 0.4, mult: true, el: 'storm', src: 'spark', how: 'burst', dx, dy })) continue;
     if (small(e) && e.act !== 'pinned') stun(e, z.owner, w.now, z.big ? SKY_STRIKE.bigStun : SKY_STRIKE.stun, w.ev);
     afflict(w, e, 'storm', n, { cast });
   }

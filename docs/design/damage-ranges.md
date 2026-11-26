@@ -38,7 +38,8 @@ shared/dmgrange.ts (`spreadOf`, `rangeOf`, `rollDmg` from the hero's own `dmgSee
 crit's), `SPREAD` in shared/tuning.ts. Rolled once a landed hit in sim/combat.ts `hitEnemy` (every swing), sim/bolts.ts
 `strike` (bows, crossbow, sparks, knives, darts) and `blast` (a hero's burst; not potions or relics), sim/sickle.ts
 (each spin tick), sim/frostholds.ts (cold blast, nova, shatter). Not rolled: burns, poisons and bleeds, enemy blows,
-the chain lightning, nets and the lodestone; other spells' damage (staff rings, storm, skystrike) and the cleric's
-chain could roll later. The card: DAMAGE lo TO hi for the weapon, HIT, FULL CHARGE and LAST BLOW as ranges with the
+the chain lightning, nets and the lodestone, the weather's storm. 2026-11-25: the skills roll too, by the hero's
+weapon (`rollOf` in shared/dmgrange.ts): fire ring, volley, quake, shield bash, stamp, censer chain, lantern light,
+blink burst, skystrike, the fire and storm dashes. Staff rings, tethers, the ice slide and the samurai cut do not yet. The card: DAMAGE lo TO hi for the weapon, HIT, FULL CHARGE and LAST BLOW as ranges with the
 hero's modifiers in. The sample fight re-recorded once (every scene moved, from its first hero hit).
 

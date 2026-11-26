@@ -5,6 +5,7 @@
  * swept so a wall stops them, each goblin within reach of the path struck once. Kept on the hero
  * (`rush`, `rollDx`, `rollDy`, `hitIds`), so a guest sees the same.
  */
+import { rollOf } from '../shared/dmgrange';
 import { DASH, HERO, LUNGE } from '../shared/tuning';
 import { travel } from '../shared/sweep';
 import { damage, isDead } from './damage';
@@ -35,11 +36,11 @@ export function stepRush(h: Hero, w: World, dt: number): void {
     h.hitIds.push(e.id);
     e.lastBy = h.id;
     if (fire) {
-      if (!damage(e, r.dmg, w.now, w.ev, { heavy: true, flinch: 0.3, mult: true, el: 'fire', how: 'burn', dx: h.rollDx, dy: h.rollDy })) afflict(w, e, 'fire', r.dmg);
+      if (!damage(e, Math.round(r.dmg * rollOf(h)), w.now, w.ev, { heavy: true, flinch: 0.3, mult: true, el: 'fire', how: 'burn', dx: h.rollDx, dy: h.rollDy })) afflict(w, e, 'fire', r.dmg);
       continue;
     }
     w.ev.push({ k: 'shock', x: h.x, y: h.y, x2: e.x, y2: e.y });
-    if (damage(e, r.dmg, w.now, w.ev, { flinch: r.big ? 0 : DASH.flinch, mult: true, el: 'storm', src: 'spark', dx: h.rollDx, dy: h.rollDy })) continue;
+    if (damage(e, Math.round(r.dmg * rollOf(h)), w.now, w.ev, { flinch: r.big ? 0 : DASH.flinch, mult: true, el: 'storm', src: 'spark', dx: h.rollDx, dy: h.rollDy })) continue;
     afflict(w, e, 'storm', r.dmg, { cast: r.cast });
     if (r.big && e.act !== 'pinned') stun(e, h.id, w.now, DASH.bigStun, w.ev);
   }

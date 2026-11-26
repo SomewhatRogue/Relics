@@ -5,6 +5,7 @@
  * catches charging or lunging. The shaft does little
  * up close. All judged here, so a guest's goblins fall the way the leader's do.
  */
+import { rollOf } from '../shared/dmgrange';
 import { SHIELD_BASH, PIN, QUAKE, SHAFT, WEAPONS, type Swing } from '../shared/tuning';
 import { shove } from './bodies';
 import { damage, isDead } from './damage';
@@ -54,7 +55,7 @@ export function quake(h: Hero, enemies: Enemy[], now: number, ev: FightEvent[]):
     const dx = e.x - cx, dy = e.y - cy, d = Math.hypot(dx, dy);
     if (d > QUAKE.radius + e.radius) continue;
     e.lastBy = h.id;
-    if (damage(e, QUAKE.dmg, now, ev, { heavy: true, src: 'slam', how: 'burst', dx, dy })) continue;
+    if (damage(e, Math.round(QUAKE.dmg * rollOf(h)), now, ev, { heavy: true, src: 'slam', how: 'burst', dx, dy })) continue;
     // Knocked flat: a striped blow or wind-up is lost with it; only a charge carries on (the spear's to stop).
     if (e.attack?.kind === 'charge' || e.act === 'pinned') continue;
     shove(e, dx / (d || 1), dy / (d || 1), QUAKE.knock, e.weight);

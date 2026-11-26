@@ -27,3 +27,6 @@ export function rollDmg(h: Dice): number {
   const s = spreadOf(h.weapon);
   return 1 - s + (2 * s * x) / 4294967296;
 }
+
+/** A spell's or skill's roll for the hero who made it, or none if there is no hero (a weather strike, a lost owner). */
+export const rollOf = (h?: Dice): number => (h ? rollDmg(h) : 1);

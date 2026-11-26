@@ -3,6 +3,7 @@
  * over, knocked aside and reeling (so they can be grabbed); big ones stagger; crates and barrels burst
  * as you go through them; a wall stops you.
  */
+import { rollOf } from '../shared/dmgrange';
 import { travel } from '../shared/sweep';
 import { BASH, HERO } from '../shared/tuning';
 import { shove } from './bodies';
@@ -37,7 +38,7 @@ export function stepBash(h: Hero, w: Enemy[], world: World, dt: number): void {
     // Knocked off the line, to whichever side it stood.
     const side = h.rollDx * dy - h.rollDy * dx >= 0 ? 1 : -1;
     const ox = h.rollDx * 0.6 - h.rollDy * side, oy = h.rollDy * 0.6 + h.rollDx * side;
-    if (damage(e, BASH.dmg, world.now, world.ev, { heavy: true, dx: ox, dy: oy })) continue;
+    if (damage(e, Math.round(BASH.dmg * rollOf(h)), world.now, world.ev, { heavy: true, dx: ox, dy: oy })) continue;
     shove(e, ox, oy, BASH.knock, e.weight);
     if (held(e, world.now)) continue;
     if (e.weight <= 1) stun(e, h.id, world.now, bashStun(h), world.ev) && world.ev.push({ k: 'stunned', x: e.x, y: e.y });
