@@ -29,10 +29,12 @@ function lay(rng: Rng, homes: [number, number, number?][], grow = 1): Bank[] {
 export const layBanks = (seed: number): Bank[] => lay(new Rng(seed * 613 + 7), HOMES.slice(0, MIST.banks));
 
 /** THE FEN's homes (shared/fenroam.ts): round the drowned chapel, over the wide reeds, thin over the causeways. */
-const FEN_HOMES: [number, number, number?][] = [[28.5, 36], [42, 30], [66, 42], [21, 60], [39, 67.5], [69, 63], [33, 99, 0.55], [54, 117, 0.5]];
+// (Kyle, 2026-11-25: the mist read subtle. Thicker, wider, and more of it: the larder and the north cuts get banks too;
+// the drawer still shows the nearest MIST_MAX.)
+const FEN_HOMES: [number, number, number?][] = [[28.5, 36, 1.25], [42, 30, 1.2], [66, 42, 1.2], [21, 60, 1.25], [39, 67.5, 1.2], [69, 63, 1.2], [33, 99, 0.8], [54, 117, 0.75], [30, 14, 1.1], [62, 18, 1.1], [76, 88, 0.9]];
 /** The banks for THE FEN's seed (own stream, so Fenmere's stay as they were): half again as wide as Fenmere's, as the
- * map grew, and no more of them (the drawer shows at most MIST_MAX, client/fenmistdraw.ts). */
-export const layFenBanks = (seed: number): Bank[] => lay(new Rng(seed * 719 + 13), FEN_HOMES, 1.5);
+ * map grew (now 1.8), and more of them (the drawer shows at most MIST_MAX, client/fenmistdraw.ts). */
+export const layFenBanks = (seed: number): Bank[] => lay(new Rng(seed * 719 + 13), FEN_HOMES, 1.8);
 
 /** The banks a map carries: Fenmere's, or a land's own. */
 export const banksOf = (m: Pick<GameMap, 'fen' | 'mist'>): Bank[] | undefined => m.fen?.mist ?? m.mist;
