@@ -8,6 +8,7 @@ import { landJob } from '../src/shared/territory';
 import { RAID, TICK } from '../src/shared/tuning';
 import { newRun, runRoom, tally, type Run } from '../src/sim/run';
 import { raidNow } from '../src/sim/raids';
+import { nearestPt, roadsOf } from '../src/sim/raidroads';
 import { jobJson, loadRoom, saveRoom } from '../src/client/coop';
 import type { ArenaRoom } from '../src/sim/room';
 import { NO_INTENT, type Enemy, type FightEvent, type Hero } from '../src/sim/types';
@@ -148,5 +149,12 @@ describe('raiding parties', () => {
     stepFor(w, 2);
     expect(calls(w)).toHaveLength(0);
     expect(w.room.raids?.live ?? []).toHaveLength(0);
+  });
+
+  it("goes round a shelter's ring rather than stopping at it (the fen's staithe no longer cuts the track)", () => {
+    const w = land('fenroam'), r = roadsOf(w.room.map)!, rings = w.room.map.stations ?? [], track = w.room.map.trails![0];
+    const [a, b] = [track[0], track[track.length - 1]].map((p) => r.part[nearestPt(r, p)]);
+    expect(a).toBe(b);
+    for (const p of r.pts) for (const s of rings) expect(far(p, s)).toBeGreaterThan(s.r + 1);
   });
 });

@@ -1,7 +1,7 @@
 /**
  * The roads a raiding party marches (sim/raids.ts): the land's roads and paths (`map.trails`) as a graph, with the stretch
- * inside a shelter's ring left out (goblins are kept out of the rings: sim/landrules.ts guard), so a party never routes
- * through one. Built once a map; pure lookups after.
+ * inside a shelter's ring swapped for an arc round it (goblins are kept out of the rings: sim/landrules.ts guard), so a
+ * party never routes through one but can still pass it. Built once a map; pure lookups after.
  */
 import type { GameMap } from '../shared/arena';
 
@@ -21,17 +21,37 @@ export function roadsOf(map: GameMap): Roads | null {
   const link = (a: number, b: number) => a !== b && !adj[a].includes(b) && (adj[a].push(b), adj[b].push(a));
   for (const l of lines) {
     // Every tile or so along it, so a ring cuts only the bit inside it.
-    let last = -1;
+    let last = -1, cut = -1;
     for (let i = 0; i < l.length; i++) {
       const a = l[i], b = l[i + 1] ?? a, n = Math.max(1, Math.ceil(near(a, b) / 1.5));
       for (let k = 0; k < (i + 1 < l.length ? n : 1); k++) {
         const p = { x: a.x + ((b.x - a.x) * k) / n, y: a.y + ((b.y - a.y) * k) / n };
-        if (out(p)) { last = -1; continue; }
+        if (out(p)) { if (last >= 0) cut = last; last = -1; continue; }
         const j = add(p);
         if (last >= 0) link(last, j);
+        else if (cut >= 0) skirt(cut, j);
         last = j;
+        cut = -1;
       }
     }
+  }
+  // A road through a ring goes round it instead (Kyle 2026-11-25: the fen's staithe cut its track in two): an arc just
+  // outside the ring, the shorter way, from where the road went in to where it came out.
+  function skirt(a: number, b: number): void {
+    const s = rings.find((r) => near(pts[a], r) <= r.r + 3 && near(pts[b], r) <= r.r + 3);
+    if (!s) return;
+    const rad = s.r + 2.5, t0 = Math.atan2(pts[a].y - s.y, pts[a].x - s.x);
+    let dt = Math.atan2(pts[b].y - s.y, pts[b].x - s.x) - t0;
+    if (dt > Math.PI) dt -= 2 * Math.PI;
+    if (dt < -Math.PI) dt += 2 * Math.PI;
+    const n = Math.max(2, Math.ceil((Math.abs(dt) * rad) / 1.5));
+    let prev = a;
+    for (let k = 1; k < n; k++) {
+      const t = t0 + (dt * k) / n, j = add({ x: s.x + Math.cos(t) * rad, y: s.y + Math.sin(t) * rad });
+      link(prev, j);
+      prev = j;
+    }
+    link(prev, b);
   }
   // Where a path meets another (its end on another's line, or two points together): joined.
   for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) if (near(pts[i], pts[j]) < 1.2) link(i, j);
