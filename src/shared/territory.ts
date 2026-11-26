@@ -12,6 +12,7 @@ import { hillPlan } from './hillmap.js';
 import { knollPlan } from './knollmap.js';
 import { gateFieldsPlan } from './gatefields.js';
 import { fenRoamPlan } from './fenroam.js';
+import { highWoodPlan } from './highwood.js';
 import { fieldsPlan } from './lowfurrowfields.js';
 import { risePlan } from './lowfurrowrise.js';
 import { barnPlan } from './tollanbarn.js';
@@ -22,10 +23,10 @@ import { yardPlan } from './tollanyard.js';
 
 /**
  * `lowfurrow`, `tollan`: the quest territories laid so far (docs/design/territories.md). `hill`: the proving hill, a
- * small test map (shared/hillmap.ts). `knoll`: the raised-area test map (shared/knollmap.ts). `gatefields`: the land's first map outside Wickhold's North Gate (shared/gatefields.ts). `fenroam`: its second, the Fen (shared/fenroam.ts).
+ * small test map (shared/hillmap.ts). `knoll`: the raised-area test map (shared/knollmap.ts). `gatefields`: the land's first map outside Wickhold's North Gate (shared/gatefields.ts). `fenroam`: its second, the Fen (shared/fenroam.ts). `highwood`: its third, the High Wood (shared/highwood.ts).
  */
-export type LandId = 'lowfurrow' | 'tollan' | 'sallow' | 'hill' | 'knoll' | 'gatefields' | 'fenroam';
-export const LANDS: LandId[] = ['lowfurrow', 'tollan', 'sallow', 'hill', 'knoll', 'gatefields', 'fenroam'];
+export type LandId = 'lowfurrow' | 'tollan' | 'sallow' | 'hill' | 'knoll' | 'gatefields' | 'fenroam' | 'highwood';
+export const LANDS: LandId[] = ['lowfurrow', 'tollan', 'sallow', 'hill', 'knoll', 'gatefields', 'fenroam', 'highwood'];
 /** Tuning for every territory. */
 export const TERR = { wake: 15, doze: 19, more: { hp: 0.3, harm: 0.15 }, gate: 3.2 };
 /** A zone or a scape: its box on the map and the stretch it belongs to. */
@@ -33,10 +34,10 @@ export interface TerrZone { name: string; kind: 'zone' | 'scape'; x: number; y: 
 export interface TerrPlan extends RoomPlan { zones: TerrZone[] }
 
 /** Each territory's maps, in the order they're walked. */
-const PLANS: Record<LandId, ((job: Job) => TerrPlan)[]> = { lowfurrow: [fieldsPlan, risePlan], tollan: [orchardPlan, yardPlan, barnPlan], sallow: [bedsPlan, holtPlan], hill: [hillPlan], knoll: [knollPlan], gatefields: [gateFieldsPlan], fenroam: [fenRoamPlan] };
-const NAMES: Record<LandId, string> = { lowfurrow: 'Lowfurrow Fields', tollan: "Tollan's Farm", sallow: 'Sallow Carr', hill: 'Lowfurrow Fields', knoll: 'Lowfurrow Fields', gatefields: 'Lowfurrow Fields', fenroam: 'The Peat Cuts' };
+const PLANS: Record<LandId, ((job: Job) => TerrPlan)[]> = { lowfurrow: [fieldsPlan, risePlan], tollan: [orchardPlan, yardPlan, barnPlan], sallow: [bedsPlan, holtPlan], hill: [hillPlan], knoll: [knollPlan], gatefields: [gateFieldsPlan], fenroam: [fenRoamPlan], highwood: [highWoodPlan] };
+const NAMES: Record<LandId, string> = { lowfurrow: 'Lowfurrow Fields', tollan: "Tollan's Farm", sallow: 'Sallow Carr', hill: 'Lowfurrow Fields', knoll: 'Lowfurrow Fields', gatefields: 'Lowfurrow Fields', fenroam: 'The Peat Cuts', highwood: 'The Charcoal Camps' };
 /** What each territory's job is, where it is not bringing people out: Tollan's Farm is the hunt for MAWL, which is in its last map's plan. */
-const WORK: Partial<Record<LandId, Partial<Job>>> = { tollan: { objective: 'hunt', boss: 'MAWL' }, sallow: { objective: 'burn' }, gatefields: { roam: true, title: 'The North Fields' }, fenroam: { roam: true, title: 'The Fen' } };
+const WORK: Partial<Record<LandId, Partial<Job>>> = { tollan: { objective: 'hunt', boss: 'MAWL' }, sallow: { objective: 'burn' }, gatefields: { roam: true, title: 'The North Fields' }, fenroam: { roam: true, title: 'The Fen' }, highwood: { roam: true, title: 'The High Wood' } };
 
 /** Whether `s` names a territory with maps (laid or still being laid: the test link opens either). */
 export const knownLand = (s: string): s is LandId => s in PLANS;

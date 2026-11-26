@@ -31,6 +31,8 @@ export const SIDES: Line[] = [
   [{ x: 52.1, y: 111.9 }, { x: 52.1, y: 105.3 }], [{ x: 66.9, y: 97.1 }, { x: 73.9, y: 97.1 }, { x: 73.9, y: 102.9 }, { x: 79.6, y: 102.9 }],
   [{ x: 60, y: 85.1 }, { x: 45, y: 85.1 }], [{ x: 36, y: 70.5 }, { x: 31.1, y: 67.2 }, { x: 33, y: 62.1 }], [{ x: 59.4, y: 28.5 }, { x: 67.5, y: 28.5 }],
   [{ x: 46.2, y: 35.8 }, { x: 10.9, y: 35.8 }, { x: 10.9, y: 44.4 }],
+  // On past the larder to the far end's boardwalk (shared/landlinks.ts).
+  [{ x: 46.5, y: 10.4 }, { x: 46.5, y: 1.2 }],
 ];
 const LINES = [MAIN, ...SIDES];
 const off = (x: number, y: number, d: number) => LINES.every((l) => near(l, x, y) >= d);

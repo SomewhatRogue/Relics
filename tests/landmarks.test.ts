@@ -28,8 +28,12 @@ describe('landMarks', () => {
     expect(landMarks({ ...base, profile: { bounties: [{ id: 'wolves', day: 1, got: 5 }] }, seen }).bounties).toEqual([]);
     expect(landMarks({ ...base, profile: {}, seen }).bounties).toEqual([]);
   });
-  it('the fen has its way back, not a gate', () => {
+  it('the fen has its way back, not a gate, and its way on into the high wood', () => {
     const m = landMarks({ ...base, land: 'fenroam', profile: {}, seen: () => false });
-    expect(m.ways.map((w) => w.name)).toEqual(['BACK TO THE NORTH FIELDS']);
+    expect(m.ways.map((w) => w.name)).toEqual(['BACK TO THE NORTH FIELDS', 'ON INTO THE HIGH WOOD']);
+  });
+  it('the high wood has its way back to the fen and no way on yet', () => {
+    const m = landMarks({ ...base, land: 'highwood', profile: {}, seen: () => false });
+    expect(m.ways.map((w) => w.name)).toEqual(['BACK TO THE FEN']);
   });
 });

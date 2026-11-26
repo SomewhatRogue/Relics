@@ -47,6 +47,8 @@ export const BOARDWALKS: R[] = [
   [30, 66, 32.2, 68.4], [61.6, 66, 63.6, 68.4], [45, 57, 47.2, 59.4], [45, 53.2, 47.2, 54.8], [18.6, 117, 40.6, 119.2], [51, 107.2, 53.2, 110.4],
   [43.6, 84, 54, 86.2], [69, 96, 75, 98.2], [72.8, 96, 75, 104], [72.8, 101.8, 77.4, 104],
   ...CUTS.map(([x0, , x1]): R => [x0, 12, x1, 14.2]),
+  // The far end: over the last of the deep to the High Wood's root stair (shared/landlinks.ts).
+  [45.4, 0, 47.6, 3.2],
 ];
 /** The reed beds' shallows, where the reeds stand. */
 export const REEDBEDS: R = [4.6, 51, 85.6, 78.6];
