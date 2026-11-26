@@ -110,6 +110,8 @@ The Deep chat, until it finishes (then the general chat).
   raidform.ts, raidroads.ts, shared/raidtune.ts): pack ids 900 and up are raids, never a bounty's; goblins may carry
   `raid` (sleep.ts never dozes them); a `{k:'raid'}` event; `GameMap.trails` (arena.ts) holds a land's roads. The
   wilds map (client/landmapui.ts) opens from the expedition MAP button on roam lands.
+  Claimed (2026-11-25): THE HIGH WOOD, the third land past the fen (docs/design/the-high-wood.md): new
+  shared/highwood*.ts, tests/highwood.test.ts; small edits to territory.ts and landlinks.ts.
 
 - **For the Graphics sweep and perf chats (General, 2026-11-23):** the 2.5D figure cell is 128x144 now (was 96x96,
   client/three/figs3d.ts CELL) so a 3x boss fits; about 1.8x the atlas area. Watch it on the phone budget.
