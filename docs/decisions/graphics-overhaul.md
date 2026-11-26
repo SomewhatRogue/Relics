@@ -1407,3 +1407,17 @@ Kyle: "Continue". In the main chat, no agents.
 - The skills' damage rolls in the hero's weapon range like the swings do (shared/dmgrange.ts `rollOf`; list in
   docs/design/damage-ranges.md). tests/skills.test.ts and warrior.test.ts pin exact hits, so they call noSpread().
 (Claude Opus 5.5)
+
+## 2026-11-25: THE HIGH WOOD, the third land
+
+Kyle: "lets get started on the third land and then go back and refine the earlier lands." Spec docs/design/the-high-wood.md
+(names from the lore keeper: its own wood, never "Deep", never Hangman's Wood's). Three builders in slices:
+- The land (shared/highwood.ts, highwoodground.ts, highwoodland.ts): 96 by 160 past the fen's far end (a boardwalk over
+  the last cut; landlinks ONWARD/BACKWARD, the fen's new way FAR END). The Root Stair, the Sunk Lanes (earth banks as
+  real heights), the Woodward's Lodge (Woodward Hild; OUT TO from the North Gate), the Struck Oaks, the Old Trees (a
+  stream crossed by one trunk), the Coin Oak. Trails for raids; the map's zones.
+- Foes (shared/highwoodfoes.ts, highwoodnooks.ts, highwoodgather.ts): 14 packs from 471, five nooks with two mini
+  bosses, thunderstone, three bounties from level 9, a wood roster for raids.
+- Art (client/tilecoinoak.ts, tilestruckoak.ts, tilelodge.ts, tiletrunk.ts, tilebank.ts): the Coin Oak with coins only
+  high in the bark and cut empty ropes; the High Wood skips the great oak's rope mutation and the rope echoes.
+(Claude Opus 5.5)

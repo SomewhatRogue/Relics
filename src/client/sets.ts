@@ -7,6 +7,7 @@
  * oak blocks as it did. The fen's and the fields' landmarks need ground of their own and come with slice 2.
  */
 import type { GameMap, Round } from '../shared/arena';
+import { HIGH_WOOD } from '../shared/highwood';
 import { countryOf, lookAt, partsOf } from './looks';
 import type { Cut } from './three/propcards';
 import { OAK_KINDS, greatOakCut, ropeCut, type OakKind } from './tilelandmarks';
@@ -27,6 +28,8 @@ const CUTS = new Map<string, Cut>();
 export function landmarkOf(m: GameMap): Landmark | null {
   if (LAND.has(m)) return LAND.get(m)!;
   let out: Landmark | null = null;
+  // (The High Wood has its own landmark, the Coin Oak block, and no hanging oak: no ropes, nobody hanging. tilecoinoak.ts.)
+  if (m.name === HIGH_WOOD) return LAND.set(m, null), null;
   // (The wood's ground: the whole map, or on the land the stretch that is wood: looks.ts partsOf.)
   const wood = setOf(m) === 'gallows' ? { x0: 0, y0: 0, x1: m.w, y1: m.h } : m.grounds?.length ? partsOf(m, 0, 0).find((p) => p.look.country === 'wood') : undefined;
   if (wood) {
@@ -57,7 +60,7 @@ export function landmarkCut(l: Landmark): Cut {
 const ROPES = new Map<number, Cut>();
 /** The set's echoes on one of the map's rounds: cards to stand by it (tiles from it: dx across, dz toward the camera). */
 export function echoesOf(m: GameMap, r: Round): { cut: Cut; dx: number; dz: number }[] {
-  if (r.kind !== 'tree' || lookAt(m, r.x, r.y)?.country !== 'wood' || landmarkOf(m)?.round === r) return [];
+  if (m.name === HIGH_WOOD || r.kind !== 'tree' || lookAt(m, r.x, r.y)?.country !== 'wood' || landmarkOf(m)?.round === r) return [];
   const h = hash(Math.round(r.x * 16), Math.round(r.y * 16), 83);
   if (h > 0.3) return [];
   const v = Math.floor(h * 1000) % 15;

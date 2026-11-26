@@ -19,6 +19,11 @@ export const LOOK: Record<Block['kind'], Look> = {
   plough: { tall: 6, roof: '#4a3320', ridge: '#6a4a2e', wall: '#2b1e12', windows: false },
   struckpine: { tall: 30, roof: '#1f3020', ridge: '#2a4328', wall: '#3a2a1c', windows: false },
   // The Fen's drowned chapel and its echoes (shared/fenroamland.ts; drawn the tile way in the 2.5D view: tilechapel.ts, tileawash.ts).
+  // The High Wood's (tilecoinoak.ts, tilestruckoak.ts, tilelodge.ts, tiletrunk.ts).
+  coinoak: { tall: 110, roof: '#1f3a22', ridge: '#2c4e2d', wall: '#3f2b19', windows: false },
+  struckoak: { tall: 40, roof: '#2a1e14', ridge: '#3f2b19', wall: '#2b1d12', windows: false },
+  woodlodge: { tall: 26, roof: '#4a4a44', ridge: '#34502a', wall: '#3f2b19', windows: false },
+  trunkbridge: { tall: 6, roof: '#56402a', ridge: '#34502a', wall: '#3f2b19', windows: false },
   chapel: { tall: 44, roof: '#3e4048', ridge: '#55585e', wall: '#5a5c62', windows: false },
   drownedcart: { tall: 14, roof: '#4a4846', ridge: '#6a6862', wall: '#2e2a28', windows: false },
   awash: { tall: 6, roof: '#4a4c52', ridge: '#5e6066', wall: '#3a3c42', windows: false },
@@ -100,7 +105,7 @@ export const LOOK: Record<Block['kind'], Look> = {
  * on the same footprint, now twice (walls up, furniture at the bigger hands; blocks.ts sizes doors and windows to
  * match). Pieces drawn from their own boxes (pieces.ts) keep theirs: their `tall` only bounds fire and rubble.
  */
-const BOXED = new Set<string>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack', 'boards', 'reeds', 'sideway']);
+const BOXED = new Set<string>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack', 'boards', 'reeds', 'sideway', 'trunkbridge']);
 // (Twice, since the heroic proportions, 2026-11-12: a house's wall a head over the 31-tall heroes, Kyle: "houses now look
 // way too tiny".)
 for (const [k, l] of Object.entries(LOOK)) if (!BOXED.has(k)) l.tall = Math.round(l.tall * 2);

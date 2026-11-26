@@ -61,7 +61,9 @@ export type BlockKind = 'house' | 'barn' | 'hall' | 'church' | 'forge' | 'stall'
   // The Fen (shared/fenroam.ts): the drowned chapel, its landmark, and its echoes awash (`look` 0 a grave slab, 1 a cross, 2 a pew).
   | 'chapel' | 'awash' | 'drownedcart'
   // Fenmere (shared/fen.ts): boards over deep water you walk on (a deck), reeds standing in the shallows you walk through (soft).
-  | 'boards' | 'reeds';
+  | 'boards' | 'reeds'
+  // The High Wood (shared/highwoodland.ts; client/tilecoinoak.ts, tilestruckoak.ts, tilelodge.ts, tiletrunk.ts): the Coin Oak, a split oak, the Woodward's lodge, the fallen trunk over the stream.
+  | 'coinoak' | 'struckoak' | 'woodlodge' | 'trunkbridge';
 export interface Round extends Circle {
   kind: RoundKind;
   /** Paint only: which drawing of its kind. A tree: 1 is a pollard willow (client/flora.ts). */

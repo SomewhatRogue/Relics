@@ -65,5 +65,5 @@ export function highWoodGround(): { water: Water[]; boards: Block[] } {
     ...POOLS.map((r) => box(r)),
   ];
   const t = box(TRUNK), p = 0.2;
-  return { water, boards: [{ kind: 'boards', deck: true, x: t.x, y: t.y - p, w: t.w, h: t.h + p * 2 }] };
+  return { water, boards: [{ kind: 'trunkbridge', deck: true, x: t.x, y: t.y - p, w: t.w, h: t.h + p * 2 }] };
 }

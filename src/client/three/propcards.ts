@@ -21,6 +21,9 @@ import { ploughCut } from '../tileplough';
 import { drownedCartCut } from '../tilecart';
 import { struckCut } from '../tilestruck';
 import { chapelCut } from '../tilechapel';
+import { coinOakCut } from '../tilecoinoak';
+import { struckOakCut } from '../tilestruckoak';
+import { lodgeCut } from '../tilelodge';
 import { awashCut } from '../tileawash';
 import { REDRAW } from '../tilelook';
 import { swayCards } from './wind3d';
@@ -39,7 +42,7 @@ export const CARD_ROUNDS = new Set<string>(['stump', 'tree', 'pine', 'bush', 'de
  * furniture the kit draws (tilefurn.ts; the flat view paints it as plain slabs, which stood up read as crates). Hearths,
  * shelves, racks and the like stay built.
  */
-const CARD_BLOCKS = new Set<string>(['stall', 'tent', 'clamp', 'plough', 'struckpine', 'chapel', 'awash', 'drownedcart', ...FURN]);
+const CARD_BLOCKS = new Set<string>(['stall', 'tent', 'clamp', 'plough', 'struckpine', 'chapel', 'coinoak', 'struckoak', 'woodlodge', 'awash', 'drownedcart', ...FURN]);
 export const isCardRound = (r: Round) => CARD_ROUNDS.has(r.kind) && !PIECE_ROUNDS.has(r.kind);
 export const isCardBlock = (b: Block) => CARD_BLOCKS.has(b.kind) && !PIECE_BLOCKS.has(b.kind) && !b.ruined && b.lands === undefined && !b.door;
 
@@ -167,6 +170,9 @@ export function blockCut(b: Block, lit: boolean): Cut | null {
   if (b.kind === 'struckpine' && REDRAW.on) return struckCut(b);
   if (b.kind === 'drownedcart' && REDRAW.on) return drownedCartCut(b);
   if (b.kind === 'chapel' && REDRAW.on) return chapelCut(b);
+  if (b.kind === 'coinoak' && REDRAW.on) return coinOakCut(b);
+  if (b.kind === 'struckoak' && REDRAW.on) return struckOakCut(b);
+  if (b.kind === 'woodlodge' && REDRAW.on) return lodgeCut(b);
   if (b.kind === 'awash' && REDRAW.on) return awashCut(b);
   const w = Math.round(b.w * PX), d = Math.round(b.h * PX), tall = LOOK[b.kind]?.tall ?? 16, m = 24;
   return cut((c, x, y) => drawBlock(c, b, x - w / 2, y - d, lit), w + m * 2, d + tall + m * 2, m + w / 2, m + tall + d);

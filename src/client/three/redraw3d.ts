@@ -9,6 +9,7 @@
  */
 import * as THREE from 'three';
 import { Rng } from '../../shared/rng';
+import { earthBankCanvas } from '../tilebank';
 import { faceCanvas, KX, KY, KZ, ledgeCanvas, roofCanvas, stepCanvas, type FaceWin } from '../tilekit';
 import { toonize } from './post';
 // (The pitch from the switch, not camera3d.ts: that loads the ground and the flat view's sprites, which the Node tests
@@ -96,9 +97,10 @@ export function drawHouse(group: THREE.Group, roof: THREE.Mesh | null, d: Drawn,
 }
 
 /** A level's retaining wall facing the camera, from a0 to a1 along x at z, h high (layoutledges.ts). */
-export function drawnLedgeFace(a0: number, a1: number, z: number, h: number, seed: number): THREE.Mesh {
+export function drawnLedgeFace(a0: number, a1: number, z: number, h: number, seed: number, earth = false): THREE.Mesh {
   const rng = new Rng(seed);
-  return screenQuad([[a0, 0, z], [a1, 0, z], [a1, h, z], [a0, h, z]], (c, r) => ledgeCanvas(c, r, rng));
+  // (An earth bank's face is earth with roots, not courses of stone: tilebank.ts.)
+  return screenQuad([[a0, 0, z], [a1, 0, z], [a1, h, z], [a0, h, z]], (c, r) => (earth ? earthBankCanvas(c, r, seed & 255) : ledgeCanvas(c, r, rng)));
 }
 
 /** A step: its tread at height y from z0 to z1, and its riser at z1 from y0 up to y (when it faces the camera). */

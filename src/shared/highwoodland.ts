@@ -65,7 +65,7 @@ export function layLodge(k: Kit): void {
   const x0 = L.x - 6, x1 = L.x + 6, y0 = L.y - 5, y1 = L.y + 5.6;
   for (let x = x0; x < x1 - 0.1; x += 1.2) if (x + 1.2 < L.x - 1.6 || x > L.x + 1.6) B('stakes', x, y0, 1.2, 0.3), B('stakes', x, y1, 1.2, 0.3);
   for (let y = y0 + 0.3; y < y1 - 0.1; y += 1.2) B('stakes', x0, y, 0.3, Math.min(1.2, y1 - y)), B('stakes', x1 - 0.3, y, 0.3, Math.min(1.2, y1 - y));
-  B('shack', x0 + 0.8, y0 + 0.9, 3.6, 2.4), B('log', L.x + 2.4, L.y + 3.2, 2.6, 0.6);
+  B('woodlodge', x0 + 0.8, y0 + 0.9, 3.6, 2.4), B('log', L.x + 2.4, L.y + 3.2, 2.6, 0.6);
   k.braziers.push({ x: L.x - 1.4, y: L.y + 2, r: 0.35, wild: true });
   for (const [x, y] of [[x1 - 1.4, y0 + 1.4], [x1 - 1.4, y0 + 2.4]]) round(k, 'stump', x, y, 0.36);
   claim(k, L.x, L.y, 6.6);
@@ -74,7 +74,7 @@ export function layLodge(k: Kit): void {
 /** The struck oaks on the ridge: split pines standing burnt, fallen trunks across the clearing, scorched ground. */
 export function layStruck(k: Kit): void {
   for (const [x, y, w, h] of [[30, 85.4, 3, 0.6], [54.6, 86.6, 3.4, 0.7], [58, 79.6, 2.8, 0.6], [40.4, 88.6, 3, 0.6], [27.6, 79, 2.6, 0.6]]) k.blocks.push({ kind: 'log', x, y, w, h }), claim(k, x + w / 2, y + h / 2, w / 2 + 0.3);
-  for (const [x, y] of [[33.4, 81.4], [52, 80.6], [64.2, 85.4], [43, 85.6], [68, 79]]) k.blocks.push({ kind: 'struckpine', x, y, w: 1.2, h: 1 }), claim(k, x + 0.6, y + 0.5, 1.2);
+  for (const [x, y, oak] of [[33.4, 81.4, 1], [52, 80.6, 0], [64.2, 85.4, 1], [43, 85.6, 0], [68, 79, 1]]) k.blocks.push({ kind: oak ? 'struckoak' : 'struckpine', x, y, w: oak ? 1.6 : 1.2, h: 1 }), claim(k, x + 0.6, y + 0.5, 1.2);
   for (const [x, y, w, h] of [[34.4, 82.6, 3, 1], [50.6, 81.8, 3.2, 0.9], [62.6, 86.6, 2.8, 1]]) mark(k, 'debris', x, y, w, h);
 }
 
@@ -91,7 +91,8 @@ export function layTrees(k: Kit): void {
     [3, 18, 93, 36, 34, ['tree', 'tree', 'pine', 'rock']],
     [3, 3, 93, 18, 26, ['pine', 'rock', 'bush', 'stump']],
   ];
-  k.rounds.push({ kind: 'tree', ...COIN_OAK });
+  // (The Coin Oak is a block of its own, its footing the old round's: a trunk wide as a house, client/tilecoinoak.ts.)
+  k.blocks.push({ kind: 'coinoak', x: COIN_OAK.x - 2.4, y: COIN_OAK.y - 1.2, w: 4.8, h: 2.4 });
   for (const [x0, y0, x1, y1, n, kinds] of boxes) for (let i = 0, t = 0; i < n && t < n * 14; t++) {
     const r = k.rng.range(0.45, 0.8), x = k.rng.range(x0, x1), y = k.rng.range(y0, y1);
     if (!room(k, x, y, r, y < 70 && y > 36 ? 1.3 : 1.6)) continue;

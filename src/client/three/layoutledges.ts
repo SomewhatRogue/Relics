@@ -11,6 +11,7 @@ import { Boxes, Seed, jit } from './boxes';
 import { stacked } from '../levelpaint';
 import { graded } from '../darkgold';
 import { REDRAW } from '../tilelook';
+import { HIGH_WOOD } from '../../shared/highwood';
 import { drawnLedgeFace, drawnStep } from './redraw3d';
 
 // The retaining walls' and steps' stone, through the world's grade (../darkgold.ts) so they are the town's slate, not
@@ -79,7 +80,7 @@ export function stackLedges(B: Boxes, group: THREE.Group, m: GameMap, floor: THR
     group.add(top(l, h, m, floor));
     // The tile redraw (redraw3d.ts): a face toward the camera drawn as courses with a coping, not built of stones.
     const put = (ax: 'x' | 'z', s: number, a: number, c: number, out: number) =>
-      REDRAW.on && ax === 'x' && out > 0 ? group.add(drawnLedgeFace(s, a, c + 0.006, h, Math.round(s * 31 + c * 17))) : wall(B, ax, s, a, c, out, h, r);
+      REDRAW.on && ax === 'x' && out > 0 ? group.add(drawnLedgeFace(s, a, c + 0.006, h, Math.round(s * 31 + c * 17), l.kind === 'earth' && m.name === HIGH_WOOD)) : wall(B, ax, s, a, c, out, h, r);
     // Faces only where the ground beside the edge is lower than this level (and inside the map).
     const face = (ax: 'x' | 'z', c: number, out: number, a0: number, a1: number) => {
       let s = -1;

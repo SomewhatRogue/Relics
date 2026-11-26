@@ -13,14 +13,15 @@ import type { Block, Round } from '../shared/arena';
 import { STAITHE_KINDS, staitheBoxes } from './staithebox';
 import { gibbetBoxes, oakBoxes, waymarkBoxes } from './woodpieces';
 import { FEN_KINDS, fenBoxes } from './fenpieces';
+import { trunkBoxes } from './tiletrunk';
 import { plinthBoxes } from './statuepieces';
 import { daisBoxes } from './daispieces';
 import { STREET_KINDS, streetBoxes } from './streetpieces';
 
 export type Bx = [number, number, number, number, number, number, number, ('lump' | 'cone')?];
-export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack', 'boards', 'reeds']);
+export const PIECE_BLOCKS = new Set<Block['kind']>(['headframe', 'log', 'mill', 'stakes', 'jetty', 'gangway', 'smokehouse', 'dryrack', 'hungnet', 'oak', 'haystack', 'boards', 'reeds', 'trunkbridge']);
 /** Boards you walk on (the Staithe's jetty and a log laid across): the flat view paints them under everyone (staithedraw.ts). */
-export const DECKS = new Set<Block['kind']>(['jetty', 'gangway', 'boards']);
+export const DECKS = new Set<Block['kind']>(['jetty', 'gangway', 'boards', 'trunkbridge']);
 export const PIECE_ROUNDS = new Set<Round['kind']>(['hangtree', 'headstone', 'apple', 'gibbet', 'waymark', 'plinth', 'dais', ...STREET_KINDS]);
 
 const TIMBER = 0x4a3420, DARK = 0x2e2016, STONE = 0x6a6470, IRON = 0x55505e, ROPE = 0x8a7a5a, BARK = 0x4a3a2a, LEAF = 0x2f4a28;
@@ -33,6 +34,7 @@ function rawBlockBoxes(b: Pick<Block, 'kind' | 'w' | 'h' | 'look' | 'ruined' | '
   if (STAITHE_KINDS.has(b.kind)) return staitheBoxes(b, r);
   if (FEN_KINDS.has(b.kind)) return fenBoxes(b, r);
   if (b.kind === 'oak') return oakBoxes(b, r);
+  if (b.kind === 'trunkbridge') return trunkBoxes(b, r);
   if (b.kind === 'haystack' && b.look) {
     // A rick out in a field (`look: 1`): hay built up in courses taller than a man, each a little in from the one
     // under it, a rounded top, the darker line where each course was trodden down, loose wisps at its foot, a ladder
