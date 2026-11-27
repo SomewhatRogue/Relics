@@ -300,6 +300,11 @@ export class RelaySocket {
    * Send `d` to `to` ('*' everyone); anything over the relay's limit goes in parts (split.ts).
    * `urgent` (a button pressed): the relay sends it on to other instances at once, not in its next batch.
    */
+  /** A connection report for the relay's logs (client/netreport.ts): to no one, never relayed. */
+  report(net: Record<string, number | string>): void {
+    if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ net }));
+  }
+
   send(to: string, d: unknown, urgent = false): void {
     const ws = this.ws;
     if (ws?.readyState !== WebSocket.OPEN) return;

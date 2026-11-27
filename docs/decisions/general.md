@@ -564,3 +564,11 @@ town". A gold quest mark (and the edge point when out of sight) now sits over wh
 the way to each lesson and the hut, Orla once she leads you west, the road out when there's no one (sim/woodmarks.ts,
 one line in main.ts; the straight-line pointer through the trees is off while Orla leads). Orla stops and turns to
 you when you fall six tiles behind, and goes on when you're near (sim/woodguard.ts, shared/orla.ts `wait`). Claude Opus 5.5.
+
+## 2026-11-27: connection reports in the logs
+
+Kyle, after the east-coast lag: "do 2 and 3". Item 2: every page in a job sends the relay a line a minute
+(client/netreport.ts over RelaySocket.report; api/_relay.ts logs `ev: 'net'`, numbers only, never relayed). A friend's:
+`rt` (its trip to the relay), `trip` (its input to the leader and back), `n` patches, `gaps` over 150 ms, `stalls` over
+300 ms, `worst` gap, `wait` (the jitter buffer's longest), `snaps` (its hero snapped back), `fr` (frame time). A
+leader's: `rt`, `fr`, `friends`. Small edits in client/coop.ts, relay.ts, ownhero.ts (a counter). Claude Opus 5.5.

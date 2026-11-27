@@ -57,6 +57,7 @@ import { heroClocks, readBody, withClock, WIRE } from './wire2';
 import { loading, whoIsComing } from './loadpage';
 import { rankLine, sayAgain, type Link } from '../shared/hostpick';
 import { myLink } from './netq';
+import { NetReport } from './netreport';
 
 /** Everyone gets the whole job this often; the friend first in line every SAVE_EVERY. */
 const SAVE_ALL = 8;
@@ -160,6 +161,9 @@ export class CoopHost {
   onRefused: (lead: string) => void = () => {};
 
   /** Online play went off (the month's budget is used up): the friends are out of reach, so the job goes on here, alone. */
+  /** A minute's word on the connection, for the logs (netreport.ts). */
+  private net = new NetReport(clock());
+
   cutOff(): void {
     for (const [id, f] of this.friends) if (!f.gone) (f.gone = true), this.game.dropFriend(id);
   }
@@ -224,6 +228,9 @@ export class CoopHost {
   /** Each frame, after the rooms have run: collect their events; send each friend their room when it's time. */
   frame(now: number): void {
     this.now = now;
+    // A minute's word on the connection, for the logs (netreport.ts).
+    const rep = this.net.due(clock(), 'host', this.sock.rtt, 0, [...this.friends.values()].filter((f) => !f.gone).length);
+    if (rep) this.sock.report(rep);
     for (const [r, ev] of this.game.stepped) {
       const l = this.evs.get(r) ?? [];
       l.push(...ev);
@@ -438,6 +445,7 @@ export class CoopGuest {
   /** The relay said the leader's last connection went (`left`): the room is free to take at once. */
   private leadLeft = false;
   private heardLead = -1;
+  private net = new NetReport(clock());
 
   constructor(readonly code: string, readonly myId: string, public lead: string, private profile: () => Profile, readonly job: Job) {
     this.sock = new RelaySocket(code, myId, 'join');
@@ -505,6 +513,7 @@ export class CoopGuest {
     // second, so it made every patch look up to a tick late or early and the playout waited about a tick
     // for it, always. A leader of an older page sends none: the room's clock, as before.)
     this.playout.push(body, Number(body.w ?? body.t) || 0, body.k, performance.now() / 1000);
+    this.net.patch(performance.now() / 1000);
   }
 
   /** My map for a big room against the leader's fingerprint of theirs: if they differ, play on mine for now and ask for theirs. */
@@ -629,8 +638,12 @@ export class CoopGuest {
   /** Each frame: send my input (when it changes, and now and then), and draw between patches. */
   frame(now: number, intent: Intent): void {
     this.now = now;
-    for (const b of this.playout.due(now)) this.apply(b);
+    for (const b of this.playout.due(now)) this.apply(b), this.net.waited(this.playout.delay);
     this.send(intent, now);
+    // A minute's word on the connection, for the logs (netreport.ts).
+    this.net.snaps = this.own.snaps;
+    const rep = this.net.due(clock(), 'guest', this.sock.rtt, this.own.trip);
+    if (rep) this.sock.report(rep), (this.own.snaps = 0);
     this.askMap(now);
     // No room yet, or no hero of mine in it (away over a minute, a locked phone): keep saying hello
     // (the leader may still be getting there, or let my hero go and will bring it back).

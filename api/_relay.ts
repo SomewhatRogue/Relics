@@ -78,6 +78,9 @@ const seenKey = (room: string) => `rl:seen:${room}`;
 /** The newest connection of a player: a dead old one that closes late mustn't say they left. */
 const connKey = (room: string, id: string) => `rl:conn:${room}:${id}`;
 const log = (o: Record<string, unknown>) => console.log(JSON.stringify({ relay: 1, ...o }));
+/** A connection report's fields: at most 16, short names, finite numbers (or a short word for the role). */
+const netOf = (o: Record<string, unknown>): Record<string, number | string> =>
+  Object.fromEntries(Object.entries(o).filter(([k, v]) => k.length <= 8 && ((typeof v === 'number' && isFinite(v)) || (k === 'as' && typeof v === 'string' && v.length <= 6))).slice(0, 16)) as Record<string, number | string>;
 /**
  * Work started from a socket event, with nobody awaiting it. Redis can drop its connection (it
  * reconnects by itself); a command in flight then fails, and an uncaught failure would take down
@@ -319,6 +322,9 @@ export class Relay {
     safe(this.touch(c), 'touch');
     // The game's own heartbeat: answered here, never relayed.
     if ((m as { ping?: unknown }).ping) return this.tell(c, { t: 'pong' });
+    // A page's own word on its connection (client/netreport.ts), for the logs: numbers only, never relayed.
+    const net = (m as { net?: unknown }).net;
+    if (net && typeof net === 'object') return void log({ ev: 'net', room: c.room, id: c.id.slice(0, 8), ...netOf(net as Record<string, unknown>) });
     const to = typeof m.to === 'string' ? m.to : '';
     if (!to) return;
     await this.send(c.room, { k: 'msg', from: c.id, to, d: m.d, o: this.origin, cn: c.nonce }, !!(m as { u?: unknown }).u);

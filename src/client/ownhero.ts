@@ -92,6 +92,8 @@ export class OwnHero {
    * rebounding like crazy") no longer moves the edge, so my hero no longer runs on and is pulled back.
    */
   private ackOff: number | null = null;
+  /** Times my hero was snapped to the leader's word (client/netreport.ts counts them). */
+  snaps = 0;
   private patchT = 0;
   private slip: Slip = {};
   private acts: Own[] = [];
@@ -222,7 +224,7 @@ export class OwnHero {
       if (k) (tx += dx * k), (ty += dy * k);
     }
     const far = now < this.settleUntil || this.acts.length ? PREDICT.far : PREDICT.snap;
-    if (Math.hypot(tx - p.x, ty - p.y) > far) (p.x = tx), (p.y = ty), (p.z = (s.z as number) ?? 0);
+    if (Math.hypot(tx - p.x, ty - p.y) > far) (p.x = tx), (p.y = ty), (p.z = (s.z as number) ?? 0), this.snaps++;
     else {
       // (Standing still with nothing of mine in play, what's left, a tick's worth of walking or so, settles gently.)
       const still = !wx && !wy && !this.acts.length;
