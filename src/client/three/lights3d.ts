@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import type { Theme } from '../../shared/arena';
 import { REDRAW } from '../tilelook';
 import { sunAt } from './sun3d';
+import { liftedAmbient } from '../darklift';
 
 /** A light in tiles: x, height, z; reach; strength; colour 0..1; flicker rate (0: steady). */
 export interface L3 { x: number; y: number; z: number; r: number; i: number; c: [number, number, number]; f?: number }
@@ -66,7 +67,7 @@ export class Lights {
     // (no moon) the room's own warmth stays warm.
     // (The tile redraw's nights: under an open sky the moon keeps a floor under the dark, MOONLIT below.)
     const moonlit = REDRAW.on && t.time === 'night' && (t.moon ?? 0) > 0;
-    const [r, g, b] = moonlit ? t.ambient.map((v, i) => Math.max(v, MOONLIT[i])) : t.ambient;
+    const amb = liftedAmbient(t), [r, g, b] = moonlit ? amb.map((v, i) => Math.max(v, MOONLIT[i])) : amb;
     const f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : Math.max((t.moon ?? 0) * MOON, moonlit ? 0.2 : 0);
     this.amb.color.setRGB(r * f, g * f, b * f);
     this.amb.intensity = Math.PI;

@@ -21,6 +21,7 @@ import { drawRat } from './ratdraw';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
 import { lightsHolder } from './heldkits';
 import { RANGER_LAMP, rangerSight } from './rangersight';
+import { liftedAmbient } from './darklift';
 import { tapEl, tapGlow } from './magetap';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
@@ -779,7 +780,7 @@ export class Scene {
     const fl = fogLook(map.theme), fog = fl && this.heroAt ? { x: this.heroAt[0] - cx, y: this.heroAt[1] - cy - 6, k: fl.k, px: PX, c: fl.c } : null;
     // Fenmere's mist banks, over the lit layer only (fenmistdraw.ts).
     const mist = map.fen || map.mist ? mistFrame(map, room.time, (x, y) => [OX + x * PX - cx, OY + y * PX - cy], PX, 1, this.heroAt ? [this.heroAt[0] - cx, this.heroAt[1] - cy - 6] : null, [this.vw, this.vh]) : null;
-    this.lighting.render(this.base, this.glowC, seen, flashAmb(map.theme.ambient, Math.max(flashOf(room.strikes, room.time), skyFlash(room))), fog, mist);
+    this.lighting.render(this.base, this.glowC, seen, flashAmb(liftedAmbient(map.theme), Math.max(flashOf(room.strikes, room.time), skyFlash(room))), fog, mist);
   }
 
   private cage(c: Ctx, x: number, y: number, now: number): void {

@@ -549,3 +549,10 @@ A friend: "too dark for the Ranger, can't see what they're shooting". A drawn bo
 out along the aim, further as the draw fills (client/rangersight.ts, both views), and a Ranger's lantern on a dark
 map reaches half as far again. Kyle: WIDE camera the default (client/camwide.ts); a page that chose CLOSE keeps it.
 Claude Opus 5.5.
+
+## 2026-11-27: dark maps a little lighter
+
+Kyle: "maps are a little dark, maybe we increase light on dark maps by a bit: dusk and night and caves". Every map
+at dusk, at night, underground or indoors has its ambient lifted by a fifth before either view lights it
+(client/darklift.ts `liftedAmbient`, read by scene.ts and three/lights3d.ts); the moonlit floor under the tile redraw
+still applies over it. Daylight and dawn unchanged. Claude Opus 5.5.
