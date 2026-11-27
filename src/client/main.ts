@@ -184,6 +184,7 @@ import { one, setData, setHidden, setHtml, setStyle, setText, setTitle, toggle }
 import { openCrossroads } from './ripeui';
 import { BIG_AREA, loading } from './loadpage';
 import { openWhisper } from './wanterrandui';
+import { woodTargets } from '../sim/woodmarks';
 
 // The UI's frames and icons, drawn once before anything shows.
 paintFrames();
@@ -733,9 +734,10 @@ function tick(t: number): void {
   scene.fanfare = game.wood?.hold?.kind === 'relic';
   // In town, only someone with an errand or a quest for you is marked (errandmarks.ts).
   scene.markEach = game.mode === 'town';
-  scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : game.mode === 'town' ? errandTargets(game.profile, game.room.map, game.room.time, game.outside ? [] : townSpots(game.world)) : game.mode === 'yard' ? yardTargets(game.profile) : [];
+  scene.marks = game.mode === 'run' ? targets(game.run, game.room, game.houses()) : game.mode === 'town' ? errandTargets(game.profile, game.room.map, game.room.time, game.outside ? [] : townSpots(game.world)) : game.mode === 'yard' ? yardTargets(game.profile) : game.mode === 'wood' ? woodTargets(game.wood, game.room) : [];
   scene.doors = game.mode === 'run' ? game.doorMarks() : [];
-  scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold && spoken(game.wood) ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
+  // (While Orla leads, her mark shows the way, not a line through the trees: sim/woodmarks.ts.)
+  scene.pointTo = game.wood && game.wood.stage === 5 && !game.wood.hold && spoken(game.wood) && !game.wood.guard ? { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + ROAD_OUT.h / 2 } : wayTarget(game);
   // An expedition: MAP, the map screen, and a word over you as things happen (expedui.ts).
   expedUi.frame(game.room, game.mode === 'run' && !!game.room.exped, evs, ME, t / 1000, (s, col) => {
     if (!game.hero) return;

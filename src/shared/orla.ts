@@ -19,4 +19,6 @@ export const ORLA = {
   speed: 3.6,
   near: 1.4,
   stoop: 0.9,
+  /** Leading you west, she stops for you when you're this far behind (tiles), and goes on two nearer. */
+  wait: 6,
 };

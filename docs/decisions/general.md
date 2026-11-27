@@ -556,3 +556,11 @@ Kyle: "maps are a little dark, maybe we increase light on dark maps by a bit: du
 at dusk, at night, underground or indoors has its ambient lifted by a fifth (then, Kyle: "brighter again", by 45%) before either view lights it
 (client/darklift.ts `liftedAmbient`, read by scene.ts and three/lights3d.ts); the moonlit floor under the tile redraw
 still applies over it. Daylight and dawn unchanged. Claude Opus 5.5.
+
+## 2026-11-27: lost in the wood
+
+Kyle: since the trees came in "things are crowded and people got lost, especially when following the guard to the
+town". A gold quest mark (and the edge point when out of sight) now sits over whoever you follow in the wood: Hew on
+the way to each lesson and the hut, Orla once she leads you west, the road out when there's no one (sim/woodmarks.ts,
+one line in main.ts; the straight-line pointer through the trees is off while Orla leads). Orla stops and turns to
+you when you fall six tiles behind, and goes on when you're near (sim/woodguard.ts, shared/orla.ts `wait`). Claude Opus 5.5.

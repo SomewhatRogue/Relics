@@ -4,6 +4,7 @@ import { kill } from '../src/sim/damage';
 import { NO_INTENT, type FightEvent } from '../src/sim/types';
 import { Game } from '../src/client/game';
 import { ORLA } from '../src/shared/orla';
+import { woodTargets } from '../src/sim/woodmarks';
 
 const store = new Map<string, string>();
 (globalThis as unknown as { localStorage: unknown }).localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) };
@@ -258,6 +259,16 @@ describe('the prologue wood', () => {
     const was = orla()!.x;
     g.step(0.5, NO_INTENT);
     expect(orla()!.x).toBeLessThan(was);
+    // Left behind, she stops and waits for you (2026-11-27: people lost her in the trees); a mark is over her.
+    Object.assign(g.hero, { x: orla()!.x + ORLA.wait + 2, y: orla()!.y });
+    g.step(0.05, NO_INTENT);
+    const stood = orla()!.x;
+    g.step(0.5, NO_INTENT);
+    expect(orla()!.x).toBe(stood);
+    expect(woodTargets(w(), g.room)).toEqual([expect.objectContaining({ kind: 'folk', x: stood })]);
+    Object.assign(g.hero, { x: orla()!.x + 1, y: orla()!.y });
+    g.step(0.5, NO_INTENT);
+    expect(orla()!.x).toBeLessThan(stood);
     // The road out is a few steps west of the hut, not the length of the wood.
     expect(Math.hypot(ROAD_OUT.x - 52, ROAD_OUT.y - 6)).toBeLessThan(16);
     Object.assign(g.hero, { x: ROAD_OUT.x + 1, y: ROAD_OUT.y + 2 });

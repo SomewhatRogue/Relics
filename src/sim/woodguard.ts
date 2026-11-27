@@ -75,7 +75,10 @@ export function stepGuard(w: WoodState, room: ArenaRoom, h: Hero, dt: number): v
     n.sneak = false;
     g.phase = 'lead';
   }
-  // West, to the road out and on; you follow.
+  // West, to the road out and on; you follow. She waits for you when you fall behind (Kyle, 2026-11-27: people
+  // lost her in the trees), turned to you, and goes on once you're near again.
+  const back = Math.hypot(h.x - n.x, h.y - n.y);
+  if (back > ORLA.wait || (n.walking === false && back > ORLA.wait - 2)) return face(n, h.x, h.y);
   walk(n, ROAD_OUT.x - 4, ROAD_OUT.y + ROAD_OUT.h / 2, dt);
 }
 
