@@ -191,7 +191,7 @@ if (uLife > 0.5) {
   float roll = abs(shore - (2.5 + 3.5 * fract(uLifeT * 0.28 + lifeHash(floor(P * 0.5)) * 0.3)));
   if (roll < 0.45 && bz > 0.3 && shore < 7.0) col = mix(col, vec3(0.64, 0.76, 0.78), 0.55);`}
   // Glints: a surface pixel here and there catching the light for a moment, brighter on a ripple's crest.
-  vec2 cell = floor(P * 16.0);
+  vec2 cell = floor(P * ${REDRAW.on ? 'vec2(20.0, 12.0)' : 'vec2(16.0)'});
   float h = lifeHash(cell), tw = fract(h * 7.0 + uLifeT * (0.35 + h * 0.6));
   if (h > 0.985 - max(0.0, n) * 0.01 && tw < 0.12) col = mix(col, vec3(0.92, 0.95, 0.88), ${REDRAW.on ? '0.3' : '0.55'});
 }

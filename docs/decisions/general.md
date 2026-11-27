@@ -676,3 +676,14 @@ iron veined red for hungry), a glint along the lid; chained, heavy links and a p
 lifts on a seam of the tier's light; open, the lid stands back, coins glint in the mouth and a shaft of light rises
 with motes. The 2.5D light over an open chest is softer and higher (three/roomlights.ts), so it lights the ground and
 not the chest's front all one colour. Claude Opus 5.5.
+
+## 2026-11-27: the water's edge flickering; pines come down
+
+- Kyle: "some of the flicker was moss being there then not, where it was terrain on water". The water's shader laid its
+  pixels 16 a tile, but under the tile redraw a tile is 20 by 12 render pixels: each water cell was 1.25 by 0.75 of a
+  pixel, and as the camera stepped they landed on different pixels, so the bank's dark band and foam came and went.
+  Its grid is 20 by 12 now (three/water3d.ts, and the glints in three/wind3d.ts). The old look keeps 16.
+- Pines can be felled by a Warrior's or Cleric's heavy now, as trees are (sim/felling.ts; big ones still stand).
+  Their trunk on the ground draws as a tree's.
+- Pines "block the path sometimes": asked Kyle which map; they're placed by the same code as the trees.
+Claude Opus 5.5.

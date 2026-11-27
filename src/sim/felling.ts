@@ -11,7 +11,7 @@
  * What the room holds: the trunk is a `log` block from the blow on (`lands`: when it comes down; in the air till then,
  * nothing bumps into it), which is sent to friends as every block is; `stump` on it names the round that was the
  * tree, which the room turns into a stump at once and a friend's screen turns when it sees the block
- * (client/felled.ts). Big old trees (over `FELL.r`) and pines stand.
+ * (client/felled.ts). Big old trees (over `FELL.r`) stand.
  */
 import { currentMap, inArea, type Block, type GameMap, type Round } from '../shared/arena';
 import { FELL, WEAPONS, type Swing } from '../shared/tuning';
@@ -20,7 +20,8 @@ import { damage, isDead } from './damage';
 import { count } from './score';
 import type { Enemy, FightEvent, Hero } from './types';
 
-const FELLABLE = new Set<Round['kind']>(['tree', 'deadtree', 'apple']);
+// (Pines too since 2026-11-27, Kyle: "pine trees are really cool but can't be cut down by a heavy blow of the warrior, which is lame".)
+const FELLABLE = new Set<Round['kind']>(['tree', 'deadtree', 'apple', 'pine']);
 const FELLERS = new Set(['WARRIOR', 'HEALER']);
 /** The four ways a tree falls: east, south, west, north. */
 export const WAYS: [number, number][] = [[1, 0], [0, 1], [-1, 0], [0, -1]];

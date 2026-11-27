@@ -25,9 +25,9 @@ const setup = (weapon = 'sword') => {
 };
 
 describe('felling a tree', () => {
-  it('only small and middling trees, dead trees and apple trees go over; big ones and pines stand', () => {
+  it('small and middling trees, dead trees, apple trees and pines go over (pines since 2026-11-27); big ones stand', () => {
     expect([{ kind: 'tree', r: 0.5 }, { kind: 'deadtree', r: 0.45 }, { kind: 'apple', r: 0.6 }, { kind: 'tree', r: FELL.r + 0.05 }, { kind: 'pine', r: 0.4 }, { kind: 'bush', r: 0.4 }]
-      .map((t) => fellable({ ...t, x: 0, y: 0 } as never))).toEqual([true, true, true, false, false, false]);
+      .map((t) => fellable({ ...t, x: 0, y: 0 } as never))).toEqual([true, true, true, false, true, false]);
   });
 
   it('falls away from the blow along the nearer of four ways, leaving a stump and a trunk in the air', () => {

@@ -46,8 +46,12 @@ const SURFACE = /* glsl */ `
 vec2 wuv = vec2(vMapUv.x, 1.0 - vMapUv.y);
 vec4 W = texture2D(uWater, wuv);
 if (abs(floor(W.r * 2.008 + 0.5) - uKind) > 0.5) discard;
-vec2 P = (floor(wuv * uSize * 16.0) + 0.5) / 16.0;
-float bz = bay4(floor(P * 16.0));
+// (Its pixels on the screen's: a tile is 20 by 12 render pixels under the tile redraw, so the water's grid is too. At
+// 16 a tile its cells were 1.25 by 0.75 of a pixel, and as the camera stepped they fell on different pixels: the bank's
+// edge and the foam flickered walking past, Kyle 2026-11-27.)
+vec2 Q = ${REDRAW.on ? 'vec2(20.0, 12.0)' : 'vec2(16.0)'};
+vec2 P = (floor(wuv * uSize * Q) + 0.5) / Q;
+float bz = bay4(floor(P * Q));
 bool deep = uKind > 1.5;
 // Along and across the current; a pool barely stirs.
 float fl = W.b * 255.0;
