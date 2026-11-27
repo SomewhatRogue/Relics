@@ -107,7 +107,7 @@ export function shapeTele(m: THREE.Mesh, a: EnemyAttack, now: number, lift: numb
   // (A boss's pose first, then its floor: sim/bosskit.ts BOSS.tell.)
   const tell = a.tell ?? 0;
   if (a.t < tell) return false;
-  const u = (m.material as THREE.ShaderMaterial).uniforms, prog = Math.min(1, (a.t - tell) / (a.windup - tell));
+  const u = (m.material as THREE.ShaderMaterial).uniforms, prog = Math.min(1, (a.t - tell) / Math.max(0.05, a.windup - tell - (a.hold ?? 0)));
   const round = isRound(a.kind), lane = a.kind === 'charge' || a.kind === 'draw' || a.kind === 'pounce' || a.kind === 'hook', shot = a.kind === 'shot';
   u.uProg.value = prog;
   u.uT.value = now;

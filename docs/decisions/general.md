@@ -590,3 +590,18 @@ Kyle: "plate etc doesn't slow down warrior and cleric, only the other two, as a 
 `ARMOR_BORN` (Warrior, Healer): their walk ignores the armour's weight (`gearStats` takes the wearer's class;
 sim/gearstats.ts and client/card.ts pass it). Ranger, Rogue and Mage still pay it. The frame's dodge length and cost
 stay for everyone. Claude Opus 5.5.
+
+## 2026-11-27: foe patterns, slice 1 (docs/design/foe-patterns.md)
+
+Kyle: "more interesting attack patterns ... a bit harder", and the slam's hop "just looks dumb". Picked everything
+offered but the guard-breaker. Slice 1:
+- The slam (client/foepose.ts): planted, up tall with the cleaver overhead, leaning back and shaking, then a step
+  in and the smash. No lift. Rules and telegraph unchanged.
+- Strings of blows (sim/foechain.ts, shared/foepatterns.ts CHAINS): a plain scrapper's stab 30% of the time runs on
+  into a stab and a longer lunge; a heavy's swing 35% into another; a butcher's cleave 30% into the slam. Each its
+  own telegraph, the blows between on a short recovery, the last winding up 1.35x. Not the wood's drilled goblins,
+  bosses of the kit or a fury. Broken by a stun or a net.
+- The held swing: a heavy's or butcher's cleave 40% of the time fills its red early and holds full 0.2 to 0.6 s
+  (`EnemyAttack.hold`; both views' telegraph fill reads it).
+Small edits in sim/enemies.ts (three calls), sim/types.ts (`hold`, `strung`), client/foes.ts and three/teleg3d.ts
+(the fill). Claude Opus 5.5.

@@ -56,6 +56,7 @@ import { bossStun } from './poise';
 import { markSum } from '../shared/deepmarks';
 import { hunted, seenBy } from './bites';
 import { stepHoming } from './homing';
+import { chainUp, nextInChain } from './foechain';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
@@ -165,7 +166,7 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
   // A pack rush's blow keeps the rush's own clock, so every one of them lands together (sim/rushguard.ts).
   a.t = rushClock(a, now) ?? a.t + (a.t < a.windup && e.chillUntil > now ? dt * FROST.windup : dt);
   // Netted: no running at you and no throwing the hook. Whatever it was winding up for is lost.
-  if ((a.kind === 'charge' || a.kind === 'draw') && e.snareUntil > now) return ev.push({ k: 'snared', x: e.x, y: e.y }), true;
+  if ((a.kind === 'charge' || a.kind === 'draw') && e.snareUntil > now) return ev.push({ k: 'snared', x: e.x, y: e.y }), (e.strung = undefined), true;
   if (a.kind === 'charge' || a.kind === 'pounce') return runCharge(e, a, heroes, now, ev, others);
   if (!a.done && a.t >= a.windup) {
     a.done = true;
@@ -294,6 +295,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     // A Pouncer through the air, landing as its blow does (sim/meaty2.ts).
     if (e.variant === 'pouncer') flyPounce(e);
     if (over && e.act === 'attack') {
+      // The next blow of a string, straight on (sim/foechain.ts).
+      if (e.strung && nextInChain(e, heroes, ev)) return;
       // (A Doorkeeper rests less between its blows: sim/doorkeepers.ts keeperPause.)
       Object.assign(e, { attack: null, act: after(e), actT: 0, cooldown: e.variant === 'hexer' ? HEXER.pause : e.attack?.kind === 'spit' ? BROOD.spitPause : e.boss && e.boss.who !== 'hempen' ? keeperPause(e) : spec ? spec.pauseBetween * quickPause(e) * edgePause(e) : SWING_DUMMY.every });
     }
@@ -381,7 +384,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (level && d <= reach && e.cooldown <= 0 && facing > 0.75) {
     if (v === 'looter') return begin(e, 'stab', VARIANTS.looter.stab, t, ev);
     if (v === 'lunger') return begin(e, 'stab', VARIANTS.lunger.stab, t, ev);
-    if (v === 'heavy') return begin(e, 'cleave', VARIANTS.heavy.swing, t, ev), e.attack && (e.attack.crush = true), undefined;
+    if (v === 'heavy') return begin(e, 'cleave', VARIANTS.heavy.swing, t, ev), e.attack && (e.attack.crush = true), chainUp(e, rng);
     if (v === 'stoker') {
       const drop = rng.next() < 0.35;
       return begin(e, drop ? 'slam' : 'cleave', drop ? VARIANTS.stoker.drop : VARIANTS.stoker.sweep, t, ev);
@@ -389,7 +392,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     if (e.kind === 'butcher') {
       const slam = rng.next() < BUTCHER.slamChance;
       begin(e, slam ? 'slam' : 'cleave', slam ? BUTCHER.slam : BUTCHER.cleave, t, ev);
-    } else begin(e, 'stab', SCRAPPER.stab, t, ev);
+      if (!slam) chainUp(e, rng);
+    } else begin(e, 'stab', SCRAPPER.stab, t, ev), chainUp(e, rng);
     return;
   }
   if (via || d > reach * 0.8) {

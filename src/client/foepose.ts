@@ -139,19 +139,23 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
       (p.oy += 1), (p.phase = 'recover'), (p.k = clamp01(r));
     }
   } else if (a && a.kind === 'slam') {
-    const S = B.slam, k = a.t / a.windup;
+    // Planted, not a leap (Kyle, 2026-11-27: the hop "just looks dumb"): a dip, then up tall with the cleaver over
+    // his head in both hands, leaning back from you, held there shaking; then a step in and the smash, low.
+    const S = B.slam, k = a.t / a.windup, F2 = B.cleave;
     if (k < 1) {
-      // Down into a crouch, then up and stretched, hanging at the top with the cleaver high.
-      const r = (k - S.crouchShare) / S.riseShare;
-      p.crouch = k < S.crouchShare ? S.crouch * easeOut(k / S.crouchShare) : -S.stretch * clamp01(1 - (r - 1) / 0.4) * easeOut(r);
-      p.lift = k < S.crouchShare ? 0 : Math.round(S.rise * easeOut(r));
-      // The cleaver over his head from the crouch on, held there through the leap.
-      p.raise = Math.round(S.raise * easeOut(k / S.crouchShare));
+      const up = easeOut(clamp01((k - S.crouchShare) / S.riseShare));
+      p.crouch = k < S.crouchShare ? S.crouch * easeOut(k / S.crouchShare) : -S.stretch * up;
+      p.lift = 0;
+      p.raise = Math.round(S.raise * easeOut(clamp01(k / S.crouchShare)));
+      p.lean = -Math.round(side * F2.lean * up);
+      p.ox = -Math.round(e.fx * 2 * up) + (k > 0.75 ? Math.round(Math.sin(now * 60)) : 0);
+      p.oy = -Math.round(e.fy * 2 * up);
       (p.phase = 'windup'), (p.k = k);
-    } else if (a.t < a.windup + a.active + 0.1) (p.crouch = S.flat), (p.phase = 'land');
+    } else if (a.t < a.windup + a.active + 0.1) lunge(p, e, 1, 3, F2.lean, F.release.reach, true), (p.crouch = S.flat), (p.phase = e.hitstop > 0 ? 'contact' : 'land');
     else {
       const r = (a.t - a.windup - a.active - 0.1) / S.recover;
-      (p.crouch = S.flat * 0.5 * (1 - easeOut(r))), (p.oy = 1), (p.phase = 'recover'), (p.k = clamp01(r));
+      lunge(p, e, 1 - easeOut(r), 3, F2.lean, 0, false);
+      (p.crouch = S.flat * 0.5 * (1 - easeOut(r))), (p.oy += 1), (p.phase = 'recover'), (p.k = clamp01(r));
     }
   } else if (a && a.kind === 'charge') {
     const C = B.charge;

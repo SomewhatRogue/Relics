@@ -334,7 +334,8 @@ export function drawTelegraph(c: Ctx, a: EnemyAttack, cx: number, cy: number): v
   // A boss's pose comes first, then its floor (sim/bosskit.ts BOSS.tell): nothing on the ground yet.
   const tell = a.tell ?? 0;
   if (a.t < tell) return;
-  const prog = Math.min(1, (a.t - tell) / (a.windup - tell)), g = c.glow;
+  // (A held swing is full early and holds: sim/foechain.ts.)
+  const prog = Math.min(1, (a.t - tell) / Math.max(0.05, a.windup - tell - (a.hold ?? 0))), g = c.glow;
   const pulse = 0.85 + 0.15 * Math.sin(c.now * 20);
   const fill = a.kind === 'slam' ? '#e8501f' : '#e23a30';
   if (a.kind === 'pounce') return drawPounce(c, a, cx, cy, pulse);
