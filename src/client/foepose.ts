@@ -144,12 +144,13 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
     const S = B.slam, k = a.t / a.windup, F2 = B.cleave;
     if (k < 1) {
       const up = easeOut(clamp01((k - S.crouchShare) / S.riseShare));
-      p.crouch = k < S.crouchShare ? S.crouch * easeOut(k / S.crouchShare) : -S.stretch * up;
+      p.crouch = k < S.crouchShare ? S.crouch * easeOut(k / S.crouchShare) : -S.stretch * 0.4 * up;
       p.lift = 0;
       p.raise = Math.round(S.raise * easeOut(clamp01(k / S.crouchShare)));
       p.lean = -Math.round(side * F2.lean * up);
+      // (Back along the ground only: drawn up the screen, a big one's lean read as a jump, 2026-11-27.)
       p.ox = -Math.round(e.fx * 2 * up) + (k > 0.75 ? Math.round(Math.sin(now * 60)) : 0);
-      p.oy = -Math.round(e.fy * 2 * up);
+      p.oy = 0;
       (p.phase = 'windup'), (p.k = k);
     } else if (a.t < a.windup + a.active + 0.1) lunge(p, e, 1, 3, F2.lean, F.release.reach, true), (p.crouch = S.flat), (p.phase = e.hitstop > 0 ? 'contact' : 'land');
     else {

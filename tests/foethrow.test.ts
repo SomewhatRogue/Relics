@@ -20,13 +20,13 @@ function yard() {
 describe('goblins out of reach', () => {
   it('a scrapper throws a stone: a short red line at you', () => {
     const { h, ev } = yard(), e = Object.assign(newEnemy(1, 'scrapper', 10, 7), { fx: 0, fy: 1, cooldown: 0 });
-    expect(throwAt(e, h, 5, 1, fixed(0.99, 0), ev)).toBe(true);
+    expect(throwAt(e, h, 5, 1, fixed(0.99, 0), 0, ev)).toBe(true);
     expect(e.attack).toMatchObject({ kind: 'shot', stone: true, dmg: STONE.spec.dmg });
   });
   it('now and then a fire pot: it lands where you stand and goes up after its fuse', () => {
     const { room, h } = yard(), e = Object.assign(newEnemy(1, 'scrapper', 10, 8), { fx: 0, fy: 1, cooldown: 0, respawns: false, alert: true });
     room.enemies.push(e);
-    expect(throwAt(e, h, 4, 1, fixed(0), [])).toBe(true);
+    expect(throwAt(e, h, 4, 1, fixed(0), 0, [])).toBe(true);
     expect(e.attack).toMatchObject({ kind: 'lob', pot: true, cx: 10, cy: 12 });
     let lit = -1;
     for (let i = 0; i < Math.round(4 / TICK); i++) {
@@ -39,7 +39,7 @@ describe('goblins out of reach', () => {
   });
   it("a heavy drags its cleaver along a long thin line", () => {
     const { h, ev } = yard(), e = Object.assign(newEnemy(1, 'scrapper', 10, 8), { variant: 'heavy' as const, fx: 0, fy: 1, cooldown: 0 });
-    expect(throwAt(e, h, 4, 1, fixed(0), ev)).toBe(true);
+    expect(throwAt(e, h, 4, 1, fixed(0), 0, ev)).toBe(true);
     expect(e.attack!.range).toBeGreaterThan(5);
     expect(e.attack!.arc).toBeLessThan(15);
   });

@@ -624,3 +624,15 @@ Tuned after the full suite: only a goblin within a second of its next blow goes 
 fight (one running is chase.ts's), and the pack is 3.5 tiles; no stone or pot at a hero running away; a burning slick
 spares a hero with `safeT`, as every blow does. Fixtures in recapboard, magic, practice and the rest wait for a plain
 blow or hold their goblins' blows off. Claude Opus 5.5.
+
+## 2026-11-27: after Old Knuckles ("still kinda dark, counter didn't do a lot, they still just jumped")
+
+- Dark: under the tile redraw an open-sky night's ambient is floored at MOONLIT, and the lift came before the floor,
+  so most nights came out no lighter. The lift now goes on top (three/lights3d.ts; darklift.ts takes the base).
+- The counter: a fury boss wears plate, and a counter met it as a tap does (a fifth). A counter now lands in full on
+  plate and strips it double, as a charged blow does (sim/combat.ts). The multiplier stays 2: at 2.5 and up the
+  Hempen bot stalls on what's left of the pack (tests/hempen.test.ts).
+- The slam: the lean back was drawn up the screen, and at a hulk's three times it read as a jump. Back along the
+  ground only now, the stretch less than half (client/foepose.ts).
+- Stones and pots: one goblin throws at most every 7 s, from 4 tiles out, so a scrapper still comes in.
+Claude Opus 5.5.

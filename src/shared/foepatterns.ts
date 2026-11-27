@@ -37,9 +37,10 @@ export const FLANK_PACK = { ready: 1, pack: 3.5, front: 0.35, slots: [180, 115, 
 /**
  * Slice 3. A scrapper that can't reach you throws: a stone (a short red line, a small hit) or now and then a pot that
  * lands where you stand and goes up in fire after its fuse. `from`/`to`: the distances it throws at (tiles);
- * `chance`: a tick's odds once it's ready, so it doesn't always throw.
+ * `chance`: a tick's odds once it's ready, so it doesn't always throw;
+ * `every`: the least time between one goblin's throws (s), so it still comes in.
  */
-export const STONE = { from: 3.2, to: 7, chance: 0.04, spec: { windup: 0.75, active: 0.08, recover: 0.8, dmg: 5, knock: 2, range: 7, arc: 6, unblockable: false } as EnemyAttackSpec };
+export const STONE = { every: 7, from: 4, to: 7, chance: 0.04, spec: { windup: 0.75, active: 0.08, recover: 0.8, dmg: 5, knock: 2, range: 7, arc: 6, unblockable: false } as EnemyAttackSpec };
 export const POT = { from: 3, to: 6.5, chance: 0.012, fuse: 1.3, radius: 1.0, life: 8, spec: { windup: 0.9, active: 0.1, recover: 1.0, dmg: 2, knock: 1, radius: 1.0, unblockable: true } as EnemyAttackSpec };
 /** A heavy drags its cleaver at you along a long thin line, from `from` to `to` tiles. */
 export const DRAG = { from: 2.6, to: 6, chance: 0.03, spec: { windup: 1.1, active: 0.12, recover: 1.0, dmg: 14, knock: 6, range: 6.2, arc: 10, unblockable: false } as EnemyAttackSpec };

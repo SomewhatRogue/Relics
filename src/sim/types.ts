@@ -577,6 +577,8 @@ export interface Enemy extends Body {
   bow?: boolean;
   /** Tutorial pacing in the wood: slower wind-ups (sim/wood.ts DRILL). */
   drill?: boolean;
+  /** When it last threw a stone or pot, or dragged its cleaver (sim/foethrow.ts). */
+  threwAt?: number;
   /** Keeping this hero busy from the front while the pack goes round (sim/flank.ts). */
   busy?: string;
   /** The blows still to come of a string (sim/foechain.ts). */

@@ -10,8 +10,7 @@ import type { Theme } from '../shared/arena';
 export const DARK_LIFT = 1.6;
 
 /** The ambient a theme is lit with: its own, lifted when it's not full day. */
-export function liftedAmbient(t: Theme): [number, number, number] {
-  const a = t.ambient;
+export function liftedAmbient(t: Theme, a: readonly number[] = t.ambient): [number, number, number] {
   const dark = !t.day || t.time === 'dusk' || t.time === 'night';
-  return !dark ? a : [Math.min(1, a[0] * DARK_LIFT), Math.min(1, a[1] * DARK_LIFT), Math.min(1, a[2] * DARK_LIFT)];
+  return !dark ? [a[0], a[1], a[2]] : [Math.min(1, a[0] * DARK_LIFT), Math.min(1, a[1] * DARK_LIFT), Math.min(1, a[2] * DARK_LIFT)];
 }

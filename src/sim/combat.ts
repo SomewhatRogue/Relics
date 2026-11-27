@@ -104,7 +104,8 @@ export function hitEnemy(h: Hero, s: Swing, e: Enemy, now: number, ev: FightEven
   // Plates (sim/ironhide.ts): a charged blow or a perfect lands and strips them; else a fifth gets through. A crit goes
   // straight past, and a storm blade strikes through as lightning does (Kyle, 2026-11-24).
   const how: PlateHow = crit ? 'through' : storm ? 'storm' : '';
-  const plate = clanks(e, now) && !(h.heavy || h.perfect) && !how, raw = plated(e, Math.round(s.dmg * mult), now, h.heavy || h.perfect, ev, how);
+  // (A counter lands in full on plate and takes it off double, as a charged blow does: Kyle, 2026-11-27, a counter on Old Knuckles "didn't do a lot".)
+  const cracks = h.heavy || h.perfect || h.counter, plate = clanks(e, now) && !cracks && !how, raw = plated(e, Math.round(s.dmg * mult), now, cracks, ev, how);
   // Mother Rust's Needles: a backstab kills anything short of a butcher.
   const n0 = rear && e.kind === 'scrapper' && wears(h, 'needles') ? Math.max(e.hp, raw) : raw;
   // A boss of the kit: what in the blow fills its POISE (door or no door), then its door (sim/poise.ts, doorwall.ts).

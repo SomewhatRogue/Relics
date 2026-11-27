@@ -410,7 +410,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     return;
   }
   // Out of reach: a stone, a fire pot, a heavy's drag (sim/foethrow.ts).
-  if (level && !via && !netted && d > reach && throwAt(e, t, d, facing, rng, ev)) return;
+  if (level && !via && !netted && d > reach && throwAt(e, t, d, facing, rng, now, ev)) return;
   if (via || d > reach * 0.8) {
     // Scrappers sidle a little rather than queueing straight in.
     const side = e.kind === 'scrapper' && !via ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;

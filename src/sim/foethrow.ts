@@ -13,18 +13,21 @@ import type { Enemy, FightEvent, Hero } from './types';
 const plain = (e: Enemy) => !e.drill && !e.boss && !e.fury;
 
 /** Out of reach, on its level, facing you and ready: a stone, a pot, or a heavy's drag. True if it began one. */
-export function throwAt(e: Enemy, t: Hero, d: number, facing: number, rng: Rng, ev: FightEvent[]): boolean {
+export function throwAt(e: Enemy, t: Hero, d: number, facing: number, rng: Rng, now: number, ev: FightEvent[]): boolean {
   // (Not at a hero running from it: that's a chase, sim/chase.ts, its sprint the answer.)
   if (!plain(e) || e.cooldown > 0 || facing < 0.9 || t.act === 'down' || fleeing(t, e)) return false;
+  // (Now and then, not every time it's ready: a scrapper that only threw would never come in.)
+  if (now - (e.threwAt ?? -99) < STONE.every) return false;
+  const threw = () => !!e.attack && ((e.threwAt = now), true);
   if (e.kind === 'scrapper' && !e.variant) {
     if (d >= POT.from && d <= POT.to && rng.next() < POT.chance) {
       begin(e, 'lob', POT.spec, t, ev);
       if (e.attack) (e.attack.cx = t.x), (e.attack.cy = t.y), (e.attack.pot = true);
-      return !!e.attack;
+      return threw();
     }
-    if (d >= STONE.from && d <= STONE.to && rng.next() < STONE.chance) return begin(e, 'shot', STONE.spec, t, ev), e.attack && (e.attack.stone = true), !!e.attack;
+    if (d >= STONE.from && d <= STONE.to && rng.next() < STONE.chance) return begin(e, 'shot', STONE.spec, t, ev), e.attack && (e.attack.stone = true), threw();
   }
-  if (e.variant === 'heavy' && d >= DRAG.from && d <= DRAG.to && rng.next() < DRAG.chance) return begin(e, 'stab', DRAG.spec, t, ev), e.attack && (e.attack.crush = true), !!e.attack;
+  if (e.variant === 'heavy' && d >= DRAG.from && d <= DRAG.to && rng.next() < DRAG.chance) return begin(e, 'stab', DRAG.spec, t, ev), e.attack && (e.attack.crush = true), threw();
   return false;
 }
 

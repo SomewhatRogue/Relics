@@ -67,7 +67,8 @@ export class Lights {
     // (no moon) the room's own warmth stays warm.
     // (The tile redraw's nights: under an open sky the moon keeps a floor under the dark, MOONLIT below.)
     const moonlit = REDRAW.on && t.time === 'night' && (t.moon ?? 0) > 0;
-    const amb = liftedAmbient(t), [r, g, b] = moonlit ? amb.map((v, i) => Math.max(v, MOONLIT[i])) : amb;
+    // (The lift on top of the moonlit floor: under it, an open-sky night came out no lighter, 2026-11-27.)
+    const [r, g, b] = liftedAmbient(t, moonlit ? t.ambient.map((v, i) => Math.max(v, MOONLIT[i])) : t.ambient);
     const f = 1.55 * 0.75, k = 1.55 * 0.45, m = t.day ? 0 : Math.max((t.moon ?? 0) * MOON, moonlit ? 0.2 : 0);
     this.amb.color.setRGB(r * f, g * f, b * f);
     this.amb.intensity = Math.PI;
