@@ -103,6 +103,10 @@ function butcher(c: Ctx, e: Enemy, x: number, y: number, t: number): void {
       arm = back + (end - back) * Math.min(1, (a.t - a.windup) / a.active);
       trail = [back, arm];
     } else arm = end;
+  } else if (a && a.spin) {
+    // The whirl (sim/foethrow.ts): the cleaver held out to the side, swept round as he turns.
+    arm = fa + side * 1.5;
+    if (a.t >= a.windup) trail = [arm - side * 1.2, arm];
   } else if (a && a.kind === 'slam') {
     if (a.t < a.windup) arm = -Math.PI / 2 + Math.sin(c.now * 18) * 0.15 * (a.t / a.windup > 0.7 ? 1 : 0);
     else if (a.t < a.windup + a.active + 0.1) arm = fa + side * 0.4;

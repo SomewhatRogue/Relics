@@ -74,6 +74,9 @@ export function scrapperPose(e: Enemy, t: number, now: number): BodyPose {
     p.crouch = up ? -0.08 * easeOut(k) : 0.12;
     if (up && k > 0.7) p.ox = Math.floor(now * 30) % 2;
     (p.phase = up ? 'windup' : 'release'), (p.k = k);
+  } else if (a && (a.stone || a.pot || a.spin || (a.crush && a.kind === 'stab' && a.range > 4))) {
+    // The new ways (foemoves.ts draws what flies): a throw, a drag, a whirl.
+    newMove(p, e, a, now);
   } else if (e.drumming && !a) {
     const k = (t % DRUMMER.beat) / DRUMMER.beat;
     p.raise = k < 0.2 ? 0 : 2;
@@ -86,8 +89,9 @@ export function scrapperPose(e: Enemy, t: number, now: number): BodyPose {
     p.ox = -Math.round(e.fx * 2 * q);
     p.oy = -Math.round(e.fy * 2 * q);
     if (lunger && k > 0.75) p.ox += Math.floor(now * 40) % 2;
-    // The brute lifts its club.
+    // The brute lifts its club, and holds it there shaking on a held swing (sim/foechain.ts).
     if (e.variant === 'heavy') p.raise = Math.round(F.windup.raise * 2 * q);
+    if (a.hold && a.t > a.windup - a.hold) p.ox += Math.round(Math.sin(now * 50) * 1.5);
     (p.phase = 'windup'), (p.k = k);
   } else if (a && a.t < a.windup + a.active + 0.08) {
     lunge(p, e, 1, lunger ? 5 : 3, F.release.lean, F.release.reach * (lunger ? 1.5 : 1), !e.bow);
@@ -116,6 +120,44 @@ export function tumble(e: Enemy, t: number): { a: number; hop: number } | null {
 }
 const TUMBLE = { a: 0, hop: 0 };
 
+/**
+ * The new goblin attacks' bodies (docs/design/foe-patterns.md): a throw (the arm back and high, the weight on the back
+ * foot, then whipped through), a drag (low and leaning in, then hauled through along the line), a whirl (low, the
+ * weapon out, bobbing as it turns), and a held swing shaking at the top.
+ */
+function newMove(p: BodyPose, e: Enemy, a: NonNullable<Enemy['attack']>, now: number): void {
+  const t = a.t, w = a.windup, k = clamp01(t / w), side = e.fx >= -0.2 ? 1 : -1;
+  if (a.spin) {
+    p.crouch = t < w ? 0.12 * easeOut(k) : 0.16;
+    p.raise = 2;
+    p.oy = Math.round(Math.sin(now * 28) * 0.6);
+    (p.phase = t < w ? 'windup' : 'release'), (p.k = k);
+    return;
+  }
+  if (a.stone || a.pot) {
+    if (t < w) {
+      const q = easeOut(k);
+      p.raise = Math.round(5 * q);
+      p.lean = -Math.round(side * 2 * q);
+      p.ox = -Math.round(e.fx * 2 * q);
+      p.crouch = 0.06 * q;
+      (p.phase = 'windup'), (p.k = k);
+    } else if (t < w + a.active + 0.12) lunge(p, e, 1, 2, F.release.lean, F.release.reach * 0.6, false), (p.raise = 1), (p.phase = 'release');
+    else lunge(p, e, 1 - clamp01((t - w - a.active - 0.12) / F.recover.time), 2, F.release.lean, 0, false), (p.phase = 'recover');
+    return;
+  }
+  // The drag: down low and leaning in over the wind-up, the weapon on the ground; then through along the line.
+  if (t < w) {
+    const q = easeOut(k);
+    p.crouch = 0.22 * q;
+    p.lean = Math.round(side * 2 * q);
+    p.ox = Math.round(e.fx * q) + (k > 0.7 ? Math.floor(now * 40) % 2 : 0);
+    p.raise = 0;
+    (p.phase = 'windup'), (p.k = k);
+  } else if (t < w + a.active + 0.12) lunge(p, e, 1, 4, F.release.lean, F.release.reach * 1.6, true), (p.crouch = 0.15), (p.phase = e.hitstop > 0 ? 'contact' : 'release');
+  else lunge(p, e, 1 - clamp01((t - w - a.active - 0.12) / F.recover.time), 4, F.release.lean, 0, false), (p.phase = 'recover');
+}
+
 /** The butcher: the cleaver hauled back high, the leap and the landing, the Stoker's coiled run. */
 export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
   const p = rest(P), a = e.attack, side = e.fx >= -0.2 ? 1 : -1;
@@ -127,7 +169,9 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
       const k = a.t / a.windup, up = easeOut(k / C.coilAt);
       p.lean = -Math.round(side * C.lean * up);
       p.crouch = k < C.coilAt ? -C.tall * up : C.coil * easeOut((k - C.coilAt) / (1 - C.coilAt));
-      p.ox = -Math.round(e.fx * 2 * up) + (k > 0.8 ? Math.round(Math.sin(now * 70)) : 0);
+      // (Held at the top, sim/foechain.ts: shaking with it the whole hold.)
+      const held = !!a.hold && a.t > a.windup - a.hold;
+      p.ox = -Math.round(e.fx * 2 * up) + (k > 0.8 || held ? Math.round(Math.sin(now * (held ? 50 : 70)) * (held ? 1.5 : 1)) : 0);
       p.oy = -Math.round(1 + e.fy * 2 * up);
       // The cleaver goes up as it comes back.
       p.raise = Math.round(C.raise * up);
@@ -138,6 +182,8 @@ export function butcherPose(e: Enemy, t: number, now: number): BodyPose {
       lunge(p, e, 1 - easeOut(r), 3, C.lean, 0, false);
       (p.oy += 1), (p.phase = 'recover'), (p.k = clamp01(r));
     }
+  } else if (a && a.spin) {
+    newMove(p, e, a, now);
   } else if (a && a.kind === 'slam') {
     // Planted, not a leap (Kyle, 2026-11-27: the hop "just looks dumb"): a dip, then up tall with the cleaver over
     // his head in both hands, leaning back from you, held there shaking; then a step in and the smash, low.

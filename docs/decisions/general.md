@@ -636,3 +636,13 @@ blow or hold their goblins' blows off. Claude Opus 5.5.
   ground only now, the stretch less than half (client/foepose.ts).
 - Stones and pots: one goblin throws at most every 7 s, from 4 tiles out, so a scrapper still comes in.
 Claude Opus 5.5.
+
+## 2026-11-27: the new attacks in motion
+
+Kyle: "Are new attacks etc animated? I want it smooth and dynamic." They weren't, past the old poses. Now
+(client/foemoves.ts, drawn into fx.ts so both views show it; poses in client/foepose.ts `newMove`, the butcher's arm
+in client/foes.ts): a stone streaks from the hand as the throw lands; a pot arcs over to where you stood, its fuse
+sparking, then fizzes on its slick faster till it goes up; a throw winds the arm back high and whips it through; the
+drag crouches low and leaning in, sparks off the cleaver, then a scrape of sparks and dust runs down the line; the
+whirl goes low with the weapon out (the butcher's cleaver held to the side with a trail), dust drawn round its feet
+on the wind-up and a ring and burst at each hit; a held swing shakes at the top and scuffs its feet. Claude Opus 5.5.

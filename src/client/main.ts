@@ -102,6 +102,7 @@ import { Fx } from './fx';
 import { rats } from './rats';
 import { DreadView } from './dreadfx';
 import { watchDust } from './dust';
+import { watchMoves } from './foemoves';
 import { watchWater } from './wetwatch';
 import { Input } from './input';
 import { HideWatch } from './hidehost';
@@ -703,6 +704,12 @@ function tick(t: number): void {
   if (game.beatenAt !== null && !fade.classList.contains('dark')) fade.classList.remove('up'), fade.classList.add('dark');
   else if (game.beatenAt === null && fade.classList.contains('dark')) fade.classList.add('up'), fade.classList.remove('dark');
   watchDust(game.room, fx);
+  // The new goblin attacks in motion (foemoves.ts; only drawing, so a fault there never stops the frame).
+  try {
+    watchMoves(game.room, fx);
+  } catch (err) {
+    console.warn('foemoves', err);
+  }
   watchWater(game.room, fx);
   // Back in the open in town: see what the world has been up to (at most every minute; not while idle).
   if (game.mode === 'town' && !game.outside && !townfolk?.dozing) void link.refresh();
