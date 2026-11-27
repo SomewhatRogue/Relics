@@ -10,6 +10,7 @@ import { nestEmber } from '../nestfire';
 import { burningAt } from '../../shared/blaze';
 import { TIERS, WEAPONS } from '../../shared/tuning';
 import { lightsHolder } from '../heldkits';
+import { RANGER_LAMP, rangerSight } from '../rangersight';
 import { tapEl, tapGlow } from '../magetap';
 import { EL_LIGHT, heldEl } from '../palette';
 import { torchIn } from '../daytime';
@@ -46,7 +47,11 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
   for (const z of room.zones) if (!z.kind) add(z.x, 0.8, z.y, z.r * 1.5 + 0.5, 0.8 * Math.min(1, (z.until - room.time) / 1.2), [1, 0.85, 0.5]);
   for (const h of room.heroes) {
     const [x, y] = lerp('h:' + h.id, h.x, h.y), up = (h.z ?? 0) * 0.75;
-    if (!map.theme.day) add(x, 1.6 + up, y + 0.3, map.theme.moon ? R(44) : R(90), (map.theme.moon ? 0.35 : 0.7) * tk, [0.95, 0.8, 0.6]);
+    const reach = WEAPONS[h.weapon]?.cls === 'RANGER' ? RANGER_LAMP : 1;
+    if (!map.theme.day) add(x, 1.6 + up, y + 0.3, R((map.theme.moon ? 44 : 90) * reach), (map.theme.moon ? 0.35 : 0.7) * tk, [0.95, 0.8, 0.6]);
+    // A bow drawn lights the way it's aimed (../rangersight.ts).
+    const sight = rangerSight(h, x, y);
+    if (sight) add(sight.x, 0.9, sight.y, R(sight.r), sight.i, sight.c);
     if (h.glow > 0 && WEAPONS[h.weapon].cls === 'HEALER') add(x, 0.8 + up, y, R(20 + h.glow * 3), 0.25 + h.glow * 0.04, [1, 0.62, 0.3], 9);
     // A Mage's quick cast lights the hand as it gathers and flashes as it goes (../magetap.ts).
     const tg = tapGlow(h);

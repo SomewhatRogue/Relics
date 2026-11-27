@@ -532,3 +532,20 @@ its line by it (shared/hostpick.ts `rankLine`, unheard friends last, ties by id)
 and its goodbye, and a friend waiting on a quiet host takes its turn from that line. Small edits in client/coop.ts
 (the Performance sweep's, the handover part only). Also: /api/names failed on every call on the server
 (`Cannot find module .../namepool`): shared/names.ts now imports `./namepool.js`. Claude Opus 5.5.
+
+## 2026-11-27: a far friend "lagging and rebounding like crazy"; the Ranger in the dark; WIDE by default
+
+Kyle hosted (20 to 35 ms to the relay) an east-coast friend on a phone (about 125 ms, and jumpy). Two faults on
+the friend's page, both from patches coming late and bunched:
+- **The stutter:** the jitter buffer (client/playout.ts) waited at most 0.1 s; his late patches kept passing it and
+  were drawn on arrival after a stand-still. MAX_DELAY is 0.25 now; a steady link still waits next to nothing.
+- **The rebounding:** his own hero's catch-up edge (client/ownhero.ts) came from when patches were applied, so a late
+  one moved it and the hero ran on and was pulled back. The edge is kept to the leader's clock now (`ackOff`: my
+  newest used input less the leader's time on that patch). tests/ownjitter.test.ts walks him under 0.2 s of jitter:
+  pulled back once on the old code, never on the new.
+- scripts/online-server.ts takes `JITTER_MS` for the online scripts. LAGCOMP.cap kept at 0.35.
+
+A friend: "too dark for the Ranger, can't see what they're shooting". A drawn bow or crossbow throws a pale light
+out along the aim, further as the draw fills (client/rangersight.ts, both views), and a Ranger's lantern on a dark
+map reaches half as far again. Kyle: WIDE camera the default (client/camwide.ts); a page that chose CLOSE keeps it.
+Claude Opus 5.5.

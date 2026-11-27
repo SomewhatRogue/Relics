@@ -14,7 +14,12 @@
  * `t` is the leader's room clock on the patch; `k` the room it's of (a new room starts the clock over,
  * and its first patch goes at once).
  */
-export const MAX_DELAY = 0.1;
+/**
+ * 0.1 till 2026-11-27: an east-coast friend on a phone (a trip of 125 ms to the relay, and a jumpy one) had
+ * patches come later than that over and over, each drawn on arrival after a stand-still: "lagging and
+ * rebounding like crazy". A steady link still waits next to nothing; only a jumpy one waits this long.
+ */
+export const MAX_DELAY = 0.25;
 /** Arrivals remembered (about two seconds of patches). */
 const WINDOW = 40;
 /** Never more than this many waiting: past it they go, oldest first. */

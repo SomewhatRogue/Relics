@@ -119,10 +119,17 @@ new WebSocketServer({ server: http }).on('connection', (ws, req) => {
   // (A far player's connection also takes a few trips across the country to open: FAR_MS four times.)
   const hold = (Number(q.get('hold')) || 0) + (/^\/api\/room\/i1/.test(req.url ?? '') ? 4 * (Number(process.env.FAR_MS) || 0) : 0);
   // LAG_MS: every message to a player arrives this much later (the whole trip there and back, as on a phone).
-  const lag = Number(process.env.LAG_MS) || 0;
-  if (lag) {
+  // JITTER_MS: on top of that, each message up to this much later again, at random, but never before the one
+  // sent ahead of it (a phone's network on a bad day: bunches and gaps, in order, as a socket keeps them).
+  const lag = Number(process.env.LAG_MS) || 0, jit = Number(process.env.JITTER_MS) || 0;
+  if (lag || jit) {
     const send = ws.send.bind(ws);
-    ws.send = ((d: string) => void setTimeout(() => ws.readyState === 1 && send(d), lag)) as typeof ws.send;
+    let last = 0;
+    ws.send = ((d: string) => {
+      const at = Math.max(last, Date.now() + lag + Math.random() * jit);
+      last = at;
+      setTimeout(() => ws.readyState === 1 && send(d), at - Date.now());
+    }) as typeof ws.send;
   }
   // FAR_MS: a player pinned to instance 1 (`/api/room/i1`) is across the country: what they're sent and
   // what they send each take this much longer (on top of LAG_MS).

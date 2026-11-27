@@ -20,6 +20,7 @@ import { rats } from './rats';
 import { drawRat } from './ratdraw';
 import { GRAB, GUARD, POTION, TIERS, WEAPONS } from '../shared/tuning';
 import { lightsHolder } from './heldkits';
+import { RANGER_LAMP, rangerSight } from './rangersight';
 import { tapEl, tapGlow } from './magetap';
 import type { ArenaRoom } from '../sim/room';
 import { drawHero } from './actors';
@@ -709,7 +710,12 @@ export class Scene {
     for (const h of room.heroes) {
       const [x, y] = lerp('h:' + h.id, h.x, h.y);
       // Underground (no moon), each hero carries a lantern.
-      if (!map.theme.day) lights.push({ x: x - cx, y: y - 10 - cy, r: map.theme.moon ? 44 : 90, i: (map.theme.moon ? 0.35 : 0.7) * tk, c: [0.95, 0.8, 0.6] });
+      // (A Ranger's reaches further: rangersight.ts.)
+      const reach = WEAPONS[h.weapon]?.cls === 'RANGER' ? RANGER_LAMP : 1;
+      if (!map.theme.day) lights.push({ x: x - cx, y: y - 10 - cy, r: (map.theme.moon ? 44 : 90) * reach, i: (map.theme.moon ? 0.35 : 0.7) * tk, c: [0.95, 0.8, 0.6] });
+      // A bow drawn lights the way it's aimed (rangersight.ts).
+      const sight = rangerSight(h, h.x, h.y);
+      if (sight) lights.push({ x: OX + sight.x * PX - cx, y: OY + sight.y * PX - cy, r: sight.r, i: sight.i, c: sight.c });
       // A Healer's censer burns brighter the more coals it has taken.
       if (h.glow > 0 && WEAPONS[h.weapon].cls === 'HEALER') lights.push({ x: x - cx, y: y - 4 - cy, r: 20 + h.glow * 3 + Math.sin(now * 9) * 2, i: 0.25 + h.glow * 0.04, c: [1, 0.62, 0.3] });
     }

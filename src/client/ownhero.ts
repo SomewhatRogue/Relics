@@ -85,6 +85,14 @@ export class OwnHero {
   /** The trip there and back (from the newest input of mine the leader has used). */
   trip = PREDICT.trip;
   private ack = -1;
+  /**
+   * My newest input the leader had used, less the leader's clock on the patch that said so (smoothed): my
+   * clock's edge of what any later patch of its has had of my walking is its own time plus this. Kept to the
+   * leader's clock, a patch that comes late or bunched (a far friend's phone, 2026-11-27: "lagging and
+   * rebounding like crazy") no longer moves the edge, so my hero no longer runs on and is pulled back.
+   */
+  private ackOff: number | null = null;
+  private patchT = 0;
   private slip: Slip = {};
   private acts: Own[] = [];
   private seq = 0;
@@ -102,6 +110,7 @@ export class OwnHero {
     this.walked = [];
     this.acts = [];
     this.owed = [];
+    this.ackOff = null;
   }
 
   /** A patch applied: `mine` what it said of my hero, `meNow` my hero as decoded, `t` the leader's time, `ack` my newest input used. */
@@ -112,8 +121,13 @@ export class OwnHero {
     const s = this.srv, at = { x: s.x as number, y: s.y as number };
     this.prevServer = this.server ?? at;
     this.server = at;
-    if (ack !== undefined && ack !== this.ack) (this.ack = ack), (this.trip = this.trip * 0.7 + Math.min(1, Math.max(0, now - ack)) * 0.3);
-    this.appliedAt = now;
+    // (A clock that went back is a new room's: the offset starts over.)
+    if (t < this.patchT) this.ackOff = null;
+    if (ack !== undefined && ack !== this.ack) {
+      (this.ack = ack), (this.trip = this.trip * 0.7 + Math.min(1, Math.max(0, now - ack)) * 0.3);
+      this.ackOff = this.ackOff === null ? ack - t : this.ackOff * 0.7 + (ack - t) * 0.3;
+    }
+    (this.appliedAt = now), (this.patchT = t);
     for (const o of this.acts) {
       if (o.dead) continue;
       if (!o.confirmed) {
@@ -200,7 +214,8 @@ export class OwnHero {
     // for the part of it past where the leader's room is with it: counted whole, a frame half done there
     // put the target up to a frame's dodge past the end, and the hero ran on and eased back (2026-11-06).
     let tx = sv.x, ty = sv.y;
-    const edge = this.appliedAt - this.trip, acts = new Map(this.acts.map((o) => [o.id, o]));
+    // (By the leader's clock once known: its time on the patch plus how far behind it my used input was.)
+    const edge = this.ackOff !== null ? Math.min(this.appliedAt, this.patchT + this.ackOff) : this.appliedAt - this.trip, acts = new Map(this.acts.map((o) => [o.id, o]));
     for (const [t, dx, dy, id, from, to] of this.walked) {
       const o = id ? acts.get(id) : undefined;
       const k = !id ? (t > edge ? 1 : 0) : !o ? 0 : !o.confirmed ? 1 : to > from ? Math.min(1, Math.max(0, (to - o.prog) / (to - from))) : to > o.prog ? 1 : 0;

@@ -3,7 +3,8 @@
  * CLOSE, as it is, or WIDE, one whole step further out in both views (scene.ts and three/view3d.ts read the
  * step from here, so a tile stays a whole number of screen pixels and the two views keep showing the same
  * floor). A button in the options box flips it live; remembered on this device; `?cam=wide` or `?cam=close`
- * in the address wins. Kyle kept it as an option (2026-11-16), CLOSE the default.
+ * in the address wins. Kyle kept it as an option (2026-11-16), CLOSE the default; WIDE the default
+ * since 2026-11-27 (Kyle), CLOSE kept for a page that chose it.
  */
 import './camwide.css';
 
@@ -12,13 +13,13 @@ const KEY = 'relic.camera';
 const AREA = 118000;
 
 function start(): boolean {
-  if (typeof location === 'undefined') return false;
+  if (typeof location === 'undefined') return true;
   const u = new URLSearchParams(location.search).get('cam');
   if (u === 'wide' || u === 'close') return u === 'wide';
   try {
-    return localStorage.getItem(KEY) === 'wide';
+    return localStorage.getItem(KEY) !== 'close';
   } catch {
-    return false;
+    return true;
   }
 }
 
