@@ -57,6 +57,8 @@ import { markSum } from '../shared/deepmarks';
 import { hunted, seenBy } from './bites';
 import { stepHoming } from './homing';
 import { chainUp, nextInChain } from './foechain';
+import { flankSpot } from './flank';
+import { FLANK_PACK } from '../shared/foepatterns';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
@@ -376,6 +378,12 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   // The wood's goblins: each fights the way its lesson needs.
   const v = e.variant, reach = v === 'lunger' ? VARIANTS.lunger.reach : v === 'heavy' ? VARIANTS.heavy.reach : spec.reach;
   const netted = e.snareUntil > now, paced = OWN_KIT.pace && level && !via;
+  // A pack goes round you before it strikes (sim/flank.ts): to your back and sides, the one in front keeping you busy.
+  const round = level && !via && !netted ? flankSpot(e, t, d, reach, others) : null;
+  if (round) {
+    const to = wayTo(e, round.x, round.y, t.z ?? 0), rx = to.x - e.x, ry = to.y - e.y;
+    if (Math.hypot(rx, ry) > 0.15) return walk(e, rx, ry, spec.speed * slow * FLANK_PACK.pace, dt);
+  }
   // Kiting answered (sim/chase.ts): the chase clock and its sprint; a lunger leaps at a hero running from it.
   if (paced) chaseOn(e, t, d, reach, true, now);
   if (paced && v === 'lunger' && !netted && e.cooldown <= 0 && facing > 0.85 && d > LEAP.from && d < LEAP.spec.range! - 0.4 && fleeing(t, e)) return begin(e, 'pounce', LEAP.spec, t, ev);

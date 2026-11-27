@@ -126,7 +126,8 @@ describe('the greatsword', () => {
   it('the overhead loosed on the white flash sends out a shockwave that knocks nearby goblins down', () => {
     // One in front of the blade, one off to the side the overhead doesn't reach.
     const { es, loose } = arena('greatsword', [7.6, 7.6], 'scrapper', true);
-    Object.assign(es[1], { x: 10.6 });
+    // (Both standing their ground, as the wood's drilled ones do: a pack would go round, sim/flank.ts.)
+    Object.assign(es[1], { x: 10.6 }), es.forEach((e) => (e.drill = true));
     const ev = loose(0.9 + 0.08, 0.3);
     expect(ev.some((x) => x.k === 'perfect')).toBe(true);
     expect(ev.some((x) => x.k === 'quake')).toBe(true);

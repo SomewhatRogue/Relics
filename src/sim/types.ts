@@ -573,6 +573,8 @@ export interface Enemy extends Body {
   bow?: boolean;
   /** Tutorial pacing in the wood: slower wind-ups (sim/wood.ts DRILL). */
   drill?: boolean;
+  /** Keeping this hero busy from the front while the pack goes round (sim/flank.ts). */
+  busy?: string;
   /** The blows still to come of a string (sim/foechain.ts). */
   strung?: import('../shared/foepatterns').ChainStep[];
   /** A goblin built for one lesson in the prologue wood (shared/wood.ts VARIANTS). */

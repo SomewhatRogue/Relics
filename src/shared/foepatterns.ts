@@ -22,3 +22,13 @@ export const CHAINS = {
 
 /** The held swing: how often a big goblin's cleave holds full before it lands, and for how long (least, most; s). */
 export const HOLD = { chance: 0.4, least: 0.2, most: 0.6 };
+
+/**
+ * Flanking (slice 2): in a pack round one hero, the goblin nearest their front keeps them busy; the rest walk round
+ * to their sides and back before they strike, so a block (front only) has to turn. `pack`: how near the hero a
+ * goblin counts (tiles); `front`: a goblin this close to straight in front (the cosine) is in front; `slots`: the
+ * places round the hero (degrees from where they face), filled in order; `at`: in reach this far round counts as
+ * there (the cosine); `pace`: how fast it goes round, as a share of its walk; `keep`: the lean toward the goblin that
+ * kept them busy last; going round, `step` radians of the arc at a time, `wide` times its reach out.
+ */
+export const FLANK_PACK = { pack: 5, front: 0.35, slots: [180, 115, -115, 150, -150], ring: 0.85, pace: 1.1, keep: 0.6, step: 0.9, wide: 1.6 };

@@ -605,3 +605,9 @@ offered but the guard-breaker. Slice 1:
   (`EnemyAttack.hold`; both views' telegraph fill reads it).
 Small edits in sim/enemies.ts (three calls), sim/types.ts (`hold`, `strung`), client/foes.ts and three/teleg3d.ts
 (the fill). Claude Opus 5.5.
+
+Slice 2, flanking (sim/flank.ts, shared/foepatterns.ts FLANK_PACK): round one hero, plain scrappers and looters within
+5 tiles share the work. The one nearest the hero's front keeps them busy (and keeps that a while: `Enemy.busy`);
+the rest walk round along an arc, a little wider than their reach, to the hero's back and then sides, and strike
+from there. One already in reach and off the hero's front strikes from where it stands. One call in sim/enemies.ts.
+tests/warrior.test.ts's shockwave test now drills its two goblins so they stand. Claude Opus 5.5.
