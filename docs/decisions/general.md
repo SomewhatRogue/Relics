@@ -663,3 +663,6 @@ world's jitter walking (trees, water's edge) asked of Kyle first: whether LIVING
 - 2.5D: nothing to read of why. A failed 2.5D now sends the error, the browser and its WebGL to the relay's logs
   (three/views.ts, relay.ts `reportAny`, api/_relay.ts takes short text for `why`, `ua`, `gl`). Next time the
   friend plays, it's in the logs as `ev: 'net', as: '3dfail'`. Claude Opus 5.5.
+- Kyle, after: the friend was just walking, and a thumb put down over a stair brought no stick. The stick's zone was
+  only the bottom left 55% by 55%; it's the left 58% from a quarter of the way down now (client/cluster.css). The
+  top's frame, tracker and party list and the right's buttons sit above it (z-index 2 and up).

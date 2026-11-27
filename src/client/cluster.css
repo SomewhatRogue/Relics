@@ -4,7 +4,10 @@
    on an upright phone: scene.ts, camera3d.ts) is never under a thumb's button. Offsets are from ATTACK's
    centre at (right 70, bottom 92): a ring of about 100px, an outer one of about 168px. */
 #touch[hidden] { display: none; }
-.stick-zone { position: fixed; left: 0; bottom: 0; width: 55vw; height: 55vh; }
+/* The stick starts wherever a thumb lands on the left of the scene, up to a quarter of the way down (was the bottom
+   left 55% by 55%: a friend's thumb on a bigger Android, put down higher over a stair, brought no stick, 2026-11-27).
+   The top's frame and tracker, and the right's buttons, stay clear of it. */
+.stick-zone { position: fixed; left: 0; bottom: 0; width: 58vw; height: 75vh; }
 .stick { position: fixed; width: 92px; height: 92px; margin: -46px 0 0 -46px; pointer-events: none; left: 25vw; top: 80vh; opacity: 0;
   background: var(--stick-ring) center / 100% 100% no-repeat; image-rendering: pixelated; }
 .stick.on { opacity: 1; }
