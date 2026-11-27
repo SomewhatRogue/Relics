@@ -15,11 +15,12 @@ export const CLOTHW = {
   /** Under the rows while a locked entry is picked: it shows on the hero above, and WEAR IT will leave it off. */
   locked: (name: string) => `${name} is locked. You can look at it, but not wear it yet.`,
   wear: 'WEAR IT',
-  row: { dye: 'DYE', edge: 'EDGE', cut: 'CUT' } as Record<Row, string>,
+  row: { dye: 'DYE', edge: 'EDGE', cut: 'CUT', badge: 'BADGE' } as Record<Row, string>,
   name: {
-    dye: ['YOUR OWN', 'RED', 'BLUE', 'GREEN', 'BLACK', 'WHITE', 'OCHRE'],
+    dye: ['YOUR OWN', 'RED', 'BLUE', 'GREEN', 'BLACK', 'WHITE', 'OCHRE', 'PEAT', 'TAWNY', 'MADDER', 'HEATHER', 'WOAD', 'MURREY', 'WELD', 'BILBERRY'],
     edge: ['YOUR OWN', 'IRON', 'SILVER', 'GOLD'],
     cut: ['YOUR OWN', 'LINED', 'RAGGED'],
+    badge: ['NONE', 'THE GATE', 'THE OAK', 'THE HOUND', 'THE TORCH', 'THE TOOTH', 'THE CLEAVER', 'THE LADDER', 'THE BOOT'],
   } as Record<Row, string[]>,
   /** The list of what is still locked, each with its deed and how far along: a tally of the Roll's by its own name,
    *  the Deep, the hero quests. */
@@ -28,4 +29,6 @@ export const CLOTHW = {
   need: (what: string, have: number, of: number) => `${what} ${have} OF ${of}`,
   deep: (have: number, of: number) => `THE DEEP, FLOOR ${have} OF ${of}`,
   quests: 'QUESTS DONE',
+  level: (have: number, of: number) => `LEVEL ${have} OF ${of}`,
+  shelters: 'SHELTERS FOUND',
 };

@@ -13,3 +13,8 @@
 #panel .cl-ahead b { min-width: 5.5em; color: #b8a47c; font-weight: 500; }
 /* The list can run long: WEAR IT and CLOSE stay at the foot of the card while it scrolls under them. */
 #panel .card:has(.cl-stage) .buttons { position: sticky; bottom: -10px; margin: 10px -10px -10px; padding: 10px 10px 10px; background: var(--i-well, #14151a); box-shadow: 0 -10px 10px -8px #000c; }
+/* A dye's swatch and a badge's emblem on its button; fifteen dyes wrap two or three to a line on a phone. */
+#panel .hd-o { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+#panel .cl-dye { display: inline-block; width: 10px; height: 10px; border: 1px solid #0d0b10; box-shadow: 0 0 0 1px #5a5d66; }
+#panel .cl-badge { image-rendering: pixelated; flex: none; }
+#panel .hd-row:has([data-row="dye"]) .hd-o { flex: 1 1 31%; padding: 6px 4px; }

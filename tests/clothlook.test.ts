@@ -46,25 +46,27 @@ describe('the cloth a hero wears', () => {
   it('anything heard is fitted, and what is not earned is not worn', () => {
     expect(fitCloth(null)).toEqual(defaultCloth());
     expect(fitCloth({ dye: 99, edge: -1, cut: 1.5 })).toEqual(defaultCloth());
-    expect(fitCloth({ dye: 6, edge: 3, cut: 2 })).toEqual({ dye: 6, edge: 3, cut: 2 });
+    expect(fitCloth({ dye: 6, edge: 3, cut: 2 })).toEqual({ dye: 6, edge: 3, cut: 2, badge: 0 });
     const p = newProfile('WARRIOR');
     p.stats.kills = 100;
-    expect(wearable(p, { dye: 1, edge: 3, cut: 1 })).toEqual({ dye: 1, edge: 0, cut: 1 });
+    expect(wearable(p, { dye: 1, edge: 3, cut: 1 })).toEqual({ dye: 1, edge: 0, cut: 1, badge: 0 });
   });
 
-  it('packs to three numbers and back', () => {
-    const c = { dye: 4, edge: 2, cut: 1 };
+  it('packs to three numbers (four with a badge) and back; an older screen\'s three read as no badge', () => {
+    const c = { dye: 4, edge: 2, cut: 1, badge: 0 };
+    expect(packCloth(c)).toEqual([4, 2, 1]);
     expect(unpackCloth(packCloth(c))).toEqual(c);
+    expect(unpackCloth(packCloth({ ...c, badge: 3 }))).toEqual({ ...c, badge: 3 });
     expect(unpackCloth([1, 2])).toBeUndefined();
-    expect(unpackCloth(['x', 9, 1])).toEqual({ dye: 0, edge: 0, cut: 1 });
+    expect(unpackCloth(['x', 9, 1])).toEqual({ dye: 0, edge: 0, cut: 1, badge: 0 });
   });
 
-  it('the Warrior has all three rows, every other class a dye and an edge', () => {
-    expect(rowsFor('WARRIOR')).toEqual(['dye', 'edge', 'cut']);
-    expect(rowsFor('RANGER')).toEqual(['dye', 'edge']);
-    expect(rowsFor('ROGUE')).toEqual(['dye', 'edge']);
-    expect(rowsFor('MAGE')).toEqual(['dye', 'edge']);
-    expect(rowsFor('HEALER')).toEqual(['dye', 'edge']);
+  it('the Warrior has all four rows, every other class a dye, an edge and a badge', () => {
+    expect(rowsFor('WARRIOR')).toEqual(['dye', 'edge', 'cut', 'badge']);
+    expect(rowsFor('RANGER')).toEqual(['dye', 'edge', 'badge']);
+    expect(rowsFor('ROGUE')).toEqual(['dye', 'edge', 'badge']);
+    expect(rowsFor('MAGE')).toEqual(['dye', 'edge', 'badge']);
+    expect(rowsFor('HEALER')).toEqual(['dye', 'edge', 'badge']);
     expect(['WARRIOR', 'RANGER', 'ROGUE', 'MAGE', 'HEALER'].every(wearsCloth)).toBe(true);
     expect(wearsCloth('NOBODY')).toBe(false);
   });
@@ -72,8 +74,23 @@ describe('the cloth a hero wears', () => {
   it('a row the tailor has not for a class is never worn by it', () => {
     const p = newProfile('RANGER');
     p.stats.kills = 100;
-    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'RANGER')).toEqual({ dye: 1, edge: 0, cut: 0 });
-    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'MAGE')).toEqual({ dye: 1, edge: 0, cut: 0 });
+    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'RANGER')).toEqual({ dye: 1, edge: 0, cut: 0, badge: 0 });
+    expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'MAGE')).toEqual({ dye: 1, edge: 0, cut: 0, badge: 0 });
     expect(wearable(p, { dye: 1, edge: 0, cut: 1 }, 'NOBODY')).toEqual(defaultCloth());
+  });
+
+  it('slice 4: the new dyes and badges unlock from their deeds, the wilds included', () => {
+    const p = newProfile('ROGUE');
+    expect(earned(p, 'dye', 7)).toBe(false);
+    p.shelters = ['a', 'b', 'c', 'd'];
+    expect(earned(p, 'dye', 7)).toBe(true);
+    expect(earned(p, 'badge', 2)).toBe(true);
+    p.level = 10;
+    expect(earned(p, 'dye', 10)).toBe(true);
+    expect(earned(p, 'badge', 3)).toBe(false);
+    p.stats.bounties = 25;
+    expect(earned(p, 'badge', 3)).toBe(true);
+    expect(wearable(p, { dye: 7, edge: 0, cut: 0, badge: 3 }, 'ROGUE')).toEqual({ dye: 7, edge: 0, cut: 0, badge: 3 });
+    expect(wearable(p, { dye: 0, edge: 0, cut: 0, badge: 5 }, 'ROGUE').badge).toBe(0);
   });
 });

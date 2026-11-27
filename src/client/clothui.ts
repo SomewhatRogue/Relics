@@ -10,6 +10,8 @@ import type { Game } from './game';
 import type { Panel } from './panels';
 import { heroArt } from './heroart';
 import { CLOTHW } from './clothwords';
+import { DYE } from './clothlife';
+import { badgeIcon } from './badgeart';
 import { line } from './speech';
 import './hound.css';
 import './cloth.css';
@@ -22,7 +24,8 @@ function row(g: Game, key: Row, pick: ClothLook): string {
   return `<div class="hd-row"><span class="hd-l">${CLOTHW.row[key]}</span><div class="hd-opts">` +
     ROWS[key].map((_, i) => {
       const got = earned(g.profile, key, i);
-      return `<button class="hd-o${i === pick[key] ? ' on' : ''}${got ? '' : ' no'}" data-row="${key}" data-n="${i}">${got ? '' : '<i class="cl-lock"></i>'}${CLOTHW.name[key][i]}</button>`;
+      const mark = key === 'badge' ? badgeIcon(i, '#d4cab0') : key === 'dye' && DYE[i] ? `<i class="cl-dye" style="background:${DYE[i]![0]}"></i>` : '';
+      return `<button class="hd-o${i === pick[key] ? ' on' : ''}${got ? '' : ' no'}" data-row="${key}" data-n="${i}">${got ? '' : '<i class="cl-lock"></i>'}${mark}${CLOTHW.name[key][i]}</button>`;
     }).join('') + '</div></div>';
 }
 const rows = (g: Game, pick: ClothLook) => rowsFor(g.profile.cls).map((k) => row(g, k, pick)).join('');
@@ -30,7 +33,9 @@ const rows = (g: Game, pick: ClothLook) => rowsFor(g.profile.cls).map((k) => row
 /** A deed and how far along the hero is in it: "BROUGHT HOME 9 OF 25". */
 function deedText(g: Game, d: Deed): string {
   const have = Math.min(d.need, tally(g.profile, d.by));
-  return d.by === 'deep' ? CLOTHW.deep(have, d.need) : CLOTHW.need(d.by === 'quests' ? CLOTHW.quests : STAT_NAME[d.by], have, d.need);
+  if (d.by === 'deep') return CLOTHW.deep(have, d.need);
+  if (d.by === 'level') return CLOTHW.level(have, d.need);
+  return CLOTHW.need(d.by === 'quests' ? CLOTHW.quests : d.by === 'shelters' ? CLOTHW.shelters : STAT_NAME[d.by], have, d.need);
 }
 
 /** Everything still to earn, each with its deed: so nobody has to guess what a lock wants. */
@@ -45,7 +50,7 @@ function ahead(g: Game): string {
 
 /** Under the rows: that the picked cloth is locked, or the plain note. */
 function note(g: Game, pick: ClothLook): string {
-  for (const k of rowsFor(g.profile.cls)) if (!earned(g.profile, k, pick[k])) return CLOTHW.locked(CLOTHW.name[k][pick[k]]);
+  for (const k of rowsFor(g.profile.cls)) if (!earned(g.profile, k, pick[k] ?? 0)) return CLOTHW.locked(CLOTHW.name[k][pick[k] ?? 0]);
   return CLOTHW.note;
 }
 

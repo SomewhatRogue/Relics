@@ -18,6 +18,7 @@ import { SHARP, shadeHex } from './charpaint';
 import { ALIVE, gust } from './alive';
 import { flare, linedFront, linedSide } from './capelined';
 import { lifeIn } from './clothlife';
+import { badgeOnCape } from './badgeart';
 
 /** A stable number in [0, 1) from a hero's id (their sway's phase, their step's timing). */
 export function idPhase(id: string): number {
@@ -152,6 +153,8 @@ export function drawLife(c: Ctx, h: Hero, d: LookDef, view: boolean | 'side', la
         if (trim && r === bottom) rect('front', x0 + hem, r + 0.6, x1 - x0 + 1 - hem * 2, 0.4, trim);
       }
     }
+    // The tailor's badge between the shoulders of the cape seen from behind.
+    if (up && L.cape && L.badge) badgeOnCape(rect, L.badge[0], L.badge[1], col, top, k > 0.2 ? wave(3) : 0);
   }
   // The plume off the top of the helm, nodding, and streaming back when walking.
   if (L.plume && sv) {

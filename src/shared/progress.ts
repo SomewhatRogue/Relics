@@ -38,12 +38,12 @@ export const levelFor = (xp: number) => {
  * blows landed on people you'd freed, and freed people you killed. `carried` (picked up by friends) is
  * still counted but off the board.
  */
-export interface Stats { jobs: number; saved: number; kills: number; given: number; dens: number; butchers: number; gold: number; raised: number; falls: number; carried: number; teamkills: number; rescueHits: number; rescueKills: number }
+export interface Stats { jobs: number; saved: number; kills: number; given: number; dens: number; butchers: number; gold: number; raised: number; falls: number; carried: number; teamkills: number; rescueHits: number; rescueKills: number; bounties: number }
 /** The Roll of the Brave: honours first, then the tallies nobody wants to top. */
-export const STAT_ORDER: (keyof Stats)[] = ['jobs', 'saved', 'butchers', 'kills', 'gold', 'given', 'dens', 'raised', 'falls', 'rescueHits', 'rescueKills', 'teamkills'];
+export const STAT_ORDER: (keyof Stats)[] = ['jobs', 'saved', 'butchers', 'kills', 'bounties', 'gold', 'given', 'dens', 'raised', 'falls', 'rescueHits', 'rescueKills', 'teamkills'];
 export const SHAME: (keyof Stats)[] = ['falls', 'rescueHits', 'rescueKills', 'teamkills'];
-export const STAT_NAME: Record<keyof Stats, string> = { jobs: 'JOBS DONE', saved: 'BROUGHT HOME', butchers: 'BUTCHERS KILLED', kills: 'GOBLINS KILLED', gold: 'COIN EARNED', given: 'COIN GIVEN', dens: 'DENS BURNED', raised: 'FRIENDS PICKED UP', falls: 'TIMES KNOCKED DOWN', carried: 'PICKED UP BY FRIENDS', teamkills: 'FRIENDS FLOORED', rescueHits: 'RESCUES STRUCK', rescueKills: 'RESCUES KILLED' };
-export const newStats = (): Stats => ({ jobs: 0, saved: 0, kills: 0, given: 0, dens: 0, butchers: 0, gold: 0, raised: 0, falls: 0, carried: 0, teamkills: 0, rescueHits: 0, rescueKills: 0 });
+export const STAT_NAME: Record<keyof Stats, string> = { jobs: 'JOBS DONE', saved: 'BROUGHT HOME', butchers: 'BUTCHERS KILLED', kills: 'GOBLINS KILLED', gold: 'COIN EARNED', given: 'COIN GIVEN', dens: 'DENS BURNED', raised: 'FRIENDS PICKED UP', falls: 'TIMES KNOCKED DOWN', carried: 'PICKED UP BY FRIENDS', teamkills: 'FRIENDS FLOORED', rescueHits: 'RESCUES STRUCK', rescueKills: 'RESCUES KILLED', bounties: 'BOUNTIES HANDED IN' };
+export const newStats = (): Stats => ({ jobs: 0, saved: 0, kills: 0, given: 0, dens: 0, butchers: 0, gold: 0, raised: 0, falls: 0, carried: 0, teamkills: 0, rescueHits: 0, rescueKills: 0, bounties: 0 });
 
 export interface Profile {
   /** Who this hero is on the Roll of the Brave (made once, never shown). */

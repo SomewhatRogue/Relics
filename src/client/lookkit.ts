@@ -24,6 +24,8 @@ export interface Life {
   hem?: [string, string];
   tabard?: string;
   tip?: string;
+  /** The tailor's badge on the cape's back (badgeart.ts): its place in BADGES and its metal. */
+  badge?: [number, string];
 }
 
 /**

@@ -9,7 +9,8 @@
  * sidejoints.ts) are its own too. Drawing only.
  */
 import type { ClothLook } from '../shared/clothlook';
-import { DYE, EDGE } from './clothlife';
+import { badgeDots, badgeX } from './badgeart';
+import { DYE, EDGE, badgeMetal } from './clothlife';
 import { HERO_W } from './heroscale';
 import type { Cls, Life, LookDef } from './lookkit';
 import { heroLook, lookDef, makeSprite, type HeroSprites, type Part } from './sprites';
@@ -46,6 +47,24 @@ function dyed(parts: Part[], swap: Map<string, string>, hem: { of: string[]; tri
   });
 }
 
+/** Where a badge's top row sits on a look's back, by its class (the rows between the shoulders and the belt). */
+const BADGE_ROW = (cls: Cls, i: number, h: number): number => (cls === 'RANGER' ? h - 19 : cls === 'ROGUE' ? h - 22 : cls === 'MAGE' ? h - 14 : i === 1 ? 11 : 8);
+
+/** `up` with a badge laid on its cloth (only on pixels that are cloth, so it never strays onto mail or an arm), in
+ *  `metal` with a darker ring of that cloth round it. Looks without a badge row for their class are left alone. */
+function badged(up: Part[], cloth: Set<string>, badge: number, metal: string, y0: number): Part[] {
+  const at = new Map<string, number>();
+  up.forEach((p, n) => p[0] === 'p' && at.set(p[1] + ',' + p[2], n));
+  const out = up.slice(), x0 = badgeX(badge), { metal: m, ring } = badgeDots(badge);
+  const put = (x: number, y: number, col: (c: string) => string) => {
+    const n = at.get(x0 + x + ',' + (y0 + y)), p = n === undefined ? undefined : out[n];
+    if (p && p[0] === 'p' && cloth.has(p[3])) out[n!] = ['p', p[1], p[2], col(p[3])];
+  };
+  for (const [x, y] of ring) put(x, y, (c) => tone(c, 0.6));
+  for (const [x, y] of m) put(x, y, () => metal);
+  return out;
+}
+
 /** What moves, in the same swap (a robe's hem, a hat's tip, a tabard's foot). */
 function lifeDyed(life: Life, swap: Map<string, string>): Life {
   const out: Record<string, unknown> = { ...life };
@@ -56,19 +75,24 @@ function lifeDyed(life: Life, swap: Map<string, string>): Life {
 const defs = new Map<string, LookDef>(), sprites = new Map<string, HeroSprites>();
 
 /** Whether this look in this cloth is anything but the look as drawn. */
-const changed = (d: LookDef, c: ClothLook | undefined): c is ClothLook => !!c && !!d.cloth && (c.dye > 0 || c.edge > 0);
+const changed = (d: LookDef, c: ClothLook | undefined): c is ClothLook => !!c && !!d.cloth && (c.dye > 0 || c.edge > 0 || !!c.badge);
 
 /** A look's definition in a cloth: the look's own when nothing is chosen or its cloth is not part of its body. */
 export function lookDefIn(cls: Cls, i = 0, c?: ClothLook): LookDef {
   const d = lookDef(cls, i);
   if (!changed(d, c)) return d;
-  const key = `${cls}${i}:${c.dye}:${c.edge}`;
+  const key = `${cls}${i}:${c.dye}:${c.edge}:${c.badge ?? 0}`;
   let out = defs.get(key);
   if (!out) {
     const dye = DYE[c.dye], trim = EDGE[c.edge], swap = dye ? table(d.cloth!, dyeTo(dye)) : new Map<string, string>();
     if (trim && d.edge) table(d.edge, edgeTo(trim), swap);
     const hem = trim && !d.edge ? { of: d.cloth!.filter(Boolean), trim } : null;
     out = { ...d, down: dyed(d.down, swap, hem), up: dyed(d.up, swap, hem), life: lifeDyed(d.life, swap) };
+    if (c.badge) {
+      // (Cloth is judged after the dye: a pixel counts if it is one of the colours the cloth has become.)
+      const cloth = new Set(d.cloth!.filter(Boolean).map((k) => swap.get(k) ?? k));
+      out.up = badged(out.up, cloth, c.badge, trim ?? d.edge?.[0] ?? badgeMetal(0), BADGE_ROW(cls, i, d.h));
+    }
     if (d.side) out.side = { ...d.side, body: dyed(d.side.body, swap, hem), arm: dyed(d.side.arm, swap, null) };
     defs.set(key, out);
   }
@@ -79,7 +103,7 @@ export function lookDefIn(cls: Cls, i = 0, c?: ClothLook): LookDef {
 export function heroLookIn(cls: Cls, i = 0, c?: ClothLook): HeroSprites {
   const d = lookDefIn(cls, i, c);
   if (d === lookDef(cls, i)) return heroLook(cls, i);
-  const key = `${cls}${i}:${c!.dye}:${c!.edge}`;
+  const key = `${cls}${i}:${c!.dye}:${c!.edge}:${c!.badge ?? 0}`;
   let s = sprites.get(key);
   if (!s) sprites.set(key, (s = { down: makeSprite(HERO_W, d.h, d.down), up: makeSprite(HERO_W, d.h, d.up) }));
   return s;

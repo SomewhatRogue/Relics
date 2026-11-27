@@ -120,3 +120,27 @@ in those files (as the knight's cloak was), or handed over with this spec.
    a party finds its healer in a fight.
 7. **Who builds it?** Suggested: this chat, slice 1 only, then you play it and say whether the other four classes
    are worth doing.
+
+## Slice 4: more dyes, and an insignia (Kyle, 2026-11-27)
+
+"Id like more color options at the tailor locked behind different achievements for all characters to customize
+including insignias on capes etc."
+
+- **More dyes**: eight more, each earned by a deed, for every class (the dye row is everyone's already). Names and
+  colours from the lore pass; deeds spread over what is now counted, the wilds included: shelters found
+  (`Profile.shelters`), bounties handed in (a new Roll tally, `bounties`, BOUNTIES HANDED IN), dens burned (free since
+  slice 1), level, the Deep's floor, butchers, coin earned.
+- **An insignia** (a new row, `mark`, for every class): none to start, then about eight small emblems, each earned by
+  a deed. Drawn small and crisp in the edge's colour (or bone where there is no edge): on the Warrior's cape and the
+  Ranger's and Rogue's cloaks between the shoulders, seen walking away; on the Mage's robe back; on the Healer's
+  tabard back (its front keeps the Lantern).
+- Kept and sent as before: `ClothLook` gains `mark`; the packed cloth gains a fourth number (an old screen's three
+  still read, its mark none). Looks only; the room never reads it.
+
+**Built 2026-11-27.** Dyes (lore keeper, valley-grown only): PEAT (4 shelters found), TAWNY (10 bounties handed in),
+MADDER (20 dens burned), HEATHER (level 10), WOAD (the Deep's floor 15), MURREY (15 butchers), WELD (5000 coin
+earned), BILBERRY (500 goblins). Badges (the row is BADGE; never "mark", which is the chalker's and the eye dial's):
+THE GATE (50 jobs), THE OAK (4 shelters), THE HOUND (25 bounties), THE TORCH (50 dens), THE TOOTH (1000 goblins),
+THE CLEAVER (25 butchers), THE LADDER (the Deep's floor 20), THE BOOT (every hero quest). Drawn in client/badgeart.ts,
+in the edge's metal (or bone) ringed in a dark of the cloth, on the back only. BOUNTIES HANDED IN is a new Roll tally.
+

@@ -1433,3 +1433,13 @@ Kyle: "continue". Main chat, no agents.
   the thin causeway ones raised, three more homes (the north cuts, the larder). The drawer still shows the nearest 8.
 - The drowned cart stays its size: about three tiles, true to a farm cart beside a hero.
 (Claude Opus 5.5)
+
+## 2026-11-27: the tailor's new dyes and badges
+
+Kyle: "Id like more color options at the tailor locked behind different achievements for all characters to customize
+including insignias on capes etc." docs/design/cloak-choice.md slice 4. Rules by me (shared/clothlook.ts: eight dyes,
+the BADGE row for every class, tallies `level` and `shelters`, a new Roll tally `bounties` bumped on hand-in; the
+packed cloth takes a fourth number only when a badge is worn, so older screens still read it); the drawing by a
+builder (client/badgeart.ts; clothsprites.ts, clothlife.ts, herolife.ts; the tailor page wraps the dyes three a line,
+with a colour chip and the badge's emblem on each button). I redrew THE TORCH's flame (it read as a tree).
+(Claude Opus 5.5)

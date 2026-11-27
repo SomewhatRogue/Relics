@@ -12,24 +12,27 @@
 import { QUESTS, doneQuests } from './heroquests.js';
 import type { Profile, Stats } from './progress.js';
 
-export const DYES = ['own', 'red', 'blue', 'green', 'black', 'white', 'ochre'] as const;
+export const DYES = ['own', 'red', 'blue', 'green', 'black', 'white', 'ochre', 'peat', 'tawny', 'madder', 'heather', 'woad', 'murrey', 'weld', 'bilberry'] as const;
 export const EDGES = ['own', 'iron', 'silver', 'gold'] as const;
 export const CUTS = ['own', 'lined', 'ragged'] as const;
-export type Row = 'dye' | 'edge' | 'cut';
-export const ROWS: Record<Row, readonly string[]> = { dye: DYES, edge: EDGES, cut: CUTS };
-export const ROW_ORDER: Row[] = ['dye', 'edge', 'cut'];
+/** A badge on the cloth's back (slice 4, Kyle 2026-11-27): none to start, then eight small emblems. */
+export const BADGES = ['none', 'gate', 'oak', 'hound', 'torch', 'tooth', 'cleaver', 'ladder', 'boot'] as const;
+export type Row = 'dye' | 'edge' | 'cut' | 'badge';
+export const ROWS: Record<Row, readonly string[]> = { dye: DYES, edge: EDGES, cut: CUTS, badge: BADGES };
+export const ROW_ORDER: Row[] = ['dye', 'edge', 'cut', 'badge'];
 
-export interface ClothLook { dye: number; edge: number; cut: number }
-export const defaultCloth = (): ClothLook => ({ dye: 0, edge: 0, cut: 0 });
+export interface ClothLook { dye: number; edge: number; cut: number; badge?: number }
+export const defaultCloth = (): ClothLook => ({ dye: 0, edge: 0, cut: 0, badge: 0 });
 
 /** The rows the tailor has for a class: the Warrior's cape takes all three; the Ranger's and the Rogue's cloaks, the
  *  Mage's robe and hat and the Healer's tabard a dye and an edge. */
 const DYED = ['RANGER', 'ROGUE', 'MAGE', 'HEALER'];
-export const rowsFor = (cls: string): Row[] => (cls === 'WARRIOR' ? ROW_ORDER : DYED.includes(cls) ? ['dye', 'edge'] : []);
+export const rowsFor = (cls: string): Row[] => (cls === 'WARRIOR' ? ROW_ORDER : DYED.includes(cls) ? ['dye', 'edge', 'badge'] : []);
 export const wearsCloth = (cls: string): boolean => rowsFor(cls).length > 0;
 
-/** What a deed is counted in: one of the Roll's tallies, the Deep's deepest floor, or hero quests done. */
-export type Tally = keyof Stats | 'deep' | 'quests';
+/** What a deed is counted in: one of the Roll's tallies, the Deep's deepest floor, hero quests done, the hero's level,
+ *  or the shelters found out past the North Gate. */
+export type Tally = keyof Stats | 'deep' | 'quests' | 'level' | 'shelters';
 export interface Deed { row: Row; i: number; by: Tally; need: number }
 
 /** What earns each entry (first guesses: the balance thread's to set). An entry with no deed is everyone's: the
@@ -45,16 +48,35 @@ export const DEEDS: Deed[] = [
   { row: 'edge', i: 2, by: 'deep', need: 5 },
   { row: 'edge', i: 3, by: 'quests', need: QUESTS.length },
   { row: 'cut', i: 2, by: 'jobs', need: 25 },
+  // Slice 4 (Kyle, 2026-11-27): eight more dyes, valley-grown, and the badges. Names from the lore keeper.
+  { row: 'dye', i: 7, by: 'shelters', need: 4 },
+  { row: 'dye', i: 8, by: 'bounties', need: 10 },
+  { row: 'dye', i: 9, by: 'dens', need: 20 },
+  { row: 'dye', i: 10, by: 'level', need: 10 },
+  { row: 'dye', i: 11, by: 'deep', need: 15 },
+  { row: 'dye', i: 12, by: 'butchers', need: 15 },
+  { row: 'dye', i: 13, by: 'gold', need: 5000 },
+  { row: 'dye', i: 14, by: 'kills', need: 500 },
+  { row: 'badge', i: 1, by: 'jobs', need: 50 },
+  { row: 'badge', i: 2, by: 'shelters', need: 4 },
+  { row: 'badge', i: 3, by: 'bounties', need: 25 },
+  { row: 'badge', i: 4, by: 'dens', need: 50 },
+  { row: 'badge', i: 5, by: 'kills', need: 1000 },
+  { row: 'badge', i: 6, by: 'butchers', need: 25 },
+  { row: 'badge', i: 7, by: 'deep', need: 20 },
+  { row: 'badge', i: 8, by: 'quests', need: QUESTS.length },
 ];
 export const deedFor = (row: Row, i: number): Deed | undefined => DEEDS.find((d) => d.row === row && d.i === i);
 
 /** What the tallies are read from. */
-export type Doer = Pick<Profile, 'stats' | 'deepBest' | 'quests' | 'level'>;
+export type Doer = Pick<Profile, 'stats' | 'deepBest' | 'quests' | 'level'> & Partial<Pick<Profile, 'shelters'>>;
 
 /** How far along a hero is in a tally. */
 export function tally(p: Doer, by: Tally): number {
   if (by === 'deep') return p.deepBest ?? 0;
   if (by === 'quests') return (p.quests ?? doneQuests(p.level)).done.length;
+  if (by === 'level') return p.level ?? 1;
+  if (by === 'shelters') return p.shelters?.length ?? 0;
   return Math.floor(p.stats?.[by] ?? 0);
 }
 
@@ -71,21 +93,21 @@ export function fitCloth(s: unknown): ClothLook {
     const v = o[row];
     return typeof v === 'number' && Number.isInteger(v) && v >= 0 && v < ROWS[row].length ? v : 0;
   };
-  return { dye: of('dye'), edge: of('edge'), cut: of('cut') };
+  return { dye: of('dye'), edge: of('edge'), cut: of('cut'), badge: of('badge') };
 }
 
 /** A cloth as this hero may wear it: any part not earned, or that the tailor has no row of for their class, falls
  *  back to the look's own. */
 export function wearable(p: Doer, s: unknown, cls: string = 'WARRIOR'): ClothLook {
   const c = fitCloth(s), has = rowsFor(cls);
-  for (const row of ROW_ORDER) if (!has.includes(row) || !earned(p, row, c[row])) c[row] = 0;
+  for (const row of ROW_ORDER) if (!has.includes(row) || !earned(p, row, c[row] ?? 0)) c[row] = 0;
   return c;
 }
 
-/** Small for the town's `me` word: three numbers. */
-export type PackedCloth = [number, number, number];
-export const packCloth = (c: ClothLook): PackedCloth => [c.dye, c.edge, c.cut];
+/** Small for the town's `me` word: four numbers (an older screen's three still read, its badge none). */
+export type PackedCloth = [number, number, number] | [number, number, number, number];
+export const packCloth = (c: ClothLook): PackedCloth => (c.badge ? [c.dye, c.edge, c.cut, c.badge] : [c.dye, c.edge, c.cut]);
 export function unpackCloth(p: unknown): ClothLook | undefined {
   if (!Array.isArray(p) || p.length < 3) return undefined;
-  return fitCloth({ dye: p[0], edge: p[1], cut: p[2] });
+  return fitCloth({ dye: p[0], edge: p[1], cut: p[2], badge: p[3] });
 }

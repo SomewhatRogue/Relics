@@ -88,7 +88,7 @@ export function handIn(p: Profile, id: string): { pay: number; xp: number } | nu
   p.bounties = held(p).filter((x) => x !== h);
   if (!p.bounties.length) delete p.bounties;
   p.gold += b.pay;
-  if (p.stats) p.stats.gold += b.pay;
+  if (p.stats) (p.stats.gold += b.pay), (p.stats.bounties = (p.stats.bounties ?? 0) + 1);
   gainXp(p, b.xp);
   return { pay: b.pay, xp: b.xp };
 }
