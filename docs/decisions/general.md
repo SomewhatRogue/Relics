@@ -666,3 +666,13 @@ world's jitter walking (trees, water's edge) asked of Kyle first: whether LIVING
 - Kyle, after: the friend was just walking, and a thumb put down over a stair brought no stick. The stick's zone was
   only the bottom left 55% by 55%; it's the left 58% from a quarter of the way down now (client/cluster.css). The
   top's frame, tracker and party list and the right's buttons sit above it (z-index 2 and up).
+
+## 2026-11-27: chests the tile way
+
+Kyle: "chests don't look cool enough in 2.5D". They were box models; now one code-drawn chest in both views
+(client/chestart.ts; scene.ts and three/cards3d.ts draw it, three/actors3d.ts no longer builds the box): domed lid,
+banded, riveted, a lock plate (a stone in it from forged up), trims by tier (iron; gold for touched and turning; black
+iron veined red for hungry), a glint along the lid; chained, heavy links and a padlock; opening, it shakes and the lid
+lifts on a seam of the tier's light; open, the lid stands back, coins glint in the mouth and a shaft of light rises
+with motes. The 2.5D light over an open chest is softer and higher (three/roomlights.ts), so it lights the ground and
+not the chest's front all one colour. Claude Opus 5.5.

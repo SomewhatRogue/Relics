@@ -38,7 +38,8 @@ export function roomLights(room: ArenaRoom, fx: Fx, lerp: Lerp, out: L3[]): void
   }
   // A house on fire inside: each patch alight (shared/blaze.ts).
   if (map.blaze) for (const a of burningAt(map.blaze, room.time)) add(a.x + a.w / 2, 0.9, a.y + a.h / 2, R(50), 0.9, [1, 0.55, 0.25], 11);
-  for (const c of room.chests) if (c.state !== 'shut') add(c.x, 0.8, c.y + 0.2, c.state === 'opening' ? R(16 + 30 * (c.t / 1.2)) : R(26), c.state === 'opening' ? 0.4 + 0.5 * (c.t / 1.2) : 0.35, tint(TIERS[c.tier].col));
+  // (Up over the mouth and softer, so it lights the ground round it and not the chest's front all one colour: chestart.ts draws its own light, 2026-11-27.)
+  for (const c of room.chests) if (c.state !== 'shut') add(c.x, 1.6, c.y - 0.2, c.state === 'opening' ? R(16 + 30 * (c.t / 1.2)) : R(30), c.state === 'opening' ? 0.25 + 0.3 * (c.t / 1.2) : 0.2, tint(TIERS[c.tier].col));
   // The Staithe's lamps, and oil burning on the water (../staithedraw.ts).
   for (const l of staitheLights(room)) add(l.x, 1.1, l.y, l.r * 1.15 + 0.6, l.i, l.c, 9);
   // Firelight in an enterable house's doorway (../shutdraw.ts), and Hangman's Wood's own fires (../wooddraw.ts).

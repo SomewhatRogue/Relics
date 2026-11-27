@@ -118,6 +118,7 @@ import { skyFlash } from './skystrikedraw';
 import { drawFound } from './foundsdraw';
 import { witchColour } from './hallsdraw';
 import { brazierOn, drawBrazier, drawLamps } from './lampsdraw';
+import { drawChestArt } from './chestart';
 import { sumpScene, trackLights } from './sumpdraw';
 import { sealScene } from './sealdraw';
 import { lampAt } from '../shared/lamps';
@@ -450,7 +451,7 @@ export class Scene {
     }
     for (const ch of room.chests) {
       const x = OX + ch.x * PX - cx, y = OY + ch.y * PX - cy;
-      items.push({ y: OY + ch.y * PX, draw: () => drawChest(c, ch, x, y) });
+      items.push({ y: OY + ch.y * PX, draw: () => drawChestArt(c, ch, x, y) });
     }
     for (const d of room.drops) {
       if (d.owner && d.owner !== meId) continue;

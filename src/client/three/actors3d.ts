@@ -142,11 +142,7 @@ export class Actors {
       if (!carrier) shakeProp(o, p, t);
     }
     (room.map.holes ?? []).forEach((h, i) => this.things.get('hole' + i, '', () => ({ root: makeHole() })).root.position.set(h.x, 0, h.y));
-    for (const c of room.chests) {
-      const f = this.chests.get('c' + c.id, '', makeChest);
-      f.root.position.set(c.x, bodyLv(room.map, c.x, c.y, levelAt(room.map, c.x, c.y)) * LEDGE_H, c.y);
-      poseChest(f, c);
-    }
+    // (Chests are cards now, drawn the tile way: cards3d.ts, ../chestart.ts.)
     for (const d of room.drops) {
       if (d.owner && d.owner !== meId) continue;
       // Lying on the floor as itself, a glint down its blade now and then (loot3d.ts).

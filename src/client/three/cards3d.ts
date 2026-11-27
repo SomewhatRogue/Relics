@@ -55,6 +55,7 @@ import { frontFigs } from '../townfronts';
 import { STREET } from './streetkit';
 import { behindTree } from './behindtree';
 import { watched } from '../alive';
+import { drawChestArt } from '../chestart';
 
 const lift = (z?: number) => (z ?? 0) * LEDGE_H;
 
@@ -92,6 +93,8 @@ export function putCards(f: Figs, room: ArenaRoom, meId: string, others: Hero[],
       drawHero(c, { ...h, act: 'idle', actT: 0 }, px, py, false, t);
     });
   }
+  // Chests, drawn the tile way (../chestart.ts), standing at their level.
+  for (const ch of room.chests) f.put('ch' + ch.id, ch.x, bodyLv(map, ch.x, ch.y, levelAt(map, ch.x, ch.y)) * LEDGE_H, ch.y, (c, px, py) => drawChestArt(c, ch, px, py), { pool: 0.25 });
   for (const h of others) {
     // (At the level they stand on: lifted, as your own hero is.)
     f.put('o' + h.id, h.x, bodyLv(map, h.x, h.y, levelAt(map, h.x, h.y)) * LEDGE_H, h.y, (c, px, py) => drawHero(c, h, px, py, false, t), { pool: 0.3 });
