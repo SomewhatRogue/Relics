@@ -3,7 +3,7 @@
  * passes its momentum on, by weight. A thrown scrapper bowls over another scrapper; it barely moves
  * the butcher. Frozen bodies shatter.
  */
-import { KNOCK } from '../shared/tuning';
+import { KNOCK, THROWN } from '../shared/tuning';
 import { damage, frozen, isDead } from './damage';
 import { shatter } from './elements';
 import type { Enemy, FightEvent } from './types';
@@ -20,7 +20,8 @@ export function impacts(enemies: Enemy[], now: number, ev: FightEvent[]): void {
       // Only a body actually driving into the other counts (not two already flying apart).
       const nx = (b.x - a.x) / (d || 1), ny = (b.y - a.y) / (d || 1), rel = (a.kvx - b.kvx) * nx + (a.kvy - b.kvy) * ny;
       if (rel < KNOCK.bodySpeed) continue;
-      const n = Math.min(KNOCK.bodyMax, Math.round(rel * KNOCK.bodyDmg)), dx = a.kvx / speed, dy = a.kvy / speed;
+      // (A thrown one hits far harder: THROWN.)
+      const thrown = (a.flung ?? -9) > now, n = thrown ? Math.min(THROWN.bodyMost, Math.round(rel * KNOCK.bodyDmg * THROWN.body)) : Math.min(KNOCK.bodyMax, Math.round(rel * KNOCK.bodyDmg)), dx = a.kvx / speed, dy = a.kvy / speed;
       ev.push({ k: 'bodyhit', x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
       if (isFinite(b.weight) && b.act !== 'pinned') {
         const k = Math.min(1.2, a.weight / b.weight) * 0.8;

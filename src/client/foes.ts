@@ -4,7 +4,7 @@
  */
 import { plateShare } from '../sim/ironhide';
 import type { GameMap } from '../shared/arena';
-import { GUARD, HERO, HEMPEN_BOSS } from '../shared/tuning';
+import { GUARD, HERO, HEMPEN_BOSS, THROWN } from '../shared/tuning';
 import type { Enemy, EnemyAttack } from '../sim/types';
 import { isRound } from '../sim/types';
 import { drawRoundSign } from './telegraph2';
@@ -250,11 +250,23 @@ function sleeping(c: Ctx, e: Enemy, x: number, y: number, flash: number): void {
 
 const DUMMY = newPose();
 
+/** A goblin struggling in deep water: drawn lower each moment, bobbing, everything under the waterline cut off. */
+function drawDrowning(c: Ctx, e: Enemy, x: number, y: number): void {
+  const t = c.t ?? c.now, k = Math.min(1, (t - (e.drownAt ?? t)) / THROWN.drown), sink = Math.round(4 + 7 * k + Math.sin(c.now * 9 + e.id) * 1.5);
+  const line = Math.round(y - 2);
+  for (const g of [c.lit, c.glow]) g.save(), g.beginPath(), g.rect(-1e4, -1e4, 2e4, 1e4 + line), g.clip();
+  // (Arms up and thrashing: its stunned pose, shaken side to side.)
+  drawEnemy(c, { ...e, drownAt: undefined, act: 'stunned' }, x + Math.round(Math.sin(c.now * 14 + e.id) * 1.5), y + sink);
+  for (const g of [c.lit, c.glow]) g.restore();
+}
+
 export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false): void {
   // (The rest of the mobs at 1.5x through the goblin pen: their shapes drawn again, their rects on whole pixels.)
   if (isSpiderKind(e.kind)) return drawSpiderKind(gobPen(c, x, y), e, x, y, c.t ?? c.now);
   // A sneak-thief or a wolf that got away: nothing left here.
   if (e.escaped) return;
+  // Thrown in deep water (sim/drown.ts): struggling, bobbing and sinking, the water cutting it off at the line.
+  if (e.drownAt !== undefined && e.act !== 'dead') return drawDrowning(c, e, x, y);
   // The Haulier (the Deep's boss on every fifth floor): its own body and poses (hauldraw.ts).
   if (e.boss?.who === 'haulier') return drawHaulier(c, e, x, y, c.t ?? c.now);
   // THE LISTENER (the Deep's boss on floor 10 of the Copperdeep): its own body and poses (listendraw.ts).
@@ -266,7 +278,7 @@ export function drawEnemy(c: Ctx, e: Enemy, x: number, y: number, dozing = false
   if (e.variant === 'log' && e.act === 'dead') return drawLogsDead(gobPen(c, x, y), e, x, y);
   if (e.act === 'dead') {
     // Burst or shattered: nothing left but the stains. Otherwise the body, headless or burned.
-    if (e.death === 'burst' || e.death === 'shatter') return;
+    if (e.death === 'burst' || e.death === 'shatter' || e.death === 'drown') return;
     // Eaten by a butcher, or burned to ash first (sim/meal.ts, worldfire.ts).
     if (e.eaten) return drawEaten(c, x, y, e.kind === 'butcher');
     if (e.ashed) return drawAsh(c, x, y, c.t ?? c.now, e.id, e.kind === 'butcher');

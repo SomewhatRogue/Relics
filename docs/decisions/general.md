@@ -692,3 +692,18 @@ Claude Opus 5.5.
   material) and the cloud shadows' (three/wind3d.ts). The screen's pattern stays put while the world steps past under
   it, so a torch's pool or a cloud's edge crawled over trees and ground as you walked. Both now add the camera's place
   in whole render pixels (post.ts `PXOFF`, set by three/camera3d.ts each frame), so the dither keeps to the world.
+
+## 2026-11-27: the camera's steps; a throw that counts; goblins in the water
+
+Kyle: "get rid of close and add a new wide view that zooms out more. I also want the warrior to be able to grab things
+just a hair further away. Should also be able to throw it and it does more damage against a wall or another unit. Also
+... throw a goblin into the water, it splashes in, struggles and dies or is eaten by a fish".
+- Camera (client/camwide.ts): WIDE (the default) and WIDER, a step further out; CLOSE gone, a page that chose it is WIDE.
+- GRAB.reach 1.3 to 1.5.
+- Thrown (shared/tuning.ts THROWN; sim/grab.ts marks it `flung` 0.9 s): into a wall 24 and stunned 1.2 s (a knock's
+  6); into another body 1.8 times a knock's, up to 42.
+- Into deep water (sim/drown.ts): it goes in past the edge, struggles 1.8 s sinking and goes under, or 35% of the time
+  a pike takes it at 0.9 s; a kill to the thrower, no body (death 'drown'). shared/arena.ts `collide` lets a drowning
+  one stay in. Drawn sinking and thrashing, the water over its lower half (client/foes.ts, three/chars3d.ts), spray and
+  rings (client/foemoves.ts, fx.ts `splash`), a splat for its sound. tests/drown.test.ts.
+Claude Opus 5.5.

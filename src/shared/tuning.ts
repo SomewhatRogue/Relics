@@ -181,7 +181,14 @@ export const KNOCK = { friction: 9, wallSpeed: 5, wallDmg: 6, /** A body this fa
  * Grabbing a small goblin: only one you've stunned, netted, frozen, staggered or got behind. Carried
  * overhead, it can be slammed into the ground (a kill pounds its head in) or thrown at its friends.
  */
-export const GRAB = { reach: 1.3, carrySpeed: 0.6, hold: 3, throwSpeed: 16, /** Seconds a thrown goblin flies before it starts to skid. */ air: 0.35, slamWindup: 0.3, slamRecover: 0.3, slamDmg: 30, slamStun: 1.5 };
+/**
+ * A goblin thrown (Kyle, 2026-11-27: "throw it and it does more damage against a wall or another unit"; "throw a goblin
+ * into the water, it splashes in, struggles and dies or is eaten by a fish"): for `flung` s after the throw it counts as
+ * thrown. Into a wall it takes `wall` and is stunned `stun` s; into another body the blow is `body` times a knock's, up to
+ * `bodyMost`. Into deep water it struggles `drown` s and goes under; `fish` of the time a pike takes it first, at `bite`.
+ */
+export const THROWN = { flung: 0.9, wall: 24, stun: 1.2, body: 1.8, bodyMost: 42, drown: 1.8, fish: 0.35, bite: 0.9 };
+export const GRAB = { reach: 1.5, carrySpeed: 0.6, hold: 3, throwSpeed: 16, /** Seconds a thrown goblin flies before it starts to skid. */ air: 0.35, slamWindup: 0.3, slamRecover: 0.3, slamDmg: 30, slamStun: 1.5 };
 
 /** A killing blow this much bigger than the life left bursts the body. */
 export const OVERKILL = 20;

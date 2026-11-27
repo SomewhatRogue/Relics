@@ -37,6 +37,7 @@ import { bodyLv } from '../../shared/heights';
 import { STREET } from './streetkit';
 import { drawParts, type Kit } from './charparts';
 import META from './charkit/chars.json';
+import { THROWN } from '../../shared/tuning';
 
 const Q = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('chars') : null;
 /** Which way this screen makes the new characters, or '' for today's figures (the default since 2026-11-15: Kyle
@@ -148,13 +149,15 @@ export class Chars {
     // (Another player's Warrior at the level they stand on.)
     for (const h of others) hero({ ...h, z: levelAt(room.map, h.x, h.y) }, 'o' + h.id, h.x, h.y);
     for (const e of room.enemies) if (this.goblin(e, room)) {
-      const [x, y] = lerp('e:' + e.id, e.x, e.y), up = bodyLv(room.map, x, y, Math.max(0, e.z ?? 0)) * LEDGE_H, key = 'e' + e.id, g = this.fig(key, this.kits.goblin);
+      // (Thrown in deep water, sim/drown.ts: sinking as it struggles, the water's surface over its lower half.)
+      const sink = e.drownAt !== undefined && e.act !== 'dead' ? 0.25 + 0.35 * Math.min(1, (t - e.drownAt) / THROWN.drown) + Math.sin(now * 9 + e.id) * 0.05 : 0;
+      const [x, y] = lerp('e:' + e.id, e.x, e.y), up = bodyLv(room.map, x, y, Math.max(0, e.z ?? 0)) * LEDGE_H - sink, key = 'e' + e.id, g = this.fig(key, this.kits.goblin);
       if (!g) continue;
       const dead = e.act === 'dead' ? e.actT : -1, p = scrapperPose(e, t, now), walk = this.walked(g, x, y, e.moving && dead < 0, STRIDE.goblin);
       goblinShows({ attack: e.attack?.kind ?? '', phase: p.phase, k: p.k, moving: e.moving, walk, dead }, SH);
       const fade = dead < 0 ? -1 : 1 - Math.max(0, 1 - e.actT / Math.max(0.01, e.actDur)) ** 0.5;
       this.show(g, this.kits.goblin, x, up, y, e.fx, e.fy, p, SH, POSE.goblin, -1, fade, e.death, now, !!e.attack && dead < 0);
-      if (dead < 0) f.put(key, x, up, y, NONE, { pool: 0.28 });
+      if (dead < 0) f.put(key, x, up, y, NONE, sink ? {} : { pool: 0.28 });
       else f.put(key, x, up, y, NONE);
     }
     for (const [key, g] of this.figs) if (g.seen !== this.frame) (g.pivot.visible = false), this.figs.delete(key), this.drop(g);

@@ -6,7 +6,7 @@ import { lure, seenFrom } from './lantern';
 import { visible } from './flasks';
 import { HUNGRY_FX, wears } from './hungry';
 import { collide, currentMap, wadeAt } from '../shared/arena';
-import { FRIENDLY, DECOY, ALERT, ARCHER, HEIGHT, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR } from '../shared/tuning';
+import { FRIENDLY, DECOY, ALERT, ARCHER, HEIGHT, BUTCHER, BROOD, NEST, SPIDER, DRUMMER, HEXER, FROST, KNOCK, NET, SCRAPPER, SWING_DUMMY, TRAIT, BANNER, LOGS, NETTER, type EnemyAttackSpec, type EnemySpec, VARIANTS, STEALTH, CLASS_DODGES, WEAPONS, HORN, HOBBLE, STILL, MEAL, ICE, WOOD_EASE, SURVIVOR, THROWN } from '../shared/tuning';
 import type { Rng } from '../shared/rng';
 import { hexFriendly, isBackline, stepBackline } from './backline';
 import { shove, slide } from './bodies';
@@ -60,6 +60,7 @@ import { chainUp, nextInChain } from './foechain';
 import { flankSpot } from './flank';
 import { FLANK_PACK } from '../shared/foepatterns';
 import { spinOn, throwAt, volleyWith, whirlAt } from './foethrow';
+import { deepAhead, flung, intoWater, stepDrown } from './drown';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
@@ -252,16 +253,22 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   }
   // A nest never moves; its waves are the room's (sim/spiders.ts stepNests).
   if (e.kind === 'nest') return;
+  // Thrown in the water: struggling till it goes under or a pike takes it (sim/drown.ts).
+  if (stepDrown(e, now, ev)) return;
   if (spec) {
+    const vx0 = e.kvx, vy0 = e.kvy, wasFlung = flung(e, now);
     const hit = slide(e, e.radius, dt);
+    // Thrown into deep water: in it goes (sim/drown.ts).
+    const pool = hit && wasFlung ? deepAhead(e, vx0, vy0) : null;
+    if (pool) return intoWater(e, vx0, vy0, pool, now, rng, ev);
     // A spider's pounce into a wall just stops it.
     if (hit && e.attack?.kind === 'pounce') e.kvx = e.kvy = 0;
     // (A boss carried along in its partner's lock, or shoved, just stops at the wall: only its own charge is stopped hard.)
     else if (hit && e.boss && !(e.attack?.kind === 'charge' && e.attack.t >= e.attack.windup)) e.kvx = e.kvy = 0;
     else if (hit) {
       const ice = frozen(e, now), by = heroes.find((h) => h.id === e.lastBy);
-      // CRUSHING: whoever threw it there makes the wall hurt more.
-      const n = KNOCK.wallDmg * (by && has(by, 'crushing') ? TRAIT.crushing : 1);
+      // CRUSHING: whoever threw it there makes the wall hurt more. Thrown there, far more (THROWN).
+      const n = (wasFlung ? THROWN.wall : KNOCK.wallDmg) * (by && has(by, 'crushing') ? TRAIT.crushing : 1);
       e.hp -= n;
       e.hitAt = now;
       dealt(e, e.lastBy, n);
@@ -279,6 +286,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
       // Thrown frozen into a wall: it breaks.
       if (ice) shatter(e, now, ev);
       if (isDead(e)) return;
+      // Thrown into it: stunned a moment, its blow lost (THROWN).
+      if (wasFlung) return void (Object.assign(e, { attack: null, act: 'stunned', actT: 0, actDur: THROWN.stun, flung: undefined }), ev.push({ k: 'stunned', x: e.x, y: e.y }));
     }
   }
   // Frozen solid, or a small goblin under a net: slides if thrown, does nothing else.

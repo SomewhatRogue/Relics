@@ -4,7 +4,7 @@
  * head in); GRAB again throws it, and it hits whatever it flies into. It wriggles free in time.
  */
 import { collide } from '../shared/arena';
-import { GRAB, GUARD, HERO, WEAPONS } from '../shared/tuning';
+import { GRAB, GUARD, HERO, WEAPONS, THROWN } from '../shared/tuning';
 import { slamBurst } from './techwarrior';
 import { damage, frozen, isDead, snared } from './damage';
 import type { Enemy, FightEvent, Hero, Intent } from './types';
@@ -90,7 +90,7 @@ export function stepCarry(h: Hero, inp: Intent, enemies: Enemy[], now: number, d
     e.x = h.x + h.fx * 0.6;
     e.y = h.y + h.fy * 0.6;
     collide(e, e.radius);
-    Object.assign(e, { act: 'flinch', actT: 0, actDur: 0.9, kvx: h.fx * GRAB.throwSpeed, kvy: h.fy * GRAB.throwSpeed, air: GRAB.air, lastBy: h.id });
+    Object.assign(e, { act: 'flinch', actT: 0, actDur: 0.9, kvx: h.fx * GRAB.throwSpeed, kvy: h.fy * GRAB.throwSpeed, air: GRAB.air, lastBy: h.id, flung: now + THROWN.flung });
     Object.assign(h, { act: 'idle', actT: 0 });
     ev.push({ k: 'hurl', x: e.x, y: e.y });
     // Thrown frozen: it skids off as ice, to crash and shatter on whatever it meets (sim/iceslide.ts).

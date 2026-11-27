@@ -79,7 +79,7 @@ export function poseFoe(f: FoeFig, e: Enemy, t: number, now: number, walked: num
 
 /** Lying where it fell, then sinking into the floor as the body fades. */
 function dead(f: FoeFig, e: Enemy): boolean {
-  if (e.death === 'burst' || e.death === 'shatter') return false;
+  if (e.death === 'burst' || e.death === 'shatter' || e.death === 'drown') return false;
   const left = e.actDur - e.actT;
   if (left <= 0) return false;
   f.mid.rotation.z = Math.PI / 2;

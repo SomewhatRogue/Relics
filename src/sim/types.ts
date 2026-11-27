@@ -88,6 +88,11 @@ export interface Body {
   kvy: number;
   /** Seconds left airborne (thrown): it barely slows until it lands. */
   air?: number;
+  /** Thrown, till this room time: it hits walls and bodies the harder (sim/drown.ts, THROWN). */
+  flung?: number;
+  /** In deep water since this room time, struggling (sim/drown.ts); `pike`: when a fish takes it, if one does. */
+  drownAt?: number;
+  pike?: number;
   /** Which level it stands on: 0 the ground, 1 up on a ledge (see shared/arena.ts). */
   z?: number;
   /** Set when it went off a ledge's edge (how fast it was moving); the room deals with the landing. */
@@ -743,7 +748,7 @@ export interface Enemy extends Body {
 
 /** How a goblin died: fell, lost its head, burst apart, burned, or shattered. */
 /** `halve`: cut in two at the waist; `opened`: cut down with a slash across the chest. */
-export type DeathKind = '' | 'fall' | 'behead' | 'halve' | 'opened' | 'burst' | 'burn' | 'shatter';
+export type DeathKind = '' | 'fall' | 'behead' | 'halve' | 'opened' | 'burst' | 'burn' | 'shatter' | 'drown';
 
 /**
  * Someone freed from a cage (sim/survivors.ts): fragile, following the nearest player till they're
@@ -1003,6 +1008,7 @@ export type FightEvent =
   | { k: 'pairup'; x: number; y: number }
   | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */
+  | { k: 'splash'; x: number; y: number; /** a pike takes it */ fish?: boolean; /** going under */ under?: boolean }
   | { k: 'block' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean; striped?: boolean }
   | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind; pot?: boolean; stone?: boolean }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */

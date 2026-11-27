@@ -211,6 +211,17 @@ export class Fx {
         for (let i = 0; i < 3; i++) this.rings.push({ x, y: y - 20, life: 0.5 + i * 0.25, max: 0.5 + i * 0.25, col: '#ff8a5a' });
         this.flashes.push({ x, y: y - 20, r: 120, i: 0.7, c: [1, 0.4, 0.2], life: 0.5, max: 0.5 });
         break;
+      case 'splash': {
+        // Thrown in deep water (sim/drown.ts): a burst of spray and rings; going under, a few bubbles; a pike, a
+        // bigger burst and its dark back turning over.
+        const big = ev.fish ? 1.6 : ev.under ? 0.5 : 1;
+        this.burst(x, y - 3, Math.round(14 * big), ['#c8dce0', '#e8f2f2', '#7aa0a8'], 70 * big, false, 180);
+        for (let i = 0; i < (ev.under ? 1 : 3); i++) this.rings.push({ x, y, life: 0.4 + i * 0.25, max: 0.4 + i * 0.25, col: '#a8c8cc', size: 6 + i * 5 });
+        if (ev.fish) {
+          this.burst(x, y - 6, 10, ['#2a3a30', '#3a4e3e', '#1a2420'], 55, false, 220);
+        }
+        break;
+      }
       case 'wallhit':
         this.crack(x, y - 6, 7);
         this.debris(x, y - 6, 8);

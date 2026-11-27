@@ -88,7 +88,15 @@ export function watchMoves(r: ArenaRoom, fx: Fx): void {
   const dt = r.time - last;
   if (dt <= 0) return;
   last = r.time;
-  for (const e of r.enemies) moves(fx, e, dt);
+  for (const e of r.enemies) {
+    moves(fx, e, dt);
+    // Struggling in deep water (sim/drown.ts): spray thrown up round it, now and then a ring.
+    if (e.drownAt !== undefined && e.act !== 'dead') {
+      const [px, py] = toPx(e.x, e.y);
+      if (Math.random() < 0.8) fx.burst(px + (Math.random() - 0.5) * 8, py - 2, 2, ['#c8dce0', '#e8f2f2'], 45, false, 160);
+      if (Math.random() < 0.15) fx.rings.push({ x: px, y: py, life: 0.4, max: 0.4, col: '#a8c8cc', size: 7 });
+    }
+  }
   for (const s of r.slicks) {
     if (s.fuse === undefined || s.lit >= 0) continue;
     // Fizzing faster the nearer it is.

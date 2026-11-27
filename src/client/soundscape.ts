@@ -91,6 +91,8 @@ export class Soundscape {
     if (ev.k === 'shoot' && ev.kind === 'dart') return dartPuff();
     if (ev.k === 'skewer') return spiderSounds.wetbite();
     if (ev.k === 'puke') return spiderSounds.spit(), spiderSounds.splat();
+    // A goblin into deep water, going under, or taken (sim/drown.ts).
+    if (ev.k === 'splash') return ev.fish ? (spiderSounds.splat(), sfx.death('burst')) : spiderSounds.splat();
     // The Warrior's: the shield's thump, the shockwave, the pin.
     if (ev.k === 'shieldbash') return sfx.block(), sfx.bodyhit();
     if (ev.k === 'quake') return sfx.slam(), sfx.rumble();
