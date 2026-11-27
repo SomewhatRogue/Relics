@@ -619,3 +619,8 @@ butcher in reach whirls 18% of the time: a ring round it, three hits, turning as
 archer shoots, half the time every ready archer within 7 tiles looses at the same hero with it. Hooks in sim/enemies.ts
 (three lines). The fight tests' butcher fixture now waits for a plain blow; the winch test keeps the road's goblins off
 it; the parity golden re-recorded (outcomes change by design). Claude Opus 5.5.
+
+Tuned after the full suite: only a goblin within a second of its next blow goes round, only round a hero standing to
+fight (one running is chase.ts's), and the pack is 3.5 tiles; no stone or pot at a hero running away; a burning slick
+spares a hero with `safeT`, as every blow does. Fixtures in recapboard, magic, practice and the rest wait for a plain
+blow or hold their goblins' blows off. Claude Opus 5.5.

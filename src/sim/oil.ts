@@ -92,7 +92,8 @@ export function stepSlicks(slicks: Slick[], w: World, dt: number): Slick[] {
   for (const s of slicks) {
     if (!lit(s, now)) continue;
     for (const h of w.heroes) {
-      if (h.act === 'down' || h.act === 'roll' || !afoot(h) || !on(s, h, HERO.radius * 0.5)) continue;
+      // (Not a hero just come in, whom nothing hurts yet: ARRIVE_SAFE, as sim/combat.ts.)
+      if (h.act === 'down' || h.act === 'roll' || h.safeT || !afoot(h) || !on(s, h, HERO.radius * 0.5)) continue;
       if (Math.floor(now * 2) === Math.floor((now - dt) * 2)) continue;
       // SHAKE IT OFF: just after a dash, the fire can't take (sim/ladderrogue.ts).
       if (fireproof(h, now)) {

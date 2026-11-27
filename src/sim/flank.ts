@@ -21,10 +21,12 @@ const frontOf = (t: Hero, x: number, y: number) => {
  * the room's goblins.
  */
 export function flankSpot(e: Enemy, t: Hero, d: number, reach: number, others: Enemy[]): { x: number; y: number } | null {
-  if (!goesRound(e) || d > F.pack) return null;
+  // (Only a goblin about ready to strike bothers, and only round a hero who's standing to fight: one running is
+  // chase.ts's to cut off.)
+  if (!goesRound(e) || d > F.pack || e.cooldown > F.ready || (t.moving && !t.blocking)) return null;
   // Off their front and in reach: strike from here.
   if (d <= reach && frontOf(t, e.x, e.y) < F.front) return null;
-  const pack = others.filter((o) => goesRound(o) && Math.hypot(o.x - t.x, o.y - t.y) <= F.pack);
+  const pack = others.filter((o) => goesRound(o) && o.cooldown <= F.ready && Math.hypot(o.x - t.x, o.y - t.y) <= F.pack);
   if (!pack.includes(e)) pack.push(e);
   if (pack.length < 2) return null;
   // The one nearest their front (then the nearest, then by id) keeps them busy; whoever kept them busy last keeps it

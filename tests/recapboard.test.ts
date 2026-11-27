@@ -29,9 +29,11 @@ function fight(run: Run, id: string, kind: 'cleave' | 'slam' = 'cleave') {
   for (const e of room.enemies.slice(1)) (e.x = 0.5), (e.y = 15.5);
   Object.assign(b, { x: 9, y: 6, cooldown: 0 });
   Object.assign(h, { x: 9, y: 7.6, fx: 0, fy: -1 });
-  for (let i = 0; i < 400 && b.attack?.kind !== kind; i++) {
+  // (A plain blow: not a held swing, a whirl or the start of a string, sim/foechain.ts and foethrow.ts.)
+  const plain = () => b.attack?.kind === kind && !b.attack.hold && !b.attack.spin && !b.strung;
+  for (let i = 0; i < 400 && !plain(); i++) {
     room.step();
-    if (b.attack && b.attack.kind !== kind) Object.assign(b, { attack: null, act: 'chase', cooldown: 0 }), Object.assign(h, { hp: HERO.hp, stamina: HERO.stamina, act: 'idle' });
+    if (b.attack && !plain()) Object.assign(b, { attack: null, act: 'chase', cooldown: 0, strung: undefined }), Object.assign(h, { hp: HERO.hp, stamina: HERO.stamina, act: 'idle' });
     Object.assign(h, { x: 9, y: 7.6, kvx: 0, kvy: 0 });
   }
   expect(b.attack?.kind).toBe(kind);

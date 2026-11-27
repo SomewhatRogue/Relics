@@ -25,13 +25,14 @@ export const HOLD = { chance: 0.4, least: 0.2, most: 0.6 };
 
 /**
  * Flanking (slice 2): in a pack round one hero, the goblin nearest their front keeps them busy; the rest walk round
- * to their sides and back before they strike, so a block (front only) has to turn. `pack`: how near the hero a
+ * to their sides and back before they strike, so a block (front only) has to turn. `ready`: only a goblin this near
+ * to its next blow (its cooldown, s) goes round; `pack`: how near the hero a
  * goblin counts (tiles); `front`: a goblin this close to straight in front (the cosine) is in front; `slots`: the
  * places round the hero (degrees from where they face), filled in order; `at`: in reach this far round counts as
  * there (the cosine); `pace`: how fast it goes round, as a share of its walk; `keep`: the lean toward the goblin that
  * kept them busy last; going round, `step` radians of the arc at a time, `wide` times its reach out.
  */
-export const FLANK_PACK = { pack: 5, front: 0.35, slots: [180, 115, -115, 150, -150], ring: 0.85, pace: 1.1, keep: 0.6, step: 0.9, wide: 1.6 };
+export const FLANK_PACK = { ready: 1, pack: 3.5, front: 0.35, slots: [180, 115, -115, 150, -150], ring: 0.85, pace: 1.1, keep: 0.6, step: 0.9, wide: 1.6 };
 
 /**
  * Slice 3. A scrapper that can't reach you throws: a stone (a short red line, a small hit) or now and then a pot that

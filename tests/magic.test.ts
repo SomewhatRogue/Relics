@@ -89,7 +89,8 @@ describe('class weapons', () => {
     }
     expect(h.hp).toBe(50 + (WEAPONS.mace.combo[2].heal ?? 0));
     run(room, 0.6);
-    Object.assign(t, { x: 9, y: 5, act: 'chase', hp: 500 });
+    // (Its blows held off: out of reach it would throw a stone, sim/foethrow.ts, and break the hold.)
+    Object.assign(t, { x: 9, y: 5, act: 'chase', hp: 500, cooldown: 99 });
     Object.assign(room.enemies[4], { x: 17, y: 13, act: 'stunned', actDur: 99 });
     Object.assign(h, { x: 9, y: 9.5 });
     const ev = charged(room, 1.3);

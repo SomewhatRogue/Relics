@@ -6,6 +6,7 @@
 import { DRAG, POT, STONE, VOLLEY_CALL, WHIRL } from '../shared/foepatterns';
 import type { Rng } from '../shared/rng';
 import { ARCHER } from '../shared/tuning';
+import { fleeing } from './chase';
 import { begin } from './enemies';
 import type { Enemy, FightEvent, Hero } from './types';
 
@@ -13,7 +14,8 @@ const plain = (e: Enemy) => !e.drill && !e.boss && !e.fury;
 
 /** Out of reach, on its level, facing you and ready: a stone, a pot, or a heavy's drag. True if it began one. */
 export function throwAt(e: Enemy, t: Hero, d: number, facing: number, rng: Rng, ev: FightEvent[]): boolean {
-  if (!plain(e) || e.cooldown > 0 || facing < 0.9 || t.act === 'down') return false;
+  // (Not at a hero running from it: that's a chase, sim/chase.ts, its sprint the answer.)
+  if (!plain(e) || e.cooldown > 0 || facing < 0.9 || t.act === 'down' || fleeing(t, e)) return false;
   if (e.kind === 'scrapper' && !e.variant) {
     if (d >= POT.from && d <= POT.to && rng.next() < POT.chance) {
       begin(e, 'lob', POT.spec, t, ev);
