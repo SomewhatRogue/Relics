@@ -653,3 +653,13 @@ Kyle: "charging and then holding a fully charged attack as warrior makes your ha
 held blade (client/heropose.ts, the arm raised a pixel at 30 a second; client/held.ts, the blade's angle at 40) are
 gone: at full it's steady, the flash says it's full. A longbow tiring still shakes (that one means something). The
 world's jitter walking (trees, water's edge) asked of Kyle first: whether LIVING WORLD off stops it. Claude Opus 5.5.
+
+## 2026-11-27: a friend's Android (no 2.5D; couldn't walk by a building or a stair)
+
+- Walking: by a door or a stair the prompt ("ENTER", "GO UP") sits over the stick's corner (bottom 300 px, the
+  middle), and took any touch begun on it as a use. On a narrow Android a thumb going to walk landed on it. Now a
+  thumb on the prompt starts the stick (client/input.ts `beginStick`; its move and end listen on the window, by the
+  touch's id), and a quick tap there still uses it (main.ts `onTap` checks the prompt's box).
+- 2.5D: nothing to read of why. A failed 2.5D now sends the error, the browser and its WebGL to the relay's logs
+  (three/views.ts, relay.ts `reportAny`, api/_relay.ts takes short text for `why`, `ua`, `gl`). Next time the
+  friend plays, it's in the logs as `ev: 'net', as: '3dfail'`. Claude Opus 5.5.

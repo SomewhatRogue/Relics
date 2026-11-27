@@ -78,9 +78,10 @@ const seenKey = (room: string) => `rl:seen:${room}`;
 /** The newest connection of a player: a dead old one that closes late mustn't say they left. */
 const connKey = (room: string, id: string) => `rl:conn:${room}:${id}`;
 const log = (o: Record<string, unknown>) => console.log(JSON.stringify({ relay: 1, ...o }));
-/** A connection report's fields: at most 16, short names, finite numbers (or a short word for the role). */
+/** A report's fields: at most 16, short names, finite numbers, or short text (the role; what failed, on what device). */
+const TEXT: Record<string, number> = { as: 8, why: 200, ua: 160, gl: 120 };
 const netOf = (o: Record<string, unknown>): Record<string, number | string> =>
-  Object.fromEntries(Object.entries(o).filter(([k, v]) => k.length <= 8 && ((typeof v === 'number' && isFinite(v)) || (k === 'as' && typeof v === 'string' && v.length <= 6))).slice(0, 16)) as Record<string, number | string>;
+  Object.fromEntries(Object.entries(o).filter(([k, v]) => k.length <= 8 && ((typeof v === 'number' && isFinite(v)) || (typeof v === 'string' && v.length <= (TEXT[k] ?? 0)))).slice(0, 16)) as Record<string, number | string>;
 /**
  * Work started from a socket event, with nobody awaiting it. Redis can drop its connection (it
  * reconnects by itself); a command in flight then fails, and an uncaught failure would take down

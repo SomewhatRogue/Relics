@@ -27,6 +27,18 @@ export let ONLINE = !!(import.meta.env?.VITE_ONLINE || params().get('relay'));
 export let FULL = false;
 const fullFns: (() => void)[] = [];
 const live = new Set<RelaySocket>();
+/** Reports waiting for a socket to open (reportAny). */
+const waiting: Record<string, number | string>[] = [];
+
+/**
+ * A line for the relay's logs from whatever socket this page has open (or the next to open): what went wrong on a
+ * player's device, so it's read rather than guessed (2026-11-27: a friend's Android couldn't bring up 2.5D).
+ */
+export function reportAny(net: Record<string, number | string>): void {
+  const s = [...live].find((x) => x.open1());
+  if (s) s.report(net);
+  else if (waiting.length < 4) waiting.push(net);
+}
 /** Told once, when online play goes off because the month's budget is used up. */
 export function onFull(fn: () => void): void {
   fullFns.push(fn);
@@ -169,6 +181,7 @@ export class RelaySocket {
     this.rotateTimer = window.setTimeout(() => this.rotate(), ROTATE_MS);
     ws.onopen = () => {
       this.heardAt = performance.now();
+      while (waiting.length) this.report(waiting.shift()!);
     };
     ws.onmessage = (e) => {
       // A connection being replaced: still deliver (nothing is lost) until the new one is placed.
@@ -300,6 +313,11 @@ export class RelaySocket {
    * Send `d` to `to` ('*' everyone); anything over the relay's limit goes in parts (split.ts).
    * `urgent` (a button pressed): the relay sends it on to other instances at once, not in its next batch.
    */
+  /** Open now (reportAny). */
+  open1(): boolean {
+    return this.ws?.readyState === WebSocket.OPEN;
+  }
+
   /** A connection report for the relay's logs (client/netreport.ts): to no one, never relayed. */
   report(net: Record<string, number | string>): void {
     if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ net }));

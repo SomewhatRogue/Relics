@@ -84,21 +84,27 @@ export class Input {
     if (this.touch) this.buildTouch();
   }
 
+  /**
+   * A thumb down: the stick starts under it. The stick zone's own, and anything laid over the zone that a thumb can
+   * land on as it goes to walk (the prompt by a door or a stair, main.ts: 2026-11-27, a friend on Android couldn't walk
+   * by a building or a staircase). A quick tap still comes to `onTap`.
+   */
+  beginStick(t: Touch): void {
+    if (this.stick.id || !this.stickEl) return;
+    Object.assign(this.stick, { id: String(t.identifier), ox: t.clientX, oy: t.clientY, x: 0, y: 0 });
+    this.tapAt = { t: performance.now(), x: t.clientX, y: t.clientY };
+    this.stickEl.style.left = t.clientX + 'px';
+    this.stickEl.style.top = t.clientY + 'px';
+    this.stickEl.classList.add('on');
+  }
+
   private buildTouch(): void {
     const ui = document.getElementById('touch')!;
     ui.hidden = false;
     this.stickEl = ui.querySelector('.stick')!;
     this.knobEl = ui.querySelector('.knob')!;
     const zone = ui.querySelector('.stick-zone') as HTMLElement;
-    zone.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const t = e.changedTouches[0];
-      Object.assign(this.stick, { id: String(t.identifier), ox: t.clientX, oy: t.clientY, x: 0, y: 0 });
-      this.tapAt = { t: performance.now(), x: t.clientX, y: t.clientY };
-      this.stickEl.style.left = t.clientX + 'px';
-      this.stickEl.style.top = t.clientY + 'px';
-      this.stickEl.classList.add('on');
-    }, { passive: false });
+    zone.addEventListener('touchstart', (e) => (e.preventDefault(), this.beginStick(e.changedTouches[0])), { passive: false });
     const move = (e: TouchEvent) => {
       for (const t of Array.from(e.changedTouches)) {
         if (String(t.identifier) !== this.stick.id) continue;
@@ -122,9 +128,11 @@ export class Input {
         this.pressed();
       }
     };
-    zone.addEventListener('touchmove', move, { passive: false });
-    zone.addEventListener('touchend', end);
-    zone.addEventListener('touchcancel', end);
+    // (On the window, not the zone: a stick begun on something over the zone, the prompt, still follows the thumb.
+    // Each checks it's the stick's own touch.)
+    addEventListener('touchmove', move, { passive: false });
+    addEventListener('touchend', end);
+    addEventListener('touchcancel', end);
     const btn = (sel: string, down: () => void, up?: () => void) => {
       const el = ui.querySelector(sel) as HTMLElement;
       el.addEventListener('touchstart', (e) => (e.preventDefault(), el.classList.add('down'), down(), this.pressed()), { passive: false });

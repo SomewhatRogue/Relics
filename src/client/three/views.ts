@@ -18,6 +18,7 @@ import type { Scene } from '../scene';
 import { LIFT, PX } from '../world';
 import { ViewSwitch } from './switch';
 import type { View3D } from './view3d';
+import { reportAny } from '../relay';
 
 const RELOADED = 'relic.reload3d';
 
@@ -35,6 +36,14 @@ function reloadOnce(): boolean {
   }
   location.reload();
   return true;
+}
+
+/** This device's WebGL as a few words for a failure report: whether WebGL2 comes up, and the renderer. */
+function glInfo(): string {
+  const c = document.createElement('canvas'), g2 = c.getContext('webgl2'), g = g2 ?? c.getContext('webgl');
+  if (!g) return 'no webgl';
+  const d = g.getExtension('WEBGL_debug_renderer_info'), r = d ? g.getParameter(d.UNMASKED_RENDERER_WEBGL) : g.getParameter(g.RENDERER);
+  return `${g2 ? 'webgl2' : 'webgl1'} ${String(r)}`.slice(0, 120);
 }
 
 export class Views {
@@ -56,6 +65,12 @@ export class Views {
 
   private fail(why: unknown): void {
     console.error('2.5D view failed:', why);
+    // Into the relay's logs, with the device and its WebGL, so a phone's failure can be read (2026-11-27).
+    try {
+      reportAny({ as: '3dfail', why: String((why as Error)?.stack ?? why).slice(0, 200), ua: navigator.userAgent.slice(0, 160), gl: glInfo() });
+    } catch {
+      /* drawing on regardless */
+    }
     this.failed = true;
     this.switch.setFailed(true);
     if (this.on3d) (this.on3d = false), this.v3?.show(false);

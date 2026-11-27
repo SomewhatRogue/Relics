@@ -364,6 +364,12 @@ let talking: Npc | null = null;
 const NOT_PEOPLE = new Set(['practice', 'board', 'best', 'market', 'gate']);
 // A phone's tap on a drop of yours in reach opens its card (lootcard.ts); the stick takes every other tap.
 input.onTap = (x, y) => {
+  // A tap on the prompt uses what it names.
+  const pr = $('#prompt');
+  if (!pr.hidden) {
+    const b = pr.getBoundingClientRect();
+    if (x >= b.left - 6 && x <= b.right + 6 && y >= b.top - 6 && y <= b.bottom + 6) return promptTap(new Event('tap'));
+  }
   const hs = views.heroScreen(), me = game.hero, d = me && LootCard.nearest(game.room, me);
   if (!hs || !d || game.mode !== 'run' || panel.open || title.open) return;
   const dx = hs[0] + (d.x - me.x) * hs[2], dy = hs[1] + (d.y - me.y) * (hs[3] ?? hs[2]);
@@ -419,7 +425,9 @@ const promptTap = (e: Event) => {
   if (game.near() || card.near >= 0) use();
   else input.intent.grabSeq++;
 };
-$('#prompt').addEventListener('touchstart', promptTap, { passive: false });
+// (A thumb on it starts the stick as well: a tap there still uses it, through `onTap`, and a drag walks. The prompt sits
+// over the stick's corner by a door or a stair, and on a narrow Android a thumb going to walk landed on it, 2026-11-27.)
+$('#prompt').addEventListener('touchstart', (e) => (e.preventDefault(), input.beginStick(e.changedTouches[0])), { passive: false });
 $('#prompt').addEventListener('click', promptTap);
 
 
