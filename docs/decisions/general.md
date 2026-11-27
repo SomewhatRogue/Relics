@@ -578,3 +578,8 @@ by its last word (ready, taught, not dark, not held back by a hungry piece; not 
 windup here, stood still and turned to the aim; a thrown relic's word (`throw`, `hookfire`) is shown at its windup
 and not again when the leader's comes; refused, it's taken back as a dodge is (client/ownhero.ts `startThrow`;
 tests/ownthrow.test.ts). The skills' own effects (zones, bolts) still come from the leader's room. Claude Opus 5.5.
+
+## 2026-11-27: a counter hits harder
+
+Kyle: after a block, an attack in the counter window "should do a decent chunk more damage, almost like a charged
+hit". GUARD.counterMult 1.5 to 2.25 (shared/tuning.ts); the window stays 1.6 s. Claude Opus 5.5.
