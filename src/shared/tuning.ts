@@ -102,9 +102,9 @@ export const GUARD = {
   guardBreakStun: 0.9,
   /** After a block takes a blow, the next attack started within this window is a counter, `counterMult` as
    *  hard (no timing to it: Kyle, 2026-11-05, parry is gone; was 2.5 when only a parry earned it; 1.5 till
-   *  2026-11-27, then 2.25, Kyle: "a decent chunk more damage, almost like a charged hit"). */
+   *  2026-11-27, then 2, Kyle: "a decent chunk more damage, almost like a charged hit"). */
   counterWindow: 1.6,
-  counterMult: 2.25,
+  counterMult: 2,
   /** A blow's damage counts in full toward a block's stamina up to `knee`, and only `past` of each point above
    *  it, so one big blow (a butcher's cleave) doesn't take the whole bar (Kyle, 2026-11-06: "Warrior block isn't
    *  great against butcher"). A butcher's cleave of 30 costs a sword 46 stamina (was 72); a scrapper's 8, 19 as before. */

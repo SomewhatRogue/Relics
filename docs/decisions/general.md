@@ -582,7 +582,7 @@ tests/ownthrow.test.ts). The skills' own effects (zones, bolts) still come from 
 ## 2026-11-27: a counter hits harder
 
 Kyle: after a block, an attack in the counter window "should do a decent chunk more damage, almost like a charged
-hit". GUARD.counterMult 1.5 to 2.25 (shared/tuning.ts); the window stays 1.6 s. Claude Opus 5.5.
+hit". GUARD.counterMult 1.5 to 2 (shared/tuning.ts; 2.25 stalled the Hempen bot at day 4, tests/hempen.test.ts); the window stays 1.6 s. Claude Opus 5.5.
 
 ## 2026-11-27: plate doesn't slow a Warrior or Cleric
 
