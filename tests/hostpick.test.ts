@@ -232,7 +232,7 @@ describe('a hidden host hands on', () => {
     const game = { room, run: null, roomKey: 1, goalText: () => '', houses: () => [], addFriend() {}, dropFriend() {}, roomOf: () => room, keyOf: () => 1, stepped: new Map(), doorMarks: () => [], jobSave: () => ({ room: saveRoom(room), houses: [] }) };
     const host = new CoopHost('PROOM0001', 'kyle', 'KYLE', game as never, [['kyle', 'KYLE'], ['sam', 'SAM'], ['amy', 'AMY']]);
     expect(host.handOver(true)).toBe('amy');
-    expect(sent.map((s) => Object.keys(s.d).sort().join())).toEqual(['save', 'bye,stay,to']);
+    expect(sent.map((s) => Object.keys(s.d).sort().join())).toEqual(['line,save', 'bye,stay,to']);
     expect(sent[1].d).toEqual({ bye: 1, stay: 1, to: 'amy' });
     expect(closed).toBe(1);
   });
@@ -332,5 +332,16 @@ describe('the room across a handover', () => {
     const r = handedOn(expedition(2), 3, Math.round(4 / TICK), Math.round(12 / TICK));
     expect(r.drift).toBeLessThanOrEqual(0.0071);
     expect(r.friend).toBe(r.plain);
+  });
+});
+
+describe('who takes the job on (rankLine)', () => {
+  it('puts the best placed friend first, the unheard last, ties by id', async () => {
+    const { rankLine } = await import('../src/shared/hostpick');
+    const l = (r: number, f = 16): Link => ({ r, f });
+    // The four-phone job of 2026-11-26: the slow phone's id came first, so it took the job.
+    expect(rankLine(['hfh7', 'hq4c', 'hs88'], { hfh7: l(68), hq4c: l(12), hs88: l(22) })).toEqual(['hq4c', 'hs88', 'hfh7']);
+    expect(rankLine(['b', 'a', 'c'], { c: l(30) })).toEqual(['c', 'a', 'b']);
+    expect(rankLine(['b', 'a'], { a: l(20), b: l(20) })).toEqual(['a', 'b']);
   });
 });

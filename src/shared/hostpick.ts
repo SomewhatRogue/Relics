@@ -88,3 +88,14 @@ export function handNow(s: { hosting: boolean; friends: number; touch: boolean; 
   if (s.hiddenFor < 0) return false;
   return s.touch || s.hiddenFor >= HIDE.desk;
 }
+
+/**
+ * Who takes the job on if its host goes (Kyle, 2026-11-26: a four-phone job went to the slowest phone, by
+ * the order of its id): the friends best first, by the links they've said in the job (`linkScore`), then
+ * those not yet heard from, each group by id so every page agrees on a tie. The host sends this line with
+ * its saves; a friend waiting on a quiet host takes its turn from it.
+ */
+export function rankLine(ids: string[], links: Record<string, Link | undefined>): string[] {
+  const score = (id: string) => (known(links[id]) ? linkScore(links[id]!) : Infinity);
+  return [...ids].sort((a, b) => score(a) - score(b) || (a < b ? -1 : a > b ? 1 : 0));
+}

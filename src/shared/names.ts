@@ -3,7 +3,7 @@
  * only allow unique ones"; api/names.ts keeps who has which). A name is held in capitals, spaces closed up, at
  * most 12 letters; a new hero's page suggests free ones from the pool (client/names.ts asks the server).
  */
-import { NAME_POOL } from './namepool';
+import { NAME_POOL } from './namepool.js';
 
 export const NAME_MAX = 12;
 /** As a name is kept and compared: capitals, one space at most between words. */

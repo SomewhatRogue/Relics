@@ -55,6 +55,8 @@ import { Playout } from './playout';
 import { OwnHero } from './ownhero';
 import { heroClocks, readBody, withClock, WIRE } from './wire2';
 import { loading, whoIsComing } from './loadpage';
+import { rankLine, sayAgain, type Link } from '../shared/hostpick';
+import { myLink } from './netq';
 
 /** Everyone gets the whole job this often; the friend first in line every SAVE_EVERY. */
 const SAVE_ALL = 8;
@@ -92,6 +94,8 @@ export interface Friend {
   pressTick?: number;
   /** The wire format their page speaks, from their latest hello (none: the first; wire2.ts). */
   v?: number;
+  /** Their link as they last said it in the job (shared/hostpick.ts): who'd take the job on best. */
+  link?: Link;
 }
 /** What the leader's game tells the host to send, and is told by it. */
 export interface HostGame {
@@ -171,6 +175,8 @@ export class CoopHost {
     if (typeof need === 'number') return this.sendMap(m.from, need);
     const here = (d as { here?: unknown }).here;
     if (typeof here === 'number') return void (f.here = here);
+    const q = (d as { q?: unknown }).q;
+    if (Array.isArray(q) && q.length === 2 && q.every((v) => typeof v === 'number' && isFinite(v))) return void (f.link = { r: q[0], f: q[1] });
     if (d.t === 'bye') return void (f.gone || ((f.gone = true), this.game.dropFriend(m.from)));
     if (d.t === 'hello' && d.profile && typeof d.profile === 'object') {
       const first = !f.profile || f.gone;
@@ -240,10 +246,11 @@ export class CoopHost {
       if (!patchDue || now - this.savedAt > SAVE_EVERY + SAVE_WAIT) {
         this.savedAt = now;
         const save = this.saved(), all = now - this.savedAllAt > SAVE_ALL;
-        if (all) (this.savedAllAt = now), this.sock.send('*', { save });
+        const line = this.line();
+        if (all) (this.savedAllAt = now), this.sock.send('*', { save, line });
         else {
-          const first = this.firstInLine();
-          if (first) this.sock.send(first, { save });
+          const first = line[0];
+          if (first) this.sock.send(first, { save, line });
         }
         // (Kept here too, for this page to lead again after a reload.)
         keepJob(save);
@@ -308,7 +315,13 @@ export class CoopHost {
 
   /** The friend first in line to take the job on (the one the save goes to: CoopGuest.shouldTake's order). */
   firstInLine(): string | undefined {
-    return [...this.friends.keys()].filter((id) => !this.away(id)).sort()[0];
+    return this.line()[0];
+  }
+
+  /** The friends still in it, best placed to take the job on first (shared/hostpick.ts rankLine). */
+  line(): string[] {
+    const ids = [...this.friends.keys()].filter((id) => !this.away(id));
+    return rankLine(ids, Object.fromEntries(ids.map((id) => [id, this.friends.get(id)!.link])));
   }
 
   /**
@@ -319,7 +332,7 @@ export class CoopHost {
    */
   handOver(stay = false): string | undefined {
     const to = this.firstInLine();
-    this.sock.send('*', { save: this.saved() });
+    this.sock.send('*', { save: this.saved(), line: this.line() });
     this.sock.send('*', stay ? { bye: 1, stay: 1, to } : { bye: 1 });
     if (stay) this.sock.close();
     else this.close();
@@ -419,6 +432,9 @@ export class CoopGuest {
   left = false;
   /** The leader handed the job to this friend by name (their page went out of sight): they take it first. */
   private named: string | undefined;
+  /** The leader's line for taking the job on (CoopHost.line), with its saves; my link as I last said it. */
+  private line: string[] | null = null;
+  private saidLink: { l: Link; at: number } | null = null;
   /** The relay said the leader's last connection went (`left`): the room is free to take at once. */
   private leadLeft = false;
   private heardLead = -1;
@@ -473,7 +489,7 @@ export class CoopGuest {
     if (d.bye) return void ((this.left = !d.stay), (this.named = d.stay && typeof d.to === 'string' ? d.to : undefined), (this.heardLead = now - TAKE + (this.named && this.leadLeft ? 0 : BYE_WAIT)));
     // (The end's run swaps ids like a patch does, so my own tallies are under `me`.)
     if (d.end) return void ((this.ended = asGuest(d.end, this.myId)), this.onEnd(this.ended!));
-    if (typeof d.save === 'string') return void (this.save = d.save);
+    if (typeof d.save === 'string') return void ((this.save = d.save), Array.isArray((d as { line?: unknown }).line) && (this.line = ((d as { line: unknown[] }).line).filter((v): v is string => typeof v === 'string')));
     // The leader's own hero is `me` in their room; in mine, I am. Either wire format (`{ s }` text, `{ b }`
     // an object: wire2.ts); anything else isn't a patch.
     const body = readBody(d, this.myId) as Body | null;
@@ -677,6 +693,7 @@ export class CoopGuest {
     if (stick !== this.stick) (this.stick = stick), (this.stickAt = now);
     if (!press && !turn && !(s !== this.said && now - this.saidAt >= STICK_EVERY) && now - this.saidAt <= KEEP) return;
     this.saidMoving = moving;
+    this.sayLink(now);
     const vt = this.viewTime(now);
     this.sock.send(this.lead, { t: 'in', i: vt === undefined ? i : { ...i, vt: Math.round(vt * 1000) / 1000 }, at: now }, press);
     (this.said = s), (this.saidButtons = b), (this.saidAt = now);
@@ -707,6 +724,8 @@ export class CoopGuest {
     this.heardLead = clock();
     this.left = false;
     this.named = undefined;
+    this.line = null;
+    this.saidLink = null;
     this.leadLeft = false;
     this.mine = null;
     // (Their names come with their first whole room: not the old leader's under '@lead' meanwhile.)
@@ -715,6 +734,12 @@ export class CoopGuest {
   }
 
   /** How long the leader has been quiet. */
+  /** My link to the leader now and then (shared/hostpick.ts sayAgain), so its line puts the best placed first. */
+  private sayLink(now: number): void {
+    const l = myLink(this.sock.rtt);
+    if (sayAgain(l, this.saidLink, now)) (this.saidLink = { l, at: now }), this.sock.send(this.lead, { q: [l.r, l.f] });
+  }
+
   quiet(now: number): number {
     if (this.firstAt < 0) this.firstAt = now;
     return now - (this.heardLead > 0 ? this.heardLead : this.firstAt);
@@ -722,12 +747,14 @@ export class CoopGuest {
 
   /**
    * Time to take the job on: the leader quiet TAKE seconds, I've a save, and I'm first in line among
-   * the friends still in it (by id; the next one waits TAKE_NEXT longer, in case the first is gone too).
+   * the friends still in it (the leader's line, best placed first, else by id; the next one waits TAKE_NEXT longer, in case the first is gone too).
    */
   shouldTake(now: number): boolean {
     if (!this.save || !this.room) return false;
     if (this.cut) return true;
-    const line = [this.myId, ...this.room.heroes.map((h) => h.id).filter((id) => id !== 'me' && id !== '@lead' && id !== 'squire')].sort();
+    const ids = [this.myId, ...this.room.heroes.map((h) => h.id).filter((id) => id !== 'me' && id !== '@lead' && id !== 'squire')].sort();
+    // (The leader's line, best placed first, when it's sent one with me in it; else by id.)
+    const line = this.line?.includes(this.myId) ? [...this.line, ...ids.filter((id) => !this.line!.includes(id))] : ids;
     // (Named by a leader handing on: them first, the rest in their order after.)
     const at = this.named ? (this.named === this.myId ? 0 : 1 + line.indexOf(this.myId)) : line.indexOf(this.myId);
     return this.quiet(now) > TAKE + at * TAKE_NEXT;

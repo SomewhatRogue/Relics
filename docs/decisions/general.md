@@ -520,3 +520,15 @@ one pointing away from it (looks backwards); I think we just need one." In 2.5D 
 arrow out (exitmat3d.ts, the same as the flat view's) and, in the gap behind it, three glowing chevrons from before the
 mat (three/shots3d.ts makeExit, 11-03), angled back into the room. The chevrons are gone; shut, the stakes stay. Looked
 at on the north fields' far end on a phone. Graphics' file, a small logged edit. Claude Opus 5.5
+
+## 2026-11-26: the four-phone lag, the job handed to the slowest phone
+
+Kyle: "a mission with two androids and another iphone, SUPER laggy". The relay's logs: the leader hosted at
+setting out, then 15 s in its page went quiet or out of sight and handed the job on to the friend first in line,
+which was first **by id**: the phone with a 68 to 89 ms trip (the others 12 to 22, and the trip as a page times it
+grows when its frames are slow, so it was likely also the busiest phone). It ran the four-hero room for the rest.
+Now the friends say their link to the host in the job (`{ q }`, at hostpick.ts `sayAgain`'s pace), the host ranks
+its line by it (shared/hostpick.ts `rankLine`, unheard friends last, ties by id) and sends the line with its saves
+and its goodbye, and a friend waiting on a quiet host takes its turn from that line. Small edits in client/coop.ts
+(the Performance sweep's, the handover part only). Also: /api/names failed on every call on the server
+(`Cannot find module .../namepool`): shared/names.ts now imports `./namepool.js`. Claude Opus 5.5.
