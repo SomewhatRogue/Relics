@@ -6,8 +6,8 @@
  */
 import type { Theme } from '../shared/arena';
 
-/** 1.2 at first; 1.45 the same day (Kyle: "lets make dark brighter again"). */
-export const DARK_LIFT = 1.45;
+/** 1.2 at first; 1.45 the same day (Kyle: "lets make dark brighter again"); 1.6 ("a tad lighter"). */
+export const DARK_LIFT = 1.6;
 
 /** The ambient a theme is lit with: its own, lifted when it's not full day. */
 export function liftedAmbient(t: Theme): [number, number, number] {

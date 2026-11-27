@@ -553,7 +553,7 @@ Claude Opus 5.5.
 ## 2026-11-27: dark maps a little lighter
 
 Kyle: "maps are a little dark, maybe we increase light on dark maps by a bit: dusk and night and caves". Every map
-at dusk, at night, underground or indoors has its ambient lifted by a fifth (then, Kyle: "brighter again", by 45%) before either view lights it
+at dusk, at night, underground or indoors has its ambient lifted by a fifth (then, Kyle: "brighter again", by 45%; then "a tad lighter", by 60%) before either view lights it
 (client/darklift.ts `liftedAmbient`, read by scene.ts and three/lights3d.ts); the moonlit floor under the tile redraw
 still applies over it. Daylight and dawn unchanged. Claude Opus 5.5.
 
