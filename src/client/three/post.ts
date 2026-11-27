@@ -18,6 +18,13 @@ import { TILES } from '../tilelook';
  * undithered. Always 1; the stepped sums it switches off are still written out in the shaders.
  */
 export const SMOOTH_U = { value: 1 };
+/**
+ * The camera's place in whole render pixels (camera3d.ts sets it each frame). A dither read off the screen's pixels
+ * stays put on the screen while the world steps past under it, so a light's banded edge (and a cloud shadow's)
+ * crawled over trees and ground as you walked (Kyle, 2026-11-27: "the world jitters, like trees"). With this added
+ * the dither keeps to the world, as the world's own pixels do.
+ */
+export const PXOFF = { value: new THREE.Vector2() };
 
 export const BAYER = `
 float bay2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
@@ -41,7 +48,7 @@ const TOON = `
   vec3 irr = (reflectedLight.directDiffuse + reflectedLight.indirectDiffuse) / alb;
   irr = max(irr, vec3(0.19));
   float L = max(max(irr.r, irr.g), irr.b);
-  float bz = bay4(gl_FragCoord.xy) - 0.5;
+  float bz = bay4(gl_FragCoord.xy + uPxOff) - 0.5;
   float q = mix(floor(sqrt(L) * 5.0 + bz * 0.6 + 0.5), sqrt(L) * 5.0, uSmooth) / 5.0;
   q = clamp(q * q, 0.0, 2.6);
   irr *= q / max(L, 0.0001);
@@ -58,8 +65,8 @@ export function toonize<T extends THREE.Material>(m: T): T {
     return m;
   }
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uSmooth = SMOOTH_U;
-    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'uniform float uSmooth;\n' + BAYER + '\nvoid main() {').replace('vec3 outgoingLight =', TOON + '\nvec3 outgoingLight =');
+    (sh.uniforms.uSmooth = SMOOTH_U), (sh.uniforms.uPxOff = PXOFF);
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'uniform float uSmooth;\nuniform vec2 uPxOff;\n' + BAYER + '\nvoid main() {').replace('vec3 outgoingLight =', TOON + '\nvec3 outgoingLight =');
   };
   return m;
 }

@@ -15,6 +15,7 @@ import type { GameMap } from '../../shared/arena';
 import { ALIVE, WIND } from '../alive';
 import { VCOL } from './mats';
 import { PITCH } from './camera3d';
+import { PXOFF } from './post';
 
 /** The shared uniforms: the time (seconds), whether it's on here (on, and outdoors). */
 export const LIFE = { uLifeT: { value: 0 }, uLife: { value: 0 }, uRefl: { value: null as THREE.Texture | null } };
@@ -103,11 +104,12 @@ function chain(m: THREE.Material, edit: (sh: THREE.WebGLProgramParametersWithUni
 }
 
 const shadows = (sh: THREE.WebGLProgramParametersWithUniforms, after: string) => {
-  Object.assign(sh.uniforms, LIFE);
+  Object.assign(sh.uniforms, LIFE, { uLifePx: PXOFF });
   sh.vertexShader = sh.vertexShader.replace('void main() {', 'varying vec2 vLifeW;\nvoid main() {').replace('#include <project_vertex>', 'vLifeW = (modelMatrix * vec4(transformed, 1.0)).xz;\n#include <project_vertex>');
   sh.fragmentShader = sh.fragmentShader
-    .replace('void main() {', LIFE_GLSL + 'varying vec2 vLifeW;\nvoid main() {')
-    .replace(after, `${after}\nif (uLife > 0.5) { float cl = lifeCloud(vLifeW, uLifeT); diffuseColor.rgb *= 1.0 - ${K.cloudDark.toFixed(2)} * step(bay4(floor(gl_FragCoord.xy)) * 0.6 + 0.2, cl); }`);
+    .replace('void main() {', LIFE_GLSL + 'varying vec2 vLifeW;\nuniform vec2 uLifePx;\nvoid main() {')
+    // (The dither kept to the world, post.ts PXOFF, so a cloud shadow's edge doesn't crawl as you walk.)
+    .replace(after, `${after}\nif (uLife > 0.5) { float cl = lifeCloud(vLifeW, uLifeT); diffuseColor.rgb *= 1.0 - ${K.cloudDark.toFixed(2)} * step(bay4(floor(gl_FragCoord.xy + uLifePx)) * 0.6 + 0.2, cl); }`);
 };
 
 /** The map's merged mesh's material: the trees bend in the wind; cloud shadows over it. */

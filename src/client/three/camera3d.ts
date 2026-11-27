@@ -11,6 +11,7 @@ import { upright } from '../phoneband';
 import { STREET } from './streetkit';
 import { SWING } from '../swing';
 import { PITCH_DEG } from '../tilelook';
+import { PXOFF } from './post';
 
 // (The new look's test street, `?hd&street`: a perspective chase camera, lower, looking down 26 degrees at your hero
 // through a 28 degree lens, turning up to 45 degrees toward where you walk in town; streetkit.ts, swing.ts.)
@@ -120,6 +121,8 @@ export class Cam {
     u = hold(u, ru, this.lastU, this.rawU);
     (this.lastR = r), (this.lastU = u), (this.rawR = rr), (this.rawU = ru);
     if (shake > 0.2) r += Math.round((Math.random() - 0.5) * shake) / this.ppu, (u += Math.round((Math.random() - 0.5) * shake) / this.ppu);
+    // Where it stands in whole render pixels, for the dithers that keep to the world (post.ts PXOFF).
+    PXOFF.value.set(Math.round(r * P), Math.round(u * P));
     this.cam.position.copy(this.right).multiplyScalar(r).addScaledVector(this.up, u).addScaledVector(this.back, b + DIST);
     this.cam.updateMatrixWorld();
   }

@@ -687,3 +687,8 @@ not the chest's front all one colour. Claude Opus 5.5.
   Their trunk on the ground draws as a tree's.
 - Pines "block the path sometimes": asked Kyle which map; they're placed by the same code as the trees.
 Claude Opus 5.5.
+- Kyle: "check if any other grids were wrong". Every 2.5D shader's pixel grid searched: the water's was the only one
+  laid at 16 a tile. But two dithers read the screen's pixels: the light's banded edges (three/post.ts, every lit
+  material) and the cloud shadows' (three/wind3d.ts). The screen's pattern stays put while the world steps past under
+  it, so a torch's pool or a cloud's edge crawled over trees and ground as you walked. Both now add the camera's place
+  in whole render pixels (post.ts `PXOFF`, set by three/camera3d.ts each frame), so the dither keeps to the world.
