@@ -111,12 +111,14 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     if (talkedTo(pr, 'trainer', arg)) g.keep();
     // The first meeting, and the word after your first job, are a talk, not the training screen (Kyle's
     // playtest, 2026-11-13): there's nothing to buy at level 1, so what they say is the point.
-    const head = `${t.name}, ${CLASS_NAME[cls]} TRAINER`, talk = (s: string, pre = '', post = '') => panel.show(head, pre + say(name, s) + post, [{ label: 'TRAINING', act: () => openTrainer(g, panel, head, name, '') }]);
+    // (A word from them is only that: a CLOSE, no TRAINING button and no skill screen. Kyle, 2026-11-27: "it opens up the
+    // skill menu though what it's giving you is go to the job board". Talk again for the training.)
+    const head = `${t.name}, ${CLASS_NAME[cls]} TRAINER`, talk = (s: string, pre = '', post = '') => panel.show(head, pre + say(name, s) + post, [{ label: 'CLOSE', act: () => panel.hide() }]);
     // A Cleric's cold censer: Isolde lights it at the Lantern first (on the first meeting, then her word too).
     const relit = pr.cls === 'HEALER' && pr.cold;
     if (relit) (pr.cold = false), g.keep(), (g.hero.cold = false);
     const lit = relit ? p('She takes your censer without asking, carries it to the Lantern, and brings it back lit.') : '';
-    const training = { label: 'TRAINING', act: () => openTrainer(g, panel, head, name, '') };
+    const training = { label: 'CLOSE', act: () => panel.hide() };
     if (first) {
       // A plain weapon of a kind you've none of, into the pack (shared/errandpay.ts).
       const gift = trainerGift(pr);
@@ -135,8 +137,13 @@ export function openSpot(id: SpotId, g: Game, panel: Panel, arg = 0, key = ''): 
     if (back && pr.level < 3) return talk(ERRANDW.back[pr.cls]);
     // A hero quest handed over just now (shared/heroquests.ts): the trainer's one line for it.
     const handed = !first && !!questHeld(pr) && questHeld(pr)!.q.id !== had;
+    // A quest handed over is a word, not the training screen (its goal line names it).
+    if (handed) {
+      const held = questHeld(pr)!;
+      return talk(QUESTW.hand[pr.cls], '', `<p><b style="color: var(--kc, #d4a537)">${ERRANDW.fresh}:</b> ${QUESTW.goal(held.q, held.n)}</p>`);
+    }
     // One spoken line at most: grown since you were last here, or (a Cleric) coals for the censer.
-    const greet = handed ? QUESTW.hand[pr.cls] : pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
+    const greet = pr.picks > 0 ? TEACH[pr.cls][0] : pr.cls === 'HEALER' && pr.glow > 0 ? COAL.isolde : '';
     openTrainer(g, panel, head, name, greet);
   } else if (id === 'hew') {
     panel.show('HEW', say('Hew', g.wood && g.wood.stage >= 2 ? LINES.north : LINES.later));

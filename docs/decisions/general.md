@@ -707,3 +707,11 @@ just a hair further away. Should also be able to throw it and it does more damag
   one stay in. Drawn sinking and thrashing, the water over its lower half (client/foes.ts, three/chars3d.ts), spray and
   rings (client/foemoves.ts, fx.ts `splash`), a splat for its sound. tests/drown.test.ts.
 Claude Opus 5.5.
+
+## 2026-11-27: a trainer's word is only a word
+
+Kyle: "you keep having options with the trainer open up even though the quest it's giving you is always go to a job
+board ... should just be text and not open up the skill menu". client/townui.ts: every talk that's a line from them
+(the first meeting, the word after the yard, the north fields' word and its return, back from a job, a hero quest
+handed over) shows the words and a CLOSE, no TRAINING button; a quest handed over no longer opens the training screen
+under its line. Talking to them again with nothing new to say opens training as before. Claude Opus 5.5.
