@@ -572,3 +572,9 @@ Kyle, after the east-coast lag: "do 2 and 3". Item 2: every page in a job sends 
 `rt` (its trip to the relay), `trip` (its input to the leader and back), `n` patches, `gaps` over 150 ms, `stalls` over
 300 ms, `worst` gap, `wait` (the jitter buffer's longest), `snaps` (its hero snapped back), `fr` (frame time). A
 leader's: `rt`, `fr`, `friends`. Small edits in client/coop.ts, relay.ts, ownhero.ts (a counter). Claude Opus 5.5.
+
+Item 3, the same day: a friend's relic or skill shows at once on their own screen. A press the room would let go
+by its last word (ready, taught, not dark, not held back by a hungry piece; not GRASP or a sign) starts the throw's
+windup here, stood still and turned to the aim; a thrown relic's word (`throw`, `hookfire`) is shown at its windup
+and not again when the leader's comes; refused, it's taken back as a dodge is (client/ownhero.ts `startThrow`;
+tests/ownthrow.test.ts). The skills' own effects (zones, bolts) still come from the leader's room. Claude Opus 5.5.

@@ -22,7 +22,10 @@
  */
 import { collide, useMap } from '../shared/arena';
 import { travel } from '../shared/sweep';
-import { CHARGE, DODGE, HERO, INPUT_BUFFER, TICK, WEAPONS, dodgeOf } from '../shared/tuning';
+import { CHARGE, DODGE, HERO, INPUT_BUFFER, RELICS, TICK, WEAPONS, dodgeOf } from '../shared/tuning';
+import { relicDark } from '../sim/charge';
+import { jealousBlocks } from '../sim/hungry';
+import { knows } from '../sim/types';
 import { statsOf } from '../sim/gearstats';
 import { currentSwing, face, rollDir } from '../sim/hero';
 import { dodgeBreath, dodgeReach } from '../sim/knacks';
@@ -39,11 +42,15 @@ export const PREDICT = { ease: 12, settleEase: 6, snap: 1.5, far: 3.5, trip: 0.1
 /** Acts the leader's room does to you: drawn where it says, never walked here. */
 const FOLLOW = new Set(['hurt', 'stun', 'down', 'zip', 'bash', 'carry', 'slam']);
 /** What this screen draws ahead of the leader's word (put back from its word each frame first). */
+/** Relics thrown from the hand: the room's `throw` (or `hookfire`) word comes at their windup. */
+const THROWN = new Set(['hook', 'javelin', 'net', 'lodestone']);
 const DRAWN = ['act', 'actT', 'blocking', 'rollDx', 'rollDy', 'fx', 'fy', 'combo', 'heavy', 'moving'] as const;
 
 interface Own {
   id: number;
-  kind: 'roll' | 'attack';
+  kind: 'roll' | 'attack' | 'throw';
+  /** A relic or skill used (`throw`): which, and its ready time in the leader's word when it began. */
+  relic?: string;
   /** This page's clock when it began; how far in; the newest input sent by then. */
   start: number;
   t: number;
@@ -102,6 +109,10 @@ export class OwnHero {
   private attackSeq = NaN;
   private rollQ = -9;
   private attackQ = -9;
+  private relicSeq = NaN;
+  private relicQ = -9;
+  /** Words of my acts shown here this frame from inside `run` (a thrown relic's), handed on in `frame`. */
+  private shown: FightEvent[] = [];
   private lastRoll = -9;
   private settleUntil = -9;
   private owed: { k: string; at: number }[] = [];
@@ -135,13 +146,14 @@ export class OwnHero {
       if (!o.confirmed) {
         if (o.kind === 'roll' && s.lastRollAt !== o.before) (o.confirmed = true), (o.began = s.lastRollAt as number);
         else if (o.kind === 'attack' && ((s.act === 'attack' && s.combo === o.combo) || s.act === 'charge')) o.confirmed = true;
+        else if (o.kind === 'throw' && (s.act === 'throw' || (s.relicReady as Record<string, number>)?.[o.relic!] !== o.before)) o.confirmed = true;
         else if (ack !== undefined && ack >= o.sent) {
           // (The room keeps a press INPUT_BUFFER, for a busy moment to pass: give it that.)
           if (o.ackT < 0) o.ackT = t;
           else if (t - o.ackT > INPUT_BUFFER + 2 * TICK) this.cancel(o, now);
         }
       }
-      if (o.confirmed) o.prog = o.kind === 'roll' ? (s.act === 'roll' && s.lastRollAt === o.began ? t - o.began : Infinity) : s.act === 'attack' && s.combo === o.combo ? (s.actT as number) : Infinity;
+      if (o.confirmed) o.prog = o.kind === 'roll' ? (s.act === 'roll' && s.lastRollAt === o.began ? t - o.began : Infinity) : o.kind === 'throw' ? (s.act === 'throw' ? (s.actT as number) : Infinity) : s.act === 'attack' && s.combo === o.combo ? (s.actT as number) : Infinity;
     }
     // Done here and done there: all of it is in the leader's word now.
     const over = new Set(this.acts.filter((o) => o.dead || (o.done && o.confirmed && o.prog === Infinity)).map((o) => o.id));
@@ -160,7 +172,7 @@ export class OwnHero {
 
   /** The leader's event for something already shown here (my dodge, my blow): not shown again. */
   owes(e: FightEvent, now: number): boolean {
-    if (e.k !== 'roll' && e.k !== 'blink' && e.k !== 'swing') return false;
+    if (e.k !== 'roll' && e.k !== 'blink' && e.k !== 'swing' && e.k !== 'throw' && e.k !== 'hookfire') return false;
     this.owed = this.owed.filter((o) => now - o.at < 1.5);
     const i = this.owed.findIndex((o) => o.k === e.k), s = this.server;
     if (i < 0 || !s || Math.hypot(e.x - s.x, e.y - s.y) > 2.5) return false;
@@ -181,6 +193,7 @@ export class OwnHero {
     useMap(room.map);
     if (intent.rollSeq !== this.rollSeq) (Number.isNaN(this.rollSeq) || (this.rollQ = now)), (this.rollSeq = intent.rollSeq);
     if (intent.attackSeq !== this.attackSeq) (Number.isNaN(this.attackSeq) || (this.attackQ = now)), (this.attackSeq = intent.attackSeq);
+    if (intent.relicSeq !== this.relicSeq) (Number.isNaN(this.relicSeq) || (this.relicQ = now)), (this.relicSeq = intent.relicSeq);
     this.walked = this.walked.filter((x) => x[0] > now - 1.2 || this.acts.some((o) => o.id === x[3]));
     // The leader's room moving me (a blow, a stun, a carry): where it says, between its patches.
     if (FOLLOW.has(s.act as string) || h.carrying || h.lifting) {
@@ -193,10 +206,11 @@ export class OwnHero {
     }
     let cur = this.acts.find((o) => !o.done);
     // Past a dodge or blow of mine the leader's still showing: on my clock it's over.
-    if (!cur && (s.act === 'roll' || s.act === 'attack') && this.acts.some((o) => o.done && o.confirmed && o.kind === s.act && o.prog !== Infinity)) (h.act = 'idle'), (h.actT = 0), (h.heavy = false);
-    cur = this.startRoll(h, cur, intent, now, sent, p, ev) ?? this.startSwing(room, h, cur, intent, now, sent, p, ev);
+    if (!cur && (s.act === 'roll' || s.act === 'attack' || s.act === 'throw') && this.acts.some((o) => o.done && o.confirmed && o.kind === s.act && o.prog !== Infinity)) (h.act = 'idle'), (h.actT = 0), (h.heavy = false);
+    cur = this.startRoll(h, cur, intent, now, sent, p, ev) ?? this.startSwing(room, h, cur, intent, now, sent, p, ev) ?? this.startThrow(room, h, intent, now, sent, lead);
     let mx = 0, my = 0, from = 0, to = 0;
     if (cur) [mx, my, from, to] = this.run(h, cur, p, dt);
+    if (this.shown.length) ev.push(...this.shown.splice(0));
     // Walking, at the pace of what I'm doing (none mid-dodge, or mid-blow but for a wand's cast).
     h.blocking = h.act === 'idle' && guardUp(h, intent);
     if (h.act === 'idle') face(h, intent, room.enemies, h.blocking);
@@ -282,10 +296,25 @@ export class OwnHero {
     return o;
   }
 
-  private add(o: Omit<Own, 'id' | 't' | 'ackT' | 'confirmed' | 'done' | 'prog' | 'began'>): Own {
+  /**
+   * A relic or skill pressed, and the room would let it go now by its last word (ready, taught, not dark, not
+   * held back by a hungry piece): its windup starts here at once (2026-11-27, for a far friend), stood still and
+   * turned to the aim as the room turns you. Not GRASP (it can fizzle on magic) or a sign.
+   */
+  private startThrow(room: ArenaRoom, h: Hero, intent: Intent, now: number, sent: number, lead: number): Own | undefined {
+    const s = this.srv!, relic = s.relic as string, r = RELICS[relic as keyof typeof RELICS];
+    if (now - this.relicQ >= INPUT_BUFFER || !r || h.act !== 'idle' || h.signing || relic === 'grasp') return;
+    const ready = (s.relicReady as Record<string, number> | undefined)?.[relic] ?? Infinity;
+    if (ready > lead || relicDark(h) || (relic === h.relics[0] && !knows(h, 'skill')) || jealousBlocks(h)) return;
+    if (relic !== 'blessing' && relic !== 'horn' && relic !== 'bash') face(h, intent, room.enemies, true, r.range);
+    this.relicQ = -9;
+    return this.add({ kind: 'throw', relic, start: now, sent, dx: 0, dy: 0, speed: 0, time: r.windup + r.recover, cost: 0, before: ready, combo: 0, fx: h.fx, fy: h.fy, ev: relic === 'hook' ? 'hookfire' : 'throw' }, false);
+  }
+
+  private add(o: Omit<Own, 'id' | 't' | 'ackT' | 'confirmed' | 'done' | 'prog' | 'began'>, owe = true): Own {
     const n: Own = { ...o, id: ++this.seq, t: 0, ackT: -1, confirmed: false, done: false, prog: -1, began: NaN };
     this.acts.push(n);
-    this.owed.push({ k: n.ev, at: n.start });
+    if (owe) this.owed.push({ k: n.ev, at: n.start });
     return n;
   }
 
@@ -300,6 +329,14 @@ export class OwnHero {
       travel(p, o.dx * o.speed * step, o.dy * o.speed * step, HERO.radius);
       o.t += dt;
       Object.assign(h, { act: 'roll', actT: Math.min(o.t, o.time), rollDx: o.dx, rollDy: o.dy });
+      if (o.t >= o.time) (o.done = true), (h.act = 'idle'), (h.actT = 0);
+    } else if (o.kind === 'throw') {
+      // A relic or skill: stood still through its windup and recovery, as the room has it (sim/hero.ts).
+      const r = RELICS[o.relic as keyof typeof RELICS], was = o.t;
+      o.t += dt;
+      Object.assign(h, { act: 'throw', actT: Math.min(o.t, o.time) });
+      // (A thrown one's own word at its windup, as the room gives it: shown here, not again when the leader's comes.)
+      if (was < r.windup && o.t >= r.windup && THROWN.has(o.relic!)) this.owed.push({ k: o.ev, at: o.start }), this.shown.push({ k: o.ev as 'throw', x: p.x, y: p.y, dx: o.fx, dy: o.fy });
       if (o.t >= o.time) (o.done = true), (h.act = 'idle'), (h.actT = 0);
     } else {
       Object.assign(h, { act: 'attack', heavy: false, combo: o.combo });
