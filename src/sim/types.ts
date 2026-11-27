@@ -471,6 +471,10 @@ export interface EnemyAttack {
   crush?: boolean;
   /** A held swing (sim/foechain.ts): its telegraph is full this long before the wind-up ends. */
   hold?: number;
+  /** Foe patterns (sim/foethrow.ts): a fire pot, a thrown stone, a whirl. */
+  pot?: boolean;
+  stone?: boolean;
+  spin?: boolean;
   /** One blow of a pack rush (sim/packrush.ts): the rush, the room time every blow of it lands, and the
    *  fan's middle (a guard facing it covers every blow). */
   rush?: number;
@@ -998,7 +1002,7 @@ export type FightEvent =
   | { k: 'boardout'; x: number; y: number }
   /** `more`: another blow of a pack rush met by the same guard in the same instant (its words said once). */
   | { k: 'block' | 'guardbreak' | 'winded' | 'breath' | 'bash' | 'dodge' | 'slip' | 'out' | 'roll' | 'stunned' | 'wallhit' | 'charged' | 'heavy'; x: number; y: number; more?: boolean; striped?: boolean }
-  | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind }
+  | { k: 'windup' | 'impact'; x: number; y: number; kind: AttackKind; pot?: boolean; stone?: boolean }
   /** The prologue's cutscene: the ground shaking, the bite, a body landing, the Stoker's bellow. */
   | { k: 'rumble' | 'bite' | 'thud' | 'bellow' | 'fanfare'; x: number; y: number }
   /** A wood objective done (sim/woodsteps.ts): the tracker's gold flash. */

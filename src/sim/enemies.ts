@@ -59,6 +59,7 @@ import { stepHoming } from './homing';
 import { chainUp, nextInChain } from './foechain';
 import { flankSpot } from './flank';
 import { FLANK_PACK } from '../shared/foepatterns';
+import { spinOn, throwAt, volleyWith, whirlAt } from './foethrow';
 
 /** The room's oil slicks, for the torch-bearers (the room sets it before its goblins move). */
 /** `pace`: this room plays the pacing rules (sim/pacing.ts, chase.ts): a job's or an expedition's, not the wood or the yard. */
@@ -173,7 +174,7 @@ function runAttack(e: Enemy, heroes: Hero[], now: number, dt: number, ev: FightE
   if (!a.done && a.t >= a.windup) {
     a.done = true;
     const round = isRound(a.kind);
-    ev.push({ k: 'impact', x: round ? a.cx : e.x, y: round ? a.cy : e.y, kind: a.kind });
+    ev.push({ k: 'impact', x: round ? a.cx : e.x, y: round ? a.cy : e.y, kind: a.kind, ...(a.pot ? { pot: true } : {}), ...(a.stone ? { stone: true } : {}) });
     // Blows land on your own level; arrows reach up and down.
     const before = heroes.map((h) => h.hp), waiting = lateCount();
     // (A skimmer's pour lands on the water, on nobody: sim/drift.ts.)
@@ -294,6 +295,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     // A boss's blow turns with its hero for the first part of its wind-up (sim/bosskit.ts).
     if (e.boss) trackAim(e, heroes);
     const over = runAttack(e, heroes, now, dt, ev, others);
+    // A whirl turns as it goes (sim/foethrow.ts).
+    spinOn(e, dt);
     // A Pouncer through the air, landing as its blow does (sim/meaty2.ts).
     if (e.variant === 'pouncer') flyPounce(e);
     if (over && e.act === 'attack') {
@@ -360,7 +363,7 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     // From a lip above you it reaches further; from below, each level you stand above it is more to cover (sim/highrange.ts).
     const cm = currentMap(), fr = reachFor(cm.theme) * (cm.fen || cm.mist ? mistReach(cm, t.x, t.y, now) : 1), tz = t.z ?? 0;
     const lift = reachShift(cm, e, ux, uy, tz), reach = Math.max(Math.min(HEIGHT.least, ARCHER.reach * fr), ARCHER.reach * fr + lift);
-    if (d <= reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', fr < 1 || lift ? { ...ARCHER.shot, range: Math.max(reach, (ARCHER.shot.range ?? ARCHER.reach) * fr + lift) } : ARCHER.shot, t, ev);
+    if (d <= reach && e.cooldown <= 0 && facing > 0.9) return begin(e, 'shot', fr < 1 || lift ? { ...ARCHER.shot, range: Math.max(reach, (ARCHER.shot.range ?? ARCHER.reach) * fr + lift) } : ARCHER.shot, t, ev), volleyWith(e, t, others, rng, ev);
     // Runs from you when you get close on its level (along its perch, up high); comes in if you're far on the ground.
     const back = level && d < ARCHER.keep * fr, on = afoot(e) && d > reach;
     if (back) {
@@ -390,6 +393,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
   if (v === 'stoker' && !netted && level && e.cooldown <= 0 && facing > 0.85 && d > VARIANTS.stoker.chargeFrom && d < VARIANTS.stoker.charge.range! - 1 && rng.next() < VARIANTS.stoker.chargeChance) return begin(e, 'charge', VARIANTS.stoker.charge, t, ev);
   if (v === 'stoker' && !netted && level && e.cooldown <= 0 && facing > 0.8 && d > VARIANTS.stoker.drawFrom && d < VARIANTS.stoker.draw.range! - 0.5 && rng.next() < VARIANTS.stoker.drawEvery) return begin(e, 'draw', VARIANTS.stoker.draw, t, ev);
   if (level && d <= reach && e.cooldown <= 0 && facing > 0.75) {
+    // A heavy or butcher may whirl (sim/foethrow.ts).
+    if (!netted && whirlAt(e, t, rng, ev)) return;
     if (v === 'looter') return begin(e, 'stab', VARIANTS.looter.stab, t, ev);
     if (v === 'lunger') return begin(e, 'stab', VARIANTS.lunger.stab, t, ev);
     if (v === 'heavy') return begin(e, 'cleave', VARIANTS.heavy.swing, t, ev), e.attack && (e.attack.crush = true), chainUp(e, rng);
@@ -404,6 +409,8 @@ export function stepEnemy(e: Enemy, heroes: Hero[], rng: Rng, now: number, dt: n
     } else begin(e, 'stab', SCRAPPER.stab, t, ev), chainUp(e, rng);
     return;
   }
+  // Out of reach: a stone, a fire pot, a heavy's drag (sim/foethrow.ts).
+  if (level && !via && !netted && d > reach && throwAt(e, t, d, facing, rng, ev)) return;
   if (via || d > reach * 0.8) {
     // Scrappers sidle a little rather than queueing straight in.
     const side = e.kind === 'scrapper' && !via ? Math.sin(now * 1.3 + e.id * 2) * 0.5 : 0;

@@ -611,3 +611,11 @@ Slice 2, flanking (sim/flank.ts, shared/foepatterns.ts FLANK_PACK): round one he
 the rest walk round along an arc, a little wider than their reach, to the hero's back and then sides, and strike
 from there. One already in reach and off the hero's front strikes from where it stands. One call in sim/enemies.ts.
 tests/warrior.test.ts's shockwave test now drills its two goblins so they stand. Claude Opus 5.5.
+
+Slice 3 (sim/foethrow.ts, shared/foepatterns.ts): a plain scrapper out of reach throws a stone (a short red line, 5
+damage) or, rarely, a fire pot that lands where you stand as a small slick on a 1.3 s fuse and goes up by itself
+(sim/oil.ts `fuse`); a heavy drags its cleaver at you along a 6-tile line 10 degrees wide (crushing); a heavy or
+butcher in reach whirls 18% of the time: a ring round it, three hits, turning as it goes, then 1.6 s dizzy; when an
+archer shoots, half the time every ready archer within 7 tiles looses at the same hero with it. Hooks in sim/enemies.ts
+(three lines). The fight tests' butcher fixture now waits for a plain blow; the winch test keeps the road's goblins off
+it; the parity golden re-recorded (outcomes change by design). Claude Opus 5.5.

@@ -5,6 +5,7 @@
  * burning whoever's in it. Any fire of yours lights a slick too: a fire burst, a flask of Lamp Oil, a
  * burning goblin walking into it.
  */
+import { POT } from '../shared/foepatterns';
 import { afoot } from './afoot';
 import { HERO, OIL, STAITHE, TICK, TORCH, type EnemyAttackSpec } from '../shared/tuning';
 import { currentMap } from '../shared/arena';
@@ -21,6 +22,8 @@ import { count } from './score';
 /** A slick of oil on the floor: lit (room time it went up, -1 not yet), how long it burns once lit (shorter in the rain), and when it's gone. */
 export interface Slick {
   id: number; x: number; y: number; r: number; until: number; lit: number; burn?: number;
+  /** A fire pot's: when it goes up by itself (sim/foethrow.ts). */
+  fuse?: number;
   /** On water (sim/drift.ts): which way it's carried, in tiles a second. */
   drift?: [number, number];
 }
@@ -75,12 +78,15 @@ export function stepTorch(e: Enemy, t: Hero, d: number, ux: number, uy: number, 
 export function stepSlicks(slicks: Slick[], w: World, dt: number): Slick[] {
   const { now, ev } = w;
   for (const e of [...ev]) {
-    if (e.k === 'impact' && e.kind === 'lob') slicks.push({ id: nextId++, x: e.x, y: e.y, r: OIL.radius, until: now + OIL.life, lit: -1 }), ev.push({ k: 'slick', x: e.x, y: e.y });
+    // (A scrapper's fire pot, shared/foepatterns.ts POT: a smaller slick on a fuse, that goes up by itself.)
+    if (e.k === 'impact' && e.kind === 'lob') slicks.push(e.pot ? { id: nextId++, x: e.x, y: e.y, r: POT.radius, until: now + POT.life, lit: -1, fuse: now + POT.fuse } : { id: nextId++, x: e.x, y: e.y, r: OIL.radius, until: now + OIL.life, lit: -1 }), ev.push({ k: 'slick', x: e.x, y: e.y });
     const fire = (e.k === 'impact' && e.kind === 'torch') || (e.k === 'burst' && e.el === 'fire') || e.k === 'oilfire' || e.k === 'ignite' || e.k === 'firering';
     if (!fire) continue;
     const reach = e.k === 'burst' ? e.r : e.k === 'firering' ? 2.5 : 0.6;
     for (const s of slicks) if (s.lit < 0 && Math.hypot(e.x - s.x, e.y - s.y) <= s.r + reach) light(s, now, ev);
   }
+  // A fire pot's fuse burnt down: it goes up.
+  for (const s of slicks) if (s.fuse !== undefined && s.lit < 0 && now >= s.fuse) (s.fuse = undefined), light(s, now, ev);
   // A burning goblin walking into a slick sets it off.
   for (const s of slicks) if (s.lit < 0 && w.enemies.some((e) => !isDead(e) && e.burnUntil > now && on(s, e))) light(s, now, ev);
   for (const s of slicks) {

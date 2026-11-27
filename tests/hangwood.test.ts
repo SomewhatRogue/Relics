@@ -105,17 +105,19 @@ describe("Hangman's Wood", () => {
 
   it('holding the winch winds the cage down; breaking it frees the one inside', () => {
     const room = wood(), h = room.heroes[0], g = room.exped!.goals.find((q) => q.kind === 'winch')!;
+    // (The winch on its own: no goblin that comes up the road knocks the hero off it with a stone or a pot, sim/foethrow.ts.)
+    const quiet = () => void (room.enemies.length = 0);
     put(h, g.x, g.y + 0.5);
-    step(room, WINCH.hold * 0.5);
+    step(room, WINCH.hold * 0.5, quiet);
     expect(g.p).toBeGreaterThan(0.4);
     expect(g.done).toBe(false);
     // Stepping out: a moment's grace, then it stops.
     put(h, g.x + 6, g.y + 4);
     const p = g.p;
-    step(room, 3);
+    step(room, 3, quiet);
     expect(g.p).toBeLessThan(p + 0.1);
     put(h, g.x, g.y + 0.5);
-    step(room, WINCH.hold * 0.6);
+    step(room, WINCH.hold * 0.6, quiet);
     expect(g.done).toBe(true);
     const cage = room.props.find((q) => q.kind === 'cage')!;
     expect(Math.hypot(cage.x - room.map.hang!.cage.x, cage.y - room.map.hang!.cage.y)).toBeLessThan(0.5);

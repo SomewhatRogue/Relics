@@ -48,9 +48,10 @@ function setup(kind: 'cleave' | 'slam' = 'cleave') {
   b.cooldown = 0;
   for (let i = 0; i < 400; i++) {
     room.step();
-    if (b.attack?.kind === kind) break;
+    // (A plain blow: not a held swing, a whirl or the start of a string, sim/foechain.ts and foethrow.ts.)
+    if (b.attack?.kind === kind && !b.attack.hold && !b.attack.spin && !b.strung) break;
     if (b.attack) {
-      Object.assign(b, { attack: null, act: 'chase', cooldown: 0 });
+      Object.assign(b, { attack: null, act: 'chase', cooldown: 0, strung: undefined });
       Object.assign(h, { hp: HERO.hp, stamina: HERO.stamina, act: 'idle' });
     }
     Object.assign(h, { x: 9, y: 7.6, kvx: 0, kvy: 0 });

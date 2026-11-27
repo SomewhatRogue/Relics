@@ -41,7 +41,8 @@ export function nextInChain(e: Enemy, heroes: Hero[], ev: FightEvent[]): boolean
   if (!t || Math.hypot(t.x - e.x, t.y - e.y) > 4) return (e.strung = undefined), false;
   begin(e, step.kind, step.spec, t, ev);
   if (!e.attack || e.act !== 'attack') return (e.strung = undefined), false;
-  if (e.strung!.length) e.attack.recover *= CHAINS.quick;
-  else (e.attack.windup *= CHAINS.late), (e.strung = undefined);
+  if (step.spin) e.attack.spin = true;
+  if (e.strung!.length) step.even || (e.attack.recover *= CHAINS.quick);
+  else (step.even || (e.attack.windup *= CHAINS.late)), (e.strung = undefined);
   return true;
 }
