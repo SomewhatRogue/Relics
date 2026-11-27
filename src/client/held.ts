@@ -52,7 +52,8 @@ export function pose(h: Hero, now: number): Pose {
     if (h.weapon === 'spear') return { a: fa, ext: -5 * charge, reach: 0, pull: 0 };
     // The Rogue draws a dagger back over the shoulder to throw it.
     if (h.weapon === 'daggers') return { a: -Math.PI / 2 - side * (0.5 + 0.9 * charge), ext: 0, reach: 0, pull: charge };
-    return { a: fa - side * (1.5 + 0.7 * charge) + Math.sin(now * 40) * 0.03 * charge, ext: 0, reach: 0, pull: 0 };
+    // (Steady: a tremble here read as the hands jittering, Kyle 2026-11-27.)
+    return { a: fa - side * (1.5 + 0.7 * charge), ext: 0, reach: 0, pull: 0 };
   }
   if (h.act === 'attack') {
     const s = currentSwing(h), t = h.actT;

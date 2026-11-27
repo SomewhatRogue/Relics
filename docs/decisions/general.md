@@ -646,3 +646,10 @@ sparking, then fizzes on its slick faster till it goes up; a throw winds the arm
 drag crouches low and leaning in, sparks off the cleaver, then a scrape of sparks and dust runs down the line; the
 whirl goes low with the weapon out (the butcher's cleaver held to the side with a trail), dust drawn round its feet
 on the wind-up and a ring and burst at each hit; a held swing shakes at the top and scuffs its feet. Claude Opus 5.5.
+
+## 2026-11-27: a full charge held steady
+
+Kyle: "charging and then holding a fully charged attack as warrior makes your hands jitter". Two old shivers on a
+held blade (client/heropose.ts, the arm raised a pixel at 30 a second; client/held.ts, the blade's angle at 40) are
+gone: at full it's steady, the flash says it's full. A longbow tiring still shakes (that one means something). The
+world's jitter walking (trees, water's edge) asked of Kyle first: whether LIVING WORLD off stops it. Claude Opus 5.5.

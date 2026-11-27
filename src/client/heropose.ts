@@ -77,8 +77,7 @@ function heroAct(p: BodyPose, h: Hero, t: number, now: number, w: (typeof WEAPON
   if (h.act === 'charge') {
     const k = clamp01((h.actT + CHARGE.start) / chargeFull(w, h));
     draw(p, M.charge.draw * k, M.charge.raise * k);
-    // A blade held at full shivers in the hand (the arm, not the body).
-    if (k >= 1 && !shot) p.raise += Math.floor(now * 30) % 2;
+    // (Held at full it's steady: the shiver read as the hands jittering, Kyle 2026-11-27. The flash says it's full.)
     return (p.phase = 'charge'), (p.k = k), p;
   }
   if (h.act === 'attack') {
