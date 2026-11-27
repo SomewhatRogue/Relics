@@ -144,7 +144,13 @@ export type GearStats = Record<ModId, number> & { speed: number; taken: number; 
 
 /** What everything worn adds up to (each piece's modifiers grown by its plus, the caps, then what the
  *  item levels and pluses add to a weapon's damage, armor's toughness and a ring's health, then any costs). */
-export function gearStats(weapon: Item | undefined, armor: Item | null | undefined, rings: Item[] = [], legs: Item | null = null): GearStats {
+/**
+ * Who walks unslowed in heavy armour (Kyle, 2026-11-27: "plate etc doesn't slow down warrior and cleric, only the
+ * others, as a debuff basically"): the classes made for it. Still takes the dodge's cost of the frame.
+ */
+export const ARMOR_BORN: HeroClass[] = ['WARRIOR', 'HEALER'];
+
+export function gearStats(weapon: Item | undefined, armor: Item | null | undefined, rings: Item[] = [], legs: Item | null = null, wearer?: HeroClass): GearStats {
   const s = Object.fromEntries((Object.keys(MODS) as ModId[]).map((k) => [k, 0])) as Record<ModId, number>;
   let taken = 1;
   const costs: Item['cost'][] = [], lift = { damage: 0, tough: 0, health: 0 };
@@ -174,5 +180,6 @@ export function gearStats(weapon: Item | undefined, armor: Item | null | undefin
     else s.focus -= c!.v;
   }
   const a = ARMOR[armor?.armor ?? 'light'];
-  return { ...s, speed: a.speed * (1 + s.foot), taken: a.taken * (1 - s.tough) * taken, dodgeDist: a.dodge, dodgeCost: a.cost, steady: a.steady };
+  const pace = wearer && ARMOR_BORN.includes(wearer) ? 1 : a.speed;
+  return { ...s, speed: pace * (1 + s.foot), taken: a.taken * (1 - s.tough) * taken, dodgeDist: a.dodge, dodgeCost: a.cost, steady: a.steady };
 }

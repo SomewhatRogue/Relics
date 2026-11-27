@@ -583,3 +583,10 @@ tests/ownthrow.test.ts). The skills' own effects (zones, bolts) still come from 
 
 Kyle: after a block, an attack in the counter window "should do a decent chunk more damage, almost like a charged
 hit". GUARD.counterMult 1.5 to 2.25 (shared/tuning.ts); the window stays 1.6 s. Claude Opus 5.5.
+
+## 2026-11-27: plate doesn't slow a Warrior or Cleric
+
+Kyle: "plate etc doesn't slow down warrior and cleric, only the other two, as a debuff basically". shared/gear.ts
+`ARMOR_BORN` (Warrior, Healer): their walk ignores the armour's weight (`gearStats` takes the wearer's class;
+sim/gearstats.ts and client/card.ts pass it). Ranger, Rogue and Mage still pay it. The frame's dodge length and cost
+stay for everyone. Claude Opus 5.5.

@@ -55,7 +55,7 @@ interface Worn { weapon: WeaponId; item?: Item; armor: Item | null; legs?: Item 
 
 /** The numbers that matter, for what's worn. */
 export function sheet(w: Worn): Row[] {
-  const g = gearStats(w.item, w.armor, w.rings, w.legs ?? null), k = WEAPONS[w.weapon], first = k.combo[0], last = k.combo[k.combo.length - 1], q = 1 - g.quick;
+  const g = gearStats(w.item, w.armor, w.rings, w.legs ?? null, WEAPONS[w.weapon]?.cls), k = WEAPONS[w.weapon], first = k.combo[0], last = k.combo[k.combo.length - 1], q = 1 - g.quick;
   return [
     // A Mage's tap spark is a spell, so SPELL POWER counts in it (sim/hero.ts currentSwing).
     dmgRow('HIT', first.dmg * (1 + g.damage) * (1 + (k.cls === 'MAGE' && first.shot ? g.spell : 0)), w.weapon),
