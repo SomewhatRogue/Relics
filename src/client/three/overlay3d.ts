@@ -26,6 +26,8 @@ import { LEDGE_H, WALL_H } from './ground';
 import { stacked } from './layoutledges';
 import { levelAt } from '../../shared/arena';
 import { bodyLv, groundLv, isLand } from '../../shared/heights';
+import { giverGone } from '../fxmini';
+import { drawIcon, folkIcons } from '../folkicons';
 import { cueAt, drawCue, drawWayWord } from '../waycues';
 
 export type Proj = (x: number, y: number, z: number) => [number, number];
@@ -174,6 +176,12 @@ export class Overlay {
       x = Math.min(this.W - pad, Math.max(pad, x));
       y = Math.min(this.H - pad, Math.max(top, y));
       diamond(g, Math.round(x), Math.round(y) + (off ? 0 : bob), off ? 2 : 3);
+    }
+    // Little icons over whoever gives a pastime or trains a class (../folkicons.ts), over the gold diamond if they have one.
+    const mine = room.heroes.find((h) => h.id === meId);
+    for (const f of folkIcons((room.map.npcs ?? []).filter((n) => !giverGone(room, n)), room.time, mine ? WEAPONS[mine.weapon].cls : null, m.marks)) {
+      const [x, y] = P(f.x, (stacked(room.map) ? levelAt(room.map, f.x, f.y) * LEDGE_H : 0) + 2.75, f.y);
+      if (x > -8 && y > -8 && x < this.W + 8 && y < this.H + 8) drawIcon(g, f.kind, x, y - 6 - (f.raised ? 22 : 0) + bob, f.mine, 2); // (doubled: at 1 it was too small to read on a phone)
     }
     if (!room.indoors) for (const d of m.doors) {
       const [x, y] = P(d.x, 2.2, d.y);

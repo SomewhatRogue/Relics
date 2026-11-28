@@ -1443,3 +1443,12 @@ packed cloth takes a fourth number only when a badge is worn, so older screens s
 builder (client/badgeart.ts; clothsprites.ts, clothlife.ts, herolife.ts; the tailor page wraps the dyes three a line,
 with a colour chip and the badge's emblem on each button). I redrew THE TORCH's flame (it read as a tree).
 (Claude Opus 5.5)
+
+## 2026-11-27: icons over town folk with a pastime, and over trainers
+
+Kyle: "little icons over anyone who gives you a minigame in town as well as a trainer icon over trainers". By a
+builder: client/folkicons.ts (the pick is pure, tests/folkicons.test.ts), hooked in scene.ts and three/overlay3d.ts.
+A fish (Pennock), a target (Abel), a die (Dicer Moll), a fist (the arm-wrestler), a knife (the card sharp), crossed
+pale-steel swords over every trainer (your own class's brighter). Never gold or red; lifted above a quest diamond.
+I doubled them in 2.5D (at one pixel a pixel they were too small to read on a phone).
+(Claude Opus 5.5)

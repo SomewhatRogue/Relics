@@ -93,6 +93,7 @@ import { propShake } from './propshake';
 import { behindMarks, drawWays, edgeMark } from './wayout';
 import { drawBoards } from './voteboards';
 import { drawQuestMarks, onScreen } from './questmarks';
+import { drawFolkIcons, folkIcons } from './folkicons';
 import { CHASE, chaseLabel, chasers } from './chasers';
 import { drawBeacon, drawExpedGround, friendMarks } from './expeddraw';
 import { drawDoorMarks } from './doormarks';
@@ -637,6 +638,8 @@ export class Scene {
     // (A door, a spot or someone standing on the new town's raised levels: marked over them up there.)
     const markAt = (t: (typeof this.marks)[number]): [number, number] => (t.id !== undefined ? lerp('e:' + t.id, t.x, t.y) : [onScreen(t)[0], onScreen(t)[1] - lv(t.x, t.y)]);
     const markLights = drawQuestMarks(c, this.marks, markAt, cx, cy, view, me ?? null, now, this.markEach);
+    // Little icons over whoever gives a pastime or trains a class (folkicons.ts), over the gold diamond if they have one.
+    markLights.push(...drawFolkIcons(c.glow, folkIcons((map.npcs ?? []).filter((n) => !giverGone(room, n)), room.time, me ? WEAPONS[me.weapon].cls : null, this.marks), (x, y) => [onScreen({ x, y })[0], onScreen({ x, y })[1] - lv(x, y)], cx, cy, this.vw, this.vh, now));
     if (!room.indoors) markLights.push(...drawDoorMarks(c, this.doors, cx, cy));
     if (me) {
       // Goblins on your trail off screen: a red point at the edge toward each, and a count.
