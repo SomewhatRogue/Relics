@@ -715,3 +715,11 @@ board ... should just be text and not open up the skill menu". client/townui.ts:
 (the first meeting, the word after the yard, the north fields' word and its return, back from a job, a hero quest
 handed over) shows the words and a CLOSE, no TRAINING button; a quest handed over no longer opens the training screen
 under its line. Talking to them again with nothing new to say opens training as before. Claude Opus 5.5.
+
+## 2026-11-27: Lowfurrow's drain gate ("the bridge is broken ... all gobbos are dead")
+
+Played through in the sim and in the built game as a Cleric: with every goblin of the Stooks dead, standing at the gate
+opens it and the way north across the gap walks. So the friend's gate was most likely still waiting on one of its
+guards somewhere unseen (or on a party member standing elsewhere). Now every goblin a stretch's gate waits on carries
+a gold mark (sim/targets.ts `keep`; client/questmarks.ts), and the edge point leads to it when it's off screen.
+tests/keepmarks.test.ts. Claude Opus 5.5.
